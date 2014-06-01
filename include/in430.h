@@ -318,6 +318,8 @@ typedef unsigned int __istate_t;
 
 #define _SWAP_BYTES(x)                      _swap_bytes(x)
 
+#define __no_init    __attribute__ ((section (".noinit")))
+
 #endif /* !defined _GNU_ASSEMBLER_ */
 
 #endif /* __IN430_H__ */

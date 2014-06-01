@@ -1,5 +1,5 @@
 /* ============================================================================ */
-/* Copyright (c) 2013, Texas Instruments Incorporated                           */
+/* Copyright (c) 2014, Texas Instruments Incorporated                           */
 /*  All rights reserved.                                                        */
 /*                                                                              */
 /*  Redistribution and use in source and binary forms, with or without          */
@@ -48,7 +48,7 @@
 #ifndef __msp430FR57XXGENERIC
 #define __msp430FR57XXGENERIC
 
-#define __MSP430_HEADER_VERSION__ 1109
+#define __MSP430_HEADER_VERSION__ 1131
 
 #define __MSP430_TI_HEADERS__
 
@@ -3374,48 +3374,48 @@ extern "C" {
 #define ID0                    (0x0040)       /* Timer B clock input divider 0 */
 #define MC1                    (0x0020)       /* Timer B mode control 1 */
 #define MC0                    (0x0010)       /* Timer B mode control 0 */
-#define MC__STOP               (0*0x10u)      /* Timer B mode control: 0 - Stop */
-#define MC__UP                 (1*0x10u)      /* Timer B mode control: 1 - Up to CCR0 */
-#define MC__CONTINUOUS         (2*0x10u)      /* Timer B mode control: 2 - Continuous up */
-#define MC__CONTINOUS          (2*0x10u)      /* Legacy define */
-#define MC__UPDOWN             (3*0x10u)      /* Timer B mode control: 3 - Up/Down */
+#define MC__STOP               (0x0000)      /* Timer B mode control: 0 - Stop */
+#define MC__UP                 (0x0010)      /* Timer B mode control: 1 - Up to CCR0 */
+#define MC__CONTINUOUS         (0x0020)      /* Timer B mode control: 2 - Continuous up */
+#define MC__CONTINOUS          (0x0020)      /* Legacy define */
+#define MC__UPDOWN             (0x0030)      /* Timer B mode control: 3 - Up/Down */
 #define CM1                    (0x8000)       /* Capture mode 1 */
 #define CM0                    (0x4000)       /* Capture mode 0 */
-#define MC_0                   (0*0x10u)      /* Timer B mode control: 0 - Stop */
-#define MC_1                   (1*0x10u)      /* Timer B mode control: 1 - Up to CCR0 */
-#define MC_2                   (2*0x10u)      /* Timer B mode control: 2 - Continuous up */
-#define MC_3                   (3*0x10u)      /* Timer B mode control: 3 - Up/Down */
+#define MC_0                   (0x0000)      /* Timer B mode control: 0 - Stop */
+#define MC_1                   (0x0010)      /* Timer B mode control: 1 - Up to CCR0 */
+#define MC_2                   (0x0020)      /* Timer B mode control: 2 - Continuous up */
+#define MC_3                   (0x0030)      /* Timer B mode control: 3 - Up/Down */
 #define CAP                    (0x0100)       /* Capture mode: 1 /Compare mode : 0 */
 #define CCIE                   (0x0010)       /* Capture/compare interrupt enable */
 #define CCIFG                  (0x0001)       /* Capture/compare interrupt flag */
-#define CCIS_0                 (0*0x1000u)
-#define CCIS_1                 (1*0x1000u)
-#define CCIS_2                 (2*0x1000u)
-#define CCIS_3                 (3*0x1000u)
-#define CM_0                   (0*0x4000u)    /* Capture mode: 0 - disabled */
-#define CM_1                   (1*0x4000u)    /* Capture mode: 1 - pos. edge */
-#define CM_2                   (2*0x4000u)    /* Capture mode: 1 - neg. edge */
-#define CM_3                   (3*0x4000u)    /* Capture mode: 1 - both edges */
+#define CCIS_0                 (0x0000)
+#define CCIS_1                 (0x1000)
+#define CCIS_2                 (0x2000)
+#define CCIS_3                 (0x3000)
+#define CM_0                   (0x0000)    /* Capture mode: 0 - disabled */
+#define CM_1                   (0x4000)    /* Capture mode: 1 - pos. edge */
+#define CM_2                   (0x8000)    /* Capture mode: 1 - neg. edge */
+#define CM_3                   (0xC000)    /* Capture mode: 1 - both edges */
 #define OUT                    (0x0004)       /* PWM Output signal if output mode 0 */
-#define OUTMOD_0               (0*0x20u)      /* PWM output mode: 0 - output only */
-#define OUTMOD_1               (1*0x20u)      /* PWM output mode: 1 - set */
-#define OUTMOD_2               (2*0x20u)      /* PWM output mode: 2 - PWM toggle/reset */
-#define OUTMOD_3               (3*0x20u)      /* PWM output mode: 3 - PWM set/reset */
-#define OUTMOD_4               (4*0x20u)      /* PWM output mode: 4 - toggle */
-#define OUTMOD_5               (5*0x20u)      /* PWM output mode: 5 - Reset */
-#define OUTMOD_6               (6*0x20u)      /* PWM output mode: 6 - PWM toggle/set */
-#define OUTMOD_7               (7*0x20u)      /* PWM output mode: 7 - PWM reset/set */
+#define OUTMOD_0               (0x0000)      /* PWM output mode: 0 - output only */
+#define OUTMOD_1               (0x0020)      /* PWM output mode: 1 - set */
+#define OUTMOD_2               (0x0040)      /* PWM output mode: 2 - PWM toggle/reset */
+#define OUTMOD_3               (0x0060)      /* PWM output mode: 3 - PWM set/reset */
+#define OUTMOD_4               (0x0080)      /* PWM output mode: 4 - toggle */
+#define OUTMOD_5               (0x00A0)      /* PWM output mode: 5 - Reset */
+#define OUTMOD_6               (0x00C0)      /* PWM output mode: 6 - PWM toggle/set */
+#define OUTMOD_7               (0x00E0)      /* PWM output mode: 7 - PWM reset/set */
 #define SCCI                   (0x0400)       /* Latched capture signal (read) */
 #define SCS                    (0x0800)       /* Capture sychronize */
 #define CCI                    (0x0008)       /* Capture input signal (read) */
-#define ID__1                  (0*0x40u)      /* Timer B input divider: 0 - /1 */
-#define ID__2                  (1*0x40u)      /* Timer B input divider: 1 - /2 */
-#define ID__4                  (2*0x40u)      /* Timer B input divider: 2 - /4 */
-#define ID__8                  (3*0x40u)      /* Timer B input divider: 3 - /8 */
-#define ID_0                   (0*0x40u)      /* Timer B input divider: 0 - /1 */
-#define ID_1                   (1*0x40u)      /* Timer B input divider: 1 - /2 */
-#define ID_2                   (2*0x40u)      /* Timer B input divider: 2 - /4 */
-#define ID_3                   (3*0x40u)      /* Timer B input divider: 3 - /8 */
+#define ID__1                  (0x0000)      /* Timer B input divider: 0 - /1 */
+#define ID__2                  (0x0040)      /* Timer B input divider: 1 - /2 */
+#define ID__4                  (0x0080)      /* Timer B input divider: 2 - /4 */
+#define ID__8                  (0x00C0)      /* Timer B input divider: 3 - /8 */
+#define ID_0                   (0x0000)      /* Timer B input divider: 0 - /1 */
+#define ID_1                   (0x0040)      /* Timer B input divider: 1 - /2 */
+#define ID_2                   (0x0080)      /* Timer B input divider: 2 - /4 */
+#define ID_3                   (0x00C0)      /* Timer B input divider: 3 - /8 */
 
 #endif
 /************************************************************

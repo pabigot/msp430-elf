@@ -1,5 +1,5 @@
 /* ============================================================================ */
-/* Copyright (c) 2013, Texas Instruments Incorporated                           */
+/* Copyright (c) 2014, Texas Instruments Incorporated                           */
 /*  All rights reserved.                                                        */
 /*                                                                              */
 /*  Redistribution and use in source and binary forms, with or without          */
@@ -48,7 +48,7 @@
 #ifndef __MSP430i2041
 #define __MSP430i2041
 
-#define __MSP430_HEADER_VERSION__ 1109
+#define __MSP430_HEADER_VERSION__ 1131
 
 #define __MSP430_TI_HEADERS__
 
@@ -345,12 +345,14 @@ const_sfrw(SUMEXT, SUMEXT_);
 
 #define LPM45CTL_             0x0060    /* PMM Power Mode 4.5 Control Register */
 sfrb(LPM45CTL, LPM45CTL_);
-#define VCMONCTL_             0x0061    /* PMM Voltage Monitor Control Register */
-sfrb(VCMONCTL, VCMONCTL_);
+#define VMONCTL_              0x0061    /* PMM Voltage Monitor Control Register */
+sfrb(VMONCTL, VMONCTL_);
 #define REFCAL0_              0x0062    /* PMM Reference Calibration Register 0 */
 sfrb(REFCAL0, REFCAL0_);
 #define REFCAL1_              0x0063    /* PMM Reference Calibration Register 1 */
 sfrb(REFCAL1, REFCAL1_);
+
+#define VCMONCTL            VMONCTL   /* Legacy Define */
 
 /* LPM45CTL Power Mode 5 Control Bits */
 #define LOCKLPM45           (0x0001)  /* Lock I/O pin configuration upon entry/exit to/from LPM4.5 */

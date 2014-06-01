@@ -1,5 +1,5 @@
 /* ============================================================================ */
-/* Copyright (c) 2013, Texas Instruments Incorporated                           */
+/* Copyright (c) 2014, Texas Instruments Incorporated                           */
 /*  All rights reserved.                                                        */
 /*                                                                              */
 /*  Redistribution and use in source and binary forms, with or without          */
@@ -48,7 +48,7 @@
 #ifndef __msp430XGENERIC
 #define __msp430XGENERIC
 
-#define __MSP430_HEADER_VERSION__ 1109
+#define __MSP430_HEADER_VERSION__ 1131
 
 #define __MSP430_TI_HEADERS__
 
@@ -1475,16 +1475,16 @@ extern "C" {
 #define ADC12ICH2MAP_H      (0x0004)    /* ADC12 Internal Channel 2 select */
 #define ADC12ICH3MAP_H      (0x0008)    /* ADC12 Internal Channel 3 select */
 
-#define ADC12CSTARTADD_0     ( 0*0x0001) /* ADC12 Conversion Start Address: 0 */
-#define ADC12CSTARTADD_1     ( 1*0x0001) /* ADC12 Conversion Start Address: 1 */
-#define ADC12CSTARTADD_2     ( 2*0x0001) /* ADC12 Conversion Start Address: 2 */
-#define ADC12CSTARTADD_3     ( 3*0x0001) /* ADC12 Conversion Start Address: 3 */
-#define ADC12CSTARTADD_4     ( 4*0x0001) /* ADC12 Conversion Start Address: 4 */
-#define ADC12CSTARTADD_5     ( 5*0x0001) /* ADC12 Conversion Start Address: 5 */
-#define ADC12CSTARTADD_6     ( 6*0x0001) /* ADC12 Conversion Start Address: 6 */
-#define ADC12CSTARTADD_7     ( 7*0x0001) /* ADC12 Conversion Start Address: 7 */
-#define ADC12CSTARTADD_8     ( 8*0x0001) /* ADC12 Conversion Start Address: 8 */
-#define ADC12CSTARTADD_9     ( 9*0x0001) /* ADC12 Conversion Start Address: 9 */
+#define ADC12CSTARTADD_0     (0x0000) /* ADC12 Conversion Start Address: 0 */
+#define ADC12CSTARTADD_1     (0x0001) /* ADC12 Conversion Start Address: 1 */
+#define ADC12CSTARTADD_2     (0x0002) /* ADC12 Conversion Start Address: 2 */
+#define ADC12CSTARTADD_3     (0x0003) /* ADC12 Conversion Start Address: 3 */
+#define ADC12CSTARTADD_4     (0x0004) /* ADC12 Conversion Start Address: 4 */
+#define ADC12CSTARTADD_5     (0x0005) /* ADC12 Conversion Start Address: 5 */
+#define ADC12CSTARTADD_6     (0x0006) /* ADC12 Conversion Start Address: 6 */
+#define ADC12CSTARTADD_7     (0x0007) /* ADC12 Conversion Start Address: 7 */
+#define ADC12CSTARTADD_8     (0x0008) /* ADC12 Conversion Start Address: 8 */
+#define ADC12CSTARTADD_9     (0x0009) /* ADC12 Conversion Start Address: 9 */
 #define ADC12CSTARTADD_10    (0x000A) /* ADC12 Conversion Start Address: 10 */
 #define ADC12CSTARTADD_11    (0x000B) /* ADC12 Conversion Start Address: 11 */
 #define ADC12CSTARTADD_12    (0x000C) /* ADC12 Conversion Start Address: 12 */
@@ -4084,9 +4084,11 @@ extern "C" {
 #define SELM_7              (0x0007)   /* MCLK Source Select 7 */
 #define SELM__LFXTCLK       (0x0000)   /* MCLK Source Select LFXTCLK */
 #define SELM__VLOCLK        (0x0001)   /* MCLK Source Select VLOCLK */
-#define SELM__LFMODOSC      (0x0002)   /* MCLK Source Select LFMODOSC */
+#define SELM__LFMODCLK      (0x0002)   /* MCLK Source Select LFMODOSC */
+#define SELM__LFMODOSC      (0x0002)   /* MCLK Source Select LFMODOSC (legacy) */
 #define SELM__DCOCLK        (0x0003)   /* MCLK Source Select DCOCLK */
-#define SELM__MODOSC        (0x0004)   /* MCLK Source Select MODOSC */
+#define SELM__MODCLK        (0x0004)   /* MCLK Source Select MODOSC */
+#define SELM__MODOSC        (0x0004)   /* MCLK Source Select MODOSC (legacy) */
 #define SELM__HFXTCLK       (0x0005)   /* MCLK Source Select HFXTCLK */
 
 #define SELS_0              (0x0000)   /* SMCLK Source Select 0 */
@@ -4099,9 +4101,11 @@ extern "C" {
 #define SELS_7              (0x0070)   /* SMCLK Source Select 7 */
 #define SELS__LFXTCLK       (0x0000)   /* SMCLK Source Select LFXTCLK */
 #define SELS__VLOCLK        (0x0010)   /* SMCLK Source Select VLOCLK */
-#define SELS__LFMODOSC      (0x0020)   /* SMCLK Source Select LFMODOSC */
+#define SELS__LFMODCLK      (0x0020)   /* SMCLK Source Select LFMODOSC */
+#define SELS__LFMODOSC      (0x0020)   /* SMCLK Source Select LFMODOSC (legacy) */
 #define SELS__DCOCLK        (0x0030)   /* SMCLK Source Select DCOCLK */
-#define SELS__MODOSC        (0x0040)   /* SMCLK Source Select MODOSC */
+#define SELS__MODCLK        (0x0040)   /* SMCLK Source Select MODOSC */
+#define SELS__MODOSC        (0x0040)   /* SMCLK Source Select MODOSC (legacy) */
 #define SELS__HFXTCLK       (0x0050)   /* SMCLK Source Select HFXTCLK */
 
 #define SELA_0              (0x0000)   /* ACLK Source Select 0 */
@@ -4114,7 +4118,8 @@ extern "C" {
 #define SELA_7              (0x0700)   /* ACLK Source Select 7 */
 #define SELA__LFXTCLK       (0x0000)   /* ACLK Source Select LFXTCLK */
 #define SELA__VLOCLK        (0x0100)   /* ACLK Source Select VLOCLK */
-#define SELA__LFMODOSC      (0x0200)   /* ACLK Source Select LFMODOSC */
+#define SELA__LFMODCLK      (0x0200)   /* ACLK Source Select LFMODOSC */
+#define SELA__LFMODOSC      (0x0200)   /* ACLK Source Select LFMODOSC (legacy) */
 
 /* CSCTL3 Control Bits */
 #define DIVM0               (0x0001)   /* MCLK Divider Bit: 0 */
@@ -4215,7 +4220,6 @@ extern "C" {
 #define SMCLKOFF            (0x0002)    /* SMCLK Off */
 #define VLOOFF              (0x0008)    /* VLO Off */
 #define LFXTBYPASS          (0x0010)    /* LFXT bypass mode : 0: internal 1:sourced from external pin */
-#define LFXTAGCOFF          (0x0020)    /* LFXT automatic gain control off */
 #define LFXTDRIVE0          (0x0040)    /* LFXT Drive Level mode Bit 0 */
 #define LFXTDRIVE1          (0x0080)    /* LFXT Drive Level mode Bit 1 */
 #define HFXTOFF             (0x0100)    /* High Frequency Oscillator disable */
@@ -4230,7 +4234,6 @@ extern "C" {
 #define SMCLKOFF_L          (0x0002)    /* SMCLK Off */
 #define VLOOFF_L            (0x0008)    /* VLO Off */
 #define LFXTBYPASS_L        (0x0010)    /* LFXT bypass mode : 0: internal 1:sourced from external pin */
-#define LFXTAGCOFF_L        (0x0020)    /* LFXT automatic gain control off */
 #define LFXTDRIVE0_L        (0x0040)    /* LFXT Drive Level mode Bit 0 */
 #define LFXTDRIVE1_L        (0x0080)    /* LFXT Drive Level mode Bit 1 */
 
@@ -7230,7 +7233,6 @@ extern "C" {
 #define OFS_PMMCTL0           (0x0000)  /* PMM Control 0 */
 #define OFS_PMMCTL0_L          OFS_PMMCTL0
 #define OFS_PMMCTL0_H          OFS_PMMCTL0+1
-#define OFS_PMMCTL1           (0x0002)  /* PMM Control 1 */
 #define OFS_PMMIFG            (0x000A)  /* PMM Interrupt Flag */
 #define OFS_PMMIFG_L           OFS_PMMIFG
 #define OFS_PMMIFG_H           OFS_PMMIFG+1
@@ -7254,27 +7256,6 @@ extern "C" {
 #define PMMREGOFF_L         (0x0010)  /* PMM Turn Regulator off */
 #define SVSHE_L             (0x0040)  /* SVS high side enable */
 #define PMMLPRST_L          (0x0080)  /* PMM Low-Power Reset Enable */
-
-
-/* PMMCTL1 Control Bits */
-#define PMMLPSVEN           (0x0002)  /* PMM Low-Power Supervision Enable */
-#define PMMLPRNG0           (0x0004)  /* PMM Load Range Control overwrite for LPM2, LPM3 and LPM4 Bit: 0 */
-#define PMMLPRNG1           (0x0008)  /* PMM Load Range Control overwrite for LPM2, LPM3 and LPM4 Bit: 1 */
-#define PMMAMRNG0           (0x0010)  /* Load Range Control overwrite for AM, LPM0 and LPM1 Bit: 0 */
-#define PMMAMRNG1           (0x0020)  /* Load Range Control overwrite for AM, LPM0 and LPM1 Bit: 1 */
-#define PMMAMRNG2           (0x0040)  /* Load Range Control overwrite for AM, LPM0 and LPM1 Bit: 2 */
-#define PMMAMRNG3           (0x0080)  /* Load Range Control overwrite for AM, LPM0 and LPM1 Bit: 3 */
-
-/* PMMCTL1 Control Bits */
-#define PMMLPSVEN_L         (0x0002)  /* PMM Low-Power Supervision Enable */
-#define PMMLPRNG0_L         (0x0004)  /* PMM Load Range Control overwrite for LPM2, LPM3 and LPM4 Bit: 0 */
-#define PMMLPRNG1_L         (0x0008)  /* PMM Load Range Control overwrite for LPM2, LPM3 and LPM4 Bit: 1 */
-#define PMMAMRNG0_L         (0x0010)  /* Load Range Control overwrite for AM, LPM0 and LPM1 Bit: 0 */
-#define PMMAMRNG1_L         (0x0020)  /* Load Range Control overwrite for AM, LPM0 and LPM1 Bit: 1 */
-#define PMMAMRNG2_L         (0x0040)  /* Load Range Control overwrite for AM, LPM0 and LPM1 Bit: 2 */
-#define PMMAMRNG3_L         (0x0080)  /* Load Range Control overwrite for AM, LPM0 and LPM1 Bit: 3 */
-
-#define PMMCTL1KEY          (0xCC00)  /* PMM PMMCTL1 Register Write Password */
 
 
 /* PMMIFG Control Bits */
@@ -9674,48 +9655,48 @@ extern "C" {
 #define ID0                    (0x0040u)      /* Timer A clock input divider 0 */
 #define MC1                    (0x0020u)      /* Timer A mode control 1 */
 #define MC0                    (0x0010u)      /* Timer A mode control 0 */
-#define MC__STOP               (0*0x10u)      /* Timer A mode control: 0 - Stop */
-#define MC__UP                 (1*0x10u)      /* Timer A mode control: 1 - Up to CCR0 */
-#define MC__CONTINUOUS         (2*0x10u)      /* Timer A mode control: 2 - Continuous up */
-#define MC__CONTINOUS          (2*0x10u)      /* Legacy define */
-#define MC__UPDOWN             (3*0x10u)      /* Timer A mode control: 3 - Up/Down */
+#define MC__STOP               (0x0000)      /* Timer A mode control: 0 - Stop */
+#define MC__UP                 (0x0010)      /* Timer A mode control: 1 - Up to CCR0 */
+#define MC__CONTINUOUS         (0x0020)      /* Timer A mode control: 2 - Continuous up */
+#define MC__CONTINOUS          (0x0020)      /* Legacy define */
+#define MC__UPDOWN             (0x0030)      /* Timer A mode control: 3 - Up/Down */
 #define CM1                    (0x8000u)      /* Capture mode 1 */
 #define CM0                    (0x4000u)      /* Capture mode 0 */
-#define MC_0                   (0*0x10u)      /* Timer A mode control: 0 - Stop */
-#define MC_1                   (1*0x10u)      /* Timer A mode control: 1 - Up to CCR0 */
-#define MC_2                   (2*0x10u)      /* Timer A mode control: 2 - Continuous up */
-#define MC_3                   (3*0x10u)      /* Timer A mode control: 3 - Up/Down */
+#define MC_0                   (0x0000)      /* Timer A mode control: 0 - Stop */
+#define MC_1                   (0x0010)      /* Timer A mode control: 1 - Up to CCR0 */
+#define MC_2                   (0x0020)      /* Timer A mode control: 2 - Continuous up */
+#define MC_3                   (0x0030)      /* Timer A mode control: 3 - Up/Down */
 #define CAP                    (0x0100)       /* Capture mode: 1 /Compare mode : 0 */
 #define CCIE                   (0x0010)       /* Capture/compare interrupt enable */
 #define CCIFG                  (0x0001)       /* Capture/compare interrupt flag */
-#define CCIS_0                 (0*0x1000u)
-#define CCIS_1                 (1*0x1000u)
-#define CCIS_2                 (2*0x1000u)
-#define CCIS_3                 (3*0x1000u)
-#define CM_0                   (0*0x4000u)    /* Capture mode: 0 - disabled */
-#define CM_1                   (1*0x4000u)    /* Capture mode: 1 - pos. edge */
-#define CM_2                   (2*0x4000u)    /* Capture mode: 1 - neg. edge */
-#define CM_3                   (3*0x4000u)    /* Capture mode: 1 - both edges */
+#define CCIS_0                 (0x0000)
+#define CCIS_1                 (0x1000)
+#define CCIS_2                 (0x2000)
+#define CCIS_3                 (0x3000)
+#define CM_0                   (0x0000)    /* Capture mode: 0 - disabled */
+#define CM_1                   (0x4000)    /* Capture mode: 1 - pos. edge */
+#define CM_2                   (0x8000)    /* Capture mode: 1 - neg. edge */
+#define CM_3                   (0xC000)    /* Capture mode: 1 - both edges */
 #define OUT                    (0x0004)       /* PWM Output signal if output mode 0 */
-#define OUTMOD_0               (0*0x20u)      /* PWM output mode: 0 - output only */
-#define OUTMOD_1               (1*0x20u)      /* PWM output mode: 1 - set */
-#define OUTMOD_2               (2*0x20u)      /* PWM output mode: 2 - PWM toggle/reset */
-#define OUTMOD_3               (3*0x20u)      /* PWM output mode: 3 - PWM set/reset */
-#define OUTMOD_4               (4*0x20u)      /* PWM output mode: 4 - toggle */
-#define OUTMOD_5               (5*0x20u)      /* PWM output mode: 5 - Reset */
-#define OUTMOD_6               (6*0x20u)      /* PWM output mode: 6 - PWM toggle/set */
-#define OUTMOD_7               (7*0x20u)      /* PWM output mode: 7 - PWM reset/set */
+#define OUTMOD_0               (0x0000)      /* PWM output mode: 0 - output only */
+#define OUTMOD_1               (0x0020)      /* PWM output mode: 1 - set */
+#define OUTMOD_2               (0x0040)      /* PWM output mode: 2 - PWM toggle/reset */
+#define OUTMOD_3               (0x0060)      /* PWM output mode: 3 - PWM set/reset */
+#define OUTMOD_4               (0x0080)      /* PWM output mode: 4 - toggle */
+#define OUTMOD_5               (0x00A0)      /* PWM output mode: 5 - Reset */
+#define OUTMOD_6               (0x00C0)      /* PWM output mode: 6 - PWM toggle/set */
+#define OUTMOD_7               (0x00E0)      /* PWM output mode: 7 - PWM reset/set */
 #define SCCI                   (0x0400)       /* Latched capture signal (read) */
 #define SCS                    (0x0800)       /* Capture sychronize */
 #define CCI                    (0x0008)       /* Capture input signal (read) */
-#define ID__1                  (0*0x40u)      /* Timer A input divider: 0 - /1 */
-#define ID__2                  (1*0x40u)      /* Timer A input divider: 1 - /2 */
-#define ID__4                  (2*0x40u)      /* Timer A input divider: 2 - /4 */
-#define ID__8                  (3*0x40u)      /* Timer A input divider: 3 - /8 */
-#define ID_0                   (0*0x40u)      /* Timer A input divider: 0 - /1 */
-#define ID_1                   (1*0x40u)      /* Timer A input divider: 1 - /2 */
-#define ID_2                   (2*0x40u)      /* Timer A input divider: 2 - /4 */
-#define ID_3                   (3*0x40u)      /* Timer A input divider: 3 - /8 */
+#define ID__1                  (0x0000)      /* Timer A input divider: 0 - /1 */
+#define ID__2                  (0x0040)      /* Timer A input divider: 1 - /2 */
+#define ID__4                  (0x0080)      /* Timer A input divider: 2 - /4 */
+#define ID__8                  (0x00C0)      /* Timer A input divider: 3 - /8 */
+#define ID_0                   (0x0000)      /* Timer A input divider: 0 - /1 */
+#define ID_1                   (0x0040)      /* Timer A input divider: 1 - /2 */
+#define ID_2                   (0x0080)      /* Timer A input divider: 2 - /4 */
+#define ID_3                   (0x00C0)      /* Timer A input divider: 3 - /8 */
 
 #endif
 /************************************************************
@@ -9938,48 +9919,48 @@ extern "C" {
 #define ID0                    (0x0040u)      /* Timer A clock input divider 0 */
 #define MC1                    (0x0020u)      /* Timer A mode control 1 */
 #define MC0                    (0x0010u)      /* Timer A mode control 0 */
-#define MC__STOP               (0*0x10u)      /* Timer A mode control: 0 - Stop */
-#define MC__UP                 (1*0x10u)      /* Timer A mode control: 1 - Up to CCR0 */
-#define MC__CONTINUOUS         (2*0x10u)      /* Timer A mode control: 2 - Continuous up */
-#define MC__CONTINOUS          (2*0x10u)      /* Legacy define */
-#define MC__UPDOWN             (3*0x10u)      /* Timer A mode control: 3 - Up/Down */
+#define MC__STOP               (0x0000)      /* Timer A mode control: 0 - Stop */
+#define MC__UP                 (0x0010)      /* Timer A mode control: 1 - Up to CCR0 */
+#define MC__CONTINUOUS         (0x0020)      /* Timer A mode control: 2 - Continuous up */
+#define MC__CONTINOUS          (0x0020)      /* Legacy define */
+#define MC__UPDOWN             (0x0030)      /* Timer A mode control: 3 - Up/Down */
 #define CM1                    (0x8000u)      /* Capture mode 1 */
 #define CM0                    (0x4000u)      /* Capture mode 0 */
-#define MC_0                   (0*0x10u)      /* Timer A mode control: 0 - Stop */
-#define MC_1                   (1*0x10u)      /* Timer A mode control: 1 - Up to CCR0 */
-#define MC_2                   (2*0x10u)      /* Timer A mode control: 2 - Continuous up */
-#define MC_3                   (3*0x10u)      /* Timer A mode control: 3 - Up/Down */
+#define MC_0                   (0x0000)      /* Timer A mode control: 0 - Stop */
+#define MC_1                   (0x0010)      /* Timer A mode control: 1 - Up to CCR0 */
+#define MC_2                   (0x0020)      /* Timer A mode control: 2 - Continuous up */
+#define MC_3                   (0x0030)      /* Timer A mode control: 3 - Up/Down */
 #define CAP                    (0x0100)       /* Capture mode: 1 /Compare mode : 0 */
 #define CCIE                   (0x0010)       /* Capture/compare interrupt enable */
 #define CCIFG                  (0x0001)       /* Capture/compare interrupt flag */
-#define CCIS_0                 (0*0x1000u)
-#define CCIS_1                 (1*0x1000u)
-#define CCIS_2                 (2*0x1000u)
-#define CCIS_3                 (3*0x1000u)
-#define CM_0                   (0*0x4000u)    /* Capture mode: 0 - disabled */
-#define CM_1                   (1*0x4000u)    /* Capture mode: 1 - pos. edge */
-#define CM_2                   (2*0x4000u)    /* Capture mode: 1 - neg. edge */
-#define CM_3                   (3*0x4000u)    /* Capture mode: 1 - both edges */
+#define CCIS_0                 (0x0000)
+#define CCIS_1                 (0x1000)
+#define CCIS_2                 (0x2000)
+#define CCIS_3                 (0x3000)
+#define CM_0                   (0x0000)    /* Capture mode: 0 - disabled */
+#define CM_1                   (0x4000)    /* Capture mode: 1 - pos. edge */
+#define CM_2                   (0x8000)    /* Capture mode: 1 - neg. edge */
+#define CM_3                   (0xC000)    /* Capture mode: 1 - both edges */
 #define OUT                    (0x0004)       /* PWM Output signal if output mode 0 */
-#define OUTMOD_0               (0*0x20u)      /* PWM output mode: 0 - output only */
-#define OUTMOD_1               (1*0x20u)      /* PWM output mode: 1 - set */
-#define OUTMOD_2               (2*0x20u)      /* PWM output mode: 2 - PWM toggle/reset */
-#define OUTMOD_3               (3*0x20u)      /* PWM output mode: 3 - PWM set/reset */
-#define OUTMOD_4               (4*0x20u)      /* PWM output mode: 4 - toggle */
-#define OUTMOD_5               (5*0x20u)      /* PWM output mode: 5 - Reset */
-#define OUTMOD_6               (6*0x20u)      /* PWM output mode: 6 - PWM toggle/set */
-#define OUTMOD_7               (7*0x20u)      /* PWM output mode: 7 - PWM reset/set */
+#define OUTMOD_0               (0x0000)      /* PWM output mode: 0 - output only */
+#define OUTMOD_1               (0x0020)      /* PWM output mode: 1 - set */
+#define OUTMOD_2               (0x0040)      /* PWM output mode: 2 - PWM toggle/reset */
+#define OUTMOD_3               (0x0060)      /* PWM output mode: 3 - PWM set/reset */
+#define OUTMOD_4               (0x0080)      /* PWM output mode: 4 - toggle */
+#define OUTMOD_5               (0x00A0)      /* PWM output mode: 5 - Reset */
+#define OUTMOD_6               (0x00C0)      /* PWM output mode: 6 - PWM toggle/set */
+#define OUTMOD_7               (0x00E0)      /* PWM output mode: 7 - PWM reset/set */
 #define SCCI                   (0x0400)       /* Latched capture signal (read) */
 #define SCS                    (0x0800)       /* Capture sychronize */
 #define CCI                    (0x0008)       /* Capture input signal (read) */
-#define ID__1                  (0*0x40u)      /* Timer A input divider: 0 - /1 */
-#define ID__2                  (1*0x40u)      /* Timer A input divider: 1 - /2 */
-#define ID__4                  (2*0x40u)      /* Timer A input divider: 2 - /4 */
-#define ID__8                  (3*0x40u)      /* Timer A input divider: 3 - /8 */
-#define ID_0                   (0*0x40u)      /* Timer A input divider: 0 - /1 */
-#define ID_1                   (1*0x40u)      /* Timer A input divider: 1 - /2 */
-#define ID_2                   (2*0x40u)      /* Timer A input divider: 2 - /4 */
-#define ID_3                   (3*0x40u)      /* Timer A input divider: 3 - /8 */
+#define ID__1                  (0x0000)      /* Timer A input divider: 0 - /1 */
+#define ID__2                  (0x0040)      /* Timer A input divider: 1 - /2 */
+#define ID__4                  (0x0080)      /* Timer A input divider: 2 - /4 */
+#define ID__8                  (0x00C0)      /* Timer A input divider: 3 - /8 */
+#define ID_0                   (0x0000)      /* Timer A input divider: 0 - /1 */
+#define ID_1                   (0x0040)      /* Timer A input divider: 1 - /2 */
+#define ID_2                   (0x0080)      /* Timer A input divider: 2 - /4 */
+#define ID_3                   (0x00C0)      /* Timer A input divider: 3 - /8 */
 
 #endif
 /************************************************************

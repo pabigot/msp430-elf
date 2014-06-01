@@ -1,5 +1,5 @@
 /* ============================================================================ */
-/* Copyright (c) 2013, Texas Instruments Incorporated                           */
+/* Copyright (c) 2014, Texas Instruments Incorporated                           */
 /*  All rights reserved.                                                        */
 /*                                                                              */
 /*  Redistribution and use in source and binary forms, with or without          */
@@ -52,7 +52,7 @@
 #ifndef __MSP430FR5727
 #define __MSP430FR5727
 
-#define __MSP430_HEADER_VERSION__ 1109
+#define __MSP430_HEADER_VERSION__ 1131
 
 #define __MSP430_TI_HEADERS__
 

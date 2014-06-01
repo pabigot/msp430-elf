@@ -1,5 +1,5 @@
 /* ============================================================================ */
-/* Copyright (c) 2013, Texas Instruments Incorporated                           */
+/* Copyright (c) 2014, Texas Instruments Incorporated                           */
 /*  All rights reserved.                                                        */
 /*                                                                              */
 /*  Redistribution and use in source and binary forms, with or without          */
@@ -48,7 +48,7 @@
 #ifndef __MSP430G2303
 #define __MSP430G2303
 
-#define __MSP430_HEADER_VERSION__ 1109
+#define __MSP430_HEADER_VERSION__ 1131
 
 #define __MSP430_TI_HEADERS__
 
@@ -780,6 +780,31 @@ sfrw(WDTCTL, WDTCTL_);
 /* These two bits are defined in the Special Function Registers */
 /* #define WDTIE               0x01 */
 /* #define WDTIFG              0x01 */
+
+/************************************************************
+* Calibration Data in Info Mem
+************************************************************/
+
+#ifndef __DisableCalData
+
+#define CALDCO_16MHZ_         0x10F8    /* DCOCTL  Calibration Data for 16MHz */
+const_sfrb(CALDCO_16MHZ, CALDCO_16MHZ_);
+#define CALBC1_16MHZ_         0x10F9    /* BCSCTL1 Calibration Data for 16MHz */
+const_sfrb(CALBC1_16MHZ, CALBC1_16MHZ_);
+#define CALDCO_12MHZ_         0x10FA    /* DCOCTL  Calibration Data for 12MHz */
+const_sfrb(CALDCO_12MHZ, CALDCO_12MHZ_);
+#define CALBC1_12MHZ_         0x10FB    /* BCSCTL1 Calibration Data for 12MHz */
+const_sfrb(CALBC1_12MHZ, CALBC1_12MHZ_);
+#define CALDCO_8MHZ_          0x10FC    /* DCOCTL  Calibration Data for 8MHz */
+const_sfrb(CALDCO_8MHZ, CALDCO_8MHZ_);
+#define CALBC1_8MHZ_          0x10FD    /* BCSCTL1 Calibration Data for 8MHz */
+const_sfrb(CALBC1_8MHZ, CALBC1_8MHZ_);
+#define CALDCO_1MHZ_          0x10FE    /* DCOCTL  Calibration Data for 1MHz */
+const_sfrb(CALDCO_1MHZ, CALDCO_1MHZ_);
+#define CALBC1_1MHZ_          0x10FF    /* BCSCTL1 Calibration Data for 1MHz */
+const_sfrb(CALBC1_1MHZ, CALBC1_1MHZ_);
+
+#endif /* #ifndef __DisableCalData */
 
 /************************************************************
 * Calibration Data in Info Mem

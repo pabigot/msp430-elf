@@ -1,5 +1,5 @@
 /* ============================================================================ */
-/* Copyright (c) 2013, Texas Instruments Incorporated                           */
+/* Copyright (c) 2014, Texas Instruments Incorporated                           */
 /*  All rights reserved.                                                        */
 /*                                                                              */
 /*  Redistribution and use in source and binary forms, with or without          */
@@ -48,7 +48,7 @@
 #ifndef __MSP430F5237
 #define __MSP430F5237
 
-#define __MSP430_HEADER_VERSION__ 1109
+#define __MSP430_HEADER_VERSION__ 1131
 
 #define __MSP430_TI_HEADERS__
 
@@ -2959,15 +2959,19 @@ sfrw(TB0IV, TB0IV_);
 #define TB0IV_NONE          (0x0000)    /* No Interrupt pending */
 #define TB0IV_TBCCR1        (0x0002)    /* TB0CCR1_CCIFG */
 #define TB0IV_TBCCR2        (0x0004)    /* TB0CCR2_CCIFG */
-#define TB0IV_3             (0x0006)    /* Reserved */
-#define TB0IV_4             (0x0008)    /* Reserved */
-#define TB0IV_5             (0x000A)    /* Reserved */
-#define TB0IV_6             (0x000C)    /* Reserved */
+#define TB0IV_TBCCR3        (0x0006)    /* TB0CCR3_CCIFG */
+#define TB0IV_TBCCR4        (0x0008)    /* TB0CCR4_CCIFG */
+#define TB0IV_TBCCR5        (0x000A)    /* TB0CCR5_CCIFG */
+#define TB0IV_TBCCR6        (0x000C)    /* TB0CCR6_CCIFG */
 #define TB0IV_TBIFG         (0x000E)    /* TB0IFG */
 
 /* Legacy Defines */
 #define TB0IV_TB0CCR1       (0x0002)    /* TB0CCR1_CCIFG */
 #define TB0IV_TB0CCR2       (0x0004)    /* TB0CCR2_CCIFG */
+#define TB0IV_TB0CCR3       (0x0006)    /* TB0CCR3_CCIFG */
+#define TB0IV_TB0CCR4       (0x0008)    /* TB0CCR4_CCIFG */
+#define TB0IV_TB0CCR5       (0x000A)    /* TB0CCR5_CCIFG */
+#define TB0IV_TB0CCR6       (0x000C)    /* TB0CCR6_CCIFG */
 #define TB0IV_TB0IFG        (0x000E)    /* TB0IFG */
 
 

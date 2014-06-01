@@ -1,5 +1,5 @@
 /* ============================================================================ */
-/* Copyright (c) 2013, Texas Instruments Incorporated                           */
+/* Copyright (c) 2014, Texas Instruments Incorporated                           */
 /*  All rights reserved.                                                        */
 /*                                                                              */
 /*  Redistribution and use in source and binary forms, with or without          */
@@ -55,7 +55,7 @@
 #ifndef __msp430x09x
 #define __msp430x09x
 
-#define __MSP430_HEADER_VERSION__ 1109
+#define __MSP430_HEADER_VERSION__ 1131
 
 #define __MSP430_TI_HEADERS__
 
@@ -993,39 +993,39 @@ sfrw(SYSRSTIV, SYSRSTIV_);
 
 /* SYSCTL Control Bits */
 #define SYSRIVECT           (0x0001)  /* SYS - RAM based interrupt vectors */
-//#define RESERVED            (0x0002)  /* SYS - Reserved */
+//#define RESERVED          (0x0002)  /* SYS - Reserved */
 #define SYSPMMPE            (0x0004)  /* SYS - PMM access protect */
-//#define RESERVED            (0x0008)  /* SYS - Reserved */
+//#define RESERVED          (0x0008)  /* SYS - Reserved */
 #define SYSBSLIND           (0x0010)  /* SYS - TCK/RST indication detected */
 #define SYSJTAGPIN          (0x0020)  /* SYS - Dedicated JTAG pins enabled */
-//#define RESERVED            (0x0040)  /* SYS - Reserved */
-//#define RESERVED            (0x0080)  /* SYS - Reserved */
-//#define RESERVED            (0x0100)  /* SYS - Reserved */
-//#define RESERVED            (0x0200)  /* SYS - Reserved */
-//#define RESERVED            (0x0400)  /* SYS - Reserved */
-//#define RESERVED            (0x0800)  /* SYS - Reserved */
-//#define RESERVED            (0x1000)  /* SYS - Reserved */
-//#define RESERVED            (0x2000)  /* SYS - Reserved */
-//#define RESERVED            (0x4000)  /* SYS - Reserved */
-//#define RESERVED            (0x8000)  /* SYS - Reserved */
+//#define RESERVED          (0x0040)  /* SYS - Reserved */
+//#define RESERVED          (0x0080)  /* SYS - Reserved */
+//#define RESERVED          (0x0100)  /* SYS - Reserved */
+//#define RESERVED          (0x0200)  /* SYS - Reserved */
+//#define RESERVED          (0x0400)  /* SYS - Reserved */
+//#define RESERVED          (0x0800)  /* SYS - Reserved */
+//#define RESERVED          (0x1000)  /* SYS - Reserved */
+//#define RESERVED          (0x2000)  /* SYS - Reserved */
+//#define RESERVED          (0x4000)  /* SYS - Reserved */
+//#define RESERVED          (0x8000)  /* SYS - Reserved */
 
 /* SYSCTL Control Bits */
 #define SYSRIVECT_L         (0x0001)  /* SYS - RAM based interrupt vectors */
-//#define RESERVED            (0x0002)  /* SYS - Reserved */
+//#define RESERVED          (0x0002)  /* SYS - Reserved */
 #define SYSPMMPE_L          (0x0004)  /* SYS - PMM access protect */
-//#define RESERVED            (0x0008)  /* SYS - Reserved */
+//#define RESERVED          (0x0008)  /* SYS - Reserved */
 #define SYSBSLIND_L         (0x0010)  /* SYS - TCK/RST indication detected */
 #define SYSJTAGPIN_L        (0x0020)  /* SYS - Dedicated JTAG pins enabled */
-//#define RESERVED            (0x0040)  /* SYS - Reserved */
-//#define RESERVED            (0x0080)  /* SYS - Reserved */
-//#define RESERVED            (0x0100)  /* SYS - Reserved */
-//#define RESERVED            (0x0200)  /* SYS - Reserved */
-//#define RESERVED            (0x0400)  /* SYS - Reserved */
-//#define RESERVED            (0x0800)  /* SYS - Reserved */
-//#define RESERVED            (0x1000)  /* SYS - Reserved */
-//#define RESERVED            (0x2000)  /* SYS - Reserved */
-//#define RESERVED            (0x4000)  /* SYS - Reserved */
-//#define RESERVED            (0x8000)  /* SYS - Reserved */
+//#define RESERVED          (0x0040)  /* SYS - Reserved */
+//#define RESERVED          (0x0080)  /* SYS - Reserved */
+//#define RESERVED          (0x0100)  /* SYS - Reserved */
+//#define RESERVED          (0x0200)  /* SYS - Reserved */
+//#define RESERVED          (0x0400)  /* SYS - Reserved */
+//#define RESERVED          (0x0800)  /* SYS - Reserved */
+//#define RESERVED          (0x1000)  /* SYS - Reserved */
+//#define RESERVED          (0x2000)  /* SYS - Reserved */
+//#define RESERVED          (0x4000)  /* SYS - Reserved */
+//#define RESERVED          (0x8000)  /* SYS - Reserved */
 
 
 /* SYSBSLC Control Bits */
@@ -1083,17 +1083,17 @@ sfrw(SYSRSTIV, SYSRSTIV_);
 #define JMBOUT0FG           (0x0004)  /* SYS - Outgoing JTAG Mailbox 0 Flag */
 #define JMBOUT1FG           (0x0008)  /* SYS - Outgoing JTAG Mailbox 1 Flag */
 #define JMBMODE             (0x0010)  /* SYS - JMB 16/32 Bit Mode */
-//#define RESERVED            (0x0020)  /* SYS - Reserved */
+//#define RESERVED          (0x0020)  /* SYS - Reserved */
 #define JMBCLR0OFF          (0x0040)  /* SYS - Incoming JTAG Mailbox 0 Flag auto-clear disalbe */
 #define JMBCLR1OFF          (0x0080)  /* SYS - Incoming JTAG Mailbox 1 Flag auto-clear disalbe */
-//#define RESERVED            (0x0100)  /* SYS - Reserved */
-//#define RESERVED            (0x0200)  /* SYS - Reserved */
-//#define RESERVED            (0x0400)  /* SYS - Reserved */
-//#define RESERVED            (0x0800)  /* SYS - Reserved */
-//#define RESERVED            (0x1000)  /* SYS - Reserved */
-//#define RESERVED            (0x2000)  /* SYS - Reserved */
-//#define RESERVED            (0x4000)  /* SYS - Reserved */
-//#define RESERVED            (0x8000)  /* SYS - Reserved */
+//#define RESERVED          (0x0100)  /* SYS - Reserved */
+//#define RESERVED          (0x0200)  /* SYS - Reserved */
+//#define RESERVED          (0x0400)  /* SYS - Reserved */
+//#define RESERVED          (0x0800)  /* SYS - Reserved */
+//#define RESERVED          (0x1000)  /* SYS - Reserved */
+//#define RESERVED          (0x2000)  /* SYS - Reserved */
+//#define RESERVED          (0x4000)  /* SYS - Reserved */
+//#define RESERVED          (0x8000)  /* SYS - Reserved */
 
 /* SYSJMBC Control Bits */
 #define JMBIN0FG_L          (0x0001)  /* SYS - Incoming JTAG Mailbox 0 Flag */
@@ -1101,66 +1101,66 @@ sfrw(SYSRSTIV, SYSRSTIV_);
 #define JMBOUT0FG_L         (0x0004)  /* SYS - Outgoing JTAG Mailbox 0 Flag */
 #define JMBOUT1FG_L         (0x0008)  /* SYS - Outgoing JTAG Mailbox 1 Flag */
 #define JMBMODE_L           (0x0010)  /* SYS - JMB 16/32 Bit Mode */
-//#define RESERVED            (0x0020)  /* SYS - Reserved */
+//#define RESERVED          (0x0020)  /* SYS - Reserved */
 #define JMBCLR0OFF_L        (0x0040)  /* SYS - Incoming JTAG Mailbox 0 Flag auto-clear disalbe */
 #define JMBCLR1OFF_L        (0x0080)  /* SYS - Incoming JTAG Mailbox 1 Flag auto-clear disalbe */
-//#define RESERVED            (0x0100)  /* SYS - Reserved */
-//#define RESERVED            (0x0200)  /* SYS - Reserved */
-//#define RESERVED            (0x0400)  /* SYS - Reserved */
-//#define RESERVED            (0x0800)  /* SYS - Reserved */
-//#define RESERVED            (0x1000)  /* SYS - Reserved */
-//#define RESERVED            (0x2000)  /* SYS - Reserved */
-//#define RESERVED            (0x4000)  /* SYS - Reserved */
-//#define RESERVED            (0x8000)  /* SYS - Reserved */
+//#define RESERVED          (0x0100)  /* SYS - Reserved */
+//#define RESERVED          (0x0200)  /* SYS - Reserved */
+//#define RESERVED          (0x0400)  /* SYS - Reserved */
+//#define RESERVED          (0x0800)  /* SYS - Reserved */
+//#define RESERVED          (0x1000)  /* SYS - Reserved */
+//#define RESERVED          (0x2000)  /* SYS - Reserved */
+//#define RESERVED          (0x4000)  /* SYS - Reserved */
+//#define RESERVED          (0x8000)  /* SYS - Reserved */
 
 
 /* SYSCNF Control Bits */
-//#define RESERVED            (0x0001)  /* SYS - Reserved */
-//#define RESERVED            (0x0002)  /* SYS - Reserved */
+//#define RESERVED          (0x0001)  /* SYS - Reserved */
+//#define RESERVED          (0x0002)  /* SYS - Reserved */
 #define SVMOE               (0x0004)  /* SYS - SVM output enable */
 #define SVMPO               (0x0008)  /* SYS - SVM based Ports off flag */
 #define SVMPD               (0x0010)  /* SYS - Incoming JTAG Mailbox 0 Flag */
 #define SVMEN               (0x0020)  /* SYS - SVM based port disable */
-//#define RESERVED            (0x0040)  /* SYS - Reserved */
-//#define RESERVED            (0x0080)  /* SYS - Reserved */
+//#define RESERVED          (0x0040)  /* SYS - Reserved */
+//#define RESERVED          (0x0080)  /* SYS - Reserved */
 #define RAMLCK0             (0x0100)  /* SYS - Write lock enable for configuration RAM */
 #define RAMLCK1             (0x0200)  /* SYS - Write lock enable for application’s code RAM */
-//#define RESERVED            (0x0400)  /* SYS - Reserved */
-//#define RESERVED            (0x0800)  /* SYS - Reserved */
-//#define RESERVED            (0x1000)  /* SYS - Reserved */
-//#define RESERVED            (0x2000)  /* SYS - Reserved */
-//#define RESERVED            (0x4000)  /* SYS - Reserved */
-//#define RESERVED            (0x8000)  /* SYS - Reserved */
+//#define RESERVED          (0x0400)  /* SYS - Reserved */
+//#define RESERVED          (0x0800)  /* SYS - Reserved */
+//#define RESERVED          (0x1000)  /* SYS - Reserved */
+//#define RESERVED          (0x2000)  /* SYS - Reserved */
+//#define RESERVED          (0x4000)  /* SYS - Reserved */
+//#define RESERVED          (0x8000)  /* SYS - Reserved */
 
 /* SYSCNF Control Bits */
-//#define RESERVED            (0x0001)  /* SYS - Reserved */
-//#define RESERVED            (0x0002)  /* SYS - Reserved */
+//#define RESERVED          (0x0001)  /* SYS - Reserved */
+//#define RESERVED          (0x0002)  /* SYS - Reserved */
 #define SVMOE_L             (0x0004)  /* SYS - SVM output enable */
 #define SVMPO_L             (0x0008)  /* SYS - SVM based Ports off flag */
 #define SVMPD_L             (0x0010)  /* SYS - Incoming JTAG Mailbox 0 Flag */
 #define SVMEN_L             (0x0020)  /* SYS - SVM based port disable */
-//#define RESERVED            (0x0040)  /* SYS - Reserved */
-//#define RESERVED            (0x0080)  /* SYS - Reserved */
-//#define RESERVED            (0x0400)  /* SYS - Reserved */
-//#define RESERVED            (0x0800)  /* SYS - Reserved */
-//#define RESERVED            (0x1000)  /* SYS - Reserved */
-//#define RESERVED            (0x2000)  /* SYS - Reserved */
-//#define RESERVED            (0x4000)  /* SYS - Reserved */
-//#define RESERVED            (0x8000)  /* SYS - Reserved */
+//#define RESERVED          (0x0040)  /* SYS - Reserved */
+//#define RESERVED          (0x0080)  /* SYS - Reserved */
+//#define RESERVED          (0x0400)  /* SYS - Reserved */
+//#define RESERVED          (0x0800)  /* SYS - Reserved */
+//#define RESERVED          (0x1000)  /* SYS - Reserved */
+//#define RESERVED          (0x2000)  /* SYS - Reserved */
+//#define RESERVED          (0x4000)  /* SYS - Reserved */
+//#define RESERVED          (0x8000)  /* SYS - Reserved */
 
 /* SYSCNF Control Bits */
-//#define RESERVED            (0x0001)  /* SYS - Reserved */
-//#define RESERVED            (0x0002)  /* SYS - Reserved */
-//#define RESERVED            (0x0040)  /* SYS - Reserved */
-//#define RESERVED            (0x0080)  /* SYS - Reserved */
+//#define RESERVED          (0x0001)  /* SYS - Reserved */
+//#define RESERVED          (0x0002)  /* SYS - Reserved */
+//#define RESERVED          (0x0040)  /* SYS - Reserved */
+//#define RESERVED          (0x0080)  /* SYS - Reserved */
 #define RAMLCK0_H           (0x0001)  /* SYS - Write lock enable for configuration RAM */
 #define RAMLCK1_H           (0x0002)  /* SYS - Write lock enable for application’s code RAM */
-//#define RESERVED            (0x0400)  /* SYS - Reserved */
-//#define RESERVED            (0x0800)  /* SYS - Reserved */
-//#define RESERVED            (0x1000)  /* SYS - Reserved */
-//#define RESERVED            (0x2000)  /* SYS - Reserved */
-//#define RESERVED            (0x4000)  /* SYS - Reserved */
-//#define RESERVED            (0x8000)  /* SYS - Reserved */
+//#define RESERVED          (0x0400)  /* SYS - Reserved */
+//#define RESERVED          (0x0800)  /* SYS - Reserved */
+//#define RESERVED          (0x1000)  /* SYS - Reserved */
+//#define RESERVED          (0x2000)  /* SYS - Reserved */
+//#define RESERVED          (0x4000)  /* SYS - Reserved */
+//#define RESERVED          (0x8000)  /* SYS - Reserved */
 
 /* SYSUNIV Definitions */
 #define SYSUNIV_NONE       (0x0000)    /* No Interrupt pending */

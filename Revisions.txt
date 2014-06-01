@@ -1,7 +1,17 @@
 ==========================================================================================
 *                         Header and Support Files History:                              *
 ==========================================================================================
-Version: 1.109
+Version: 1.131
+==========================================================================================
+release Package 29.04.2014
+==========================================================================================
+==========================================================================================
+release Package 21.01.2014
+==========================================================================================
+20.01.2014   Added Version Tag to Linker command files (identical to header files)
+             updated Signature defintion for CCS in linker command files 
+             replaced MirrowRAMEnd with MirrowedRAMEnd 
+             added MSP430F677xA devices
 21.11.2013   MSP430F665x: Added USCI_A2 and USCI_B2 to DMA Trigger Table
 20.11.2013   CCS: updated path for mathlib (4xx/5xx version)
 11.11.2013   MSP430i20xx: fixed TAxIV_TAIFG definition

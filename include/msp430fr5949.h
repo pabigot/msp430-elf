@@ -1,5 +1,5 @@
 /* ============================================================================ */
-/* Copyright (c) 2013, Texas Instruments Incorporated                           */
+/* Copyright (c) 2014, Texas Instruments Incorporated                           */
 /*  All rights reserved.                                                        */
 /*                                                                              */
 /*  Redistribution and use in source and binary forms, with or without          */
@@ -53,7 +53,7 @@
 #ifndef __MSP430FR5949
 #define __MSP430FR5949
 
-#define __MSP430_HEADER_VERSION__ 1109
+#define __MSP430_HEADER_VERSION__ 1131
 
 #define __MSP430_TI_HEADERS__
 
@@ -659,16 +659,16 @@ sfrw(ADC12MEM31, ADC12MEM31_);
 #define ADC12ICH2MAP_H      (0x0004)    /* ADC12 Internal Channel 2 select */
 #define ADC12ICH3MAP_H      (0x0008)    /* ADC12 Internal Channel 3 select */
 
-#define ADC12CSTARTADD_0     ( 0*0x0001) /* ADC12 Conversion Start Address: 0 */
-#define ADC12CSTARTADD_1     ( 1*0x0001) /* ADC12 Conversion Start Address: 1 */
-#define ADC12CSTARTADD_2     ( 2*0x0001) /* ADC12 Conversion Start Address: 2 */
-#define ADC12CSTARTADD_3     ( 3*0x0001) /* ADC12 Conversion Start Address: 3 */
-#define ADC12CSTARTADD_4     ( 4*0x0001) /* ADC12 Conversion Start Address: 4 */
-#define ADC12CSTARTADD_5     ( 5*0x0001) /* ADC12 Conversion Start Address: 5 */
-#define ADC12CSTARTADD_6     ( 6*0x0001) /* ADC12 Conversion Start Address: 6 */
-#define ADC12CSTARTADD_7     ( 7*0x0001) /* ADC12 Conversion Start Address: 7 */
-#define ADC12CSTARTADD_8     ( 8*0x0001) /* ADC12 Conversion Start Address: 8 */
-#define ADC12CSTARTADD_9     ( 9*0x0001) /* ADC12 Conversion Start Address: 9 */
+#define ADC12CSTARTADD_0     (0x0000) /* ADC12 Conversion Start Address: 0 */
+#define ADC12CSTARTADD_1     (0x0001) /* ADC12 Conversion Start Address: 1 */
+#define ADC12CSTARTADD_2     (0x0002) /* ADC12 Conversion Start Address: 2 */
+#define ADC12CSTARTADD_3     (0x0003) /* ADC12 Conversion Start Address: 3 */
+#define ADC12CSTARTADD_4     (0x0004) /* ADC12 Conversion Start Address: 4 */
+#define ADC12CSTARTADD_5     (0x0005) /* ADC12 Conversion Start Address: 5 */
+#define ADC12CSTARTADD_6     (0x0006) /* ADC12 Conversion Start Address: 6 */
+#define ADC12CSTARTADD_7     (0x0007) /* ADC12 Conversion Start Address: 7 */
+#define ADC12CSTARTADD_8     (0x0008) /* ADC12 Conversion Start Address: 8 */
+#define ADC12CSTARTADD_9     (0x0009) /* ADC12 Conversion Start Address: 9 */
 #define ADC12CSTARTADD_10    (0x000A) /* ADC12 Conversion Start Address: 10 */
 #define ADC12CSTARTADD_11    (0x000B) /* ADC12 Conversion Start Address: 11 */
 #define ADC12CSTARTADD_12    (0x000C) /* ADC12 Conversion Start Address: 12 */
@@ -1745,9 +1745,11 @@ sfrw(CSCTL6, CSCTL6_);
 #define SELM_7              (0x0007)   /* MCLK Source Select 7 */
 #define SELM__LFXTCLK       (0x0000)   /* MCLK Source Select LFXTCLK */
 #define SELM__VLOCLK        (0x0001)   /* MCLK Source Select VLOCLK */
-#define SELM__LFMODOSC      (0x0002)   /* MCLK Source Select LFMODOSC */
+#define SELM__LFMODCLK      (0x0002)   /* MCLK Source Select LFMODOSC */
+#define SELM__LFMODOSC      (0x0002)   /* MCLK Source Select LFMODOSC (legacy) */
 #define SELM__DCOCLK        (0x0003)   /* MCLK Source Select DCOCLK */
-#define SELM__MODOSC        (0x0004)   /* MCLK Source Select MODOSC */
+#define SELM__MODCLK        (0x0004)   /* MCLK Source Select MODOSC */
+#define SELM__MODOSC        (0x0004)   /* MCLK Source Select MODOSC (legacy) */
 
 #define SELS_0              (0x0000)   /* SMCLK Source Select 0 */
 #define SELS_1              (0x0010)   /* SMCLK Source Select 1 */
@@ -1759,9 +1761,11 @@ sfrw(CSCTL6, CSCTL6_);
 #define SELS_7              (0x0070)   /* SMCLK Source Select 7 */
 #define SELS__LFXTCLK       (0x0000)   /* SMCLK Source Select LFXTCLK */
 #define SELS__VLOCLK        (0x0010)   /* SMCLK Source Select VLOCLK */
-#define SELS__LFMODOSC      (0x0020)   /* SMCLK Source Select LFMODOSC */
+#define SELS__LFMODCLK      (0x0020)   /* SMCLK Source Select LFMODOSC */
+#define SELS__LFMODOSC      (0x0020)   /* SMCLK Source Select LFMODOSC (legacy) */
 #define SELS__DCOCLK        (0x0030)   /* SMCLK Source Select DCOCLK */
-#define SELS__MODOSC        (0x0040)   /* SMCLK Source Select MODOSC */
+#define SELS__MODCLK        (0x0040)   /* SMCLK Source Select MODOSC */
+#define SELS__MODOSC        (0x0040)   /* SMCLK Source Select MODOSC (legacy) */
 
 #define SELA_0              (0x0000)   /* ACLK Source Select 0 */
 #define SELA_1              (0x0100)   /* ACLK Source Select 1 */
@@ -1773,7 +1777,8 @@ sfrw(CSCTL6, CSCTL6_);
 #define SELA_7              (0x0700)   /* ACLK Source Select 7 */
 #define SELA__LFXTCLK       (0x0000)   /* ACLK Source Select LFXTCLK */
 #define SELA__VLOCLK        (0x0100)   /* ACLK Source Select VLOCLK */
-#define SELA__LFMODOSC      (0x0200)   /* ACLK Source Select LFMODOSC */
+#define SELA__LFMODCLK      (0x0200)   /* ACLK Source Select LFMODOSC */
+#define SELA__LFMODOSC      (0x0200)   /* ACLK Source Select LFMODOSC (legacy) */
 
 /* CSCTL3 Control Bits */
 #define DIVM0               (0x0001)   /* MCLK Divider Bit: 0 */
@@ -1874,7 +1879,6 @@ sfrw(CSCTL6, CSCTL6_);
 #define SMCLKOFF            (0x0002)    /* SMCLK Off */
 #define VLOOFF              (0x0008)    /* VLO Off */
 #define LFXTBYPASS          (0x0010)    /* LFXT bypass mode : 0: internal 1:sourced from external pin */
-#define LFXTAGCOFF          (0x0020)    /* LFXT automatic gain control off */
 #define LFXTDRIVE0          (0x0040)    /* LFXT Drive Level mode Bit 0 */
 #define LFXTDRIVE1          (0x0080)    /* LFXT Drive Level mode Bit 1 */
 
@@ -1883,7 +1887,6 @@ sfrw(CSCTL6, CSCTL6_);
 #define SMCLKOFF_L          (0x0002)    /* SMCLK Off */
 #define VLOOFF_L            (0x0008)    /* VLO Off */
 #define LFXTBYPASS_L        (0x0010)    /* LFXT bypass mode : 0: internal 1:sourced from external pin */
-#define LFXTAGCOFF_L        (0x0020)    /* LFXT automatic gain control off */
 #define LFXTDRIVE0_L        (0x0040)    /* LFXT Drive Level mode Bit 0 */
 #define LFXTDRIVE1_L        (0x0080)    /* LFXT Drive Level mode Bit 1 */
 
@@ -2305,6 +2308,7 @@ sfrw(DMA2SZ, DMA2SZ_);
 #define __MSP430_HAS_FRAM__           /* Definition to show that Module is available */
 #define __MSP430_BASEADDRESS_FRAM__ 0x0140
 #define FRAM_BASE __MSP430_BASEADDRESS_FRAM__
+#define __MSP430_HAS_GC__            /* Definition to show that Module is available */
 
 #define FRCTL0_               0x0140    /* FRAM Controller Control 0 */
 sfrb(FRCTL0_L , FRCTL0_);
@@ -2709,8 +2713,6 @@ sfrw(MPY32CTL0, MPY32CTL0_);
 sfrb(PMMCTL0_L , PMMCTL0_);
 sfrb(PMMCTL0_H , PMMCTL0_+1);
 sfrw(PMMCTL0, PMMCTL0_);
-#define PMMCTL1_              0x0122    /* PMM Control 1 */
-sfrw(PMMCTL1, PMMCTL1_);
 #define PMMIFG_               0x012A    /* PMM Interrupt Flag */
 sfrb(PMMIFG_L , PMMIFG_);
 sfrb(PMMIFG_H , PMMIFG_+1);
@@ -2736,17 +2738,6 @@ sfrw(PM5CTL0, PM5CTL0_);
 #define PMMREGOFF_L         (0x0010)  /* PMM Turn Regulator off */
 #define SVSHE_L             (0x0040)  /* SVS high side enable */
 #define PMMLPRST_L          (0x0080)  /* PMM Low-Power Reset Enable */
-
-
-/* PMMCTL1 Control Bits */
-#define PMMLPSVEN           (0x0002)  /* PMM Low-Power Supervision Enable */
-#define PMMLPRNG0           (0x0004)  /* PMM Load Range Control overwrite for LPM2, LPM3 and LPM4 Bit: 0 */
-#define PMMLPRNG1           (0x0008)  /* PMM Load Range Control overwrite for LPM2, LPM3 and LPM4 Bit: 1 */
-#define PMMAMRNG0           (0x0010)  /* Load Range Control overwrite for AM, LPM0 and LPM1 Bit: 0 */
-#define PMMAMRNG1           (0x0020)  /* Load Range Control overwrite for AM, LPM0 and LPM1 Bit: 1 */
-#define PMMAMRNG2           (0x0040)  /* Load Range Control overwrite for AM, LPM0 and LPM1 Bit: 2 */
-#define PMMAMRNG3           (0x0080)  /* Load Range Control overwrite for AM, LPM0 and LPM1 Bit: 3 */
-#define PMMCTL1KEY          (0xCC00)  /* PMM PMMCTL1 Register Write Password */
 
 
 /* PMMIFG Control Bits */
@@ -4116,15 +4107,19 @@ sfrw(TB0IV, TB0IV_);
 #define TB0IV_NONE          (0x0000)    /* No Interrupt pending */
 #define TB0IV_TBCCR1        (0x0002)    /* TB0CCR1_CCIFG */
 #define TB0IV_TBCCR2        (0x0004)    /* TB0CCR2_CCIFG */
-#define TB0IV_3             (0x0006)    /* Reserved */
-#define TB0IV_4             (0x0008)    /* Reserved */
-#define TB0IV_5             (0x000A)    /* Reserved */
-#define TB0IV_6             (0x000C)    /* Reserved */
+#define TB0IV_TBCCR3        (0x0006)    /* TB0CCR3_CCIFG */
+#define TB0IV_TBCCR4        (0x0008)    /* TB0CCR4_CCIFG */
+#define TB0IV_TBCCR5        (0x000A)    /* TB0CCR5_CCIFG */
+#define TB0IV_TBCCR6        (0x000C)    /* TB0CCR6_CCIFG */
 #define TB0IV_TBIFG         (0x000E)    /* TB0IFG */
 
 /* Legacy Defines */
 #define TB0IV_TB0CCR1       (0x0002)    /* TB0CCR1_CCIFG */
 #define TB0IV_TB0CCR2       (0x0004)    /* TB0CCR2_CCIFG */
+#define TB0IV_TB0CCR3       (0x0006)    /* TB0CCR3_CCIFG */
+#define TB0IV_TB0CCR4       (0x0008)    /* TB0CCR4_CCIFG */
+#define TB0IV_TB0CCR5       (0x000A)    /* TB0CCR5_CCIFG */
+#define TB0IV_TB0CCR6       (0x000C)    /* TB0CCR6_CCIFG */
 #define TB0IV_TB0IFG        (0x000E)    /* TB0IFG */
 
 
@@ -4910,6 +4905,31 @@ sfrw(WDTCTL, WDTCTL_);
 #define WDT_ARST_250        (WDTPW+WDTCNTCL+WDTSSEL0+WDTIS2+WDTIS0)                  /* 250ms   " */
 #define WDT_ARST_16         (WDTPW+WDTCNTCL+WDTSSEL0+WDTIS2+WDTIS1)                  /* 16ms    " */
 #define WDT_ARST_1_9        (WDTPW+WDTCNTCL+WDTSSEL0+WDTIS2+WDTIS1+WDTIS0)           /* 1.9ms   " */
+
+
+/************************************************************
+* TLV Descriptors
+************************************************************/
+#define __MSP430_HAS_TLV__              /* Definition to show that Module is available */
+#define TLV_BASE __MSP430_BASEADDRESS_TLV__
+
+#define TLV_START             (0x1A08)    /* Start Address of the TLV structure */
+#define TLV_END               (0x1AFF)    /* End Address of the TLV structure */
+
+#define TLV_LDTAG             (0x01)      /*  Legacy descriptor (1xx, 2xx, 4xx families) */
+#define TLV_PDTAG             (0x02)      /*  Peripheral discovery descriptor */
+#define TLV_Reserved3         (0x03)      /*  Future usage */
+#define TLV_Reserved4         (0x04)      /*  Future usage */
+#define TLV_BLANK             (0x05)      /*  Blank descriptor */
+#define TLV_Reserved6         (0x06)      /*  Future usage */
+#define TLV_Reserved7         (0x07)      /*  Serial Number */
+#define TLV_DIERECORD         (0x08)      /*  Die Record  */
+#define TLV_ADCCAL            (0x11)      /*  ADC12 calibration */
+#define TLV_ADC12CAL          (0x11)      /*  ADC12 calibration */
+#define TLV_ADC10CAL          (0x13)      /*  ADC10 calibration */
+#define TLV_REFCAL            (0x12)      /*  REF calibration */
+#define TLV_TAGEXT            (0xFE)      /*  Tag extender */
+#define TLV_TAGEND            (0xFF)      //  Tag End of Table
 
 
 /************************************************************

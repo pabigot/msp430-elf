@@ -1,5 +1,5 @@
 /* ============================================================================ */
-/* Copyright (c) 2013, Texas Instruments Incorporated                           */
+/* Copyright (c) 2014, Texas Instruments Incorporated                           */
 /*  All rights reserved.                                                        */
 /*                                                                              */
 /*  Redistribution and use in source and binary forms, with or without          */
@@ -48,7 +48,7 @@
 #ifndef __msp430F5XX_F6XXGENERIC
 #define __msp430F5XX_F6XXGENERIC
 
-#define __MSP430_HEADER_VERSION__ 1109
+#define __MSP430_HEADER_VERSION__ 1131
 
 #define __MSP430_TI_HEADERS__
 
@@ -1630,6 +1630,157 @@ extern "C" {
 #define OFS_CRCRESR           (0x0006)  /* CRC reverse result Register */
 #define OFS_CRCRESR_L          OFS_CRCRESR
 #define OFS_CRCRESR_H          OFS_CRCRESR+1
+
+#endif
+/************************************************************
+* CTSD16 - Sigma Delta 16 Bit
+************************************************************/
+#ifdef  __MSP430_HAS_CTSD16__         /* Definition to show that Module is available */
+
+#define OFS_CTSD16CTL         (0x0000)  /* CTSD16 Control Register 0 */
+#define OFS_CTSD16CTL_L        OFS_CTSD16CTL
+#define OFS_CTSD16CTL_H        OFS_CTSD16CTL+1
+#define OFS_CTSD16IFG         (0x002C)  /* CTSD16 Interrupt Flag Register */
+#define OFS_CTSD16IFG_L        OFS_CTSD16IFG
+#define OFS_CTSD16IFG_H        OFS_CTSD16IFG+1
+#define OFS_CTSD16IE          (0x002E)  /* CTSD16 Interrupt Enable Register */
+#define OFS_CTSD16IE_L         OFS_CTSD16IE
+#define OFS_CTSD16IE_H         OFS_CTSD16IE+1
+#define OFS_CTSD16IV          (0x0030)  /* CTSD16 Interrupt Vector Register */
+#define OFS_CTSD16IV_L         OFS_CTSD16IV
+#define OFS_CTSD16IV_H         OFS_CTSD16IV+1
+
+#define OFS_CTSD16CCTL0       (0x0002)  /* CTSD16 Channel 0 Control Register */
+#define OFS_CTSD16CCTL0_L      OFS_CTSD16CCTL0
+#define OFS_CTSD16CCTL0_H      OFS_CTSD16CCTL0+1
+#define OFS_CTSD16MEM0        (0x0032)  /* CTSD16 Channel 0 Conversion Memory */
+#define OFS_CTSD16MEM0_L       OFS_CTSD16MEM0
+#define OFS_CTSD16MEM0_H       OFS_CTSD16MEM0+1
+#define OFS_CTSD16INCTL0      (0x0004)  /* CTSD16 Channel 0 Input Control Register */
+#define OFS_CTSD16INCTL0_L     OFS_CTSD16INCTL0
+#define OFS_CTSD16INCTL0_H     OFS_CTSD16INCTL0+1
+#define OFS_CTSD16PRE0        (0x0006)  /* CTSD16 Channel 0 Preload Register */
+#define OFS_CTSD16PRE0_L       OFS_CTSD16PRE0
+#define OFS_CTSD16PRE0_H       OFS_CTSD16PRE0+1
+
+
+/* CTSD16CTL */
+#define CTSD16REFS            (0x0004)  /* CTSD16 reference select */
+#define CTSD16CLKR            (0x0008)  /* CTSD16CLK resistor select */
+#define CTSD16OFFG            (0x0010)  /* CTSD16 clock fault flag */
+#define CTSD16RRIBURST        (0x0100)  /* Rail-to-rail input charge pump burst mode request */
+#define CTSD16RRIRDY          (0x0200)  /* CTSD16 Rail-to-rail input ready */
+#define CTSD16RRIERR          (0x0400)  /* CTSD16 Rail-to-rail input error */
+
+#define CTSD16REFS_L        (0x0004)  /* CTSD16 reference select */
+#define CTSD16CLKR_L        (0x0008)  /* CTSD16CLK resistor select */
+#define CTSD16OFFG_L        (0x0010)  /* CTSD16 clock fault flag */
+
+#define CTSD16RRIBURST_H    (0x0001)  /* Rail-to-rail input charge pump burst mode request */
+#define CTSD16RRIRDY_H      (0x0002)  /* CTSD16 Rail-to-rail input ready */
+#define CTSD16RRIERR_H      (0x0004)  /* CTSD16 Rail-to-rail input error */
+
+
+/* CTSD16CCTLx */
+#define CTSD16GRP              (0x0001)  /* CTSD16 group */
+#define CTSD16SC               (0x0002)  /* CTSD16 Start Conversion */
+#define CTSD16DF               (0x0010)  /* CTSD16 Data Format */
+#define CTSD16LSBACC           (0x0040)  /* CTSD16 LSB access */
+#define CTSD16LSBTOG           (0x0080)  /* CTSD16 LSB toggle */
+#define CTSD16OSR0             (0x0100)  /* CTSD16 Channel OverSampling Ratio 0 */
+#define CTSD16OSR1             (0x0200)  /* CTSD16 Channel OverSampling Ratio 1 */
+#define CTSD16SNGL             (0x0400)  /* CTSD16 Channel Single Conversion Mode */
+
+#define CTSD16GRP_L         (0x0001)  /* CTSD16 group */
+#define CTSD16SC_L          (0x0002)  /* CTSD16 Start Conversion */
+#define CTSD16DF_L          (0x0010)  /* CTSD16 Data Format */
+#define CTSD16LSBACC_L      (0x0040)  /* CTSD16 LSB access */
+#define CTSD16LSBTOG_L      (0x0080)  /* CTSD16 LSB toggle */
+
+#define CTSD16OSR0_H        (0x0001)  /* CTSD16 Channel OverSampling Ratio 0 */
+#define CTSD16OSR1_H        (0x0002)  /* CTSD16 Channel OverSampling Ratio 1 */
+#define CTSD16SNGL_H        (0x0004)  /* CTSD16 Channel Single Conversion Mode */
+
+#define CTSD16OSR_256          (0x0000)  /* CTSD16 Channel OverSampling Ratio 256 */
+#define CTSD16OSR_128          (0x0100)  /* CTSD16 Channel OverSampling Ratio 128 */
+#define CTSD16OSR_64           (0x0200)  /* CTSD16 Channel OverSampling Ratio  64 */
+#define CTSD16OSR_32           (0x0300)  /* CTSD16 Channel OverSampling Ratio  32 */
+
+
+/* CTSD16INCTLx */
+#define CTSD16INCH0           (0x0001)  /* CTSD16 Input Channel select 0 */
+#define CTSD16INCH1           (0x0002)  /* CTSD16 Input Channel select 1 */
+#define CTSD16INCH2           (0x0004)  /* CTSD16 Input Channel select 2 */
+#define CTSD16INCH3           (0x0008)  /* CTSD16 Input Channel select 3 */
+#define CTSD16INCH4           (0x0010)  /* CTSD16 Input Channel select 4 */
+#define CTSD16GAIN0           (0x0020)  /* CTSD16 Input Pre-Amplifier Gain Select 0 */
+#define CTSD16GAIN1           (0x0040)  /* CTSD16 Input Pre-Amplifier Gain Select 1 */
+#define CTSD16GAIN2           (0x0080)  /* CTSD16 Input Pre-Amplifier Gain Select 2 */
+#define CTSD16INTDLY          (0x0100)  /* CTSD16 Interrupt Delay after 1.Conversion */
+#define CTSD16BUFOFF          (0x0400)  /* CTSD16 Controls input buffer */
+#define CTSD16RRI             (0x0800)  /* CTSD16 Rail-to-rail input enable */
+
+#define CTSD16INCH0_L       (0x0001)  /* CTSD16 Input Channel select 0 */
+#define CTSD16INCH1_L       (0x0002)  /* CTSD16 Input Channel select 1 */
+#define CTSD16INCH2_L       (0x0004)  /* CTSD16 Input Channel select 2 */
+#define CTSD16INCH3_L       (0x0008)  /* CTSD16 Input Channel select 3 */
+#define CTSD16INCH4_L       (0x0010)  /* CTSD16 Input Channel select 4 */
+#define CTSD16GAIN0_L       (0x0020)  /* CTSD16 Input Pre-Amplifier Gain Select 0 */
+#define CTSD16GAIN1_L       (0x0040)  /* CTSD16 Input Pre-Amplifier Gain Select 1 */
+#define CTSD16GAIN2_L       (0x0080)  /* CTSD16 Input Pre-Amplifier Gain Select 2 */
+
+#define CTSD16INTDLY_H      (0x0001)  /* CTSD16 Interrupt Delay after 1.Conversion */
+#define CTSD16BUFOFF_H      (0x0004)  /* CTSD16 Controls input buffer */
+#define CTSD16RRI_H         (0x0008)  /* CTSD16 Rail-to-rail input enable */
+
+#define CTSD16GAIN_1          (0x0000)  /* CTSD16 Input Pre-Amplifier Gain Select *1  */
+#define CTSD16GAIN_2          (0x0008)  /* CTSD16 Input Pre-Amplifier Gain Select *2  */
+#define CTSD16GAIN_4          (0x0010)  /* CTSD16 Input Pre-Amplifier Gain Select *4  */
+#define CTSD16GAIN_8          (0x0018)  /* CTSD16 Input Pre-Amplifier Gain Select *8  */
+#define CTSD16GAIN_16         (0x0020)  /* CTSD16 Input Pre-Amplifier Gain Select *16 */
+
+#define CTSD16INCH_0          (0x0000)  /* CTSD16 Input Channel select A0 */
+#define CTSD16INCH_1          (0x0001)  /* CTSD16 Input Channel select A1 */
+#define CTSD16INCH_2          (0x0002)  /* CTSD16 Input Channel select A2 */
+#define CTSD16INCH_3          (0x0003)  /* CTSD16 Input Channel select A3 */
+#define CTSD16INCH_4          (0x0004)  /* CTSD16 Input Channel select A4 */
+#define CTSD16INCH_5          (0x0005)  /* CTSD16 Input Channel select A5 */
+#define CTSD16INCH_6          (0x0006)  /* CTSD16 Input Channel select Temp */
+#define CTSD16INCH_7          (0x0007)  /* CTSD16 Input Channel select Vcc */
+#define CTSD16INCH_8          (0x0008)  /* CTSD16 Input Channel select VBat */
+#define CTSD16INCH_9          (0x0009)  /* CTSD16 Input Channel select AD0+ / AD0- */
+#define CTSD16INCH_10         (0x000A)  /* CTSD16 Input Channel select AD0+ / VREF */
+#define CTSD16INCH_11         (0x000B)  /* CTSD16 Input Channel select AD1+ / AD1- */
+#define CTSD16INCH_12         (0x000C)  /* CTSD16 Input Channel select AD1+ / VREF*/
+#define CTSD16INCH_13         (0x000D)  /* CTSD16 Input Channel select AD2+ / AD2- */
+#define CTSD16INCH_14         (0x000E)  /* CTSD16 Input Channel select AD2+ / VREF*/
+#define CTSD16INCH_15         (0x000F)  /* CTSD16 Input Channel select AD3+ / AD3 -*/
+#define CTSD16INCH_16         (0x0010)  /* CTSD16 Input Channel select AD3+ / VREF*/
+#define CTSD16INCH_17         (0x0011)  /* CTSD16 Input Channel select AD4x - VREF*/
+#define CTSD16INCH_18         (0x0012)  /* CTSD16 Input Channel select AD4x - DAC0 */
+
+
+/* CTSD16IFG */
+#define CTSD16IFG0            (0x0001)  /* CTSD16 Channel 0 Interrupt Flag */
+#define CTSD16OVIFG0          (0x0100)  /* CTSD16 Channel 0 Overflow Interrupt Flag */
+
+#define CTSD16IFG0_L        (0x0001)  /* CTSD16 Channel 0 Interrupt Flag */
+
+#define CTSD16OVIFG0_H      (0x0001)  /* CTSD16 Channel 0 Overflow Interrupt Flag */
+
+/* CTSD16IE */
+#define CTSD16IE0             (0x0001)  /* CTSD16 Channel 0 Interrupt Enable */
+#define CTSD16OVIE0           (0x0100)  /* CTSD16 Channel 0 Overflow Interrupt Enable */
+
+#define CTSD16IE0_L         (0x0001)  /* CTSD16 Channel 0 Interrupt Enable */
+
+#define CTSD16OVIE0_H       (0x0001)  /* CTSD16 Channel 0 Overflow Interrupt Enable */
+
+/* CTSD16IV Definitions */
+#define CTSD16IV_NONE         (0x0000)    /* No Interrupt pending */
+#define CTSD16IV_CTSD16OVIFG  (0x0002)    /* CTSD16OVIFG */
+#define CTSD16IV_CTSD16MEM0   (0x0004)    /* CTSD16MEM0-CTSD16IFG0 */
+
 
 #endif
 /************************************************************
@@ -3336,6 +3487,84 @@ extern "C" {
 #define MPYM__MPYS          (0x0010)  /* Multiplier mode: MPYS */
 #define MPYM__MAC           (0x0020)  /* Multiplier mode: MAC */
 #define MPYM__MACS          (0x0030)  /* Multiplier mode: MACS */
+
+#endif
+/************************************************************
+* Operational Amplifier
+************************************************************/
+#ifdef  __MSP430_HAS_OA_0__           /* Definition to show that Module is available */
+
+#define OFS_OA0CTL0           (0x0000)  /* OA0 Control register 0 */
+#define OFS_OA0CTL0_L          OFS_OA0CTL0
+#define OFS_OA0CTL0_H          OFS_OA0CTL0+1
+#define OFS_OA0PSW            (0x0002)  /* OA0 Positive Input Terminal Switches */
+#define OFS_OA0PSW_L           OFS_OA0PSW
+#define OFS_OA0PSW_H           OFS_OA0PSW+1
+#define OFS_OA0NSW            (0x0004)  /* OA0 Negative Input Terminal Switches */
+#define OFS_OA0NSW_L           OFS_OA0NSW
+#define OFS_OA0NSW_H           OFS_OA0NSW+1
+#define OFS_OA0GSW            (0x000E)  /* OA0 Ground Switches */
+#define OFS_OA0GSW_L           OFS_OA0GSW
+#define OFS_OA0GSW_H           OFS_OA0GSW+1
+
+#define OAM                  (0x0001)  /* Amplifier mode selection */
+#define OARRI                (0x0020)  /* Rail-to-rail input enable */
+#define OARRIRDY             (0x0040)  /* Rail-to-rail input ready status */
+
+#define OAM_L               (0x0001)  /* Amplifier mode selection */
+#define OARRI_L             (0x0020)  /* Rail-to-rail input enable */
+#define OARRIRDY_L          (0x0040)  /* Rail-to-rail input ready status */
+
+
+#define PSW0                (0x0001)  /* Positive input terminal switch 0 control */
+#define PSW1                (0x0002)  /* Positive input terminal switch 1 control */
+#define PSW2                (0x0004)  /* Positive input terminal switch 2 control */
+#define PSW3                (0x0008)  /* Positive input terminal switch 3 control */
+
+#define PSW0_L              (0x0001)  /* Positive input terminal switch 0 control */
+#define PSW1_L              (0x0002)  /* Positive input terminal switch 1 control */
+#define PSW2_L              (0x0004)  /* Positive input terminal switch 2 control */
+#define PSW3_L              (0x0008)  /* Positive input terminal switch 3 control */
+
+
+#define NSW0                (0x0001)  /* Negative input terminal switch 0 control */
+#define NSW1                (0x0002)  /* Negative input terminal switch 1 control */
+#define NSW2                (0x0004)  /* Negative input terminal switch 2 control */
+#define NSW3                (0x0008)  /* Negative input terminal switch 3 control */
+#define NSW4                (0x0010)  /* Negative input terminal switch 4 control */
+
+#define NSW0_L              (0x0001)  /* Negative input terminal switch 0 control */
+#define NSW1_L              (0x0002)  /* Negative input terminal switch 1 control */
+#define NSW2_L              (0x0004)  /* Negative input terminal switch 2 control */
+#define NSW3_L              (0x0008)  /* Negative input terminal switch 3 control */
+#define NSW4_L              (0x0010)  /* Negative input terminal switch 4 control */
+
+
+#define GSW0                (0x0001)  /* Ground switch 0 */
+#define GSW1                (0x0002)  /* Ground switch 1 */
+
+#define GSW0_L              (0x0001)  /* Ground switch 0 */
+#define GSW1_L              (0x0002)  /* Ground switch 1 */
+
+
+#endif
+/************************************************************
+* Operational Amplifier
+************************************************************/
+#ifdef  __MSP430_HAS_OA_1__           /* Definition to show that Module is available */
+
+#define OFS_OA1CTL0           (0x0000)  /* OA1 Control register 0 */
+#define OFS_OA1CTL0_L          OFS_OA1CTL0
+#define OFS_OA1CTL0_H          OFS_OA1CTL0+1
+#define OFS_OA1PSW            (0x0002)  /* OA1 Positive Input Terminal Switches */
+#define OFS_OA1PSW_L           OFS_OA1PSW
+#define OFS_OA1PSW_H           OFS_OA1PSW+1
+#define OFS_OA1NSW            (0x0004)  /* OA1 Negative Input Terminal Switches */
+#define OFS_OA1NSW_L           OFS_OA1NSW
+#define OFS_OA1NSW_H           OFS_OA1NSW+1
+#define OFS_OA1GSW            (0x000E)  /* OA1 Ground Switches */
+#define OFS_OA1GSW_L           OFS_OA1GSW
+#define OFS_OA1GSW_H           OFS_OA1GSW+1
 
 #endif
 /************************************************************
@@ -5652,6 +5881,7 @@ extern "C" {
 
 
 /* RTCCTL13 Control Bits */
+#define RTCLOCK             (0x0400)   /* RTC Real-Time clock lock */
 #define RTCCALF1            (0x0200)   /* RTC Calibration Frequency Bit 1 */
 #define RTCCALF0            (0x0100)   /* RTC Calibration Frequency Bit 0 */
 #define RTCBCD              (0x0080)   /* RTC BCD  0:Binary / 1:BCD */
@@ -5674,6 +5904,7 @@ extern "C" {
 #define RTCTEV0_L           (0x0001)   /* RTC Time Event 0 */
 
 /* RTCCTL13 Control Bits */
+#define RTCLOCK_H           (0x0004)   /* RTC Real-Time clock lock */
 #define RTCCALF1_H          (0x0002)   /* RTC Calibration Frequency Bit 1 */
 #define RTCCALF0_H          (0x0001)   /* RTC Calibration Frequency Bit 0 */
 
@@ -6695,48 +6926,48 @@ extern "C" {
 #define ID0                    (0x0040)       /* Timer B clock input divider 0 */
 #define MC1                    (0x0020)       /* Timer B mode control 1 */
 #define MC0                    (0x0010)       /* Timer B mode control 0 */
-#define MC__STOP               (0*0x10u)      /* Timer B mode control: 0 - Stop */
-#define MC__UP                 (1*0x10u)      /* Timer B mode control: 1 - Up to CCR0 */
-#define MC__CONTINUOUS         (2*0x10u)      /* Timer B mode control: 2 - Continuous up */
-#define MC__CONTINOUS          (2*0x10u)      /* Legacy define */
-#define MC__UPDOWN             (3*0x10u)      /* Timer B mode control: 3 - Up/Down */
+#define MC__STOP               (0x0000)      /* Timer B mode control: 0 - Stop */
+#define MC__UP                 (0x0010)      /* Timer B mode control: 1 - Up to CCR0 */
+#define MC__CONTINUOUS         (0x0020)      /* Timer B mode control: 2 - Continuous up */
+#define MC__CONTINOUS          (0x0020)      /* Legacy define */
+#define MC__UPDOWN             (0x0030)      /* Timer B mode control: 3 - Up/Down */
 #define CM1                    (0x8000)       /* Capture mode 1 */
 #define CM0                    (0x4000)       /* Capture mode 0 */
-#define MC_0                   (0*0x10u)      /* Timer B mode control: 0 - Stop */
-#define MC_1                   (1*0x10u)      /* Timer B mode control: 1 - Up to CCR0 */
-#define MC_2                   (2*0x10u)      /* Timer B mode control: 2 - Continuous up */
-#define MC_3                   (3*0x10u)      /* Timer B mode control: 3 - Up/Down */
+#define MC_0                   (0x0000)      /* Timer B mode control: 0 - Stop */
+#define MC_1                   (0x0010)      /* Timer B mode control: 1 - Up to CCR0 */
+#define MC_2                   (0x0020)      /* Timer B mode control: 2 - Continuous up */
+#define MC_3                   (0x0030)      /* Timer B mode control: 3 - Up/Down */
 #define CAP                    (0x0100)       /* Capture mode: 1 /Compare mode : 0 */
 #define CCIE                   (0x0010)       /* Capture/compare interrupt enable */
 #define CCIFG                  (0x0001)       /* Capture/compare interrupt flag */
-#define CCIS_0                 (0*0x1000u)
-#define CCIS_1                 (1*0x1000u)
-#define CCIS_2                 (2*0x1000u)
-#define CCIS_3                 (3*0x1000u)
-#define CM_0                   (0*0x4000u)    /* Capture mode: 0 - disabled */
-#define CM_1                   (1*0x4000u)    /* Capture mode: 1 - pos. edge */
-#define CM_2                   (2*0x4000u)    /* Capture mode: 1 - neg. edge */
-#define CM_3                   (3*0x4000u)    /* Capture mode: 1 - both edges */
+#define CCIS_0                 (0x0000)
+#define CCIS_1                 (0x1000)
+#define CCIS_2                 (0x2000)
+#define CCIS_3                 (0x3000)
+#define CM_0                   (0x0000)    /* Capture mode: 0 - disabled */
+#define CM_1                   (0x4000)    /* Capture mode: 1 - pos. edge */
+#define CM_2                   (0x8000)    /* Capture mode: 1 - neg. edge */
+#define CM_3                   (0xC000)    /* Capture mode: 1 - both edges */
 #define OUT                    (0x0004)       /* PWM Output signal if output mode 0 */
-#define OUTMOD_0               (0*0x20u)      /* PWM output mode: 0 - output only */
-#define OUTMOD_1               (1*0x20u)      /* PWM output mode: 1 - set */
-#define OUTMOD_2               (2*0x20u)      /* PWM output mode: 2 - PWM toggle/reset */
-#define OUTMOD_3               (3*0x20u)      /* PWM output mode: 3 - PWM set/reset */
-#define OUTMOD_4               (4*0x20u)      /* PWM output mode: 4 - toggle */
-#define OUTMOD_5               (5*0x20u)      /* PWM output mode: 5 - Reset */
-#define OUTMOD_6               (6*0x20u)      /* PWM output mode: 6 - PWM toggle/set */
-#define OUTMOD_7               (7*0x20u)      /* PWM output mode: 7 - PWM reset/set */
+#define OUTMOD_0               (0x0000)      /* PWM output mode: 0 - output only */
+#define OUTMOD_1               (0x0020)      /* PWM output mode: 1 - set */
+#define OUTMOD_2               (0x0040)      /* PWM output mode: 2 - PWM toggle/reset */
+#define OUTMOD_3               (0x0060)      /* PWM output mode: 3 - PWM set/reset */
+#define OUTMOD_4               (0x0080)      /* PWM output mode: 4 - toggle */
+#define OUTMOD_5               (0x00A0)      /* PWM output mode: 5 - Reset */
+#define OUTMOD_6               (0x00C0)      /* PWM output mode: 6 - PWM toggle/set */
+#define OUTMOD_7               (0x00E0)      /* PWM output mode: 7 - PWM reset/set */
 #define SCCI                   (0x0400)       /* Latched capture signal (read) */
 #define SCS                    (0x0800)       /* Capture sychronize */
 #define CCI                    (0x0008)       /* Capture input signal (read) */
-#define ID__1                  (0*0x40u)      /* Timer B input divider: 0 - /1 */
-#define ID__2                  (1*0x40u)      /* Timer B input divider: 1 - /2 */
-#define ID__4                  (2*0x40u)      /* Timer B input divider: 2 - /4 */
-#define ID__8                  (3*0x40u)      /* Timer B input divider: 3 - /8 */
-#define ID_0                   (0*0x40u)      /* Timer B input divider: 0 - /1 */
-#define ID_1                   (1*0x40u)      /* Timer B input divider: 1 - /2 */
-#define ID_2                   (2*0x40u)      /* Timer B input divider: 2 - /4 */
-#define ID_3                   (3*0x40u)      /* Timer B input divider: 3 - /8 */
+#define ID__1                  (0x0000)      /* Timer B input divider: 0 - /1 */
+#define ID__2                  (0x0040)      /* Timer B input divider: 1 - /2 */
+#define ID__4                  (0x0080)      /* Timer B input divider: 2 - /4 */
+#define ID__8                  (0x00C0)      /* Timer B input divider: 3 - /8 */
+#define ID_0                   (0x0000)      /* Timer B input divider: 0 - /1 */
+#define ID_1                   (0x0040)      /* Timer B input divider: 1 - /2 */
+#define ID_2                   (0x0080)      /* Timer B input divider: 2 - /4 */
+#define ID_3                   (0x00C0)      /* Timer B input divider: 3 - /8 */
 
 #endif
 /************************************************************
@@ -6958,48 +7189,48 @@ extern "C" {
 #define ID0                    (0x0040)       /* Timer D clock input divider 0 */
 #define MC1                    (0x0020)       /* Timer D mode control 1 */
 #define MC0                    (0x0010)       /* Timer D mode control 0 */
-#define MC__STOP               (0*0x10u)      /* Timer D mode control: 0 - Stop */
-#define MC__UP                 (1*0x10u)      /* Timer D mode control: 1 - Up to CCR0 */
-#define MC__CONTINUOUS         (2*0x10u)      /* Timer D mode control: 2 - Continuous up */
-#define MC__CONTINOUS          (2*0x10u)      /* Legacy define */
-#define MC__UPDOWN             (3*0x10u)      /* Timer D mode control: 3 - Up/Down */
+#define MC__STOP               (0x0000)      /* Timer D mode control: 0 - Stop */
+#define MC__UP                 (0x0010)      /* Timer D mode control: 1 - Up to CCR0 */
+#define MC__CONTINUOUS         (0x0020)      /* Timer D mode control: 2 - Continuous up */
+#define MC__CONTINOUS          (0x0020)      /* Legacy define */
+#define MC__UPDOWN             (0x0030)      /* Timer D mode control: 3 - Up/Down */
 #define CM1                    (0x8000)       /* Capture mode 1 */
 #define CM0                    (0x4000)       /* Capture mode 0 */
-#define MC_0                   (0*0x10u)      /* Timer D mode control: 0 - Stop */
-#define MC_1                   (1*0x10u)      /* Timer D mode control: 1 - Up to CCR0 */
-#define MC_2                   (2*0x10u)      /* Timer D mode control: 2 - Continuous up */
-#define MC_3                   (3*0x10u)      /* Timer D mode control: 3 - Up/Down */
+#define MC_0                   (0x0000)      /* Timer D mode control: 0 - Stop */
+#define MC_1                   (0x0010)      /* Timer D mode control: 1 - Up to CCR0 */
+#define MC_2                   (0x0020)      /* Timer D mode control: 2 - Continuous up */
+#define MC_3                   (0x0030)      /* Timer D mode control: 3 - Up/Down */
 #define CAP                    (0x0100)       /* Capture mode: 1 /Compare mode : 0 */
 #define CCIE                   (0x0010)       /* Capture/compare interrupt enable */
 #define CCIFG                  (0x0001)       /* Capture/compare interrupt flag */
-#define CCIS_0                 (0*0x1000u)
-#define CCIS_1                 (1*0x1000u)
-#define CCIS_2                 (2*0x1000u)
-#define CCIS_3                 (3*0x1000u)
-#define CM_0                   (0*0x4000u)    /* Capture mode: 0 - disabled */
-#define CM_1                   (1*0x4000u)    /* Capture mode: 1 - pos. edge */
-#define CM_2                   (2*0x4000u)    /* Capture mode: 1 - neg. edge */
-#define CM_3                   (3*0x4000u)    /* Capture mode: 1 - both edges */
+#define CCIS_0                 (0x0000)
+#define CCIS_1                 (0x1000)
+#define CCIS_2                 (0x2000)
+#define CCIS_3                 (0x3000)
+#define CM_0                   (0x0000)    /* Capture mode: 0 - disabled */
+#define CM_1                   (0x4000)    /* Capture mode: 1 - pos. edge */
+#define CM_2                   (0x8000)    /* Capture mode: 1 - neg. edge */
+#define CM_3                   (0xC000)    /* Capture mode: 1 - both edges */
 #define OUT                    (0x0004)       /* PWM Output signal if output mode 0 */
-#define OUTMOD_0               (0*0x20u)      /* PWM output mode: 0 - output only */
-#define OUTMOD_1               (1*0x20u)      /* PWM output mode: 1 - set */
-#define OUTMOD_2               (2*0x20u)      /* PWM output mode: 2 - PWM toggle/reset */
-#define OUTMOD_3               (3*0x20u)      /* PWM output mode: 3 - PWM set/reset */
-#define OUTMOD_4               (4*0x20u)      /* PWM output mode: 4 - toggle */
-#define OUTMOD_5               (5*0x20u)      /* PWM output mode: 5 - Reset */
-#define OUTMOD_6               (6*0x20u)      /* PWM output mode: 6 - PWM toggle/set */
-#define OUTMOD_7               (7*0x20u)      /* PWM output mode: 7 - PWM reset/set */
+#define OUTMOD_0               (0x0000)      /* PWM output mode: 0 - output only */
+#define OUTMOD_1               (0x0020)      /* PWM output mode: 1 - set */
+#define OUTMOD_2               (0x0040)      /* PWM output mode: 2 - PWM toggle/reset */
+#define OUTMOD_3               (0x0060)      /* PWM output mode: 3 - PWM set/reset */
+#define OUTMOD_4               (0x0080)      /* PWM output mode: 4 - toggle */
+#define OUTMOD_5               (0x00A0)      /* PWM output mode: 5 - Reset */
+#define OUTMOD_6               (0x00C0)      /* PWM output mode: 6 - PWM toggle/set */
+#define OUTMOD_7               (0x00E0)      /* PWM output mode: 7 - PWM reset/set */
 #define SCCI                   (0x0400)       /* Latched capture signal (read) */
 #define SCS                    (0x0800)       /* Capture sychronize */
 #define CCI                    (0x0008)       /* Capture input signal (read) */
-#define ID__1                  (0*0x40u)      /* Timer D input divider: 0 - /1 */
-#define ID__2                  (1*0x40u)      /* Timer D input divider: 1 - /2 */
-#define ID__4                  (2*0x40u)      /* Timer D input divider: 2 - /4 */
-#define ID__8                  (3*0x40u)      /* Timer D input divider: 3 - /8 */
-#define ID_0                   (0*0x40u)      /* Timer D input divider: 0 - /1 */
-#define ID_1                   (1*0x40u)      /* Timer D input divider: 1 - /2 */
-#define ID_2                   (2*0x40u)      /* Timer D input divider: 2 - /4 */
-#define ID_3                   (3*0x40u)      /* Timer D input divider: 3 - /8 */
+#define ID__1                  (0x0000)      /* Timer D input divider: 0 - /1 */
+#define ID__2                  (0x0040)      /* Timer D input divider: 1 - /2 */
+#define ID__4                  (0x0080)      /* Timer D input divider: 2 - /4 */
+#define ID__8                  (0x00C0)      /* Timer D input divider: 3 - /8 */
+#define ID_0                   (0x0000)      /* Timer D input divider: 0 - /1 */
+#define ID_1                   (0x0040)      /* Timer D input divider: 1 - /2 */
+#define ID_2                   (0x0080)      /* Timer D input divider: 2 - /4 */
+#define ID_3                   (0x00C0)      /* Timer D input divider: 3 - /8 */
 
 #endif
 /************************************************************
