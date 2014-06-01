@@ -1,3 +1,5 @@
+/ChangeLog/1.885.2.2/Tue Jun  4 18:41:54 2013//Tmsp430-130322-branch
+/ChangeLog.RedHat/1.131.2.11/Fri Dec  6 10:03:38 2013//Tmsp430-130322-branch
 /Makefile.in/1.22/Mon Jun 28 22:47:29 2004//Tmsp430-130322-branch
 /README/1.9/Sun Mar 25 16:34:51 2012//Tmsp430-130322-branch
 /acinclude.m4/1.1/Sun Jun 18 17:08:04 2006//Tmsp430-130322-branch
@@ -67,5 +69,3 @@ D/v850////
 D/wince////
 D/xc16x////
 D/xstormy16////
-/ChangeLog/1.885.2.2/Tue Jun  4 18:45:54 2013//Tmsp430-130322-branch
-/ChangeLog.RedHat/1.131.2.10/Fri Nov  8 22:34:23 2013//Tmsp430-130322-branch

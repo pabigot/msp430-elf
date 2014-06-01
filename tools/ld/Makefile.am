@@ -364,6 +364,7 @@ ALL_EMULATION_SOURCES = \
 	emipspe.c \
 	emn10200.c \
 	emn10300.c \
+	emsp430.c \
 	emsp430x110.c \
 	emsp430x1101.c \
 	emsp430x1111.c \
@@ -423,7 +424,7 @@ ALL_EMULATION_SOURCES = \
 	emsp430xW423.c \
 	emsp430xW425.c \
 	emsp430xW427.c \
-	  emsp430X.c \
+	emsp430X.c \
 	enews.c \
 	ens32knbsd.c \
 	eor32.c \
@@ -1531,6 +1532,10 @@ emn10300.c: $(srcdir)/emulparams/mn10300.sh \
   $(srcdir)/emulparams/mn10200.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mn10300 "$(tdir_mn10300)"
+emsp430.c: $(srcdir)/emulparams/msp430all.sh \
+  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} msp430 "$(tdir_msp430)" msp430all
 emsp430x110.c: $(srcdir)/emulparams/msp430all.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc \
   ${GEN_DEPENDS}

@@ -1134,7 +1134,8 @@ extract_word (char * from, char * to, int limit)
 #define OPTION_LARGE 'l'
 static bfd_boolean large_model = FALSE;
 #define OPTION_NO_INTR_NOPS 'N'
-static bfd_boolean gen_interrupt_nops = TRUE;
+#define OPTION_INTR_NOPS 'n'
+static bfd_boolean gen_interrupt_nops = FALSE;
 #define OPTION_MCPU 'c'
 #define OPTION_MOVE_DATA 'd'
 static bfd_boolean move_data = FALSE;
@@ -1149,23 +1150,6 @@ msp430_set_arch (int option)
   md_parse_option (option, str);
   bfd_set_arch_mach (stdoutput, TARGET_ARCH,
 		     target_is_430x () ? bfd_mach_msp430x : bfd_mach_msp11);
-}
-
-static void
-show_mcu_list (FILE * stream)
-{
-  int i;
-
-  fprintf (stream, _("Known MCU names:\n"));
-
-  for (i = 0; mcu_types[i].name; i++)
-    {
-      fprintf (stream, "%14.14s", mcu_types[i].name);
-      if ((i % 6) == 5)
-	fprintf (stream, "\n");
-    }
-
-  fprintf (stream, "\n");
 }
 
 int
@@ -1184,10 +1168,7 @@ md_parse_option (int c, char * arg)
 	  break;
 
       if (mcu_types[i].name == NULL)
-	{
-	  show_mcu_list (stderr);
-	  as_fatal (_("unknown MCU: %s\n"), arg);
-	}
+	as_fatal (_("unknown MCU: %s\n"), arg);
 
       /* Allow switching to the same or a lesser architecture.  */
       if (msp430_mcu == &default_mcu || msp430_mcu->isa >= mcu_types[i].isa)
@@ -1224,6 +1205,9 @@ md_parse_option (int c, char * arg)
 
     case OPTION_NO_INTR_NOPS:
       gen_interrupt_nops = FALSE;
+      return 1;
+    case OPTION_INTR_NOPS:
+      gen_interrupt_nops = TRUE;
       return 1;
 
     case OPTION_MOVE_DATA:
@@ -1321,6 +1305,7 @@ struct option md_longopts[] =
   {"mQ", no_argument, NULL, OPTION_RELAX},
   {"ml", no_argument, NULL, OPTION_LARGE},
   {"mN", no_argument, NULL, OPTION_NO_INTR_NOPS},
+  {"mn", no_argument, NULL, OPTION_INTR_NOPS},
   {"md", no_argument, NULL, OPTION_MOVE_DATA},
   {NULL, no_argument, NULL, 0}
 };
@@ -1340,11 +1325,11 @@ md_show_usage (FILE * stream)
   fprintf (stream,
 	   _("  -ml - enable large code model\n"));
   fprintf (stream,
-	   _("  -mN - disable generation of NOP after changing interrupts\n"));
+	   _("  -mN - do not insert NOPs after changing interrupts (default)\n"));
+  fprintf (stream,
+	   _("  -mn - enable generation of NOP after changing interrupts\n"));
   fprintf (stream,
 	   _("  -md - Force copying of data from ROM to RAM at startup\n"));
-  
-  show_mcu_list (stream);
 }
 
 symbolS *
@@ -2349,7 +2334,6 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  bfd_putl16 ((bfd_vma) bin, frag);
 
 	  if (gen_interrupt_nops
-	      && target_is_430xv2 ()
 	      && (is_opcode ("eint") || is_opcode ("dint")))
 	    {
 	      /* Emit a NOP following interrupt enable/disable.
@@ -2433,7 +2417,6 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    }
 
 	  if (gen_interrupt_nops
-	      && target_is_430xv2 ()
 	      && is_opcode ("clr")
 	      && bin == 0x4302 /* CLR R2*/)
 	    {
@@ -3193,7 +3176,6 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	}
 
       if (gen_interrupt_nops
-	  && target_is_430xv2 ()
 	  && (   (is_opcode ("bic") && bin == 0xc232)
 	      || (is_opcode ("bis") && bin == 0xd232)
 	      || (is_opcode ("mov") && op2.mode == OP_REG && op2.reg == 2)))

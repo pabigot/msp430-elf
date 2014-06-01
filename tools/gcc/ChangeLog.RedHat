@@ -1,3 +1,69 @@
+2014-01-13  DJ Delorie  <dj@redhat.com>
+
+	* config/msp430/constraints.md (Yc): New.
+	* config/msp430/msp430.md (call_internal): Use it.
+	(call_value_internal): Likewise.
+
+	* config/msp430/msp430.c (msp430_expand_epilogue): Move
+	refsym_need_exit earlier to handle functions that use an epilogue
+	helper.
+
+2014-01-06  Nick Clifton  <nickc@redhat.com>
+
+	* config/msp430/msp430.c (msp430_expand_epilogue): Do not invert
+	helper number.
+	(msp430_print_operand): Add 'J' to print an integer value without
+	a # prefix.
+	* config/msp430/msp430.md (popm): Use %J.
+	(epilogue_helper): Likewise.
+
+2013-12-13  DJ Delorie  <dj@redhat.com>
+
+	* config/msp430/msp430.md (movqi): replace general_operand with
+	msp_general_operand and nonimmediate_operand with
+	msp_nonimmediate_operand to allow volatile operands.
+	(movhi): Likewise.
+	(movpsi): Likewise.
+	(addpsi3): Likewise.
+	(addhi3): Likewise.
+	(addhi3_cy): Likewise.
+	(addchi4_cy): Likewise.
+	(xor<mode>3): Likewise.
+	(ome_cmpl<mode>2): Likewise.
+	(extendqihi2): Likewise.
+	(zero_extendqihi2): Likewise.
+	(zero_extendhipsi2): Likewise.
+	(truncpsihi2): Likewise.
+	(srai_1): Likewise.
+
+2013-12-13  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4181313
+	* config/msp430/msp430.c (msp430_print_operand): Rename %A to %Q and
+	%B to %b.  Add %A,%B,%C,%D to extract parts of a 64-bit value.
+	(msp430x_extendhisi): Update uses of %L and %H.
+	* config/msp430/msp430.md: Update all uses of %A, %B and %D.
+
+2013-12-09  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4422693
+	* config/msp430/msp430.md (disable_interrupts): Append a NOP after
+	the DINT.
+
+2013-12-06  Nick Clifton  <nickc@redhat.com>
+
+	Issue 3867763:
+	* config/msp430/msp430.c (is_wakeup_func): New function.
+	(msp430_attribute_table): Add wakeup.
+	(msp430_expand_epilogue): If the wakeup attribute is active
+	generate a __bic_SR_register_on_exit(0xF0) before starting to
+	unwind the stack.
+	(msp430_start_function): Document wakeup functions.
+	* doc/extend.texi: Document the behaviour of the wakeup function
+	attribute.
+
+	* doc/invoke.texi: Document MSP430 specific command line options.
+
 2013-11-22  Nick Clifton  <nickc@redhat.com>
 
 	* config/msp430/msp430.c: Synchronize with FSF GCC sources.

@@ -4,6 +4,7 @@
 /COPYING.LIB/1.10/Mon Jul 18 02:52:28 2005//Tmsp430-130322-branch
 /COPYING3/1.1/Sun Jul 22 16:19:16 2007//Tmsp430-130322-branch
 /COPYING3.LIB/1.1/Sun Jul 22 16:19:16 2007//Tmsp430-130322-branch
+/ChangeLog/1.6622.2.1/Thu Jun 13 11:26:28 2013//Tmsp430-130322-branch
 /ChangeLog-1997/1.2/Sun Apr 26 17:24:54 2009//Tmsp430-130322-branch
 /ChangeLog-1998/1.3/Sun Apr 26 17:24:54 2009//Tmsp430-130322-branch
 /ChangeLog-1999/1.3/Sun Apr 26 17:24:54 2009//Tmsp430-130322-branch
@@ -177,6 +178,7 @@
 /fwprop.c/1.46/Sun Feb 24 19:44:19 2013//Tmsp430-130322-branch
 /gcc-ar.c/1.5/Sun Jan 27 20:24:23 2013//Tmsp430-130322-branch
 /gcc-plugin.h/1.11/Sun Jan 27 20:24:23 2013//Tmsp430-130322-branch
+/gcc.c/1.440.2.2/Thu Oct 17 09:05:45 2013//Tmsp430-130322-branch
 /gcc.h/1.29/Sun Jan 27 20:24:23 2013//Tmsp430-130322-branch
 /gcov-dump.c/1.25/Sun Jan 27 20:24:23 2013//Tmsp430-130322-branch
 /gcov-io.c/1.19/Sun Jan 27 20:24:23 2013//Tmsp430-130322-branch
@@ -640,6 +642,4 @@ D/objc////
 D/objcp////
 D/po////
 D/testsuite////
-/ChangeLog/1.6622.2.1/Thu Jun 13 18:03:59 2013//Tmsp430-130322-branch
-/gcc.c/1.440.2.2/Thu Oct 17 23:53:22 2013//Tmsp430-130322-branch
-/ChangeLog.RedHat/1.1100.2.17/Sat Nov 23 00:30:39 2013//Tmsp430-130322-branch
+/ChangeLog.RedHat/1.1100.2.24/Tue Jan 14 17:31:41 2014//Tmsp430-130322-branch

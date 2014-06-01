@@ -1,3 +1,8 @@
+2013-11-20  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4414453
+	* msp430/syscalls.S: Add stub for unlink.
+
 2013-11-07  DJ Delorie  <dj@redhat.com>
 
 	* msp430/Makefile.in (copy_scripts_to_objdir): Install per-mcu

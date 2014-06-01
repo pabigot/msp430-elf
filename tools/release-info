@@ -14,7 +14,7 @@ VAULT_ROOT=/opt/redhat/release-vault
 ### Variables for each product, might change this later
 CDK_BUNDLE=comp-tools
 CDK_MODULE=comp-tools
-CDK_RELEASE=msp430-130423-272
+CDK_RELEASE=msp430-130423-317
 CDK_PREFIX=${INSTALL_ROOT}/${CDK_RELEASE}
 CDK_VAULT=${VAULT_ROOT}/${CDK_RELEASE}
 CDK_TAG=${CDK-RELEASE}-release

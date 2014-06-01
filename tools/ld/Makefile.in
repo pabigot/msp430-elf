@@ -673,6 +673,7 @@ ALL_EMULATION_SOURCES = \
 	emipspe.c \
 	emn10200.c \
 	emn10300.c \
+	emsp430.c \
 	emsp430x110.c \
 	emsp430x1101.c \
 	emsp430x1111.c \
@@ -732,7 +733,7 @@ ALL_EMULATION_SOURCES = \
 	emsp430xW423.c \
 	emsp430xW425.c \
 	emsp430xW427.c \
-	  emsp430X.c \
+	emsp430X.c \
 	enews.c \
 	ens32knbsd.c \
 	eor32.c \
@@ -1169,12 +1170,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32btsmip_fbsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32btsmipn32.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32btsmipn32_fbsd.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32calmrisc16.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32cr16.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32cr16c.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32cra8500.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32crx.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32cy16.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32ebmip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32ebmipvxworks.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32elmip.Po@am__quote@
@@ -1186,8 +1184,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32frvfd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32i370.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32ip2k.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32ip4k.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32ip4kmath.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32iq10.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32iq2000.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf32l4300.Po@am__quote@
@@ -1247,7 +1243,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64bmip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64btsmip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64btsmip_fbsd.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64calmrisc32.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64hppa.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64lppc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf64ltsmip.Po@am__quote@
@@ -1275,8 +1270,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_x86_64_fbsd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_x86_64_nacl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelf_x86_64_sol2.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelfnios16.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eelfnios32.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/egld960.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/egld960coff.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/eh8300.Po@am__quote@
@@ -1351,6 +1344,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emmo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emn10200.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emn10300.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emsp430.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emsp430X.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emsp430x110.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emsp430x1101.Po@am__quote@
@@ -3026,6 +3020,10 @@ emn10300.c: $(srcdir)/emulparams/mn10300.sh \
   $(srcdir)/emulparams/mn10200.sh \
   $(ELF_DEPS) $(srcdir)/scripttempl/elf.sc ${GEN_DEPENDS}
 	${GENSCRIPTS} mn10300 "$(tdir_mn10300)"
+emsp430.c: $(srcdir)/emulparams/msp430all.sh \
+  $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc \
+  ${GEN_DEPENDS}
+	${GENSCRIPTS} msp430 "$(tdir_msp430)" msp430all
 emsp430x110.c: $(srcdir)/emulparams/msp430all.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc \
   ${GEN_DEPENDS}

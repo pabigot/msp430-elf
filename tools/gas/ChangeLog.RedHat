@@ -1,3 +1,22 @@
+2013-12-31  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4422683
+	* config/tc-msp430.c (show_mcu_list): Delete.
+	(md_show_usage): Do not call show_mcu_list.
+	(md_parse_option): Likewise.
+
+2013-12-09  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4422693
+	* config/tc-msp430.c (OPTION_INTR_NOPS): New define.
+	(gen_interrupt_nops): Initialise to FALSE.
+	(md_parse_option): Add -mn.
+	(md_longopts): Likewise.
+	(md_show_usage): Likewise.
+	(msp430_operands): Do not check for xv2 architecture when
+	generating NOPs.
+	* doc/c-msp430.texi: Document -mn.
+
 2013-10-22  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-msp430.c (msp430_section): Always flag data sections,

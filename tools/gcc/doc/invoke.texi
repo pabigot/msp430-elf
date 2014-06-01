@@ -804,6 +804,9 @@ Objective-C and Objective-C++ Dialects}.
 @emph{Moxie Options}
 @gccoptlist{-meb -mel -mno-crt0}
 
+@emph{MSP430 Options}
+@gccoptlist{-msim -masm-hex -mmcu= -mlarge -msmall -mrelax -minrt}
+
 @emph{PDP-11 Options}
 @gccoptlist{-mfpu  -msoft-float  -mac0  -mno-ac0  -m40  -m45  -m10 @gol
 -mbcopy  -mbcopy-builtin  -mint32  -mno-int16 @gol
@@ -10882,6 +10885,7 @@ platform.
 * MMIX Options::
 * MN10300 Options::
 * Moxie Options::
+* MSP430 Options::
 * PDP-11 Options::
 * picoChip Options::
 * PowerPC Options::
@@ -17054,6 +17058,63 @@ Generate little-endian code.
 @opindex mno-crt0
 Do not link in the C run-time initialization object file.
 
+@end table
+
+@node MSP430 Options
+@subsection MSP430 Options
+@cindex MSP430 Options
+
+These options are defined for the MSP430:
+
+@table @gcctabopt
+
+@item -masm-hex
+@opindex masm-hex
+Force assembly output to always use hex constants.  Normally such
+constants are signed decimals, but this option is available for
+testsuite and/or aesthetic purposes.
+
+@item -mmcu=
+@opindex mmcu=
+Select the MCU to target.  If the MCU supports the MSP430X ISA or the
+MSP430Xv2 ISA then gcc will make use of the extra instructions.  A C
+preprocessor symbol will be defined based upon the MCU name, converted
+to upper case and pre- and post- fixed with @code{__}.
+
+In addition two scripts will be added to the linker command line:
+@code{memory.ld} and @code{peripherals.ld}, with a search path based
+upon the MCU name.
+
+Note that there are three ``generic'' MCUs: @code{msp430},
+@code{msp430x} and @code{msp430xv2}, which can be used if a specific
+MCU is not being targeted.
+
+This option is also passed on to the assembler.
+
+@item -msim
+@opindex msim
+Link to the simulator runtime libraries and linker script.  Overrides
+any scripts that would be selected by the @option{-mmcu=} option.
+
+@item -mlarge
+@opindex mlarge
+Use large-model addressing (20-bit pointers, 32-bit @code{size_t}).
+
+@item -msmall
+@opindex msmall
+Use small-model addressing (16-bit pointers, 16-bit @code{size_t}).
+
+@item -mrelax
+@opindex mrelax
+This option is passed to the assembler and linker, and allows the
+linker to perform certain optimizations that cannot be done until
+the final link.
+
+@item -minrt
+@opindex minrt
+Enable the use of a minimum runtime environemtn - no static
+initializers or constructors.  This is intended for memory-constrained
+devices.
 @end table
 
 @node PDP-11 Options

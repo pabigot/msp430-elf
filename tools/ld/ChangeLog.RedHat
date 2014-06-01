@@ -1,3 +1,12 @@
+2013-12-10  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4422683
+	* Makefile.am (ALL_EMULATION_SOURCES): Add emsp430.c
+	* configure.tgt (msp430): Remove all extra emuls except msp430X.
+	* emulparams/msp430all.sh: Add msp430 entry.
+	* configure: Regenerate.
+	* Makefile.in: Regenerate.
+
 2013-03-04  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/generic.em: Only enable relaxation when not performing

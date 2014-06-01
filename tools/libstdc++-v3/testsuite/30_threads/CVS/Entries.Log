@@ -1,6 +1,0 @@
-A D/lock_error////
-A D/shared_lock////
-A D/shared_mutex////
-R D/shared_mutex////
-R D/shared_lock////
-R D/lock_error////

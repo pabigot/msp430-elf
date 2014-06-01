@@ -26,6 +26,7 @@
 /ChangeLog-2010/2.1/Fri Apr  1 00:27:56 2011//Tmsp430-130322-branch
 /ChangeLog-2011/2.1/Tue Feb 21 22:06:20 2012//Tmsp430-130322-branch
 /ChangeLog-3.x/1.2/Thu Oct 30 21:23:13 1997//Tmsp430-130322-branch
+/ChangeLog.RedHat/2.345.2.2/Thu Mar 28 20:45:03 2013//Tmsp430-130322-branch
 /MAINTAINERS/2.124/Wed Sep  5 23:23:36 2012//Tmsp430-130322-branch
 /Makefile.in/1.983.8.1/Wed Mar 27 02:38:09 2013//Tmsp430-130322-branch
 /NEWS/2.155/Wed Sep  5 23:23:36 2012//Tmsp430-130322-branch
@@ -467,6 +468,7 @@
 /msg_reply.defs/2.1/Mon Apr  8 05:49:58 1996//Tmsp430-130322-branch
 /msp430-cio.c/2.2/Tue Feb 19 02:19:04 2013//Tmsp430-130322-branch
 /msp430-cio.h/2.1/Sun Feb 10 02:04:38 2013//Tmsp430-130322-branch
+/msp430-tdep.c/2.12.2.1/Thu Mar 28 20:45:04 2013//Tmsp430-130322-branch
 /mt-tdep.c/2.9/Wed Sep  5 23:24:00 2012//Tmsp430-130322-branch
 /nbsd-nat.c/2.5/Tue Feb 21 22:06:45 2012//Tmsp430-130322-branch
 /nbsd-nat.h/2.5/Tue Feb 21 22:06:45 2012//Tmsp430-130322-branch
@@ -704,6 +706,7 @@
 /vaxnbsd-tdep.c/2.7/Tue Feb 21 22:06:58 2012//Tmsp430-130322-branch
 /vaxobsd-tdep.c/2.7/Tue Feb 21 22:06:58 2012//Tmsp430-130322-branch
 /version.h/2.8/Tue Feb 21 22:06:58 2012//Tmsp430-130322-branch
+/version.in/2.140.8.2/Wed May  1 04:19:06 2013//Tmsp430-130322-branch
 /windows-nat.c/2.10/Wed Sep  5 23:24:14 2012//Tmsp430-130322-branch
 /windows-nat.h/2.4/Wed Sep  5 23:24:14 2012//Tmsp430-130322-branch
 /windows-tdep.c/2.6/Wed Sep  5 23:24:15 2012//Tmsp430-130322-branch
@@ -745,6 +748,3 @@ D/stubs////
 D/syscalls////
 D/testsuite////
 D/tui////
-/ChangeLog.RedHat/2.345.2.2/Sat Mar 30 06:00:40 2013//Tmsp430-130322-branch
-/msp430-tdep.c/2.12.2.1/Sat Mar 30 06:00:42 2013//Tmsp430-130322-branch
-/version.in/2.140.8.2/Thu May  2 00:17:41 2013//Tmsp430-130322-branch

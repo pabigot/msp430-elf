@@ -3025,6 +3025,28 @@ A constant in the range of 0 to @minus{}255.
 
 @end table
 
+@item MSP430---@file{config/msp430/constraints.md}
+@table @code
+@item K
+The integer constant 1.
+
+@item L
+An integer constant in the range -1^20 to 1^19.
+
+@item M
+An integer constant between 1 and 4 inclusive.
+
+@item Ya
+A memory address.  Symbolic or label based addresses are not allowed.
+
+@item Yl
+A memory address using a label.
+
+@item Ys
+A stack based memory reference.
+
+@end table
+
 @item PDP-11---@file{config/pdp11/constraints.md}
 @table @code
 @item a
