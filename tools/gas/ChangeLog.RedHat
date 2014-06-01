@@ -1,3 +1,50 @@
+2014-03-11  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4422693
+	* config/tc-msp430.c (-mZ): Rename option to -mY.
+	(-mz): Rename option to -my.
+	* doc/c-msp430.c: Update options description.
+
+2014-02-04  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4562603
+	* config/tc-msp430.c: Restore MCU name table.  Except that
+	this time it just contains the names of the MCUs that only support
+	the 430 ISA.
+	Default to 430X ISA.  Allow -mmcu to specify "msp430" as a generic
+
+2014-01-30  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4422693
+	* config/tc-msp430.c (warn_interrupt_nops): New variable.
+	(md_parse_option): Parse -mz and -mZ.
+	(md_longopts): Add -mz and -mZ.
+	(md_show_usage): Likewise.
+	(check_for_nop): New variable.
+	(msp430_operands): Pre-insert a NOP if requested and needed.
+	Warn about NOP insertion if requested.
+	(msp430_md_end): Warn about pending NOP insertion.
+	* doc/c-msp430.texi: Document -mz and -mZ.
+
+2014-01-28  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4562603
+	* config/tc-msp430.c (struct mcu_type_s): Delete.
+	(mcu_types): Delete.
+	(default_mcu, msp430x_mcu, msp430xv2_mcu): Delete.
+	(msp430_mcu): Delete.
+	(selected_isa): New variable.
+	(target_is_430x): Test selected_isa.
+	(target_is_430xv2): Likewise.
+	(md_parse_option): Accept but ignore -mmcu option unless it uses a
+	generic mcu name.  Set selected_isa from -mmcu or -mcpu options.
+
+2014-01-23  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4422683
+	* config/tc-msp430.c (md_parse_option): Do not complain about
+	unrecognised MCU names.  Be more flexible in accepting CPU names.
+
 2013-12-31  Nick Clifton  <nickc@redhat.com>
 
 	Issue 4422683

@@ -145,7 +145,7 @@ sim_load_file (sd, myname, callback, prog, prog_bfd, verbose_p, lma_p, do_write)
 	    }
 	}
     }
-
+#if 0
   if (!found_loadable_section)
     {
       eprintf (callback,
@@ -153,7 +153,7 @@ sim_load_file (sd, myname, callback, prog, prog_bfd, verbose_p, lma_p, do_write)
 	       myname, prog);
       return NULL;
     }
-
+#endif
   if (verbose_p)
     {
       end_time = time (NULL);

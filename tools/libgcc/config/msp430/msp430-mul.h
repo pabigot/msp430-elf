@@ -32,7 +32,7 @@ C3(__mul,NAME_MODE,3) (UINT_TYPE a, UINT_TYPE b)
 
   char bit;
 
-  for (bit=0; b && bit<sizeof(UINT_TYPE)*8; bit++)
+  for (bit = 0; b && bit < sizeof (UINT_TYPE) * 8; bit++)
     {
       if (b & 1)
 	rv += a;

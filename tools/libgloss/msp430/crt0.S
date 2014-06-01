@@ -56,8 +56,6 @@ __start:
 	MOV	#0x5a80, &0x15C
 #endif
 
-
-
 ;;  Note - if needed sections .crt_bss and/or .crt_movedata
 ;;  will be inserted here.
 #if Lbss
@@ -96,7 +94,6 @@ __crt0_movedata:
 1:	
 #endif
 
-
 #if Lmain_minrt
 	.section ".crt_0300main", "ax", @progbits
 	.global	__crt0_call_just_main
@@ -121,7 +118,6 @@ __crt0_call_init_then_main:
 __crt0_call_exit:
 	call_	#_exit
 #endif
-
 
 ;----------------------------------------
 
@@ -169,7 +165,7 @@ _msp430_run_done:
 
 	.global __msp430_init
 __msp430_init:
-	
+
 	.section	.fini,"ax"
 
 	.global __msp430_fini

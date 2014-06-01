@@ -1,5 +1,4 @@
 /ChangeLog/1.1394/Wed Sep  5 23:24:55 2012//Tmsp430-130322-branch
-/ChangeLog.RedHat/1.71.22.1/Wed Mar 27 02:38:32 2013//Tmsp430-130322-branch
 /Makefile.in/1.80/Wed Sep  5 23:24:55 2012//Tmsp430-130322-branch
 /TODO/1.25/Sat Sep 23 11:12:44 1995//Tmsp430-130322-branch
 /aclocal.m4/1.8/Tue Jul  7 19:23:56 2009//Tmsp430-130322-branch
@@ -38,3 +37,4 @@ D/gdb.threads////
 D/gdb.trace////
 D/gdb.xml////
 D/lib////
+/ChangeLog.RedHat/1.71.22.2/Mon Mar 10 19:16:10 2014//Tmsp430-130322-branch

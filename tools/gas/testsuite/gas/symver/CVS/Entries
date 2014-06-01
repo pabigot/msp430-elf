@@ -1,7 +1,5 @@
 /symver.exp/1.7/Sun Jan 27 12:18:24 2013//Tmsp430-130322-branch
-/symver0.d/1.4/Sun Mar 22 16:29:11 2009//Tmsp430-130322-branch
 /symver0.s/1.1/Mon Dec 11 03:03:06 2000//Tmsp430-130322-branch
-/symver1.d/1.4/Sun Mar 22 16:29:11 2009//Tmsp430-130322-branch
 /symver1.s/1.1/Mon Dec 11 03:03:06 2000//Tmsp430-130322-branch
 /symver2.l/1.2/Sun Mar 20 16:20:01 2011//Tmsp430-130322-branch
 /symver2.s/1.1/Mon Dec 11 03:03:06 2000//Tmsp430-130322-branch
@@ -13,4 +11,6 @@
 /symver5.s/1.1/Mon Dec 11 03:03:06 2000//Tmsp430-130322-branch
 /symver6.l/1.1/Mon Dec 11 03:03:06 2000//Tmsp430-130322-branch
 /symver6.s/1.1/Mon Dec 11 03:03:06 2000//Tmsp430-130322-branch
+/symver0.d/1.4.20.1/Thu Jan 30 17:58:43 2014//Tmsp430-130322-branch
+/symver1.d/1.4.20.1/Thu Jan 30 17:58:43 2014//Tmsp430-130322-branch
 D

@@ -1,5 +1,4 @@
 /ChangeLog/1.75/Sun Mar 17 21:33:09 2013//Tmsp430-130322-branch
-/ChangeLog.RedHat/1.38.2.1/Wed Mar 27 02:40:05 2013//Tmsp430-130322-branch
 /Makefile.in/1.35.2.1/Wed Mar 27 02:40:05 2013//Tmsp430-130322-branch
 /config.host/1.61.2.1/Wed Mar 27 02:40:06 2013//Tmsp430-130322-branch
 /config.in/1.1/Sun May 20 19:49:11 2012//Tmsp430-130322-branch
@@ -66,3 +65,4 @@
 /unwind.inc/1.2/Sun Feb 24 18:31:18 2013//Tmsp430-130322-branch
 D/config////
 D/soft-fp////
+/ChangeLog.RedHat/1.38.2.4/Tue Feb 11 11:44:49 2014//Tmsp430-130322-branch

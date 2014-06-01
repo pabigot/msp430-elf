@@ -30,3 +30,6 @@ class C
 
 D C::field;
 C c;
+
+// Necessary so that the simulator does not complain about failing to find any loadable sections.
+int a = 1;

@@ -1,3 +1,97 @@
+2014-03-11  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4096983
+	* config/msp430/msp430.c (msp430_option_override): Expect that
+	only one of -mmcu and -mcpu are specified.
+	* config.gcc (msp430): Accept default value of common_out_file.
+	* common/config/msp430/msp430-common.c: New file.
+
+2014-02-25  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4656053
+	Import these patches from the FSF mainline:
+
+	2014-01-08  Jakub Jelinek  <jakub@redhat.com>
+
+	PR rtl-optimization/59649
+	* stor-layout.c (get_mode_bounds): For BImode return
+	0 and STORE_FLAG_VALUE.
+
+	2013-12-30  Nick Clifton  <nickc@redhat.com>
+	    Peter Bigot  <bigotp@acm.org>
+
+	PR target/59613
+	* stor-layout.c (get_mode_bounds): Use GET_MODE_PRECISION instead
+	of GET_MODE_BITSIZE.
+
+2014-02-10  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4432123
+	* config/msp430/msp430.c (is_f5_mcu): Rename to msp430_is_f5_mcu
+	and export.
+	(msp430_hwmult_enabled): New function.
+	* config/msp430/msp430.md (mulhisi3): New pattern.
+	(umulhisi3); New pattern.
+	(mulsidi3): New pattern.
+	(umulsidi3): New pattern.
+
+2014-02-06  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4432123
+	* config/msp430/msp430.c (msp430_output_labelref): Add support for
+	hardware multiply functions.
+	(msp430_is_interrupt_func): Return false if there is no current
+	function.
+	(is_f5_mcu): New function.
+	(has_32-bit_hw_mult): New function.
+	* config/msp430/msp430.h (TARGET_HAS_NO_HW_DIVIDE): Define.
+	* config/msp430/msp430.opt (mhwmult): New option.
+	* doc/invoke.texi (-mno-hwmult): Document.
+
+2014-02-04  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4562603
+	* config/msp430/msp430.c: Restore MCU name table.  Except that
+	this time it just contains the names of the MCUs that only support
+	the 430 ISA.
+	Default to 430X ISA.  Allow -mmcu to specify "msp430" as a generic
+	name.  Allow -mcpu to specific "430" or "msp430" as an ISA name.
+	* config/msp430/t-msp430: Change multilibs to 430 and large.  Add
+	matches for known 430 MCU names.
+
+2014-01-28  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4562603
+	* config/msp430/msp430.c: Get rid of MCU name table.  Select ISA
+	based upon -mcpu= command line option.
+
+2014-01-23  Nick Clifton  <nickc@redhat.com>
+
+	Issue: 4562603
+	* config/msp430/t-msp430 (MULTILIB_MATCHES): Add matches for
+	generic -mmcu and -mcpu options.
+	* config/msp430/msp430.c (msp430_option_override): Accept isa
+	names without an msp430 prefix.
+	* config/msp430/msp430.h (ASM_SPEC): Pass -mcpu on to the
+	assembler as -mcpu.
+	(LINK_SPEC): Replace memory.ld and peripherals.ld scripts with a
+	single, mcu-specific script.
+	* doc/invoke.texi: Update description of -mmcu option.
+
+2014-01-17  Nick Clifton  <nickc@redhat.com>
+
+	Issue: 4422683
+	* config/msp430/msp430.opt: (mcpu): New option.
+	* config/msp430/msp430.c (msp430_mcu_name): Use target_mcu.
+	(msp430_option_override): Parse target_cpu.  If the MCU name
+	matches a generic string, clear target_mcu.
+	(msp430_attr): Allow numeric interrupt values up to 63.
+	* config/msp430/msp430.h (ASM_SPEC): Convert -mcpu into a -mmcu
+	option.
+	* config/msp430/t-msp430: (MULTILIB_MATCHES): Remove mcu matches.
+	Add mcpu matches.
+	* doc/invoke.texi: Document -mcpu option.
+
 2014-01-13  DJ Delorie  <dj@redhat.com>
 
 	* config/msp430/constraints.md (Yc): New.

@@ -1,3 +1,15 @@
+2014-02-10  Nick Clifton  <nickc@redhat.com>
+
+	* config/msp430/lib2hw_mul.S: Remove unused functions.  Add
+	comments.
+
+2014-02-06  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4432123
+	* config/msp430/lib2hw_mul.S: New file.  Contains hardware
+	multiply routines.
+	* config/msp430/t-msp430 (LIB2ADD): Add lib2hw_mul.S.
+
 2013-03-20  DJ Delorie  <dj@redhat.com>
 
 	* config/msp430/floathidf.c: Call floatsidf, not floatsisf.

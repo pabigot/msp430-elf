@@ -1,5 +1,5 @@
 # Makefile fragment for building LIBGCC for the TI MSP430 processor.
-# Copyright (C) 2011 Free Software Foundation, Inc.
+# Copyright (C) 2011-2014 Free Software Foundation, Inc.
 # Contributed by Red Hat.
 #
 # This file is part of GCC.
@@ -35,6 +35,7 @@ LIB2ADD = \
 	$(srcdir)/config/msp430/srai.S \
 	$(srcdir)/config/msp430/srli.S \
 	$(srcdir)/config/msp430/cmpsi2.S \
+	$(srcdir)/config/msp430/lib2hw_mul.S \
 	$(srcdir)/config/msp430/floatunhisf.c \
 	$(srcdir)/config/msp430/floatunhidf.c \
 	$(srcdir)/config/msp430/floathidf.c \

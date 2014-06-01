@@ -1,3 +1,16 @@
+2014-01-23  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4565913
+	* msp430/Makefile.in (MCUSCRIPTS): Delete.
+	(MCUDIRS): Delete.
+	(install): Remove installation of MCU scripts.
+
+2014-01-23  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4414453
+	* msp430/unlink.c: New.
+	* msp430/Makefile.in (NOSYS_OBJS): Add unlink.o.
+
 2013-11-20  Nick Clifton  <nickc@redhat.com>
 
 	Issue 4414453

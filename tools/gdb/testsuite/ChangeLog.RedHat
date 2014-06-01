@@ -1,3 +1,9 @@
+2014-03-10  Nick Clifton  <nickc@redhat.com>
+
+	* gdb.cp/static-print-quit.cc: Add an initialised varaible so that
+	the simulator does not complain about not finding any loadable
+	sections.
+
 2008-02-14  Kevin Buettner  <kevinb@redhat.com>
 
 	* gdb.base/gdb1555.exp: Remove sanitized code which skips test

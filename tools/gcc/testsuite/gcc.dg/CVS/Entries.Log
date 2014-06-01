@@ -4,8 +4,10 @@ A D/cilk-plus////
 A D/matrix////
 A D/r5900////
 A D/struct////
+A D/tsan////
 A D/ubsan////
 R D/ubsan////
+R D/tsan////
 R D/struct////
 R D/r5900////
 R D/matrix////

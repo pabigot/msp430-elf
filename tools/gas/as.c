@@ -832,6 +832,7 @@ This program has absolutely no warranty.\n"));
 	  break;
 #endif
 	case 'Z':
+	  fprintf (stderr, "FLAG Z\n");
 	  flag_always_generate_output = 1;
 	  break;
 

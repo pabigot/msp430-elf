@@ -4,7 +4,6 @@
 /COPYING.LIB/1.10/Mon Jul 18 02:52:28 2005//Tmsp430-130322-branch
 /COPYING3/1.1/Sun Jul 22 16:19:16 2007//Tmsp430-130322-branch
 /COPYING3.LIB/1.1/Sun Jul 22 16:19:16 2007//Tmsp430-130322-branch
-/ChangeLog/1.6622.2.1/Thu Jun 13 11:26:28 2013//Tmsp430-130322-branch
 /ChangeLog-1997/1.2/Sun Apr 26 17:24:54 2009//Tmsp430-130322-branch
 /ChangeLog-1998/1.3/Sun Apr 26 17:24:54 2009//Tmsp430-130322-branch
 /ChangeLog-1999/1.3/Sun Apr 26 17:24:54 2009//Tmsp430-130322-branch
@@ -90,7 +89,6 @@
 /compare-elim.c/1.10/Sun Jan 27 20:24:14 2013//Tmsp430-130322-branch
 /conditions.h/1.20/Sun Jan 27 20:24:14 2013//Tmsp430-130322-branch
 /config.build/1.11/Sun Jan 27 20:24:14 2013//Tmsp430-130322-branch
-/config.gcc/1.240.2.1/Wed Mar 27 02:21:39 2013//Tmsp430-130322-branch
 /config.host/1.39/Sun Jan 27 20:24:15 2013//Tmsp430-130322-branch
 /config.in/1.132/Sun Feb 24 19:44:17 2013//Tmsp430-130322-branch
 /configure/1.751.2.1/Wed Mar 27 02:21:41 2013//Tmsp430-130322-branch
@@ -469,7 +467,6 @@
 /statistics.c/1.10.4.1/Wed Mar 27 02:25:51 2013//Tmsp430-130322-branch
 /statistics.h/1.10/Sun Jan 27 20:24:49 2013//Tmsp430-130322-branch
 /stmt.c/1.312/Sun Mar 17 23:14:35 2013//Tmsp430-130322-branch
-/stor-layout.c/1.258.4.1/Wed Mar 27 02:26:00 2013//Tmsp430-130322-branch
 /store-motion.c/1.14.4.1/Wed Mar 27 02:25:53 2013//Tmsp430-130322-branch
 /streamer-hooks.c/1.2/Sun Jan 27 20:24:49 2013//Tmsp430-130322-branch
 /streamer-hooks.h/1.5/Sun Jan 27 20:24:49 2013//Tmsp430-130322-branch
@@ -642,4 +639,7 @@ D/objc////
 D/objcp////
 D/po////
 D/testsuite////
-/ChangeLog.RedHat/1.1100.2.24/Tue Jan 14 17:31:41 2014//Tmsp430-130322-branch
+/stor-layout.c/1.258.4.2/Wed Feb 26 04:16:57 2014//Tmsp430-130322-branch
+/ChangeLog/1.6622.2.2/Mon Mar 10 19:15:33 2014//Tmsp430-130322-branch
+/ChangeLog.RedHat/1.1100.2.35/Wed Mar 12 00:00:16 2014//Tmsp430-130322-branch
+/config.gcc/1.240.2.2/Wed Mar 12 00:00:16 2014//Tmsp430-130322-branch

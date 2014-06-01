@@ -1,3 +1,16 @@
+2014-03-12  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4422693
+	* gas/msp430/bad.d: Rename command line option.
+
+2014-01-30  Nick Clifton  <nickc@redhat.com>
+
+	Issue 4422693
+	* gas/msp430/bad.s: Add interrupt changing instructions that
+	require NOP insertion.
+	* gas/msp430/bad.1: Add expected warning messages.
+	* gas/msp430/bad.d: Add -mz command line option.
+
 2013-10-04  Nick Clifton  <nickc@redhat.com>
 
 	* gas/msp430/msp430.exp: Run bad test.

@@ -1,5 +1,5 @@
 /* GCC backend definitions for the TI MSP430 Processor
-   Copyright (C) 2012-2013 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
    This file is part of GCC.
@@ -54,7 +54,7 @@ extern bool msp430x;
 #define ENDFILE_SPEC "%{!minrt:crtend.o%s} %{minrt:crtn-minrt.o%s}%{!minrt:crtn.o%s} -lgcc"
 
 #define ASM_SPEC "-mP " /* Enable polymorphic instructions.  */ \
-  "%{mmcu=msp430x:-mmcu=msp430X;mmcu=*:-mmcu=%*} " /* Pass the MCU type on to the assembler.  */  \
+  "%{mcpu=*:-mcpu=%*}%{!mcpu=*:%{mmcu=*:-mmcu=%*}} " /* Pass the CPU type on to the assembler.  */ \
   "%{mrelax=-mQ} " /* Pass the relax option on to the assembler.  */ \
   "%{mlarge:-ml} " /* Tell the assembler if we are building for the LARGE pointer model.  */ \
   "%{!msim:-md} %{msim:%{mlarge:-md}}" /* Copy data from ROM to RAM if necessary.  */ \
@@ -74,8 +74,8 @@ extern bool msp430x;
 %{msim:-lsim}						\
 %{!msim:-lnosys}					\
 --end-group					   	\
-%{!T*:%{!msim:%{mmcu=*:--script=%*/memory.ld --script=%*/peripherals.ld}}}	\
-%{!T*:%{!msim:%{!mmcu=*:%Tmsp430.ld}}} \
+%{!T*:%{!msim:%{mmcu=*:--script=%*.ld}}}		\
+%{!T*:%{!msim:%{!mmcu=*:%Tmsp430.ld}}}			\
 %{!T*:%{msim:%{mlarge:%Tmsp430xl-sim.ld}%{!mlarge:%Tmsp430-sim.ld}}} \
 "
 
@@ -412,5 +412,7 @@ typedef struct
 #undef  ASM_DECLARE_FUNCTION_NAME
 #define ASM_DECLARE_FUNCTION_NAME(FILE, NAME, DECL) \
   msp430_start_function ((FILE), (NAME), (DECL))
+
+#define TARGET_HAS_NO_HW_DIVIDE (! TARGET_HWMULT)
 
 #endif /* GCC_MSP430_H */
