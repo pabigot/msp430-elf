@@ -1,0 +1,20 @@
+	.code
+        .level 2.0
+	hadd %r1,%r2,%r3
+	hadd,ss %r1,%r2,%r3
+	hadd,us %r1,%r2,%r3
+	havg %r1,%r2,%r3
+	hshl %r1,10,%r3
+	hshladd %r1,3,%r2,%r3
+	hshr %r1,10,%r3
+	hshr,u %r1,10,%r3
+	hshr,s %r1,10,%r3
+	hshradd %r1,3,%r2,%r3
+	hsub %r1,%r2,%r3
+	hsub,ss %r1,%r2,%r3
+	hsub,us %r1,%r2,%r3
+	mixh,l %r1,%r2,%r3
+	mixh,r %r1,%r2,%r3
+	mixw,l %r1,%r2,%r3
+	mixw,r %r1,%r2,%r3
+	permh,0123 %r2,%r3

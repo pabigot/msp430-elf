@@ -1,0 +1,119 @@
+2013-03-20  DJ Delorie  <dj@redhat.com>
+
+	* config/msp430/floathidf.c: Call floatsidf, not floatsisf.
+
+2013-03-06  Nick Clifton  <nickc@redhat.com>
+
+	Issue 3575223
+	* config/rl78/t-rl78 (HOST_LIBGCC2_CFLAGS): Define.
+
+2013-03-01  DJ Delorie  <dj@redhat.com>
+
+	* config/msp430/cmpd.c: New.
+	* config/msp430/floathidf.c: New.
+	* config/msp430/floathisf.c: New.
+	* config/msp430/floatunhidf.c: New.
+	* config/msp430/floatunhis.c: New.
+	* config/msp430/t-msp430: Add them.
+
+2013-03-01  Nick Clifton  <nickc@redhat.com>
+
+	* config/msp430/mpy.c: Add prototype for __mulhi3.
+
+2013-02-12  Nick Clifton  <nickc@redhat.com>
+
+	* config/msp430/srli.S (__mspabi_srli): Fix thinko.
+
+2013-02-07  Nick Clifton  <nickc@redhat.com>
+
+	* config/msp430/lib2bitcountHI.c (L_popcountsi2): Add missing
+	code.
+
+2013-01-15  Nick Clifton  <nickc@redhat.com>
+
+	* config/msp430/cmpsi2.S: Use macro for RET vs RETA.
+
+2013-01-03  Nick Clifton  <nickc@redhat.com>
+
+	* config/msp430/t-msp430 (HOST_LIBGCC2_CFLAGS): Add
+	-ffunction-sections and -fdata-sections.
+
+2013-01-02  Nick Clifton  <nickc@redhat.com>
+
+	* config/msp430/t-msp430 (HOST_LIBGCC2_CFLAGS): Define. Add -Os to
+	the command line.
+
+2012-12-21  Nick Clifton  <nickc@redhat.com>
+
+	* config/msp430/t-msp430 (LIB2ADD): Replace lib2div.c with
+	separate files...
+	* config/msp430/lib2div.c: Delete.
+	* config/msp430/lib2divQI.c: New.
+	* config/msp430/lib2divHI.c: New.
+	* config/msp430/lib2divSI.c: New.
+	* config/msp430/lib2bitcountHI.c: New.
+
+2012-12-20  DJ Delorie  <dj@redhat.com>
+
+	* config.host (msp430-elf): Add t-crtstuff.
+
+2012-12-18  Nick Clifton  <nickc@redhat.com>
+
+	* config/msp430/srli.S: Use RETA as the return instruction when
+	compiled with -mlarge enabled.
+	* cmpsi2.S: Likewise.
+	* epilogue.S: Likewise.
+	* slli.S: Likewise.
+	* srai.S: Likewise.
+	* srli.S: Likewise.
+
+2012-12-07  Nick Clifton  <nickc@redhat.com>
+
+	* config/msp430/cmpsi2.S: New file.
+	* config/msp430/t-msp430 (LIB2ADD): Add cmpsi2.S.
+
+2012-10-17  DJ Delorie  <dj@redhat.com>
+
+	* config/msp430: New directory.
+	* config.host: Use it.
+
+2012-10-02  DJ Delorie  <dj@redhat.com>
+
+	* config.host: Add msp430 support.
+
+2012-09-13  Nick Clifton  <nickc@redhat.com>
+
+	* config/v850/lib1funcs.S: Only define CALLT support functions
+	when CALLT support is enabled in the compiler.
+
+2012-08-29  Nick Clifton  <nickc@redhat.com>
+
+	* lib1funcs.S: Add support for v850e3v5 architecture.
+
+2012-08-15  Nick Clifton  <nickc@redhat.com>
+
+	* config.host: Fix typo.
+	* config/stormy16/lib2funcs.c (__ffshi2): Add prototype and remove
+	unused local variable.
+
+2012-08-02  Nick Clifton  <nickc@redhat.com>
+
+	* config.host (powerpc-eabispe): Add t-fdpbit to tmake_file.
+
+2012-06-13  Nick Clifton  <nickc@redhat.com>
+
+	* fp-bit.h (FLOAT_BIT_ORDER_MISMATCH): If
+	LIBGCC2_FLOAT_BIT_ORDER_MISMATCH is defined then use this to
+	determine if FLOAT_BIT_ORDER_MISMATCH should be defined.
+        * config/rx/rx-lib.h (LIBGCC2_FLOAT_BIT_ORDER_MISMATCH): Define
+	to false.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:
+

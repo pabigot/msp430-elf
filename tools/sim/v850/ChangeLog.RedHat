@@ -1,0 +1,73 @@
+2013-02-08  Nick Clifton  <nickc@redhat.com>
+
+	* v850.igen (FMAF.S): New pattern.
+	(FMSF.S): New pattern.
+	(FNMAF.S): New pattern.
+	(FNMSF.S): New pattern.
+
+2012-09-11  Nick Clifton  <nickc@redhat.com>
+
+	* interp.c (sim_open): Add support for bfd_arch_v850_rh850.
+
+2012-09-03  Nick Clifton  <nickc@redhat.com>
+
+	* v850.igen (trncf_dul): New pattern.
+	(trncf_duw, trncf_sul, trncf_suw): Likewise.
+	* v850-dc: Add exceptsions for the new patterns.
+
+2012-08-31  Nick Clifton  <nickc@redhat.com>
+
+	* simops.c (v850_rotl): New function.
+	(v850_bins): New function.
+	* simops.h (v850_rotl): Prototype.
+	(v850_rotl): Likewise.
+	* v850-dc: Add V850E3V5 exceptions.
+	* v850.igen: (reg4): Fix cache definition.
+	(bit13): New cache definition.
+	(jarl): Add V850E3V5 pattern.
+	(ld.dw): Likewise.
+	(st.dw): Likewise.
+	(maddf.s): Remove premature rounding.
+	(trncf.dl): Likewise.
+	(trncf.dw): Likewise.
+	(trncf.sl): Likewise.
+	(trncf.sw): Likewise.
+	(rolt): New patterns.
+	(bins): New patterns.
+
+2012-08-29  Nick Clifton  <nickc@redhat.com>
+
+	* interp.c: Add support for v850e3v5 architecture.
+	* v850-dc: Likewise.
+	* v850.igen: Likewise.
+
+2010-09-01  Nick Clifton  <nickc@redhat.com>
+
+	* v850.igen (nop): Trap if executing a NOP at address 0x0.
+
+2002-11-22  Andrew Cagney  <cagney@redhat.com>
+
+	* v850.igen (dbtrap): Create a separate v850e1 specific
+	instruction.
+	(break): Mark as v850/v850e specific.
+
+2002-07-19  Nick Clifton  <nickc@redhat.com>
+
+	* v850.igen (DBTRAP): Only generate a trap if the target is not
+	the v850e1.  Otherwise treat it as a special kind of branch.
+
+2002-07-16  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* interp.c (sim_open): Accept bfd_mach_v850e1.
+	* v850-dc: Add entry for v850e1.
+	* v850.igen: Add support for v850e1.
+	Add code for DBTRAP and DBRET instructions.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

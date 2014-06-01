@@ -1,0 +1,22 @@
+2007-09-05  Nick Clifton  <nickc@redhat.com>
+
+	* fpp.c (MAKE_FPSR): Also set NaN flag bit.
+	(fpp_opp): Make FCMP case correctly set flag bits.
+	* md-fpp.h (to_single): Hack to fix rounding errors.
+	(from_single, to_double, from_double): Likewise.
+
+2007-03-09  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Accept CC=, CFLAGS= and LDFLAGS= assignments on
+	the command line.  Skip build_alias=, host_alias= and
+	target_alias= assignments.
+	Generate LIBINTL, LIBINTL_DEP and INCINTL assignments.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

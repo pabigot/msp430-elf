@@ -1,0 +1,176 @@
+2011-05-16  Kevin Buettner  <kevinb@redhat.com
+
+	* sim-if.c (sim_hardware_watchpoint): New function.
+
+2003-10-02  Dave Brolley  <brolley@redhat.com>
+
+	* traps.c (frv_mtrap): Don't check MSR0.MTT for fr550.
+	(frvbf_media_cr_not_aligned): Handle fr550.
+	(frvbf_media_acc_not_aligned): Ditto.
+	(frvbf_media_register_not_aligned): Ditto.
+	(frvbf_check_swap_address): New function.
+	* registers.c (fr550_spr): Correct initial setting of MSR0.
+	(frv_check_spr_read_access): Handle fr550.
+	(frv_check_register_access): Ditto.
+	* profile-fr550.c (frvbf_model_fr550_u_trap): New function.
+	(frvbf_model_fr550_u_ici, frvbf_model_fr550_u_dci) 
+	(frvbf_model_fr550_u_dcf, frvbf_model_fr550_u_icpl) 
+	(frvbf_model_fr550_u_dcpl, frvbf_model_fr550_u_icul) 
+	(frvbf_model_fr550_u_dcul): Ditto.
+	(frvbf_model_fr550_u_spr2gr, frvbf_model_fr550_u_gr2spr) 
+	(frvbf_model_fr550_u_swap): Ditto.
+	* memory.c (fr550_check_data_read_address): Detect data_access_error.
+	(fr550_check_readwrite_address): New function.
+	(check_readwrite_address): Call it.
+	(fr550_check_insn_read_address): Align the address.
+	(read_mem_unaligned_HI): New function.
+	(frvbf_read_mem_HI): Call it.
+	(frvbf_read_mem_UHI): Ditto.
+	(read_mem_unaligned_SI): New function.
+	(frvbf_read_mem_SI): Call it.
+	(read_mem_unaligned_DI): New function.
+	(frvbf_read_mem_DI): Call it.
+	(frvbf_read_mem_DF): Ditto.
+	(fr550_check_write_address): New function.
+	(check_write_address): Call it.
+	(mem_set_unaligned_HI): New function.
+	(frvbf_mem_set_HI): Call it.
+	(mem_set_unaligned_SI): New function.
+	(frvbf_mem_set_SI): Call it.
+	(mem_set_unaligned_DI): New function.
+	(frvbf_mem_set_DI): Call it.
+	* interrupts.c (frv_queue_illegal_instruction_interrupt): Handle
+	fr550.
+	(frv_queue_non_implemented_instruction_interrupt): Ditto.
+	(esr_for_data_access_exception): Use ESR8, EPCR8 for fr550.
+	(clear_exception_status_registers): Clear ESR14-15.
+	(frv_set_mp_exception_registers): Use MSR0 for fr550.
+	Generate interrupt immediately for fr550 when MSR0.MPEM is set.
+	(set_fp_exception_registers): Use FSR0 for fr550. No FQnn registers
+	for fr550.
+	(set_exception_status_registers): Don't set EPCRn for precise interrupts
+	for fr550. Use ESR0 for commit_exception and division_exception for fr550.
+	Fr550 has no EDR registers. Use ESR2 and EPCR2 for mp_exception and
+	fp_exception for fr550.
+	* frv.c (check_register_alignment): Handle fr550.
+	(check_fr_register_alignment): Ditto.
+	* frv-sim.h (GET_MSR_MPEM): New macro.
+	* cache.h (CACHE_RETURN_DATA): Don't align the address.
+	(CACHE_RETURN_DATA_ADDRESS): Ditto.
+	(DATA_CROSSES_CACHE_LINE): New macro.
+	* cache.c (frv_cache_read_passive_SI): Don't align the address.
+
+2003-09-30  Michael Snyder  <msnyder@redhat.com>
+
+	* frv-sim.h: Declare c functions for SLASS, SCUTSS.
+	* frv.c: Implement c functions for SLASS, SCUTSS.
+
+2003-09-29  Dave Brolley  <brolley@redhat.com>
+
+	* frv-sim.h: Use CGEN_ATTR_VALUE_ENUM_TYPE in place of
+	CGEN_ATTR_VALUE_TYPE.
+	* mloop.in: Ditto.
+	* pipeline.c: Ditto.
+	* traps.c: Ditto.
+
+2003-09-25  Dave Brolley  <brolley@redhat.com>
+
+	* registers.c (fr550_spr): Correct read-only mask for IHSR8.
+	* memory.c (fr550_check_data_read_address): New function.
+	(check_data_read_address): Handle bfd_mach_fr550.
+	(fr550_check_insn_read_address): New function.
+	(check_insn_read_address): Handle bfd_mach_fr550.
+	* frv.c (frvbf_h_spr_set_handler): Handle H_SPR_IHSR8.
+	* frv-sim.h (GET_IHSR8_ICDM,GET_IHSR8_ICWE,GET_IHSR8_DCWE): New macros.
+	* cache.h (configured_ways,configured_sets): New members of FRV_CACHE.
+	(frv_cache_reconfigure): New function.
+	* cache.c (frv_cache_reconfigure): New function.
+	(frv_cache_init): Set configured_sets and configured_ways. Handle
+	bfd_mach_fr550. Call frv_cache_reconfigure.
+	(ram_access): New function.
+	(non_cache_access): Handle bfd_mach_fr550. Call ram_access.
+
+2003-09-24  Dave Brolley  <brolley@redhat.com>
+
+	* profile.h (float_busy): New member of FRV_PROFILE_STATE.
+	(media_busy): Ditto.
+	(mclracc_acc): Ditto.
+	(mclracc_A): Ditto.
+	(update_float_resource_latency): New function.
+	(update_media_resource_latency): Ditto.
+	(vliw_wait_for_float_resource): Ditto.
+	(vliw_wait_for_media_resource): Ditto.
+	(post_wait_for_float): Ditto.
+	(post_wait_for_media): Ditto.
+	* profile.c (update_latencies): Maintain float_busy and media_busy.
+	(frvbf_model_insn_before): Call fr550_model_insn_before.
+	(frvbf_model_insn_after): Call fr550_model_insn_after.
+	(update_float_resource_latency): New function.
+	(update_media_resource_latency): Ditto.
+	(vliw_wait_for_float_resource): Ditto.
+	(vliw_wait_for_media_resource): Ditto.
+	(post_wait_for_float): Ditto.
+	(post_wait_for_media): Ditto.
+	* profile-fr550.h (fr550_model_insn_before): New prototype.
+	(fr550_model_insn_after): New prototype.
+	* frv.c (frvbf_clear_accumulators): Set mclracc_acc and mclracc_A in
+	the cpu's profile state.
+	* profile-fr550.c: Add modelling unit functions for all new units.
+
+2003-09-15  Dave Brolley  <brolley@redhat.com>
+
+	* registers.c (fr550_spr): New spr register table.
+	(frv_register_control_init): Check size of fr550_spr table.
+	Handle bfd_mach_fr550 using fr550_spr.
+
+2003-09-12  Dave Brolley  <brolley@redhat.com>
+
+	* profile-fr550.c (frvbf_model_fr550_u_idiv): New unit modeller for
+	fr550.
+	(frvbf_model_fr550_u_clrgr, frvbf_model_fr550_u_clrfr): Ditto.
+	* profile.c (profile-fr550.h): #include it.
+
+2003-09-11  Michael Snyder  <msnyder@redhat.com>
+
+	* registers.c (frv_spr): Add registers iacc0h, iacc0l.
+	(fr400_spr): Ditto.
+
+2003-09-10  Dave Brolley  <brolley@redhat.com>
+
+	* profile.c (slot_names): Add I2, I3, FM2, FM3.
+
+2003-09-09  Dave Brolley  <brolley@redhat.com>
+
+	* traps.c (frv_current_fm_slot): New external variable.
+	(frvbf_check_acc_range): New function.
+	* mloop.in (main loop): Maintain frv_current_fm_slot.
+	* frv.c (frvbf_clear_accumulators): Handle bfd_mach_fr550.
+	* frv-sim.h (frv_current_fm_slot): New external variable.
+
+2003-08-27  Dave Brolley  <brolley@redhat.com>
+
+	* mloop.in (@cpu@_simulate_insn_prefetch): Handle bfd_mach_fr550.
+
+2003-08-26  Dave Brolley  <brolley@redhat.com>
+
+	* registers.c (frv_register_control_init): Handle bfd_mach_fr550.
+	* memory.c (check_data_read_address): Handle bfd_mach_fr550.
+	(check_readwrite_address, check_insn_read_address) 
+	(check_write_address): Ditto.
+	* profile-fr550.c (frvbf_model_fr550_u_integer): Removed.
+	(frvbf_model_fr550_u_imul): Removed.
+	(frvbf_model_fr550_u_idiv): Removed.
+	* Makefile.in (profile.o): Depends on profile-fr550.h
+
+2003-08-25  Michael Snyder  <msnyder@redhat.com>
+
+	* profile-fr550.c, profile-fr550.h: New files.
+	* Makefile.in: Add above, plus new fr550 mach for cgen.
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

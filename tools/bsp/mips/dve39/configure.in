@@ -1,0 +1,24 @@
+dnl This is the bsp/mips configure.in file.
+dnl Process this file with autoconf to produce a configure script.
+
+AC_PREREQ(2.5)
+AC_INIT(dve39.c)
+
+dnl Can't be done in BSP_CONFIGURE because that confuses automake. 
+AC_CONFIG_AUX_DIR(../../..)
+
+BSP_CONFIGURE(../..)
+
+if test "x${with_multisubdir}" = "x" ; then
+  build_it=yes ;
+  BOARD_LIB=libdve39.a ;
+  files="../start.S ../crt0.S" ;
+  links="dve39-start.S dve39-crt0.S" ;
+fi
+
+AC_LINK_FILES(${files}, ${links})
+
+AC_SUBST(BOARD_LIB)
+AM_CONDITIONAL(BUILD_IT, test x$build_it = xyes)
+
+AC_OUTPUT(Makefile)

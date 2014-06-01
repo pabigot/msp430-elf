@@ -1,0 +1,15 @@
+%rename cpp                 old_cpp
+%rename link                old_link
+
+*lib:
+--start-group -ltiger -lc -lgcc --end-group
+
+*cpp:
+-D__CPU_TIGER__ -D__TIGER_EVB__ %(old_cpp)
+
+*startfile:
+tiger-start%O%s frvbegin%O%s
+
+*link:
+-T frv.ld%s -Ttext 0xff000000 -Tdata 0x30000000 %(old_link)
+

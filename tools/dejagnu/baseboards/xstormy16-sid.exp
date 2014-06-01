@@ -1,0 +1,37 @@
+# This is a list of toolchains that are supported on this board.
+set_board_info target_install {xstormy16-elf}
+
+# Load a baseboard description for SID simulators.
+load_base_board_description "basic-sid"
+process_multilib_options ""
+
+verbose "Using simulator [board_info $board sim]\n"
+set_board_info sim [find_rawsid]
+set_board_info sim,protocol "sid";
+if { ${tool} == "gdb" } {
+    set_board_info sim,options "-f [find_sid_conf xstormy16-gdb]"
+} else {
+    set_board_info sim,options "-f [find_sid_conf xstormy16-gloss]"
+}
+
+# Do this before loading sid.exp, so we can override it (ewww).
+set_board_info ldflags   "-msim [libgloss_link_flags] [newlib_link_flags]"
+
+# Load the generic configuration for this board. This will define a basic set
+# of routines needed by the tool to communicate with the board.
+load_generic_config "sid"
+
+# Used by a few gcc.c-torture testcases to delimit how large the stack can
+set_board_info gcc,stack_size  5000
+
+# Used by a few gcc.c-torture testcases when trampolines are used.
+# set_board_info gcc,no_trampolines  1
+
+# Used by a few gdb tests. SID doesn't allow hardware watchpoints.
+set_board_info gdb,no_hardware_watchpoints 1
+
+# This disables huge.exp test since it must fail due to memory restrictions.
+set_board_info gdb,skip_huge_test 1
+
+# This one is needed to run MI tests.
+set_board_info gdb,start_symbol "_start"

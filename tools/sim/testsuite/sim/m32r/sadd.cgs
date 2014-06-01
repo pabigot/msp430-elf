@@ -1,0 +1,16 @@
+# m32r testcase for sadd
+# mach(): m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global sadd
+sadd:
+
+	mvi_h_accum0 0, 0x100
+	mvi_h_accum1 0, 0x20000
+	sadd
+	test_h_accum0 0, 0x102
+
+	pass

@@ -1,0 +1,585 @@
+#!/bin/sh
+
+#
+# ChVer -- change version numbers
+#
+# Originally authored by Angela Marie Thomas
+# angela@redhat.com
+# $Date: 2013/08/12 20:47:01 $
+# 
+# $Id: ChVer,v 1.6.14.2 2013/08/12 20:47:01 release Exp $
+#
+# Designed to be run from the top-level of a source tree
+#
+# The following files may be modified:
+#   binutils/Makefile.in dosrel/Makefile.in gas/Makefile.in gdb/Makefile.in
+#   libg++/Makefile.in libio/Makefile.in newlib/Makefile.in send-pr/Makefile.in
+#   texinfo/Makefile.in newlib/libc/Makefile.in newlib/libm/Makefile.in
+#   bfd/VERSION byacc/main.c diff/version.c dosrel/makedostree
+#   expect/exp_main_sub.c flex/version.h gas/gasp.c gcc/version.c gcc/gcov.c
+#   ld/ldver.c texinfo/makeinfo/makeinfo.c make/version.c patch/patchlevel.h
+#   texinfo/util/texindex.c tcl/unix/tclAppInit.c tk/generic/tkArgv.c
+#   apache/configure apache/configure.in perl/perl.c texinfo/info/info.c
+#   gdb/mswin/gui.rc grez/Makefile.in libstdc++/Makefile.in, release-info
+#   libremote/configure{,.in} gdb/version.in
+#
+# You might be tempted to make this prettier, but we don't recommend it
+# The version numbers are different enough in each file that the proper
+# search/replace patterns are unique for most of the files.
+#
+# This script automagically RedHatifies version strings (strips out info
+# so the version is as close to <major>.<minor>-<release> as possible) as
+# they come out of cvs or simply change the release string on the version.
+# It cannot un-RedHatify any versions.  There are some tools missing or
+# commented out.  They can be added as they are needed.
+#
+
+# use /bin/sh5 on Ultrix systems to get shell functions
+if [ -f /bin/sh5 ] ; then 
+   if [ ! -n "${RUNNING_UNDER_BIN_SH5}" ] ; then
+       RUNNING_UNDER_BIN_SH5=yes
+       export RUNNING_UNDER_BIN_SH5
+       exec /bin/sh5 $0 $*
+   fi
+fi
+
+ProgName=`basename $0`
+Version='$Revision: 1.6.14.2 $'
+
+# reasonable umask
+umask 0002
+
+# exit on any error
+set -e
+
+# tmp file for sed output
+TmpFile="/tmp/chver.$$"
+
+# go away on certain signals
+trap "echo \"${ProgName}: Caught a sig @ \`date\`, exiting.\" ; rm -f $TmpFile; exit 1" 1 2 3 15
+
+TRUE=1
+FALSE=0
+
+# CVS operations by default may be undesirable
+Commit=$FALSE
+CVS=${CVS:="cvs"}
+
+# Begin shell functions
+
+#
+# usage()
+# Quickie "how do I use this thing?"
+#
+usage()
+{
+cat << EndOfUsage
+${ProgName} $Version
+Usage: ${ProgName} [options] <release>
+Options:
+  --release=<release>               Release name (of the form YYqQ or
+                                       <prefix>-<datestamp> for customs)
+  --commit                          CVS commit changes (default)
+  --nocommit                        Do not CVS commit changes
+  --product=PRODUCT                 Product being built (default is cdk)
+  --src=SRCDIR                      Top level source tree (default is `dirname $0`/..)
+  --x                               set -x for shell debugging
+  --version                         version
+  --verbose                         verbose
+  --just-print                      Print commands without running them
+  --help                            This message
+EndOfUsage
+}
+
+#
+# Vecho($string)
+# echo string if verbose enabled
+#
+Vecho () {
+    [ "$Verbose" = "$TRUE" ] && echo $*
+    return 0
+}
+
+#
+# patch_Makefile($dir)
+# changes VERSION in $dir/Makefile.in
+#
+patch_Makefile () {
+#VERSION=3.9-foo-123456
+#VERSION=3.9
+    file=$1/Makefile.in ; Vecho $file
+    file2=$1/configure ; Vecho $file
+    if [ ! -f $file ] ; then
+        Vecho "${ProgName}: no entry for $file"
+    else
+        $Echo sed \
+	    -e "/^[ 	]*VERSION[ 	]*=/s/cygnus-//" \
+            -e "/^[ 	]*VERSION[ 	]*=/s/[ 	]*=[ 	]*\([0-9]*\.[0-9]*\).*$/=\1-$Release/" $file > $TmpFile
+	$Echo cp $TmpFile $file
+        commit_list="$commit_list $file"
+	if [ -f $file2 ]; then
+	    touch $file2
+	fi
+    fi
+}
+
+#
+# patch_config($dir)
+# changes VERSION in $dir/configure and $dir/configure.in
+#
+patch_config () {
+#VERSION=3.9-foo-123456
+#VERSION=3.9
+    # do configure.in before configure
+    file=$1/configure.in ; Vecho $file
+    if [ ! -f $file ] ; then
+        Vecho "${ProgName}: no entry for $file"
+    else
+        $Echo sed \
+	    -e "/^[ 	]*AM_INIT_AUTOMAKE/s/cygnus-//" \
+	    -e "/^[ 	]*AM_INIT_AUTOMAKE/s/\(,[ ]*\)\([0-9]*\.[0-9]*\).*$/\1\2-$Release)/" $file > $TmpFile
+	$Echo cp $TmpFile $file
+        commit_list="$commit_list $file"
+    fi
+
+    file=$1/configure ; Vecho $file
+    if [ ! -f $file ] ; then
+        Vecho "${ProgName}: no entry for $file"
+    else
+        $Echo sed \
+	    -e "/^[ 	]*VERSION[ 	]*=/s/cygnus-//" \
+            -e "/^[ 	]*VERSION[ 	]*=/s/[ 	]*=[ 	]*\([0-9]*\.[0-9]*\).*$/=\1-$Release/" $file > $TmpFile
+	$Echo cp $TmpFile $file
+        commit_list="$commit_list $file"
+    fi
+}
+
+# End shell functions
+
+# arg parsing time
+while [ $# -ne 0 ]; do
+    option=$1
+    shift
+
+    case $option in
+    --*=*)
+        optarg=`echo $option | sed -e 's/^[^=]*=//'`
+        ;;
+    esac
+
+    case $option in
+    --x)
+        set -x
+        ;;
+    --rel*|--tag*)
+        Release="$optarg"
+        ;;
+    --commit)
+        Commit="$TRUE"
+        ;;
+    --nocommit)
+        Commit="$FALSE"
+        ;;
+    --src*)
+        SRCROOT=$optarg
+        ;;
+    --prod*)
+        Product=$optarg
+        ;;
+    --just-print)
+        Echo=echo
+        ;;
+    --verb*)
+        Verbose="$TRUE"
+        ;;
+    --vers*)
+        echo "${ProgName} $Version"
+        exit 0
+        ;;
+    --help)
+        usage
+        exit 0
+        ;;
+    *)
+	echo "${ProgName}: Invalid argument \"$option\""
+        usage
+        exit 1
+	;;
+    esac
+done
+
+# Product defaults to cdk
+Product=${Product:="cdk"}
+
+# if releases not given, exit
+if [ "$Release" = "" ]; then
+    echo "${ProgName}: release is null."
+    usage
+    exit 1
+fi
+
+commit_list=""
+SRCROOT=${SRCROOT:="`dirname $0`/.."}
+cd $SRCROOT
+
+# simple tests to see if we're in a source tree
+if [ ! -f Makefile.in ] ; then
+    echo "${ProgName}: Makefile.in missing from current directory."
+    echo "${ProgName}: You need to run ${ProgName} in a source tree"
+    exit 1
+fi
+if [ ! -f configure.ac ] ; then
+    echo "${ProgName}: configure.ac missing from current directory."
+    echo "${ProgName}: You need to run ${ProgName} in a source tree"
+    exit 1
+fi
+
+# For changing release-info
+case $Product in
+    cdk) RelVar=CDK_RELEASE ;;
+    foundry) RelVar=FOUNDRY_RELEASE ;;
+    java) RelVar=CDK_RELEASE ;;
+    utools|user-tools|usertools) RelVar=UTOOLS_RELEASE ;;
+    *) echo "${ProgName}: $Product unknown... Exiting." ; exit 1 ;;
+esac
+
+Vecho "Change the version numbers for $Product release $Release"
+
+# patch release-info
+file=release-info ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+    # ROOTING is an old variable so if we find it, it's an old file.
+    if grep ROOTING $file > /dev/null 2>&1 ; then
+	echo "${ProgName}: Warning: this is an old release-info file."
+	echo "${ProgName}: You will need to change the entries by hand"
+	echo "${ProgName}: or update release-info from current devo."
+    else
+        $Echo sed \
+            -e "s/^$RelVar=.*$/$RelVar=$Release/" \
+            < release-info > $TmpFile
+        $Echo cp $TmpFile $file
+        commit_list="$commit_list $file"
+    fi
+
+fi
+
+
+# list of dirs for updating Makefile.in with patch_Makefile()
+MakefileList="\
+    binutils dosrel gas gdb libg++ libio newlib send-pr texinfo \
+    newlib/libc newlib/libm grez libstdc++"
+
+# patch 'em
+for dir in $MakefileList; do
+    patch_Makefile $dir
+done
+
+# list of dirs for updating configure/configure.in with patch_config()
+ConfigList="bfd binutils gas gprof ld libremote opcodes sid rda"
+
+# patch 'em
+for dir in $ConfigList; do
+    patch_config $dir
+done
+
+# now for the unique stuff
+file=bfd/VERSION ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+#cygnus-2.7.2
+#2.7-foo-123456
+    $Echo sed \
+	-e "s/cygnus-//" \
+        -e "s/\([0-9]*\.[0-9]*\).*$/\1-$Release/" \
+	$file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=byacc/main.c ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+#char *yaccversion = "Berkeley Yacc (+28-foo-123456)";
+#char *yaccversion = "Berkeley Yacc (+Cygnus.28)";
+    $Echo sed \
+	-e "/^char \*yaccversion = /s/Cygnus\.//" \
+        -e "/^char \*yaccversion = /s/\(([+]*[0-9]*\).*\"/\1-$Release)\"/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=diff/version.c ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+#char const version_string[] = "2.7-foo-123456";
+#char const version_string[] = "2.7";
+    $Echo sed \
+	-e "/^char const version_string\[\][ 	]*=[ 	]*/s/\([0-9]*\.[0-9]*\).*\";/\1-$Release\";/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=dosrel/makedostree ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+    $Echo sed \
+	-e "/^RELEASE=/s/RELEASE=.*/RELEASE=\"$Release\"/" \
+	$file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=expect/exp_main_sub.c ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+#                        debuglog("expect version %s\r\n",exp_version);
+#                        printf("expect version %s\n", exp_version);
+    $Echo sed \
+        -e "/buglog.*expect version/s/\(expect version %s\).*\\\\r/\1-$Release\\\\r/" \
+        -e "/printf.*expect version/s/\(expect version %s\).*\\\\n/\1-$Release\\\\n/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=flex/version.h ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+##define FLEX_VERSION "2.5.2"
+    $Echo sed \
+	-e "/^#define[ 	]*FLEX_VERSION[ 	]*/s/\([0-9]\.[0-9]\).*\"/\1-$Release\"/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=gas/gasp.c ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+    $Echo sed \
+	-e "/^char[ 	]*\*program_version[ 	]*/s/\([0-9]*\.[0-9]*\).*\"/\1-$Release\"/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=gcc/version.c ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+#char *version_string = "2.7-foo-123456";
+#char *version_string = "cygnus-2.7.2-961023";
+#const char *const version_string = "cygnus-2.96 20000521";
+    $Echo sed \
+	-e "/^c.*.version_string.*=.*/s/\"[-A-Za-z]*\([0-9]*\.[0-9]*\).*\";/\"\1-$Release\";/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=gcc/gcov.c ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+    $Echo sed \
+	-e "/^char[ 	]*.gcov_version_string/s/\(version [0-9]*\.[0-9]*\).*\\\\n/\1-$Release\\\\n/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+#file=gzip/revision.h ; Vecho $file
+#if [ ! -f $file ] ; then
+#    Vecho "${ProgName}: no entry for $file"
+#else
+#    $Echo sed \
+#        -e "/^#define VERSION[ 	]*\"/s/\"$/-$CQ\"/" \
+#        $file > $TmpFile
+#    $Echo cp $TmpFile $file
+#    commit_list="$commit_list $file"
+#fi
+
+file=texinfo/info/info.c ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+#      printf ("GNU Info (Texinfo 3.9) %s\n", version_string ());
+    $Echo sed \
+	-e "/GNU Info .*%s/s/\(%s\).*\\\\n/\1-$Release\\\\n/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=ld/ldver.c ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+#const char *ld_program_version = "cygnus-2.7.1";
+    $Echo sed \
+	-e "/const char.*ld_program_version/s/cygnus-//" \
+        -e "/const char.*ld_program_version/s/\([0-9]*\.[0-9]*\).*\"/\1-$Release\"/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=texinfo/makeinfo/makeinfo.c ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+#  printf ("GNU Makeinfo (Texinfo 3.9) %d.%d\n", major_version, minor_version);
+    $Echo sed \
+	-e "/GNU Makeinfo .*%d.%d/s/\(%d.%d\).*\\\\n/\1-$Release\\\\n/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=make/version.c ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+#char *version_string = "3.75";
+    $Echo sed \
+	-e "/^char[ 	]*.version_string[ 	]*=[ 	]*/s/\"\([0-9]*\.[0-9]*\).*\"/\"\1-$Release\"/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=patch/patchlevel.h ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+    $Echo sed \
+	-e "/^#define[ 	]*PATCH_VERSION/s/\(\"[\.0-9]*\).*\"$/\1-$Release\"/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=texinfo/util/texindex.c ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+    $Echo sed \
+	-e "/^#define.*TEXINDEX_VERSION_STRING/s/\() [\.0-9\]*\.[\.0-9\]*\).*\"$/\1-$Release\"/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=tcl/unix/tclAppInit.c ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+#            printf ("Tcl version %s\n", TCL_VERSION);
+    $Echo sed \
+	-e "/Tcl version/s/\(Tcl version %s\).*\\\\n/\1-$Release\\\\n/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=tk/generic/tkArgv.c ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+#                Tcl_AppendResult(interp, "Tk version ", TK_VERSION,
+    $Echo sed \
+	-e "/Tcl_AppendResult.*Tk version /s/\(TK_VERSION\).*/\1, \"-$Release\",/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=apache/configure ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+#VERSION=Apache/1.1
+    $Echo sed \
+	-e "/^VERSION=Apache/s/\(Apache\/[\.0-9]*\).*/\1 Cygnus-\1-$Release/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=apache/configure.in ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+#VERSION=Apache/1.1
+    $Echo sed \
+	-e "/^VERSION=Apache/s/\(Apache\/[\.0-9]*\).*/\1 Cygnus-\1-$Release/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=perl/perl.c ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+#        printf("\nThis is perl, version 5.%03d_%02d", PATCHLEVEL, SUBVERSION);
+#        printf("\nThis is perl, version %s",patchlevel);
+    $Echo sed \
+	-e "/This is perl, version/s/\(This is perl, version[^\"]*%02d\).*\"/\1-$Release\"/" \
+	-e "/This is perl, version/s/\(This is perl, version[^\"]*%s\).*\"/\1-$Release\"/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+file=gdb/mswin/gui.rc ; Vecho $file
+if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+else
+#    LTEXT           "Cygnus 96q2",-1,61,16,164,8,NOT WS_GROUP
+#	    VALUE "ProductVersion", "96q2\0"
+    $Echo sed \
+	-e '/LTEXT.*"Ver .*, Rel /s/Rel [^" ]*/Rel '"$Release"/ \
+	-e "/LTEXT[ 	]*\"Cygnus.*\",-1,61,16,164,.*WS_GROUP/s/Cygnus .*\"/Cygnus $Release\"/" \
+	-e "/VALUE[ 	]*\"ProductVersion\",[ 	]*\"/s/\(\"ProductVersion\",\).*/\1 \"$Release\\\\0\"/" \
+        $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+fi
+
+for file in file=gdb/version.in gcc/DEV-PHASE; do
+  Vecho $file
+  if [ ! -f $file ] ; then
+    Vecho "${ProgName}: no entry for $file"
+  else
+    $Echo sed \
+      -e "s/ .*//" \
+      -e "s/$/ ($Release)/" \
+      $file > $TmpFile
+    $Echo cp $TmpFile $file
+    commit_list="$commit_list $file"
+  fi
+done
+
+# cleanup
+rm -f $TmpFile
+
+# Do a single commit to minimize the mail
+echo "$CVS commit -m \"RedHatify version numbers with $Release\" $commit_list"
+
+if [ "$Commit" = "$TRUE" ]; then
+    $CVS commit -m "RedHatify version numbers with $Release" $commit_list || \
+        { echo "${ProgName}: Can't commit $commit_list"; exit 1; }
+fi
+exit 0

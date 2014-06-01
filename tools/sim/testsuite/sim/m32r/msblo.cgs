@@ -1,0 +1,17 @@
+# m32r testcase for msblo $src1,$src2
+# mach(): m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global msblo
+msblo:
+
+	mvi_h_accum0 0, 0x140001
+	mvi_h_gr r4, 4
+	mvi_h_gr r5, 5
+	msblo r4, r5
+	test_h_accum0 0, 1
+
+	pass

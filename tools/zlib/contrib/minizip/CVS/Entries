@@ -1,0 +1,21 @@
+/Makefile/1.2/Sun Nov 21 18:19:16 2004//Tmsp430-130322-branch
+/Makefile.am/1.1/Sun Nov 18 22:19:34 2012//Tmsp430-130322-branch
+/MiniZip64_Changes.txt/1.1/Sun Mar 25 17:49:32 2012//Tmsp430-130322-branch
+/MiniZip64_info.txt/1.1/Sun Mar 25 17:49:32 2012//Tmsp430-130322-branch
+/configure.ac/1.1/Sun Nov 18 22:19:34 2012//Tmsp430-130322-branch
+/crypt.h/1.4/Sun Mar 25 17:49:32 2012//Tmsp430-130322-branch
+/ioapi.c/1.5/Sun Nov 18 22:19:35 2012//Tmsp430-130322-branch
+/ioapi.h/1.5/Sun Nov 18 22:19:35 2012//Tmsp430-130322-branch
+/iowin32.c/1.4/Sun Mar 25 17:49:32 2012//Tmsp430-130322-branch
+/iowin32.h/1.4/Sun Mar 25 17:49:32 2012//Tmsp430-130322-branch
+/make_vms.com/1.1/Sun Mar 25 17:49:32 2012//Tmsp430-130322-branch
+/miniunz.c/1.5/Sun Nov 18 22:19:35 2012//Tmsp430-130322-branch
+/minizip.c/1.5/Sun Nov 18 22:19:35 2012//Tmsp430-130322-branch
+/minizip.pc.in/1.1/Sun Nov 18 22:19:35 2012//Tmsp430-130322-branch
+/mztools.c/1.2/Sun Nov 18 22:19:35 2012//Tmsp430-130322-branch
+/mztools.h/1.2/Sun Nov 18 22:19:35 2012//Tmsp430-130322-branch
+/unzip.c/1.5/Sun Nov 18 22:19:35 2012//Tmsp430-130322-branch
+/unzip.h/1.4/Sun Mar 25 17:49:32 2012//Tmsp430-130322-branch
+/zip.c/1.5/Sun Nov 18 22:19:35 2012//Tmsp430-130322-branch
+/zip.h/1.4/Sun Mar 25 17:49:33 2012//Tmsp430-130322-branch
+D

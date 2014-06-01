@@ -1,0 +1,1137 @@
+2013-10-04  Nick Clifton  <nickc@redhat.com>
+
+	* gas/msp430/msp430.exp: Run bad test.
+	* gas/msp430/msp430x.s: Add tests of address sized aliases.
+	* gas/msp430/msp430x.d: Update expected disassembly.
+	* gas/msp430/bad.s: New test source.
+	* gas/msp430/bad.d: New test driver.
+	* gas/msp430/bad.l: Expected error messages.
+
+2013-03-14  Nick Clifton  <nickc@redhat.com>
+
+	* gas/msp430/msp430x.d: Update expected disassembly.
+
+2013-03-05  Nick Clifton  <nickc@redhat.com>
+
+	* gas/msp430/msp430x.d: Update expected disassembly.
+	* gas/all/gas.exp: Expect forward reference test to pass for MSP430.
+
+2013-02-25  Nick Clifton  <nickc@redhat.com>
+
+	* gas/lns/lns.exp: Use alternate version of lns-common-1 test.
+
+2013-02-08  Nick Clifton  <nickc@redhat.com>
+
+	* gas/v850/v850e3v5.s: New test - check v850e3v5 instructions.
+	* gas/v850/v850e3v5.d: Expected disassembly.
+	* gas/v850/basic.exp: Run the new test.
+
+2013-02-06  Nick Clifton  <nickc@redhat.com>
+
+	* gas/elf/elf.exp (run_elf_list_test): Skip ehopt for MSP430.
+	* gas/all/struct.d: Skip for MSP430.
+	* gas/all/gas.exp: Skip diff1 for MSP430.
+
+2013-01-14  Nick Clifton  <nickc@redhat.com>
+
+	* gas/elf/elf.exp: Add msp430 target_machine.
+	Skip redef test for msp430.
+	* gas/elf/section2.e-msp430: New file.
+
+	* gas/msp430/msp430x.s: Add RPT tests
+	* gas/msp430/msp430x.d: Extend expected disassembly.
+2012-12-20  Nick Clifton  <nickc@redhat.com>
+
+	Issue 3472963
+	* gas/v850/v850e1.s: Add more examples of the prepare insn.
+	* gas/v850/v850e1.d: Extend expected disassembly.
+
+2012-12-18  Nick Clifton  <nickc@redhat.com>
+
+	* gas/msp430/msp430x.d: Update expected disassembly.
+
+2012-12-11  Nick Clifton  <nickc@redhat.com>
+
+	Issue 3472963
+	* gas/v850/v850e1.s: Add example of prepare insn.
+	* gas/v850/v850e1.d: Extend expected disassembly.
+
+2012-12-10  Nick Clifton  <nickc@redhat.com>
+
+	* gas/msp430/msp430x.d: Update expected disassembly.
+
+2012-11-26  Nick Clifton  <nickc@redhat.com>
+
+	* gas/msp430/msp430x.s: New test file.
+	* gas/msp430/msp430x.d: Expected disassembly.
+	* gas/msp430/msp430.exp: Run the new test.
+	* gas/msp430/opcode.d: Update expected disassembly.
+
+2012-10-16  Nick Clifton  <nickc@redhat.com>
+
+	* gas/v850/basic.exp (do_simple_reloc_tests): Update expected
+	reloc output.
+	* gas/v850/split-lo16.d: Likewise.
+
+2012-08-29  Nick Clifton  <nickc@redhat.com>
+
+	* gas/elf/warn-2.s: Skip warning check for all v850 targets.
+
+2005-04-22  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mep/allinsn32.d, gas/mep/allinsn32.le.d, gas/mep/allinsn32.s,
+	gas/mep/allinsn64.d, gas/mep/allinsn64.le.d, gas/mep/allinsn64.s,
+	gas/mep/nopinsertion32.d, gas/mep/nopinsertion32.s,
+	gas/mep/nopinsertion64.d, gas/mep/nopinsertion64.s,
+	gas/mep/relocs-bad1.s, gas/mep/relocs-bad2.s, gas/mep/relocs-bad4.s,
+	gas/mep/relocs-ok.d, gas/mep/relocs-ok.s, gas/mep/ucidsp.d,
+	gas/mep/ucidsp.le.d, gas/mep/ucidsp.s: Delete.
+	* gas/mep/allinsn.exp: Don't run allinsn64, ucidsp or nopinsertion64.
+	gas/mep/complex-relocs.exp: Use -mconfig=fmax. Don't run relocs-ok
+	or relocs-bad-[124].
+
+2004-09-30  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mep/branch1.[sd]: New test.
+	* gas/mep/allinsn.exp: Run it.
+
+2004-05-07  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mep/ucidsp.d, gas/mep/ucidsp.le.d: Expect $fp to be mapped to $8.
+	Expect $12 to be disassembled as such.
+	* gas/mep/dj1.d, gas/mep/dj1.le.d: Likewise.
+	* gas/mep/dj2.d, gas/mep/dj2.le.d: Likewise.
+	* gas/mep/allinsn.d, gas/mep/allinsn.le.d: Likewise.  Fix R_MEP_HI*
+	patterns.
+	* gas/mep/relocs-ok.d: Remove "Contents of" lines for empty sections.
+	* gas/mep/relocs.d: Likewise.  Update expected output for nop regions.
+
+2003-04-23  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/frv/fr451-spr.[sd]: Rename to...
+	* gas/frv/fr450-spr.[sd]: ...these new files.
+	* gas/frv/fr451-insn.[sdl]: Rename to...
+	* gas/frv/fr450-insn.[sdl]: ...these new files.
+	* gas/frv/allinsn.exp: Update accordingly.
+
+2003-04-22  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/frv/fr451-insn.[sdl]: Add tests for mqlclrhs, mqlmths,
+	mqsllhi and mqsrahi.
+
+2003-04-21  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/frv/allinsn.s: Replace rst* instructions with nops.
+	* gas/frv/allinsn.d: Update accordingly.
+	* gas/frv/fr451-spr.d: Pass -mcpu=fr451.
+	* gas/frv/fr405-insn.[sdl]: New test.
+	* gas/frv/fr451-insn.[sdl]: New test.
+	* gas/frv/allinsn.exp: Run new tests.  Ensure fr405 instructions
+	aren't accepted for -mcpu=fr400 or -mcpu=fr500.  Ensure fr451
+	instructions aren't accepted for -mcpu=fr400, -mcpu=fr405 or
+	-mcpu=fr500.
+
+2003-12-30  DJ Delorie  <dj@redhat.com>
+
+	* gas/sh/sh2a.s: New.
+	* gas/sh/sh2a.d: New.
+	* gas/sh/basic.exp: Add it.
+
+2003-12-16  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/frv/fr451-spr.[sd]: New test.
+	* gas/frv/allinsn.exp: Run it.
+
+2003-11-05  Alexandre Oliva  <aoliva@redhat.com>
+
+	* lib/gas-defs.exp (is_elf_format): Match frv-uclinux.
+
+2003-09-18  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/frv/fdpic.s, gas/frv/fdpic.d: Renamed from ucpic*.
+
+2003-09-15  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/frv/ucpic.s, gas/frv/ucpic.d: Use gr15 as PIC register.  Use
+	gprel12 for rodata symbol and gotoff12 for sdata symbol.
+
+2003-08-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/frv/ucpic.d: Test gotoff and gotofffuncdesc.
+
+2003-08-04  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/frv/ucpic.d, gas/frv/ucpic.s: New.
+	* gas/frv/allinsns.exp: Run it.
+
+2003-05-28  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/h8300/h8sx_mov_imm.[sd]: New test.
+	* gas/h8300/h8300.exp: Run it.
+
+2003-05-27  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/h8300/h8sx_disp2.[sd]: New test.
+	* gas/h8300/h8300.exp: Run it.
+
+2003-05-14  Michael Snyder  <msnyder@redhat.com>
+
+	* gas/h8300/t01_mov.s: New file, tests h8300sx mov.insns.
+	* gas/h8300/t01_mov.exp: Ditto.
+	* gas/h8300/t02_mova.s: New file, tests h8300sx mova insns.
+	* gas/h8300/t02_mova.exp: Ditto.
+	* gas/h8300/t03_add.s: New file, tests h8300sx add insns.
+	* gas/h8300/t03_add.exp: Ditto.
+	* gas/h8300/t04_sub.s: New file, tests h8300sx sub insns.
+	* gas/h8300/t04_sub.exp: Ditto.
+	* gas/h8300/t05_cmp.s: New file, tests h8300sx cmp insns.
+	* gas/h8300/t05_cmp.exp: Ditto.
+	* gas/h8300/t06_ari2.s: New file, tests h8300sx arithmetic insns.
+	* gas/h8300/t06_ari2.exp: Ditto.
+	* gas/h8300/t07_ari3.s: New file, tests h8300sx arithmetic insns.
+	* gas/h8300/t07_ari3.exp: Ditto.
+	* gas/h8300/t08_or.s: New file, tests h8300sx or insns.
+	* gas/h8300/t08_or.exp: Ditto.
+	* gas/h8300/t09_xor.s: New file, tests h8300sx xor insns.
+	* gas/h8300/t09_xor.exp: Ditto.
+	* gas/h8300/t10_and.s: New file, tests h8300sx and insns.
+	* gas/h8300/t10_and.exp: Ditto.
+	* gas/h8300/t11_logs.s: New file, tests h8300sx logic insns.
+	* gas/h8300/t11_logs.exp: Ditto.
+	* gas/h8300/t12_bit.s: New file, tests h8300sx bit insns.
+	* gas/h8300/t12_bit.exp: Ditto.
+	* gas/h8300/t13_otr.s: New file, tests h8300 misc. insns.
+	* gas/h8300/t13_otr.exp: Ditto.
+
+2002-09-26  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/vr4122.d: Change 4121 options to 4120.
+
+2002-08-17  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/vr5400.[sd]: Add rol-by-constant and ror-by-register checks.
+
+2002-08-15  DJ Delorie  <dj@redhat.com>
+
+	* gas/mips/vr4122.s: New, for vr4122 workarounds.
+	* gas/mips/vr4122.d: Likewise.
+
+2002-07-24  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gas/mips/vr5400.s: Add .end directive.
+	* gas/mips/vr5500.s: Likewise.
+	* gas/mips/vr5500.d: Fix mfdr and mtdr registers.
+
+2002-07-16  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* gas/v850/v850e1.s: New test source file.
+	* gas/v850/v850e1.d: New test disassembly file.
+	* gas/v850/basic.exp: Run v850e1 test.
+
+2002-05-10  Ben Elliston  <bje@redhat.com>
+
+	* gas/mep/complex-relocs.exp (objdump_test): Use $objdump to hold
+	the full filename of the objdump program, not $objcopy. Make the
+	test strings more explanatory to help differentiate failures.
+
+	* gas/mep/relocs.d: Update.
+	* gas/mep/relocs-x.d: Likewise.
+
+2002-04-19  Dave Brolley  <brolley@redhat.com>
+
+	* gas/mep/allinsn.s: Correct to reflect assembler optimization of
+	load/store insn with displacement of zero. Add new test cases.
+	* gas/mep/allinsn.d: Ditto.
+	* gas/mep/allinsn.le.d: Ditto.
+	* gas/mep/dj1.s: Ditto.
+	* gas/mep/dj1.d: Ditto.
+	* gas/mep/dj1.le.d: Ditto.
+
+2002-04-19  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* gas/arm/iwmmxt.d: Change expected encodings of WROR, WSLL, WSRA
+	and WSRL instructions in their G form to expect bit 3 to be set.
+
+2002-04-04  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* gas/arm/iwmmxt.d: Fix expected decodes for WRORG, WSSLG, WSRLG
+	and WSRAG instructions.
+
+2002-03-29  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* gas/arm/iwmmxt.s: New file: Test assembler source for iWMMXt
+	instructions.
+	* gas/arm/iwmmxt.d: New file: Expected disassembly of iWMMXt
+	instructions.
+	* gas/arm/arm.exp: Run iWMMXt tests for XScale targets.
+
+2002-02-20  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/mn10300/am33-2.c (d8pcsec): PC-relative relocations within
+	text sections don't decay to section+offset.
+	* gas/mn10300/am33-2.d: Rebuilt.
+
+2002-02-08  Frank Ch. Eigler  <fche@redhat.com>
+
+	* gas/mep/allinsn.s, .d, .le.d: Remove uci/dsp insns.
+	* .../dj1.s, .d, .le.d: Ditto.
+	* .../ucidsp.s, .d, .le.d: Move them to these new files.
+	* .../allinsn.exp: Don't run 32-bit vliw tests.
+
+	Merged:
+
+	2002-01-23  Graydon Hoare  <graydon@redhat.com>
+
+        * gas/mep/complex-relocs.exp: Separate negative tests,
+        correct positive test to check post-link objdump.
+        * gas/mep/relocs-ok.s: Add case for SIMM16 in mov.
+        * gas/mep/relocs-ok.d: Regenerate.
+        * gas/mep/relocs-bad.s: Remove.
+        * gas/mep/relocs-bad1.s: Add.
+        * gas/mep/relocs-bad2.s: Add.
+        * gas/mep/relocs-bad3.s: Add.
+        * gas/mep/relocs-bad4.s: Add.
+
+	2002-01-15  Graydon Hoare  <graydon@redhat.com>
+
+        * gas/mep/relocs-junk1.s: Add.
+        * gas/mep/relocs-junk2.s: Add.
+        * gas/mep/relocs-syms.s: Add.
+        * gas/mep/relocs-refs.s: Add.
+        * gas/mep/relocs.d: Add.
+        * gas/mep/relocs-ok.s: Add.
+        * gas/mep/relocs-ok.d: Add.
+        * gas/mep/relocs-bad.s: Add.
+        * gas/mep/complex-relocs.exp: Add.
+
+	2002-01-10  Graydon Hoare  <graydon@redhat.com>
+
+        * gas/mep/dj1.d: Updated to match recent '0x' prefix change in
+        objdump.
+        * gas/mep/dj1.le.d: Likewise.
+        * gas/mep/dj2.d: Likewise.
+        * gas/mep/dj2.le.d: Likewise.
+        * gas/mep/allinsn.d: Likewise.
+        * gas/mep/allinsn.le.d: Likewise.
+        * gas/mep/allinsn64.d: Likewise.
+        * gas/mep/allinsn64.le.d: Likewise.
+        * gas/mep/nopinsertion64.d: Likewise.
+
+2002-02-01  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/sh/sh64/syntax-1.s: Remove `-4' from @(expr-4,pc).
+	
+2002-01-28  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gas/sh/sh64/crange1-1.d: Formatting changes to match the current
+	output of objdump.
+	* gas/sh/sh64/crange1-2.d: Likewise.
+	* gas/sh/sh64/crange2-2.d: Likewise.
+	* gas/sh/sh64/crange3-1.d: Likewise.
+	* gas/sh/sh64/crange4-1.d: Likewise.
+	* gas/sh/sh64/datal-2.d: Likewise.
+	* gas/sh/sh64/datal32-1.d: Likewise.
+	* gas/sh/sh64/datal32-3.d: Likewise.
+	* gas/sh/sh64/localcom-1.d: Likewise.
+	* gas/sh/sh64/mix-1.d: Likewise.
+	* gas/sh/sh64/pt32-1.d: Likewise.
+	* gas/sh/sh64/rel32-1.d: Likewise.
+	* gas/sh/sh64/rel32-2.d: Likewise.
+	* gas/sh/sh64/rel32-3.d: Likewise.
+	* gas/sh/sh64/rel32-4.d: Likewise.
+	* gas/sh/sh64/rel32-5.d: Likewise.
+	* gas/sh/sh64/ua32-1.d: Likewise.
+
+Mon Dec 31 07:43:30 2001  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/basic/pa20addb.s: Use wide mode for test.
+
+2001-12-14  Graydon Hoare <graydon@redhat.com>
+
+	* gas/mep/dj1.d: Updated to match recent RELC work.
+	* gas/mep/dj1.le.d: Likewise.
+
+2001-12-13  Ben Elliston  <bje@redhat.com>
+
+	* gas/mep/allinsn.d: Update for correct encoding.
+	* gas/mep/allinsn.le.d: Likewise.
+
+Fri Nov 23 09:21:51 2001  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/basic/pa20branch.s: Update to handle stricter syntax
+	checking in the assembler.
+	* gas/hppa/basic/pa20imem.s: Likewise.
+	* gas/hppa/basic/pa20fmem.s: Likewise.
+
+2001-11-15  Graydon Hoare <graydon@redhat.com>
+
+	* gas/mep/allinsn.s: Removed test for regression on case
+	106611, as case was reverted by customer.
+	* gas/mep/alllinsn.d: Likewise.
+	* gas/mep/alllinsn.le.d: Likewise.
+
+2001-11-16  John Healy  <jhealy@redhat.com>
+
+	* gas/mep/allinsn32.s: Removed tests for ldcp, stcp, mulcp, madducp.
+	* gas/mep/allinsn32.d: Removed ldcp, stcp, mulcp, madducp.
+	* gas/mep/allinsn32.le.d: Removed ldcp, stcp, mulcp, madducp.
+
+2001-11-14  Geoffrey Keating  <geoffk@redhat.com>
+
+	* gas/xstormy16/reloc-1.d: Update spacing.
+
+2001-11-14  John Healy  <jhealy@redhat.com>
+
+	* gas/mep/allinsn32.d: Fixed bit pattern for cpnop16, added tests
+	for two new insns.
+	* gas/mep/allinsn32.le.d: Ditto.
+	* gas/mep/nopinsertion32.d: Ditto.
+
+2001-11-01  graydon hoare <graydon@redhat.com>
+
+	* gas/mep/allinsn.s: Test for regression on case 106611.
+	* gas/mep/alllinsn.d: Likewise.
+	* gas/mep/alllinsn.le.d: Likewise.
+
+2001-10-11  John Healy  <jhealy@redhat.com>
+
+	* gas/mep/nopinsertion64.d: Fixed bad value for cpnop48.
+
+2001-10-05  John Healy  <jhealy@redhat.com>
+
+	* gas/mep/allinsn64.s: New file.
+	* gas/mep/allinsn64.d: New file.
+	* gas/mep/allinsn64.le.d: New file.
+	* gas/mep/nopinsertion64.s: New file.
+	* gas/mep/nopinsertion64.d: New file.
+	* gas/mep/allinsn.exp: Added entries for allinsn64 and nopinsertion64.
+
+2001-10-04  matthew green  <mrg@redhat.com>
+
+	* gas/xstormy16/allinsn.d: Update jmp, call and icall tests for the
+	modified behaviour of the Rbj operand.
+	* gas/xstormy16/allinsn.s: Likewise.
+
+2001-10-04  John Healy  <jhealy@redhat.com>
+
+	* gas/mep/allinsn.exp: Added mechanism to run nopinsertion32 test
+	in only big endian mode.  Endianness is not a factor in this test.
+	* gas/mep/allinsn32.s: New file containing assembly tests for
+	16- and 32-bit copro insns.
+        * gas/mep/allinsn32.d: New file. Expected EB results for allinsn32.
+        * gas/mep/allinsn32.el.d: New file. Expected EL results for allinsn32.
+	* gas/mep/nopinsertion32.s: New file containing tests to validate the
+	automatic insertion of nops in vliw32 mode.
+	* gas/mep/nopinsertion32.d: Expected results for nopinsertion32.
+
+2001-09-19  Ben Elliston  <bje@redhat.com>
+
+	* gas/mep/allinsn.s: Use an expression for imm5 operand of ldc.
+
+2001-09-05  Ben Elliston  <bje@redhat.com>
+
+	* gas/mep/allinsn.s: Add tests for ldc $rn, $imm5 (and stc).
+	* gas/mep/allinsn.d: Update.
+	* gas/mep/allinsn.le.d: Likewise for little endian assembly.
+
+2001-08-01  Aldy Hernandez  <aldyh@redhat.com>
+
+	* gas/mips/mips.exp: Add ilocks for 5500.
+
+2001-07-21  Geoffrey Keating  <geoffk@redhat.com>
+
+	* gas/xstormy16/gcc.s: Add testcase for a load of
+	the address of an external symbol.
+	* gas/xstormy16/gcc.d: Add testcase for a load of
+	the address of an external symbol.
+
+2001-07-19  Geoffrey Keating  <geoffk@redhat.com>
+
+	* gas/xstormy16/reloc-2.d: Correct single-byte
+	relocs for little-endianness.
+
+2001-07-19  Richard Henderson  <rth@redhat.com>
+
+	* gas/mep/allinsn.d: Adjust patterns for 64-bit host.
+	* gas/mep/allinsn.le.d, gas/mep/dj1.d, gas/mep/dj1.le.d: Likewise.
+	* gas/mep/dj2.d, gas/mep/dj2.le.d: Likewise.
+
+2001-07-04  Frank Ch. Eigler  <fche@redhat.com>
+
+	* gas/mep/allinsn.le.d, dj1.le.d, dj2.le.d: Generate -EL set.
+	* gas/mep/dj2.d: Correct #name:.
+
+2001-07-03  Geoffrey Keating  <geoffk@redhat.com>
+
+	* gas/xstormy16/allinsn.d: Correct endianness.
+	* gas/xstormy16/reloc-2.d: Correct endianness.
+	* gas/xstormy16/gcc.d: Correct endianness.
+
+2001-06-30  Geoffrey Keating  <geoffk@redhat.com>
+
+	* gas/xstormy16/allinsn.exp: Add "gcc" test.
+	* gas/xstormy16/gcc.d: New file.
+	* gas/xstormy16/gcc.s: New file.
+	* gas/xstormy16/reloc-2.d: When the add immediate instruction
+	is used with a forward reference, only the two-word version
+	will now be used.
+
+2001-06-28  Frank Ch. Eigler  <fche@redhat.com>
+
+	* gas/mep/allinsn.le.d, dj1.le.d, dj2.le.d: New failing test cases for
+	little-endian.
+	* gas/mep/allinsn.exp: Run them and weep.
+
+2001-06-20  Geoffrey Keating  <geoffk@redhat.com>
+
+	* gas/xstormy16/reloc-2.s: Also test jmpf.
+	* gas/xstormy16/reloc-2.d: Likewise.
+
+	* gas/xstormy16/reloc-1.s: New testcase.
+	* gas/xstormy16/reloc-1.d: New testcase.
+	* gas/xstormy16/reloc-2.s: New testcase.
+	* gas/xstormy16/reloc-2.d: New testcase.
+	* gas/xstormy16/allinsn.exp: Add reloc-* testcases.
+
+2001-06-18  Geoffrey Keating  <geoffk@redhat.com>
+
+	* gas/xstormy16/allinsn.sh: Add branch-relative instructions.
+	* gas/xstormy16/allinsn.s: Likewise.
+	* gas/xstormy16/allinsn.d: Likewise.  Also correct opcode bits
+	past bit 16.
+
+2001-06-13  Geoffrey Keating  <geoffk@redhat.com>
+
+	* gas/xstormy16/allinsn.d: New file.
+	* gas/xstormy16/allinsn.exp: New file.
+	* gas/xstormy16/allinsn.sh: New file.
+	* gas/xstormy16/allinsn.s: New file.
+
+2001-06-12  DJ Delorie  <dj@redhat.com>
+
+	* gas/mep/dj1.d: Update offsets for not expanding bra to jmp for
+	external symbols.
+
+2001-06-06  Ben Elliston  <bje@redhat.com>
+
+	* gas/mep/allinsn.s: Remove cp tests.
+	* gas/mep/allinsn.d: Update.
+	* gas/mep/dj1.s: Likewise, remove cp tests.
+	* gas/mep/dj1.d: Update.
+
+2001-05-14  Ben Elliston  <bje@redhat.com>
+
+	* gas/mep/allinsn.s: Fix typo for syncm case.
+	* gas/mep/allinsn.d: Ditto.
+
+2001-05-11  Frank Ch. Eigler  <fche@redhat.com>
+
+	* gas/mep/allinsn.exp: Add dj2.
+	* gas/mep/dj2.s, dj2.d: New mini tests.
+	* gas/mep/dj1.d, allinsn.d: Corrected.
+
+2001-05-11  Ben Elliston  <bje@redhat.com>
+
+	* gas/mep/allinsn.exp: Add dj1.
+	* gas/mep/dj1.s: New test case from DJ Delorie.
+	* gas/mep/dj1.d: New file.
+
+2001-05-11  Ben Elliston  <bje@redhat.com>
+
+	* gas/mep/allinsn.exp: Generate.
+	* gas/mep/allinsn.s: Ditto.
+	* gas/mep/allinsn.d: Ditto.
+
+2001-04-05  Dave Brolley  <brolley@redhat.com>
+
+	* gas/frv/allinsn.d (cmovfg): Correct expected decoded bytes.
+
+2001-03-14  DJ Delorie  <dj@redhat.com>
+
+	* gas/sh/sh64/endian-1.d: New test - Little Endianness.
+	* gas/sh/sh64/endian-1.s: New test - Little Endianness.
+	* gas/sh/sh64/endian-2.d: New test - Big Endianness.
+	* gas/sh/sh64/endian-2.s: New test - Big Endianness.
+
+2001-03-12  DJ Delorie  <dj@redhat.com>
+
+	* gas/sh/sh64/syntax-1.d: New test - basic syntax.
+	* gas/sh/sh64/syntax-1.s: New test - basic syntax.
+	* gas/sh/sh64/syntax-2.d: New test - basic syntax, pseudos.
+	* gas/sh/sh64/syntax-2.s: New test - basic syntax, pseudos.
+
+2001-03-06  DJ Delorie  <dj@redhat.com>
+
+	* gas/sh/sh64/lineno.d: New, test dwarf2 line numbers vs macros.
+	* gas/sh/sh64/lineno.s: Ditto.
+
+2001-01-14  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* gas/sh/sh64/err-dsp.s: New test.
+
+2001-01-13  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* gas/sh/sh64/err-abi-64.s, gas/sh/sh64/err-abi-32.s,
+	gas/sh/sh64/abi-64.s, gas/sh/sh64/abi-64.d, gas/sh/sh64/abi-32.s,
+	gas/sh/sh64/abi-32.d, gas/sh/sh64/crange3.s,
+	gas/sh/sh64/crange3-1.d, gas/sh/sh64/crange4.s,
+	gas/sh/sh64/crange4-1.d, gas/sh/sh64/crange5.s,
+	gas/sh/sh64/crange5-1.d: New tests.
+
+2001-01-07  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* gas/sh/sh64/relax-1.s, gas/sh/sh64/relax-1.d: New test.
+	* gas/sh/sh64/err-pt-1.s: New test.
+	* gas/sh/sh64/relax-2.s, gas/sh/sh64/relax-2.d: New test.
+	* gas/sh/sh64/localcom-1.s, gas/sh/sh64/localcom-1.d: New test.
+	* gas/sh/sh64/movi-3.s, gas/sh/sh64/movi-3.d: New test.
+	* gas/sh/sh64/relax-3.s, gas/sh/sh64/relax-3.d: New test.
+
+2001-01-05  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* gas/sh/sh64/case-noexp-1.d: Adjust to changed GAS output for
+	check-PTA/PTB / perhaps-change-to-PTB bit in target field.
+	* gas/sh/sh64/case-noexp-1.d: Ditto.
+	* gas/sh/sh64/mix-noexp-1.d: Ditto.
+	* gas/sh/sh64/pt32-noexp-2.d: Ditto.
+	* gas/sh/sh64/pt64-noexp-2.d: Ditto.
+	* gas/sh/sh64/ptc32-noexp-1.d: Ditto.
+	* gas/sh/sh64/ptc64-noexp-1.d: Ditto.
+	* gas/sh/sh64/ptext32-noexp-1.d: Ditto.
+	* gas/sh/sh64/ptext64-noexp-1.d: Ditto.
+
+2000-12-31  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* gas/sh/sh64/shift64-3.d: Fix typo.
+
+	* gas/sh/sh64/shift64-noexp-3.d, gas/sh/sh64/shift32-noexp-3.d,
+	gas/sh/sh64/ptext64-noexp-1.d, gas/sh/sh64/ptext64-32-1.d,
+	gas/sh/sh64/ptext32-noexp-1.d, gas/sh/sh64/ptc64-noexp-1.d,
+	gas/sh/sh64/ptc64-32-1.d, gas/sh/sh64/ptc32-noexp-1.d,
+	gas/sh/sh64/pt64-noexp-2.d, gas/sh/sh64/pt64-32-2.d,
+	gas/sh/sh64/pt64-32-1.d, gas/sh/sh64/pt32-noexp-2.d,
+	gas/sh/sh64/pt-noexp-1.d, gas/sh/sh64/movi64-noexp-2.d,
+	gas/sh/sh64/movi32-noexp-2.d, gas/sh/sh64/mix-noexp-1.d,
+	gas/sh/sh64/err-ptb-2.s, gas/sh/sh64/err-ptb-1.s,
+	gas/sh/sh64/err-pt32-cmd3.s, gas/sh/sh64/err-pt32-cmd2.s,
+	gas/sh/sh64/err-pt32-cmd1.s, gas/sh/sh64/err-noexp-cmd1.s,
+	gas/sh/sh64/err-movi-noexp-1.s, gas/sh/sh64/crange2.s,
+	gas/sh/sh64/crange2-noexp-1.d, gas/sh/sh64/crange2-2.d,
+	gas/sh/sh64/crange2-1.d, gas/sh/sh64/case-noexp-1.d: New tests.
+
+2000-12-18  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* gas/sh/sh64/err-4.s: Use option -no-mix to see errors.  Adjust
+	for errors not being emitted at the .mode directives anymore.
+	* gas/sh/sh64/crange1.s, gas/sh/sh64/crange1-2.d,
+	gas/sh/sh64/crange1-1.d: New tests for .cranges section.
+
+2000-12-12  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* gas/sh/sh64/err-3.s: New test.
+
+	* gas/sh/sh64/immexpr1.s, gas/sh/sh64/immexpr32-1.d,
+	gas/sh/sh64/immexpr64-1.d: New tests.
+
+	* gas/sh/sh64/immexpr2.s, gas/sh/sh64/immexpr32-2.d,
+	gas/sh/sh64/immexpr64-2.d: New tests.
+
+2000-12-11  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* gas/sh/sh64/rel-1.s, gas/sh/sh64/rel-2.s, gas/sh/sh64/rel-3.s,
+	gas/sh/sh64/rel-4.s, gas/sh/sh64/rel-5.s, gas/sh/sh64/rel32-1.d,
+	gas/sh/sh64/rel32-2.d, gas/sh/sh64/rel32-3.d,
+	gas/sh/sh64/rel32-4.d, gas/sh/sh64/rel32-5.d,
+	gas/sh/sh64/rel64-1.d, gas/sh/sh64/rel64-2.d,
+	gas/sh/sh64/rel64-3.d, gas/sh/sh64/rel64-4.d,
+	gas/sh/sh64/rel64-5.d: New tests.
+
+2000-12-07  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* gas/sh/sh64/case-1.d, gas/sh/sh64/mix-1.d, gas/sh/sh64/pt32-1.d,
+	gas/sh/sh64/pt64-1.d, gas/sh/sh64/ptc32-1.d,
+	gas/sh/sh64/ptc64-1.d, gas/sh/sh64/ptext32-1.d,
+	gas/sh/sh64/ptext64-1.d: Correct offsets in PT/PTA/PTB expansion.
+
+2000-12-05  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* gas/sh/sh64/datal-3.s, gas/sh/sh64/datal32-3.d,
+	gas/sh/sh64/datal64-3.d: New tests.
+
+2000-11-29  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* gas/sh/err.exp: New, framework for error-testing.
+	* gas/sh/err-1.s: New test.
+	* gas/sh/sh64/err-3.s: Remove obsoleted test.
+
+2000-11-27  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/arm.exp: Remove xscale sanitization.
+
+2000-11-27  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* gas/sh/sh64/datal-1.s: Remove whitespace at end of line.
+
+	* gas/sh/sh64/datal32-1.d, gas/sh/sh64/datal64-1.d,
+	gas/sh/sh64/movi32-1.d, gas/sh/sh64/movi32-2.d,
+	gas/sh/sh64/movi64-1.d, gas/sh/sh64/movi64-3.d: Correct register.
+
+	* gas/sh/sh64/mix-1.s, gas/sh/sh64/mix-1.d, gas/sh/sh64/err-4.s:
+	New tests.
+
+2000-11-26  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* gas/macros/macros.exp: Import xfail sh*-*-* from net binutils.
+
+	* gas/sh/sh64/case-1.d: Correct offsets in PT/PTA/PTB expansion.
+	gas/sh/sh64/pt32-1.d, gas/sh/sh64/pt64-1.d: Ditto.
+	gas/sh/sh64/ptc32-1.d, gas/sh/sh64/ptc64-1.d: Ditto.
+	gas/sh/sh64/ptext32-1.d, gas/sh/sh64/ptext64-1.d: Ditto.
+
+2000-11-25  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* gas/sh/sh64/err-3.s: xfail, pending sh net report and patch.
+
+	* gas/sh/sh64/ptc32-1.d, gas/sh/sh64/ptc64-1.d: Correct.
+
+	* gas/sh/sh64/datal-1.s, gas/sh/sh64/datal32-1.d,
+	gas/sh/sh64/datal64-1.d: New test.
+	* gas/sh/sh64/datal-2.s, gas/sh/sh64/datal-2.d: New test.
+
+	* gas/sh/sh64/creg-1.d, gas/sh/sh64/creg-1.s: New test.
+	* gas/sh/sh64/creg-2.d, gas/sh/sh64/creg-2.s: New test.
+
+2000-11-24  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* gas/sh/sh64: New testsuite.
+
+2000-11-10  Dave Brolley  <brolley@redhat.com>
+
+	* gas/frv/allinsn.s: Update to latest syntax.
+	* gas/frv/allinsn.d: Update to latest syntax.
+
+2000-11-09  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/xscale.s: Add test of msr CPSR_c, <immediate>
+	* gas/arm/xscale.d: Add expected result.
+
+2000-08-25  Nick Clifton  <nickc@redhat.com>
+
+	* gas/arm/xscale.d: Update register names to use standard abbreivations.
+
+2000-08-15  Eric Christopher  <echristo@cygnus.com>
+
+	* gas/mn10300/am33-2.c (d8pcsec): New Function
+	(condjmp): Adjust testcase for TC_LINKRELAX_FIXUP
+	functionality.
+	* gas/mn10300/am33-2.d: Regenerate
+
+2000-05-24  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* gas/all/test-gen.c (output_insns): Output `0*%x' to match
+	current_offset.
+	* gas/mn10300/am33-2.c (d8pcoff): Likewise.
+	* gas/mn10300/am33-2.d: Rebuilt.
+
+2000-04-09  Tim Wall  <twall@cygnus.com>
+
+        * gas/ia64/opc-m.[ds]: Fix tests failing due to new enforced
+          stops after FIRST/LAST insns.
+	* gas/ia64/dv-waw-err.s: Ditto.
+	* gas/ia64/opc-i.s: Ditto.
+	* gas/ia64/dv-srlz.d: Ditto.
+	* gas/ia64/dv-waw-err.l: Ditto.
+	* gas/ia64/dv-raw-err.l: Ditto.
+	* gas/ia64/dv-raw-err.s: Ditto.
+	* gas/ia64/dv-imply.d: Ditto.
+	* gas/ia64/dv-mutex.d: Ditto.
+
+2000-04-01  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* gas/mn10300/am33-2.c (main): Changed `.am332' to `.am33_2'.
+	Replaced `AM33 2.0' with `AM33/2.0'.
+	* gas/mn10300/am33-2.d, gas/mn10300/am33-2.s: Rebuilt.
+
+Fri Mar 31 16:04:18 2000  Jim Wilson  <wilson@cygnus.com>
+
+	* gas/ia64/opc-i.pl: Delete obsolete mov br= instructions.  Fix
+	invalid mov pr.rot= instruction.
+	* gas/ia64/opc-i.d, gas/ia64/opc-i.s: Regenerate.
+
+	* gas/ia64/opc-b.pl: Delete obsolete brp instructions.
+	* gas/ia64/opc-b.d, gas/ia64/opc-b.s: Regenerate.
+
+2000-03-31  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* gas/all/test-gen.c (last_label_offset, last_label_name): New
+	variables.
+	(comma): Make the following space optional for the disassembler.
+	(plus): New macro.
+	(lparen, rparen): Must be quoted for disassembler.
+	(random_order_3u, random_order_16s): New arrays.
+	(random_order_24s, random_order_32s): Likewise.
+	(ulen): Operate on unsinged longs.
+	(signed_constant, unsigned_constant): New functions/macros.
+	(absolute_address): Likewise.
+	(output_insns): Do not repeat insn of randomization_counter does
+	not advance.  Output the current offset relative to the last
+	label.  Accept an optional space between each byte in the insn bit
+	pattern.
+	(output_groups): Record the offset and the name of each label.
+	* gas/all/test-example.c: New file.
+	* gas/mn10300/am33-2.c: New file, that generated...
+	* gas/mn10300/am33-2.s, gas/mn10300/am33-2.d: New files.
+	* gas/mn10300/basic.exp: Test am33-2.
+
+	* gas/all/test-gen.c (output_groups): Use the right stream names.
+	Output group name to dis_out too, as a comment.
+2000-03-30  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* gas/all/test-gen.c: Infrastructure for test generators.
+
+2000-03-13  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/arm/xscale.d: Fix pld tests after fixing bug test pld
+	encoding.
+
+1999-09-02  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/vtable/vtable.exp: Add [istarget "strongarm*-*-*"] to run
+	dump  test "entry0" instead of "entry1".
+
+2000-02-15  Timothy Wall  <twall@cygnus.com>
+
+	* gas/ia64/dv-branch.[sd]: New DV clear on branch test.
+	* gas/ia64/ia64.exp: Add dv-branch test.
+
+2000-02-06  Timothy Wall  <twall@cygnus.com>
+
+	* gas/ia64/ia64.exp: Add new DV tests.
+	* gas/ia64/dv-entry-err.[sl]: New DV entry paths tests.
+	* gas/ia64/dv-imply.[sd]: New DV implies hints tests.
+	* gas/ia64/dv-mutex.[ds]: New DV mutex hints tests.
+	* gas/ia64/dv-srlz.[ds]: New Automatic insn/data serialization.
+	* gas/ia64/dv-mutex-err.[ls]: New DV detection on mutexes.
+	* gas/ia64/dv-safe.[ds]: New DV safe across calls hint.
+	* gas/ia64/dv-raw-err.[ls]: New RAW DV detection.
+	* gas/ia64/dv-waw-err.[ls]: New WAW DV detection.
+	* gas/ia64/dv-war-err.[ls]: New WAR DV detection.
+
+2000-01-05  Timothy Wall  <twall@cygnus.com>
+
+	* gas/ia64/opc-a.d: update disassembly (raw bytes unchanged) and
+	  add a stop to the end of the file.
+
+2000-01-03  Timothy Wall  <twall@cygnus.com>
+
+        * gas/tic54x/set.d: global .set symbols should not show up as labels
+        * gas/tic54x/align.d: update for no COFF section size "alignment"
+        * gas/tic54x/extaddr.d: ditto
+        * gas/tic54x/sectiosn.d: ditto
+        * gas/tic54x/opcodes.[sd]: update do to new error trapping
+        * gas/tic54x/tic54x.exp: make all-opcodes run last
+        * gas/tic54x/macro1.s,subsym1.s: NEW tests
+        * gas/tic54x/*.d, gas/tic54x/tic54x.exp: "tic54x" changed to "*c54x"
+        * gas/all/gas.exp: ditto
+        * gas/macros/macros.exp: omit some tests for c54x target
+        * gas/ieee-fp/x930509a.exp: omit test for c54x target
+        * gas/tic54x/opcodes.d: fix ld #k9,dp assembly
+        * gas/all/gas.exp: exclude struct/align/cofftag tests from
+          tic54x testing
+        * gas/tic54x/tic54x.exp: added all-opcodes tests
+        * gas/tic54x/all-opcodes*: NEW tests
+        * gas/tic54x/struct.s: .stag changed to .tag
+
+2000-01-03  Timothy Wall  <twall@cygnus.com>
+
+	* gas/ia64/ia64.exp: add test for X-unit insns
+	* gas/ia64/opc-x.[sd]: New tests
+	* gas/ia64/opc-m.d: add expected stop
+
+1999-12-02  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/arm/arm.exp: Run tests for arm and strongarm targets.
+	Add invocation of xscale instruction test.
+
+	* gas/arm/xscale.s: New File: XScale instruction test.
+	* gas/arm/xscale.d: New File: Expected results from the
+	XScale instruction test.
+
+Tue Nov 16 16:22:47 1999  Donald Lindsay  <dlindsay@hound.cygnus.com>
+
+	* gas/arm/{coyanosa.{s,d},coyanosa_bad.{s,out},
+	el_segundo.{s,d},v5_thumb.{s,d},v5_thumb_bad.{s.out}}: add rather minimal
+	test cases for new instructions.
+
+Tue Sep 14 00:48:29 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/basic/pa20.exp: Update to handle recent changes
+	in PA opcode table ordering.
+
+1999-09-13  Timothy Wall <twall@cygnus.com>
+
+	* gas/tic54x/tic54x.exp: New
+	* gas/tic54x/*.[sd]: New
+
+Sat Aug 28 01:20:18 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/basic/pa20.exp: Update due to recent PA2.0 support
+	improvements.
+	* gas/hppa/basic/pa20sub.s: Likewise.
+
+1999-08-24  Catherine Moore  <clm@cygnus.com>
+
+	* gas/frv/allinsn.exp: New.
+	* gas/frv/allinsn.s: New.
+	* gad/frv/allinsn.d: New.
+
+Fri Aug  6 09:57:10 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/basic/pa20add.s: Updates after fixes to parser.
+	* gas/hppa/basic/pa20.exp: Updates after opcode table fixes.
+
+Thu Jul  1 15:43:40 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/basic/pa20imem.s: Add some regress tests.
+	* gas/hppa/basic/pa20.exp: Test them.
+
+Mon Jun 14 19:36:15 1999  Richard Henderson  <rth@cygnus.com>
+
+	* gas/ia64/opc-f.pl: New test generator.
+	* gas/ia64/ia64.exp: Run opc-f.
+	* gas/ia64/opc-f.[sd]: Rebuild.
+
+Mon Jun 14 18:24:16 1999  Richard Henderson  <rth@cygnus.com>
+
+	* gas/ia64/opc-m.pl: New test generator.
+	* gas/ia64/ia64.exp: Run opc-m.
+	* gas/ia64/opc-m.[sd]: Rebuild.
+
+Mon Jun 14 16:40:56 1999  Richard Henderson  <rth@cygnus.com>
+
+	* gas/ia64/regs.pl: Use more caution in bundling.
+	* gas/ia64/opc-a.pl, gas/ia64/opc-i.pl: New test generators.
+	* gas/ia64/fixup-dump.pl: Build the header too.
+	* gas/ia64/{regs,opc-a,opc-i}.[ds]: Rebuild.
+	* gas/ia64/ia64.exp: Run opc-i.
+
+Thu Jun 10 18:34:42 1999  Richard Henderson  <rth@cygnus.com>
+
+	* gas/ia64/opc-b.pl: New test generator.
+	* gas/ia64/opc-b.[sd]: Build.
+	* gas/ia64/ia64.exp: Run it.
+
+Thu Jun 10 17:24:35 1999  Richard Henderson  <rth@cygnus.com>
+
+	* gas/ia64/ia64.exp (opc-d-err): Don't use -al.
+	* gas/ia64/opc-a-err.s: Add more stuff.
+
+Thu Jun 10 16:44:13 1999  Richard Henderson  <rth@cygnus.com>
+
+	* gas/ia64/opc-d.s: New test.
+	* gas/ia64/opc-d-err.s: New test.
+
+Thu Jun 10 13:53:17 1999  Richard Henderson  <rth@cygnus.com>
+
+	* gas/vtable/vtable.exp: Don't run for ia64.
+
+	* gas/ia64/ia64.exp: New file.
+	* gas/ia64/ia64.pl: New test generator.
+	* gas/ia64/ia64.[sd]: New test.
+
+Thu Apr 15 15:03:43 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/basic/pa20imem.s: New test file.
+	* gas/hppa/basic/pa20coprmem.s: New test file.
+	* gas/hppa/basic/pa20fmem.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run them.
+
+Fri Apr  9 21:05:13 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/basic/pa20sys.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+Thu Mar 25 16:19:15 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/basic/pa20mmx.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+Wed Mar 24 13:54:57 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/basic/pa20branch.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+	* gas/hppa/basic/pa20cmpib.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+	* gas/hppa/basic/pa20cmpb.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+Tue Mar 23 19:54:30 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/basic/pa20bb.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+	* gas/hppa/basic/pa20depd.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+	* gas/hppa/basic/pa20depw.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+Mon Mar 22 12:07:19 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/basic/pa20extrd.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+	* gas/hppa/basic/pa20extrw.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+	* gas/hppa/basic/pa20shladd.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+	* gas/hppa/basic/pa20shrpd.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+	* gas/hppa/basic/pa20shrpw.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+Fri Mar 19 10:06:13 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/basic/pa20subi.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+	* gas/hppa/basic/pa20sub.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+	* gas/hppa/basic/pa20unit.s: Add "uaddcm" tests
+	* gas/hppa/basic/pa20.exp: Corresponding changes.
+
+Thu Mar 18 10:43:22 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/basic/pa20unit.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+	* gas/hppa/basic/pa20cmpclr.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+	* gas/hppa/basic/pa20logical.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+	* gas/hppa/basic/pa20add.s: Add "addi" tests.
+	* gas/hppa/basic/pa20.exp: Corresponding changes.
+
+	* gas/hppa/basic/pa20addb.s: New test file.
+	* gas/hppa/basic/pa20.exp: Run it.
+
+Thu Mar 18 01:59:03 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/hppa/basic/pa20.exp: New test driver.
+	* gas/hppa/basic/pa20add.s: New test file.
+	* gas/hppa/basic/pa20fp.s: New test file.
+	* gas/hppa/basic/pa20misc.s: New test file.
+
+Fri Feb  5 19:53:52 1999  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/m32r/relax-2.[sd]: New testcase.
+	* gas/m32r/m32rx.exp: Run it.
+
+Thu Feb  4 14:13:32 1999  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/m32r/outofrange.s: New testcase.
+	* gas/m32r/error.exp: Run it.
+
+1999-01-06  Doug Evans  <devans@casey.cygnus.com>
+
+	* gas/m32r/interfere.s: New testcase.
+	* gas/m32r/error.exp: Run it.
+
+Tue Jul 28 10:11:22 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/m32r/m32rx.s: Test new insns.
+	* gas/m32r/m32rx.d: Ditto.
+
+Wed May 13 15:06:31 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* gas/m32r/m32rx.d: Pass --enable-special to gas.
+
+Thu Apr  2 16:49:29 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/m32rx.d: Fix SATB and SAT bit patterns.
+	* gas/m32r/allinsn.d: Fix expected result for CMPUI insn.
+
+Wed Apr  1 14:59:29 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/m32rx.d: Fix SATB bit pattern.
+
+Sun Mar 29 13:05:41 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/m32rx.d: Fix expected results for parallel lock.
+
+Mon Mar 23 11:34:00 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/m32rx.d: Fix sath bit pattern (PR15418).
+
+Mon Feb 23 10:31:05 1998  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mips/vr5400.s: Use absolute expression for performance
+	register number.
+	* gas/mips/vr5400.d: Corresponding changes.
+
+Thu Feb 19 10:35:48 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/m32rx.s (mvtc__subv): Avoid register conflict.
+
+	* gas/m32r/m32rx.d: Updated to match latest assembler output.
+
+Fri Feb 13 14:44:32 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/m32rx.s (rte__subx): Do not perform RTE and SUBX in
+	parallel since they both write to the C bit.
+
+Mon Feb  9 17:19:05 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/m32rx.s: Add tests for DIVH and new versions of RAC and
+	RACH instructions.  Rename MACHL1 ro MACLH1.
+
+Fri Jan 23 10:30:29 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/m32rx.s: Use 'label' as desitnation of branches.
+	* gas/m32r/m32rx.d: Update to match latest disassembly.
+
+Thu Jan 22 17:29:07 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/m32rx.s: Add tests for automatic parallelisation.
+	* gas/m32r/m32rx.d: Add results of automatic parallelisation.
+	* gas/m32r/relax-1.d: Add results of automatic parallelisation.
+	* gas/m32r/uppercase.d: Add results of automatic parallelisation.
+
+Thu Dec 18 11:10:42 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* gas/m32r/m32rx.d: New file.
+	* gas/m32r/m32rx.s: New file.
+	* gas/m32r/m32rx.exp: New file.
+
+Mon Dec 15 10:34:15 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mips/vr5400.s: Tweak mfpc, mtpc, mfps, mfps, and mtps for
+	better testing coverage.
+	* gas/mips/vr5400.d: Corresponding changes.
+
+Tue Dec  9 13:19:58 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* gas/mips/vr5400.d: Minor tweaks for more accurate matching.
+
+Fri Nov  7 21:32:01 1997  Ken Raeburn  <raeburn@cygnus.com>
+
+	* gas/mips/vr5400.s, gas/mips/vr5400.d: New test, for
+	VR5400-specific instructions.
+	* gas/mips/mips.exp: Run it.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

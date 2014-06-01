@@ -1,0 +1,17 @@
+/Makefile.am/1.6/Sun Jun 24 21:49:09 2007//Tmsp430-130322-branch
+/Makefile.in/1.21/Sun Mar 17 22:15:05 2013//Tmsp430-130322-branch
+/aclocal.m4/1.37/Sun Mar 17 22:15:05 2013//Tmsp430-130322-branch
+/configure/1.42/Sun Mar 17 22:15:05 2013//Tmsp430-130322-branch
+/configure.in/1.4/Sun Jun 18 17:06:44 2006//Tmsp430-130322-branch
+/memchr.c/1.3/Sat Apr 20 00:40:56 2002//Tmsp430-130322-branch
+/memcmp.c/1.6/Fri Sep  5 18:10:52 2003//Tmsp430-130322-branch
+/memcpy.c/1.3/Sat Apr 20 00:40:56 2002//Tmsp430-130322-branch
+/memmove.c/1.3/Sat Apr 20 00:40:56 2002//Tmsp430-130322-branch
+/memset.c/1.4/Sat Apr 20 00:40:56 2002//Tmsp430-130322-branch
+/setjmp.S/1.1/Fri Jun  3 07:41:15 2005//Tmsp430-130322-branch
+/strchr.c/1.4/Sat Apr 20 00:40:56 2002//Tmsp430-130322-branch
+/strcmp.c/1.3/Sat Apr 20 00:40:56 2002//Tmsp430-130322-branch
+/strcpy.c/1.3/Sat Apr 20 00:40:56 2002//Tmsp430-130322-branch
+/strlen.c/1.3/Sat Apr 20 00:40:56 2002//Tmsp430-130322-branch
+/xscale.h/1.2/Thu Sep  7 18:07:14 2000//Tmsp430-130322-branch
+D/machine////

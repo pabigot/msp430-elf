@@ -1,0 +1,33 @@
+2011-05-16  Kevin Buettner  <kevinb@redhat.com
+
+	* sim-if.c (sim_hardware_watchpoint): New function.
+
+1999-02-12  Doug Evans  <devans@casey.cygnus.com>
+
+	* Makefile.in (stamp-arch,stamp-cpu): CGEN_MAIN_SCM renamed to
+	CGEN_READ_SCM.
+
+1999-02-09  Doug Evans  <devans@casey.cygnus.com>
+
+	* Makefile.in (stamp-arch,stamp-cpu): Update FLAGS variable,
+ 	option syntax changed.
+	(stamp-desc): New rule.
+	
+1999-01-14  Doug Evans  <devans@casey.cygnus.com>
+
+	* Makefile.in (stamp-arch): Pass FLAGS to cgen.
+
+Mon Dec 14 22:33:38 1998  Jim Wilson  <wilson@cygnus.com>
+
+	* Makefile.in (i960-clean): Delete stamp-decode.
+	(stamp-cpu): Add in decode support.
+	(decode.c, decode.h): Depend on stamp-cpu instead of stamp-decode.
+	(stamp-decode): Delete.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+End:

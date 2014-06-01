@@ -1,0 +1,17 @@
+/close.c/1.2/Tue Feb  1 18:50:36 2000//Tmsp430-130322-branch
+/exit.c/1.3/Tue Feb  1 18:51:07 2000//Tmsp430-130322-branch
+/fstat.c/1.2/Tue Feb  1 18:51:27 2000//Tmsp430-130322-branch
+/getpid.c/1.3/Tue Sep 19 18:47:13 2000//Tmsp430-130322-branch
+/gettimeofday.c/1.2/Tue Sep 19 18:47:13 2000//Tmsp430-130322-branch
+/isatty.c/1.2/Tue Sep 19 18:47:13 2000//Tmsp430-130322-branch
+/kill.c/1.3/Tue Sep 19 18:47:13 2000//Tmsp430-130322-branch
+/lseek.c/1.3/Tue Sep 19 18:47:13 2000//Tmsp430-130322-branch
+/open.c/1.3/Tue Sep 19 18:47:13 2000//Tmsp430-130322-branch
+/print.c/1.2/Tue Sep 19 18:47:13 2000//Tmsp430-130322-branch
+/raise.c/1.2/Tue Sep 19 18:47:13 2000//Tmsp430-130322-branch
+/read.c/1.3/Tue Sep 19 18:47:13 2000//Tmsp430-130322-branch
+/sbrk.c/1.3/Tue Sep 19 18:47:13 2000//Tmsp430-130322-branch
+/times.c/1.2/Tue Apr  4 15:37:57 2000//Tmsp430-130322-branch
+/unlink.c/1.2/Tue Sep 19 18:47:13 2000//Tmsp430-130322-branch
+/write.c/1.5/Tue Sep 19 18:47:13 2000//Tmsp430-130322-branch
+D

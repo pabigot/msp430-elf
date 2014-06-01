@@ -1,0 +1,23 @@
+# m32r testcase for maclh1 $src1,$src2
+# mach(): m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global maclh1
+maclh1:
+
+	mvi_h_gr r4,0x007fedcb
+	mvi_h_gr r5,0x86543210
+	mvi_h_gr r6,0x80007fff
+	mvi_h_gr r7,0x7fff8000
+
+        mvtachi r4,a1
+        mvtaclo r5,a1
+
+        maclh1  r7,r6
+
+	test_h_accum1 0xff802dcb, 0x86543210
+
+	pass

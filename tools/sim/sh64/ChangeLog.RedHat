@@ -1,0 +1,55 @@
+2006-05-16  Dave Brolley  <brolley@redhat.com>
+
+	* arch.c: Regenerated.
+	* arch.h: Likewise.
+	* cpu.c: Likewise.
+	* cpu.h: Likewise.
+	* cpuall.h: Likewise.
+	* decode-compact.c: Likewise.
+	* decode-compact.h: Likewise.
+	* decode-media.c: Likewise.
+	* decode-media.h: Likewise.
+	* defs-compact.h: Likewise.
+	* defs-media.h: Likewise.
+	* sem-compact-switch.c: Likewise.
+	* sem-compact.c: Likewise.
+	* sem-media-switch.c: Likewise.
+	* sem-media.c: Likewise.
+	* sh-desc.c: Likewise.
+	* sh-desc.h: Likewise.
+	* sh-opc.h: Likewise.
+
+2003-11-30  Fred Fish  <fnf@redhat.com>
+
+	* sim-if.c (sim_open): Use "struct bfd" instead of "struct _bfd".
+	(sim_create_inferior): Ditto.
+
+2002-09-05  Dave Brolley  <brolley@redhat.com>
+
+	* arch.c: Regenerated.
+	* arch.h: Ditto.
+	* cpu.c: Ditto.
+	* cpu.h: Ditto.
+	* cpuall.h: Ditto.
+	* decode-compact.c: Ditto.
+	* decode-compact.h: Ditto.
+	* decode-media.c: Ditto.
+	* decode-media.h: Ditto.
+	* defs-compact.h: Ditto.
+	* defs-media.h: Ditto.
+	* sem-compact-switch.c: Ditto.
+	* sem-compact.c: Ditto.
+	* sem-media-switch.c: Ditto.
+	* sem-media.c: Ditto.
+
+2002-06-24  Richard Sandiford  <rsandifo@redhat.com>
+
+	* sh64.c: Update path of "callback.h".
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+End:

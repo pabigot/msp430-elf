@@ -1,0 +1,2 @@
+/* 20-bit address */
+PARTIAL_INT_MODE (SI);

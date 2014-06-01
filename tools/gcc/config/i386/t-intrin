@@ -1,0 +1,4 @@
+
+EXTRA_HEADERS = $(srcdir)/config/i386/xmmintrin.h \
+		$(srcdir)/config/i386/mmintrin.h \
+		$(srcdir)/config/i386/xmm_utils.h

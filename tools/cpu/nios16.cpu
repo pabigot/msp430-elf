@@ -1,0 +1,342 @@
+; Altera NIOS 16-bit CPU description.  -*- Scheme -*-
+; Copyright (C) 2000, 2001 Red Hat, Inc.
+; This file is part of CGEN.
+; See file COPYING.CGEN for details.
+
+(define-hardware
+  (name h-m16-gr);
+  (comment "nios-16 general registers")
+  (attrs VIRTUAL (MACH16))
+  (type register HI (32))
+  (indices extern-keyword gr-names);
+  (get (index) (c-call HI "GET_H_GR_RAW" index))
+  (set (index newval) (c-call VOID "SET_H_GR_RAW" index newval))
+)
+
+; r0 which is required by some instructions
+(define-hardware
+  (name h-m16-gr0);
+  (comment "nios-16 register 0")
+  (attrs VIRTUAL (MACH16))
+  (type register HI)
+  (indices keyword "" ((%r0 0))); %r0 only
+  (get () (c-call HI "GET_H_GR_RAW" 0))
+  (set (newval) (c-call VOID "SET_H_GR_RAW" 0 newval))
+)
+
+; Rp which is restricted to certain possible values
+(define-hardware
+  (name h-m16-bp);
+  (comment "nios-16 base pointer registers")
+  (attrs VIRTUAL (MACH16))
+  (type register HI (4))
+  (indices extern-keyword bp-names)
+  (get (index) (c-call HI "GET_H_GR_RAW" (add index 16)))
+  (set (index newval) (c-call VOID "SET_H_GR_RAW" (add index 16) newval))
+)
+
+; Rz which is restricted to certain possible values
+(define-hardware
+  (name h-m16-rz);
+  (comment "nios-16 Rz registers")
+  (attrs VIRTUAL (MACH16))
+  (type register HI (4))
+  (indices extern-keyword gr-names)
+  (get (index) (c-call HI "GET_H_GR_RAW" index))
+  (set (index newval) (c-call VOID "SET_H_GR_RAW" index newval))
+)
+
+; sp which is required by some instructions
+(define-hardware
+  (name h-m16-sp);
+  (comment "nios-16 sp register")
+  (attrs VIRTUAL (MACH16))
+  (type register HI)
+  (indices keyword "" ((%sp 0))); %sp only
+  (get () (c-call HI "GET_H_GR_RAW" 14))
+  (set (newval) (c-call VOID "SET_H_GR_RAW" 14 newval))
+)
+
+(define-hardware
+  (name h-m16-ctl);
+  (comment "nios-16 control registers")
+  (attrs VIRTUAL (MACH16))
+  (type register UHI (6))
+  (indices extern-keyword ctl-names);
+  (get (index) (c-call HI "GET_H_CTL_RAW" index))
+  (set (index newval) (c-call VOID "SET_H_CTL_RAW" index newval))
+)
+
+; Operands
+
+(dnop m16_Ra      "source register a"         ((MACH16)) h-m16-gr  f-Ra)
+(dnop m16_Rb      "source register b"         ((MACH16)) h-m16-gr  f-Rb)
+(dnop m16_R0      "source register 0"         ((MACH16)) h-m16-gr0 f-nil)
+(dnop m16_sp      "stack pointer"             ((MACH16)) h-m16-sp  f-nil)
+(dnop m16_Rp      "base pointer register"     ((MACH16)) h-m16-bp  f-Rp)
+(dnop m16_Rz      "ctl target register"       ((MACH16)) h-m16-rz  f-Rz)
+(dnop m16_i6      "6-bit half-word pc rel"    ((MACH16)) h-iaddr   f-i6-rel-h)
+(dnop m16_i8v     "8-bit half-word pc rel"    ((MACH16)) h-iaddr   f-i8v-rel-h)
+
+(define-pmacro (m16-gr x) (.sym m16_ x))
+
+; ext8s
+(dni (ext8s16)
+     (.str "ext8s reg/imm1")
+     ((MACH16))
+     (.str "ext8s $m16_Ra,$i1")
+     (+ OP_EXT8s m16_Ra i1)
+     (sequence ((HI tmp))
+	       (set pbit (const 0))
+	       (set tmp (and HI (srl HI m16_Ra (sll i1 (const 3))) (const #xff)))
+	       (set m16_Ra tmp))
+     ()
+)
+
+; st8s
+(dni (st8s16)
+     (.str "st8s reg/r0/i1")
+     ((MACH16) PREFIXED-INSN)
+     (.str "st8s [$m16_Ra],$m16_R0,$i1")
+     (+ OP_ST8s m16_Ra i1)
+     (sequence ((QI tmp) (HI K1) (HI ea_word))
+	       (if (eq pbit (const 1))
+		   (set K1 (or HI i1 (sra HI K (const 4))))
+		   (set K1 i1))
+	       (set pbit (const 0))
+	       (set tmp (trunc QI (srl HI m16_R0 (sll i1 (const 3)))))
+	       (set ea_word (sll HI (srl HI m16_Ra (const 1)) (const 1)))
+	       (set (mem QI (zext SI (add HI ea_word K1))) tmp))
+     ()
+)
+
+; sts8s
+(dni (sts8s16)
+     (.str "sts8s [sp, imm],reg")
+     ((MACH16))
+     (.str "sts8s [$m16_sp,$i10],$m16_R0")
+     (+ OP_STS8s i10)
+     (sequence ((SI tmp) (HI tmp2) (HI ea_word))
+	       (set pbit (const 0))
+	       (set tmp (and (zext SI i10) (const #x1)))
+	       (set tmp2 (srl HI m16_R0 (sll tmp (const 3))))
+	       (set ea_word (and HI (const #xfffe) (add HI m16_sp i10)))
+	       (set (mem UQI (zext SI (add HI ea_word tmp))) (trunc UQI tmp2)))
+     ()
+)
+
+; st8d
+(dni (st8d16)
+     (.str "st8d reg/r0")
+     ((MACH16))
+     (.str "st8d [$m16_Ra],$m16_R0")
+     (+ OP_ST8d m16_Ra)
+     (sequence ((QI tmp) (HI Ktmp))
+	       (if (ne pbit (const 0))
+		   (set Ktmp (sra HI K (const 4)))
+		   (set Ktmp (const 0)))
+	       (set pbit (const 0))
+	       (set tmp (trunc QI (srl HI m16_R0 (zext SI (sll (and HI m16_Ra (const 1)) (const 3))))))
+	       (set (mem QI (zext SI (add HI m16_Ra Ktmp))) tmp))
+     ()
+)
+
+; wrctl
+(dni (wrctl16)
+     (.str "wrctl reg")
+     ((MACH16) COND-CTI DELAY-SLOT)
+     (.str "wrctl $m16_Ra")
+     (+ OP_WRCTL m16_Ra)
+     (sequence ((SI tmp))
+	       (if (eq pbit (const 0))
+		   (set HI K (const 0)))
+	       (set pbit (const 0))
+	       (if (eq HI K (const 0))
+		   (set wbit (const 1)))
+	       (set tmp (zext SI (srl K (const 5))))
+	       (set (reg HI h-m16-ctl tmp) m16_Ra))
+     ()
+)
+
+; addc
+(dni (addc16)
+     (.str "addc16 reg/reg")
+     ((MACH16))
+     (.str "addc $m16_Ra,$m16_Rb")
+     (+ OP_ADDC m16_Ra m16_Rb)
+     (sequence ((BI old_cbit))
+	       (set pbit (const 0))
+	       (set old_cbit cbit)
+	       (set vbit (add-oflag HI m16_Ra m16_Rb cbit))
+	       (set cbit (add-cflag HI m16_Ra m16_Rb cbit))
+	       (set m16_Ra (addc HI m16_Ra m16_Rb old_cbit))
+	       (set-z-and-n m16_Ra HI))
+     ()
+)
+
+; subc
+(dni (subc16)
+     (.str "subc16 reg/reg")
+     ((MACH16))
+     (.str "subc $m16_Ra,$m16_Rb")
+     (+ OP_SUBC m16_Ra m16_Rb)
+     (sequence ((BI old_cbit))
+	       (set pbit (const 0))
+	       (set old_cbit cbit)
+	       (set vbit (sub-oflag HI m16_Ra m16_Rb cbit))
+	       (set cbit (sub-cflag HI m16_Ra m16_Rb cbit))
+	       (set m16_Ra (subc HI m16_Ra m16_Rb old_cbit))
+	       (set-z-and-n m16_Ra HI))
+     ()
+)
+
+; add / sub
+(define-pmacro (arithmetic-op16 name insn comment opc op arg1 arg2)
+  (arithmetic-op-com name 16 HI (MACH16) insn comment opc op (m16-gr arg1) (m16-gr arg2)))
+
+(arithmetic-op16   add   add   "reg/reg"   OP_ADD add Ra Rb)
+(arithmetic-op16   sub   sub   "reg/reg"   OP_SUB sub Ra Rb)
+
+; addi / subi
+(define-pmacro (arithmetic-imm-op16 name insn comment opc op arg1 arg2)
+  (arithmetic-imm-op-com name 16 HI (MACH16) insn comment opc op (m16-gr arg1) arg2))
+
+(arithmetic-imm-op16 addi addi "reg/imm"       OP_ADDI add Ra i5)
+(arithmetic-imm-op16 subi subi "reg/imm"       OP_SUBI sub Ra i5)
+
+; or / xor / and
+(define-pmacro (logical-dual-op16 name insn comment opc op arg1)
+  (logical-dual-op-com name 16 HI (MACH16) insn comment opc op (m16-gr arg1) h-m16-gr))
+
+(logical-dual-op16 or  or   "reg/{imm | reg}"       OP_OR  or  Ra)
+(logical-dual-op16 xor xor  "reg/{imm | reg}"       OP_XOR xor Ra)
+(logical-dual-op16 and and  "reg/{imm | reg}"       OP_AND and Ra)
+
+; andn
+(andn-com  16  HI   (MACH16)  m16_Ra   h-m16-gr)
+
+; lsl / lsr / asr
+(define-pmacro (shift-op16 name insn comment opc op arg1 arg2)
+  (shift-op-com name 16 UHI (MACH16) insn comment opc op (m16-gr arg1) (m16-gr arg2)))
+
+(shift-op16   lsl   lsl   "reg/reg"   OP_LSL  sll Ra Rb)
+(shift-op16   lsr   lsr   "reg/reg"   OP_LSR  srl Ra Rb)
+(shift-op16   asr   asr   "reg/reg"   OP_ASR  sra Ra Rb)
+
+(define-pmacro (shift-imm-op16 name insn comment opc op arg1)
+  (shift-op-com name 16 UHI (MACH16) insn comment opc op (m16-gr arg1) i5))
+
+(shift-imm-op16   lsli  lsli  "reg/imm"   OP_LSLI sll Ra)
+(shift-imm-op16   lsri  lsri  "reg/imm"   OP_LSRI srl Ra)
+(shift-imm-op16   asri  asri  "reg/imm"   OP_ASRI sra Ra)
+
+(define-pmacro (monadic-op16 name insn comment opc op arg1)
+  (monadic-op-com name 16 UHI (MACH16) insn comment opc op (m16-gr arg1)))
+
+; not / neg / abs
+(monadic-op16     not   not   "reg"       OP_NOT  inv Ra)
+(monadic-op16     neg   neg   "reg"       OP_NEG  neg Ra)
+(monadic-op16     abs   abs   "reg"       OP_ABS  abs Ra)
+
+
+; mov / movi
+(mov-com  16 HI (MACH16) m16_Ra m16_Rb)
+(movi-com 16 HI (MACH16) m16_Ra)
+
+; bgen
+(bgen-com 16 HI (MACH16) m16_Ra)
+
+; cmp / cmpi
+(cmp-com 16 HI (MACH16) m16_Ra m16_Rb)
+(cmpi-com 16 HI (MACH16) m16_Ra)
+
+; ldc
+(ldc-com 16 HI (MACH16) m16_Ra m16_i6)
+
+; ext8d
+(ext8d-com 16 HI (MACH16) m16_Ra m16_Rb)
+
+; sext8
+(sext8-com 16 HI (MACH16) m16_Ra)
+
+; fill8
+(fill8-com 16 HI (MACH16) m16_R0 m16_Ra)
+
+; lds / sts
+(lds-com 16 HI (MACH16) m16_Ra m16_sp)
+(sts-com 16 HI (MACH16) m16_Ra m16_sp)
+
+; ldp / stp
+(ldp-com 16 HI (MACH16) m16_Ra m16_Rp)
+(stp-com 16 HI (MACH16) m16_Ra m16_Rp)
+
+; ld / st
+(ld-com 16 HI (MACH16) m16_Ra m16_Rb)
+(st-com 16 HI (MACH16) m16_Ra m16_Rb)
+
+; trap
+(trap-com 16 HI (MACH16))
+
+; tret
+(tret-com 16 HI (MACH16) m16_Ra)
+
+; save
+(save-com 16 HI (MACH16) m16_sp)
+
+; restore
+(restore-com 16 HI (MACH16) xRa)
+
+;  bsr
+(bsr-com  16 HI (MACH16) (reg h-m16-gr 15))
+(bsrr-com 16 HI (MACH16) (reg h-m16-gr 15) m16_Ra)
+
+;  jmp / call
+(jmp-com  16 HI (MACH16) m16_Ra)
+(call-com 16 HI (MACH16) m16_Ra (reg h-m16-gr 15))
+
+;  jmpc / callc
+(jmpc-com  16 HI (MACH16) m16_i8v)
+(callc-com 16 HI (MACH16) m16_i8v (reg h-m16-gr 15))
+
+; skp0 / skp1 / skprz / skps
+(skpx-com  skp0   skp0   16 HI (MACH16) m16_Ra OP_SKP0   eq)
+(skpx-com  skp1   skp1   16 HI (MACH16) m16_Ra OP_SKP1   ne) 
+(skprx-com skprz  skprz  16 HI (MACH16) m16_Ra OP_SKPRz  eq) 
+(skprx-com skprnz skprnz 16 HI (MACH16) m16_Ra OP_SKPRnz ne) 
+(skps-com                16 HI (MACH16))
+
+; if0 / if1 / ifrnz / ifrz / ifs
+(ifx-com  16 if0   (MACH16) m16_Ra skp1)
+(ifx-com  16 if1   (MACH16) m16_Ra skp0)
+(ifrx-com 16 ifrz  (MACH16) m16_Ra skprnz)
+(ifrx-com 16 ifrnz (MACH16) m16_Ra skprz)
+(ifs-com  16       (MACH16))
+
+; rrc / rlc
+(rrc-com 16 HI (MACH16) m16_Ra)
+(rlc-com 16 HI (MACH16) m16_Ra)
+
+; nop
+(nop-com 16 (MACH16) m16_Ra m16_Rb)
+
+; inc / dec
+(counter-com 16 inc (MACH16) m16_Ra addi)
+(counter-com 16 dec (MACH16) m16_Ra subi)
+
+; clr
+(clr-com 16 (MACH16) m16_Ra)
+
+; ret / lret
+(ret-com 16 (MACH16) m16_Ra)
+(lret-com 16 (MACH16) m16_Ra)
+
+; rdctl
+(rdctl-com 16 HI (MACH16) m16_Ra h-m16-ctl)
+
+; New instructions added at request of Altera.
+(dni (usr0_16) (.str "usr0") ((MACH16)) (.str "usr0 $m16_Ra,$m16_Rb") (+ OP_USR0 m16_Ra m16_Rb) (nop) ())
+(dni (usr1_16) (.str "usr1") ((MACH16)) (.str "usr1 $m16_Ra") (+ OP_USR1 m16_Ra) (nop) ())
+(dni (usr2_16) (.str "usr2") ((MACH16)) (.str "usr2 $m16_Ra") (+ OP_USR2 m16_Ra) (nop) ())
+(dni (usr3_16) (.str "usr3") ((MACH16)) (.str "usr3 $m16_Ra") (+ OP_USR3 m16_Ra) (nop) ())
+(dni (usr4_16) (.str "usr4") ((MACH16)) (.str "usr4 $m16_Ra") (+ OP_USR4 m16_Ra) (nop) ())
+

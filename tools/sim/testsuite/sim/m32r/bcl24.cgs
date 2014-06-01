@@ -1,0 +1,23 @@
+# m32rx testcase for bcl $disp24
+# mach(): m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global bcl24
+bcl24:
+
+	mvi_h_condbit 1
+	bcl.l test0pass
+test1fail:
+	fail
+
+test0pass:
+	mvi_h_condbit 0
+	bcl.l test1fail
+
+	mvaddr_h_gr r4, test1fail
+	bne  r4, r14, test1fail
+
+	pass

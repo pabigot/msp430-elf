@@ -1,0 +1,36 @@
+# m32r testcase for pcmpbz $src2
+# mach(): m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global pcmpbz
+pcmpbz:
+
+	mvi_h_condbit 1
+	mvi_h_gr r4, 0xffffffff
+	pcmpbz r4
+	test_h_condbit 0
+
+	mvi_h_condbit 0
+	mvi_h_gr r4, 0x00ffffff
+	pcmpbz r4
+	test_h_condbit 1
+
+	mvi_h_condbit 0
+	mvi_h_gr r4, 0xff00ffff
+	pcmpbz r4
+	test_h_condbit 1
+
+	mvi_h_condbit 0
+	mvi_h_gr r4, 0xffff00ff
+	pcmpbz r4
+	test_h_condbit 1
+
+	mvi_h_condbit 0
+	mvi_h_gr r4, 0xffffff00
+	pcmpbz r4
+	test_h_condbit 1
+
+	pass

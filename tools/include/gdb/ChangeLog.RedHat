@@ -1,0 +1,31 @@
+2008-08-26  Nick Clifton  <nickc@redhat.com>
+
+	* remote-sim.h (sim_target_display_usage): Update prototype.
+
+2008-05-02  DJ Delorie  <dj@redhat.com>
+
+	* sim-rx.h (sim_rx_regnum): Remove vct register, add fintv.
+
+2008-04-11  Kevin Buettner  <kevinb@redhat.com>
+
+	* sim-rx.h (sim_rx_num_regs): New constant.
+
+2008-04-10  Kevin Buettner  <kevinb@redhat.com>
+
+	* sim-rx.h: New file.
+
+2005-02-22  Jim Blandy  <jimb@redhat.com>
+
+	* sim-m32c.h: New file.
+
+2002-04-18  Andrew Cagney  <cagney@redhat.com>
+
+	* sim-arm.h: New file
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

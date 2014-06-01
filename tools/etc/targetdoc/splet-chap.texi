@@ -1,0 +1,240 @@
+@c                                                  -*-Texinfo-*-
+@c Contents of SPARClet datasheet or chapter.  For use as a chapter,
+@c surround inclusion of this file with `@lowersections' and `@raisesections'.
+
+@setfilename sparclite.info
+@settitle Programming the Matra SPARClet
+
+The Cygnus Developer's Kit supports the @w{SPARClet} family as a
+variant of the support for SPARC.
+
+@menu
+* SPLETNames::	What the tools are called for SPARClet.
+* SPLETGCC::	Compiling for the SPARClet.
+* SPLETGAS::	Assembling SPARClet code.
+* SPLETGDB::	Remote SPARClet debugging with GDB.
+* SPLETRefs::	SPARClet documentation
+@end menu
+
+@node SPLETNames
+@chapter What the tools are called for SPARClet
+
+Cross-development tools in the Cygnus Developer's Kit are normally
+installed with names that reflect the target machine, so that you can
+install more than one set of tools in the same binary directory.
+
+The names are constructed by using as a prefix the @samp{--target}
+argument to @code{configure}.  For example, the compiler (called
+simply @code{gcc} in native configurations) is called by one of these
+names for @w{SPARClet} cross-development, depending on which
+configuration you have installed:
+
+@example
+@exdent @emph{Available as preconfigured binaries from Cygnus:}
+sparclet-aout-gcc
+@end example
+
+@xref{SPLETGCC Configuration,,Setting up GCC for the @w{SPARClet}}, for
+explanations of the alternative @w{SPARClet} configurations.
+
+@node SPLETGCC
+@chapter Compiling for the SPARClet
+
+When you @emph{run} GCC, you can use command-line options to choose
+whether to take advantage of the extra SPARClet features,
+whether to use the normal register window model or a flat window model,
+and various other options GCC supports.  For a complete list of GCC options
+see @ref{Using GNU CC,, Using GNU CC, gcc.info, Using GNU CC}.
+
+@menu
+* SPLETGCC Configuration::	Setting up GCC for the SPARClet.
+* SPLETArchitecture::	        SPARC options for architecture/code generation.
+@end menu
+
+@node SPLETGCC Configuration
+@section Setting up GCC for the @w{SPARClet}
+
+Configure CDK for the @w{@code{SPARClet}} with
+@samp{--target=sparclet-aout}.
+
+One can also configure CDK for standard @sc{sparc} chips
+without the additional @w{@code{SPARClet}} instructions
+with @samp{--target=sparc-aout} or @samp{--target=sparc-coff}.
+The @samp{coff} file format is not supported in @w{@code{SPARClet}}
+configurations.
+
+@node SPLETArchitecture
+@section SPARC options for architecture and code generation
+
+Some special compiler command-line options are available for
+@w{SPARClet}; in addition, the machine-dependent options already
+present for SPARC in general continue to be available.  Both kinds of
+options are described in @ref{SPARC Options,, SPARC Options, gcc.info,
+Using GNU CC}.
+
+@table @code
+@item -mcpu=sparclet
+The SPARC configurations of GCC generate code for the common subset of
+the instruction set: the v7 variant of the SPARC architecture.
+
+@samp{-mcpu=sparclet} (which is on automatically for any of the
+@w{SPARClet} configurations) gives you @w{SPARClet} code.  This adds the
+additional instructions available on the @w{SPARClet} but not in SPARC v7.
+
+@item -mcpu=v7
+Generate code for the v7 variant of the SPARC architecture.
+
+@item -mcpu=v8
+@samp{-mcpu=v8} gives you SPARC v8 code.  The only difference from v7 code
+is that the compiler emits the integer multiply (@code{smul} and
+@code{umul}) and integer divide (@code{sdiv} and @code{udiv})
+instructions which exist in SPARC v8 but not in SPARC v7.
+@end table
+
+The following command line options are available for both @w{SPARClet} and
+other SPARC configurations of the compiler.  @xref{SPARC Options,, SPARC
+Options, gcc.info, Using GNU CC}.
+
+@table @code
+@item -mflat
+Does not use register windows in function calls.
+Code generated with @samp{-mflat} is compatible with the normal
+register window calling convention.
+@end table
+
+The following command line options are available for @w{SPARClet}
+configurations only.
+
+@table @code
+@item -mbig-endian
+@itemx -mlittle-endian
+Generate code for big endian or little endian mode.
+Big endian is the default.
+
+@item -mno-live-g0
+@itemx -mlive-g0
+@samp{-mno-live-g0}, the default, treats register @samp{g0} as always
+having value 0.  @samp{-mlive-g0} treats @samp{g0} as a normal register.
+
+@item -mno-broken-saverestore
+@item -mbroken-saverestore
+Early versions of the @w{SPARClet} chip has broken @code{save} and
+@code{restore} instructions, they only handled @code{save %g0,%g0,%g0}
+and @code{restore %g0,%g0,%g0}.  @samp{-mbroken-saverestore} the compiler
+will generate these and assume the operating environment will properly
+handle interrupts and window overflow/underflow conditions.
+@end table
+
+@node SPLETGAS
+@chapter Assembling SPARClet code
+
+The GNU assembler, configured for SPARC, recognizes the additional
+SPARClet machine instructions that GCC can generate.
+
+You can specify the flag @samp{-Asparclet} to the GNU assembler
+(configured for SPARC) to explicitly select this particular SPARC
+architecture.
+
+@node SPLETGDB
+@chapter Remote SPARClet Debugging with GDB
+
+You can use the GDB remote serial protocol to communicate with a
+@w{SPARClet} board.  You must first link your programs with program
+with a "stub" which handles the communications with GDB.  You can
+also use the ROM monitor on the @w{SPARClet} board which this requires
+no additional code.
+
+@menu
+* GDB's remote protocol::       Debugging with GDB's remote protocol
+* ROM monitor::                 Debugging with the ROM monitor
+@end menu
+
+@node GDB's remote protocol
+@section Debugging with GDB's remote protocol
+
+In order to debug an application using GDB's remote protocol,
+the application must be specially linked:
+
+@table @code
+@item Place calls to initialize stub
+
+The following function calls must be placed in the application.
+This is usually done in the @code{main} routine before anything else.
+
+@smallexample
+        set_debug_traps ();
+        breakpoint ();
+@end smallexample
+
+@item Link with stub
+The application must link in special code that handles the communication
+with GDB.  This is normally done with:
+
+$(CC) -nostdlib -N -Ttsc701.ld ...
+
+File @file{tsc701.ld} is a linker script that allocates sections
+according to the hardware's memory layout and links in the stub
+(in addition to the default libraries libc.a and libgcc.a).
+
+The @samp{-N} flag shrinks the size of the executable by
+not aligning the data segment on a page boundary.  For further information
+see @ref{Using LD,, Using ld, ld.info, Using ld}.
+@end table
+
+GDB's remote protocol cannot be used to load an application unto
+the target board.  It's the chicken and egg problem: you can't download
+a program using GDB's remote protocol unless there is code already there
+that understands the protocol, but you first need to download that code!
+Some other means must be used (for example the ROM monitor can be used).
+Once downloaded the application must be run to initialize communication
+with GDB:
+
+@enumerate 1
+@item On GDB side do @code{target remote @var{port}}
+@item With the ROM monitor do @code{run}
+@end enumerate
+@noindent
+where @var{port} is the port to which your board is connected:
+@code{/dev/ttya}, @code{com1}, etc.
+
+The application will start running and will invoke the two subroutines
+we added above:
+
+@smallexample
+        set_debug_traps ();
+        breakpoint ();
+@end smallexample
+
+At this point GDB is talking to the target board via GDB's remote
+protcol.
+
+See @xref{Remote Serial,, The GDB remote serial protocol, gdb.info,
+Debugging with GDB}, for more details.
+
+@node ROM monitor
+@section Debugging with the ROM monitor
+
+The ROM monitor can be used to debug applications.  Debugging with
+the ROM monitor has the advantage that no special code needs to be
+linked in with the application.
+
+To debug an application with the ROM monitor:
+
+@enumerate 1
+@item Link application as you normally would
+@item @code{target sparclet @var{port}}
+@item @code{load app-executable 0x12010000}
+@end enumerate
+@noindent
+where @var{port} is the port to which your board is connected:
+@code{/dev/ttya}, @code{com1}, etc.
+and where 0x12010000 is the address the program has been configured
+to load at.  Specifying 0x12010000 is necessary because there is no
+way to record section addresses in the a.out file format.
+
+@node SPLETRefs
+@chapter SPARClet documentation
+
+See @cite{TSC701 Advanced Communication Controller Users Manual}
+(Temic Semiconductors, Semiconductor Division, 1996) for full documentation
+of the @w{SPARClet} family, architecture, and instruction set.

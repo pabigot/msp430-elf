@@ -1,0 +1,33 @@
+/README/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/aors_n.asm/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/aorsmul_1.asm/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/bdiv_dbm1c.asm/1.1/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/copyd.asm/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/copyi.asm/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/darwin.m4/1.1/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/dive_1.asm/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/diveby3.asm/1.1/Fri Nov 17 11:29:36 2006//Tmsp430-130322-branch
+/divrem_1.asm/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/divrem_2.asm/1.1/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/gmp-mparam.h/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/invert_limb.asm/1.1/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/lshift.asm/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/mod_1.asm/1.1/Fri Nov 17 11:29:36 2006//Tmsp430-130322-branch
+/mod_34lsub1.asm/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/mul_1.asm/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/mul_basecase.asm/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/rshift.asm/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/sqr_basecase.asm/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/t-zdisp.sh/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/t-zdisp2.pl/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/udiv.asm/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/umul.asm/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+/x86-defs.m4/1.2/Wed Apr 14 09:40:46 2010//Tmsp430-130322-branch
+D/atom////
+D/fat////
+D/i486////
+D/k6////
+D/k7////
+D/p6////
+D/pentium////
+D/pentium4////

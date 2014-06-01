@@ -1,0 +1,20 @@
+2009-02-10  Kevin Buettner  <kevinb@redhat.com>
+
+	* iwidgets/Makefile.in (SCRIPT_INSTALL_DIR): Use an install
+	location that will play well with insight on Windows.  The
+	original upstream location has been left uncommented on the
+	line before in order to reduce sanitization clutter and to
+	make merges easier.
+
+2009-02-05  Kevin Buettner  <kevinb@redhat.com>
+
+	* itcl/configure.ac, itk/configure.ac: Add "PKG_CFLAGS=-fPIC"
+	for non-windows hosts.  This is needed for building on an x86_64
+	GNU/Linux host.
+	* itcl/configure, itk/configure: Regenerate.
+
+2009-02-04  Kevin Buettner  <kevinb@redhat.com>
+
+	* itcl/Makefile.in, itk/Makefile.in, iwidgets/Makefile.in:
+	Add do-nothing info, install-info, and install-check targets
+	so that build system won't complain.

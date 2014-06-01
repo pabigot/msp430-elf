@@ -1,0 +1,38 @@
+/Makeasm.am/1.2/Wed Apr 14 09:40:39 2010//Tmsp430-130322-branch
+/Makefile.am/1.2/Wed Apr 14 09:40:39 2010//Tmsp430-130322-branch
+/Makefile.in/1.3/Wed Apr 14 09:40:39 2010//Tmsp430-130322-branch
+/README/1.2/Wed Apr 14 09:40:39 2010//Tmsp430-130322-branch
+/asm-defs.m4/1.2/Wed Apr 14 09:40:39 2010//Tmsp430-130322-branch
+/cpp-ccas/1.2/Wed Apr 14 09:40:39 2010//Tmsp430-130322-branch
+/m4-ccas/1.2/Wed Apr 14 09:40:39 2010//Tmsp430-130322-branch
+D/a29k////
+D/alpha////
+D/arm////
+D/clipper////
+D/cray////
+D/generic////
+D/i960////
+D/ia64////
+D/lisp////
+D/m68k////
+D/m88k////
+D/minithres////
+D/mips32////
+D/mips64////
+D/ns32k////
+D/pa32////
+D/pa64////
+D/power////
+D/powerpc32////
+D/powerpc64////
+D/pyr////
+D/s390////
+D/sh////
+D/sparc32////
+D/sparc64////
+D/thumb////
+D/vax////
+D/x86////
+D/x86_64////
+D/z8000////
+D/z8000x////

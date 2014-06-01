@@ -1,0 +1,19 @@
+/.cvsignore/1.1/Wed Mar 19 23:00:53 2003//Tmsp430-130322-branch
+/CHANGES/1.1/Wed Mar 19 23:00:53 2003//Tmsp430-130322-branch
+/ChangeLog/1.2/Tue Feb  3 19:07:29 2009//Tmsp430-130322-branch
+/Makefile.in/1.4.20.2/Thu Mar 28 01:08:42 2013//Tmsp430-130322-branch
+/README/1.1/Wed Mar 19 23:00:53 2003//Tmsp430-130322-branch
+/aclocal.m4/1.2/Tue Feb  3 19:07:29 2009//Tmsp430-130322-branch
+/configure/1.2/Tue Feb  3 19:07:29 2009//Tmsp430-130322-branch
+/configure.ac/1.1/Tue Feb  3 19:07:29 2009//Tmsp430-130322-branch
+/iwidgets.tcl.in/1.1/Wed Mar 19 23:00:53 2003//Tmsp430-130322-branch
+/license.terms/1.1/Wed Mar 19 23:00:53 2003//Tmsp430-130322-branch
+/pkgIndex.tcl.in/1.1/Wed Mar 19 23:00:53 2003//Tmsp430-130322-branch
+D/demos////
+D/doc////
+D/generic////
+D/incoming////
+D/outgoing////
+D/tclconfig////
+D/tests////
+D/win////

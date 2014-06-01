@@ -1,0 +1,635 @@
+2011-05-16  Kevin Buettner  <kevinb@redhat.com
+
+	* wrapper.c (sim_hardware_watchpoint): New function.
+
+2002-09-17  Nick Clifton  <nickc@redhat.com>
+
+	* armemu.c (ARMul_Emulate32): Add (suppressed) debug to catch
+	misaligned stack ops.
+
+2002-07-05  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* iwmmxt.c (wC[wCID]): Set initial value.
+	(DECODE_G_BIT): New macro.
+	(Compute_Iwmmxt_Address): Add new parameter 'failed'. Set to true
+	of address computation is invalid.
+	(IwmmxtLDC, IwmmxtSTC, IwmmxtMRC, IwmmxtMCR, IwmmxtCDP): Always
+	return ARMul_CANT.  If the load was not handled by the iWMMXt
+	emulation instructions then it cannot be valid.
+	(TANDC, TBCST, TEXTRC, TEXTRM, TINSR, TMCR, TMCRR, TMIA, TMIAPH,
+	TMIAxy, TMOVMSK, TMRC, TMRRC, TORC, WACC, WADD, WALIGNI, WALIGNR,
+	WAND, WANDN, WAVG2, WCMPEQ, WCMPGT, WLDR, WMAC, WMADD, WMAX, WMIN, 
+	WMUL, WOR, WPACK, WROR, WSAD, WSHUFH, WSLL, WSRA, WSRL, WSTR,
+	WSUB, WUNPCKEH, WUNPCKEL, WUNPCKIH, WUNPCKIL, WXOR): Test for
+	coprocessor enablement before evaluating. Test for invalid bits in
+	the instruction pattern.
+
+2002-06-12  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* iwmmxt.c (TANDC): Fix TANDCH instruction (case 107400).
+	(TORC): Fix TORCH (case 107403).
+	(TANDC, TEXTRC, TORC): Check for r15 in Rs field. (case 107402).
+
+2002-05-16  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* config/arm/t-xscale-elf (crti.o, crtn.o): Add -mno-fpu to
+	assembler command line.
+
+2002-05-27  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* wrapper.c (sim_create_inferior): Only zero the vectors if the
+	SWI_vector has not already been written to.
+
+2002-05-09  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* wrapper.c (sim_create_inferior): Reset SWI_vector_installed
+	after zeroing the vectors.
+
+2002-04-29  Nick Clifton  <nickc@cambridge.redhat.com>
+
+        * configure.in (CON_FLAGS): Define and substitute.  For iWMMXt
+        targets define as -D__IWMMXT__.
+        * configure: Regenerate.
+        
+        * Makefile.in (CONFLAGS): Define.
+        (ALL_CFLAGS): Include CON_FLAGS.
+
+        * armcopro.c, armemu.c, wrapper.c: Conditionalize iWMMXt code
+	on the presence of the __IWMMXT__ define.
+
+2002-04-19  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* wrapper.c (sim_create_inferior): For XScale and iWMMXt
+        binaries, zero out the hardware vectors unless the program
+        being simulated has installed its own vectors.
+        (sim_stop_reason): If the end condition is because of a Data
+        Abort or an Address Exception return a SIGBUS signal.
+
+        * arminit.c (ARMul_Abort): If the installed vector is zero,
+        stop emulation and set the end condition based on the vector
+        used.
+        
+	* iwmmxt.c (WROR, WSLL, WSRA, WSRL): Fix check of G bit to ensure
+	that bit 3 is set.
+
+	* wrapper.c (sim_create_inferior): Accept bfd_mach_arm_iWMMXt.
+	
+2002-04-18  Andrew Cagney  <cagney@redhat.com>
+
+	* wrapper.c: Include "gdb/sim-arm.h".
+	(sim_store_register, sim_fetch_register): Use
+	sim_arm_maveric_cop0r0_regnum.  Return size of register.
+	(sim_store_register, sim_fetch_register): Use
+	sim_arm_iwmmxt_cop0r0_regnum.  Return size of register.
+	* iwmmxt.c (Store_Iwmmxt_Register, Fetch_Iwmmxt_Register): Return
+	the size of the register.
+	* iwmmxt.h (Store_Iwmmxt_Register): Change return type to int.
+	
+2002-04-18  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* iwmmxt.c (TMCR): When writing to the wCon register, a 1 bit
+	in the value clears the corresponding bit in the registers.
+        (WSAD): Clear the top 32-bits of the accumulator.
+
+	* iwmmxt.c (WSAD): Clear the top word of the accumulator before
+	computing the sum.
+
+	* iwmmxt.c (AddS32): Return an ARMdword not an ARMword.
+
+	* iwmmxt.c (Fetch_Iwmmxt_Register): New function.
+	(Store_Iwmmxt_Register): New function.
+	* iwmmxt.h: Add prototypes for new functions.	
+	* wrapper.c (sim_store_register): Use Store_Iwmmxt_Register.
+	(sim_fetch_register): Use Fetch_Iwmmxt_Register.
+
+2002-04-17  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* iwmmxt.c (Iwmmxt_Load_Double_Word): Create a debug message
+	for misaligned loads; temporarily leave it enabled by
+	default.
+        Change the sense of the endianness signal to conform to
+	Intel's spec.
+	(Iwmmxt_Store_Double_Word): Create a debug message for
+	misaligned stores; temporarily leave it enabled by default.
+        Change the sense of the endianness signal to conform to
+	Intel's spec.
+
+2002-04-16  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* iwmmxt.c: Many fixes for bugs exposed by the Intel(r) iWMMXt
+	assembler testsuite.
+
+2002-04-13  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* iwmmxt.c (TINSR): Fix bugs handling B and H qualifiers.
+
+2002-04-12  Stan Cox  <scox@redhat.com>
+
+	* armemu.c (ARMul_Emulate26): wldrw and wstrw are unconditional.
+	* iwmmxt.c (Iwmmxt_Store_Double_Word):  Put words in correct
+	endian order. 
+	
+2002-04-08  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* iwmmxt.c (WCON_CUP): Define.
+	(WCON_MUP): Define.
+        (AddU8, AddS8, AddU16, AddS16, AddS32): Take extra argument -
+	overflow result pointer.  Compute if overflow has occured
+	during addition.
+        (AddU32): New function.  Handle 32 bit unsigned addition.
+        (TBCST, TINSR, TMCRR, TMIA, TMIPH, TMIAxy, WACC, WALIGNI,
+	WALIGNR, WLDR, WMAC, WMADD, WMAX, WMIN, WMUL, WSAD): Set MUP
+	bit in wCON register. 
+        (TMCR): Set CUP bit in wCON register.
+        (WAND, WANDN, WADD, WAVG2, WCMPEQ, WCMPGT, WOR, WPACK, WROR,
+	WSHUFH, WSLL, WSRA, WSRL, WSUB, WUNPCKEH, WUNPCKEL, WUNPCKIH,
+	WUNPCKIL, WXOR): Set MUP and CUP bits in wCON register. 
+        (WAND, WANDN, WOR, WXOR): Set WCASF bits.
+        (WADD): Fix overflow handling.
+
+2002-04-04  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* iwmmxt.c (WROR, WSRL, WSRA, WSLL): Chnage handling of G bit to
+	match latest info from Intel.
+
+2002-04-04  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* iwmmxt.c: Various bug fixes for problems uncovered by new sim
+	tests.
+
+2002-04-03  Matthew Green <mrg@redhat.com>
+
+	* iwmmxt.c: New file: iWMMXt instruction emulation.
+	* iwmmxt.h: New file: Header for iWMMt emulation.
+	* configure.in: Add iwmmxt.o to COPRO list.
+	* configure: Regenerate.
+	* Makefile.in: Add rule to build iwmmxt.o
+	* armcopro.c (ARMul_CoProInit): Attach iWMMXt coprocessors 0 and 1. 
+	* armemu.c (ARMul_Emulate32): Intercept iWMMXt instructions.
+
+2002-01-22  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* armcopro.c: Fix compile time warnings.
+
+2002-01-22  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* armcopro.c (ARMul_CoProInit): Suppress MMU functions when
+	XScale branch is made.
+
+2001-12-03  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* wrapper.c (sim_create_inferior): Default to XScale for Intel
+	compatability.
+
+2001-02-13  Nick Clifton  <nickc@redhat.com>
+
+	* armdefs.h (ARMul_CP15_R5_MMU_EXCPT): Fix value (bit 9, not bit
+	10).
+
+2000-11-16  Nick Clifton  <nickc@redhat.com>
+
+	* armemu.c (BKPT): Always treat this instruction as a breakpoint,
+	if there is no SWI vector installed - necessary for correct
+	operation of GDB.
+
+2000-11-15  Nick Clifton  <nickc@redhat.com>
+
+	* arminit.c (ARMul_Abort): Compute correct address for data abort.
+
+2000-11-14  Nick Clifton  <nickc@redhat.com>
+	
+	* maverick.c: Fix formatting.
+	(write_cp14_reg): New dummy function.
+	(write_cp15_reg): New dummy function.
+	
+2000-11-14  Nick Clifton  <nickc@redhat.com>
+
+	* arminit.c (ARMul_Abort): Set correct value into register 14 for
+	Prefetch Abort, DataAbort, IRQ and FIQ.
+
+	* wrapper.c (sim_create_inferior): Add detection of XScale
+	architecture.
+	* arminit.c (ARMul_SelectProcessor): Add initialisation of
+	is_Xscale flag.
+	* armdefs.h (ARM_XScale_Prop): New property.
+	(struct ARMul_State): Add new field 'is_XScale'.
+	* armemu.c (BKPT): For XScale set FSR and FAR bits in coprocessor
+	if breakpoint is being taken.
+	(BLX (2)): Compute new PC before writing R15.
+	
+2000-11-09  Nick Clifton  <nickc@redhat.com>
+
+	* armos.c (ARMul_OSHandleSWI): When following the SWI vector
+	compute instruction size before changing the state to allow for
+	the loss of the T bit.
+
+	* thumbemu.c (ARMul_ThumbDecode): Treat a BLX instruction, format
+	2, with the bottom bit set as undefined.
+
+2000-11-08  Nick Clifton  <nickc@redhat.com>
+
+	* armcopro.c (write_cp15_reg): Insert missing break.
+
+	* thumbemu.c (ARMul_ThumbDecode): Swap ARM equivalent instructions
+	for PUSH and POP instructions.
+
+2000-09-18  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (DSPCDP5): cfsh32 is an arithmetic shift.
+	(DSPCDP5): cfsh64 is an arithmetic shift.
+	(DSPMCR5): cfrshl32 is an arithmetic shift.
+	(DSPMCR5): cfrshl64 is an arithmetic shift.
+
+2000-09-15  Aldy Hernandez  <aldyh@redhat.com>
+
+	* armemu.c: only choose 0xe2 opcode when in v5 mode.
+
+2000-09-15  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (DSPMRC4): cfcmps, cfcmpd: set overflow flag.
+	(DSPMRC4): clean up setting of flags.
+
+2000-09-12  Nick Clifton  <nickc@redhat.com>
+
+	* armos.c (ARMul_OSHandleSWI): Do not warn about FPE SWIs.
+
+	* armemu.c (ARMul_Emulate26): Fix detection of PLD instruction.
+
+2000-09-11  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (DSPLDC4): cfldrd: load depending on endianness.
+	(DSPSTC4): cfstrd: store depending on endianness.
+	(DSPSTC5): cfstr64: store depending on endianness.
+
+2000-08-30  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (read_cp14_reg): add dummy routine.
+
+2000-08-29  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (DSPCDP4): cfaddd: correct printf typo.
+	(DSPMRC4): cfcmps, cfcmpd: calculate Z flag correctly so we can
+	compare NaN's correctly.
+
+2000-08-24  Nick Clifton  <nickc@redhat.com>
+
+	* armcopro.c: Implement emulation of StrongARM-2's coprocessor 13.
+	Add checks of the CRm, opcode_1 and opcode_2 fields for
+	coprocessor 13 and 14. 
+	Add implementation of registers in coprocessor 15.
+
+2000-08-23  Nick Clifton  <nickc@redhat.com>
+
+	* armemu.c (ARMul_Emulate26): Accept and ignore the PLD
+	instruction - do not generate an undefined instruction trap for
+	it.
+	If bit 31 of register 10 of coprocessor 14 is clear then treat the
+	BKPT instruction as a no-op.
+
+	* armcopro.c (XScale_cp14_Regs): New array: Registers in coprocessor
+	14.
+	(XScale_cp14_init): New function: Initialise coprocessor 14's
+	registers.
+	(XScale_cp14_access): New function: Determine if a coprocessor 14
+	register can be accessed.
+	(write_cp14_reg): New function: Write to a copro 14 register. 
+	(read_cp14_reg): New function: Read from a copro 14 register.
+	(XScale_cp14_LDC): New function: Emulate LDC instruction to coproc 14.
+	(XScale_cp14_STC): New function: Emulate STC instruction from coproc 14.
+	(XScale_cp14_MRC): New function: Emulate MRC instruction from coproc 14.
+	(XScale_cp14_MCR): New function: Emulate MCR instruction to coproc 14.
+	(XScale_cp14_read_reg): New function: Read from a copro 14 register.
+	(XScale_cp14_write_reg): New function: Write to a copro 14 register.
+	(ARMul_CoProInit): Disable old coprocessor emulation.  Enable XScale
+	coprocessor 14 emulation.
+
+2000-08-22  Nick Clifton  <nickc@redhat.com>
+
+	* armemu.c (ARMul_Emulate26): Treat all instructions with a
+	condition code field of NV as UNDEFINED, except for the BLX
+	instruction.
+
+	* thumbemu.c (ARMul_ThumbDecode): Translate thumb BKPT instruction
+	into an arm BKPT instruction.  Catch other undefiend thumb
+	instructions and treat them as such.
+
+	* armemu.c (ARMul_Emulate26): Handle BKPT instruction.
+
+2000-08-21  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (DSPMCR5): fix cfrshl32/64 to do unsigned shift
+	rights.
+	(DSPMCR5): add union to do signed<->unsigned conversions.
+
+2000-08-21  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (DSPMCR5): cfrshl32/64: switch operands.
+
+2000-08-18  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (DSPMRC5): typo fix.
+
+2000-08-17  Aldy Hernandez  <aldyh@redhat.com>
+
+	* armemu.c (ARMul_Emulate26): fix coprocessor and strongarm opcode
+	conflict.
+
+2000-08-17  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (DSPCDP5): cfsh32: do a logical shift instead.
+	(DSPCDP5): cfsh64: do a logical shift instead.
+
+2000-08-16  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (DSPMRC5): cfcmp32: calculate C and V flags.
+	(POS64): new macro.
+	(NEG64): new macro.
+	(DSPMRC5): cfcmp64: calculate C and V flags.
+
+2000-08-16  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (DSPMRC4): cfcmps: set Z flag.
+	cfcmpd: same.
+	(DSPMRC5): cfcmp32: same.
+	cfcmp64: same.
+	(DSPCDP5): cfsh64: fixed shift typo.
+
+2000-08-15  Nick Clifton  <nickc@redhat.com>
+
+	* armemu.c (ARMul_Emulate26): Do not allow T bit to be set by MSR
+	instruction.
+
+2000-08-14  Nick Clifton  <nickc@redhat.com>
+
+	* armos.c (ARMul_OSHandleSWI): Only change mode once, not twice,
+	when invoking SWi handler.
+
+	* armemu.c (ARMul_Emulate26): BLX(2): Set LR after updating the
+	PC, not before.  Also if in Thumb mode , only store PC + 2 into
+	the LR and set the bottom bit of the address.
+
+2000-08-13  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (DSPMCR5): fix cfrshl32, cfrshl64, cfmv64lr, cfmv6rhr
+	to look for registers in the correct place in the opcode.
+	(DSPMCR4): fix cfmvdlr, cfmvdhr, cfmvsr to look for regs in
+	correct place in opcode.
+
+2000-08-12  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c: add some tracing support.
+
+2000-08-10  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (DSPMRC4): add preliminary support for SF and DF
+	compares (cfcmps, cfcmpd).
+	(DSPMRC5): add preliminary support for SI and DI compares
+	(cfcmp32, cfcmp64).
+
+2000-08-09  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (DSPSTC4): add support for cfstrd, cfstr64.
+	Misc endian fixes.
+
+2000-08-08  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c: new definition for maverick_regs as a struct.
+	Remove UPPER_int and LOWER_int variable definitions.
+	(DSPMRC4): fix instructions to use new register layout.
+	(DSPMRC5): same.
+	(DSPMCR4): same.
+	(DSPSTC4): same.
+	(DSPLDC5): same.
+	(DSPLDC4): same.
+	(DSPCDP5): same.
+	Define lsw_int_index, msw_int_index, lsw_float_index,
+	msw_float_index.
+	(mv_compute_host_endianness): initialize them based on endianness.
+	(mv_getRegDouble): New conversion function.
+	(mv_getReg64int): same.
+	(mv_setRegDouble): same.
+	(mv_setReg64int): same.
+
+	Define "reg_conv" union for use in conversion routines.
+
+	* wrapper.c: new definition for maverick_regs as a struct.
+	(sim_store_register): use correct sizeof.
+	(sim_fetch_register): use correct sizeof.
+
+2000-08-08  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (DSPMRC4): endian fixes cfmvrdl and cfmvrdh.
+
+	* maverick.c (DSPMRC5): cfmvr64l and cfmvr64h take into account
+	endianness.
+	(DSPMCR4): same, but for cfmvdlr, cfmvdhr.
+	(DSPMCR5): same, but for cfmv64hr, cfmv6rlr.
+
+	* maverick.c (DSPLDC4): fix order of words in cfldrd.
+	(DSPLDC5): add support for 64 bit loads (cfldr64).
+	(DSPMRC4): cfmvrdh-- move data into upper half.
+	(DSPMRC4): cfmvrdl-- move data into lower half.
+
+2000-08-07  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (DSPLDC4): add support for double floating point
+	loads (cfldrd).
+	(DSPMCR5): add support for cfrshl32, cfrshl64
+	(mv_compute_host_endianness): new function.
+	(ARMul_CoProInit): call it.
+
+	include assert.h
+
+	UPPER_int, LOWER_int: new globals.
+
+2000-08-03  Nick Clifton  <nickc@cygnus.com>
+
+	* armemu.c (ARMul_Emulate26): Handle backwards branching BLX
+	instructions.
+
+2000-07-31  Aldy Hernandez  <aldyh@redhat.com>
+
+	* maverick.c (DSPMCR5): add support for cfmv64lr, cfmv64hr
+	(DSPLDC5): add support for cfldr32
+	(DSPSTC5): add support for cfstr32
+
+	Print a nice error and die if attempting to execute instructions
+	not supported (those not generated by gcc ;-)).
+
+	* maverick.c (DSPMRC5): Add support for cfmvr64l and cfmvr6rh
+	instructions.
+	(DSPMCR4): add support for cfmvsr, cfmvdhr, cfmvdlr
+
+	* wrapper.c: New union maverick_acc_regs for accumulator
+	registers.
+	(sim_fetch_register): Fixed code to fetch cirrus registers.  Was
+	buggy.
+
+	* maverick.c (DSPCDP4): add support for the following
+	instructions-- cfsubs, cfnegs, cfnegd, cfabss, cfabsd, cfmuld,
+	cfaddd, cfsubd, cfcpys, cfcvtds, cfcvt32s, cfcvt32d, cfcvt64s,
+	cfcvt64d,
+	(DSPCDP5): add support for the following instructions-- cfsh32,
+	cfmul32, cfmul64, cfmac32, cfmsc32, cfcvts32, cfcvtd32,
+	cftruncs32, cftruncd32, cfsh64, cfabs32, cfabs64, cfneg32,
+	cfneg64, cfadd32, cfadd64, cfsub32, cfsub64
+	(DSPMRC4): add support for the following instructions-- cfmvrs
+
+	New union maverick_acc_regs for accumulator registers.
+
+	* wrapper.c (sim_store_register): remove extern declarations for
+	DSPregs, DSPacc, and DSPsc.
+	(sim_fetch_register): same.
+	(sim_store_register): change sizeof(double) to sizeof(union
+	maverick_regs).
+	(sim_fetch_register): same.
+
+	* maverick.c (maverick_regs): new union.  Changed definition of
+	Cirrus regs to use union.  Change all uses of DSPregs to use union
+	instead of pointer magic.
+
+	Get rid of all those nasty pointer magic, type conversion macros.
+	This should be done with unions.
+
+	* wrapper.c (maverick_regs): new union.  Changed definition of
+	Cirrus reg to use union.
+
+2000-07-07  Nick Clifton  <nickc@cygnus.com>
+
+	* armos.c (ARMul_OSHandleSWI): Do not disable SWI_Breakpoint
+	handling.
+
+2000-07-06  Dave Brolley  <brolley@topaz>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+2000-07-05  Ben Elliston  <bje@redhat.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+2000-07-05  Michael Hayes  <mhaye@cygnus.com>
+
+	* armemu.c (ARMul_Emulate26): Add breaks to prevent MRRC and MCRR
+	cases falling through.
+
+2000-07-05  Michael Hayes  <mhayes@cygnus.com)
+
+	* armemu.c (ARMul_Emulate26): Implement MRRC and MCRR instructions.  
+	Fix MAR and MRA instructions to generate Undefined Interrupt exceptions
+	for invalid opcodes.
+
+2000-07-05  Nick Clifton  <nickc@cygnus.com>
+
+	* armos.c (ARMul_OSHandleSWI): Disable DEMON SWI emulation at the
+	direct request of Intel.
+
+2000-07-04  Alexandre Oliva  <aoliva@redhat.com>
+
+	* armemu.c (ARMul_Emulate, blx): Implement.
+	* thumbemu.c (ARMul_ThumbDecode, blx): Likewise.
+
+	* armos.c (ARMul_OSHandleSWI): Save SPSR and use INSN_SIZE to
+	adjust LR.
+
+	* armemu.c (ARMul_Emulate, miaph): Sign-extend the products
+	separately.
+
+	* armemu.c (ARMul_Emulate, MIAxy): Initialize t2 instead of
+	re-initializing t1.
+
+2000-06-02  Nick Clifton  <nickc@cygnus.com>
+
+	* wrapper.c (SWI_vector_installed): New global variable.
+	(sim_write): Set SWI_vector_installed if the SWI vector is written
+	to.
+
+	* armos.c (ARMul_OSHandleSWI): If SWI_vector_installed is set,
+	then invoke the SWI handler provided by the program being
+	simulated.
+
+2000-06-01  Nick Clifton  <nickc@cygnus.com>
+
+	* arminit.c (ARMul_NewState): Start in 32bit mode not 26bit. 
+
+2000-05-25  Nick Clifton  <nickc@cygnus.com>
+
+	* wrapper.c (sim_create_inferior): Do not switch to USER32 mode
+	upon startup.
+
+2000-05-23  Nick Clifton  <nickc@cygnus.com>
+
+	* armemu.h (CCBITS): Fix definition so that Q bit is picked up
+	when compiling armsupp.c.
+
+2000-05-14  Aldy Hernandez  <aldyh@redhat.com>
+
+	* wrapper.c: DSP registers are now declared here.
+
+	* maverick.c: Declare DSP registers extern because this file might
+	not be linked.
+
+	* wrapper.c (sim_store_register): Handle cirrus registers.
+	(sim_fetch_register): Handle cirrus registers.
+
+	* Makefile.in (COPRO): use autoconfed $(COPRO) instead of
+	armcopro.o.
+
+	* configure.in (COPRO): new variable set to either maverick.o or
+	armcopro.o depending on the build target.
+
+	* maverick.c: new file-- Cirrus DSP coprocessor extensions for
+	ARMulator.
+
+2000-04-26  Nick Clifton  <nickc@cygnus.com>
+
+	* armemu.c (ARMul_Emulate26): Fix MRA instruction.
+	Fix decoding of writeback bit in LDRD/STRD instructions.
+
+2000-04-20  Nick Clifton  <nickc@cygnus.com>
+
+	* armemu.c (ARMul_Emulate26): Fix implementation of MAR
+	instruction.
+
+2000-01-25  Bernd Schmidt  <bernds@cygnus.co.uk>
+
+	* armdefs.h (struct ARMul_State): New member SFlag.
+	* armemu.c (ARMul_Emulate32): Add ElSegundo support.
+	* armemu.h (SBIT, SFLAG, SETS, CLEARS, ASSIGNS): New macros.
+	(CCBITS): If [MODE32], include S bit.
+	(ECC): Include S flag.
+	(AddOverflow, SubOverflow): Declare new functions.
+	* armsupp.c (ARMul_CPSRAltered): Assign S flag.
+	(AddOverflow, SubOverflow): New functions.
+	(ARMul_AddOverflow, ARMul_SubOverflow): Use them.
+
+1999-12-05  Bernd Schmidt  <bernds@cygnus.co.uk>
+
+	* armemu.c (ARMul_Emulate32): Preincrement addressing modes were
+	wrong for XScale LDRD/STRD.
+
+1999-12-03  Nick Clifton  <nickc@cygnus.com>
+
+	* armemu.c (ARMul_Emulate26): Fix typo in previous delta.
+
+1999-12-02  Nick Clifton  <nickc@cygnus.com>
+
+	* armemu.c: Add support for new XScale instruction patterns.
+
+1999-12-01  Nick Clifton  <nickc@cygnus.com>
+
+	* armemu.c (ARMul_Emulate26): Parse but ignore preload instructions.
+
+1999-07-12  Bernd Schmidt  <bernds@cygnus.com>
+
+	* armdefs.h (ARMdword): New typedef.
+	(struct ARMul_State): New field Accumulator.
+	* armemu.c (ARMul_Emulate32): Add support for StrongARM-2
+	instructions MIA, MIAPH, MRA, MAR, LDRL.
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

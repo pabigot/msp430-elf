@@ -1,0 +1,16 @@
+/README/1.2/Wed Apr 14 09:40:44 2010//Tmsp430-130322-branch
+/aix.m4/1.2/Wed Apr 14 09:40:44 2010//Tmsp430-130322-branch
+/com.asm/1.1/Wed Apr 14 09:40:44 2010//Tmsp430-130322-branch
+/copyd.asm/1.2/Wed Apr 14 09:40:44 2010//Tmsp430-130322-branch
+/copyi.asm/1.2/Wed Apr 14 09:40:44 2010//Tmsp430-130322-branch
+/darwin.m4/1.2/Wed Apr 14 09:40:44 2010//Tmsp430-130322-branch
+/elf.m4/1.2/Wed Apr 14 09:40:44 2010//Tmsp430-130322-branch
+/gmp-mparam.h/1.1/Fri Nov 17 11:29:33 2006//Tmsp430-130322-branch
+/logops_n.asm/1.1/Wed Apr 14 09:40:44 2010//Tmsp430-130322-branch
+/lshift.asm/1.2/Wed Apr 14 09:40:44 2010//Tmsp430-130322-branch
+/rshift.asm/1.2/Wed Apr 14 09:40:44 2010//Tmsp430-130322-branch
+/sqr_diagonal.asm/1.2/Wed Apr 14 09:40:44 2010//Tmsp430-130322-branch
+/umul.asm/1.2/Wed Apr 14 09:40:44 2010//Tmsp430-130322-branch
+D/mode32////
+D/mode64////
+D/vmx////

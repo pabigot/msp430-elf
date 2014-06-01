@@ -1,0 +1,27 @@
+dnl Process this file with autoconf to produce a configure script.
+
+AC_PREREQ(2.5)
+AC_INIT(sa1100dp.c)
+
+dnl Can't be done in BSP_CONFIGURE because that confuses automake. 
+AC_CONFIG_AUX_DIR(../../..)
+
+BSP_CONFIGURE(../..)
+
+board_name=sa1100dp 
+
+case "x${with_multisubdir}" in
+  x)
+    build_it=yes
+    BOARD_LIB=lib${board_name}.a
+    files="../start.S ../crt0.S ${arch_obj}-${board_name}-rom.specs ${arch_obj}-${board_name}.specs"
+    links="${board_name}-start.S ${board_name}-crt0.S ${board_name}-rom.specs ${board_name}.specs"
+    ;;
+esac
+
+AC_LINK_FILES(${files}, ${links})
+
+AC_SUBST(BOARD_LIB)
+AM_CONDITIONAL(BUILD_IT, test x$build_it = xyes)
+
+AC_OUTPUT(Makefile)

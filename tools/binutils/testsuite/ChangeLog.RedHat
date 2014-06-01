@@ -1,0 +1,49 @@
+2013-02-06  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/readelf.exp (readelf_wi_test): Xfail for the
+	MSP430.
+
+2012-01-06  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/objdump.exp (cpu_expected): Add am33-2.
+
+2003-08-26  Dave Brolley  <brolley@redhat.com>
+
+	* binutils-all/objdump.exp (cpu_expected): Add fr550.
+
+2001-06-20  Frank Ch. Eigler  <fche@redhat.com>
+
+	* binutils-all/relctest.exp: New test driver.
+	* binutils-all/relctest.s, relctest.d: New test files.
+
+2000-05-02  Nick Clifton  <nickc@cygnus.com>
+
+	* binutils-all/readelf.exp: Fix typo.
+
+2000-04-26  Jerry Quinn <jquinn@nortelnetworks.com>
+
+	* binutils-all/hppa/freg.s:  New file.
+	* binutils-all/hppa/objdump.exp:  Add freg.s test.
+
+2000-03-13  Nick Clifton  <nickc@cygnus.com>
+
+	* binutils-all/readelf.s: Fix testsuite failures.
+	* binutils-all/readelf.ss: Fix testsuite failures.
+
+2000-01-09  Nick Clifton  <nickc@cygnus.com>
+
+	* binutils-all/readelf.wi: Remove path dependency in test of
+	compile_unit debug info.
+
+1999-12-17  Timothy Wall <twall@cygnus.com>
+
+        * binutils-all/objdump.exp: change expected section sizes for c54x
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

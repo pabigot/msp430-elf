@@ -1,0 +1,18 @@
+#!/bin/sh
+
+echo cd `pwd`
+
+find "$@" '(' \
+	-name "*~" -o \
+	-name "#*" -o \
+	-name "%*" -o \
+	-name "=*" -o \
+	-name "*.cvsignore" -o \
+	-name "*.orig" -o \
+	-name "*.rej" -o \
+	-name ".#*" -o \
+	-name ",*" -o \
+	-name "CVS" \
+')' -print |
+sed \
+	-e 's/^/rm -r /'

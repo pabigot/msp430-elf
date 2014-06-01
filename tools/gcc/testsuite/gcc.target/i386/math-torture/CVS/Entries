@@ -1,0 +1,12 @@
+/ceil.c/1.1/Sun Nov 26 22:42:48 2006//Tmsp430-130322-branch
+/floor.c/1.1/Sun Nov 26 22:42:48 2006//Tmsp430-130322-branch
+/lceil.c/1.1/Sun Nov 26 22:42:48 2006//Tmsp430-130322-branch
+/lfloor.c/1.1/Sun Nov 26 22:42:48 2006//Tmsp430-130322-branch
+/lrint.c/1.1/Sun Oct 29 19:07:57 2006//Tmsp430-130322-branch
+/lround.c/1.1/Sun Nov 26 22:42:48 2006//Tmsp430-130322-branch
+/math-torture.exp/1.8/Sun Jan 27 20:29:03 2013//Tmsp430-130322-branch
+/nearbyint.c/1.1/Sun Nov 26 22:42:48 2006//Tmsp430-130322-branch
+/rint.c/1.1/Sun Nov 26 22:42:48 2006//Tmsp430-130322-branch
+/round.c/1.1/Sun Nov 26 22:42:48 2006//Tmsp430-130322-branch
+/trunc.c/1.1/Sun Nov 26 22:42:48 2006//Tmsp430-130322-branch
+D

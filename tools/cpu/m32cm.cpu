@@ -1,0 +1,3592 @@
+(dnf f-op-0-2 "opcode" ()  0 2)
+(dnf f-op-2-2 "opcode" ()  2 2)
+(dnf f-bs-2-2 "dest for .B.S" () 2 2)
+(dnop bitno	"bit number"		() h-cmp f-dst-13-3)
+(dnop bitno-pfx	"bit number"		() h-cmp f-dst-21-3)
+
+
+; Derived Operands
+
+; Destination
+
+(define-pmacro (d-Rn-direct d4d3d2 pfx rtype reg)
+  (begin
+    (dndo (.sym "d-Rn-direct-" rtype pfx)
+	  rtype
+	  (reg)
+	  (.str "$" reg)
+	  d4d3d2
+	  (+ (d4d3d2 4) reg)
+	  (eq d4d3d2 4)
+	  (ext SI reg)
+	  () ; no setter
+	  )
+    )
+  )
+
+(d-Rn-direct f-d4d3d2-4-3 "" QI Rnqid82)
+(d-Rn-direct f-d4d3d2-4-3 "" HI Rnhid82)
+(d-Rn-direct f-d4d3d2-4-3 "" SI Rnsid82)
+(d-Rn-direct f-d4d3d2-12-3 "-pfx" QI Rnqid162)
+(d-Rn-direct f-d4d3d2-12-3 "-pfx" HI Rnhid162)
+(d-Rn-direct f-d4d3d2-12-3 "-pfx" SI Rnsid162)
+
+(define-pmacro (d-An-direct d4d3d2 pfx d1 rtype reg)
+  (begin
+    (dndo (.sym "d-An-direct-" rtype pfx)
+	  rtype
+	  (reg)
+	  (.str "$" reg)
+	  d4d3d2
+	  (+ (d4d3d2 0) (d1 1) reg)
+	  (andif (eq d4d3d2 0)
+		 (eq d1 1))
+	  (ext SI reg)
+	  () ; no setter
+	  )
+    )
+  )
+
+(d-An-direct f-d4d3d2-4-3 "" f-d1-8-1 HI Annodsp91)
+(d-An-direct f-d4d3d2-12-3 "-pfx" f-d1-16-1 HI Annodsp171) ; what is wrong ?
+; (d-An-direct f-d4d3d2-12-3 "-pfx" f-d1-8-1 HI Annodsp91)
+
+(define-pmacro (d-An-indirect d4d3d2 pfx d1 rtype reg)
+  (begin
+    (dndo (.sym "d-An-indirect-" rtype pfx)
+	  rtype
+	  (reg)
+	  (.str "[$" reg "]")
+	  d4d3d2
+	  (+ (d4d3d2 0) (d1 0) reg)
+	  (andif (eq d4d3d2 0)
+		 (eq d1 0))
+	  (ext SI (mem rtype reg))
+	  () ; no setter
+	  )
+    )
+  )
+
+(d-An-indirect f-d4d3d2-4-3 "" f-d1-8-1 QI Annodsp91)
+(d-An-indirect f-d4d3d2-4-3 "" f-d1-8-1 HI Annodsp91)
+(d-An-indirect f-d4d3d2-12-3 "-pfx" f-d1-16-1 QI Annodsp171)
+(d-An-indirect f-d4d3d2-12-3 "-pfx" f-d1-16-1 HI Annodsp171)
+
+(define-pmacro (d-An-indirect-offset d4d3d2 pfx rtype reg code off)
+  (begin
+    (dndo (.sym "d-An-indirect-offset-" rtype "-" off pfx)
+	  rtype
+	  (off reg)
+	  (.str "$" off "[$" reg "]")
+	  d4d3d2
+	  (+ (d4d3d2 code) reg off)
+	  (eq d4d3d2 code)
+	  (ext SI (mem rtype reg))
+	  () ; no setter
+	  )
+    )
+  )
+
+(d-An-indirect-offset f-d4d3d2-4-3 "" QI Ansfd82 1 imm168)
+(d-An-indirect-offset f-d4d3d2-4-3 "" HI Ansfd82 1 imm168)
+(d-An-indirect-offset f-d4d3d2-4-3 "" QI Ansfd82 2 imm1616)
+(d-An-indirect-offset f-d4d3d2-4-3 "" HI Ansfd82 2 imm1616)
+(d-An-indirect-offset f-d4d3d2-4-3 "" QI And82 3 imm1624)
+(d-An-indirect-offset f-d4d3d2-4-3 "" HI And82 3 imm1624)
+(d-An-indirect-offset f-d4d3d2-12-3 "-pfx" QI Ansfd162 1 imm248)
+(d-An-indirect-offset f-d4d3d2-12-3 "-pfx" HI Ansfd162 1 imm248)
+(d-An-indirect-offset f-d4d3d2-12-3 "-pfx" QI Ansfd162 2 imm2416)
+(d-An-indirect-offset f-d4d3d2-12-3 "-pfx" HI Ansfd162 2 imm2416)
+(d-An-indirect-offset f-d4d3d2-12-3 "-pfx" QI And162 3 imm2424)
+(d-An-indirect-offset f-d4d3d2-12-3 "-pfx" HI And162 3 imm2424)
+(d-An-indirect-offset f-d4d3d2-4-3 "-mov" QI Ansfd82 1 imm248)
+(d-An-indirect-offset f-d4d3d2-4-3 "-mov" HI Ansfd82 1 imm248)
+(d-An-indirect-offset f-d4d3d2-4-3 "-mov" QI Ansfd82 2 imm2416)
+(d-An-indirect-offset f-d4d3d2-4-3 "-mov" HI Ansfd82 2 imm2416)
+(d-An-indirect-offset f-d4d3d2-4-3 "-mov" QI And82 3 imm2424)
+(d-An-indirect-offset f-d4d3d2-4-3 "-mov" HI And82 3 imm2424)
+
+(define-pmacro (d-absolute d4d3d2 d1d0 pfx rtype code d1d0-v off)
+  (begin
+    (dndo (.sym "d-absolute-" rtype "-" off pfx)
+	  rtype
+	  (off)
+	  (.str "$" off)
+	  d4d3d2
+	  (+ (d4d3d2 code) (d1d0 d1d0-v) off)
+	  (andif (eq d4d3d2 code)
+		 (eq d1d0 d1d0-v))
+	  (ext SI (mem rtype reg))
+	  () ; no setter
+	  )
+    )
+  )
+
+(d-absolute f-d4d3d2-4-3 f-dst-8-2 "" QI 3 3 abs1616)
+(d-absolute f-d4d3d2-4-3 f-dst-8-2 "" HI 3 3 abs1616)
+(d-absolute f-d4d3d2-4-3 f-dst-8-2 "" QI 3 2 abs1624)
+(d-absolute f-d4d3d2-4-3 f-dst-8-2 "" HI 3 2 abs1624)
+(d-absolute f-d4d3d2-12-3 f-dst-16-2 "-pfx" QI 3 3 abs2416)
+(d-absolute f-d4d3d2-12-3 f-dst-16-2 "-pfx" HI 3 3 abs2416)
+(d-absolute f-d4d3d2-12-3 f-dst-16-2 "-pfx" QI 3 2 abs2424)
+(d-absolute f-d4d3d2-12-3 f-dst-16-2 "-pfx" HI 3 2 abs2424)
+(d-absolute f-d4d3d2-4-3 f-dst-8-2 "-mov" QI 3 3 abs2416)
+(d-absolute f-d4d3d2-4-3 f-dst-8-2 "-mov" HI 3 3 abs2416)
+(d-absolute f-d4d3d2-4-3 f-dst-8-2 "-mov" QI 3 2 abs2424)
+(d-absolute f-d4d3d2-4-3 f-dst-8-2 "-mov" HI 3 2 abs2424)
+(define-anyof-operand
+  (name d-qi)
+  (comment "source qimode operand")
+  (mode QI)
+  (choices
+   d-Rn-direct-QI
+   d-An-direct-HI
+   d-An-indirect-QI
+   d-An-indirect-offset-QI-imm168
+   d-An-indirect-offset-QI-imm1616
+   d-An-indirect-offset-QI-imm1624
+   d-absolute-QI-abs1616
+   d-absolute-QI-abs1624
+   )
+  )
+
+(define-anyof-operand
+  (name d-qi-pfx)
+  (comment "source qimode operand")
+  (mode QI)
+  (choices
+   d-Rn-direct-QI-pfx
+   d-An-direct-HI-pfx
+   d-An-indirect-QI-pfx
+   d-An-indirect-offset-QI-imm248-pfx
+   d-An-indirect-offset-QI-imm2416-pfx
+   d-An-indirect-offset-QI-imm2424-pfx
+   d-absolute-QI-abs2416-pfx
+   d-absolute-QI-abs2424-pfx
+   )
+  )
+
+(define-anyof-operand
+  (name d-qi-mov)
+  (comment "dest qimode operand")
+  (mode QI)
+  (choices
+   d-Rn-direct-QI
+   d-An-direct-HI
+   d-An-indirect-QI
+   d-An-indirect-offset-QI-imm248-mov
+   d-An-indirect-offset-QI-imm2416-mov
+   d-An-indirect-offset-QI-imm2424-mov
+   d-absolute-QI-abs2416-mov
+   d-absolute-QI-abs2424-mov
+   )
+  )
+
+(define-anyof-operand
+  (name d-hi)
+  (comment "dest qimode operand")
+  (mode HI)
+  (choices
+   d-Rn-direct-HI
+   d-An-direct-HI
+   d-An-indirect-HI
+   d-An-indirect-offset-HI-imm168
+   d-An-indirect-offset-HI-imm1616
+   d-An-indirect-offset-HI-imm1624
+   d-absolute-HI-abs1616
+   d-absolute-HI-abs1624
+   )
+  )
+
+(define-anyof-operand
+  (name d-hi-pfx)
+  (comment "dest qimode operand")
+  (mode HI)
+  (choices
+   d-Rn-direct-HI-pfx
+   d-An-direct-HI-pfx
+   d-An-indirect-HI-pfx
+   d-An-indirect-offset-HI-imm248-pfx
+   d-An-indirect-offset-HI-imm2416-pfx
+   d-An-indirect-offset-HI-imm2424-pfx
+   d-absolute-QI-abs2416-pfx
+   d-absolute-QI-abs2424-pfx
+   )
+  )
+
+(define-anyof-operand
+  (name d-hi-mov)
+  (comment "dest himode operand")
+  (mode HI)
+  (choices
+   d-Rn-direct-HI
+   d-An-direct-HI
+   d-An-indirect-HI
+   d-An-indirect-offset-HI-imm248-mov
+   d-An-indirect-offset-HI-imm2416-mov
+   d-An-indirect-offset-HI-imm2424-mov
+   d-absolute-HI-abs2416-mov
+   d-absolute-HI-abs2424-mov
+   )
+  )
+
+(define-anyof-operand
+  (name d-si)
+  (comment "dest qimode operand")
+  (mode SI)
+  (choices
+   d-Rn-direct-SI
+   d-An-direct-HI
+   d-An-indirect-HI
+   d-An-indirect-offset-HI-imm168
+   d-An-indirect-offset-HI-imm1616
+   d-An-indirect-offset-HI-imm1624
+   d-absolute-QI-abs1616
+   d-absolute-HI-abs1624
+   )
+  )
+
+(define-anyof-operand
+  (name d-si-pfx)
+  (comment "dest simode operand")
+  (mode SI)
+  (choices
+   d-Rn-direct-SI-pfx
+   d-An-direct-HI-pfx
+   d-An-indirect-HI-pfx
+   d-An-indirect-offset-HI-imm248-pfx
+   d-An-indirect-offset-HI-imm2416-pfx
+   d-An-indirect-offset-HI-imm2424-pfx
+   d-absolute-QI-abs2416-pfx
+   d-absolute-QI-abs2424-pfx
+   )
+  )
+
+; Source
+
+(define-pmacro (s-Rn-direct s4s3s2 pfx rtype reg)
+  (begin
+    (dndo (.sym "s-Rn-direct-" rtype pfx)
+	  rtype
+	  (reg)
+	  (.str "$" reg)
+	  s4s3s2
+	  (+ (s4s3s2 4) reg)
+	  (eq s4s3s2 4)
+	  (ext SI reg)
+	  () ; no setter
+	  )
+    )
+  )
+
+(s-Rn-direct f-s4s3s2-1-3 "" QI Rnqis102)
+(s-Rn-direct f-s4s3s2-1-3 "" HI Rnhis102)
+(s-Rn-direct f-s4s3s2-1-3 "" SI Rnsis102)
+(s-Rn-direct f-s4s3s2-9-3 "-pfx" QI Rnqis182)
+(s-Rn-direct f-s4s3s2-9-3 "-pfx" HI Rnhis182)
+
+(define-pmacro (s-An-direct s4s3s2 pfx d1 rtype reg)
+  (begin
+    (dndo (.sym "s-An-direct-" rtype pfx)
+	  rtype
+	  (reg)
+	  (.str "$" reg)
+	  s4s3s2
+	  (+ (s4s3s2 0) (d1 1) reg)
+	  (andif (eq s4s3s2 0)
+		 (eq d1 1))
+	  (ext SI reg)
+	  () ; no setter
+	  )
+    )
+  )
+
+(s-An-direct f-s4s3s2-1-3 "" f-s1-10-1 HI Annodsp111)
+(s-An-direct f-s4s3s2-9-3 "-pfx" f-s1-18-1 HI Annodsp191)
+;(s-An-direct f-s4s3s2-1-3 "" f-s1-8-1 HI Annodsp111)
+;(s-An-direct f-s4s3s2-9-3 "-pfx" f-s1-16-1 HI Annodsp191)
+
+(define-pmacro (s-An-indirect s4s3s2 pfx d1 rtype reg)
+  (begin
+    (dndo (.sym "s-An-indirect-" rtype pfx)
+	  rtype
+	  (reg)
+	  (.str "[$" reg "]")
+	  s4s3s2
+	  (+ (s4s3s2 0) (d1 0) reg)
+	  (andif (eq s4s3s2 0)
+		 (eq d1 0))
+	  (ext SI (mem rtype reg))
+	  () ; no setter
+	  )
+    )
+  )
+
+(s-An-indirect f-s4s3s2-1-3 "" f-s1-10-1 QI Annodsp111)
+(s-An-indirect f-s4s3s2-1-3 "" f-s1-10-1 HI Annodsp111)
+(s-An-indirect f-s4s3s2-9-3 "-pfx" f-s1-18-1 QI Annodsp191)
+(s-An-indirect f-s4s3s2-9-3 "-pfx" f-s1-18-1 HI Annodsp191)
+;(s-An-indirect f-s4s3s2-1-3 "" f-s1-8-1 QI Annodsp111)
+;(s-An-indirect f-s4s3s2-1-3 "" f-s1-8-1 HI Annodsp111)
+;(s-An-indirect f-s4s3s2-9-3 "-pfx" f-s1-16-1 QI Annodsp191)
+;(s-An-indirect f-s4s3s2-9-3 "-pfx" f-s1-16-1 HI Annodsp191)
+
+(define-pmacro (s-An-indirect-offset s4s3s2 pfx rtype reg code off)
+  (begin
+    (dndo (.sym "s-An-indirect-offset-" rtype "-" off pfx)
+	  rtype
+	  (off reg)
+	  (.str "$" off "[$" reg "]")
+	  s4s3s2
+	  (+ (s4s3s2 code) reg off)
+	  (eq s4s3s2 code)
+	  (ext SI (mem rtype reg))
+	  () ; no setter
+	  )
+    )
+  )
+
+(s-An-indirect-offset f-s4s3s2-1-3 "" QI Ansfs102 1 imm168)
+(s-An-indirect-offset f-s4s3s2-1-3 "" HI Ansfs102 1 imm168)
+(s-An-indirect-offset f-s4s3s2-1-3 "" QI Ansfs102 2 imm1616)
+(s-An-indirect-offset f-s4s3s2-1-3 "" HI Ansfs102 2 imm1616)
+;(s-An-indirect-offset f-s4s3s2-1-3 "" QI Ans102 2 imm1616)
+;(s-An-indirect-offset f-s4s3s2-1-3 "" HI Ans102 2 imm1616)
+(s-An-indirect-offset f-s4s3s2-1-3 "" QI Ans102 3 imm1624)
+(s-An-indirect-offset f-s4s3s2-1-3 "" HI Ans102 3 imm1624)
+(s-An-indirect-offset f-s4s3s2-9-3 "-pfx" QI Ansfs182 1 imm248)
+(s-An-indirect-offset f-s4s3s2-9-3 "-pfx" HI Ansfs182 1 imm248)
+(s-An-indirect-offset f-s4s3s2-9-3 "-pfx" QI Ansfs182 2 imm2416)
+(s-An-indirect-offset f-s4s3s2-9-3 "-pfx" HI Ansfs182 2 imm2416)
+;(s-An-indirect-offset f-s4s3s2-9-3 "-pfx" QI Ans182 2 imm2416)
+;(s-An-indirect-offset f-s4s3s2-9-3 "-pfx" HI Ans182 2 imm2416)
+(s-An-indirect-offset f-s4s3s2-9-3 "-pfx" QI Ans182 3 imm2424)
+(s-An-indirect-offset f-s4s3s2-9-3 "-pfx" HI Ans182 3 imm2424)
+
+(define-pmacro (s-absolute s4s3s2 s1s0 pfx rtype code s1s0-v off)
+  (begin
+    (dndo (.sym "s-absolute-" rtype "-" off pfx)
+	  rtype
+	  (off)
+	  (.str "$" off)
+	  s4s3s2
+	  (+ (s4s3s2 code) (s1s0 s1s0-v) off)
+	  (andif (eq s4s3s2 code)
+		 (eq s1s0 s1s0-v))
+	  (ext SI (mem rtype reg))
+	  () ; no setter
+	  )
+    )
+  )
+(s-absolute f-s4s3s2-1-3 f-src-10-2 "" QI 3 3 abs1616)
+(s-absolute f-s4s3s2-1-3 f-src-10-2 "" HI 3 3 abs1616)
+(s-absolute f-s4s3s2-1-3 f-src-10-2 "" SI 3 3 abs1616)
+(s-absolute f-s4s3s2-1-3 f-src-10-2 "" QI 3 2 abs1624)
+(s-absolute f-s4s3s2-1-3 f-src-10-2 "" HI 3 2 abs1624)
+(s-absolute f-s4s3s2-1-3 f-src-10-2 "" SI 3 2 abs1624)
+(s-absolute f-s4s3s2-9-3 f-src-18-2 "-pfx" QI 3 3 abs2416)
+(s-absolute f-s4s3s2-9-3 f-src-18-2 "-pfx" HI 3 3 abs2416)
+(s-absolute f-s4s3s2-9-3 f-src-18-2 "-pfx" QI 3 2 abs2424)
+(s-absolute f-s4s3s2-9-3 f-src-18-2 "-pfx" HI 3 2 abs2424)
+
+(define-anyof-operand
+  (name s-qi)
+  (comment "source qimode operand")
+  (mode QI)
+  (choices
+   s-Rn-direct-QI
+   s-An-direct-HI
+   s-An-indirect-QI
+   s-absolute-QI-abs1616
+   s-absolute-QI-abs1624
+   s-An-indirect-offset-QI-imm168
+   s-An-indirect-offset-QI-imm1616
+   s-An-indirect-offset-QI-imm1624
+   )
+  )
+
+(define-anyof-operand
+  (name s-hi)
+  (comment "source qimode operand")
+  (mode QI)
+  (choices
+   s-Rn-direct-HI
+   s-An-direct-HI
+   s-An-indirect-HI
+   s-absolute-HI-abs1616
+   s-absolute-HI-abs1624
+   s-An-indirect-offset-HI-imm168
+   s-An-indirect-offset-HI-imm1616
+   s-An-indirect-offset-HI-imm1624
+   )
+  )
+
+(define-anyof-operand
+  (name s-si)
+  (comment "source simode operand")
+  (mode SI)
+  (choices
+   s-Rn-direct-SI
+   s-An-direct-HI
+   s-An-indirect-HI
+   s-absolute-SI-abs1616
+   s-absolute-SI-abs1624
+   s-An-indirect-offset-HI-imm168
+   s-An-indirect-offset-HI-imm1616
+   s-An-indirect-offset-HI-imm1624
+   )
+  )
+
+(define-anyof-operand
+  (name s-qi-pfx)
+  (comment "source qimode operand")
+  (mode QI)
+  (choices
+   s-Rn-direct-QI-pfx
+   s-An-direct-HI-pfx
+   s-An-indirect-QI-pfx
+   s-absolute-QI-abs2416-pfx
+   s-absolute-QI-abs2424-pfx
+   s-An-indirect-offset-QI-imm248-pfx
+   s-An-indirect-offset-QI-imm2416-pfx
+   s-An-indirect-offset-QI-imm2424-pfx
+   )
+  )
+
+(define-anyof-operand
+  (name s-hi-pfx)
+  (comment "source himode operand")
+  (mode QI)
+  (choices
+   s-Rn-direct-HI-pfx
+   s-An-direct-HI-pfx
+   s-An-indirect-HI-pfx
+   s-absolute-HI-abs2416-pfx
+   s-absolute-HI-abs2424-pfx
+   s-An-indirect-offset-HI-imm248-pfx
+   s-An-indirect-offset-HI-imm2416-pfx
+   s-An-indirect-offset-HI-imm2424-pfx
+   )
+  )
+
+; Immediate
+
+(define-pmacro (s-imm d4d3d2 pfx rtype code imm)
+  (begin
+    (dndo (.sym "s-imm-" rtype "-" code pfx)
+	  rtype
+	  (imm)
+	  (.str "#${" imm "}")
+	  imm
+	  (+ imm)
+	  (eq d4d3d2 code)
+	  (ext SI imm)
+	  () ; no setter
+	  )
+    )
+  )
+; ?? check for -pfx and -2
+(define-pmacro (s-imm-abs d4d3d2 d1d0 pfx rtype code d1d0-v imm)
+  (begin
+    (dndo (.sym "s-imm-" rtype "-" code d1d0-v pfx)
+	  rtype
+	  (imm)
+	  (.str "#${" imm "}")
+	  imm
+	  (+ imm)
+	  (andif (eq d4d3d2 code)
+		 (eq d1d0 d1d0-v))
+	  (ext SI imm)
+	  () ; no setter
+	  )
+    )
+  )
+(s-imm f-d4d3d2-4-3 "" QI 4 imm168)
+(s-imm f-d4d3d2-4-3 "" QI 0 imm168)
+(s-imm f-d4d3d2-4-3 "" QI 1 imm248)
+(s-imm f-d4d3d2-4-3 "" QI 2 imm328)
+(s-imm-abs f-d4d3d2-4-3 f-dst-8-2 "" QI 3 0 imm408)
+(s-imm-abs f-d4d3d2-4-3 f-dst-8-2 "" QI 3 1 imm408)
+(s-imm-abs f-d4d3d2-4-3 f-dst-8-2 "" QI 3 2 imm408)
+(s-imm-abs f-d4d3d2-4-3 f-dst-8-2 "" QI 3 3 imm328)
+(s-imm f-d4d3d2-4-3 "" HI 4 imm1616)
+(s-imm f-d4d3d2-4-3 "" HI 0 imm1616)
+(s-imm f-d4d3d2-4-3 "" HI 1 imm2416)
+(s-imm f-d4d3d2-4-3 "" HI 2 imm3216)
+(s-imm-abs f-d4d3d2-4-3 f-dst-8-2 "" HI 3 0 imm4016)
+(s-imm-abs f-d4d3d2-4-3 f-dst-8-2 "" HI 3 1 imm4016)
+(s-imm-abs f-d4d3d2-4-3 f-dst-8-2 "" HI 3 2 imm4016)
+(s-imm-abs f-d4d3d2-4-3 f-dst-8-2 "" HI 3 3 imm3216)
+(s-imm f-d4d3d2-4-3 "" SI 4 imm1632)
+(s-imm f-d4d3d2-4-3 "" SI 0 imm1632)
+(s-imm f-d4d3d2-4-3 "" SI 1 imm2432)
+(s-imm f-d4d3d2-4-3 "" SI 2 imm3232)
+(s-imm-abs f-d4d3d2-4-3 f-dst-8-2 "" SI 3 0 imm4032)
+(s-imm-abs f-d4d3d2-4-3 f-dst-8-2 "" SI 3 1 imm4032)
+(s-imm-abs f-d4d3d2-4-3 f-dst-8-2 "" SI 3 2 imm4032)
+(s-imm-abs f-d4d3d2-4-3 f-dst-8-2 "" SI 3 3 imm3232)
+(s-imm f-d4d3d2-12-3 "-pfx" QI 4 imm248)
+(s-imm f-d4d3d2-12-3 "-pfx" QI 0 imm248)
+(s-imm f-d4d3d2-12-3 "-pfx" QI 1 imm328)
+(s-imm f-d4d3d2-12-3 "-pfx" QI 2 imm408)
+(s-imm f-d4d3d2-12-3 "-pfx" QI 3 imm488)
+(s-imm f-d4d3d2-12-3 "-pfx" HI 4 imm2416)
+(s-imm f-d4d3d2-12-3 "-pfx" HI 0 imm2416)
+(s-imm f-d4d3d2-12-3 "-pfx" HI 1 imm3216)
+(s-imm f-d4d3d2-12-3 "-pfx" HI 2 imm4016)
+(s-imm f-d4d3d2-12-3 "-pfx" HI 3 imm4816)
+(s-imm f-d4d3d2-4-3 "-2" QI 4 imm248)
+(s-imm f-d4d3d2-4-3 "-2" QI 0 imm248)
+(s-imm f-d4d3d2-4-3 "-2" QI 1 imm328)
+(s-imm f-d4d3d2-4-3 "-2" QI 2 imm408)
+(s-imm f-d4d3d2-4-3 "-2" QI 3 imm488)
+(s-imm f-d4d3d2-4-3 "-2" HI 4 imm2416)
+(s-imm f-d4d3d2-4-3 "-2" HI 0 imm2416)
+(s-imm f-d4d3d2-4-3 "-2" HI 1 imm3216)
+(s-imm f-d4d3d2-4-3 "-2" HI 2 imm4016)
+(s-imm f-d4d3d2-4-3 "-2" HI 3 imm4816)
+
+(define-anyof-operand
+  (name s-qi-imm)
+  (comment "source qimode immediate")
+  (mode QI)
+  (choices
+   s-imm-QI-0
+   s-imm-QI-1
+   s-imm-QI-2
+   s-imm-QI-30
+   s-imm-QI-31
+   s-imm-QI-32
+   s-imm-QI-33
+   s-imm-QI-4
+   )
+  )
+
+(define-anyof-operand
+  (name s-hi-imm)
+  (comment "source himode immediate")
+  (mode HI)
+  (choices
+   s-imm-HI-0
+   s-imm-HI-1
+   s-imm-HI-2
+   s-imm-HI-30
+   s-imm-HI-31
+   s-imm-HI-32
+   s-imm-HI-33
+   s-imm-HI-4
+   )
+  )
+
+(define-anyof-operand
+  (name s-si-imm)
+  (comment "source simode immediate")
+  (mode SI)
+  (choices
+   s-imm-SI-0
+   s-imm-SI-1
+   s-imm-SI-2
+   s-imm-SI-30
+   s-imm-SI-31
+   s-imm-SI-32
+   s-imm-SI-33
+   s-imm-SI-4
+   )
+  )
+
+(define-anyof-operand
+  (name s-qi-imm-pfx)
+  (comment "source qimode immediate")
+  (mode QI)
+  (choices
+   s-imm-QI-0-pfx
+   s-imm-QI-1-pfx
+   s-imm-QI-2-pfx
+   s-imm-QI-3-pfx
+   s-imm-QI-4-pfx
+   )
+  )
+
+(define-anyof-operand
+  (name s-hi-imm-pfx)
+  (comment "source qimode immediate")
+  (mode HI)
+  (choices
+   s-imm-HI-0-pfx
+   s-imm-HI-1-pfx
+   s-imm-HI-2-pfx
+   s-imm-HI-3-pfx
+   s-imm-HI-4-pfx
+   )
+  )
+
+(define-anyof-operand
+  (name s-qi-imm-2)
+  (comment "source qimode immediate")
+  (mode QI)
+  (choices
+   s-imm-QI-0-2
+   s-imm-QI-1-2
+   s-imm-QI-2-2
+   s-imm-QI-3-2
+   s-imm-QI-4-2
+   )
+  )
+
+(define-anyof-operand
+  (name s-hi-imm-2)
+  (comment "source qimode immediate")
+  (mode HI)
+  (choices
+   s-imm-HI-0-2
+   s-imm-HI-1-2
+   s-imm-HI-2-2
+   s-imm-HI-3-2
+   s-imm-HI-4-2
+   )
+  )
+
+; Destination of form: src,dest
+
+(define-pmacro (sd-An-indirect-offset s4s3s2 d4d3d2 pfx rtype reg scode code off)
+  (begin
+    (dndo (.sym "sd-An-indirect-offset-" rtype "-" scode off pfx)
+	  rtype
+	  (off reg)
+	  (.str "$" off "[$" reg "]")
+	  d4d3d2
+	  (+ (d4d3d2 code) reg off)
+	  (andif (eq s4s3s2 scode)
+		 (eq d4d3d2 code))
+	  (ext SI (mem rtype reg))
+	  () ; no setter
+	  )
+    )
+  )
+
+(define-pmacro (sd-absolute s4s3s2 d4d3d2 pfx rtype scode code d1d0 d1d0-v off)
+  (begin
+    (dndo (.sym "sd-absolute-" rtype "-" scode off pfx)
+	  rtype
+	  (off)
+	  (.str "$" off)
+	  d4d3d2
+	  (+ (d4d3d2 code) (d1d0 d1d0-v) off)
+	  (andif (eq s4s3s2 scode)
+		 (eq d4d3d2 code)
+		 (eq d1d0 d1d0-v))
+	  (ext SI (mem rtype reg))
+	  () ; no setter
+	  )
+    )
+  )
+
+(define-pmacro (sd-a16-An-indirect-offset s4s3s2 s1s0 d4d3d2 pfx rtype reg scode s1s0-v code off)
+  (begin
+    (dndo (.sym "sd-a16-An-indirect-offset-" rtype "-" scode s1s0-v off pfx)
+	  rtype
+	  (off reg)
+	  (.str "$" off "[$" reg "]")
+	  d4d3d2
+	  (+ (d4d3d2 code) reg off)
+	  (andif (eq s4s3s2 scode)
+		 (eq s1s0 s1s0-v)
+		 (eq d4d3d2 code)
+		 (eq d1d0 d1d0-v))
+	  (ext SI (mem rtype reg))
+	  () ; no setter
+	  )
+    )
+  )
+
+(define-pmacro (sd-a16-absolute s4s3s2 s1s0 d4d3d2 pfx rtype scode s1s0-v code d1d0 d1d0-v off)
+  (begin
+    (dndo (.sym "sd-a16-absolute-" rtype "-" scode s1s0-v off pfx)
+	  rtype
+	  (off)
+	  (.str "$" off)
+	  d4d3d2
+	  (+ (d4d3d2 code) (d1d0 d1d0-v) off)
+	  (andif (eq s4s3s2 scode)
+		 (eq s1s0 s1s0-v)
+		 (eq d4d3d2 code)
+		 (eq d1d0 d1d0-v))
+	  (ext SI (mem rtype reg))
+	  () ; no setter
+	  )
+    )
+  )
+
+(define-pmacro (sd-a24-An-indirect-offset s4s3s2 s1s0 d4d3d2 pfx rtype reg scode code off)
+  (begin
+    (dndo (.sym "sd-a24-An-indirect-offset-" rtype "-" scode off pfx)
+	  rtype
+	  (off reg)
+	  (.str "$" off "[$" reg "]")
+	  d4d3d2
+	  (+ (d4d3d2 code) reg off)
+	  (andif (ne s1s0 3)
+		 (eq s4s3s2 scode)
+		 (eq d4d3d2 code))
+	  (ext SI (mem rtype reg))
+	  () ; no setter
+	  )
+    )
+  )
+
+(define-pmacro (sd-a24-absolute s4s3s2 s1s0 d4d3d2 pfx rtype scode code d1d0 d1d0-v off)
+  (begin
+    (dndo (.sym "sd-a24-absolute-" rtype "-" scode off pfx)
+	  rtype
+	  (off)
+	  (.str "$" off)
+	  d4d3d2
+	  (+ (d4d3d2 code) (d1d0 d1d0-v) off)
+	  (andif (ne s1s0 3)
+		 (eq s4s3s2 scode)
+		 (eq d4d3d2 code)
+		 (eq d1d0 d1d0-v))
+	  (ext SI (mem rtype reg))
+	  () ; no setter
+	  )
+    )
+  )
+
+; source has no displacement
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI Ansfd82 4 1 imm168)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI Ansfd82 4 1 imm168)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI Ansfd82 4 2 imm1616)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI Ansfd82 4 2 imm1616)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI And82 4 3 imm1624)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI And82 4 3 imm1624)
+(sd-absolute f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI 4 3 f-dst-8-2 3 abs1616)
+(sd-absolute f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI 4 3 f-dst-8-2 2 abs1624)
+(sd-absolute f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI 4 3 f-dst-8-2 3 abs1616)
+(sd-absolute f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI 4 3 f-dst-8-2 2 abs1624)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI Ansfd82 0 1 imm168)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI Ansfd82 0 1 imm168)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI Ansfd82 0 2 imm1616)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI Ansfd82 0 2 imm1616)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI And82 0 3 imm1624)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI And82 0 3 imm1624)
+(sd-absolute f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI 0 3 f-dst-8-2 3 abs1616)
+(sd-absolute f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI 0 3 f-dst-8-2 2 abs1624)
+(sd-absolute f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI 0 3 f-dst-8-2 3 abs1616)
+(sd-absolute f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI 0 3 f-dst-8-2 2 abs1624)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI Ansfd162 4 1 imm248)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI Ansfd162 4 1 imm248)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI Ansfd162 4 2 imm2416)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI Ansfd162 4 2 imm2416)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI And162 4 3 imm2424)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI And162 4 3 imm2424)
+(sd-absolute f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI 4 3 f-dst-16-2 3 abs2416)
+(sd-absolute f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI 4 3 f-dst-16-2 2 abs2424)
+(sd-absolute f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI 4 3 f-dst-16-2 3 abs2416)
+(sd-absolute f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI 4 3 f-dst-16-2 2 abs2424)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI Ansfd162 0 1 imm248)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI Ansfd162 0 1 imm248)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI Ansfd162 0 2 imm2416)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI Ansfd162 0 2 imm2416)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI And162 0 3 imm2424)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI And162 0 3 imm2424)
+(sd-absolute f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI 0 3 f-dst-16-2 3 abs2416)
+(sd-absolute f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI 0 3 f-dst-16-2 2 abs2424)
+(sd-absolute f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI 0 3 f-dst-16-2 3 abs2416)
+(sd-absolute f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI 0 3 f-dst-16-2 2 abs2424)
+
+; source has 8 bit displacement
+
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI Ansfd82 1 1 imm248)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI Ansfd82 1 1 imm248)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI Ansfd82 1 2 imm2416)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI Ansfd82 1 2 imm2416)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI And82 1 3 imm2424)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI And82 1 3 imm2424)
+(sd-absolute f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI 1 3 f-dst-8-2 3 abs2416)
+(sd-absolute f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI 1 3 f-dst-8-2 2 abs2424)
+(sd-absolute f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI 1 3 f-dst-8-2 3 abs2416)
+(sd-absolute f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI 1 3 f-dst-8-2 2 abs2424)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI Ansfd162 1 1 imm328)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI Ansfd162 1 1 imm328)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI Ansfd162 1 2 imm3216)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI Ansfd162 1 2 imm3216)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI And162 1 3 imm3224)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI And162 1 3 imm3224)
+(sd-absolute f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI 1 3 f-dst-16-2 3 abs3216)
+(sd-absolute f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI 1 3 f-dst-16-2 2 abs3224)
+(sd-absolute f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI 1 3 f-dst-16-2 3 abs3216)
+(sd-absolute f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI 1 3 f-dst-16-2 2 abs3224)
+
+; source has 16 bit displacement
+
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI Ansfd82 2 1 imm328)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI Ansfd82 2 1 imm328)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI Ansfd82 2 2 imm3216)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI Ansfd82 2 2 imm3216)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI And82 2 3 imm3224)
+(sd-An-indirect-offset f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI And82 2 3 imm3224)
+(sd-absolute f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI 2 3 f-dst-8-2 3 abs3216)
+(sd-absolute f-s4s3s2-1-3 f-d4d3d2-4-3 "" QI 2 3 f-dst-8-2 2 abs3224)
+(sd-absolute f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI 2 3 f-dst-8-2 3 abs3216)
+(sd-absolute f-s4s3s2-1-3 f-d4d3d2-4-3 "" HI 2 3 f-dst-8-2 2 abs3224)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI Ansfd162 2 1 imm408)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI Ansfd162 2 1 imm408)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI Ansfd162 2 2 imm4016)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI Ansfd162 2 2 imm4016)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI And162 2 3 imm4024)
+(sd-An-indirect-offset f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI And162 2 3 imm4024)
+(sd-absolute f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI 2 3 f-dst-16-2 3 abs4016)
+(sd-absolute f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" QI 2 3 f-dst-16-2 2 abs4024)
+(sd-absolute f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI 2 3 f-dst-16-2 3 abs4016)
+(sd-absolute f-s4s3s2-9-3 f-d4d3d2-12-3 "-pfx" HI 2 3 f-dst-16-2 2 abs4024)
+
+; source has 16 bit absolute
+
+(sd-a16-An-indirect-offset f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" QI Ansfd82 3 3 1 imm328)
+(sd-a16-An-indirect-offset f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" HI Ansfd82 3 3 1 imm328)
+(sd-a16-An-indirect-offset f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" QI Ansfd82 3 3 2 imm3216)
+(sd-a16-An-indirect-offset f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" HI Ansfd82 3 3 2 imm3216)
+(sd-a16-An-indirect-offset f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" QI And82 3 3 3 imm3224)
+(sd-a16-An-indirect-offset f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" HI And82 3 3 3 imm3224)
+(sd-a16-absolute f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" QI 3 3 3 f-dst-8-2 3 abs3216)
+(sd-a16-absolute f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" QI 3 3 3 f-dst-8-2 2 abs3224)
+(sd-a16-absolute f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" HI 3 3 3 f-dst-8-2 3 abs3216)
+(sd-a16-absolute f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" HI 3 3 3 f-dst-8-2 2 abs3224)
+(sd-a16-An-indirect-offset f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" QI Ansfd162 3 3 1 imm408)
+(sd-a16-An-indirect-offset f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" HI Ansfd162 3 3 1 imm408)
+(sd-a16-An-indirect-offset f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" QI Ansfd162 3 3 2 imm4016)
+(sd-a16-An-indirect-offset f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" HI Ansfd162 3 3 2 imm4016)
+(sd-a16-An-indirect-offset f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" QI And162 3 3 3 imm4024)
+(sd-a16-An-indirect-offset f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" HI And162 3 3 3 imm4024)
+(sd-a16-absolute f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" QI 3 3 3 f-dst-16-2 3 abs4016)
+(sd-a16-absolute f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" QI 3 3 3 f-dst-16-2 2 abs4024)
+(sd-a16-absolute f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" HI 3 3 3 f-dst-16-2 3 abs4016)
+(sd-a16-absolute f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" HI 3 3 3 f-dst-16-2 2 abs4024)
+
+; source has 24 bit displacement
+
+(sd-a24-An-indirect-offset f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" QI Ansfd82 3 1 imm408)
+(sd-a24-An-indirect-offset f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" HI Ansfd82 3 1 imm408)
+(sd-a24-An-indirect-offset f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" QI Ansfd82 3 2 imm4016)
+(sd-a24-An-indirect-offset f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" HI Ansfd82 3 2 imm4016)
+(sd-a24-An-indirect-offset f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" QI And82 3 3 imm4024)
+(sd-a24-An-indirect-offset f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" HI And82 3 3 imm4024)
+(sd-a24-absolute f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" QI 3 3 f-dst-8-2 3 abs4016)
+(sd-a24-absolute f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" QI 3 3 f-dst-8-2 2 abs4024)
+(sd-a24-absolute f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" HI 3 3 f-dst-8-2 3 abs4016)
+(sd-a24-absolute f-s4s3s2-1-3 f-src-10-2 f-d4d3d2-4-3 "" HI 3 3 f-dst-8-2 2 abs4024)
+(sd-a24-An-indirect-offset f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" QI Ansfd162 3 1 imm488)
+(sd-a24-An-indirect-offset f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" HI Ansfd162 3 1 imm488)
+(sd-a24-An-indirect-offset f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" QI Ansfd162 3 2 imm4816)
+(sd-a24-An-indirect-offset f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" HI Ansfd162 3 2 imm4816)
+(sd-a24-An-indirect-offset f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" QI And162 3 3 imm4824)
+(sd-a24-An-indirect-offset f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" HI And162 3 3 imm4824)
+(sd-a24-absolute f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" QI 3 3 f-dst-16-2 3 abs4816)
+(sd-a24-absolute f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" QI 3 3 f-dst-16-2 2 abs4824)
+(sd-a24-absolute f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" HI 3 3 f-dst-16-2 3 abs4816)
+(sd-a24-absolute f-s4s3s2-9-3 f-src-18-2 f-d4d3d2-12-3 "-pfx" HI 3 3 f-dst-16-2 2 abs4824)
+
+(define-anyof-operand
+  (name sd-qi)
+  (comment "source qimode operand")
+  (mode QI)
+  (choices
+   d-Rn-direct-QI
+   d-An-direct-HI
+   d-An-indirect-QI
+   sd-An-indirect-offset-QI-4imm168
+   sd-An-indirect-offset-QI-4imm1616
+   sd-An-indirect-offset-QI-4imm1624
+   sd-absolute-QI-4abs1616
+   sd-absolute-QI-4abs1624
+   sd-An-indirect-offset-QI-0imm168
+   sd-An-indirect-offset-QI-0imm1616
+   sd-An-indirect-offset-QI-0imm1624
+   sd-absolute-QI-0abs1616
+   sd-absolute-QI-0abs1624
+   sd-An-indirect-offset-QI-1imm248
+   sd-An-indirect-offset-QI-1imm2416
+   sd-An-indirect-offset-QI-1imm2424
+   sd-absolute-QI-1abs2416
+   sd-absolute-QI-1abs2424
+   sd-An-indirect-offset-QI-2imm328
+   sd-An-indirect-offset-QI-2imm3216
+   sd-An-indirect-offset-QI-2imm3224
+   sd-absolute-QI-2abs3216
+   sd-absolute-QI-2abs3224
+   sd-a24-An-indirect-offset-QI-3imm408
+   sd-a24-An-indirect-offset-QI-3imm4016
+   sd-a24-An-indirect-offset-QI-3imm4024
+   sd-a24-absolute-QI-3abs4016
+   sd-a24-absolute-QI-3abs4024
+; s-An-indirect-offset-XI-imm1624-sd-a16-absolute-XI-33abs322
+; is incorrectly matched if we reverse -3imm/-33imm operand order
+   sd-a16-An-indirect-offset-QI-33imm328
+   sd-a16-An-indirect-offset-QI-33imm3216
+   sd-a16-An-indirect-offset-QI-33imm3224
+   sd-a16-absolute-QI-33abs3216
+   sd-a16-absolute-QI-33abs3224
+   )
+  )
+
+(define-anyof-operand
+  (name sd-hi)
+  (comment "source himode operand")
+  (mode HI)
+  (choices
+   d-Rn-direct-HI
+   d-An-direct-HI
+   d-An-indirect-HI
+   sd-An-indirect-offset-HI-4imm168
+   sd-An-indirect-offset-HI-4imm1616
+   sd-An-indirect-offset-HI-4imm1624
+   sd-absolute-HI-4abs1616
+   sd-absolute-HI-4abs1624
+   sd-An-indirect-offset-HI-0imm168
+   sd-An-indirect-offset-HI-0imm1616
+   sd-An-indirect-offset-HI-0imm1624
+   sd-absolute-HI-0abs1616
+   sd-absolute-HI-0abs1624
+   sd-An-indirect-offset-HI-1imm248
+   sd-An-indirect-offset-HI-1imm2416
+   sd-An-indirect-offset-HI-1imm2424
+   sd-absolute-HI-1abs2416
+   sd-absolute-HI-1abs2424
+   sd-An-indirect-offset-HI-2imm328
+   sd-An-indirect-offset-HI-2imm3216
+   sd-An-indirect-offset-HI-2imm3224
+   sd-absolute-HI-2abs3216
+   sd-absolute-HI-2abs3224
+   sd-a24-An-indirect-offset-HI-3imm408
+   sd-a24-An-indirect-offset-HI-3imm4016
+   sd-a24-An-indirect-offset-HI-3imm4024
+   sd-a24-absolute-HI-3abs4016
+   sd-a24-absolute-HI-3abs4024
+; s-An-indirect-offset-XI-imm1624-sd-a16-absolute-XI-33abs322
+; is incorrectly matched if we reverse -3imm/-33imm operand order
+   sd-a16-An-indirect-offset-HI-33imm328
+   sd-a16-An-indirect-offset-HI-33imm3216
+   sd-a16-An-indirect-offset-HI-33imm3224
+   sd-a16-absolute-HI-33abs3216
+   sd-a16-absolute-HI-33abs3224
+   )
+  )
+
+(define-anyof-operand
+  (name sd-si)
+  (comment "source himode operand")
+  (mode SI)
+  (choices
+   d-Rn-direct-SI
+   d-An-direct-HI
+   d-An-indirect-HI
+   sd-An-indirect-offset-HI-4imm168
+   sd-An-indirect-offset-HI-4imm1616
+   sd-An-indirect-offset-HI-4imm1624
+   sd-absolute-HI-4abs1616
+   sd-absolute-HI-4abs1624
+   sd-An-indirect-offset-HI-0imm168
+   sd-An-indirect-offset-HI-0imm1616
+   sd-An-indirect-offset-HI-0imm1624
+   sd-absolute-HI-0abs1616
+   sd-absolute-HI-0abs1624
+   sd-An-indirect-offset-HI-1imm248
+   sd-An-indirect-offset-HI-1imm2416
+   sd-An-indirect-offset-HI-1imm2424
+   sd-absolute-HI-1abs2416
+   sd-absolute-HI-1abs2424
+   sd-An-indirect-offset-HI-2imm328
+   sd-An-indirect-offset-HI-2imm3216
+   sd-An-indirect-offset-HI-2imm3224
+   sd-absolute-HI-2abs3216
+   sd-absolute-HI-2abs3224
+   sd-a24-An-indirect-offset-HI-3imm408
+   sd-a24-An-indirect-offset-HI-3imm4016
+   sd-a24-An-indirect-offset-HI-3imm4024
+   sd-a24-absolute-HI-3abs4016
+   sd-a24-absolute-HI-3abs4024
+; s-An-indirect-offset-XI-imm1624-sd-a16-absolute-XI-33abs322
+; is incorrectly matched if we reverse -3imm/-33imm operand order
+   sd-a16-An-indirect-offset-HI-33imm328
+   sd-a16-An-indirect-offset-HI-33imm3216
+   sd-a16-An-indirect-offset-HI-33imm3224
+   sd-a16-absolute-HI-33abs3216
+   sd-a16-absolute-HI-33abs3224
+   )
+  )
+
+(define-anyof-operand
+  (name sd-qi-pfx)
+  (comment "source qimode operand")
+  (mode QI)
+  (choices
+   d-Rn-direct-QI-pfx
+   d-An-direct-HI-pfx
+   d-An-indirect-QI-pfx
+   sd-An-indirect-offset-QI-4imm248-pfx
+   sd-An-indirect-offset-QI-4imm2416-pfx
+   sd-An-indirect-offset-QI-4imm2424-pfx
+   sd-absolute-QI-4abs2416-pfx
+   sd-absolute-QI-4abs2424-pfx
+   sd-An-indirect-offset-QI-0imm248-pfx
+   sd-An-indirect-offset-QI-0imm2416-pfx
+   sd-An-indirect-offset-QI-0imm2424-pfx
+   sd-absolute-QI-0abs2416-pfx
+   sd-absolute-QI-0abs2424-pfx
+   sd-An-indirect-offset-QI-1imm328-pfx
+   sd-An-indirect-offset-QI-1imm3216-pfx
+   sd-An-indirect-offset-QI-1imm3224-pfx
+   sd-absolute-QI-1abs3216-pfx
+   sd-absolute-QI-1abs3224-pfx
+   sd-An-indirect-offset-QI-2imm408-pfx
+   sd-An-indirect-offset-QI-2imm4016-pfx
+   sd-An-indirect-offset-QI-2imm4024-pfx
+   sd-absolute-QI-2abs4016-pfx
+   sd-absolute-QI-2abs4024-pfx
+   sd-a16-An-indirect-offset-QI-33imm408-pfx
+   sd-a16-An-indirect-offset-QI-33imm4016-pfx
+   sd-a16-An-indirect-offset-QI-33imm4024-pfx
+   sd-a16-absolute-QI-33abs4016-pfx
+   sd-a16-absolute-QI-33abs4024-pfx
+   sd-a24-An-indirect-offset-QI-3imm488-pfx
+   sd-a24-An-indirect-offset-QI-3imm4816-pfx
+   sd-a24-An-indirect-offset-QI-3imm4824-pfx
+   sd-a24-absolute-QI-3abs4816-pfx
+   sd-a24-absolute-QI-3abs4824-pfx
+   )
+  )
+
+(define-anyof-operand
+  (name sd-hi-pfx)
+  (comment "source qimode operand")
+  (mode HI)
+  (choices
+   d-Rn-direct-HI-pfx
+   d-An-direct-HI-pfx
+   d-An-indirect-HI-pfx
+   sd-An-indirect-offset-HI-4imm248-pfx
+   sd-An-indirect-offset-HI-4imm2416-pfx
+   sd-An-indirect-offset-HI-4imm2424-pfx
+   sd-absolute-HI-4abs2416-pfx
+   sd-absolute-HI-4abs2424-pfx
+   sd-An-indirect-offset-HI-0imm248-pfx
+   sd-An-indirect-offset-HI-0imm2416-pfx
+   sd-An-indirect-offset-HI-0imm2424-pfx
+   sd-absolute-HI-0abs2416-pfx
+   sd-absolute-HI-0abs2424-pfx
+   sd-An-indirect-offset-HI-1imm328-pfx
+   sd-An-indirect-offset-HI-1imm3216-pfx
+   sd-An-indirect-offset-HI-1imm3224-pfx
+   sd-absolute-HI-1abs3216-pfx
+   sd-absolute-HI-1abs3224-pfx
+   sd-An-indirect-offset-HI-2imm408-pfx
+   sd-An-indirect-offset-HI-2imm4016-pfx
+   sd-An-indirect-offset-HI-2imm4024-pfx
+   sd-absolute-HI-2abs4016-pfx
+   sd-absolute-HI-2abs4024-pfx
+   sd-a16-An-indirect-offset-HI-33imm408-pfx
+   sd-a16-An-indirect-offset-HI-33imm4016-pfx
+   sd-a16-An-indirect-offset-HI-33imm4024-pfx
+   sd-a16-absolute-HI-33abs4016-pfx
+   sd-a16-absolute-HI-33abs4024-pfx
+   sd-a24-An-indirect-offset-HI-3imm488-pfx
+   sd-a24-An-indirect-offset-HI-3imm4816-pfx
+   sd-a24-An-indirect-offset-HI-3imm4824-pfx
+   sd-a24-absolute-HI-3abs4816-pfx
+   sd-a24-absolute-HI-3abs4824-pfx
+   )
+)
+
+(dndo bsr-Rn-direct-r0l
+      QI
+      ()
+      "r0l"
+      f-bs-2-2
+      (+ (f-bs-2-2 0))
+      (eq f-bs-2-2 0)
+      (ext SI (reg QI h-gr-qi 2))
+      (ext SI (reg QI h-gr-qi 2))
+      )
+
+(dndo bsr-Rn-direct-r0
+      HI
+      ()
+      "r0"
+      f-bs-2-2
+      (+ (f-bs-2-2 0))
+      (eq f-bs-2-2 0)
+      (ext SI (reg QI h-gr-qi 2))
+      (ext SI (reg QI h-gr-qi 2))
+      )
+
+(dndo bsr-An-indirect-offset-sb
+      QI
+      (imm168)
+      "$imm88[sb]"
+      f-bs-2-2
+      (+ (f-bs-2-2 2) imm88)
+      (eq f-bs-2-2 2)
+      (ext SI (mem QI (add SI (reg h-ar-sb-fb 2) imm88)))
+      (ext SI (mem QI (add SI (reg h-ar-sb-fb 2) imm88)))
+      )
+
+(dndo bsr-An-indirect-offset-fb
+      QI
+      (imm88)
+      "$imm88[fb]"
+      f-bs-2-2
+      (+ (f-bs-2-2 3) imm88)
+      (eq f-bs-2-2 3)
+      (ext SI (mem QI (add SI (reg h-ar-sb-fb 3) imm88)))
+      (ext SI (mem QI (add SI (reg h-ar-sb-fb 3) imm88)))
+      )
+
+(dndo bsr-absolute
+      QI
+      (abs816)
+      "$abs816"
+      f-bs-2-2
+      (+ (f-bs-2-2 1) abs816)
+      (eq f-bs-2-2 1)
+      (ext SI (mem QI abs816))
+      (ext SI (mem QI abs816))
+      )
+
+(define-anyof-operand
+  (name bsr-qi)
+  (comment ".B.S qimode operand")
+  (mode QI)
+  (choices
+   bsr-Rn-direct-r0l
+   bsr-An-indirect-offset-sb
+   bsr-An-indirect-offset-fb
+   bsr-absolute
+   )
+  )
+
+(define-anyof-operand
+  (name bsr-nor-qi)
+  (comment ".B.S qimode operand without r0")
+  (mode QI)
+  (choices
+   bsr-An-indirect-offset-sb
+   bsr-An-indirect-offset-fb
+   bsr-absolute
+   )
+  )
+
+(define-anyof-operand
+  (name bsr-hi)
+  (comment ".W.S himode operand")
+  (mode HI)
+  (choices
+   bsr-Rn-direct-r0
+   bsr-An-indirect-offset-sb
+   bsr-An-indirect-offset-fb
+   bsr-absolute
+   )
+  )
+
+(define-anyof-operand
+  (name bsr-nor-hi)
+  (comment ".W.S himode operand without r0")
+  (mode HI)
+  (choices
+   bsr-An-indirect-offset-sb
+   bsr-An-indirect-offset-fb
+   bsr-absolute
+   )
+  )
+
+(define-pmacro (bsr-imm d1d0 rtype code imm)
+  (begin
+    (dndo (.sym "bsr-imm-" rtype "-" code)
+	  rtype
+	  (imm)
+	  (.str "#${" imm "}")
+	  imm
+	  (+ imm)
+	  (eq d1d0 code)
+	  (ext SI imm)
+	  (ext SI imm)
+	  )
+    )
+  )
+
+(bsr-imm #:d1d0 f-bs-2-2 #:rtype QI #:code 0 #:imm imm88)
+(bsr-imm #:d1d0 f-bs-2-2 #:rtype QI #:code 1 #:imm imm248)
+(bsr-imm #:d1d0 f-bs-2-2 #:rtype QI #:code 2 #:imm imm168)
+(bsr-imm #:d1d0 f-bs-2-2 #:rtype QI #:code 3 #:imm imm168)
+(bsr-imm #:d1d0 f-bs-2-2 #:rtype HI #:code 0 #:imm imm816)
+(bsr-imm #:d1d0 f-bs-2-2 #:rtype HI #:code 1 #:imm imm2416)
+(bsr-imm #:d1d0 f-bs-2-2 #:rtype HI #:code 2 #:imm imm1616)
+(bsr-imm #:d1d0 f-bs-2-2 #:rtype HI #:code 3 #:imm imm1616)
+
+
+(define-anyof-operand
+  (name bsr-qi-imm)
+  (comment "source qimode offset")
+  (mode QI)
+  (choices
+   bsr-imm-QI-0
+   bsr-imm-QI-1
+   bsr-imm-QI-2
+   bsr-imm-QI-3
+   )
+  )
+
+(define-anyof-operand
+  (name bsr-hi-imm)
+  (comment "source himode offset")
+  (mode HI)
+  (choices
+   bsr-imm-HI-0
+   bsr-imm-HI-1
+   bsr-imm-HI-2
+   bsr-imm-HI-3
+   )
+  )
+
+; Offset
+(define-pmacro (s-off d4d3d2 pfx rtype code imm)
+  (begin
+    (dndo (.sym "s-off-" rtype "-" code pfx)
+	  rtype
+	  (imm)
+	  (.str "${" imm "}")
+	  imm
+	  (+ imm)
+	  (eq d4d3d2 code)
+	  (ext SI imm)
+	  () ; no setter
+	  )
+    )
+  )
+
+(s-off f-d4d3d2-4-3 "" QI 4 imm168)
+(s-off f-d4d3d2-4-3 "" QI 0 imm168)
+(s-off f-d4d3d2-4-3 "" QI 1 imm248)
+(s-off f-d4d3d2-4-3 "" QI 2 imm328)
+(s-off f-d4d3d2-4-3 "" QI 3 imm408)
+(s-off f-d4d3d2-4-3 "-eoff" QI 4 eoffset2-168)
+(s-off f-d4d3d2-4-3 "-eoff" QI 0 eoffset2-168)
+(s-off f-d4d3d2-4-3 "-eoff" QI 1 eoffset2-248)
+(s-off f-d4d3d2-4-3 "-eoff" QI 2 eoffset2-328)
+(s-off f-d4d3d2-4-3 "-eoff" QI 3 eoffset2-408)
+
+(define-anyof-operand
+  (name s-qi-eoff)
+  (comment "source qimode eoffset")
+  (mode QI)
+  (choices
+   s-off-QI-0-eoff
+   s-off-QI-1-eoff
+   s-off-QI-2-eoff
+   s-off-QI-3-eoff
+   s-off-QI-4-eoff
+   )
+  )
+
+(define-anyof-operand
+  (name s-qi-off)
+  (comment "source qimode offset")
+  (mode QI)
+  (choices
+   s-off-QI-0
+   s-off-QI-1
+   s-off-QI-2
+   s-off-QI-3
+   s-off-QI-4
+   )
+  )
+
+
+; Instructions
+
+(dni abs.b "abs.b dest" (MACH32)
+     ("abs.b ${d-qi}")
+     (+ OP1_A d-qi (f-size-7-1 0) (f-op-10-2 1) OP4_F)
+     (unary-sem QI abs d-qi)
+     ())
+
+(dni abs.w "abs.w dest" (MACH32)
+     ("abs.w ${d-hi}")
+     (+ OP1_A d-hi (f-size-7-1 1) (f-op-10-2 1) OP4_F)
+     (unary-sem HI abs d-hi)
+     ())
+
+(dni adci.b "adc.b #imm,dest" (MACH32)
+     ("adc.b ${s-qi-imm-pfx},${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_8 d-qi-pfx (f-size-15-1 0) (f-op-18-2 2) OP6_E s-qi-imm-pfx)
+     (nop)
+     ())
+
+(dni adci.w "adc.w #imm,dest" (MACH32)
+     ("adc.w ${s-hi-imm-pfx},${d-hi-pfx}")
+     (+ OP1_0 OP2_1 OP3_8 d-hi-pfx (f-size-15-1 1) (f-op-18-2 2) OP6_E s-hi-imm-pfx)
+     (nop)
+     ())
+
+(dni adc.b "adc.b src,dest" (MACH32)
+     ("adc.b ${s-qi-pfx},${sd-qi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-qi-pfx sd-qi-pfx (f-size-15-1 0) OP6_4)
+     (nop)
+     ())
+
+(dni adc.w "adc.w src,dest" (MACH32)
+     ("adc.w ${s-hi-pfx},${sd-hi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-hi-pfx sd-hi-pfx (f-size-15-1 1) OP6_4)
+     (nop)
+     ())
+
+(dni adcf.b "adcf.b dest" (MACH32)
+     ("adcf.b ${d-qi}")
+     (+ OP1_B d-qi (f-size-7-1 0) (f-op-10-2 1) OP4_E)
+     (nop)
+     ())
+
+(dni adcf.w "adcf.w dest" (MACH32)
+     ("adcf.w ${d-hi}")
+     (+ OP1_B d-hi (f-size-7-1 1) (f-op-10-2 1) OP4_E)
+     (nop)
+     ())
+
+(dni addi.b "add.b #imm,dest" (MACH32)
+     ("add.b ${s-qi-imm},${d-qi}")
+     (+ OP1_8 d-qi (f-size-7-1 0) (f-op-10-2 2) OP4_E s-qi-imm)
+     (nop)
+     ())
+
+(dni addi.w "add.w #imm,dest" (MACH32)
+     ("add.w ${s-hi-imm},${d-hi}")
+     (+ OP1_8 d-hi (f-size-7-1 1) (f-op-10-2 2) OP4_E s-hi-imm)
+     (nop)
+     ())
+
+(dni addil "add.l #imm,dest" (MACH32)
+     ("add.l ${s-si-imm},${d-si}")
+     (+ OP1_8 d-si (f-size-7-1 0) (f-op-10-2 3) OP4_1 s-si-imm)
+     (nop)
+     ())
+
+(dni addi.b:q "add.b:q #imm,dest" (MACH32)
+     ("add.b:q #${immcmp},${d-qi}")
+     (+ OP1_E d-qi (f-size-7-1 0) (f-op-10-2 3) immcmp)
+     (nop)
+     ())
+
+(dni addi.w:q "add.w:q #imm,dest" (MACH32)
+     ("add.w:q #${immcmp},${d-hi}")
+     (+ OP1_E d-hi (f-size-7-1 1) (f-op-10-2 3) immcmp)
+     (nop)
+     ())
+
+(dni addi.l:q "add.l:q #imm,dest" (MACH32)
+     ("add.l:q #${immcmp},${d-si}")
+     (+ OP1_F d-si (f-size-7-1 0) (f-op-10-2 3) immcmp)
+     (nop)
+     ())
+
+(dni add.b:s "add.b:s #imm,dest" (MACH32)
+     ("add.b:s ${bsr-qi-imm},${bsr-qi}")
+     (+ (f-op-0-2 0) bsr-qi OP2_6 bsr-qi-imm)
+     (nop)
+     ())
+
+(dni add.w:s "add.w:s #imm,dest" (MACH32)
+     ("add.w:s ${bsr-hi-imm},${bsr-hi}")
+     (+ (f-op-0-2 0) bsr-hi OP2_7 bsr-hi-imm)
+     (nop)
+     ())
+
+(dni add1a0.l:s "add.l:s #imm,dest" (MACH32)
+     ("add.l:s 1,a0")
+     (+ OP1_8 OP2_C)
+     (nop)
+     ())
+
+(dni add2a0.l:s "add.l:s #imm,dest" (MACH32)
+     ("add.l:s 2,a0")
+     (+ OP1_A OP2_C)
+     (nop)
+     ())
+
+(dni add1a1.l:s "add.l:s #imm,dest" (MACH32)
+     ("add.l:s 1,a1")
+     (+ OP1_8 OP2_D)
+     (nop)
+     ())
+
+(dni add2a1.l:s "add.l:s #imm,dest" (MACH32)
+     ("add.l:s 2,a0")
+     (+ OP1_A OP2_D)
+     (nop)
+     ())
+
+(dni add.b "add.b src,dest" (MACH32)
+     ("add.b ${s-qi},${sd-qi}")
+     (+ (f-op-0-1 1) s-qi sd-qi (f-size-7-1 0) OP4_8)
+     (nop)
+     ())
+
+(dni add.w "add.w src,dest" (MACH32)
+     ("add.w ${s-hi},${sd-hi}")
+     (+ (f-op-0-1 1) s-hi sd-hi (f-size-7-1 1) OP4_8)
+     (nop)
+     ())
+
+(dni add.l "add.l src,dest" (MACH32)
+     ("add.l ${s-si},${sd-si}")
+     (+ (f-op-0-1 1) s-si sd-si (f-size-7-1 1) OP4_2)
+     (nop)
+     ())
+
+(dni add.l:g "add.l:g #imm,dest" (MACH32)
+     ("add.l #${imm1616},sp")
+     (+ OP1_B OP2_6 OP3_1 OP4_3 imm1616)
+     (nop)
+     ())
+
+(dni add1.l:q "add.l:q 1,sp" (MACH32)
+     ("add.l:q 1,sp")
+     (+ OP1_4 OP2_2)
+     (nop)
+     ())
+(dni add2.l:q "add.l:q 2,sp" (MACH32)
+     ("add.l:q 2,sp")
+     (+ OP1_4 OP2_3)
+     (nop)
+     ())
+(dni add3.l:q "add.l:q 3,sp" (MACH32)
+     ("add.l:q 3,sp")
+     (+ OP1_5 OP2_2)
+     (nop)
+     ())
+(dni add4.l:q "add.l:q 4,sp" (MACH32)
+     ("add.l:q 4,sp")
+     (+ OP1_5 OP2_3)
+     (nop)
+     ())
+(dni add5.l:q "add.l:q 5,sp" (MACH32)
+     ("add.l:q 5,sp")
+     (+ OP1_6 OP2_2)
+     (nop)
+     ())
+(dni add6.l:q "add.l:q 6,sp" (MACH32)
+     ("add.l:q 6,sp")
+     (+ OP1_6 OP2_3)
+     (nop)
+     ())
+(dni add7.l:q "add.l:q 7,sp" (MACH32)
+     ("add.l:q 7,sp")
+     (+ OP1_7 OP2_2)
+     (nop)
+     ())
+(dni add8.l:q "add.l:q 8,sp" (MACH32)
+     ("add.l:q 8,sp")
+     (+ OP1_7 OP2_3)
+     (nop)
+     ())
+
+(dni add.l:s "add.l:s #imm,sp" (MACH32)
+     ("add.l:s #${imm168},sp")
+     (+ OP1_B OP2_6 OP3_0 OP4_3 imm168)
+     (nop)
+     ())
+
+(dni addix "addx #imm,dest" (MACH32)
+     ("addx ${s-qi-imm},${d-si}")
+     (+ OP1_8 d-si (f-size-7-1 0) (f-op-10-2 1) OP4_1 s-qi-imm)
+     (nop)
+     ())
+
+(dni addx "addx src,dest" (MACH32)
+     ("addx ${s-qi},${sd-si}")
+     (+ (f-op-0-1 1) s-qi sd-si (f-size-7-1 0) OP4_2)
+     (nop)
+     ())
+
+(dni adjnz.b "adjnz.b #imm, dest, label" (MACH32)
+     ("adjnz.b #${immcmp},${d-qi},${s-qi-eoff}")
+     (+ OP1_F d-qi (f-size-7-1 0) (f-op-10-2 1) immcmp s-qi-eoff)
+     (nop)
+     ())
+
+(dni adjnz.w "adjnz.w #imm, dest, label" (MACH32)
+     ("adjnz.w #${immcmp},${d-hi},${s-qi-eoff}")
+     (+ OP1_F d-hi (f-size-7-1 1) (f-op-10-2 1) immcmp s-qi-eoff)
+     (nop)
+     ())
+
+(dni andi.b "and.b #imm,dest" (MACH32)
+     ("and.b ${s-qi-imm},${d-qi}")
+     (+ OP1_8 d-qi (f-size-7-1 0) (f-op-10-2 3) OP4_F s-qi-imm)
+     (nop)
+     ())
+
+(dni andi.w "and.w #imm,dest" (MACH32)
+     ("and.w ${s-hi-imm},${d-hi}")
+     (+ OP1_8 d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_F s-hi-imm)
+     (nop)
+     ())
+
+(dni and.b:s "and.b:s #imm,dest" (MACH32)
+     ("and.b:s ${bsr-qi-imm},${bsr-qi}")
+     (+ (f-op-0-2 1) bsr-qi OP2_C bsr-qi-imm)
+     (nop)
+     ())
+
+(dni and.w:s "and.b:s #imm,dest" (MACH32)
+     ("and.w:s ${bsr-hi-imm},${bsr-hi}")
+     (+ (f-op-0-2 1) bsr-hi OP2_D bsr-hi-imm)
+     (nop)
+     ())
+
+(dni and.b "and.b src,dest" (MACH32)
+     ("and.b ${s-qi},${sd-qi}")
+     (+ (f-op-0-1 1) s-qi sd-qi (f-size-7-1 0) OP4_D)
+     (nop)
+     ())
+
+(dni and.w "and.w src,dest" (MACH32)
+     ("and.w ${s-hi},${sd-hi}")
+     (+ (f-op-0-1 1) s-hi sd-hi (f-size-7-1 1) OP4_D)
+     (nop)
+     ())
+
+(dni band "band src" (MACH32)
+     ("band ${bitno-pfx},${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_D d-qi-pfx (f-size-15-1 0) (f-op-18-2 0) (f-op-20-1 1)
+	bitno-pfx)
+     (nop)
+     ())
+
+(dni bclr "bclr dest" (MACH32)
+     ("bclr ${bitno},${d-qi}")
+     (+ OP1_D d-qi (f-size-7-1 0) (f-op-10-2 3) (f-op-12-1 0) bitno)
+     (nop)
+     ())
+
+(dni bitindex.b "bitindex.b src" (MACH32)
+     ("bitindex.b ${d-qi}")
+     (+ OP1_C d-qi (f-size-7-1 0) (f-op-10-2 1) OP4_E)
+     (nop)
+     ())
+
+(dni bitindex.w "bitindex.b src" (MACH32)
+     ("bitindex.w ${d-hi}")
+     (+ OP1_C d-hi (f-size-7-1 0) (f-op-10-2 1) OP4_E)
+     (nop)
+     ())
+
+; (dni bmcnd "bm cnd,dest" (MACH32)
+;      ("bm ${s-qi-imm},${bitno},${d-qi}")
+;      (+ OP1_8 d-qi (f-size-7-1 0) (f-op-10-2 1) (f-op-12-1 0) bitno s-qi-imm)
+;      (nop)
+;      ())
+
+; (dnmi bmdltu "bmltu dest" (MACH32)
+;	"bmltu ${bitno},${d-qi}"
+;	(emit bmcnd (s-qi-imm 0) bitno d-qi)) 
+
+; ? make jnc an alias for this
+(dni bmltu "bmltu" (MACH32)
+     ("bmltu c")
+     (+ OP1_D OP2_9 OP3_2 OP4_8)
+     (nop)
+     ())
+
+(dni bmleu "bmleu" (MACH32)
+     ("bmleu c")
+     (+ OP1_D OP2_9 OP3_2 OP4_9)
+     (nop)
+     ())
+
+; ? make jnz an alias for this
+(dni bmne "bmne" (MACH32)
+     ("bmne c")
+     (+ OP1_D OP2_9 OP3_2 OP4_A)
+     (nop)
+     ())
+
+(dni bmpz "bmpz" (MACH32)
+     ("bmpz c")
+     (+ OP1_D OP2_9 OP3_2 OP4_B)
+     (nop)
+     ())
+
+(dni bmno "bmno" (MACH32)
+     ("bmno c")
+     (+ OP1_D OP2_9 OP3_2 OP4_C)
+     (nop)
+     ())
+
+(dni bmgt "bmgt" (MACH32)
+     ("bmgt c")
+     (+ OP1_D OP2_9 OP3_2 OP4_D)
+     (nop)
+     ())
+
+(dni bmge "bmge" (MACH32)
+     ("bmge c")
+     (+ OP1_D OP2_9 OP3_2 OP4_E)
+     (nop)
+     ())
+
+; ? make jc an alias for this
+(dni bmgeu "bmgeu" (MACH32)
+     ("bmgeu c")
+     (+ OP1_D OP2_9 OP3_6 OP4_8)
+     (nop)
+     ())
+
+(dni bmgtu "bmgtu" (MACH32)
+     ("bmgtu c")
+     (+ OP1_D OP2_9 OP3_6 OP4_9)
+     (nop)
+     ())
+
+; ? make jz an alias for this
+(dni bmeq "bmeq" (MACH32)
+     ("bmeq c")
+     (+ OP1_D OP2_9 OP3_6 OP4_A)
+     (nop)
+     ())
+
+(dni bmn "bmn" (MACH32)
+     ("bmn c")
+     (+ OP1_D OP2_9 OP3_6 OP4_B)
+     (nop)
+     ())
+
+(dni bmo "bmo" (MACH32)
+     ("bmo c")
+     (+ OP1_D OP2_9 OP3_6 OP4_C)
+     (nop)
+     ())
+
+(dni bmle "bmle" (MACH32)
+     ("bmle c")
+     (+ OP1_D OP2_9 OP3_6 OP4_D)
+     (nop)
+     ())
+
+(dni bmlt "bmlt" (MACH32)
+     ("bmlt c")
+     (+ OP1_D OP2_9 OP3_6 OP4_E)
+     (nop)
+     ())
+
+(dni bnand "bnand src" (MACH32)
+     ("bnand ${bitno-pfx},${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_D d-qi-pfx (f-size-15-1 0) (f-op-18-2 1) (f-op-20-1 1)
+	bitno-pfx)
+     (nop)
+     ())
+
+(dni bnor "bnor src" (MACH32)
+     ("bnor ${bitno-pfx},${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_D d-qi-pfx (f-size-15-1 0) (f-op-18-2 3) (f-op-20-1 0)
+	bitno-pfx)
+     (nop)
+     ())
+
+(dni bnot "bnot dest" (MACH32)
+     ("bnot ${bitno},${d-qi}")
+     (+ OP1_D d-qi (f-size-7-1 0) (f-op-10-2 0) (f-op-12-1 3) bitno)
+     (nop)
+     ())
+
+(dni bntst "bntst src" (MACH32)
+     ("bntst ${bitno-pfx},${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_D d-qi-pfx (f-size-15-1 0) (f-op-18-2 0) (f-op-20-1 0)
+	bitno-pfx)
+     (nop)
+     ())
+
+(dni bnxor "bnxor src" (MACH32)
+     ("bnxor ${bitno-pfx},${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_D d-qi-pfx (f-size-15-1 0) (f-op-18-2 3) (f-op-20-1 1)
+	bitno-pfx)
+     (nop)
+     ())
+
+(dni bor "bor src" (MACH32)
+     ("bor ${bitno-pfx},${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_D d-qi-pfx (f-size-15-1 0) (f-op-18-2 2) (f-op-20-1 0)
+	bitno-pfx)
+     (nop)
+     ())
+
+(dni brk "brk" (MACH32)
+     ("brk")
+     (+ OP1_0 OP2_0)
+     (nop)
+     ())
+
+(dni brk2 "brk2" (MACH32)
+     ("brk2")
+     (+ OP1_0 OP2_8)
+     (nop)
+     ())
+
+(dni bset "bset dest" (MACH32)
+     ("bset ${bitno},${d-qi}")
+     (+ OP1_D d-qi (f-size-7-1 0) (f-op-10-2 3) (f-op-12-1 1) bitno)
+     (nop)
+     ())
+
+(dni btst "btst dest" (MACH32)
+     ("btst ${bitno},${d-qi}")
+     (+ OP1_D d-qi (f-size-7-1 0) (f-op-10-2 0) (f-op-12-1 0) bitno)
+     (nop)
+     ())
+
+(dni btstc "btstc dest" (MACH32)
+     ("btstc ${bitno},${d-qi}")
+     (+ OP1_D d-qi (f-size-7-1 0) (f-op-10-2 2) (f-op-12-1 0) bitno)
+     (nop)
+     ())
+
+; ?? btst:s src
+
+(dni btsts "btsts dest" (MACH32)
+     ("btsts ${bitno},${d-qi}")
+     (+ OP1_D d-qi (f-size-7-1 0) (f-op-10-2 2) (f-op-12-1 1) bitno)
+     (nop)
+     ())
+
+(dni bxor "bxor src" (MACH32)
+     ("bxor ${bitno-pfx},${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_D d-qi-pfx (f-size-15-1 0) (f-op-18-2 2) (f-op-20-1 1)
+	bitno-pfx)
+     (nop)
+     ())
+
+; ?? clip.size #imm1, #imm2, dest
+
+(dni cmpi.b "cmp.b #imm,dest" (MACH32)
+     ("cmp.b ${s-qi-imm},${d-qi}")
+     (+ OP1_9 d-qi (f-size-7-1 0) (f-op-10-2 2) OP4_E s-qi-imm)
+     (nop)
+     ())
+
+(dni cmpi.w "cmp.w #imm,dest" (MACH32)
+     ("cmp.w ${s-hi-imm},${d-hi}")
+     (+ OP1_9 d-hi (f-size-7-1 1) (f-op-10-2 2) OP4_E s-hi-imm)
+     (nop)
+     ())
+
+(dni cmpil "cmp.l #imm,dest" (MACH32)
+     ("cmp.l ${s-si-imm},${d-si}")
+     (+ OP1_A d-si (f-size-7-1 0) (f-op-10-2 3) OP4_1 s-si-imm)
+     (nop)
+     ())
+
+(dni cmp.b:q "cmp.b:q #imm,dest" (MACH32)
+     ("cmp.b:q #${immcmp},${d-qi}")
+     (+ OP1_E d-qi (f-size-7-1 0) (f-op-10-2 1) immcmp)
+     (nop)
+     ())
+
+(dni cmp.w:q "cmp.w:q #imm,dest" (MACH32)
+     ("cmp.w:q #${immcmp},${d-qi}")
+     (+ OP1_E d-qi (f-size-7-1 1) (f-op-10-2 1) immcmp)
+     (nop)
+     ())
+
+(dni cmpi.b:s "cmp.b:s #imm,dest" (MACH32)
+     ("cmp.b:s ${bsr-qi-imm},${bsr-qi}")
+     (+ (f-op-0-2 1) bsr-qi OP2_6 bsr-qi-imm)
+     (nop)
+     ())
+
+(dni cmpi.w:s "cmp.w:s #imm,dest" (MACH32)
+     ("cmp.w:s ${bsr-hi-imm},${bsr-hi}")
+     (+ (f-op-0-2 1) bsr-hi OP2_7 bsr-hi-imm)
+     (nop)
+     ())
+
+(dni cmp.b "cmp.b src,dest" (MACH32)
+     ("cmp.b ${s-qi},${sd-qi}")
+     (+ (f-op-0-1 1) s-qi sd-qi (f-size-7-1 0) OP4_6)
+     (nop)
+     ())
+
+(dni cmp.w "cmp.w src,dest" (MACH32)
+     ("cmp.w ${s-hi},${sd-hi}")
+     (+ (f-op-0-1 1) s-hi sd-hi (f-size-7-1 1) OP4_6)
+     (nop)
+     ())
+
+(dni cmp.l "cmp.l src,dest" (MACH32)
+     ("cmp.l ${s-si},${sd-si}")
+     (+ (f-op-0-1 1) s-si sd-si (f-size-7-1 1) OP4_1)
+     (nop)
+     ())
+
+(dni cmpr0d.b:s "cmp.b:s src,r0l" (MACH32)
+     ("cmp.b:s ${bsr-nor-qi},r0l")
+     (+ (f-op-0-2 3) bsr-nor-qi OP2_8)
+     (nop)
+     ())
+
+(dni cmpr0d.w:s "cmp.w:s src,r0" (MACH32)
+     ("cmp.w:s ${bsr-nor-qi},r0")
+     (+ (f-op-0-2 3) bsr-nor-qi OP2_9)
+     (nop)
+     ())
+
+(dni cmpx "cmpx #imm,dest" (MACH32)
+     ("cmpx ${s-qi-imm},${d-si}")
+     (+ OP1_C d-si (f-size-7-1 0) (f-op-10-2 1) OP4_1 s-qi-imm)
+     (nop)
+     ())
+
+(dni dadci.b "dadc.b #imm,dest" (MACH32)
+     ("dadc.b ${s-qi-imm-pfx},${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_8 d-qi-pfx (f-size-15-1 0) (f-op-18-2 0) OP6_E s-qi-imm-pfx)
+     (nop)
+     ())
+
+(dni dadci.w "dadc.w #imm,dest" (MACH32)
+     ("dadc.w ${s-hi-imm-pfx},${d-hi-pfx}")
+     (+ OP1_0 OP2_1 OP3_8 d-hi-pfx (f-size-15-1 1) (f-op-18-2 0) OP6_E s-hi-imm-pfx)
+     (nop)
+     ())
+
+(dni dadc.b "dadc.b src,dest" (MACH32)
+     ("dadc.b ${s-qi-pfx},${sd-qi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-qi-pfx sd-qi-pfx (f-size-15-1 0) OP6_8)
+     (nop)
+     ())
+
+(dni dadc.w "dadc.w src,dest" (MACH32)
+     ("dadc.w ${s-hi-pfx},${sd-hi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-hi-pfx sd-hi-pfx (f-size-15-1 1) OP6_8)
+     (nop)
+     ())
+
+(dni daddi.b "dadd.b #imm,dest" (MACH32)
+     ("dadd.b ${s-qi-imm-pfx},${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_8 d-qi-pfx (f-size-15-1 0) (f-op-18-2 1) OP6_E s-qi-imm-pfx)
+     (nop)
+     ())
+
+(dni daddi.w "dadd.w #imm,dest" (MACH32)
+     ("dadd.w ${s-hi-imm-pfx},${d-hi-pfx}")
+     (+ OP1_0 OP2_1 OP3_8 d-hi-pfx (f-size-15-1 1) (f-op-18-2 1) OP6_E s-hi-imm-pfx)
+     (nop)
+     ())
+
+(dni dadd.b "dadd.b src,dest" (MACH32)
+     ("dadd.b ${s-qi-pfx},${sd-qi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-qi-pfx sd-qi-pfx (f-size-15-1 0) OP6_0)
+     (nop)
+     ())
+
+(dni dadd.w "dadd.w src,dest" (MACH32)
+     ("dadd.w ${s-hi-pfx},${sd-hi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-hi-pfx sd-hi-pfx (f-size-15-1 1) OP6_0)
+     (nop)
+     ())
+
+(dni dec.b "dec.b dest" (MACH32)
+     ("dec.b ${d-qi}")
+     (+ OP1_B d-qi (f-size-7-1 0) (f-op-10-2 0) OP4_E)
+     (nop)
+     ())
+
+(dni dec.w "dec.w dest" (MACH32)
+     ("dec.w ${d-hi}")
+     (+ OP1_B d-hi (f-size-7-1 1) (f-op-10-2 0) OP4_E)
+     (nop)
+     ())
+
+(dni divi.b "div.b #imm" (MACH32)
+     ("div.b #${imm168}")
+     (+ OP1_B OP2_0 OP3_4 OP4_3 imm168)
+     (nop)
+     ())
+
+(dni divi.w "div.w #imm" (MACH32)
+     ("div.w #${imm1616}")
+     (+ OP1_B OP2_0 OP3_5 OP4_3 imm1616)
+     (nop)
+     ())
+
+(dni div.b "div.b dest" (MACH32)
+     ("div.b ${d-qi}")
+     (+ OP1_8 d-qi (f-size-7-1 0) (f-op-10-2 1) OP4_E)
+     (nop)
+     ())
+
+(dni div.w "div.w dest" (MACH32)
+     ("div.w ${d-hi}")
+     (+ OP1_8 d-hi (f-size-7-1 1) (f-op-10-2 1) OP4_E)
+     (nop)
+     ())
+
+(dni diviu.b "divu.b #imm" (MACH32)
+     ("divu.b #${imm168}")
+     (+ OP1_B OP2_0 OP3_0 OP4_3 imm168)
+     (nop)
+     ())
+
+(dni diviu.w "divu.w #imm" (MACH32)
+     ("divu.w #${imm1616}")
+     (+ OP1_B OP2_0 OP3_1 OP4_3 imm1616)
+     (nop)
+     ())
+
+(dni divu.b "divu.b dest" (MACH32)
+     ("divu.b ${d-qi}")
+     (+ OP1_8 d-qi (f-size-7-1 0) (f-op-10-2 0) OP4_E)
+     (nop)
+     ())
+
+(dni divu.w "divu.w dest" (MACH32)
+     ("divu.w ${d-hi}")
+     (+ OP1_8 d-hi (f-size-7-1 1) (f-op-10-2 0) OP4_E)
+     (nop)
+     ())
+
+(dni divix.b "divx.b #imm" (MACH32)
+     ("divx.b #${imm168}")
+     (+ OP1_B OP2_2 OP3_4 OP5_3 imm168)
+     (nop)
+     ())
+
+(dni divix.w "divx.w #imm" (MACH32)
+     ("divx.w #${imm1616}")
+     (+ OP1_B OP2_2 OP3_5 OP4_3 imm1616)
+     (nop)
+     ())
+
+(dni divx.b "divx.b dest" (MACH32)
+     ("divx.b ${d-qi}")
+     (+ OP1_9 d-qi (f-size-7-1 0) (f-op-10-2 1) OP4_E)
+     (nop)
+     ())
+
+(dni divx.w "divx.w dest" (MACH32)
+     ("divx.w ${d-hi}")
+     (+ OP1_9 d-hi (f-size-7-1 1) (f-op-10-2 1) OP4_E)
+     (nop)
+     ())
+
+(dni dsbbi.b "dsbb.b #imm,dest" (MACH32)
+     ("dsbb.b ${s-qi-imm-pfx},${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_9 d-qi-pfx (f-size-15-1 0) (f-op-18-2 0) OP6_E s-qi-imm-pfx)
+     (nop)
+     ())
+
+(dni dsbbi.w "dsbb.w #imm,dest" (MACH32)
+     ("dsbb.w ${s-hi-imm-pfx},${d-hi-pfx}")
+     (+ OP1_0 OP2_1 OP3_9 d-hi-pfx (f-size-15-1 1) (f-op-18-2 0) OP6_E s-hi-imm-pfx)
+     (nop)
+     ())
+
+(dni dsbb.b "dsbb.b src,dest" (MACH32)
+     ("dsbb.b ${s-qi-pfx},${sd-qi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-qi-pfx sd-qi-pfx (f-size-15-1 0) OP6_A)
+     (nop)
+     ())
+
+(dni dsbb.w "dsbb.w src,dest" (MACH32)
+     ("dsbb.w ${s-hi-pfx},${sd-hi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-hi-pfx sd-hi-pfx (f-size-15-1 1) OP6_A)
+     (nop)
+     ())
+
+(dni dsubi.b "dsub.b #imm,dest" (MACH32)
+     ("dsub.b ${s-qi-imm-pfx},${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_9 d-qi-pfx (f-size-15-1 0) (f-op-18-2 1) OP6_E s-qi-imm-pfx)
+     (nop)
+     ())
+
+(dni dsubi.w "dsub.w #imm,dest" (MACH32)
+     ("dsub.w ${s-hi-imm-pfx},${d-hi-pfx}")
+     (+ OP1_0 OP2_1 OP3_9 d-hi-pfx (f-size-15-1 1) (f-op-18-2 1) OP6_E s-hi-imm-pfx)
+     (nop)
+     ())
+
+(dni dsub.b "dsub.b src,dest" (MACH32)
+     ("dsub.b ${s-qi-pfx},${sd-qi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-qi-pfx sd-qi-pfx (f-size-15-1 0) OP6_2)
+     (nop)
+     ())
+
+(dni dsub.w "dsub.w src,dest" (MACH32)
+     ("dsub.w ${s-hi-pfx},${sd-hi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-hi-pfx sd-hi-pfx (f-size-15-1 1) OP6_2)
+     (nop)
+     ())
+
+(dni enter "enter #imm" (MACH32)
+     ("enter #${imm88}")
+     (+ OP1_E OP2_C imm88)
+     (nop)
+     ())
+
+(dni exitd "exitd" (MACH32)
+     ("exitd")
+     (+ OP1_F OP2_C)
+     (nop)
+     ())
+
+(dni extsd.b "exts.b dest" (MACH32)
+     ("exts.b ${d-qi}")
+     (+ OP1_C d-qi (f-size-7-1 0) (f-op-10-2 1) OP4_E)
+     (nop)
+     ())
+
+(dni extsd.w "exts.w dest" (MACH32)
+     ("exts.w ${d-hi}")
+     (+ OP1_C d-hi (f-size-7-1 1) (f-op-10-2 1) OP4_E)
+     (nop)
+     ())
+
+(dni exts.b "exts.b src,dest" (MACH32)
+     ("exts.b ${s-qi-pfx},${sd-hi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-qi-pfx sd-hi-pfx (f-size-15-1 0) OP6_7)
+     (nop)
+     ())
+
+(dni extz "extz.b src,dest" (MACH32)
+     ("extz ${s-qi-pfx},${sd-hi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-qi-pfx sd-hi-pfx (f-size-15-1 0) OP6_B)
+     (nop)
+     ())
+
+(dni fclr "fclr" (MACH32)
+     ("fclr ${immflags}")
+     (+ OP1_D OP2_3 OP3_E (f-op-12-1 1) immflags)
+     (nop)
+     ())
+
+(dni freit "FREIT" (MACH32)
+     ("freit")
+     (+ OP1_9 OP2_F)
+     (nop)
+     ())
+
+(dni fset "fset" (MACH32)
+     ("fset ${immflags}")
+     (+ OP1_D OP2_1 OP3_E (f-op-12-1 1) immflags)
+     (nop)
+     ())
+
+(dni inc.b "inc.b dest" (MACH32)
+     ("inc.b ${d-qi}")
+     (+ OP1_A d-qi (f-size-7-1 0) (f-op-10-2 0) OP4_E)
+     (nop)
+     ())
+
+(dni inc.w "inc.w dest" (MACH32)
+     ("inc.w ${d-hi}")
+     (+ OP1_A d-hi (f-size-7-1 1) (f-op-10-2 0) OP4_E)
+     (nop)
+     ())
+
+(dni indexb.b "indexb.b src" (MACH32)
+     ("indexb.b ${d-qi}")
+     (+ OP1_8 d-qi (f-size-7-1 0) (f-op-10-2 0) OP4_3)
+     (nop)
+     ())
+
+(dni indexb.w "indexb.w src" (MACH32)
+     ("indexb.w ${d-hi}")
+     (+ OP1_8 d-hi (f-size-7-1 0) (f-op-10-2 1) OP4_3)
+     (nop)
+     ())
+
+(dni indexbd.b "indexbd.b src" (MACH32)
+     ("indexbd.b ${d-qi}")
+     (+ OP1_A d-qi (f-size-7-1 0) (f-op-10-2 0) OP4_3)
+     (nop)
+     ())
+
+(dni indexbd.w "indexbd.w src" (MACH32)
+     ("indexbd.w ${d-hi}")
+     (+ OP1_A d-hi (f-size-7-1 0) (f-op-10-2 1) OP4_3)
+     (nop)
+     ())
+
+(dni indexbs.b "indexbs.b src" (MACH32)
+     ("indexbs.b ${d-qi}")
+     (+ OP1_C d-qi (f-size-7-1 0) (f-op-10-2 0) OP4_3)
+     (nop)
+     ())
+
+(dni indexbs.w "indexbs.w src" (MACH32)
+     ("indexbs.w ${d-hi}")
+     (+ OP1_C d-hi (f-size-7-1 0) (f-op-10-2 1) OP4_3)
+     (nop)
+     ())
+
+(dni indexl.b "indexl.b src" (MACH32)
+     ("indexl.b ${d-qi}")
+     (+ OP1_9 d-qi (f-size-7-1 0) (f-op-10-2 2) OP4_3)
+     (nop)
+     ())
+
+(dni indexl.w "indexl.w src" (MACH32)
+     ("indexl.w ${d-hi}")
+     (+ OP1_9 d-hi (f-size-7-1 0) (f-op-10-2 3) OP4_3)
+     (nop)
+     ())
+
+(dni indexld.b "indexld.b src" (MACH32)
+     ("indexld.b ${d-qi}")
+     (+ OP1_B d-qi (f-size-7-1 0) (f-op-10-2 2) OP4_3)
+     (nop)
+     ())
+
+(dni indexld.w "indexld.w src" (MACH32)
+     ("indexld.w ${d-hi}")
+     (+ OP1_B d-hi (f-size-7-1 0) (f-op-10-2 3) OP4_3)
+     (nop)
+     ())
+
+(dni indexls.b "indexls.b src" (MACH32)
+     ("indexls.b ${d-qi}")
+     (+ OP1_9 d-qi (f-size-7-1 0) (f-op-10-2 0) OP4_3)
+     (nop)
+     ())
+
+(dni indexls.w "indexls.w src" (MACH32)
+     ("indexls.w ${d-hi}")
+     (+ OP1_9 d-hi (f-size-7-1 0) (f-op-10-2 1) OP4_3)
+     (nop)
+     ())
+
+(dni indexw.b "indexw.b src" (MACH32)
+     ("indexw.b ${d-qi}")
+     (+ OP1_8 d-qi (f-size-7-1 0) (f-op-10-2 2) OP4_3)
+     (nop)
+     ())
+
+(dni indexw.w "indexw.w src" (MACH32)
+     ("indexw.w ${d-hi}")
+     (+ OP1_8 d-hi (f-size-7-1 0) (f-op-10-2 3) OP4_3)
+     (nop)
+     ())
+
+(dni indexwd.b "indexwd.b src" (MACH32)
+     ("indexwd.b ${d-qi}")
+     (+ OP1_A d-qi (f-size-7-1 0) (f-op-10-2 2) OP4_3)
+     (nop)
+     ())
+
+(dni indexwd.w "indexwd.w src" (MACH32)
+     ("indexwd.w ${d-hi}")
+     (+ OP1_A d-hi (f-size-7-1 0) (f-op-10-2 3) OP4_3)
+     (nop)
+     ())
+
+(dni indexws.b "indexws.b src" (MACH32)
+     ("indexws.b ${d-qi}")
+     (+ OP1_C d-qi (f-size-7-1 0) (f-op-10-2 2) OP4_3)
+     (nop)
+     ())
+
+(dni indexws.w "indexws.w src" (MACH32)
+     ("indexws.w ${d-hi}")
+     (+ OP1_C d-hi (f-size-7-1 0) (f-op-10-2 3) OP4_3)
+     (nop)
+     ())
+
+(dni int "int imm" (MACH32)
+     ("int #${imm86}")
+     (+ OP1_B OP2_E imm86 (f-op-14-2 0))
+     (nop)
+     ())
+
+(dni into "into" (MACH32)
+     ("into")
+     (+ OP1_B OP2_F)
+     (nop)
+     ())
+
+(dni jnc "jnc label" (MACH32)
+     ("jnc ${eoffset88}")
+     (+ OP1_8 OP2_A eoffset88)
+     (nop)
+     ())
+
+(dni jltu "jltu label" (MACH32)
+     ("jltu ${eoffset88}")
+     (+ OP1_8 OP2_A eoffset88)
+     (nop)
+     ())
+
+(dni jleu "jleu label" (MACH32)
+     ("jleu ${eoffset88}")
+     (+ OP1_8 OP2_B eoffset88)
+     (nop)
+     ())
+
+(dni jnz "jnz label" (MACH32)
+     ("jnz ${eoffset88}")
+     (+ OP1_9 OP2_A eoffset88)
+     (nop)
+     ())
+
+(dni jne "jne label" (MACH32)
+     ("jne ${eoffset88}")
+     (+ OP1_9 OP2_A eoffset88)
+     (nop)
+     ())
+
+(dni jpz "jpz label" (MACH32)
+     ("jpz ${eoffset88}")
+     (+ OP1_9 OP2_B eoffset88)
+     (nop)
+     ())
+
+(dni jno "jno label" (MACH32)
+     ("jno ${eoffset88}")
+     (+ OP1_A OP2_A eoffset88)
+     (nop)
+     ())
+
+(dni jgt "jgt label" (MACH32)
+     ("jgt ${eoffset88}")
+     (+ OP1_A OP2_B eoffset88)
+     (nop)
+     ())
+
+(dni jge "jge label" (MACH32)
+     ("jge ${eoffset88}")
+     (+ OP1_B OP2_A eoffset88)
+     (nop)
+     ())
+
+(dni jc "jc label" (MACH32)
+     ("jc ${eoffset88}")
+     (+ OP1_C OP2_A eoffset88)
+     (nop)
+     ())
+
+(dni jgeu "jgeu label" (MACH32)
+     ("jgeu ${eoffset88}")
+     (+ OP1_C OP2_A eoffset88)
+     (nop)
+     ())
+
+(dni jgtu "jgtu label" (MACH32)
+     ("jgtu ${eoffset88}")
+     (+ OP1_C OP2_B eoffset88)
+     (nop)
+     ())
+
+(dni jz "jz label" (MACH32)
+     ("jz ${eoffset88}")
+     (+ OP1_D OP2_A eoffset88)
+     (nop)
+     ())
+
+(dni jeq "jeq label" (MACH32)
+     ("jeq ${eoffset88}")
+     (+ OP1_D OP2_A eoffset88)
+     (nop)
+     ())
+
+(dni jn "jn label" (MACH32)
+     ("jn ${eoffset88}")
+     (+ OP1_D OP2_B eoffset88)
+     (nop)
+     ())
+
+(dni jo "jo label" (MACH32)
+     ("jo ${eoffset88}")
+     (+ OP1_E OP2_A eoffset88)
+     (nop)
+     ())
+
+(dni jle "jle label" (MACH32)
+     ("jle ${eoffset88}")
+     (+ OP1_E OP2_B eoffset88)
+     (nop)
+     ())
+
+(dni jlt "jlt label" (MACH32)
+     ("jlt ${eoffset88}")
+     (+ OP1_F OP2_A eoffset88)
+     (nop)
+     ())
+
+(dni jmp2.s "jmp.s label" (MACH32)
+     ("jmp.s .+2")
+     (+ OP1_4 OP2_A)
+     (nop)
+     ())
+(dni jmp3.s "jmp.s label" (MACH32)
+     ("jmp.s .+3")
+     (+ OP1_4 OP2_B)
+     (nop)
+     ())
+(dni jmp4.s "jmp.s label" (MACH32)
+     ("jmp.s .+4")
+     (+ OP1_5 OP2_A)
+     (nop)
+     ())
+(dni jmp5.s "jmp.s label" (MACH32)
+     ("jmp.s .+5")
+     (+ OP1_5 OP2_B)
+     (nop)
+     ())
+(dni jmp6.s "jmp.s label" (MACH32)
+     ("jmp.s .+6")
+     (+ OP1_6 OP2_A)
+     (nop)
+     ())
+(dni jmp7.s "jmp.s label" (MACH32)
+     ("jmp.s .+7")
+     (+ OP1_6 OP2_B)
+     (nop)
+     ())
+(dni jmp8.s "jmp.s label" (MACH32)
+     ("jmp.s .+8")
+     (+ OP1_7 OP2_A)
+     (nop)
+     ())
+(dni jmp9.s "jmp.s label" (MACH32)
+     ("jmp.s .+9")
+     (+ OP1_7 OP2_B)
+     (nop)
+     ())
+
+(dni jmp.b "jmp.b label" (MACH32)
+     ("jmp.b ${eoffset88}")
+     (+ OP1_B OP2_B eoffset88)
+     (nop)
+     ())
+
+(dni jmp.w "jmp.w label" (MACH32)
+     ("jmp.w ${eoffset816}")
+     (+ OP1_C OP2_E eoffset816)
+     (nop)
+     ())
+
+(dni jmp.a "jmp.a label" (MACH32)
+     ("jmp.a ${eoffset824}")
+     (+ OP1_C OP2_C eoffset824)
+     (nop)
+     ())
+
+(dni jmpi.w "jmpi.w dest" (MACH32)
+     ("jmpi.w ${d-hi}")
+     (+ OP1_C d-hi (f-size-7-1 1) (f-op-10-2 0) OP4_F)
+     (nop)
+     ())
+
+(dni jmpi.a "jmpi.a dest" (MACH32)
+     ("jmpi.a ${d-si}")
+     (+ OP1_8 d-si (f-size-7-1 0) (f-op-10-2 0) OP4_1)
+     (nop)
+     ())
+
+(dni jmps "jmps imm" (MACH32)
+     ("jmps #${imm88}")
+     (+ OP1_B OP2_B imm88)
+     (nop)
+     ())
+
+(dni jsr.w "jsr.w label" (MACH32)
+     ("jsr.w ${eoffset816}")
+     (+ OP1_C OP2_F eoffset816)
+     (nop)
+     ())
+
+(dni jsr.a "jsr.a label" (MACH32)
+     ("jsr.a ${eoffset824}")
+     (+ OP1_C OP2_D eoffset824)
+     (nop)
+     ())
+
+(dni jsri.w "jsri.w dest" (MACH32)
+     ("jsri.w ${d-hi}")
+     (+ OP1_C d-hi (f-size-7-1 1) (f-op-10-2 1) OP4_F)
+     (nop)
+     ())
+
+(dni jsri.a "jsri.a dest" (MACH32)
+     ("jsri.a ${d-si}")
+     (+ OP1_9 d-si (f-size-7-1 0) (f-op-10-2 0) OP4_1)
+     (nop)
+     ())
+
+(dni jsrs "jsrs #imm" (MACH32)
+     ("jsrs #${imm88}")
+     (+ OP1_D OP2_D imm88)
+     (nop)
+     ())
+
+(dni ldciqi "ldc #imm,dst" (MACH32)
+     ("ldc #${imm1616},${Cnqi133}")
+     (+ OP1_D OP2_5 OP3_A (f-op-12-1 1) Cnqi133 imm1616)
+     (nop)
+     ())
+
+(dni ldcia "ldc #imm,dst" (MACH32)
+     ("ldc #${imm1624},${Cna}")
+     (+ OP1_D OP2_5 OP3_2 (f-op-12-1 1) Cna imm1624)
+     (nop)
+     ())
+
+(dni ldcib "ldc #imm,dst" (MACH32)
+     ("ldc #${imm1624},${Cnb133}")
+     (+ OP1_D OP2_5 OP3_6 (f-op-12-1 1) Cnb133 imm1624)
+     (nop)
+     ())
+
+(dni ldcqi "ldc src,dst" (MACH32)
+     ("ldc ${d-hi-pfx},${Cnqi213}")
+     (+ OP1_0 OP2_1 OP3_D d-hi-pfx (f-op-15-1 1) (f-op-18-2 0) (f-op-20-1 1) Cnqi213)
+     (nop)
+     ())
+
+(dni ldca "ldc src,dest" (MACH32)
+     ("ldc ${d-si},${Cna}")
+     (+ OP1_D d-si (f-size-7-1 1) (f-op-10-2 0) (f-op-12-1 0) Cna)
+     (nop)
+     ())
+
+(dni ldcb "ldc src,dst" (MACH32)
+     ("ldc ${d-si-pfx},${Cnb213}")
+     (+ OP1_0 OP2_1 OP3_D d-si-pfx (f-op-15-1 1) (f-op-18-2 0) (f-op-20-1 0) Cnb213)
+     (nop)
+     ())
+
+(dni ldctx "ldctx abs16,abs24" (MACH32)
+     ("ldctx ${abs1616},${abs3224}")
+     (+ OP1_B OP2_6 OP3_C OP4_3 abs1616 abs3224)
+     (nop)
+     ())
+
+(dni ldipl "ldipl #imm" (MACH32)
+     ("ldipl #${imm133}")
+     (+ OP1_D OP2_5 OP3_E (f-op-12-1 1) imm133)
+     (nop)
+     ())
+
+(dni maxi.b "max.b dest" (MACH32)
+     ("max.b ${s-qi-imm-pfx},${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_8 d-qi-pfx (f-size-15-1 0) (f-op-18-2 3) OP6_F s-qi-imm-pfx)
+     (nop)
+     ())
+
+(dni maxi.w "max.w dest" (MACH32)
+     ("max.w ${s-hi-imm-pfx},${d-hi-pfx}")
+     (+ OP1_0 OP2_1 OP3_8 d-hi-pfx (f-size-15-1 1) (f-op-18-2 3) OP6_F s-hi-imm-pfx)
+     (nop)
+     ())
+
+(dni max.b "max.b src,dest" (MACH32)
+     ("max.b ${s-qi-pfx},${sd-qi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-qi-pfx sd-qi-pfx (f-size-15-1 0) OP6_D)
+     (nop)
+     ())
+
+(dni max.w "max.w src,dest" (MACH32)
+     ("max.w ${s-hi-pfx},${sd-hi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-hi-pfx sd-hi-pfx (f-size-15-1 1) OP6_D)
+     (nop)
+     ())
+
+(dni mini.b "min.b #imm,dest" (MACH32)
+     ("min.b ${s-qi-imm-pfx},${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_8 d-qi-pfx (f-size-15-1 0) (f-op-18-2 2) OP6_F s-qi-imm-pfx)
+     (nop)
+     ())
+
+(dni mini.w "min.w #imm,dest" (MACH32)
+     ("min.w ${s-hi-imm-pfx},${d-hi-pfx}")
+     (+ OP1_0 OP2_1 OP3_8 d-hi-pfx (f-size-15-1 1) (f-op-18-2 2) OP6_F s-hi-imm-pfx)
+     (nop)
+     ())
+
+(dni min.b "min.b src,dest" (MACH32)
+     ("min.b ${s-qi-pfx},${sd-qi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-qi-pfx sd-qi-pfx (f-size-15-1 0) OP6_C)
+     (nop)
+     ())
+
+(dni min.w "min.w src,dest" (MACH32)
+     ("min.w ${s-hi-pfx},${sd-hi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-hi-pfx sd-hi-pfx (f-size-15-1 1) OP6_C)
+     (nop)
+     ())
+
+(dni movi.b "mov.b #imm,dest" (MACH32)
+     ("mov.b ${s-qi-imm},${d-qi}")
+     (+ OP1_9 d-qi (f-size-7-1 0) (f-op-10-2 2) OP4_F s-qi-imm)
+     (nop)
+     ())
+
+(dni movi.w "mov.w #imm,dest" (MACH32)
+     ("mov.w ${s-hi-imm},${d-hi}")
+     (+ OP1_9 d-hi (f-size-7-1 1) (f-op-10-2 2) OP4_F s-hi-imm)
+     (nop)
+     ())
+
+(dni movil "mov.l #imm,dest" (MACH32)
+     ("mov.l ${s-si-imm},${d-si}")
+     (+ OP1_B d-si (f-size-7-1 0) (f-op-10-2 3) OP4_1 s-si-imm)
+     (nop)
+     ())
+
+(dni mov.b:q "mov.b:q imm4,dest" (MACH32)
+     ("mov.b:q #${immmov},${d-qi}")
+     (+ OP1_F d-qi (f-size-7-1 0) (f-op-10-2 2) immmov)
+     (nop)
+     ())
+
+(dni mov.w:q "mov.w:q imm4,dest" (MACH32)
+     ("mov.w:q #${immmov},${d-hi}")
+     (+ OP1_F d-hi (f-size-7-1 1) (f-op-10-2 2) immmov)
+     (nop)
+     ())
+
+(dni movi.b:s "mov.b:s #imm,dest" (MACH32)
+     ("mov.b:s ${bsr-qi-imm},${bsr-qi}")
+     (+ (f-op-0-2 0) bsr-qi OP2_4 bsr-qi-imm)
+     (nop)
+     ())
+
+(dni movi.w:s "mov.b #imm,dest" (MACH32)
+     ("mov.w:s ${bsr-hi-imm},${bsr-hi}")
+     (+ (f-op-0-2 0) bsr-hi OP2_5 bsr-hi-imm)
+     (nop)
+     ())
+
+(dni movi16a0.w:s "mov.w:s #imm,a0" (MACH32)
+     ("mov.w:s #${imm816},a0")
+     (+ OP1_9 OP2_C imm816)
+     (nop)
+     ())
+(dni movi16a1.w:s "mov.w:s #imm,a1" (MACH32)
+     ("mov.w:s #${imm816},a1")
+     (+ OP1_9 OP2_D imm816)
+     (nop)
+     ())
+(dni movi24a0.l:s "mov.l:s #imm,a0" (MACH32)
+     ("mov.l:s #${imm824},a0")
+     (+ OP1_B OP2_C imm824)
+     (nop)
+     ())
+(dni movi24a1.l:s "mov.l:s #imm,a1" (MACH32)
+     ("mov.l:s #${imm824},a1")
+     (+ OP1_B OP2_D imm824)
+     (nop)
+     ())
+
+(dni mov.b:z "mov.b:z  #0,dest" (MACH32)
+     ("mov.b:z #0,${bsr-qi}")
+     (+ (f-op-0-2 0) bsr-qi OP2_2)
+     (nop)
+     ())
+
+(dni mov.w:z "mov.w:z #0,dest" (MACH32)
+     ("mov.w:z #0,${bsr-hi}")
+     (+ (f-op-0-2 0) bsr-hi OP2_3)
+     (nop)
+     ())
+
+(dni mov.b "mov.b src,dest" (MACH32)
+     ("mov.b ${s-qi},${sd-qi}")
+     (+ (f-op-0-1 1) s-qi sd-qi (f-size-7-1 0) OP4_B)
+     (nop)
+     ())
+
+(dni mov.w "mov.w src,dest" (MACH32)
+     ("mov.w ${s-hi},${sd-hi}")
+     (+ (f-op-0-1 1) s-hi sd-hi (f-size-7-1 1) OP4_B)
+     (nop)
+     ())
+
+(dni mov.l "mov.l src,dest" (MACH32)
+     ("mov.l ${s-si},${sd-si}")
+     (+ (f-op-0-1 1) s-si sd-si (f-size-7-1 1) OP4_3)
+     (nop)
+     ())
+
+(dni movr0d.b:s "mov.b:s src,r0l" (MACH32)
+     ("mov.b:s ${bsr-nor-qi},r0l")
+     (+ (f-op-0-2 0) bsr-nor-qi OP2_8)
+     (nop)
+     ())
+
+(dni movr0d.w:s "mov.w:s src,r0" (MACH32)
+     ("mov.w:s ${bsr-nor-qi},r0")
+     (+ (f-op-0-2 0) bsr-nor-qi OP2_9)
+     (nop)
+     ())
+
+(dni movr1.b:s "mov.b:s src,r1l" (MACH32)
+     ("mov.b:s ${bsr-hi},r1l")
+     (+ (f-op-0-2 1) bsr-hi OP2_E)
+     (nop)
+     ())
+
+(dni movr1.w:s "mov.w:s src,r1" (MACH32)
+     ("mov.w:s ${bsr-hi},r1")
+     (+ (f-op-0-2 1) bsr-hi OP2_F)
+     (nop)
+     ())
+
+(dni movr0.b:s "mov.b:s r0l,dest" (MACH32)
+     ("mov.b:s r0l,${bsr-nor-qi}")
+     (+ (f-op-0-2 0) bsr-nor-qi OP2_0)
+     (nop)
+     ())
+
+(dni movr0.w:s "mov.w:s r0,dest" (MACH32)
+     ("mov.w:s r0,${bsr-nor-qi}")
+     (+ (f-op-0-2 0) bsr-nor-qi OP2_1)
+     (nop)
+     ())
+
+(dni mova0.w:s "mov.b:s src,a0" (MACH32)
+     ("mov.l:s ${bsr-nor-hi},a0")
+     (+ (f-op-0-2 1) bsr-nor-hi OP2_8)
+     (nop)
+     ())
+
+(dni mova1.w:s "mov.w:s src,a1" (MACH32)
+     ("mov.l:s ${bsr-hi},a1")
+     (+ (f-op-0-2 1) bsr-hi OP2_9)
+     (nop)
+     ())
+
+(dni movss.b:g "mov.b:g src,dest" (MACH32)
+     ("mov.b ${imm168}[sp],${d-qi-mov}")
+     (+ OP1_B d-qi-mov (f-size-7-1 0) (f-op-10-2 0) OP4_F imm168)
+     (nop)
+     ())
+
+(dni movss.w:g "mov.w:g src,dest" (MACH32)
+     ("mov.w ${imm168}[sp],${d-hi-mov}")
+     (+ OP1_B d-hi-mov (f-size-7-1 1) (f-op-10-2 0) OP4_F imm168)
+     (nop)
+     ())
+
+(dni movsd.b:g "mov.b:g src,dsp[sp]" (MACH32)
+     ("mov.b ${d-qi},${s-qi-off}[sp]")
+     (+ OP1_A d-qi (f-size-7-1 0) (f-op-10-2 0) OP4_F s-qi-off)
+     (nop)
+     ())
+
+(dni movsd.w:g "mov.w:g src,dsp[sp]" (MACH32)
+     ("mov.w ${d-hi},${s-qi-off}[sp]")
+     (+ OP1_A d-hi (f-size-7-1 1) (f-op-10-2 0) OP4_F s-qi-off)
+     (nop)
+     ())
+
+; ? technically rn,an,[an] not allowed with mova
+(dni movr2r0a "mova src,dest" (MACH32)
+     ("mova ${d-si},r2r0")
+     (+ OP1_D d-si (f-size-7-1 1) (f-op-10-2 1) OP4_8)
+     (nop)
+     ())
+(dni movr3r1a "mova src,dest" (MACH32)
+     ("mova ${d-si},r3r1")
+     (+ OP1_D d-si (f-size-7-1 1) (f-op-10-2 1) OP4_9)
+     (nop)
+     ())
+(dni mova0a "mova src,dest" (MACH32)
+     ("mova ${d-si},a0")
+     (+ OP1_D d-si (f-size-7-1 1) (f-op-10-2 1) OP4_A)
+     (nop)
+     ())
+(dni mova1a "mova src,dest" (MACH32)
+     ("mova ${d-si},a1")
+     (+ OP1_D d-si (f-size-7-1 1) (f-op-10-2 1) OP4_B)
+     (nop)
+     ())
+
+(dni movll "movll r0l,dest" (MACH32)
+     ("movll r0l,${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_B d-qi-pfx (f-size-15-1 0) (f-op-18-2 0) OP6_E)
+     (nop)
+     ())
+
+(dni movhl "movhl r0l,dest" (MACH32)
+     ("movhl r0l,${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_B d-qi-pfx (f-size-15-1 0) (f-op-18-2 1) OP6_E)
+     (nop)
+     ())
+
+(dni movlh "movlh r0l,dest" (MACH32)
+     ("movlh r0l,${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_B d-qi-pfx (f-size-15-1 0) (f-op-18-2 2) OP6_E)
+     (nop)
+     ())
+
+(dni movhh "movhh r0l,dest" (MACH32)
+     ("movhh r0l,${d-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_B d-qi-pfx (f-size-15-1 0) (f-op-18-2 3) OP6_E)
+     (nop)
+     ())
+
+(dni movlls "movll src,r0l" (MACH32)
+     ("movll ${d-qi-pfx},r0l")
+     (+ OP1_0 OP2_1 OP3_A d-qi-pfx (f-size-15-1 0) (f-op-18-2 0) OP6_E)
+     (nop)
+     ())
+
+(dni movhls "movhl src,r0l" (MACH32)
+     ("movhl ${d-qi-pfx},r0l")
+     (+ OP1_0 OP2_1 OP3_A d-qi-pfx (f-size-15-1 0) (f-op-18-2 1) OP6_E)
+     (nop)
+     ())
+
+(dni movlhs "movlh src,r0l" (MACH32)
+     ("movlh ${d-qi-pfx},r0l")
+     (+ OP1_0 OP2_1 OP3_A d-qi-pfx (f-size-15-1 0) (f-op-18-2 2) OP6_E)
+     (nop)
+     ())
+
+(dni movhhs "movhh src,r0l" (MACH32)
+     ("movhh ${d-qi-pfx},r0l,")
+     (+ OP1_0 OP2_1 OP3_A d-qi-pfx (f-size-15-1 0) (f-op-18-2 3) OP6_E)
+     (nop)
+     ())
+
+(dni movx "movx #imm,dest" (MACH32)
+     ("movx ${s-qi-imm},${d-si}")
+     (+ OP1_B d-si (f-size-7-1 0)  (f-op-10-2 1) OP4_1 s-qi-imm)
+     (nop)
+     ())
+
+(dni muli.b "mul.b #imm,dest" (MACH32)
+     ("mul.b ${s-qi-imm},${d-qi}")
+     (+ OP1_8 d-qi (f-size-7-1 0) (f-op-10-2 1) OP4_F s-qi-imm)
+     (nop)
+     ())
+
+(dni muli.w "mul.w #imm,dest" (MACH32)
+     ("mul.w ${s-hi-imm},${d-hi}")
+     (+ OP1_8 d-hi (f-size-7-1 1) (f-op-10-2 1) OP4_F s-hi-imm)
+     (nop)
+     ())
+
+(dni mul.b "mul.b src,dest" (MACH32)
+     ("mul.b ${s-qi},${sd-qi}")
+     (+ (f-op-0-1 1) s-qi sd-qi (f-size-7-1 0) OP4_C)
+     (nop)
+     ())
+
+(dni mul.w "mul.w src,dest" (MACH32)
+     ("mul.w ${s-hi},${sd-hi}")
+     (+ (f-op-0-1 1) s-hi sd-hi (f-size-7-1 1) OP4_C)
+     (nop)
+     ())
+
+; ? technically rn, not allowed with mulex
+(dni mulex "mulex src" (MACH32)
+     ("mulex ${d-hi}")
+     (+ OP1_C d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_E)
+     (nop)
+     ())
+
+(dni mului.b "mulu.b #imm,dest" (MACH32)
+     ("mulu.b ${s-qi-imm},${d-qi}")
+     (+ OP1_8 d-qi (f-size-7-1 0) (f-op-10-2 0) OP4_F s-qi-imm)
+     (nop)
+     ())
+
+(dni mului.w "mulu.w #imm,dest" (MACH32)
+     ("mulu.w ${s-hi-imm},${d-hi}")
+     (+ OP1_8 d-hi (f-size-7-1 1) (f-op-10-2 0) OP4_F s-hi-imm)
+     (nop)
+     ())
+
+(dni mulu.b "mulu.b src,dest" (MACH32)
+     ("mulu.b ${s-qi},${sd-qi}")
+     (+ (f-op-0-1 1) s-qi sd-qi (f-size-7-1 0) OP4_4)
+     (nop)
+     ())
+
+(dni mulu.w "mulu.w src,dest" (MACH32)
+     ("mulu.w ${s-hi},${sd-hi}")
+     (+ (f-op-0-1 1) s-hi sd-hi (f-size-7-1 1) OP4_4)
+     (nop)
+     ())
+
+(dni neg.b "neg.b dest" (MACH32)
+     ("neg.b ${d-qi}")
+     (+ OP1_A d-qi (f-size-7-1 0) (f-op-10-2 2) OP4_F)
+     (nop)
+     ())
+
+(dni neg.w "neg.w dest" (MACH32)
+     ("neg.w ${d-hi}")
+     (+ OP1_A d-hi (f-size-7-1 1) (f-op-10-2 2) OP4_F)
+     (nop)
+     ())
+
+(dni nop "NOP" (MACH32)
+     ("nop")
+     (+ OP1_D OP2_E)
+     (nop)
+     ())
+
+(dni not.b "not.b dest" (MACH32)
+     ("not.b ${d-qi}")
+     (+ OP1_A d-qi (f-size-7-1 0) (f-op-10-2 1) OP4_E)
+     (nop)
+     ())
+
+(dni not.w "not.w dest" (MACH32)
+     ("not.w ${d-hi}")
+     (+ OP1_A d-hi (f-size-7-1 1) (f-op-10-2 1) OP4_E)
+     (nop)
+     ())
+
+(dni ori.b "or.b #imm,dest" (MACH32)
+     ("or.b ${s-qi-imm},${d-qi}")
+     (+ OP1_8 d-qi (f-size-7-1 0) (f-op-10-2 2) OP4_F s-qi-imm)
+     (nop)
+     ())
+
+(dni ori.w "or.w #imm,dest" (MACH32)
+     ("or.w ${s-hi-imm},${d-hi}")
+     (+ OP1_8 d-hi (f-size-7-1 1) (f-op-10-2 2) OP4_F s-hi-imm)
+     (nop)
+     ())
+
+(dni or.b:s "or.b:s #imm,dest" (MACH32)
+     ("or.b:s ${bsr-qi-imm},${bsr-qi}")
+     (+ (f-op-0-2 1) bsr-qi OP2_4 bsr-qi-imm)
+     (nop)
+     ())
+
+(dni or.w:s "or.b:s #imm,dest" (MACH32)
+     ("or.w:s ${bsr-hi-imm},${bsr-hi}")
+     (+ (f-op-0-2 1) bsr-hi OP2_5 bsr-hi-imm)
+     (nop)
+     ())
+
+(dni or.b "or.b src,dest" (MACH32)
+     ("or.b ${s-qi},${sd-qi}")
+     (+ (f-op-0-1 1) s-qi sd-qi (f-size-7-1 0) OP4_5)
+     (nop)
+     ())
+
+(dni or.w "or.w src,dest" (MACH32)
+     ("or.w ${s-hi},${sd-hi}")
+     (+ (f-op-0-1 1) s-hi sd-hi (f-size-7-1 1) OP4_5)
+     (nop)
+     ())
+
+(dni pop.b "pop.b dest" (MACH32)
+     ("pop.b ${d-qi}")
+     (+ OP1_B d-qi (f-size-7-1 0) (f-op-10-2 2) OP4_F)
+     (nop)
+     ())
+
+(dni pop.w "pop.w dest" (MACH32)
+     ("pop.w ${d-hi}")
+     (+ OP1_B d-hi (f-size-7-1 1) (f-op-10-2 2) OP4_F)
+     (nop)
+     ())
+
+(dni popcna "popc dest" (MACH32)
+     ("popc ${Cna}")
+     (+ OP1_D OP2_3 OP3_A (f-op-12-1 0) Cna)
+     (nop)
+     ())
+(dni popcnqi "popc dest" (MACH32)
+     ("popc ${Cnqi133}")
+     (+ OP1_D OP2_3 OP3_2 (f-op-12-1 0) Cnqi133)
+     (nop)
+     ())
+
+(dni popm "popm regs" (MACH32)
+     ("popm ${Regset16pop}")
+     (+ OP1_8 OP2_E Regset16pop)
+     (sequence ()
+	       (if (and Regset16pop (const #x1)) (set (reg h-gr-hi 0) (mem HI (reg h-cr-16 5)))
+		   (set (reg h-cr-16 5) (add (reg h-cr-16 5) 2)))
+	       (if (and Regset16pop (const #x2)) (set (reg h-gr-hi 1) (mem HI (reg h-cr-16 5)))
+		   (set (reg h-cr-16 5) (add (reg h-cr-16 5) 2)))
+	       (if (and Regset16pop (const #x4)) (set (reg h-gr-hi 2) (mem HI (reg h-cr-16 5)))
+		   (set (reg h-cr-16 5) (add (reg h-cr-16 5) 2)))
+	       (if (and Regset16pop (const #x8)) (set (reg h-gr-hi 3) (mem HI (reg h-cr-16 5)))
+		   (set (reg h-cr-16 5) (add (reg h-cr-16 5) 2)))
+	       (if (and Regset16pop (const #x16)) (set (reg h-ar-sb-fb 0) (mem HI (reg h-cr-16 5)))
+		   (set (reg h-cr-16 5) (add (reg h-cr-16 5) 2)))
+	       (if (and Regset16pop (const #x32)) (set (reg h-ar-sb-fb 1) (mem HI (reg h-cr-16 5)))
+		   (set (reg h-cr-16 5) (add (reg h-cr-16 5) 2)))
+	       (if (and Regset16pop (const #x64)) (set (reg h-ar-sb-fb 2) (mem HI (reg h-cr-16 5)))
+		   (set (reg h-cr-0 1) (add (reg h-cr-0 1) 2)))
+	       (if (eq Regset16pop (const #x128)) (set (reg h-ar-sb-fb 3) (mem HI (reg h-cr-16 5)))
+		   (set (reg h-cr-0 1) (add (reg h-cr-0 1) 2))))
+     ())
+
+(dni pushi.b "push.b #imm" (MACH32)
+     ("push.b #${imm88}")
+     (+ OP1_A OP2_E imm88)
+     (nop)
+     ())
+
+(dni pushi.w "push.w #imm" (MACH32)
+     ("push.w #${imm816}")
+     (+ OP1_A OP2_F imm816)
+     (nop)
+     ())
+
+(dni push.b "push.b dest" (MACH32)
+     ("push.b ${d-qi}")
+     (+ OP1_C d-qi (f-size-7-1 0) (f-op-10-2 0) OP4_E)
+     (nop)
+     ())
+
+(dni push.w "push.w dest" (MACH32)
+     ("push.w ${d-hi}")
+     (+ OP1_C d-hi (f-size-7-1 1) (f-op-10-2 0) OP4_E)
+     (nop)
+     ())
+
+(dni pushi.l "push.l dest" (MACH32)
+     ("push.l #${imm1632}")
+     (+ OP1_B OP2_6 OP3_5 OP4_3 imm1632)
+     (nop)
+     ())
+
+(dni push.l "push.l dest" (MACH32)
+     ("push.l ${d-si}")
+     (+ OP1_A d-si (f-size-7-1 0) (f-op-10-2 0) OP4_1)
+     (nop)
+     ())
+
+; ? technically rn,an,[an], not allowed with pusha
+(dni pusha "pusha src" (MACH32)
+     ("pusha ${d-hi}")
+     (+ OP1_B d-hi (f-size-7-1 0) (f-op-10-2 0) OP4_1)
+     (nop)
+     ())
+
+(dni pushcqi "pushc src" (MACH32)
+     ("pushc ${Cnqi133}")
+     (+ OP1_D OP2_1 OP3_A (f-op-12-1 1) Cnqi133)
+     (nop)
+     ())
+
+(dni pushca "pushc src" (MACH32)
+     ("pushc ${Cna}")
+     (+ OP1_D OP2_1 OP3_2 (f-op-12-1 1) Cna)
+     (nop)
+     ())
+
+(dni pushm "pushm regs" (MACH32)
+     ("pushm ${Regset16push}")
+     (+ OP1_8 OP2_F Regset16push)
+     (sequence ()
+	       (if (and Regset16push (const #x1)) (set (reg h-cr-0 1) (sub (reg h-cr-0 1) 2))
+		   (set (mem HI (reg h-cr-0 1)) (reg h-gr16-hi 0)))
+	       (if (and Regset16push (const #x2)) (set (reg h-cr-0 1) (sub (reg h-cr-0 1) 2))
+		   (set (mem HI (reg h-cr-0 1)) (reg h-gr16-hi 1)))
+	       (if (and Regset16push (const #x4)) (set (reg h-cr-0 1) (sub (reg h-cr-0 1) 2))
+		   (set (mem HI (reg h-cr-0 1)) (reg h-gr16-hi 2)))
+	       (if (and Regset16push (const #x8)) (set (reg h-cr-0 1) (sub (reg h-cr-0 1) 2))
+		   (set (mem HI (reg h-cr-0 1)) (reg h-gr16-hi 3)))
+	       (if (and Regset16push (const #x16)) (set (reg h-cr-0 1) (sub (reg h-cr-0 1) 2))
+		   (set (mem HI (reg h-cr-0 1)) (reg h-ar16-sb-fb 0)))
+	       (if (and Regset16push (const #x32)) (set (reg h-cr-0 1) (sub (reg h-cr-0 1) 2))
+		   (set (mem HI (reg h-cr-0 1)) (reg h-ar16-sb-fb 1)))
+	       (if (and Regset16push (const #x64)) (set (reg h-cr-0 1) (sub (reg h-cr-0 1) 2))
+		   (set (mem HI (reg h-cr-0 1)) (reg h-ar16-sb-fb 2)))
+	       (if (eq Regset16push (const #x128)) (set (reg h-cr-0 1) (sub (reg h-cr-0 1) 2))
+		   (set (mem HI (reg h-cr-0 1)) (reg h-ar16-sb-fb 3))))
+     ())
+
+(dni reit "REIT" (MACH32)
+     ("reit")
+     (+ OP1_9 OP2_E)
+     (nop)
+     ())
+
+(dni rmpa.b "rmpa.size" (MACH32)
+     ("rmpa.b")
+     (+ OP1_B OP2_8 OP3_4 OP4_3)
+     (nop)
+     ())
+
+(dni rmpa.w "rmpa.size" (MACH32)
+     ("rmpa.w")
+     (+ OP1_B OP2_8 OP3_5 OP4_3)
+     (nop)
+     ())
+
+(dni rolc.b "rolc.b dest" (MACH32)
+     ("rolc.b ${d-qi}")
+     (+ OP1_B d-qi (f-size-7-1 0) (f-op-10-2 2) OP4_E)
+     (nop)
+     ())
+
+(dni rolc.w "rolc.w dest" (MACH32)
+     ("rolc.w ${d-hi}")
+     (+ OP1_B d-hi (f-size-7-1 1) (f-op-10-2 2) OP4_E)
+     (nop)
+     ())
+
+(dni rorc.b "rorc.b dest" (MACH32)
+     ("rorc.b ${d-qi}")
+     (+ OP1_A d-qi (f-size-7-1 0) (f-op-10-2 2) OP4_E)
+     (nop)
+     ())
+
+(dni rorc.w "rorc.w dest" (MACH32)
+     ("rorc.w ${d-hi}")
+     (+ OP1_A d-hi (f-size-7-1 1) (f-op-10-2 2) OP4_E)
+     (nop)
+     ())
+
+(dni roti.b "rot.b #imm,dest" (MACH32)
+     ("rot.b ${d-qi},#${immsh}")
+     (+ OP1_E d-qi (f-size-7-1 0) (f-op-10-2 2) immsh)
+     (nop)
+     ())
+
+(dni roti.w "rot.w #imm,dest" (MACH32)
+     ("rot.w ${d-hi},#${immsh}")
+     (+ OP1_E d-hi (f-size-7-1 0) (f-op-10-2 2) immsh)
+     (nop)
+     ())
+
+; ? technically r1,r1h, not allowed with rot
+(dni rot.b "rot.b r1h,dest" (MACH32)
+     ("rot.b r1h,${d-qi}")
+     (+ OP1_A d-qi (f-size-7-1 0) (f-op-10-2 3) OP4_F)
+     (nop)
+     ())
+
+(dni rot.w "rot.w r1h,dest" (MACH32)
+     ("rot.w r1h,${d-hi}")
+     (+ OP1_A d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_F)
+     (nop)
+     ())
+
+(dni rts "rts" (MACH32)
+     ("rts")
+     (+ OP1_D OP2_F)
+     (nop)
+     ())
+
+(dni sbbi.b "sbb.b #imm,dest" (MACH32)
+     ("sbb.b ${s-qi-imm-pfx},${sd-qi-pfx}")
+     (+ OP1_0 OP2_1 OP3_9 sd-qi-pfx (f-size-15-1 0) (f-op-18-2 2) OP6_E s-qi-imm-pfx)
+     (nop)
+     ())
+
+(dni sbbi.w "sbb.w #imm,dest" (MACH32)
+     ("sbb.w ${s-hi-imm-pfx},${sd-hi-pfx}")
+     (+ OP1_0 OP2_1 OP3_9 sd-hi-pfx (f-size-15-1 1) (f-op-18-2 2) OP6_E s-hi-imm-pfx)
+     (nop)
+     ())
+
+(dni sbb.b "sbb.b src,dest" (MACH32)
+     ("sbb.b ${s-qi-pfx},${sd-qi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-qi-pfx sd-qi-pfx (f-size-15-1 0) OP6_5)
+     (nop)
+     ())
+
+(dni sbb.w "sbb.w src,dest" (MACH32)
+     ("sbb.w ${s-hi-pfx},${sd-hi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-hi-pfx sd-hi-pfx (f-size-15-1 1) OP6_5)
+     (nop)
+     ())
+
+(dni sbjnz.b "sbjnz.b #imm,dest,label" (MACH32)
+     ("sbjnz.b #${immsbjnz},${d-qi},${s-qi-eoff}")
+     (+ OP1_F d-qi (f-size-7-1 0) (f-op-10-2 1) immsbjnz s-qi-eoff)
+     (nop)
+     ())
+
+(dni sbjnz.w "sbjnz.b #imm,dest,label" (MACH32)
+     ("sbjnz.b #${immsbjnz},${d-hi},${s-qi-eoff}")
+     (+ OP1_F d-hi (f-size-7-1 1) (f-op-10-2 1) immsbjnz s-qi-eoff)
+     (nop)
+     ())
+
+(dni scnc "scnc label" (MACH32)
+     ("scnc ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_0)
+     (nop)
+     ())
+
+(dni scltu "scltu label" (MACH32)
+     ("scltu ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_0)
+     (nop)
+     ())
+
+(dni scleu "scleu label" (MACH32)
+     ("scleu ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_1)
+     (nop)
+     ())
+
+(dni scnz "scnz label" (MACH32)
+     ("scnz ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_2)
+     (nop)
+     ())
+
+(dni scne "scne label" (MACH32)
+     ("scne ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_2)
+     (nop)
+     ())
+
+(dni scpz "scpz label" (MACH32)
+     ("scpz ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_3)
+     (nop)
+     ())
+
+(dni scno "scno label" (MACH32)
+     ("scno ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_4)
+     (nop)
+     ())
+
+(dni scgt "scgt label" (MACH32)
+     ("scgt ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_5)
+     (nop)
+     ())
+
+(dni scge "scge label" (MACH32)
+     ("scge ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_6)
+     (nop)
+     ())
+
+(dni scc "scc label" (MACH32)
+     ("scc ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_8)
+     (nop)
+     ())
+
+(dni scgeu "scgeu label" (MACH32)
+     ("scgeu ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_8)
+     (nop)
+     ())
+
+(dni scgtu "scgtu label" (MACH32)
+     ("scgtu ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_9)
+     (nop)
+     ())
+
+(dni scz "scz label" (MACH32)
+     ("scz ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_A)
+     (nop)
+     ())
+
+(dni sceq "sceq label" (MACH32)
+     ("sceq ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_A)
+     (nop)
+     ())
+
+(dni scn "scn label" (MACH32)
+     ("scn ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_B)
+     (nop)
+     ())
+
+(dni sco "sco label" (MACH32)
+     ("sco ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_C)
+     (nop)
+     ())
+
+(dni scle "scle label" (MACH32)
+     ("scle ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_D)
+     (nop)
+     ())
+
+(dni sclt "sclt label" (MACH32)
+     ("sclt ${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_E)
+     (nop)
+     ())
+
+(dni scmpu.b "scmpu.b" (MACH32)
+     ("scmpu.b")
+     (+ OP1_B OP2_8 OP3_C OP4_3)
+     (nop)
+     ())
+
+(dni scmpu.w "scmpu.w" (MACH32)
+     ("scmpu.w")
+     (+ OP1_B OP2_8 OP3_D OP4_3)
+     (nop)
+     ())
+
+(dni sha.b "sha.b #imm,dest" (MACH32)
+     ("sha.b #${immsh},${d-qi}")
+     (+ OP1_F d-qi (f-size-7-1 0) (f-op-10-2 0) immsh)
+     (nop)
+     ())
+
+(dni sha.w "sha.w #imm,dest" (MACH32)
+     ("sha.w #${immsh},${d-hi}")
+     (+ OP1_F d-hi (f-size-7-1 1) (f-op-10-2 0) immsh)
+     (nop)
+     ())
+
+(dni shail "sha.l #imm,dest" (MACH32)
+     ("sha.l ${s-qi-imm},${d-si}")
+     (+ OP1_A d-si (f-size-7-1 0) (f-op-10-2 2) OP4_1 s-qi-imm)
+     (nop)
+     ())
+
+(dni shar1h.b "sha.b r1h,dest" (MACH32)
+     ("sha.b r1h,${d-qi}")
+     (+ OP1_B d-qi (f-size-7-1 0) (f-op-10-2 3) OP4_E)
+     (nop)
+     ())
+
+(dni shar1h.w "sha.w r1h,dest" (MACH32)
+     ("sha.w r1h,${d-hi}")
+     (+ OP1_B d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_E)
+     (nop)
+     ())
+
+(dni shar1h.l "sha.l r1h,dest" (MACH32)
+     ("sha.l r1h,${d-si}")
+     (+ OP1_C d-si (f-size-7-1 0) (f-op-10-2 1) OP4_1)
+     (nop)
+     ())
+
+(dni shl.b "shl.b #imm,dest" (MACH32)
+     ("shl.b #${immsh},${d-qi}")
+     (+ OP1_E d-qi (f-size-7-1 0) (f-op-10-2 0) immsh)
+     (nop)
+     ())
+
+(dni shl.w "shl.w #imm,dest" (MACH32)
+     ("shl.w #${immsh},${d-hi}")
+     (+ OP1_E d-hi (f-size-7-1 1) (f-op-10-2 0) immsh)
+     (nop)
+     ())
+
+(dni shlil "shl.l #imm,dest" (MACH32)
+     ("shl.l ${s-qi-imm},${d-si}")
+     (+ OP1_9 d-si (f-size-7-1 0) (f-op-10-2 2) OP4_1 s-qi-imm)
+     (nop)
+     ())
+
+(dni shlr1h.b "shl.b r1h,dest" (MACH32)
+     ("shl.b r1h,${d-qi}")
+     (+ OP1_A d-qi (f-size-7-1 0) (f-op-10-2 3) OP4_E)
+     (nop)
+     ())
+
+(dni shlr1h.w "shl.w r1h,dest" (MACH32)
+     ("shl.w r1h,${d-hi}")
+     (+ OP1_A d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_E)
+     (nop)
+     ())
+
+(dni shlr1h.l "shl.l r1h,dest" (MACH32)
+     ("shl.l r1h,${d-si}")
+     (+ OP1_C d-si (f-size-7-1 0) (f-op-10-2 0) OP4_1)
+     (nop)
+     ())
+
+(dni sin.b "sin.b" (MACH32)
+     ("sin.b")
+     (+ OP1_B OP2_2 OP3_8  OP4_3)
+     (nop)
+     ())
+
+(dni sin.w "sin.w" (MACH32)
+     ("sin.w")
+     (+ OP1_B OP2_2 OP3_9  OP4_3)
+     (nop)
+     ())
+
+(dni smovb.b "smovb.b" (MACH32)
+     ("smovb.b")
+     (+ OP1_B OP2_5 OP3_8  OP4_3)
+     (nop)
+     ())
+
+(dni smovb.w "smovb.w" (MACH32)
+     ("smovb.w")
+     (+ OP1_B OP2_5 OP3_9  OP4_3)
+     (nop)
+     ())
+
+(dni smovf.b "smovf.b" (MACH32)
+     ("smovf.b")
+     (+ OP1_B OP2_0 OP3_8  OP4_3)
+     (nop)
+     ())
+
+(dni smovf.w "smovf.w" (MACH32)
+     ("smovf.w")
+     (+ OP1_B OP2_0 OP3_9  OP4_3)
+     (nop)
+     ())
+
+(dni smovu.b "smovu.b" (MACH32)
+     ("smovu.b")
+     (+ OP1_B OP2_8 OP3_8  OP4_3)
+     (nop)
+     ())
+
+(dni smovu.w "smovu.w" (MACH32)
+     ("smovu.w")
+     (+ OP1_B OP2_8 OP3_9  OP4_3)
+     (nop)
+     ())
+
+(dni sout.b "sout" (MACH32)
+     ("sout.b")
+     (+ OP1_B OP2_4 OP3_8 OP4_3)
+     (nop)
+     ())
+
+(dni sout.w "sout" (MACH32)
+     ("sout.b")
+     (+ OP1_B OP2_5 OP3_8 OP4_3)
+     (nop)
+     ())
+
+(dni sstr.b "sstr" (MACH32)
+     ("sstr.b")
+     (+ OP1_B OP2_8 OP3_0 OP4_3)
+     (nop)
+     ())
+
+(dni sstr.w "sstr" (MACH32)
+     ("sstr.b")
+     (+ OP1_B OP2_8 OP3_1 OP4_3)
+     (nop)
+     ())
+
+(dni stcb "stc src,dst" (MACH32)
+     ("stc ${Cnb213},${d-si}")
+     (+ OP1_0 OP2_1 OP3_D d-si (f-size-15-1 1) (f-op-18-2 1) (f-op-20-1 0)
+	Cnb213)
+     (nop)
+     ())
+
+(dni stcqi "stc src,dst,Cnqi" (MACH32)
+     ("stc ${Cnqi213},${d-si}")
+     (+ OP1_0 OP2_1 OP3_D d-si (f-size-15-1 1) (f-op-18-2 1) (f-op-20-1 1)
+	Cnqi213)
+     (nop)
+     ())
+
+(dni stca "stc src,dst" (MACH32)
+     ("stc ${Cna},${d-si}")
+     (+ OP1_D d-si (f-size-7-1 1) (f-op-10-2 1) (f-op-12-1 0) Cna)
+     (nop)
+     ())
+
+(dni stctx "stctx abs1616,abs3224" (MACH32)
+     ("stctx ${abs1616},${abs3224}")
+     (+ OP1_B OP2_6 OP3_D OP4_3 abs1616 abs3224)
+     (nop)
+     ())
+
+(dni stnzi.b "stnz.b #imm,dest" (MACH32)
+     ("stnz.b ${s-qi-imm},${d-qi}")
+     (+ OP1_9 d-qi (f-size-7-1 0) (f-op-10-2 1) OP4_F s-qi-imm)
+     (nop)
+     ())
+
+(dni stnzi.w "stnz.w #imm,dest" (MACH32)
+     ("stnz.w ${s-hi-imm},${d-hi}")
+     (+ OP1_9 d-hi (f-size-7-1 1) (f-op-10-2 1) OP4_F s-hi-imm)
+     (nop)
+     ())
+
+(dni stzi.b "stz.b #imm,dest" (MACH32)
+     ("stz.b ${s-qi-imm},${d-qi}")
+     (+ OP1_9 d-qi (f-size-7-1 0) (f-op-10-2 0) OP4_F s-qi-imm)
+     (nop)
+     ())
+
+(dni stzi.w "stz.w #imm,dest" (MACH32)
+     ("stz.w ${s-hi-imm},${d-hi}")
+     (+ OP1_9 d-hi (f-size-7-1 1) (f-op-10-2 0) OP4_F s-hi-imm)
+     (nop)
+     ())
+
+(dni stzx.b "stzx.b imm1,imm2,dest" (MACH32)
+     ("stzx.b ${s-qi-imm},${s-qi-imm-2},d-qi")
+     (+ OP1_9 d-qi (f-size-7-1 0) (f-op-10-2 3) OP4_F s-qi-imm s-qi-imm-2)
+     (nop)
+     ())
+
+(dni stzx.w "stzx.w imm1,imm2,dest" (MACH32)
+     ("stzx.b ${s-hi-imm},${s-hi-imm-2},d-hi")
+     (+ OP1_9 d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_F s-hi-imm s-hi-imm-2)
+     (nop)
+     ())
+
+(dni subi.b "sub.b #imm,dest" (MACH32)
+     ("sub.b ${s-qi-imm},${d-qi}")
+     (+ OP1_8 d-qi (f-size-7-1 0) (f-op-10-2 3) OP4_E s-qi-imm)
+     (nop)
+     ())
+
+(dni subi.w "sub.w #imm,dest" (MACH32)
+     ("sub.w ${s-hi-imm},${d-hi}")
+     (+ OP1_8 d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_E s-hi-imm)
+     (nop)
+     ())
+
+(dni subil "sub.l #imm,dest" (MACH32)
+     ("sub.l ${s-si-imm},${d-si}")
+     (+ OP1_9 d-si (f-size-7-1 0) (f-op-10-2 3) OP4_1 s-si-imm)
+     (nop)
+     ())
+
+(dni sub.b "sub.b src,dest" (MACH32)
+     ("sub.b ${s-qi},${sd-qi}")
+     (+ (f-op-0-1 1) s-qi sd-qi (f-size-7-1 0) OP4_A)
+     (nop)
+     ())
+
+(dni sub.w "sub.w src,dest" (MACH32)
+     ("sub.w ${s-hi},${sd-hi}")
+     (+ (f-op-0-1 1) s-hi sd-hi (f-size-7-1 1) OP4_A)
+     (nop)
+     ())
+
+(dni sub.l "sub.l src,dest" (MACH32)
+     ("sub.l ${s-si},${sd-si}")
+     (+ (f-op-0-1 1) s-si sd-si (f-size-7-1 1) OP4_0)
+     (nop)
+     ())
+
+(dni subix "subx #imm,dest" (MACH32)
+     ("subx ${s-qi-imm},${d-si}")
+     (+ OP1_9 d-si (f-size-7-1 0) (f-op-10-2 1) OP4_1 s-qi-imm)
+     (nop)
+     ())
+
+(dni subx "subx src,dest" (MACH32)
+     ("subx ${s-qi},${sd-si}")
+     (+ (f-op-0-1 1) s-qi sd-si (f-size-7-1 0) OP4_0)
+     (nop)
+     ())
+
+(dni tsti.b "tst.b #imm,dest" (MACH32)
+     ("tst.b ${s-qi-imm},${d-qi}")
+     (+ OP1_9 d-qi (f-size-7-1 0) (f-op-10-2 3) OP4_E s-qi-imm)
+     (nop)
+     ())
+
+(dni tsti.w "tst.w #imm,dest" (MACH32)
+     ("tst.w ${s-hi-imm},${d-hi}")
+     (+ OP1_9 d-hi (f-size-7-1 1) (f-op-10-2 3) OP4_E s-hi-imm)
+     (nop)
+     ())
+
+(dni tst.b:s "tst.b:s #imm,dest" (MACH32)
+     ("tst.b:s ${bsr-qi-imm},${bsr-qi}")
+     (+ (f-op-0-2 0) bsr-qi OP2_C bsr-qi-imm)
+     (nop)
+     ())
+
+(dni tst.w:s "tst.w:s #imm,dest" (MACH32)
+     ("tst.w:s ${bsr-hi-imm},${bsr-hi}")
+     (+ (f-op-0-2 0) bsr-hi OP2_D bsr-hi-imm)
+     (nop)
+     ())
+
+(dni tst.b "tst.b src,dest" (MACH32)
+     ("tst.b ${s-qi-pfx},${sd-qi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-qi-pfx sd-qi-pfx (f-size-15-1 0) OP6_9)
+     (nop)
+     ())
+
+(dni tst.w "tst.w src,dest" (MACH32)
+     ("tst.w ${s-hi-pfx},${sd-hi-pfx}")
+     (+ OP1_0 OP2_1 (f-op-8-1 1) s-hi-pfx sd-hi-pfx (f-size-15-1 1) OP6_9)
+     (nop)
+     ())
+
+(dni und "und" (MACH32)
+     ("und")
+     (+ OP1_F OP2_F)
+     (nop)
+     ())
+
+(dni wait "wait" (MACH32)
+     ("wait")
+     (+ OP1_B OP2_2 OP3_0 OP4_3)
+     (nop)
+     ())
+
+(dni xchg.b "xchg.b src, dest" (MACH32)
+     ("xchg.b ${immxchg},${d-qi}")
+     (+ OP1_D d-qi (f-size-7-1 0) (f-op-10-2 0) (f-op-12-1 1) immxchg)
+     (nop)
+     ())
+
+(dni xchg.w "xchg.b src, dest" (MACH32)
+     ("xchg.w ${immxchg},${d-hi}")
+     (+ OP1_D d-hi (f-size-7-1 1) (f-op-10-2 0) (f-op-12-1 1) immxchg)
+     (nop)
+     ())
+
+(dni xori.b "xor.b #imm,dest" (MACH32)
+     ("xor.b ${s-qi-imm},${d-qi}")
+     (+ OP1_9 d-qi (f-size-7-1 0) (f-op-10-2 0) OP4_E s-qi-imm)
+     (nop)
+     ())
+
+(dni xori.w "xor.w #imm,dest" (MACH32)
+     ("xor.w ${s-hi-imm},${d-hi}")
+     (+ OP1_9 d-hi (f-size-7-1 1) (f-op-10-2 0) OP4_E s-hi-imm)
+     (nop)
+     ())
+
+(dni xor.b "xor.b src,dest" (MACH32)
+     ("xor.b ${s-qi},${sd-qi}")
+     (+ (f-op-0-1 1) s-qi sd-qi (f-size-7-1 0) OP4_9)
+     (nop)
+     ())
+
+(dni xor.w "xor.w src,dest" (MACH32)
+     ("xor.w ${s-hi},${sd-hi}")
+     (+ (f-op-0-1 1) s-hi sd-hi (f-size-7-1 1) OP4_9)
+     (nop)
+     ())
+
+; special indirect opcodes for [[operands]]
+
+(dni srcind "SRC-INDIRECT" (MACH32)
+     ("src-indirect")
+     (+ OP1_4 OP2_1)
+     (nop)
+     ())
+
+(dni destind "DEST-INDIRECT" (MACH32)
+     ("dest-indirect")
+     (+ OP1_0 OP2_9)
+     (nop)
+     ())
+
+(dni srcdestind "SRC-DEST-INDIRECT" (MACH32)
+     ("src-dest-indirect")
+     (+ OP1_4 OP2_9)
+     (nop)
+     ())

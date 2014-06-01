@@ -1,0 +1,25 @@
+dnl Process this file with autoconf to produce a configure script.
+
+AC_PREREQ(2.5)
+AC_INIT(mb8683x.c)
+
+dnl Can't be done in BSP_CONFIGURE because that confuses automake. 
+AC_CONFIG_AUX_DIR(../../..)
+
+BSP_CONFIGURE(../..)
+
+case "x${with_multisubdir}" in
+  x)
+    build_it=yes ;
+    BOARD_LIB=libmb8683x.a ;
+    files="../start.S ../crt0.S" ;
+    links="mb8683x-start.S mb8683x-crt0.S" ;
+    ;;
+esac
+
+AC_LINK_FILES(${files}, ${links})
+
+AC_SUBST(BOARD_LIB)
+AM_CONDITIONAL(BUILD_IT, test x$build_it = xyes)
+
+AC_OUTPUT(Makefile)

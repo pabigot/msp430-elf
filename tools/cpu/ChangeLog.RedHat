@@ -1,0 +1,210 @@
+2003-04-23  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv.cpu (FR400-SUBMODEL): Rename fr451 to fr450.  Update rest of
+	file accordingly.
+
+2003-04-23  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv.cpu (r-store, r-store-double, r-store-quad): Delete.
+
+2003-04-22  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv.cpu (media-quad-limit): Renamed from media-quad-limit-semantics.
+	(mqlclrhs, mqlmths): Update accordingly.
+	(media-quad-shift): New macro.
+	(mqsllhi, mqsrahi): Use it.
+
+2003-04-21  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv.cpu (FR400-SUBMODEL): New attribute.
+	(f-LRAE, f-LRAD, f-LRAS, f-TLBPRopx, f-TLBPR): New fields.
+	(f-LRA-null, f-TLBPR-null): New fields.
+	(LRAE, LRAD, LRAS, TLBPRopx, TLBPRL): New operands.
+	(LRA-null, TLBPR-null): New macros.
+	(iacc-multiply-r-r): Set FR400-SUBMODEL to fr405.
+	(slass, scutss, int-arith-ss-r-r): Likewise.
+	(rst, rst[bhdq], rstf, rst[bhdq]f): Delete.
+	(load-real-address): New macro.
+	(lrai, lrad, tlbpr): New instructions.
+	(media-quad-limit-semantics): Set FR400-SUBMODEL to fr451.
+
+2004-01-20  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv.cpu (media-low-clear-semantics, (media-scope-limit-semantics)
+	(media-quad-limit-semantics): New macros.
+	(mqlclrhs, mqlmths): New instructions.
+
+2003-12-19  Alexandre Oliva  <aoliva@redhat.com>
+
+	* frv.opc (parse_ulo16, parse_uhi16, parse_d12): Fix some
+	cut&paste errors in shifting/truncating numerical operands.
+
+2003-12-16  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv.cpu (scr0, scr1, scr2, scr3, imavr1, damvr1, cxnr, ttbr)
+	(tplr, tppr, tpxr, timerh, timerl, timerd, btbr): New SPRs.
+
+2003-10-02  Dave Brolley  <brolley@redhat.com>
+
+	* frv.cpu (u-trap): New modelling unit for fr550.
+	(u-spr2gr): Ditto.
+	(u-gr2spr): Ditto.
+	(u-swap): Ditto.
+	(u-ici): Ditto.
+	(u-dci): Ditto.
+	(u-dcf): Ditto.
+	(u-icpl): Ditto.
+	(u-dcpl): Ditto.
+	(u-icul): Ditto.
+	(u-dcul): Ditto.
+	(swap-semantics): Call @cpu@_check_swap_address.
+	(all trap insns): Add modelling unit spec for fr550.
+	(movsg): Ditto.
+	(movgs): Ditto.
+	(*swap*): Ditto.
+	(ici): Ditto.
+	(dci): Ditto.
+	(dcf): Ditto.
+	(icpl): Ditto.
+	(dcpl): Ditto.
+	(icul): Ditto.
+	(dcul): Ditto.
+
+2003-09-30  Michael Snyder  <msnyder@redhat.com>
+
+	* frv.cpu (scutss, slass): Define new audio instructions.
+
+2003-09-30  Nick Clifton  <nickc@redhat.com>
+
+	* iq10.cpu: Import from sourceware.
+	* iq2000.cpu: Import from sourceware.
+	* iq2000.opc: Import from sourceware.
+	* iq2000m.cpu: Import from sourceware.
+	* simplify.inc: Import from sourceware.
+
+2003-09-24  Dave Brolley  <brolley@redhat.com>
+
+	* frv.opc: Use CGEN_ATTR_VALUE_ENUM_TYPE in place of
+	CGEN_ATTR_VALUE_TYPE.
+
+2003-09-24  Dave Brolley  <brolley@redhat.com>
+
+	* frv.cpu (model fr550): Add state variables for fr550 modelling. Add
+	modelling unit definitions.
+	(all insns): Add modelling unit specs for fr550.
+
+2003-09-17  Michael Snyder  <msnyder@redhat.com>
+
+	* frv.cpu (smu, smass, smsss): New instructions.
+
+2003-09-12  Dave Brolley  <brolley@redhat.com>
+
+	* frv.cpu (u-idiv, u-clrgr, u-clrfr): New units of model fr550.
+	(*div*): Add profiling for fr550.
+	(clrgr,clrfr,clrga,clrfa): Add profiling information for fr550.
+
+2003-09-11  Michael Snyder  <msnyder@redhat.com>
+
+	* frv.cpu (spr-names): Add iacc0h, iacc0l.
+	(spr-iacc-h, spr-iacc0l): New access methods.
+	(h-iacc0): New hardware definition.
+
+2003-09-09  Dave Brolley  <brolley@redhat.com>
+
+	* frv.cpu (media-acc-arith-sat): Call @cpu@_check_acc_range.
+	(media-dual-acc-arith-sat, masaccs, mdasaccs) 
+	(media-dual-multiply-semantics, media-quad-multiply-semantics) 
+	(media-dual-multiply-acc-semantics) 
+	(media-quad-multiply-acc-semantics) 
+	(media-quad-multiply-cross-acc-semantics) 
+	(media-quad-cross-multiply-cross-acc-semantics) 
+	(media-quad-cross-multiply-acc-semantics) 
+	(media-dual-complex-semantics, media-dual-complex-semantics-i) 
+	(media-quad-complex, media-quad-complex-i): Likewise.
+	* frv.opc (FRV_VLIW): Add new member: insn.
+	(fr550_check_insn_major_constraints): Now takes third argument.
+	Implement more checking. Update caller.
+	(check_insn_major_constraints): Now takes third argument.
+	Update caller.
+	(find_unit_in_vliw): New function.
+	(find_major_in_slot): New function.
+	(find_media_in_vliw): New function.
+	(find_float_in_vliw): New function.
+	(frv_vliw_add_insn): Set vliw->insn.
+
+2003-09-09  Michael Snyder  <msnyder@redhat.com>
+
+	* frv.cpu (addss, subss): Add new instructions.
+
+2003-09-04  Dave Brolley  <brolley@redhat.com>
+
+	* frv.cpu: Add FR550-MAJOR attribute to insns as appropriate.
+
+2003-09-03  Dave Brolley  <brolley@redhat.com>
+
+	* frv.opc (PAD_VLIW_COMBO): New macro.
+	(fr400_allowed_vliw): Pad extra slots.
+	(fr500_allowed_vliw): Ditto.
+	(fr550_allowed_vliw): New vliw table.
+	(fr550_unit_mapping): New unit mapping table.
+	(frv_vliw_reset): Handle bfd_mach_fr550.
+	(match_unit): Handle UNIT_IALL and UNIT_FMALL.
+	(fr550_check_insn_major_constraints): New function.
+	(check_insn_major_constraints): Handle bfd_mach_fr550.
+	(frv_vliw_add_insn): Ditto.
+	* frv.cpu (UNIT): Add I2, I3, FM2, FM3.
+	(FR550-MAJOR): New insn attribute.
+	(all insns): Use new UNIT attributes.
+
+2003-09-03  Michael Snyder  <msnyder@redhat.com>
+
+	* frv.opc (check_insn_major_constraints): Replace missing 'break;'.
+
+2003-08-29  Michael Snyder  <msnyder@redhat.com>
+
+	* frv.opc (frv_vliw_add_insn): Remove 8-27 kludge.
+	(check_insn_major_constraints): Temporary: always return true for 550.
+
+2003-08-27  Michael Snyder  <msnyder@redhat.com>
+
+	* frv.cpu: Add MACH fr550 to fr400 media insns.
+	* frv.opc: Add error messages before abort.
+	(frv_vliw_add_insn): Add (kludgy) attempt to find 'major' value
+	for fr550.
+
+2003-08-26  Dave Brolley  <brolley@redhat.com>
+
+	* frv.opc (FRV_VLIW_SIZE): Define to 8 for fr550.
+	* frv.cpu (parallel-insns): Set to 8.
+	(fr550): Remove u-integer, u-imul, u-idiv.
+	(all insns): Remove references to fr550 model units.
+
+2003-08-25  Michael Snyder  <msnyder@redhat.com>
+
+	* frv.cpu: Add new mach and model for fr550.
+	Start adding references to (empty) units for fr550.
+
+2003-08-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* frv.opc (parse_ulo16): Parse gotofflo and gotofffuncdesclo.
+	(parse_uslo16): Likewise.
+	(parse_uhi16): Parse gotoffhi and gotofffuncdeschi.
+	(parse_d12): Parse gotoff12 and gotofffuncdesc12.
+	(parse_s12): Likewise.
+
+2003-08-04  Alexandre Oliva  <aoliva@redhat.com>
+
+	* frv.opc (parse_ulo16): Parse gotlo and gotfuncdesclo.
+	(parse_uslo16): Likewise.
+	(parse_uhi16): Parse gothi and gotfuncdeschi.
+	(parse_d12): Parse got12 and gotfuncdesc12.
+	(parse_s12): Likewise.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

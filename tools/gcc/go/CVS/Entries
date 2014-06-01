@@ -1,0 +1,16 @@
+/ChangeLog/1.21/Sun Jan 27 20:28:05 2013//Tmsp430-130322-branch
+/Make-lang.in/1.14/Sun Jan 27 20:28:05 2013//Tmsp430-130322-branch
+/README.gcc/1.1/Sun Jan 16 18:06:06 2011//Tmsp430-130322-branch
+/config-lang.in/1.4/Sun Jan 27 20:28:05 2013//Tmsp430-130322-branch
+/gccgo.texi/1.7/Sun Jan 27 20:28:05 2013//Tmsp430-130322-branch
+/go-backend.c/1.6/Sun Jan 27 20:28:05 2013//Tmsp430-130322-branch
+/go-c.h/1.11/Sun Jan 27 20:28:05 2013//Tmsp430-130322-branch
+/go-gcc.cc/1.12/Sun Jan 27 20:28:05 2013//Tmsp430-130322-branch
+/go-lang.c/1.15/Sun Jan 27 20:28:05 2013//Tmsp430-130322-branch
+/go-linemap.cc/1.1/Sun Dec 18 19:23:26 2011//Tmsp430-130322-branch
+/go-location.h/1.1/Sun Dec 18 19:23:26 2011//Tmsp430-130322-branch
+/go-system.h/1.4/Sun Jan 27 20:28:05 2013//Tmsp430-130322-branch
+/gospec.c/1.5/Sun Jan 27 20:28:05 2013//Tmsp430-130322-branch
+/lang-specs.h/1.2/Sun Jan 27 20:28:05 2013//Tmsp430-130322-branch
+/lang.opt/1.6/Sun Jan 27 20:28:05 2013//Tmsp430-130322-branch
+D/gofrontend////

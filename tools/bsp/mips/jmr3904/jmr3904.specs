@@ -1,0 +1,16 @@
+%rename lib                 old_lib
+%rename cpp                 old_cpp
+%rename link                old_link
+
+*lib:
+--start-group -ljmr39 -lc -lgcc --end-group %(old_lib)
+
+*cpp:
+-D__CPU_R3900__ -D__CPU_R3904__ -D__BOARD_JMR3904__ -D__MISSING_SYSCALL_NAMES__ %(old_cpp)
+
+*startfile:
+crtbegin%O%s jmr3904-crt0%O%s
+
+*link:
+-T mips.ld%s -Ttext 0x80010000 %(old_link)
+

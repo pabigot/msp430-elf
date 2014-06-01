@@ -1,0 +1,1039 @@
+2013-03-26  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.dg/torture/pr56488.c: Fix bad loop iteration count.
+	* gcc.dg/pr53265.c: Add requirement for a 32-bit+ target.
+
+2013-03-13  Nick Clifton  <nickc@redhat.com>
+
+	* c-c++-common/pr41779.c: Remove bogus warning expectations.
+	* gcc.c-torture/compile/pr34885.c: Reorder code to remove
+	assumption about pointer types.
+	* gcc.c-torture/execute/pr52286.c: Fix variable initializations.
+	* gcc.dg/torture/ipa-pta-1.c: Skip final scan.
+	* gcc.dg/torture/pr25654.c: Skip bogus test.
+	* gcc.dg/torture/pr53366-1.c: Skip for MSP430.
+	* gcc.dg/tree-ssa/pr54245.c: Require a 32-bit target.
+	* gcc.dg/tree-ssa/scev-3.c: Likewise.
+	* gcc.dg/tree-ssa/scev-4.c: Likewise.
+	* gcc.dg/tree-ssa/slsr-1.c: Likewise.
+	* gcc.dg/tree-ssa/slsr-2.c: Likewise.
+	* gcc.dg/tree-ssa/slsr-3.c: Likewise.
+	* gcc.dg/tree-ssa/sra-13.c: Likewise.
+	* gcc.dg/tree-ssa/vector-4.c: Likewise.
+	* gcc.dg/tree-ssa/vrp47.c: Likewise.
+	* gcc.dg/tree-ssa/vrp58.c: Likewise.
+	* gcc.dg/weak/typeof-2.c: Skip bogus final scan.
+	* gcc.target/msp430/abi-332-1.c: Fix assembler output expectations.
+	* gcc.target/msp430/abi-337-1.c: Likewise.
+	* gcc.target/msp430/abi-338-1.c: Likewise.
+	* gcc.target/msp430/abi-34-1.c: Likewise.
+	* lib/target-supports.exp: Fix ARM thumb tests to skip non-ARM
+	architectures.
+
+2013-03-08  Nick Clifton  <nickc@redhat.com>
+
+	* lib/target-supports.exp (check_effective_target_tls_runtime):
+	Return false for the MSP430.
+	* g++.old-deja/g++.jason/thunk3.C: Note that the MSP430 uses
+	generic thunks.
+
+2013-03-06  Nick Clifton  <nickc@redhat.com>
+
+	* c-c++-common.c/vector-scalar.c: Correct type of veci.
+	* g++.dg/cpp0x/auto8.c: Correct expectations of error messages.
+	* g++.dg/cpp0x/variadic-value1.C: Only run on 32-bit+ targets.
+	* g++.dg/opt/pr55717.C: Fix to work on 16-bit targets.
+	* g++.dg/warn/Wtype-limits-Wextra.C: Update expected warnings.
+	* g++.dg/warn/Wtype-limits.C: Likewise.
+	* g++.dg/warn/pr11492.C: Likewise.
+
+2013-02-28  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/execute/920501-6.x: New.
+	* gcc.c-torture/execute/arith-rand-ll.x: New.
+	* gcc.c-torture/execute/pr43220.x: New.
+	* gcc.c-torture/execute/builtins/strcpy-chk.x: New.
+	* gcc.c-torture/execute/builtins/strpcpy-chk.x: New.
+
+2013-02-19  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/compile/990617-1.c: Fix for 16-bit targets.
+	* gcc.dg/tree-ssa/predcom-1.c: Likewise.
+	* c-c++-common/scal-to-vec1.c: Skip fpr MSP430.
+	* gcc.dg/Wdouble-promotion.c: Likewise.
+	* gcc.dg/torture/fp-int-convert-double.c: Likewise.
+	* gcc.dg/torture/fp-int-convert-float.c: Likewise.
+	* gcc.dg/torture/fp-int-convert-long-double.c: Likewise.
+	* gcc.dg/torture/fp-int-convert-timode.c: Likewise.
+	* gcc.dg/torture/vec-cvt-1.c: Likewise.
+	* gcc.dg/non-local-goto-1.c: Require trampoline support.
+	* gcc.dg/non-local-goto-2.c: Likewise.
+	* gcc.dg/torture/stackalign/nested-1.c: Likewise.
+	* gcc.dg/torture/stackalign/nested-2.c: Likewise.
+	* gcc.dg/torture/stackalign/nested-3.c: Likewise.
+	* gcc.dg/torture/stackalign/non-local-goto-1.c: Likewise.
+	* gcc.dg/torture/stackalign/non-local-goto-2.: Likewise.c
+	* gcc.dg/torture/pr51071-2.c: Add -Wno-pointer-to-int-cast.
+
+2013-02-18  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/compile/pr55955.x: New file.
+	* gcc.c-torture/compile/990617-1.x: Skip for the MSP430.
+
+2013-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.target/msp430/abi-34-1.c: Update expected
+	assembler output.
+
+2013-02-14  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/execute/builtins/memmove-chk.x: New file
+	* gcc.c-torture/execute/builtins/memset-chk.x: New file.
+
+	* c-c++-common/torture/complex-sign-add.c: Too big for the MSP430.
+	* c-c++-common/torture/complex-sign-mixed-add.c: Likewise.
+	* c-c++-common/torture/complex-sign-mixed-mul.c: Likewise.
+	* c-c++-common/torture/complex-sign-mixed-sub.c: Likewise.
+	* c-c++-common/torture/complex-sign-mul.c: Likewise.
+	* c-c++-common/torture/complex-sign-sub.c: Likewise.
+	* c-c++-common/torture/vector-compare-1.c: Likewise.
+	* gcc.dg/lto/20091013-1_0.c: Likewise.
+	* gcc.dg/torture/fp-int-convert-long-double.c: Likewise.
+	* gcc.dg/torture/pr53366-1.c: Likewise.
+	* gcc.dg/torture/vec-cvt-1.c: Likewise.
+
+	* lib/target-supports.exp: Profiling not available for the
+	MSP430.
+
+2013-02-13  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.target/msp430/abi-331-1.c: Fix for MSP430x output.
+	* gcc.target/msp430/abi-333-1.c: Likewise.
+	* gcc.target/msp430/abi-334-1.c: Likewise.
+	* gcc.target/msp430/abi-338-1.c: Likewise.
+	* gcc.target/msp430/abi-34-1.c: Likewise.
+
+2013-02-12  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.dg/torture/matrix-1.c: Add tests for malloc failure.
+
+	* gcc.c-torture/execute/20101011-1.c: Skip for MSP430.
+
+2013-02-11  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.target/msp430/abi-34-1.c: Update expected
+	assembler output.
+	* gcc.target/msp430/abi-331-1.c: Likewise.
+	* gcc.target/msp430/abi-332-1.c: Likewise.
+	* gcc.target/msp430/abi-333-1.c: Likewise.
+	* gcc.target/msp430/abi-334-1.c: Likewise.
+	* gcc.target/msp430/abi-334-2.c: Likewise.
+	* gcc.target/msp430/abi-337-1.c: Likewise.
+	* gcc.target/msp430/abi-338-2.c: Likewise.
+
+2013-02-08  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/compile/calls.c: Fix for 16-bit targets.
+	* gcc.c-torture/unsorted/DFcmp.c: Likewise.
+	* gcc/testsuite/gcc.c-torture/unsorted/HIcmp.c: Likewise.
+	* gcc/testsuite/gcc.c-torture/unsorted/HIset.c: Likewise.
+	* gcc/testsuite/gcc.c-torture/unsorted/QIcmp.c: Likewise.
+	* gcc/testsuite/gcc.c-torture/unsorted/QIset.c: Likewise.
+	* gcc/testsuite/gcc.c-torture/unsorted/SFset.c: Likewise.
+	* gcc/testsuite/gcc.c-torture/unsorted/SIcmp.c: Likewise.
+	* gcc/testsuite/gcc.c-torture/unsorted/SIset.c: Likewise.
+	* gcc/testsuite/gcc.c-torture/unsorted/UHIcmp.c: Likewise.
+	* gcc/testsuite/gcc.c-torture/unsorted/UQIcmp.c: Likewise.
+	* gcc/testsuite/gcc.c-torture/unsorted/USIcmp.c: Likewise.
+
+	* gcc.c-torture/compile/limits-externdecl.c: Skip for MSP430.
+	* gcc/testsuite/gcc.dg/bitfld-15.c: Likewise.
+	* gcc/testsuite/gcc.dg/bitfld-16.c: Likewise.
+	* gcc/testsuite/gcc.dg/bitfld-17.c: Likewise.
+	* gcc/testsuite/gcc.dg/bitfld-18.c: Likewise.
+
+	* gcc/testsuite/gcc.dg/c99-const-expr-2.c: Fix for MSP430.
+	* gcc/testsuite/gcc.dg/sms-10.c: Likewise.
+	* gcc/testsuite/gcc.dg/tree-ssa/asm-3.c: Likewise.
+
+	* gcc/testsuite/gcc.dg/pr55153.c: Require scheduling support.
+	* gcc/testsuite/gcc.dg/torture/alias-1.c: Likewise.
+
+	* gcc/testsuite/gcc.target/msp430/abi-334-1.c: Update expected
+	assembler output.
+	* gcc/testsuite/gcc.target/msp430/abi-334-2.c: Likewise.
+	* gcc/testsuite/gcc.target/msp430/abi-34-1.c: Likewise.
+
+2013-02-01  Nick Clifton  <nickc@redhat.com>
+
+	* lib/target-supports.exp (check_linker_plugin_available): Add
+	optimization option to avoid compile time warning.
+
+2013-01-15  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.dg/pr37544.c: Skip for MSP430.
+	* gcc.dg/max-1.c: Skip for MSP430X when using the large memory
+	model.
+	* c90-const-expr-2.c: Likewise.
+	* large-size-array.c: Likewise.
+	* stack-usage-1.c: Likewise.
+	* struct-by-value-1.c: Likewise.
+	* transparent-union-1.c: Likewise.
+	* transparent-union-2.c: Likewise.
+	* transparent-union-4.c: Likewise.
+	* transparent-union-5.c: Likewise.
+	* unroll_1.c: Likewise.
+
+	* pr18241-1.c: Require a 32-bit target.
+
+2012-12-18  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.dg/stack-usage-1.c (SIZE): Define for MSP430.
+
+2012-12-12  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.dg/20020312-2.c: No PIC register for MSP430.
+	* gcc.dg/20021014-1.c: Skip if profiling not available.
+	* gcc.dg/nest.c: Likewise.
+	* gcc.dg/nested-func-4.c: Likewise.
+	* gcc.dg/pr32450.c: Likewise.
+	* gcc.dg/pr43643.c: Likewise.
+	* gcc.dg/54455.c: Skip if instruction scheduling not available.
+	* gcc.dg/pr19340.c: Likewise.
+	* gcc.dg/asm-4.c: Skip id asm operand formatter not supported.
+	* gcc.dg/ftrapv-1.c: Skip if trapping arithmetic not available.
+	* gcc.dg/ftrapv-2.c: Likewise.
+	* gcc.dg/ftrapv-3.c: Likewise.
+	* gcc.dg/pr30286.c: Likewise.
+	* gcc.dg/pr38364.c: Likewise.
+	* gcc.dg/pr54676.c: Use long int.
+	* gcc.dg/pr55150-1.c: Only run on 32-bit+ targets.
+	* lib/target-supports.exp (check_profiling_available): Return
+	false for MSP430.
+
+2012-12-07  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.target/msp430/abi-34-1.c: Update expected assembler output.
+	Use ISO C99 to compile the file.
+	* gcc.target/msp430/prologue-1.c: Use __asm instead of asm.
+	* gcc.target/msp430/prologue-2.c: Likewise.
+	* gcc.target/msp430/abi-334-1.c: Use ISO C99 to compile the file.
+	* gcc.target/msp430/abi-334-2.c: Likewise.
+
+2012-12-07  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/compile/per-func-switches.c: Require trampoline
+	support.
+	* gcc.c-torture/compile/20010605-1.c: Likewise.
+	* lib/target-supports.exp (check_effective_target_trampolines):
+	Return 0 for the MSP430.
+	* gcc.c-torture/compile/20020604-1.c: Skip for the MSP430.
+	* gcc.c-torture/compile/20080625-1.c: Likewise.
+	* gcc.c-torture/compile/20010903-1.c: Likewise.
+	* gcc.c-torture/compile/20000804-1.c: Likewise.
+
+2012-10-17  Nick Clifton  <nickc@redhat.com>
+
+	* g++.dg/cpp0x/alias-decl-debug-0.C: Skip for v850.
+	* g++.dg/other/PR23205.C: Likewise.
+	* g++.dg/other/pr23205-2.C: Likewise.
+	* g++.old-deja/g++.jason/thunk3.C: Likewise.
+
+2012-10-08  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/execute/20101011-1.c: Skip test for v850.
+
+2012-09-06  DJ Delorie  <dj@redhat.com>
+
+	* gcc.target/msp430: New directory.
+
+2012-08-31  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.dg/20020312-2.c: Define for V850.
+	* gcc.dg/stack-usage-1.c: Likewise.
+	* lib/target-supports.exp (check_profiling_available): Assume
+	profiling is not supported for the V850.
+
+2012-08-02  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/execute/pr52979-1.c: Use long int type for large bitfield.
+	* gcc.c-torture/execute/pr52979-2.c: Likewise.
+
+2012-03-28  Nick Clifton  <nickc@redhat.com>
+
+	* g++.dg/cpp0x/auto8.C: Mark as needing 32-bit ints.
+	* g++.dg/cpp0x/constexpr-bitfield3.C: Likewise.
+	* g++.dg/cpp0x/initlist25.C: Likewise.
+	* g++.dg/cpp0x/initlist7.C: Likewise.
+	* g++.dg/cpp0x/nullptr04.C: Likewise.
+	* g++.dg/ext/utf-cvt.C: Likewise.
+	* g++.dg/init/array15.C: Likewise.
+	* g++.dg/init/array16.C: Likewise.
+	* g++.dg/lto/pr45679-1_0.C: Likewise.
+	* g++.dg/opt/pr15551.C: Likewise.
+	* g++.dg/opt/pr23478.C: Likewise.
+	* g++.dg/opt/pr36449.C: Likewise.
+	* g++.dg/other/error23.C: Likewise.
+	* g++.dg/torture/pr31863.C: Likewise.
+	* g++.dg/torture/pr33887-1.C: Likewise.
+	* g++.dg/torture/pr33887-2.C: Likewise.
+	* g++.dg/torture/pr33887-3.C: Likewise.
+	* g++.dg/torture/pr34235.C: Likewise.
+	* g++.dg/torture/pr34641.C: Likewise.
+	* g++.dg/torture/pr37146-1.C: Likewise.
+	* g++.dg/torture/pr37146-2.C: Likewise.
+	* g++.dg/torture/pr38565.C: Likewise.
+	* g++.old-deja/g++.abi/ptrmem.C: Likewise.
+	* gcc++.dg/lto/2008090801_0.C: Likewise.
+	* g++.dg/torture/stackalign/eh-global-1.C: Compile with
+	optimization enabled for the RL78.
+
+2012-03-26  Nick Clifton  <nickc@redhat.com>
+
+	* g++.dg/pr48484.C: Mark as needing 32-bit ints.
+	* g++.dg/cpp0x/initlist5.C: Likewise.
+	* g++.dg/eh/omit-frame-pointer.C: Likewise.
+	* g++.dg/ext/attribute-test-1.C: Likewise.
+	* g++.dg/ext/bitfield1.C: Likewise.
+	* g++.dg/init/array11.C: Likewise.
+	* g++.dg/init/value9.C: Likewise.
+	* g++.dg/lookup/builtin5.C: Likewise.
+	* g++.dg/lto/20090112_0.C: Likewise.
+	* g++.dg/opt/anonunion2.C: Likewise.
+	* g++.dg/opt/asm2.C: Likewise.
+	* g++.dg/opt/reload3.C: Likewise.
+	* g++.dg/opt/temp2.C: Likewise.
+	* g++.dg/opt/thunk1.C: Likewise.
+	* g++.dg/other/error23.C: Likewise.
+	* g++.dg/other/linkage2.C: Likewise.
+	* g++.dg/other/pr31078.C: Likewise.
+	* g++.dg/parse/defarg5.C: Likewise.
+	* g++.dg/rtti/typeid4.C: Likewise.
+	* g++.dg/template/friend10.C: Likewise.
+	* g++.dg/template/friend18.C: Likewise.
+	* g++.dg/tree-ssa/pr20458.C: Likewise.
+	* g++.dg/tree-ssa/pr27291.C: Likewise.
+	* g++.dg/tree-ssa/pr49516.C: Likewise.
+	* g++.dg/tree-ssa/tmmti-2.C: Likewise.
+	* g++.dg/warn/Wconversion-integer.C: Likewise.
+	* g++.dg/warn/Wconversion3.C: Likewise.
+	* g++.dg/warn/Wdouble-promotion.C: Likewise.
+	* g++.dg/warn/Wstrict-aliasing-5.C: Likewise.
+	* g++.dg/warn/Wstrict-aliasing-bogus-signed-unsigned.C: Likewise.
+	* g++.dg/warn/Wtype-limits-Wextra.C: Likewise.
+	* g++.dg/warn/Wtype-limits.C: Likewise.
+	* g++.dg/warn/multiple-overflow-warn-3.C: Likewise.
+	* g++.old-deja/g++.benjamin/15071.C: Likewise.
+	* g++.old-deja/g++.brendan/copy9.C: Likewise.
+	* g++.old-deja/g++.brendan/enum11.C: Likewise.
+	* g++.old-deja/g++.brendan/nest21.C: Likewise.
+	* g++.old-deja/g++.brendan/ptolemy2.C: Likewise.
+	* g++.old-deja/g++.bugs/900227_01.C: Likewise.
+	* g++.old-deja/g++.eh/badalloc1.C: Likewise.
+	* g++.old-deja/g++.jason/2371.C: Likewise.
+	* g++.old-deja/g++.jason/template24.C: Likewise.
+	* g++.old-deja/g++.jason/template31.C: Likewise.
+	* g++.old-deja/g++.jason/thunk3.C: Likewise.
+	* g++.old-deja/g++.law/arg8.C: Likewise.
+	* g++.old-deja/g++.law/code-gen5.C: Likewise.
+	* g++.old-deja/g++.law/ctors12.C: Likewise.
+	* g++.old-deja/g++.law/cvt2.C: Likewise.
+	* g++.old-deja/g++.law/virtual3.C: Likewise.
+	* g++.old-deja/g++.mike/eh2.C: Likewise.
+	* g++.old-deja/g++.mike/net34.C: Likewise.
+	* g++.old-deja/g++.mike/net46.C: Likewise.
+	* g++.old-deja/g++.mike/ns15.C: Likewise.
+	* g++.old-deja/g++.mike/p658.C: Likewise.
+	* g++.old-deja/g++.other/exprstmt1.C: Likewise.
+	* g++.old-deja/g++.other/headers1.C: Likewise.
+	* g++.old-deja/g++.other/inline12.C: Likewise.
+	* g++.old-deja/g++.other/new6.C: Likewise.
+	* g++.old-deja/g++.other/sibcall1.C: Likewise.
+	* g++.old-deja/g++.other/unchanging1.C: Likewise.
+	* g++.old-deja/g++.pt/crash16.C: Likewise.
+	* g++.old-deja/g++.pt/ptrmem6.C: Likewise.
+	* g++.old-deja/g++.robertl/eb115.C: Likewise.
+	* g++.old-deja/g++.robertl/eb21.C: Likewise.
+	* g++.old-deja/g++.robertl/eb31.C: Likewise.
+	* g++.old-deja/g++.robertl/eb41.C: Likewise.
+	* g++.old-deja/g++.robertl/eb46.C: Likewise.
+	* g++.old-deja/g++.robertl/eb54.C: Likewise.
+	* g++.old-deja/g++.robertl/eb66.C: Likewise.
+	* g++.old-deja/g++.robertl/eb73.C: Likewise.
+	* g++.old-deja/g++.robertl/eb77.C: Likewise.
+	* g++.old-deja/g++.warn/flow1.C: Likewise.
+
+2011-01-24  Nick Clifton  <nickc@redhat.com>
+
+	Issue 1278303
+	* gcc.target/xstormy16/set1clr1_warn: New directory.
+	* gcc.target/xstormy16/set1clr1_warn/10_SET_SFRB_BIT_0.c: New test.
+	* gcc.target/xstormy16/set1clr1_warn/11_CLR_SFRB_BIT_7.c: New test.
+	* gcc.target/xstormy16/set1clr1_warn/LCD_Printf.c: New test.
+	* gcc.target/xstormy16/set1clr1_warn/TEST2X.c: New test.
+	* gcc.target/xstormy16/set1clr1_warn/Usb.c: New test.
+	* gcc.target/xstormy16/set1clr1_warn/10_SET_SFRB_BIT_7.c: New test.
+	* gcc.target/xstormy16/set1clr1_warn/ChipUnique.c: New test.
+	* gcc.target/xstormy16/set1clr1_warn/Sample.c: New test.
+	* gcc.target/xstormy16/set1clr1_warn/Tutorial.c: New test.
+
+2010-09-17  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.target/xstormy16/i1357493_main.c: New test.
+	* gcc.target/xstormy16/i1357493_large_array.c: Second file for new test.
+	* gcc.target/xstormy16/xstormy16.exp: Run the new test.
+
+2010-08-13  Nick Clifton  <nickc@redhat.com>
+
+	* gcc_plumhall.10a/lang.execute.exp: Add
+	-DDISALLOW_UNIVERSAL_CHARACTER_NAME to ANSICFLAGS.
+
+2010-08-11  Nick Clifton  <nickc@redhat.com>
+
+	* gcc_plumhall.10a/envsuite (HOCFLAGS): Fix for building on Fedora 12.
+
+2010-04-22  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/compile/limits-fndefn.c: Only run for 32-bit+ targets.
+	* gcc.c-torture/compile/pr41181.c: Likewise.
+	* gcc.c-torture/compile/pr43191.c: Likewise.
+	* gcc.dg/c99-stdint-1.c: Likewise.
+	* gcc.dg/c99-stdint-2.c: Likewise.
+	* gcc.dg/cdce1.c: Likewise.
+	* gcc.dg/large-size-array-2.c: Likewise.
+	* gcc.dg/large-size-array-4.c: Likewise.
+	* gcc.dg/pr41340.c: Likewise.
+	* gcc.dg/pr41551.c: Likewise.
+	* gcc.dg/pr42629.c: Likewise.
+	* gcc.dg/pr43402.c: Likewise.
+	* gcc.dg/utf-cvt.c: Likewise.
+	* gcc.dg/graphite/pr42205-1.cc: Likewise.
+	* gcc.dg/graphite/pr42221.cc: Likewise.
+	* gcc.dg/graphite/scop-22.cc: Likewise.
+	* gcc.dg/graphite/scop-dsyr2k.cc: Likewise.
+	* gcc.dg/graphite/scop-dsyrk.cc: Likewise.
+	* gcc.dg/graphite/scop-mvt.cc: Likewise.
+	* gcc.dg/graphite/scop-sor.cc: Likewise.
+	* gcc.dg/special/align-1.c: Likewise.
+	* gcc.dg/torture/pr43165.c: Likewise.
+	* gcc.c-torture/compile/pr35318.c: Skip for xstormy16.
+	* gcc.dg/pr19340.c: Likewise.
+	* gcc.dg/pr36998.cc: Likewise.
+	* gcc.dg/cpp/_Pragma6.cc: Likewise.
+	* gcc.dg/bitfld-1.c: Remove RX special case.
+	* gcc.dg/cpp/warn-multichar-2.c: Fix expected warning message.
+	* gcc.dg/cpp/warn-multichar.c: Likewise.
+	* gcc.dg/lto/20090218-2_1.c: Mark memcpy and malloc prototypes as extern.
+
+2009-11-03  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.target/rx/builtins,c: Remove redundant tests.
+	Add test of MVTIPL instruction.
+	* gcc.target/rx/interrupts.c: Use fast_interrupt and interrupt
+	function attributes.  Add -msave-acc-in-interrupts option to the
+	command line.
+	* lib/target-supports.exp: Remove redundant check.
+
+2009-08-18  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.target/rx/interrupts.c: Use -mint-register.
+
+2009-08-10  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.dg/builtin-apply4.c: Only copy 4 bytes of stack space as
+	otherwise an illegal memory access can be generated on the RX.
+	* gcc.dg/fold-overflow-1.c: Expect a hexadecimal constant in the
+	assembler output of the RX toolchain.
+
+2009-07-31  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/execute/ieee/compare-fp-1.x: Skip for RX.
+	* gcc.c-torture/execute/ieee/fp-cmp-1.x: Skip for RX.
+
+2009-07-29  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.dg/20050607-1.c: Remove RX exception.
+	* gcc.dg/Wpadded.c: Remove RX exception.
+	* gcc.dg/bitfld-1.c: Fix dg-warning line number.
+
+2009-07-22  Nick Clifton  <nickc@redhat.com>
+
+	* g++.dg/abi/bitfield5.C: Do not epxect a warning from the RX
+	toolchain.
+	* g++.dg/ipa/iinline-1.C: Reduce size of array for smaller
+	processors.
+	* g++.old-deja/g++.pt/zstring.C: Fix typo.
+
+2009-07-21  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.target/rx/interrupts.c: New test.  Check the __interrupt__,
+	__exception__ and __naked__ function attributes.
+
+2009-07-20  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.target/rx/builtins.c: Add -fno-ipa-cp-clone to fix problem
+	with cloned saturate_add function.
+
+	* gcc.c-torture/execute/ieee/fp-cmp-4.x: New file.
+	* gcc.c-torture/execute/ieee/fp-cmp-4l.x: New file.
+	* gcc.c-torture/execute/ieee/fp-cmp-5.x: New file.
+	* gcc.c-torture/execute/ieee/fp-cmp-8.x: New file.
+	* gcc.c-torture/execute/ieee/fp-cmp-8l.x: New file.
+	* gcc.c-torture/execute/ieee/fp-cmp-4f.x: Add RX exception.
+	* gcc.c-torture/execute/ieee/fp-cmp-8f.x: Likewise.
+	* gcc.c-torture/execute/ieee/pr38016.x: Likewise.
+	* gcc.dg/20050607-1.c: Likewise.
+	* gcc.dg/Wpadded.c: Likewise.
+	* gcc.dg/bitfld-1.c: Fix offset in dg-warning.
+
+2009-03-25  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/compile/pr27528.c: Do not run this test in PIC
+	mode.
+
+2009-03-05  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.target/rx/i272091.c: New test.
+	* gcc.target/rx/packed-struct.c: New test.
+	* gcc.target/rx/zero-width-bitfield: New test.
+	* gcc.target/rx/rx-abi-functions-tests.c: Remove spurious
+	underscore prefix from function names.  Use dg-options to override
+	default compilation options.
+	* gcc.c-torture/compile/pr38789.c: Change comment character.
+	* gcc.dg/bitfld-1.c: Do not expect an error message for a
+	zero-width named bitfield.
+
+2009-02-24  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.target/rx/rx-abi-function-tests.c: Check RX ABI specified
+	run-time functions.
+
+2009-01-26  Nick Clifton  <nickc@redhat.com>
+
+	* g++.dg/compat/struct-layout-1.exp: Do not run if there is no
+	second compiler to test.
+	* g++.old-deja/g++.pt/zstring.C. Use memcpy instead of bcopy.
+
+2009-01-09  Nick Clifton  <nickc@redhat.com>
+
+	*  gcc.dg/div-double-1.c: Expect to fail when not using 64-bit
+	doubles.
+	* gcc.dg/pr37544.c: Likewise.
+	* gcc.c-torture/compile/20011114-1.c: Remove redundant 16-bit-int
+	mode test.
+	* gcc.dg/Wbad-function-cast-1.c: Likewise.
+	* gcc.dg/Wconversion-5.c: Likewise.
+	* gcc.dg/Wtype-limits-Wextra.c: Likewise.
+	* gcc.dg/Wtype-limits.c: Likewise.
+	* gcc.dg/c99-const-expr-2.c: Likewise.
+	* gcc.dg/fold-eqandshift-3.c: Likewise.
+	* gcc.dg/inline-23.c: Likewise.
+	* gcc.dg/pr30744-1.c: Likewise.
+	* gcc.dg/tree-ssa/foldaddr-1.c: Likewise.
+	* gcc.dg/tree-ssa/loadpre6.c: Likewise.
+	* gcc.dg/tree-ssa/vrp47.c: Likewise.
+
+2008-12-01  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/compile/20010327-1.c: Skip for xStormy16.
+	* gcc.c-torture/compile/20020604-1.c: Likewise.
+	* gcc.c-torture/compile/20020825-1.c: Likewise.
+	* gcc.c-torture/compile/limits-stringlit.c: Likewise.
+
+2008-10-31  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.target/rx/builtins.c (get_coprocessor_1_register_2):
+	Suppressed, because coprocessor instructions have not yet been
+	finalized in the ISA.
+	(set_coprocessor_2_register_3): Likewise.
+	(do_coprocessor_3_op_4): Likewise.
+
+2008-10-16  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.dg/tree-ssa/static-local.c: Do not use nested functions when
+	compiling in strict ANSI mode.
+
+2008-02-15  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.target/mn10300/issue163767.c: New test.
+
+2008-02-13  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.target/mn10300/issue161126.c: New test.
+
+2007-10-17  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.dg/tree-ssa/static-local.c: Cleanup dump file at the end of
+	the test.
+
+2006-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.dg/tree-ssa/static-local.c: New test.  Check
+	-foptimize-local-statics.
+
+2006-05-03  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/compile/20001226-1.c: Add -fno-tree-vrp to gcc
+	command line as the tree-vrp pass, enabled at -O2 or higher,
+	requires a huge amount of stack space, much more than is available
+	on lots of our host machines.
+
+2005-09-07  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/execute/20020412-1.x: New file.  Expect this
+	test to fail for the xstormy16 as this is the only port with
+	an upward growing stack but downward growing arguments.
+
+2004-09-08  Nick Clifton  <nickc@redhat.com>
+
+	* lib/target-supports.exp (check_profiling_available): Suppress
+	profiling checks for SH toolchains - there is no easy way to
+	determine if profiling is supported by a particular toolchain.  In
+	the FSF world it is safe to assume that it is and allow the tests
+	to fail, but for our toolchain releases it wastes engineer's time
+	investigating bogus FAILS.
+
+2004-08-06  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.target/sh/abi-c.c: Remove calls to C library functions
+	memset() and memcmp() so that the test is multilib independent.
+
+2003-08-08  Nick Clifton  <nickc@redhat.com>
+
+	* g++.dg/opt/anonunion2.C: Test for correct handling on nested
+	anonynous unions.
+
+2003-07-06  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gcc.dg/sh4a-memmovua.c: Tweak regular expression.
+
+2003-07-01  Alexandre Oliva  <aoliva@redhat.com>
+
+	* gcc.dg/sh4a-bitmovua.c: New.
+	* gcc.dg/sh4a-cos.c: New.
+	* gcc.dg/sh4a-cosf.c: New.
+	* gcc.dg/sh4a-fprun.c: New.
+	* gcc.dg/sh4a-fsrra.c: New.
+	* gcc.dg/sh4a-memmovua.c: New.
+	* gcc.dg/sh4a-sin.c: New.
+	* gcc.dg/sh4a-sincos.c: New.
+	* gcc.dg/sh4a-sincosf.c: New.
+	* gcc.dg/sh4a-sinf.c: New.
+
+2003-01-17  Nick Clifton  <nickc@redhat.com>
+
+	* g++_perennial.99/scaffold.C: Remove CYGNUS LOCAL comments.
+	Replace with sanitization and redact commands.
+
+2003-01-16  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.target/xscale: New directory: Contains XScale specific
+	tests.
+	* gcc.target/xscale/xscale.exp: New file: Driver for xscale tests.
+	* gcc.target/xscale/107491.c: New file: Test based on case 107491.
+
+2002-12-12  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.eembc/pktflow_B1M.out: Use regular expressions to match
+	Target Timer Rate and Target Timer Granularity as these are not
+	constants.
+
+2002-10-31  Richard Sandiford  <rsandifo@redhat.com>
+
+	* lib/g++_perennial.exp (perennial_check_expected): Fix quoting.
+
+2002-08-14  Jason Merrill  <jason@redhat.com>
+
+	* lib/g++_perennial.exp (perennial_check_expected): Use ==.
+	(perennial_read_test_info): Use 'string index'.
+
+2002-07-12  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* gcc.c-torture/compile/20020712-1.c: New test.  Check for a
+	case that used to provoke infinite recursion in cc1.
+
+2002-07-08  Brendan Conoboy  <blc@redhat.com>
+
+	* lib/g++_plumhall.exp: Call g++_ functions, not gcc_ functions.
+
+2002-06-19  Jason Merrill  <jason@redhat.com>
+
+	* lib/g++_perennial.exp (CRASH_FAILURE): New global.
+	(perennial_run_compile_fail_test): Check it.
+	(perennial_run_testline): Handle only counting tests once here.
+	(perennial_run_cm): Not here.
+	(perennial_do_compile): Return output.
+	(perennial_read_test_info): Close infofile.
+	(perennial_run_testlist): Close testlist.
+	(perennial_run_cm, perennial_run_rd): Close input.
+
+2002-04-29  Richard Sandiford  <rsandifo@redhat.com>
+
+	* gcc.c-torture/execute/20020425-1.c: New test.
+
+2002-04-24  Jason Merrill  <jason@redhat.com>
+
+	* lib/g++_perennial.exp (perennial_run_testline): Limit count to
+	one per test for all test types.
+	(perennial_run_cm): Not just cm tests.
+	(CRASH_FAILURE): New global variable.
+	(perennial_run_compile_fail_test): If it's set, fail on a compiler
+	crash.
+	(perennial_do_compile): Return a value.
+	* g++_perennial.99/test_info: Add XFAIL for C14455.cm.
+
+2002-02-28  Jason Merrill  <jason@redhat.com>
+
+	Completely rewrite C++ Perennial support to handle all Perennial
+	test types and provide xfail capability.
+	* lib/g++_perennial.exp: Rewrite.
+	* g++_perennial.99/ISO.execute.exp: Rewrite.
+	* g++_perennial.99/ISO.other.exp: New file.
+	* g++_perennial.99/ISO.link.exp: Remove.
+	* g++_perennial.99/ISO.xcompile.exp: Remove.
+	* g++_perennial.99/scaffold.C: Move Red Hat-modified copy here
+	from Perennial directory.
+	* g++_perennial.99/test_config.h: Likewise.
+	* g++_perennial.99/testlist: Likewise.
+	* g++_perennial.99/test_info: New file.
+	* g++_perennial.99/README: Update.
+
+2002-02-23  Jason Merrill  <jason@redhat.com>
+
+	* lib/g++_perennial.exp (CATEGORIES): New global variable.
+	(perennial_make): Add support for linking without executing.
+	* g++_perennial.99/ISO.link.exp: Check category against
+	$CATEGORIES rather than explicit REQ.
+	* g++_perennial.99/ISO.xcompile.exp: Likewise.
+	* g++_perennial.99/ISO.execute.exp: Likewise.  Get xfile from
+	testlist.  Pass "run" to perennial_make.
+
+2001-11-27  Jason Merrill  <jason@redhat.com>
+
+	* lib/g++_perennial.exp (perennial_init): Only run tests with -g -O
+	by default.
+
+	* g++_perennial.99/ISO.execute.exp, g++_perennial.99/ISO.xcompile.exp,
+	g++_perennial.99/ISO.link.exp: Use the testlist from the Perennial
+	source directory.
+	* g++_perennial.99/ISO.execute.exp: Also run .r0 tests.
+	* g++_perennial.99/ISO.xcompile.exp: Lose xcompile_or_execute concept.
+	* lib/g++_perennial.exp: Add PEREN_CXX_TESTLIST, defaulting to the
+	one in $PEREN_CXX_SRC.
+	(perennial_init): Use "file copy" instead of "exec cp".
+	(perennial_check_log, perennial_check_output,
+	perennial_check_exit): New fns, split out from...
+	(perennial_make): Here.  Take one of them as a parameter.
+
+2001-10-03  Jonathan Larmour  <jlarmour@redhat.com>
+
+	* gcc.dg/special/ecos.exp: Take into account remote hosts.
+	* g++.dg/special/ecos.exp: Likewise
+
+2001-07-27  Stan Cox  <scox@redhat.com>
+
+	* lib/g++_perennial.exp (perennial_init): Add PER_FILE_OPTIONS.
+	* lib/perennial.exp (perennial_init): Print error if PEREN_SRC not set.
+	* g++_perennial/ISO.execute.exp: Use stoplist7 if no wctype.h.
+
+2001-07-24  Stan Cox  <scox@redhat.com>
+
+	* lib/g++_perennial.exp: New file.
+	* g++_perennial/ISO.execute.exp: New file.
+	* g++_perennial/ISO.link.exp: New file.
+	* g++_perennial/ISO.xcompile.exp: New file.
+	* gcc_perennial/ISO.execute.exp: Declare runtests.
+	* gcc_perennial/CLASSIC.execute.exp: Likewise.
+
+2001-07-05  Jeff Knaggs  <jknaggs@redhat.com>
+
+        * gcc_perennial.99/ISO.execute.exp: Support -mieee, based
+        on board info for selected tests.
+
+        * lib/perennial.exp: Likewise.  Code changes allow
+	extension of test options on a per-file basis.
+
+2001-07-02  Geoffrey Keating  <geoffk@redhat.com>
+
+	* gcc.c-torture/compile/961203-1.x: Mark unsupported by stormy16.
+	* gcc.c-torture/compile/980506-1.x: Mark unsupported by stormy16.
+	* gcc.c-torture/compile/990617-1.x: Mark unsupported by stormy16.
+
+Sat Jan 20 21:49:31 2001  J"orn Rennecke <amylaar@redhat.com>
+
+	* gcc.c-torture/execute/string-opt-9.c (strcmp): Returns int.
+	* gcc.c-torture/execute/string-opt-10.c (strcmp): Likewise.
+
+2001-01-19  Stan Cox  <scox@redhat.com>
+
+        * gcc_perennial.99/ISO.execute.exp: support running only
+        some of the tests.
+        * gcc_perennial.99/CLASSIC.execute.exp: Likewise.
+
+2001-01-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	Merged from net GCC:
+	2000-11-15  Neil Booth  <neilb@earthling.net>
+	gcc.dg/cpp/_Pragma1.c: Update.
+
+2000-11-09  Donald Lindsay  <dlindsay@redhat.com>
+
+	* lib/plumhalll_99b.exp (ph_section): when an XFAIL leaves a
+	core file, this is not the expected fail. Added logic to
+	keep the core file safe from accidental overwrite, and declare FAIL.
+
+2000-10-31  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* g++.old-deja/g++.arm/ch10/p000.C: 'printf' returns an int
+	and takes a 'const char *'.
+        * g++.old-deja/g++.arm/ch13/p311b.C: Likewise.
+        * g++.old-deja/g++.arm/ch13/p313.C: Likewise.
+        * g++.old-deja/g++.arm/ch13/p317b.C: Likewise.
+        * g++.old-deja/g++.arm/ch13/p320.C: Likewise.
+        * g++.old-deja/g++.arm/ch13/p320b.C: Likewise.
+        * g++.old-deja/g++.arm/ch13/p320c1.C: Likewise.
+        * g++.old-deja/g++.arm/ch13/p321b.C: Likewise.
+        * g++.old-deja/g++.arm/ch13/p322.C: Likewise.
+        * g++.old-deja/g++.arm/ch13/p322b.C: Likewise.
+        * g++.old-deja/g++.arm/ch13/p324b.C: Likewise.
+        * g++.old-deja/g++.arm/ch13/p324c.C: Likewise.
+        * g++.old-deja/g++.arm/ch13/p325.C: Likewise.
+        * g++.old-deja/g++.arm/ch13/p325b.C: Likewise.
+        * g++.old-deja/g++.arm/ch13/p326c.C: Likewise.
+        * g++.old-deja/g++.arm/ch13/p335.C: Likewise.
+	* g++.old-deja/g++.brendan/code-gen7.C: Likewise.
+
+	* g++.old-deja/g++.pt/zephyrd.C: Delete, too out-of-date.
+
+	* g++.old-deja/g++.sun/g++.comp/1075720.C: Expect warnings
+	about deprecated return value extension.
+	* g++.old-deja/g++.sun/g++.comp/1068113.C: Allow for
+	'candidates are: ' message.
+
+	* g++.old-deja/g++.arm/ch13/p332.C: Remove expected
+	cascading errors that g++ doesn't now generate.
+	* g++.old-deja/g++.brendan/code-gen7.C: 'main' returns 'int'.
+
+Wed Aug 23 15:09:55 2000  Donald Lindsay  <dlindsay@cygnus.com>
+
+	* g++_plumhall.99: added this directory.
+	* lib/g++_plumhall.exp: added this file
+
+2000-08-14  Richard Henderson  <rth@cygnus.com>
+
+	* gcc.prms/2541.c: Declare exit and abort.
+	* gcc.prms/4723.c: Likewise.
+	* gcc.prms/5012.c: Likewise.
+
+2000-05-28  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* g++.old-deja/g++.arm/ch11/p247b.C: Do not expect any errors, the
+	code is valid.
+
+	* g++.old-deja/g++.arm/ch13/p308.C: Adjust the location of
+	some warnings.
+	* g++.old-deja/g++.brendan/misc12.C: __FUNCTION__ and
+	__PRETTY_FUNCTION__ are now `const char*'.
+	* g++.old-deja/g++.sun/g++.comp/1069997.C: No -pg on mn10300.
+	* g++.old-deja/g++.sun/g++.comp/1069997a.C: No -pg on mn10300.
+
+2000-05-25  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* lib/plumhall_99b.exp: Rename ph_initted to ph99b_initted, to
+	avoid clash with plumhall.exp.
+	(TORTURE_OPTIONS): Do not set to -O0.
+
+2000-05-24  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* gcc_perennial.99/ISO.execute.exp (stoplist5): Skip if noargs.
+
+2000-04-17  Donald Lindsay  <dlindsay@cygnus.com>
+
+	* lib/perennial.exp (perennial_make): was deleting object files.
+	but leaving executables around. Will now  append the executable
+	to the files_to_delete list.
+
+2000-03-28  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* lib/plumhall_99b.exp (PH_BUILD): Set in the top-level, ph_init
+	was too late.
+
+	* lib/perennial.exp (TORTURE_OPTIONS): Use defaults from
+	c-torture.exp.
+	(perennial_shortname): Retain CLASSIC, ISO_C, etc.
+	(perennial_make): `pass' on success.
+	(perennial_compile_fail): Submit existing sources for
+	re-compilation for execution tests.  Log failures using a test's
+	short name, not just its base name.
+
+2000-03-15  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
+
+	* gcc_perennial.99/CLASSIC.execute.exp: Skip if
+	PERENNIAL_CLASSIC_C is set to `no' or not set.
+	* gcc_perennial.99/CLASSIC.link.exp: Likewise.
+	* gcc_perennial.99/CLASSIC.xcompile.exp: Likewise.
+
+2000-03-10  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
+
+	* lib/perennial.exp (perennial_compile_fail): Delete any object
+	files it creates.  Link the scaffold object last.
+
+2000-03-08  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
+
+	* gcc_perennial.99/scaffold.c: Moved back to PEREN_SRC.
+	* lib/perennial.exp (perennial_init): Copy it from there.
+
+2000-02-27  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
+
+	* gcc_perennial.99/CLASSIC.xcompile.exp: Adjusted to new
+	perennial_compile_fail.
+
+2000-02-25  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
+
+	* lib/perennial.exp (perennial_compile_fail): Support conditional
+	linking and execution.
+	* gcc_perennial.99/ISO.xcompile.exp (xcompile_or_execute): Define
+	with Clause6/8_3_4/E61115.c.  Use this variable to decide whether
+	or not to request conditional linking and execution.
+
+2000-02-23  Alexandre Oliva  <oliva@lsd.ic.unicamp.br>
+
+	* gcc_perennial.99/CLASSIC.execute.exp (ANSICFLAGS): Save it,
+	add -fwritable-strings and restore it at the end.
+	* gcc_perennial.99/CLASSIC.link.exp (ANSICFLAGS): Likewise.
+	* gcc_perennial.99/CLASSIC.xcompile.exp (ANSICFLAGS): Likewise.
+
+	* gcc_perennial.99/ISO.xcompile.exp: Support X* files.
+	* lib/perennial.exp (perennial_compile_fail): Likewise.
+
+1999-09-22  Nick Clifton  <nickc@cygnus.com>
+
+	* special/special.exp: Remove CYGNUS LOCAL markers.
+	* execute/comp-goto-1.x: Delete.
+	* execute/980526-1.x: Delete.
+
+1999-08-07  Nick Clifton  <nickc@cygnus.com>
+
+	* execute/941014-1.x: Expect strongarm2 failure.
+
+1999-03-29  Nick Clifton  <nickc@cygnus.com>
+
+	* (compile/930529-1.x): New file: Compile with -Wa,-C for d30v tests.
+	* (execute/981019-1.x): New file: Compile with -Wa,-C for d30v tests.
+	* (execute/va-arg-2.x): New file: Compile with -Wa,-C for d30v tests.
+	* (execute/va-arg-3.x): Compile with -Wa,-C for d30v tests.
+	* (execute/ieee/920518-1.x): New file: Compile with -Wa,-C for d30v tests
+	* (execute/memtest/t4.x): New file: Compile with -Wa,-C for d30v tests.
+	* (execute/memtest/t5.x): New file: Compile with -Wa,-C for d30v tests.
+	* (execute/memtest/t6.x): New file: Compile with -Wa,-C for d30v tests.
+	* (execute/memtest/t7.x): New file: Compile with -Wa,-C for d30v tests.
+
+1999-03-12  Nick Clifton  <nickc@cygnus.com>
+
+	* g++.old-deja/g++.robertl/eb106.C: Add expected failure for ARM
+	ports.
+
+1999-03-05  Nick Clifton  <nickc@cygnus.com>
+
+	* gcc.c-torture/execute/980526-1.x: Add StrongARM and change
+	from -O2 to -O3.
+
+1999-02-11  Nick Clifton  <nickc@cygnus.com>
+
+        * lib/consistency.exp (proc gcc_target_compile): Add support for
+        timeout specified by target.
+
+1999-02-10  Nick Clifton  <nickc@cygnus.com>
+
+	* execute/comp-goto-1.x: Add StrongARM and rework to avoid bug in
+	framework.exp.
+
+	* execute/980506-2.x: No longer needed.
+	* execute/bcp-1.x: No longer needed.
+
+	* special/special.exp: Suppress use of -fpic when compiling
+	special/981006-1 for the StrongARM.
+
+	* execute/bcp-1.x: Add
+
+1999-02-09  Vladimir N. Makarov  <vmakarov@cygnus.com>
+
+	* consistency.vlad/vlad.exp: Fix bug with NO_LIBGLOSS_LIBRARY_OPTIONS.
+
+	* consistency.vlad: New directory.
+
+	* consistency.vlad/README: New file describing consistency
+	testsuite.
+
+	* consistency.vlad/vlad.exp: New file (consistency test driver).
+
+	* consistency.vlad/layout: New directory for checking layout
+	consistency.
+
+        * consistency.vlad/layout/{*.c,*.cpp}: New files (tests for
+	checking layout consistency).
+
+	* consistency.vlad/layout/i960-97r2-results: New directory for
+	test results for 97r2 i960 compiler.
+
+	* consistency.vlad/layout/i960-97r2-results/README: New file
+	describing the directory.
+
+	* consistency.vlad/layout/i960-97r2-results/{*.out,*.out++}: New
+	files (the test results).
+
+	* consistency.vlad/nortel: New directory for Nortel specific
+	consistency tests.
+
+        * consistency.vlad/nortel/{*.c,*.cpp,*.s,*.S}: New files
+        (Nortel	specific consistency tests).
+
+        * consistency.vlad/nortel/{*.cexp}: New files (Nortel specific
+	consistency test drivers).
+
+	* consistency.vlad/nortel/{dollar,cast}.conly: New files used
+        as flag for the test compilation only.
+
+	* consistency.vlad/nortel/WRAP_FILE: New file containing name of
+	used wrap file for Nortel specific tests.
+
+	* consistency.vlad/layout/i960-97r2-results: New directory for
+	the test results for 97r2 i960 compiler.
+
+	* consistency.vlad/nortel/i960-97r2-results/README: New file
+	describing the directory.
+
+	* consistency.vlad/nortel/i960-97r2-results/{*.out,*.out++}: New
+	files (the test results).
+
+	* lib/consistency.exp: New library file of the testsuite.
+
+1999-02-03  Felix Lee  <flee@cygnus.com>
+
+	* lib/plumhall.exp (ph_make): rewrite; iterate over
+	TORTURE_OPTIONS.
+	(ph_make_objs): new function.
+	(ph_compile, ph_compiler, ph_doexpr, ph_linker): delete unused,
+	out-of-date functions.
+
+1998-12-17  Nick Clifton  <nickc@cygnus.com>
+
+	* special/special.exp: Suppress use of -fpic when compiling
+	special/981006-1 for the FR30.
+
+1998-11-21  Jim Wilson  <wilson@cygnus.com>
+
+	* lib/plumhall.exp (ph_doexpr): Spell missing arg correctly.
+
+1998-11-02  Jim Wilson  <wilson@cygnus.com>
+
+	* lib/plumhall.exp (ph_doexpr): Add missing arg to ph_make.
+
+1998-10-13  Felix Lee  <flee@cygnus.com>
+
+	* lib/plumhall.exp: hack for i960-vxworks5.0
+
+Local Variables:
+mode: change-log
+change-log-default-name: "ChangeLog.RedHat"
+End:

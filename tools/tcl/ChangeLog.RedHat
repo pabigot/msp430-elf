@@ -1,0 +1,13 @@
+2009-02-06  Kevin Buettner  <kevinb@redhat.com>
+
+	Merge / backport upstream changes:
+	*tclWinDde.c (Tcl_DdObjCmd): Change declaration and remove
+	cast of `objv' to avoid GCC error.
+
+2009-02-05  Kevin Buettner  <kevinb@redhat.com>
+
+	Merge / backport upstream changes:
+	* tclWinChan.c (Tcl_MakeFileChannel): Put inline assembler into
+	one big block.
+	(struct EXCEPTION_REGISTRATION): Define.
+	(_except_makefilechannel_handler): Delete.

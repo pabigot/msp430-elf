@@ -1,0 +1,5 @@
+1999-10-06  Tom Tromey  <tromey@cygnus.com>
+
+	* Makefile.in: Rebuilt.
+	* Makefile.am (libzgcj_la_LDFLAGS): Also specify -release.
+

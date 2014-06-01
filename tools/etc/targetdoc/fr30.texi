@@ -1,0 +1,91 @@
+\input texinfo        @c                    -*- Texinfo -*-
+@setfilename fr30.info
+@settitle FR30 Release Notes
+
+@finalout
+@setchapternewpage odd
+@iftex
+@raggedbottom
+@global@parindent=0pt
+@end iftex
+
+@titlepage
+@title FR30 Release Notes
+@sp 4
+@author Nick Clifton
+@page
+
+@ifinfo
+@format
+START-INFO-DIR-ENTRY
+* FR30 Release Notes:              Release Notes for the FR30 targeted GnuPro toolchain
+END-INFO-DIR-ENTRY
+@end format
+@end ifinfo
+
+@vskip 0pt plus 1filll
+Copyright @copyright{} 1998 Cygnus Solutions
+
+Permission is granted to make and distribute verbatim copies of
+this manual provided the copyright notice and this permission notice
+are preserved on all copies.
+
+Permission is granted to copy and distribute modified versions of this
+manual under the conditions for verbatim copying, provided also that
+the entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+
+Permission is granted to copy and distribute translations of this manual
+into another language, under the above conditions for modified versions,
+except that this permission notice may be stated in a translation approved
+by Cygnus Solutions.
+@end titlepage
+
+@ifinfo
+@node Top
+@top FR30 Release Notes
+@end ifinfo
+
+@c @lowersections
+
+@c @chapter FR30 Release Notes
+
+@menu
+* Compiler::          Notes about the FR30 compiler
+* Simulator::         Notes about the FR30 simulator
+* Debugger::          Notes about the FR30 targetted debugger
+@end menu
+
+@node Compiler
+@chapter The FR30 port of the GCC compiler
+
+The FR30 port of GCC is a standard port of the compiler.  This section
+documents only those differences between the FR30 port and any other
+port.
+
+@table @bullet
+
+@item
+The compiler supports a command line switch @emph{-msmall-model} which
+makes the compiler assume that all addresses in the program will fit in
+20 bits (unsigned), so that they can be loaded with the LDI:20
+instruction instead of the LDI:32 instruction.
+
+@item
+The compiler conforms to the ABI used by Fujitsu's own FR30 C compiler. 
+
+@end table
+
+
+@node Simulator
+@chapter The FR30 instruction level simulator
+
+@comment To be filled in by Dave
+
+@node Debugger
+@chapter The FR30 port of the GDB debugger
+
+@comment To be filled in by Zdenek
+
+@contents
+@bye

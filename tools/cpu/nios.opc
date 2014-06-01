@@ -1,0 +1,895 @@
+/* NIOS opcode support.  -*- C -*-
+   Copyright (C) 2000, 2001, 2005 Red Hat, Inc.
+   This file is part of CGEN.  */
+
+/* This file is an addendum to nios.cpu.  Heavy use of C code isn't
+   appropriate in .cpu files, so it resides here.  This especially applies
+   to assembly/disassembly where parsing/printing can be quite involved.
+   Such things aren't really part of the specification of the cpu, per se,
+   so .cpu files provide the general framework and .opc files handle the
+   nitty-gritty details as necessary.
+
+   Each section is delimited with start and end markers.
+
+   <arch>-opc.h additions use: "-- opc.h"
+   <arch>-opc.c additions use: "-- opc.c"
+   <arch>-asm.c additions use: "-- asm.c"
+   <arch>-dis.c additions use: "-- dis.c"
+   <arch>-ibd.h additions use: "-- ibd.h".  */
+
+/* -- opc.h */
+
+#undef  CGEN_DIS_HASH_SIZE
+#define CGEN_DIS_HASH_SIZE 65
+#undef  CGEN_DIS_HASH
+#define CGEN_DIS_HASH(buffer, value) (((unsigned char *) (buffer))[1] >> 5)
+
+/* Condition code masks for SKPS instruction.  */
+
+#define CC_C       0x0
+#define CC_NC      0x1
+#define CC_Z       0x2
+#define CC_NZ      0x3
+#define CC_MI      0x4
+#define CC_PL      0x5
+#define CC_GE      0x6
+#define CC_LT      0x7
+#define CC_LE      0x8
+#define CC_GT      0x9
+#define CC_V       0xa
+#define CC_NV      0xb
+#define CC_LS      0xc
+#define CC_HI      0xd
+#define CC_MAX     CC_HI
+
+/* Following activates check beyond hashing since m16 and m32
+   instructions hash identically, but have different descriptions.  */
+#define CGEN_VALIDATE_INSN_SUPPORTED
+
+/* Following allows reason codes to be output when assembler errors occur.  */
+#define CGEN_VERBOSE_ASSEMBLER_ERRORS
+
+
+extern int nios_cgen_insn_supported PARAMS ((CGEN_CPU_DESC, const CGEN_INSN *));
+
+/* Walues to signal between parse routines and md_assemble.  */
+extern int nios_parsed_i11;
+extern int nios_Rbi5;
+
+/* Values of nios_Rbi5 to help catch Rbi5 syntax errors.  */
+#define NIOS_RBI5_REGISTER  1
+#define NIOS_RBI5_IMMEDIATE 2
+
+/* -- */
+
+/* -- opc.c */
+/* Special check to ensure that instruction exists for given machine.  */
+
+int
+nios_cgen_insn_supported (CGEN_CPU_DESC cd,
+			  const CGEN_INSN *insn)
+{
+  int machs = cd->machs;
+
+  return ((CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_MACH) & machs) != 0);
+}
+
+/* -- */
+
+/* -- asm.c */
+/* Handle %lo(), %xlo().  */
+
+int nios_parsed_i11 = 0;
+int nios_Rbi5 = 0;
+
+/* The following is an internal routine to allow @h values to specify offsets.
+   The routine creates a temporary buffer with the string "sans" the @h specifier.
+   This allows the cgen_parse_address routine to correctly set any desired offset.  */
+
+static const char *
+parse_h_address (CGEN_CPU_DESC cd,
+		 const char **strp,
+		 char *at_h_pos,
+		 int opindex,
+		 int opinfo,
+		 enum cgen_parse_operand_result *resultp,
+		 bfd_vma *valuep)
+{
+  char buffer[200];
+  const char *bufptr = buffer;
+  const char **bufp = &bufptr;
+  int at_h_index = at_h_pos - *strp;
+  const char *errmsg;
+
+  memcpy (buffer, *strp, at_h_index);
+  strcpy (buffer + at_h_index, *strp + at_h_index + 2);
+
+  errmsg = cgen_parse_address (cd, bufp, opindex, opinfo, resultp, valuep);
+
+  /* Bump up real string pointer appropriately and account for the @h as well.  */
+  *strp += (bufptr - buffer) + 2;
+
+  return errmsg;
+} 
+
+
+static const char *
+parse_i5 (CGEN_CPU_DESC cd,
+	  const char **strp,
+	  int opindex,
+	  unsigned long *valuep)
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type;
+  unsigned long value = 0;
+
+  if (strncasecmp (*strp, "%lo(", 4) == 0)
+    {
+      *strp += 4;
+      if (**strp == '-' || ISDIGIT (**strp))
+	{
+	  signed long val;
+
+	  errmsg = cgen_parse_signed_integer (cd, strp, opindex, &val);
+	  if (**strp != ')')
+	    return _("missing ')'");
+	  value = val;
+	}
+      else 
+        {
+	  char *k = strchr (*strp, '@');
+	  unsigned long val;
+
+	  if (k != NULL && k[1] == 'h')
+	    {
+	      errmsg = parse_h_address (cd, strp, k, opindex, BFD_RELOC_NIOS_H_LO5,
+					&result_type, & val);
+	      val >>= 1;
+	    }
+	  else
+	    errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_NIOS_LO16_LO5,
+					 &result_type, & val);
+	  value = val;
+	  if (**strp != ')')
+	    return _("missing ')'");
+	}
+
+      ++*strp;
+      value &= 0x1f;
+    }
+  else if (strncasecmp (*strp, "%xlo(", 5) == 0)
+    {
+      *strp += 5;
+      if (**strp == '-' || ISDIGIT (**strp))
+	{
+	  signed long val;
+
+	  errmsg = cgen_parse_signed_integer (cd, strp, opindex, &val);
+	  if (**strp != ')')
+	    return _("missing ')'");
+	  value = val;
+	}
+      else 
+        {
+	  unsigned long val;
+	  char *k = strchr (*strp, '@');
+
+	  if (k != NULL && k[1] == 'h')
+	    {
+	      errmsg = parse_h_address (cd, strp, k, opindex, BFD_RELOC_NIOS_H_XLO5,
+				        &result_type, & val);
+	      value >>= 1;
+	    }
+	  else
+	    errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_NIOS_HI16_LO5,
+					 &result_type, & val);
+
+	  value = val;
+	  if (**strp != ')')
+	    return _("missing ')'");
+	}
+
+      ++*strp;
+      value = ((value >> 16) & 0x1f);
+    }
+  else
+    {
+      unsigned long val;
+
+      errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, &val);
+      value = val;
+      if (value > 0x1f)
+	return _("immediate value out of range");
+    }
+
+  *valuep = value;
+
+  return errmsg;
+}
+
+/* For STS8s.  */
+
+static const char *
+parse_i10 (CGEN_CPU_DESC cd,
+	   const char **strp,
+	   int opindex,
+	   unsigned long *valuep)
+{
+  const char *errmsg;
+  unsigned long value;
+
+  errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, &value);
+  if (value > 0x3ff)
+    return _("immediate value out of range");
+  *valuep = value;
+  return errmsg;
+}
+
+/* For STS16s.  */
+
+static const char *
+parse_i9 (CGEN_CPU_DESC cd,
+	  const char **strp,
+	  int opindex,
+	  unsigned long *valuep)
+{
+  const char *errmsg;
+  unsigned long value;
+
+  errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, &value);
+  if (value > 0x1ff)
+    return _("immediate value out of range");
+  *valuep = value;
+  return errmsg;
+}
+
+/* Check dual mode instruction...could be register or immediate value.  */
+
+static const char *
+parse_Rbi5 (CGEN_CPU_DESC cd,
+	    const char **strp,
+	    int opindex,
+	    unsigned long *valuep)
+{
+  const char *errmsg = NULL;
+  enum cgen_parse_operand_result result_type;
+  bfd_vma value;
+  bfd_vma extra = 0;
+
+  nios_Rbi5 = NIOS_RBI5_IMMEDIATE;
+
+  if (strncasecmp (*strp, "%lo(", 4) == 0)
+    {
+      *strp += 4;
+      if (**strp == '-' || ISDIGIT (**strp))
+	{
+	  long val;
+
+	  errmsg = cgen_parse_signed_integer (cd, strp, opindex, &val);
+	  if (**strp != ')')
+	    return _("missing ')'");
+	  value = val;
+	}
+      else 
+        {
+	  char *k = strchr (*strp, '@');
+
+	  if (k != NULL && k[1] == 'h')
+	    {
+	      errmsg = parse_h_address (cd, strp, k, opindex, BFD_RELOC_NIOS_H_LO5,
+					&result_type, &value);
+	      value >>= 1;
+	    }
+	  else
+	    errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_NIOS_LO16_LO5,
+					 &result_type, &value);
+
+	  if (**strp != ')')
+	    return _("missing ')'");
+	}
+
+      ++*strp;
+      value &= 0x1f;
+      *valuep = value;
+
+      return errmsg;
+    }
+  else if (strncasecmp (*strp, "%xlo(", 5) == 0)
+    {
+      *strp += 5;
+      if (**strp == '-' || ISDIGIT (**strp))
+	{
+	  long val;
+
+	  errmsg = cgen_parse_signed_integer (cd, strp, opindex, &val);
+	  if (**strp != ')')
+	    return _("missing ')'");
+	  value = val;
+	}
+      else 
+        {
+	  char *k = strchr (*strp, '@');
+
+	  if (k != NULL && k[1] == 'h')
+	    {
+	      errmsg = parse_h_address (cd, strp, k, opindex, BFD_RELOC_NIOS_H_XLO5,
+					   &result_type, &value);
+	      value >>= 1;
+	    }
+	  else
+	    errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_NIOS_HI16_LO5,
+					 &result_type, &value);
+
+	  if (**strp != ')')
+	    return _("missing ')'");
+	}
+
+      ++*strp;
+      value = ((value >> 16) & 0x1f);
+      *valuep = value;
+
+      return errmsg;
+    }
+  else if (strncmp (*strp, "%r", 2) == 0 ||
+	   strncmp (*strp, "%g", 2) == 0)
+    {
+      *strp += 2;
+      nios_Rbi5 = NIOS_RBI5_REGISTER;
+    }
+  else if (strncmp (*strp, "%i", 2) == 0)
+    {
+      *strp += 2;
+      extra = 24;
+      nios_Rbi5 = NIOS_RBI5_REGISTER;
+    }
+  else if (strncmp (*strp, "%o", 2) == 0)
+    {
+      *strp += 2;
+      extra = 8;
+      nios_Rbi5 = NIOS_RBI5_REGISTER;
+    }
+  else if (strncmp (*strp, "%l", 2) == 0)
+    {
+      *strp += 2;
+      extra = 16;
+      nios_Rbi5 = NIOS_RBI5_REGISTER;
+    }
+  else if (strncmp (*strp, "%sp", 3) == 0)
+    {
+      *strp += 2;
+      *valuep = 14;
+      nios_Rbi5 = NIOS_RBI5_REGISTER;
+
+      return errmsg;
+    }
+
+  errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, valuep);
+  *valuep += extra;
+
+  if (*valuep > 0x1f)
+    return _("immediate value out of range");
+  return errmsg;
+}
+
+/* Handle %hi(), %xhi().  */
+
+static const char *
+parse_i11 (CGEN_CPU_DESC cd,
+	   const char **strp,
+	   int opindex,
+	   unsigned long *valuep)
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type = CGEN_PARSE_OPERAND_RESULT_NUMBER;
+  bfd_vma value;
+
+  nios_parsed_i11 = 1;
+
+  if (strncasecmp (*strp, "%hi(", 4) == 0)
+    {
+      *strp += 4;
+      if (**strp == '-' || ISDIGIT (**strp))
+	{
+	  long val;
+
+	  errmsg = cgen_parse_signed_integer (cd, strp, opindex, &val);
+	  if (**strp != ')')
+	    return _("missing ')'");
+	  value = val;
+	}
+      else 
+        {
+	  char *k = strchr (*strp, '@');
+
+	  if (k != NULL && k[1] == 'h')
+	    {
+	      errmsg = parse_h_address (cd, strp, k, opindex, BFD_RELOC_NIOS_H_HI11,
+					   &result_type, &value);
+	      value >>= 1;
+	    }
+	  else
+	    errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_NIOS_LO16_HI11,
+					 &result_type, &value);
+
+	  if (**strp != ')')
+	    return _("missing ')'");
+	}
+
+      ++*strp;
+      if (result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value = (value & 0xffff) >> 5;
+    }
+  else if (strncasecmp (*strp, "%xhi(", 5) == 0)
+    {
+      *strp += 5;
+      if (**strp == '-' || ISDIGIT (**strp))
+	{
+	  long val;
+
+	  errmsg = cgen_parse_signed_integer (cd, strp, opindex, &val);
+	  if (**strp != ')')
+	    return _("missing ')'");
+	  value = val;
+	}
+      else 
+        {
+	  char *k = strchr (*strp, '@');
+
+	  if (k != NULL && k[1] == 'h')
+	    {
+	      errmsg = parse_h_address (cd, strp, k, opindex, BFD_RELOC_NIOS_H_XHI11,
+					   &result_type, &value);
+	      value >>= 1;
+	    }
+	  else
+	    errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_NIOS_HI16_HI11,
+					 &result_type, &value);
+
+	  if (**strp != ')')
+	    return _("missing ')'");
+	}
+
+      ++*strp;
+      if (result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value = (value >> 21);
+    }
+  else
+    {
+      long val;
+
+      errmsg = cgen_parse_signed_integer (cd, strp, opindex, &val);
+      value = val;
+
+      if ((long) value > 0x7ff || (long) value < -0x800)
+	return _("immediate value out of range");
+      value &= 0x7ff;
+    }
+
+  *valuep = value;
+  return errmsg;
+}
+
+static const char *
+parse_save_i8v (CGEN_CPU_DESC cd,
+		const char **strp,
+		int opindex,
+		unsigned long *valuep)
+{
+  const char *errmsg;
+  long value;
+
+  errmsg = cgen_parse_signed_integer (cd, strp, opindex, &value);
+  if (value > 0)
+    return _("stack alteration value must be negative or zero");
+  value = 0 - value;
+    
+  if (value > 0xff)
+    return _("immediate value out of range");
+  *valuep = value;
+  return errmsg;
+}
+
+/* Parse possible condition code masks.  */
+
+static const char *
+parse_i4w (CGEN_CPU_DESC cd,
+	   const char **strp,
+	   int opindex,
+	   unsigned long *valuep)
+{
+  const char *errmsg;
+  unsigned long value;
+  char ch, ch2;
+  int not_flag = 0;
+  int cc = 0;
+
+  value = 0xffff;
+
+  if (strncasecmp (*strp, "cc_", 3) == 0)
+    {
+      cc = 1;
+      *strp += 3;
+    }
+  else if (strncasecmp (*strp, "!cc_", 4) == 0)
+    {
+      cc = 1;
+      *strp += 4;
+      not_flag = 1;
+    }
+
+  if (cc)
+    {
+      errmsg = NULL;
+      ch = **strp;
+      ++*strp;
+
+      switch (ch)
+	{
+	case 'z':
+	  value = CC_Z;
+	  break;
+	
+	case 'g':
+	  ch2 = **strp;
+	  if (ch2 == 'e')
+	    {
+	      value = CC_GE;
+	      ++*strp;
+	    }
+	  else if (ch2 == 't')
+	    {
+	      value = CC_GT;
+	      ++*strp;
+	    }
+	  break;
+	
+	case 'l':
+	  ch2 = **strp;
+	  if (ch2 == 'e')
+	    {
+	      value = CC_LE;
+	      ++*strp;
+	    }
+	  else if (ch2 == 't')
+	    {
+	      value = CC_LT;
+	      ++*strp;
+	    }
+	  else if (ch2 == 's')
+	    {
+	      value = CC_LS;
+	      ++*strp;
+	    }
+	  break;
+	
+	case 'h':
+	  if (**strp == 'i')
+	    {
+	      value = CC_HI;
+	      ++*strp;
+	    }
+	  break;
+	
+	case 'p':
+	  ch2 = **strp;
+	  if (ch2 == 'l')
+	    {
+	      value = CC_PL;
+	      ++*strp;
+	    }
+	  else if (ch2 == '\0' || ISSPACE (ch2))
+	    value = CC_PL;
+	  break;
+
+	case 'm':
+	  ch2 = **strp;
+	  if (ch2 == 'i')
+	    {
+	      value = CC_MI;
+	      ++*strp;
+	    }
+	  break;
+
+	case 'e':
+	  ch2 = **strp;
+	  if (ch2 == 'q')
+	    {
+	      value = CC_Z;
+	      ++*strp;
+	    }
+	  break;
+	
+	case 'n':
+	  ch2 = **strp;
+	  if (ch2 == 'z' || ch2 == 'e')
+	    {
+	      value = CC_NZ;
+	      ++*strp;
+	    }
+	  else if (ch2 == 'e')
+	    {
+	      value = CC_NZ;
+	      ++*strp;
+	    }
+	  else if (ch2 == 'c')
+	    {
+	      value = CC_NC;
+	      ++*strp;
+	    }
+	  else if (ch2 == 'v')
+	    {
+	      value = CC_NV;
+	      ++*strp;
+	    }
+	  else if (ch2 == '\0' || ISSPACE (ch2))
+	    {
+	      value = CC_MI;
+	    }
+	  break;
+	
+	case 'v':
+	  ch2 = **strp;
+	  if (ch2 == 'c')
+	    {
+	      value = CC_NV;
+	      ++*strp;
+	    }
+	  else if (ch2 == 's')
+	    {
+	      value = CC_V;
+	      ++*strp;
+	    }
+	  else if (ch2 == '\0' || ISSPACE (ch2))
+	    {
+	      value = CC_V;
+	    }
+	  break;
+	
+	case 'c':
+	  ch2 = **strp;
+	  if (ch2 == 'c')
+	    {
+	      value = CC_NC;
+	      ++*strp;
+	    }
+	  else if (ch2 == 's')
+	    {
+	      value = CC_C;
+	      ++*strp;
+	    }
+	  else if (ch2 == '\0' || ISSPACE (ch2))
+	    {
+	      value = CC_C;
+	    }
+	  break;
+	}
+	
+      if (value == 0xffff || (**strp != '\0' && ! ISSPACE (**strp)))
+	return _("invalid condition code mask specified");
+      if (not_flag)
+	value ^= 1;
+    }
+  else
+    {
+      errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, &value);
+      if (value > CC_MAX)
+	return _("invalid condition code mask specified");
+    }
+  *valuep = value;
+  return errmsg;
+}
+
+/* Parse possible condition code masks for ifs.  */
+
+static const char *
+parse_i4wn (CGEN_CPU_DESC cd,
+	    const char **strp,
+	    int opindex,
+	    unsigned long *valuep)
+{
+  const char *errmsg;
+
+  errmsg = parse_i4w (cd, strp, opindex, valuep);
+  *valuep ^= 1;
+  return errmsg;
+}
+
+#if 0
+static const char *
+parse_i16 (CGEN_CPU_DESC cd,
+	   const char **strp,
+	   int opindex,
+	   unsigned long *valuep)
+{
+  const char *errmsg;
+  long value;
+
+  errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, &value);
+  if (value > 0xffff)
+    return _("immediate value out of range");
+  *valuep = value;
+  return errmsg;
+}
+
+static const char *
+parse_i32 (CGEN_CPU_DESC cd,
+	   const char **strp,
+	   int opindex,
+	   unsigned long *valuep)
+{
+  return cgen_parse_unsigned_integer (cd, strp, opindex, valuep);
+}
+#endif
+
+/* -- dis.c */
+
+/* Include "%hi(foo) in output.  */
+      
+static void
+print_Rbi5 (CGEN_CPU_DESC cd,
+	    void * dis_info,
+	    long value,
+	    unsigned int attrs ATTRIBUTE_UNUSED,
+	    bfd_vma pc,
+	    int length ATTRIBUTE_UNUSED)
+{
+  int status;
+  bfd_byte buf[2];
+  unsigned long insn_value;
+  const CGEN_INSN_LIST *insn_list;
+
+  disassemble_info *info = (disassemble_info *) dis_info;
+
+  /* Look at previous instruction, if possible, to see if it is PFX.  */
+  if (pc > 0)
+    {
+      status = (*info->read_memory_func) (pc - 2, buf, 2, info);  
+      if (status != 0)
+	{
+	  print_keyword (cd, info, & nios_cgen_opval_gr_names, value, 0);
+	  return;
+	}
+      insn_value = info->endian == BFD_ENDIAN_BIG ? bfd_getb16 (buf) : bfd_getl16 (buf);
+      insn_list = CGEN_DIS_LOOKUP_INSN (cd, (const char *) buf, insn_value);
+      while (insn_list != NULL)
+	{
+	  const CGEN_INSN *insn = insn_list->insn;
+
+	  /* Basic bit mask must be correct.  */
+	  /* ??? May wish to allow target to defer this check until the extract
+	     handler.  */
+	  if ((insn_value & CGEN_INSN_BASE_MASK (insn))
+	      == CGEN_INSN_BASE_VALUE (insn))
+	    {
+	      if (CGEN_INSN_ATTR_VALUE (insn, CGEN_INSN_PREFIX))
+		(*info->fprintf_func) (info->stream, "0x%lx", value);
+	      else
+		print_keyword (cd, info, & nios_cgen_opval_gr_names, value, 0);
+	      return;
+	    }
+	  insn_list = CGEN_DIS_NEXT_INSN (insn_list);
+	}
+    }
+  print_keyword (cd, info, & nios_cgen_opval_gr_names, value, 0);
+}
+
+static void
+print_i11 (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+	   void * dis_info,
+	   long value,
+	   unsigned int attrs ATTRIBUTE_UNUSED,
+	   bfd_vma pc ATTRIBUTE_UNUSED,
+	   int length ATTRIBUTE_UNUSED)
+{
+  disassemble_info *info = (disassemble_info *) dis_info;
+
+  (*info->fprintf_func) (info->stream, "%%hi(0x%lx)", value << 5);
+}
+
+#if 0
+static void
+print_r0 (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+	  void * dis_info,
+	  long value ATTRIBUTE_UNUSED,
+	  unsigned int attrs ATTRIBUTE_UNUSED,
+	  bfd_vma pc ATTRIBUTE_UNUSED,
+	  int length ATTRIBUTE_UNUSED)
+{
+  disassemble_info *info = (disassemble_info *) dis_info;
+
+  (*info->fprintf_func) (info->stream, "%g0");
+}
+
+static void
+print_i16 (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+	   void * dis_info,
+	   long value,
+	   unsigned int attrs ATTRIBUTE_UNUSED,
+	   bfd_vma pc ATTRIBUTE_UNUSED,
+	   int length ATTRIBUTE_UNUSED)
+{
+  disassemble_info *info = (disassemble_info *) dis_info;
+
+  (*info->fprintf_func) (info->stream, "#0x%hx)", (short)value);
+}
+	   
+static void
+print_i32 (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+	   void * dis_info,
+	   long value,
+	   unsigned int attrs ATTRIBUTE_UNUSED,
+	   bfd_vma pc ATTRIBUTE_UNUSED,
+	   int length ATTRIBUTE_UNUSED)
+{
+  disassemble_info *info = (disassemble_info *) dis_info;
+  (*info->fprintf_func) (info->stream, "#0x%lx)", value);
+}
+#endif
+
+static void
+print_i4w (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+	   void * dis_info,
+	   long value,
+	   unsigned int attrs ATTRIBUTE_UNUSED,
+	   bfd_vma pc ATTRIBUTE_UNUSED,
+	   int length ATTRIBUTE_UNUSED)
+{
+  char *str;
+  disassemble_info *info = (disassemble_info *) dis_info;
+
+  switch (value)
+    {
+    default:
+      str = NULL;
+      break;
+    case CC_Z:
+      str = "cc_eq";
+      break;
+    case CC_NZ:
+      str = "cc_ne";
+      break;
+    case CC_C:
+      str = "cc_c";
+      break;
+    case CC_NC:
+      str = "cc_nc";
+      break;
+    case CC_V:
+      str = "cc_v";
+      break;
+    case CC_NV:
+      str = "cc_nv";
+      break;
+    case CC_GT:
+      str = "cc_gt";
+      break;
+    case CC_GE:
+      str = "cc_ge";
+      break;
+    case CC_LT:
+      str = "cc_lt";
+      break;
+    case CC_LE:
+      str = "cc_le";
+      break;
+    case CC_LS:
+      str = "cc_ls";
+      break;
+    case CC_HI:
+      str = "cc_hi";
+      break;
+    case CC_PL:
+      str = "cc_pl";
+      break;
+    case CC_MI:
+      str = "cc_mi";
+      break;
+    }
+
+  if (str != NULL)
+    (*info->fprintf_func) (info->stream, "%s", str);
+  else
+    (*info->fprintf_func) (info->stream, "0x%lx", value);
+}
+
+/* -- */

@@ -1,0 +1,17 @@
+D/cons////
+D/exceptions////
+D/extractors_arithmetic////
+D/extractors_character////
+D/extractors_other////
+D/get////
+D/getline////
+D/ignore////
+D/peek////
+D/putback////
+D/read////
+D/readsome////
+D/requirements////
+D/seekg////
+D/sentry////
+D/tellg////
+D/ws////

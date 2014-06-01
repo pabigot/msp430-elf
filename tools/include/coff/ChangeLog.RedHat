@@ -1,0 +1,60 @@
+2000-01-24  Nick Clifton  <nickc@redhat.com>
+
+	* pe.h (IMPORT_CODE): Define.
+	(IMPORT_DATA): Define.
+	(IMPORT_CONST): Define.
+	(IMPORT_ORDINAL): Define.
+	(IMPORT_NAME): Define.
+	(IMPORT_NAME_NOPREFIX): Define.
+	(IMPORT_NAME_UNDECOARATE): Define.
+
+1999-12-15  Tim Wall <twall@cygnus.com>
+
+	* ti.h: define COFF_ALIGN_IN_S_FLAGS for use by coffcode.h
+	don't use "isdigit"
+
+1999-12-30  Nick Clifton  <nickc@cygnus.com>
+
+	* arm.h: Fix defintion of ARMBADMAG.
+	Add arm-wince-pe specific reloc structure.
+
+1999-12-14  Nick Clifton  <nickc@cygnus.com>
+
+	* arm.h (ARMPEMAGIC2): Rename to THUMBPEMAGIC.
+
+1999-12-13  Nick Clifton  <nickc@cygnus.com>
+
+	* arm.h (ARMPEMAGIC, ARMPEMAGIC2): Define.
+	(ARMBADMAGIC): Allow new PE magic values.
+
+1999-09-10  Tim Wall <twall@cygnus.com>
+
+        * ti.h: use power-of-two to define octets per byte; add
+          COFF_ALIGN_IN_SECTION_HEADER so that our alignments
+          encodings actually take place.  change conflicting _CONST
+          define. 
+        * tic54x.h: use power-of-two to define octets per byte
+
+1999-07-31  Tim Wall <twall@cygnus.com>
+
+	* internal.h: added field for section load page
+	* ti.h: NEW generic TI COFF header
+	* tic54x.h: NEW tic54x-specific TI COFF stuff
+	
+1999-05-14  DJ Delorie  <dj@cygnus.com>
+
+	* sh.h (PUT_LINENO_LNNO): redefine {GET,PUT}_LINENO_LNNO for CE
+
+1999-05-11  DJ Delorie  <dj@cygnus.com>
+
+	* sh.h: add sh-pe (Windows CE) definitions
+	* mipspe.h: new
+	
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

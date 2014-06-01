@@ -1,0 +1,32 @@
+
+# Exit
+
+if {![target_info exists bfd,relc]} then {
+    unsupported "relc tests"
+    return
+}
+
+set test "relctest assembly"
+if {![binutils_assemble $srcdir/$subdir/relctest.s tmpdir/relctest.o]} then {
+    fail $test
+    return
+} else {
+    pass $test
+}
+
+if [is_remote host] {
+    set tempfile [remote_download host tmpdir/relctest.o]
+} else {
+    set tempfile tmpdir/relctest.o
+}
+
+set test "relctest.o symbol list"
+
+set f [open $srcdir/$subdir/relctest.d r]
+set want [read $f]
+close $f
+set got [binutils_run $NM "$NMFLAGS $tempfile"]
+
+if {$want == $got} then { pass $test } else { fail $test }
+
+

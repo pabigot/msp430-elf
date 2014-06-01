@@ -1,0 +1,404 @@
+/* CALMRISC16 opcode support.  -*- C -*-
+   Copyright (C) 2000, 2001, 2005 Red Hat, Inc.
+   This file is part of CGEN.  */
+
+/* This file is an addendum to calmrisc16.cpu.  Heavy use of C code isn't
+   appropriate in .cpu files, so it resides here.  This especially applies
+   to assembly/disassembly where parsing/printing can be quite involved.
+   Such things aren't really part of the specification of the cpu, per se,
+   so .cpu files provide the general framework and .opc files handle the
+   nitty-gritty details as necessary.
+
+   Each section is delimited with start and end markers.
+
+   <arch>-opc.h additions use: "-- opc.h"
+   <arch>-opc.c additions use: "-- opc.c"
+   <arch>-asm.c additions use: "-- asm.c"
+   <arch>-dis.c additions use: "-- dis.c"
+   <arch>-ibd.h additions use: "-- ibd.h"  */
+
+/* -- opc.h */
+
+/* ??? This can be improved upon.  */
+#undef  CGEN_DIS_HASH_SIZE
+#define CGEN_DIS_HASH_SIZE 16
+#undef  CGEN_DIS_HASH
+#define CGEN_DIS_HASH(buffer, value) (((unsigned char *) (buffer))[0] >> 4)
+
+/* -- */
+
+/* -- asm.c */
+/* Handle register lists for LDMx and STMx.  */
+
+static int
+parse_register_number (const char **strp)
+{
+  int regno;
+
+  if (**strp < '0' || **strp > '9')
+    return -1; /* Error.  */
+
+  regno = **strp - '0';
+  ++*strp;
+
+  if (**strp >= '0' && **strp <= '9')
+    {
+      regno = regno * 10 + (**strp - '0');
+      ++*strp;
+    }
+
+  return regno;
+}
+
+/* Parse a list of 1 or two general registers, Rn[,Rm].
+   They both must be in the same range, either r0-r7 or r8-r14.
+   Encode them as mmmmnnn where mmmm is 4 bits representing Rm and nnn is
+   3 bits representing Rn. If Rm is not specified, then use the value of Rn.  */
+
+static const char *
+parse_Rlist (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+	     const char **strp,
+	     int opindex ATTRIBUTE_UNUSED,
+	     unsigned long *valuep)
+{
+  int Rn, Rm;
+
+  if (**strp == 'R' || **strp == 'r')
+    {
+      ++*strp;
+
+      Rn = parse_register_number (strp);
+      if (Rn == -1)
+	return _("Register number is not valid");
+      if (Rn > 14)
+	return _("First register must be between r0 and r14");
+
+      Rm = Rn;
+      if (**strp == ',')
+	{
+	  ++*strp;
+	  if (**strp == 'R' || **strp == 'r')
+	    {
+	      ++*strp;
+	      Rm = parse_register_number (strp);
+	      if (Rm == -1)
+		return _("Register number is not valid");
+
+	      /* Second register must be in the same range (0-7 or 8-14) as the
+		 first.  */
+	      if (Rn <= 7)
+		{
+		  if (Rm > 7)
+		    return _("Second register must be between r0 and r7");
+		}
+	      else
+		{
+		  if (Rm < 8 || Rm > 14)
+		    return _("Second register must be between r8 and r14");
+		}
+	    }
+	  else
+	    return _("Second register not specified or not valid");
+	}
+
+      *valuep = (Rm << 3) | (Rn & 0x7);
+    }
+
+  if (! *strp)
+    return _("Register list is not valid");
+
+  return NULL;
+}
+
+/* Parse a list of 1 or two address registers, An[,Am].
+   They both must be in the range a8-a14.
+   Encode them as mmmnnn where mmm is 3 bits representing Am and nnn is
+   3 bits representing An. If Am is not specified, then use the value of An.  */
+
+static const char *
+parse_Alist (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+	     const char **strp,
+	     int opindex ATTRIBUTE_UNUSED,
+	     unsigned long *valuep)
+{
+  int An, Am;
+
+  if (**strp == 'A' || **strp == 'a')
+    {
+      ++*strp;
+      An = parse_register_number (strp);
+      if (An == -1)
+	return _("Register number is not valid");
+      if (An < 8 || An > 14)
+	return _("First register must be between a8 and a14");
+
+      An &= 0x7;
+      Am = An;
+      if (**strp == ',')
+	{
+	  ++*strp;
+	  if (**strp == 'A' || **strp == 'a')
+	    {
+	      ++*strp;
+	      Am = parse_register_number (strp);
+	      if (Am == -1)
+		return _("Register number is not valid");
+	      if (Am < 8 || Am > 14)
+		return _("Second register must be between a8 and a14");
+	      Am &= 0x7;
+	    }
+	  else
+	    return _("Second register not specified or not valid");
+	}
+
+      *valuep = (Am << 3) | An;
+    }
+
+  if (! *strp)
+    return _("Register list is not valid");
+
+  return NULL;
+}
+
+/* Reject %hi and %lo explicitely so that parse_imm16 will
+   get a crack at it without an error being generated.  */
+
+static const char *
+parse_small_immediate (CGEN_CPU_DESC cd,
+		       const char **strp,
+		       int opindex,
+		       unsigned long *valuep)
+{
+  if (**strp == '#')
+    ++*strp;
+  if (**strp == '%')
+    return _("Bad expression");
+
+  return cgen_parse_unsigned_integer (cd, strp, opindex, valuep);
+}
+
+/* Parse %hi(...).  */
+
+static const char *
+parse_hi_6 (CGEN_CPU_DESC cd,
+	    const char **strp,
+	    int opindex,
+	    unsigned long *valuep,
+	    bfd_reloc_code_real_type bfd_reloc_val)
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type;
+  bfd_vma value;
+
+  /* '%hi(' has already been seen but not consumed.  */
+  *strp += 4;
+  errmsg = cgen_parse_address (cd, strp, opindex, bfd_reloc_val,
+			       &result_type, &value);
+  if (**strp != ')')
+    return _("missing `)'");
+  ++*strp;
+  if (errmsg == NULL && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+    value >>= 16;
+  *valuep = value;
+  return errmsg;
+}
+
+/* Parse %lo(...).  */
+
+static const char *
+parse_lo_16 (CGEN_CPU_DESC cd,
+	     const char **strp,
+	     int opindex,
+	     unsigned long *valuep)
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type;
+  bfd_vma value;
+
+  /* '%lo(' has already been seen but not consumed.  */
+  *strp += 4;
+  errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_CALMRISC16_LO16,
+			       &result_type, &value);
+  if (**strp != ')')
+    return _("missing `)'");
+  ++*strp;
+  if (errmsg == NULL && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+    value &= 0xffff;
+  *valuep = value;
+  return errmsg;
+}
+
+/* Allow %hi but reject %lo.  */
+
+static const char *
+parse_medium_immediate (CGEN_CPU_DESC cd,
+			const char **strp,
+			int opindex,
+			unsigned long *valuep)
+{
+  if (**strp == '#')
+    ++*strp;
+
+  if (**strp == '%')
+    {
+      if (strncasecmp (*strp, "%hi(", 4) == 0)
+	return parse_hi_6 (cd, strp, opindex, valuep,
+			   BFD_RELOC_CALMRISC16_HI6_SHORT);
+      return _("Bad expression");
+    }
+
+  return cgen_parse_unsigned_integer (cd, strp, opindex, valuep);
+}
+
+/* imm13 should be greater than or equal to 0x200.  */
+
+static const char *
+parse_imm13 (CGEN_CPU_DESC cd,
+	     const char **strp,
+	     int opindex,
+	     unsigned long *valuep)
+{
+  const char *errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, valuep);
+  if (! errmsg && *valuep < 0x200)
+    return _("Immediate value must not be less than 0x200");
+  return errmsg;
+}
+	     
+/* Handle %hi, %lo, <label> and immediate operands.  */
+
+static const char *
+parse_imm16 (CGEN_CPU_DESC cd,
+	     const char **strp,
+	     int opindex,
+	     unsigned long *valuep)
+{
+  if (**strp == '#')
+    ++*strp;
+
+  if (strncasecmp (*strp, "%hi(", 4) == 0)
+    return parse_hi_6 (cd, strp, opindex, valuep,
+		       BFD_RELOC_CALMRISC16_HI6_LONG);
+
+  if (strncasecmp (*strp, "%lo(", 4) == 0)
+    return parse_lo_16 (cd, strp, opindex, valuep);
+
+  return cgen_parse_unsigned_integer (cd, strp, opindex, valuep);
+}
+
+/* Parse imm16, but allow negative values in the range -1 to -32767.  */
+
+static const char *
+parse_eimm16 (CGEN_CPU_DESC cd,
+	      const char **strp,
+	      int opindex,
+	      unsigned long *valuep)
+{
+  const char *errmsg;
+
+  if (**strp == '#')
+    ++*strp;
+
+  /* Accept negative values in the range -1 (0xffff) to -32768 (0x8000).  */
+  if (**strp == '-')
+    {
+      long svalue;
+      errmsg = cgen_parse_signed_integer (cd, strp, opindex, &svalue);
+      if (errmsg != NULL)
+	return errmsg;
+      /* Accept these negative values, but massage the result so that it looks
+	 like a positive 16 bit value with the same bit pattern.  */
+      if (svalue <= -1 && svalue >= ~0x7fff)
+	{
+	  *valuep = svalue & 0xffff;
+	  return NULL;
+	}
+      return _("Immediate value is out of range");
+    }
+
+  errmsg = parse_imm16 (cd, strp, opindex, valuep);
+  return errmsg;
+}
+
+/* Parse imm22, but allow negative values in the range -1 to -2097152.  */
+
+static const char *
+parse_eimm22 (CGEN_CPU_DESC cd,
+	      const char **strp,
+	      int opindex,
+	      unsigned long *valuep)
+{
+  const char *errmsg;
+
+  if (**strp == '#')
+    ++*strp;
+
+  /* Accept negative values in the range -1 (0x3fffff) to -2097152 (0x200000).  */
+  if (**strp == '-')
+    {
+      long svalue;
+      errmsg = cgen_parse_signed_integer (cd, strp, opindex, &svalue);
+      if (errmsg != NULL)
+	return errmsg;
+      /* Accept these negative values, but massage the result so that it looks
+	 like a positive 22 bit value with the same bit pattern.  */
+      if (svalue <= -1 && svalue >= ~0x1fffff)
+	{
+	  *valuep = svalue & 0x3fffff;
+	  return NULL;
+	}
+      return _("Immediate value is out of range");
+    }
+
+  if (strncasecmp (*strp, "%hi(", 4) == 0)
+    return parse_hi_6 (cd, strp, opindex, valuep,
+		       BFD_RELOC_CALMRISC16_HI6_LONG);
+
+  if (strncasecmp (*strp, "%lo(", 4) == 0)
+    return parse_lo_16 (cd, strp, opindex, valuep);
+
+  errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, valuep);
+  return errmsg;
+}
+/* -- */
+
+/* -- dis.c */
+static void
+print_Rlist (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+	     void * dis_info,
+	     long value,
+	     unsigned int attrs ATTRIBUTE_UNUSED,
+	     bfd_vma pc ATTRIBUTE_UNUSED,
+	     int length ATTRIBUTE_UNUSED)
+{
+  disassemble_info *info = dis_info;
+  int second_reg = (value >> 3) & 0xf;
+  int first_reg = (value & 0x7) | (second_reg & 0x8);
+
+  /* The first register is always printed.  */
+  (*info->fprintf_func) (info->stream, "r%i", first_reg);
+
+  /* The second is only printed if it is not the same as the first.  */
+  if (first_reg != second_reg)
+    (*info->fprintf_func) (info->stream, ",r%i", second_reg);
+}
+
+static void
+print_Alist (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+	     void * dis_info,
+	     long value,
+	     unsigned int attrs ATTRIBUTE_UNUSED,
+	     bfd_vma pc ATTRIBUTE_UNUSED,
+	     int length ATTRIBUTE_UNUSED)
+{
+  disassemble_info *info = dis_info;
+  int first_reg = (value & 0x7) + 8;
+  int second_reg = ((value >> 3) & 0x7) + 8;
+
+  /* The first register is always printed.  */
+  (*info->fprintf_func) (info->stream, "a%i", first_reg);
+
+  /* The second is only printed if it is not the same as the first.  */
+  if (first_reg != second_reg)
+    (*info->fprintf_func) (info->stream, ",a%i", second_reg);
+}
+/* -- */

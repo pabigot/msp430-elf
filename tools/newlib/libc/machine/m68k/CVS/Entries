@@ -1,0 +1,12 @@
+/Makefile.am/1.6/Sun Jun 24 21:48:59 2007//Tmsp430-130322-branch
+/Makefile.in/1.38/Sun Mar 17 22:14:49 2013//Tmsp430-130322-branch
+/aclocal.m4/1.43/Sun Mar 17 22:14:49 2013//Tmsp430-130322-branch
+/configure/1.48/Sun Mar 17 22:14:49 2013//Tmsp430-130322-branch
+/configure.in/1.5/Thu Apr 13 20:25:09 2006//Tmsp430-130322-branch
+/m68kasm.h/1.1/Sun Jan 20 13:36:14 2008//Tmsp430-130322-branch
+/memcpy.S/1.4/Sun Feb 21 16:04:26 2010//Tmsp430-130322-branch
+/memset.S/1.2/Sun Jan 20 13:36:14 2008//Tmsp430-130322-branch
+/setjmp.S/1.5/Sun Jan 20 13:36:14 2008//Tmsp430-130322-branch
+/strcpy.c/1.1/Tue Sep  7 21:18:34 1999//Tmsp430-130322-branch
+/strlen.c/1.1/Tue Sep  7 21:18:34 1999//Tmsp430-130322-branch
+D

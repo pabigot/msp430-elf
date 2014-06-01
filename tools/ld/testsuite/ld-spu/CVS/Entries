@@ -1,0 +1,19 @@
+/ear.d/1.1/Sun Apr 22 12:15:00 2007//Tmsp430-130322-branch
+/ear.s/1.2/Sun May 25 14:26:47 2008//Tmsp430-130322-branch
+/embed.rd/1.2/Sun May 25 14:26:47 2008//Tmsp430-130322-branch
+/fixup.d/1.1/Sun Aug 16 10:19:46 2009//Tmsp430-130322-branch
+/fixup.s/1.1/Sun Aug 16 10:19:46 2009//Tmsp430-130322-branch
+/icache1.d/1.6/Mon Jul 23 07:50:45 2012//Tmsp430-130322-branch
+/icache1.s/1.1/Sun Jan 18 16:03:37 2009//Tmsp430-130322-branch
+/ovl.d/1.8/Sun May 31 21:36:11 2009//Tmsp430-130322-branch
+/ovl.lnk/1.3/Mon Feb 18 08:37:00 2008//Tmsp430-130322-branch
+/ovl.s/1.2/Sun Apr 22 12:15:00 2007//Tmsp430-130322-branch
+/ovl1.lnk/1.1/Mon Feb 18 08:37:00 2008//Tmsp430-130322-branch
+/ovl2.d/1.8/Sun May 31 21:36:11 2009//Tmsp430-130322-branch
+/ovl2.lnk/1.1/Mon Feb 18 08:37:00 2008//Tmsp430-130322-branch
+/ovl2.s/1.2/Sun Apr 20 19:38:32 2008//Tmsp430-130322-branch
+/pic.d/1.3/Mon Jul 23 07:50:45 2012//Tmsp430-130322-branch
+/pic.s/1.1/Sun Aug 16 10:19:46 2009//Tmsp430-130322-branch
+/picdef.s/1.1/Sun Aug 16 10:19:46 2009//Tmsp430-130322-branch
+/spu.exp/1.3/Sun Jul 22 15:47:00 2007//Tmsp430-130322-branch
+D

@@ -1,0 +1,18 @@
+%rename lib                 old_lib
+%rename cpp                 old_cpp
+%rename link                old_link
+
+*lib:
+--start-group -lmb8683x -lc -lgcc --end-group %(old_lib)
+
+*cpp:
+-D__MISSING_SYSCALL_NAMES__ -D__CPU_MB8683X__ -D__BOARD_MB8683X__ %(old_cpp)
+
+*startfile:
+mb8683x-crt0%O%s
+
+*endfile:
+crtend.o%s
+
+*link:
+-T bsp.ld%s -Ttext 0x04010000 %(old_link)

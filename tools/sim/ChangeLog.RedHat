@@ -1,0 +1,173 @@
+2013-03-04  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/msp430-sim.c (put_op): Disable serial port hacks - they
+	interfere with gcc test runs.
+
+2013-02-25  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/trace.c (remove_useless_symbols): Treat assembler local
+	labels as useless.
+
+2013-02-20  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/msp430-sim.c (sim_open): Increase simulated memory to 16M.
+
+2013-02-11  DJ Delorie  <dj@redhat.com>
+
+	* msp430/msp430-sim.c (sim_open): Check for _CIOBUF_ also.
+	(msp430_cio): Change CIO to int16 length.
+
+2013-01-16  Nick Clifton  <nickc@redhat.com>
+
+	* rx.rx.c (decode_opcode): Handle SATR.
+
+2013-01-11  DJ Delorie  <dj@redhat.com>
+
+	* msp430/msp430-sim.c (put_op): Keep SP word-aligned.
+	(msp430_step_once): Likewise.
+
+2013-01-10  DJ Delorie  <dj@redhat.com>
+
+	* msp430/msp430-sim.c (sim_open): Map memory above 64k.
+	(msp430_step_once): Allow PC values above 64k.
+
+2013-01-03  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/Makefile.in: Add copyright notice.
+
+2012-12-18  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/trace.c (remove_useless_symbols): Include local symbols.
+
+2012-11-06  DJ Delorie  <dj@redhat.com>
+
+	* msp430/msp430-sim.h (msp430_cpu_state): Store CIO addresses as
+	well.
+	* msp430/msp430-sim.c (bfd.h): Include.
+	(lookup_symbol): New.
+	(sim_open): Look up the CIO symbols.
+	(msp430_cio): New.  Only write() is supported for now.
+	(msp430_step_once): If the CIO address is executed, run CIO
+	commands.
+	(msp430_step_once): Discriminate between BRK and NOP.
+	(sim_create_inferior): Save reset vector to $R0 as well.
+
+2012-09-06  DJ Delorie  <dj@redhat.com>
+
+	* msp430: New Directory.
+	* configure.txt: Add it.
+	* configure: Regenerate.
+
+2011-06-07  Kevin Buettner  <kevinb@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* rx/gdb-if.c (sim_read): Retry a read that fails the first time.
+	* rx/err.c (rx_overrides): Default to allowing access to address 0.
+
+2010-07-30  Nick Clifton  <nickc@redhat.com>
+
+	* load.c (rx_load): Do not load segments that are not readable.
+	* mem.c (mem_put_byte): In verbose mode, issue a message when
+	generating an access exception.
+
+2008-07-23  Nick Clifton  <nickc@redhat.com>
+
+	* common/genmloop.sh: Add new parameter: -shell to specify the
+	command interpreter to use to run the input file.  This is
+	necessary because otherwise SHELL is taken from the user's
+	environment, and not from the makefile that invoked this script
+	and the user might not be running an sh-like shell.
+	* cris/Makefile.in: Pass -shell parameter to genmloop.sh.
+	* fr30/Makefile.in: Likewise.
+	* frv/Makefile.in: Likewise.
+	* i960/Makefile.in: Likewise.
+	* iq2000/Makefile.in: Likewise.
+	* m32r/Makefile.in: Likewise.
+
+	* frv/mloop.in: Add missing start of line comment marker.
+
+2007-09-04  Nick Clifton  <nickc@redhat.com>
+
+	* m68k: New simulator.
+
+2007-03-28  Kevin Buettner  <kevinb@redhat.com>
+
+	* common/aclocal.m4: Include gettext-sister.m4 instead of
+	gettext.m4.  Use ZW_GNU_GETTEXT_SISTER_DIR instead of
+	CY_GNU_GETTEXT.
+	* arm/configure, frv/configure, h8300/configure, m32c/configure,
+	m32r/configure, m68hc11/configure, mips/configure, sh/configure,
+	sh64/configure, v850/configure: Regenerate.
+
+2005-02-17  Jim Blandy  <jimb@redhat.com>
+
+	* configure.ac: Fix configury for sh64.
+	* configure: Regenerated.
+
+2004-06-16  Alexandre Oliva  <aoliva@redhat.com>
+
+	* configure.in: Drop h8sx, revert to h8300.
+	* configure: Likewise.
+
+2003-02-18  Michael Snyder  <msnyder@redhat.com>
+
+	* configure.in: Add testsuite to subdirs for h8sx.
+	* configure: Regenerate.
+
+2003-01-09  Andrew Cagney  <cagney@redhat.com>
+
+	* configure.in: When h800*-*-* configure h8sx directory.
+	* configure: Regenerate.
+
+2002-05-07  matthew green <mrg@redhat.com>
+
+	* configure, configure.in: Decend into "testsuite" for PowerPC.
+
+2002-01-10  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* MAINTAINERS: Import text from sourceware.
+
+2000-10-31  Ben Elliston  <bje@redhat.com>
+
+	* configure.in: Match sh64, not sh5.
+	* configure: Regenerate.
+
+2000-10-09  Ben Elliston  <bje@redhat.com>
+
+	* configure.in: Add support for sh5.
+	* configure: Regenerate.
+
+Thu Jul 27 20:47:00 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* Makefile.in: Put autoconf messages into ChangeLog.Cygnus.
+
+2000-04-20  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.in (extra_subdirs): Add testsuite to strongarm
+	directories.
+	* configure: Regenerate.
+
+Thu Apr 29 17:10:20 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* configure.in: Add support for frv.
+	* configure: Regenerate.
+
+1999-02-10  Doug Evans  <devans@casey.cygnus.com>
+
+	* configure.in (sparc*): Configure sparc subdir if --with-cgen or
+	--with-cgen-sim.
+	* configure: Rebuild.
+
+1999-02-02  Doug Evans  <devans@casey.cygnus.com>
+
+	* configure.in (sparc*): Configure sparc subdir if --with-cgen.
+	* configure: Rebuild.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

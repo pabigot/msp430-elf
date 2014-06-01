@@ -1,0 +1,54 @@
+2003-06-19  Andrew Cagney  <cagney@redhat.com>
+
+	* Makefile.in (IDECODE_H): Add e500_expression.h and
+	altivec_expression.h.
+
+	* idecode_expression.h: Include "altivec_expression.h" and
+	"e500_expression.h".
+	* altivec_expression.h: New file.
+	* e500_expression.h: New file.
+
+2002-06-24  Richard Sandiford  <rsandifo@redhat.com>
+
+	* main.c, sim_calls.c: Update path of "callback.h" and "remote-sim.h".
+
+2002-05-22  matthew green  <mrg@redhat.com>
+
+	* altivec.igen (lvsl, lvsr): Fix endianness problems.
+
+2002-05-07  matthew green  <mrg@redhat.com>
+
+	* Makefile (IGEN_EXTRA_DEPENDS): Set to altivec.igen.
+	tmp-igen: Also depend on ${IGEN_EXTRA_DEPENDS}.
+
+	* configure (*altivec*): Add "av" to sim_filter.
+	* configure.in: Regenerate.
+	
+	* altivec.igen: New file, implements AltiVec support.
+	* decode_expression.h (ALTIVEC_SET_CR6, VSCR_SAT, VSCR_NJ): New macros.
+	* ppc-cache-rules (VS, VA, VB, VC): Cache the vector instructions.
+	* ppc-instructions (struct _model_busy, struct _model_data): Add
+	member elements for the vector register set.
+	(model_trace_release, model_new_cycle, model_make) Add vector support.
+	(altivec.igen): Add a commented include for altivec.igen.
+	* ppc-spr-table (VRSAVE): Add.
+	* psim.c (psim_read_register, psim_write_register) Add support for the
+	AltiVec registers set and the VSCR.
+	* registers.c (register_description): Likewise.
+	* registers.h (vreg): New type to handle vector registers.
+	(vscreg): New type to handle vector registers.
+	(struct _registers): Add vr array and vscr members.
+	(register_types): Add reg_vr and reg_vscr.
+	(VR, VSCR): New macros to access vector registers.
+	* sim-endian.h (AV_BINDEX, AV_HINDEX, endian_b2l_bindex,
+	endian_b2l_hindex): New macros & arrays for correct handling of
+	endian issues within the AltiVec implementation.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

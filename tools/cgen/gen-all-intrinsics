@@ -1,0 +1,54 @@
+#! /bin/sh
+# Utility script to generate the intrinsics files.
+# This is useful for verifying changes to the generated files.
+#
+#   Copyright 2012 Free Software Foundation
+#
+# This file is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 3 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; see the file COPYING3.  If not see
+# <http://www.gnu.org/licenses/>.
+#
+
+# Usage: gen-all-intrinsics /path/to/gcc/top [extra args]
+#
+# Run this script in the src/cgen directory.
+#
+# NOTE: The various command line arguments depend on which mep cores
+# you're targetting.
+
+CGEN_TOP=`pwd`
+
+if [ $# -lt 1 ]
+then
+    echo "Usage: gen-all-intrinsics /path/to/gcc/top [extra args]" >&2
+    exit 1
+fi
+
+GCC_TOP=$1 ; shift
+if [ ! -d ${GCC_TOP}/gcc/config/mep ]
+then
+    echo "Not a gcc top level directory: $GCC_TOP" >&2
+    exit 1
+fi
+
+(
+    cd ${GCC_TOP}/gcc/config/mep
+    guile -s ${CGEN_TOP}/cgen-intrinsics.scm -s ${CGEN_TOP} \
+        -a ${CGEN_TOP}/cpu/mep.cpu \
+        -m mep,c5 \
+        -i mep,ext_core1,ext_cop1_16,ext_cop1_32,ext_cop1_48,ext_cop1_64 \
+        -K mep,ext_core1,ext_cop1_16,ext_cop1_32,ext_cop1_48,ext_cop1_64 \
+        -M intrinsics.md -N mep-intrin.h -P intrinsics.h \
+        -b \
+        "$@"
+)

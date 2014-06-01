@@ -1,0 +1,16 @@
+%rename lib                 old_lib
+%rename cpp                 old_cpp
+%rename link                old_link
+
+*lib:
+-u exit -u read -u lseek -u write -u open -u close -u kill -u getpid -u sbrk -u fstat -u unlink -u raise -u gettimeofday -u times -u isatty -u _exit -u _read -u _lseek -u _write -u _open -u _close -u _kill -u _getpid -u _sbrk -u _fstat -u _unlink -u _raise -u _gettimeofday -u _times -u _isatty -u __exit -u __read -u __lseek -u __write -u __open -u __close -u __kill -u __getpid -u __sbrk -u __fstat -u __unlink -u __raise -u __gettimeofday -u __times -u __isatty --start-group -liq80310 -lc -lgcc --end-group %(old_lib)
+
+*cpp:
+-D__YAVAPAI__ -D__CPU_SA220__ -D__BOARD_IQ80310__ -D__BOARD_HEADER__=\<bsp/iq80310.h\> %(old_cpp)
+
+*startfile:
+iq80310-crt0%O%s
+
+*link:
+-T bsp.ld%s -Ttext 0xA0020000 %(old_link)
+

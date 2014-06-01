@@ -1,0 +1,21 @@
+# m32r testcase for snc
+# mach(): m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global snc
+snc:
+	mvi_h_condbit 0
+	mvi_h_gr r4, 0
+	snc || ldi r4, #1
+	beqz r4, ok
+not_ok:
+	fail
+ok:
+	mvi_h_condbit 1
+	snc || ldi r4, #1
+	beqz r4, not_ok
+
+	pass

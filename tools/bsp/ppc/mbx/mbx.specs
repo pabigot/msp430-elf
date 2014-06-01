@@ -1,0 +1,19 @@
+%rename lib                 old_lib
+%rename cpp                 old_cpp
+%rename link                old_link
+
+*lib:
+--start-group -lmbxbsp -lc -lgcc --end-group %(old_lib)
+
+*cpp:
+-D__MISSING_SYSCALL_NAMES__ -D__CPU_MPC8XX__ -D__BOARD_MBX__ %(old_cpp)
+
+*startfile_default:
+ecrti%O%s mbx-crt0%O%s
+
+*endfile_default:
+ecrtn%O%s
+
+*link:
+-T bsp.ld%s -Ttext 0x10000 %(old_link)
+

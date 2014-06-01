@@ -1,0 +1,11 @@
+2001-10-22  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* POTFILES.in: Remove entries for deleted files.
+	* gcc.pot: Regerate.
+	* cat-id-tbl.c: Regenerate.
+	
+2000-03-28  Zack Weinberg  <weinberg@cygnus.com>
+
+	* POTFILES.in: Remove cppalloc.c.  Add cpplex.c, cppobscure.c,
+	cppobscure.h, and cppulp.c.
+

@@ -1,0 +1,76 @@
+
+This is the README file for the PowerPC implementation of the Cygnus BSP.
+
+OVERVIEW
+--------
+
+The following CPU families are supported:
+  * MPC8xx
+  * PPC4xx
+  * PPC6xx
+
+The following boards are supported (board-specific directory in <...>):
+  * <mbx>    - Motorola MBX board with MPC860 or MPC821
+  * <cma101> - Cogent CMA101 motherboard w/MPC8xx CPU card
+  * <evb403> - IBM PPC403 eval board
+  * <yka>    - Motorola Yellowknife, X2 or X4, Map A (PREP), bigendian
+  * <ykb>    - Motorola Yellowknife, X2 or X4, Map B (CHRP), bigendian
+  * <yklb>   - Motorola Yellowknife, X4 only,  Map B (CHRP), littleendian
+
+
+BUILDING
+--------
+
+Following are example commands to build a simple app for the supported boards.
+The sample app is the "hello world". There are two target builds shown for each
+board. One for a downloadable (e.g. via gdb) version and one for a ROMable
+version. These command lines show the minimum options needed. Other option
+such as (-g, -O2, etc) may be desired.
+
+mbx
+---
+(RAM)$ powerpc-eabi-gcc -mcpu=860 -specs=mbx.specs hello.c -o hello.x
+(ROM)$ powerpc-eabi-gcc -mcpu=860 -specs=mbx_rom.specs hello.c -o hello.x
+(ROM)$ powerpc-eabi-objcopy -O binary hello.x hello.bin
+
+cma101
+------
+(RAM)$ powerpc-eabi-gcc -mcpu=860 -specs=cma.specs hello.c -o hello.x
+(ROM)$ powerpc-eabi-gcc -mcpu=860 -specs=cma_rom.specs hello.c -o hello.x
+(ROM)$ powerpc-eabi-objcopy -O binary hello.x hello.bin
+
+evb403
+------
+(RAM)$ powerpc-eabi-gcc -mcpu=403 -specs=evb403.specs hello.c -o hello.x
+(ROM)$ powerpc-eabi-gcc -mcpu=403 -specs=evb403_rom.specs hello.c -o hello.x
+(ROM)$ powerpc-eabi-objcopy -O binary hello.x hello.bin
+
+yka
+---
+(RAM)$ powerpc-eabi-gcc -mcpu=604 -specs=yka.specs hello.c -o hello.x
+(ROM)$ powerpc-eabi-gcc -mcpu=604 -specs=yka_rom.specs hello.c -o hello.x
+(ROM)$ powerpc-eabi-objcopy -O binary hello.x hello.bin
+
+ykb
+---
+(RAM)$ powerpc-eabi-gcc -mcpu=604 -specs=ykb.specs hello.c -o hello.x
+(ROM)$ powerpc-eabi-gcc -mcpu=604 -specs=ykb_rom.specs hello.c -o hello.x
+(ROM)$ powerpc-eabi-objcopy -O binary hello.x hello.bin
+
+yklb
+---
+(RAM)$ powerpc-eabi-gcc -mlittle-endian -mcpu=604 -specs=yklb.specs \
+                        hello.c -o hello.x
+
+ROM builds are a little more complicated because the PPC resets into big
+endian mode. This means two ROM images must be used. A small reset module
+in bigendian mode which does some basic initialization and switches to
+little endian mode. And a the main application wihich is built little endian.
+The bigendian part is built as part of the bsp and is installed with the
+bsp in <prefix>/powerpc-eabi/lib.
+
+(ROM)$ powerpc-eabi-gcc -mlittle-endian -mcpu=604 -specs=yklb_rom.specs \
+                        hello.c -o hello.x
+(ROM)$ powerpc-eabi-objcopy -O binary hello.x hello.bin
+(ROM)$ cat <prefix>/powerpc-eabi/lib/yklb-boot.bin hello.bin > hello.image
+

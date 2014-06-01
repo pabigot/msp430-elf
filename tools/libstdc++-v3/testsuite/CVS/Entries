@@ -1,0 +1,30 @@
+/Makefile.am/1.46/Sun Feb 24 19:20:58 2013//Tmsp430-130322-branch
+/Makefile.in/1.88/Sun Oct 28 17:37:08 2012//Tmsp430-130322-branch
+D/17_intro////
+D/18_support////
+D/19_diagnostics////
+D/20_util////
+D/21_strings////
+D/22_locale////
+D/23_containers////
+D/24_iterators////
+D/25_algorithms////
+D/26_numerics////
+D/27_io////
+D/28_regex////
+D/29_atomics////
+D/30_threads////
+D/abi////
+D/backward////
+D/config////
+D/data////
+D/decimal////
+D/ext////
+D/lib////
+D/libstdc++-abi////
+D/libstdc++-dg////
+D/libstdc++-prettyprinters////
+D/performance////
+D/tr1////
+D/tr2////
+D/util////

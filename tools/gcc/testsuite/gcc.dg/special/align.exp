@@ -1,0 +1,52 @@
+# Copyright (C) 2001 Free Software Foundation, Inc.
+
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+# 
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+# 
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.  
+
+# This file was written by Nick Clifton <nickc@redhat.com>
+
+# Load support procs.
+load_lib gcc-dg.exp
+
+# proc gcc_target_object_format is in gcc/testsuite/lib/file-format.exp
+
+# Proc to determine if the target file format ought to be able to
+# support large values for the aligned() attribute.  If this ever
+# becomes more complex it probably ought to be moved into
+# lib/target-supports.exp.
+
+proc check_large_aligned_available { } {
+    # ELF support it, others do not.
+
+    set objformat [gcc_target_object_format]
+
+    switch $objformat {
+        elf      { return yes }
+        unknown  { return unknown }
+        default  { return no }
+    }
+}
+
+set file_to_test "$srcdir/$subdir/align-1.c"
+
+# Decide if the test should be run.
+
+dg-init
+switch [check_large_aligned_available] {
+    yes     { dg-runtest  "$file_to_test" "" "" }
+    no      { unsupported "$file_to_test" }
+    default { fail        "$file_to_test" }
+}
+dg-finish
+

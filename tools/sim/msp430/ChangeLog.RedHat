@@ -1,0 +1,110 @@
+2013-11-20  Nick Clifton  <nickc@redhat.com>
+
+	* msp430-sim.c (maybe_perform_syscall): Add tracing of sys_unlink.
+
+2013-03-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* msp430-sim.c (sim_open): Return early if sim_load_file()
+	returns NULL.
+
+2013-02-15  Kevin Buettner  <kevinb@redhat.com>
+
+	* msp430-sim.c (msp430_reg_store): Fix thinko involving 4-byte
+	stores.
+
+2013-02-13  Kevin Buettner  <kevinb@redhat.com>
+
+	* msp430-sim.c (msp430_step_once): Don't do CIO in the sim when
+	being run from the debugger.
+
+2013-01-28  Kevin Buettner  <kevinb@redhat.com>
+
+	* msp430-sim.c (msp430_reg_fetch, msp430_reg_store): Add
+	support for registers wider than 16 bits.
+
+2013-01-18  DJ Delorie  <dj@redhat.com>
+
+	* msp430-sim.c (msp430_cio): Expand cio write() support.
+
+2012-12-17  DJ Delorie  <dj@redhat.com>
+
+	* msp430-sim.c (sim_open): Load program into LMA, not VMA.
+	(loader_write_mem): New.
+	(msp430_step_once): More carry logic fixes.
+
+	* msp430-sim.c (get_op): Add MSP430X5438 serial port support.
+	Temporary until we add a full serial port peripheral.
+	(put_op): Likewise.
+	(msp430_step_once): Fix carry logic in SUB/SUBC/CMP opcodes.
+
+2012-12-15  Kevin Buettner  <kevinb@redhat.com>
+
+	* msp430-sim.c (msp430_reg_store): Don't return 0; return
+	number of bytes transferred to the register.
+
+2012-12-13  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/msp430-sim.c (put_op): Sign extend register index
+	values.
+	(get_op): Likewise.
+
+2012-12-12  Kevin Buettner  <kevinb@redhat.com>
+
+	* msp430-sim.c (sim_close): Deallocate memory and reinitialize
+	some state.
+
+2012-12-07  DJ Delorie  <dj@redhat.com>
+
+	* msp430/msp430-sim.c (put_op): Fix 20-bit store.
+	* msp430/msp430-sim.c (msp430_step_once): Fix syscall mask.
+
+2012-11-17  DJ Delorie  <dj@redhat.com>
+
+	* msp430/msp430-sim.c (msp430_step_once): Add 430X support.
+
+2012-11-06  DJ Delorie  <dj@redhat.com>
+
+	* msp430/msp430-sim.h (msp430_cpu_state): Store CIO addresses as
+	well.
+	* msp430/msp430-sim.c (bfd.h): Include.
+	(lookup_symbol): New.
+	(sim_open): Look up the CIO symbols.
+	(msp430_cio): New.  Only write() is supported for now.
+	(msp430_step_once): If the CIO address is executed, run CIO
+	commands.
+	(msp430_step_once): Discriminate between BRK and NOP.
+	(sim_create_inferior): Save reset vector to $R0 as well.
+
+2012-10-08  DJ Delorie  <dj@redhat.com>
+
+	* Makefile.in (SIM_OBJS): Add trace.o.
+	* trace.c: New.
+	* msp430-sim.c (sim_open): Initialize trace.
+	(register_names): New.
+	(trace_reg_put, trace_reg_get): New.  Trace register ops.
+	(get_op): Use them.
+	(put_op): Likewise.  Trim results from overflow, auto-increment by
+	bytes.
+	(cond_string): New.
+	(msp_step_once): Make opcode_pc unsigned, force PC to 16 bits for
+	now.  Fault on PC less than 0x10 or undecodable opcodes.  Trace
+	each function to dump source lines. Use new GET/PUT_REG macros.
+	Support conditional branches.
+	(sim_engine_run): Remove watchdog.
+
+2012-10-02  DJ Delorie  <dj@redhat.com>
+
+	* msp430-sim.c: Add remaining MSP430 opcodes.  Add syscall
+	support.  Add proper start-after-reset logic and memory maps.
+	* Makefile.in: Add syscall support.
+
+2012-09-06  DJ Delorie  <dj@redhat.com>
+
+	* Makefile.in: New.
+	* aclocal.m4: New.
+	* config.in: New.
+	* configure: New.
+	* configure.ac: New.
+	* msp430-sim.c: New.
+	* msp430-sim.h: New.
+	* sim-main.h: New.

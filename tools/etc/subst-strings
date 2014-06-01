@@ -1,0 +1,105 @@
+#!/bin/sh
+#
+# substitute various values for ||STRINGS|| 
+#
+
+set -e
+
+if [ $# != 8 ] ; then 
+  echo "usage: $0 host target release-date bundle bindir srcdir inputfile outputfile"
+  exit 1
+fi
+
+HOSTstr=$1
+TARGETstr=$2
+RELNO=$3
+BUNDLE=$4
+BINDIR=$5
+SRCDIR=$6
+INFILE=$7
+OUTFILE=$8
+
+if [ -f ${SRCDIR}/release-info ] ; then
+  . ${SRCDIR}/release-info
+fi
+
+if [ -f ${SRCDIR}/gcc/version.c ] ; then
+  GCCvn=`awk '{printf "%s", substr ($4, 2, length ($4) - 3); }' ${SRCDIR}/gcc/version.c`
+else
+  GCCvn='N.A.'
+fi
+
+if [ $BUNDLE = "comp-tools" ] ; then
+  TEXBUNDLE=comptools
+  if [ ! $TARGETstr = $HOSTstr ] ; then
+    BUNDLE=cross-tools
+  fi
+  else
+    if [ "$BUNDLE" = "deja-gnu" ]; then
+      TEXBUNDLE=dejagnu
+      else
+        TEXBUNDLE=$BUNDLE
+    fi
+fi
+
+TEX_RELEASE_TAG=`echo ${RELEASE_TAG} | sed 's/-/--/g'`
+INSTALLdir=`echo ${ROOTING} | sed 's,\(/[a-zA-Z0-9]+\),,'`
+
+case $HOSTstr in 
+  sparc-sun-solaris*)
+	DEVdflt="/dev/rmt/0n"
+	;;
+  sparc-sun-sunos4.1*)
+	DEVdflt=/dev/nrst8
+  	;;
+  mips-sgi-irix*)
+	DEVdflt=/dev/mt/tps0d0nrns
+	;;
+  rs6000-ibm-aix*)
+	DEVdflt=/dev/rmt0.1
+	;;
+  powerpc-ibm-aix*)
+	DEVdflt=/dev/rmt0.1
+	;;
+  hppa1.1-hp-hpux*)
+	DEVdflt=/dev/rmt/0mn
+	;;
+  i[345]86-*sysv4*)
+	DEVdflt=/dev/rmt/c0s0n
+	;;
+  i486-linux)
+	DEVdflt=/dev/nst0
+	;;
+  alpha-dec-osf*)
+	DEVdflt=/dev/rmt0a
+	;;
+  *)
+	echo "WARNING: host not found"
+	echo "WARNING: setting default tape to /dev/tape"
+	DEVdflt=/dev/tape
+	;;
+esac
+
+TARGET=$TARGETstr
+
+sed \
+	-e "/@fix@/r ${SRCDIR}/etc/${BUNDLE}-fix" \
+	-e "/@verify@/r ${SRCDIR}/etc/${BUNDLE}-verify" \
+	-e "/@fix@/d" \
+	-e "/@verify@/d" \
+	< $INFILE | \
+sed 	-e "s,\|\|RELNO\|\|,$RELNO,g" \
+    	-e "s,\|\|GCCvn\|\|,$GCCvn,g" \
+	-e "s,\|\|HOSTstr\|\|,$HOSTstr,g" \
+	-e "s,\|\|HOST\|\|,$HOST,g" \
+	-e "s,\|\|TARGETstr\|\|,$TARGETstr,g" \
+	-e "s,\|\|TARGET\|\|,$TARGET,g" \
+	-e "s,\|\|BUNDLE\|\|,$BUNDLE,g" \
+	-e "s,\|\|TEXBUNDLE\|\|,$TEXBUNDLE,g" \
+	-e "s,\|\|DEVdflt\|\|,$DEVdflt,g" \
+	-e "s,\|\|INSTALLdir\|\|,$INSTALLdir,g" \
+	-e "s,\|\|ROOTING\|\|,$ROOTING,g" \
+	-e "s,\|\|RELEASE_DIR\|\|,$RELEASE_DIR,g" \
+	-e "s,\|\|RELEASE_TAG\|\|,$RELEASE_TAG,g" \
+	-e "s,\|\|TEX_RELEASE_TAG\|\|,$TEX_RELEASE_TAG,g" \
+	> $OUTFILE

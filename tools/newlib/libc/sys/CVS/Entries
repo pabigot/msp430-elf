@@ -1,0 +1,30 @@
+/Makefile.am/1.4/Sun Jun 24 21:49:10 2007//Tmsp430-130322-branch
+/Makefile.in/1.52/Sun Mar 17 22:15:09 2013//Tmsp430-130322-branch
+/aclocal.m4/1.46/Sun Mar 17 22:15:09 2013//Tmsp430-130322-branch
+/configure/1.63.2.1/Wed Mar 27 02:47:30 2013//Tmsp430-130322-branch
+/configure.in/1.17.12.1/Wed Mar 27 02:47:30 2013//Tmsp430-130322-branch
+D/a29khif////
+D/arc////
+D/arm////
+D/d10v////
+D/decstation////
+D/epiphany////
+D/h8300hms////
+D/h8500hms////
+D/linux////
+D/m88kbug////
+D/mmixware////
+D/netware////
+D/rdos////
+D/rtems////
+D/sh////
+D/sparc64////
+D/sun4////
+D/sysmec////
+D/sysnec810////
+D/sysnecv850////
+D/sysvi386////
+D/sysvnecv70////
+D/tic80////
+D/w65////
+D/z8ksim////

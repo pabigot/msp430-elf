@@ -1,0 +1,25 @@
+2006-11-27  Nick Clifton  <nickc@redhat.com>
+
+	Applied this patch: http://swox.com/gmp/patches/x86-fat.diff
+	from Torbjorn Granlund <tg@swox.com>.
+	
+	* mpn/generic/addsub_n.c: Correct handling of mpn_add_nc and
+	mpn_sub_nc.
+	* configure.in: Initialise gcc_cflgags and gcc_cflags_arch for fat
+	builds.
+	* configure: Regenerate.
+
+2006-11-17  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: Add --enable-target switch.  If --enable-target=no
+	is passed on the configure command line then ignore the --target
+	configure switch.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

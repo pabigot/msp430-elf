@@ -1,0 +1,15 @@
+%rename cpp                 old_cpp
+%rename link                old_link
+
+*lib:
+--start-group -lsimstub -lc -lgcc --end-group
+
+*cpp:
+-D__SIM__ %(old_cpp)
+
+*startfile:
+simstub-crt0%O%s frvbegin%O%s
+
+*link:
+-T frv.ld%s -Ttext 0x00010000 %(old_link)
+

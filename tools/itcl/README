@@ -1,0 +1,53 @@
+		   - Sourceware.org Incr Tcl Overview -
+			Written by Keith Seitz
+
+This module is an import of the ITcl/Itk/Iwidgets modules for Tcl/Tk
+into the sourceware.org repository. The net sources have been
+imported into the NET branch and subsequently merged into the
+main repository branch (HEAD or tip or what have you).
+
+All three modules are distributed separately, and have been committed
+to the vendor branch using the following layout:
+
+itcl/
+  itcl/  itk/  iwidgets/
+
+The itcl, itk, and iwidgets subfolders contain the virgin upstream
+sources from sf.net. Configury has been added in the toplevel itcl/
+folder to set facilitate building Itcl et al as part of a sourceware.org
+build.
+
+To import a new version of Incr Tcl, follow this procedure:
+
+1. Download the itcl, itk, and iwidgets source tarballs. And
+   layout the sources in the following hierarchy: itcl/, itcl/itcl, itcl/itk,
+   and itcl/iwidgets. The toplevel itcl folder should only contain three
+   subfolders -- no regular files.
+2. Checkout the itcl module:
+  $ cvs co naked-itcl
+3. Force a commit for every file:
+  $ cd src/itcl
+  $ cvs commit -f -R -m "touch all sources to ease next import"
+4. Import the new sources:
+  $ cd /my/local/itcl
+  $ cvs import -ko -I\! -m 'imported Itcl 3.3' src/itcl NET ITCL_3_3
+5. Merge local changes with the newly imported sources:
+  $ cd /some/empty/directory
+  $ cvs co -jNET:yesterday -jNET src/itcl
+  ... look at merges; resolve any conflicts ...
+  $ cvs commit
+6. Update working directory. This step is often done in parallel
+   with merging and conflict resolution.
+7. I also go back and remove obsolete files from the NET branch
+   (files which no longer exist).
+
+While I have attempted to add only toplevel configury for Itcl,
+it has been necessary to directly fiddle with the sources, particularly
+for iwidgets, whose build configury I have updated to mimmick that
+of itcl and itk. I have also regenerated autotools files. Check the toplevel
+ChangeLog for specifics when merging. I have only added *local* differences
+between the NET branch and the HEAD/tip version into the ChangeLog.
+
+I have opted not to add "SOURCEWARE LOCAL" around everything. They never
+really seem to help me anyway. It is much easier to inspect diffs of
+the vendor branch and the main repository copy.

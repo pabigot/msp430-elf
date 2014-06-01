@@ -1,0 +1,15 @@
+%rename cpp                 old_cpp
+%rename link                old_link
+
+*lib:
+--start-group -ltomcat -lc -lgcc --end-group
+
+*cpp:
+-D__CPU_TOMCAT__ -D__TOMCAT_EVB__ %(old_cpp)
+
+*startfile:
+tomcat-start%O%s frvbegin%O%s
+
+*link:
+-T frv.ld%s -Ttext 0xff000000 -Tdata 0x00000000 %(old_link)
+

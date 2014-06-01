@@ -1,0 +1,247 @@
+@c @chapter M32R GNU Toolset
+
+@menu
+* M32R Names::         What the tools are called for the M32R
+* M32R GCC::           Compiling code for the M32R
+* M32R Gplus::         Using C++ for the M32R
+* M32R GAS::           Assembling code for the M32R
+* M32R GDB::           Debugging code for the M32R
+* M32R Startup code::  Startup code and linker scripts
+* M32R PIC::           Position Independent Code
+* M32R ABI::           M32R Application Binary Interface
+* M32R Refs::          M32R documentation
+@end menu
+
+@node M32R Names
+@chapter What the tools are called for the Mitsubishi @sc{M32R}.
+
+Cross-development tools in the Cygnus Developer's Kit are normally
+installed with names that reflect the target machine, so that you can
+install more than one set of tools in the same binary directory.
+
+The names are constructed by using as a prefix the @samp{--target}
+argument to @code{configure}.  For example, the compiler (called simply
+@code{gcc} in native configurations) is called by the name for @sc{M32R}
+cross-development, @w{@code{m32r-elf-gcc}}.  Likewise, the
+@sc{M32R}-configured @code{gdb} is called by the name
+@w{@code{m32r-elf-gdb}}.
+
+@node M32R GCC
+@chapter Compiling for the Mitsubishi @sc{M32R}
+
+Once the toolchain is configured to generate code for the @sc{M32R}, you
+can control variances in code generation directly from the command line.
+
+@subheading General Options
+
+There are currently no @sc{M32R} specific GCC options.
+
+For a complete list of options, refer to the relevant sections of the
+GCC, GAS (assembler), and GLD (linker) manuals.
+
+@subheading Predefined Preprocessor Symbols
+
+The following @sc{M32R} specific symbols are predefined by the preprocessor
+and are available for programs to use.
+
+@table @code
+@item __M32R__
+This symbol is always defined.
+@end table
+
+@node M32R Gplus
+@chapter Using C++ for the Mitsubishi @sc{M32R}
+
+This chapter not finished.
+
+@node M32R GAS
+@chapter Assembling code for the Mitsubishi @sc{M32R}
+
+The GNU assembler follows the syntax in the programmer's reference
+manual as close as possible.  There are no known divergences but
+that does not mean there will not ever be.  Of course such divergences
+will not be done without reason.
+
+@subheading Assembler Syntax Extensions
+
+Register Aliases
+
+Register @code{r13} is used as the frame pointer and has an alias of @code{fp}.
+
+Register @code{r14} is contains the subroutine return address and has an
+alias of @code{lr}.  @code{lr} is short for "link register".
+
+Instruction Aliases
+
+@smallexample
+Alias                Real Instruction
+
+@code{push reg}           @code{st reg,@@-sp}
+@code{pop reg}            @code{ld reg,@@sp+}
+@end smallexample
+
+@subheading Mitsubishi @sc{M32R} specific features
+
+The best way to determine what the assembler syntax for a particular
+construct is is to write the equivalent in C and see what GCC generates.
+
+@table @code
+@item .fillinsn directive
+An experimental pseudo-op to align the next instruction on a 32 bit
+boundary if it isn't already.  This is done by inserting a @code{nop}.
+
+NOTE:
+The current GAS release requires this directive before each label
+that can be branched to.  This restriction will be removed shortly,
+and @code{.fillinsn} may eventually be deleted.
+@end table
+
+@node M32R GDB
+@chapter Debugging code for the Mitsubishi @sc{M32R}
+
+@subheading Choosing the debugging target.
+
+@table @code
+@item Debugging with remote monitor
+GDB talks to the board via the monitor interface.
+Choose the monitor with @samp{target m32r device} where @samp{device}
+is the tty device.
+
+@smallexample
+(gdb) target m32r /dev/ttya
+@end smallexample
+
+@item Debugging with the simulator
+A simple m32r simulator is built into GDB.
+Choose the simulator with
+
+@smallexample
+(gdb) target sim
+@end smallexample
+
+@end table
+
+@node M32R Startup code
+@chapter Startup code and linker scripts
+
+The prebuilt toolchains from Cygnus come with a simple @file{crt0.o}
+file which contains the C Run Time startup code.  The source code is
+in @file{devo/libgloss/m32r/crt0.S}.
+
+@iftex
+@let@nonarrowing=@comment
+@end iftex
+@smallexample
+
+	.text
+	.balign 4
+	.global	_start
+_start:
+
+	ld24	sp, _stack
+	ldi	fp, #0
+
+# Clear the BSS.  Do it in two parts for efficiency: longwords first
+# for most of it, then the remaining 0 to 3 bytes.
+
+	ld24	r2, __bss_start	; R2 = start of BSS
+	ld24	r3, _end	; R3 = end of BSS + 1
+	sub	r3, r2		; R3 = BSS size in bytes
+	mv	r4, r3
+	srli	r4, #2		; R4 = BSS size in longwords (rounded down)
+	ldi	r1, #0		; clear R1 for longword store
+	addi	r2, #-4		; account for pre-inc store
+	beqz	r4, .Lendloop1	; any more to go?
+	.fillinsn
+.Lloop1:
+	st	r1, @@+r2	; yep, zero out another longword
+	addi	r4, #-1		; decrement count
+	bnez	r4, .Lloop1	; go do some more
+	.fillinsn
+.Lendloop1:
+	and3	r4, r3, #3	; get no. of remaining BSS bytes to clear
+	addi	r2, #4		; account for pre-inc store
+	beqz	r4, .Lendloop2	; any more to go?
+	.fillinsn
+.Lloop2:
+	stb	r1, @@r2		; yep, zero out another byte
+	addi	r2, #1		; bump address
+	addi	r4, #-1		; decrement count
+	bnez	r4, .Lloop2	; go do some more
+	.fillinsn
+.Lendloop2:
+
+# Run code in the .init section.
+# This will queue the .fini section to be run with atexit.
+
+	bl	__init
+
+# Call main, then exit.
+
+	bl	main
+	bl	exit
+
+# If that fails just loop.
+
+	.fillinsn
+.Lexit:
+	bra	.Lexit
+	.fillinsn
+
+@end smallexample
+@iftex
+@let@nonarrowing=@relax
+@end iftex
+
+The default linker script sets @sc{_stack} to 0x100000.
+The stack grows downwards from there and the @code{malloc}
+heap grows upwards from the end of the @sc{bss} section.
+
+To link with your own startup file, pass the @samp{-nostartfiles}
+option to @sc{GCC}.
+
+@node M32R PIC
+@chapter Position Independent Code
+
+NOTE: What form of PIC, if any, that will be supported is still
+under review.
+
+The ABI defines how PIC will work with the supplied toolchain.
+Support for position independent code is still incomplete so
+do not use the @samp{-fpic} @sc{GCC} option.
+
+@node M32R ABI
+@chapter M32R Application Binary Interface
+
+An "Application Binary Interface" provides the definition of how the
+pieces of a program fit together.  It describes, among other things,
+
+@itemize @bullet
+@item
+how arguments are passed between functions
+@item
+how structure elements are laid out
+@item
+how position independent code (PIC) works
+@item
+how relocations are done
+@item
+how functions and data are laid out in an executable image
+@end itemize
+
+@include m32r-abi.texi
+
+@node M32R Refs
+@chapter Mitsubishi @sc{M32R} documentation
+
+The following manual provides extensive documentation on the @sc{M32R}.
+
+@table @cite
+@item M32R/D Family User's Manual
+Mitsubishi Electronic Device Group
+@*
+First Edition, January 12, 1996
+@c @item board man
+@c FIXME
+@end table
+

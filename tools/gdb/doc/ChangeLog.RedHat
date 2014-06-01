@@ -1,0 +1,13 @@
+2002-05-19  Andrew Cagney  <ac131313@redhat.com>
+
+	From 2002-02-21 Mark Salter <msalter@redhat.com>:
+	* gdb.texinfo: Document watchpoint info in T packets.
+
+
+Local Variables:
+mode: indented-text
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

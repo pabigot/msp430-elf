@@ -1,0 +1,408 @@
+2012-12-07  Nick Clifton  <nickc@redhat.com>
+
+	* baseboards/msp430-sim.exp: Add no_trampolines.
+
+2012-10-09  DJ Delorie  <dj@redhat.com>
+
+	* baseboards/msp430-sim.exp: Add.
+
+2010-07-16  Nick Clifton  <nickc@redhat.com>
+
+	* testglue.c: Include stdlib.h in order to obtain the prototypes
+	for abort and exit.
+
+2010-04-28  Kevin Buettner  <kevinb@redhat.com>
+
+	* baseboards/mep-sid.exp: Set gdb,start_symbol, gdb,noinferiorio,
+	gdb,nofileio, gdb,nosignals, and gdb,skip_huge_test.  Default
+	endian is now "little".
+
+2009-08-18  DJ Delorie  <dj@redhat.com>
+
+	* baseboards/mep-sid.exp: Default to the "default" config.
+
+2009-07-15  Nick Clifton  <nickc@redhat.com>
+
+	* baseboards/i386-sid.exp (ldflags): Include a specific reference
+	to -lstdc++ since -nostdlib will prevent it being added
+	automatically.
+	* baseboards/cygmon.ld (ldflags): Likewise.
+
+2008-07-23  Nick Clifton  <nickc@redhat.com>
+
+	* baseboards/powerpc-sim.exp: Do not wrap exit functions, the sim
+	does return a proper value.
+
+2008-05-14  DJ Delorie  <dj@redhat.com>
+
+	* lib/framework.exp (open_logs): Make SUM file line-buffered.
+
+2008-03-31  DJ Delorie  <dj@redhat.com>
+
+	* examples/calc/configure: Regenerate with autoconf 2.61.
+
+2007-03-20  Nick Clifton  <nickc@redhat.com>
+
+	* baseboards/powerpc-sim.exp (needs_status_wrapper): Define
+	and set to 1, so that gcc tests which print to stdout do not
+	cause false FAILs.
+
+2006-12-06  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (AC_PROG_CXX): Suppress - it is not needed to build
+	dejagnu and it breaks bootstrap builds.
+	* configure: Regenerate.
+
+2006-09-29  Nick Clifton  <nickc@redhat.com>
+
+	* runtest.exp: Ignore duplicate file names returned by the find
+	proc.
+	* runtest: Import fix from mainline: Stop after finding first
+	viable runtest.exp.
+
+2006-05-23  Nick Clifton  <nickc@redhat.com>
+
+	* baseboards/mips-sim.exp: Fix sanitization strings.
+	* baseboards/sh-hms-sim.exp: Fixes for sh-elf target.
+
+2004-06-16  Alexandre Oliva  <aoliva@redhat.com>
+
+	* baseboards/h8sx-sim.exp: Remove, obsolete.
+
+Tue Feb 25 05:19:57 UTC 2003  Brendan Conoboy  <blc@@redhat.com>
+
+	* lib/remote.exp (call_remote): Remove multlibs from the board
+	name when rebooting a board.
+
+2003-06-05  Michael Snyder  <msnyder@redhat.com>
+
+	* baseboards/sh-sim.exp: New file.
+
+2003-05-15  Corinna Vinschen  <vinschen@redhat.com>
+
+	* Makefile.am: Add empty install-info and uninstall-info rules.
+	* Makefile.in: Regenerate.
+
+2003-02-27  Alexandre Oliva  <aoliva@redhat.com>
+
+	* baseboards/h8sx-sim.exp: setup_sim h8sx.
+
+2003-02-26  Michael Snyder  <msnyder@redhat.com>
+
+	* baseboards/h8sx-sim.exp: New file (hopefully temporary).
+
+2002-09-04  Nick Clifton  <nickc@redhat.com>
+
+	* baseboards/iwmmxt-sim.exp (cflags): Remove -mcpu=iwmmxt flag.  It is
+	now the subject of a multilib.
+
+2002-05-09  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* baseboards/iwmmxt-sim.exp: A copy of arm-sim.exp that enables
+	-mcpu=iwmmxt.
+
+2002-02-14  Graydon Hoare  <graydon@redhat.com>
+
+	* config/sim.exp: Include support for the "rawsid" protocol.
+
+2002-02-05  Mark Salter  <msalter@redhat.com>
+
+	* baseboards/xscale-cygmon.exp: Set do_reload_on_run.
+
+2002-01-24  Mark Salter  <msalter@redhat.com>
+
+	* baseboards/xscale-cygmon.exp: Use redboot.specs by default.
+	Set skip_huge_test.
+
+2001-11-14  Thomas Fitzsimmons  <fitzsim@redhat.com>
+
+	* baseboards/i386-sid.exp: Fix ldflags to include
+	libgloss_link_flags and newlib_link_flags.
+
+2001-11-12  Andrew Cagney  <cagney@redhat.com>
+
+	From who knows where:
+	* lib/libgloss.exp (g++_link_flags): Append libstdc++-v3 to
+	library path.
+
+2001-10-23  Thomas Fitzsimmons  <fitzsim@redhat.com>
+
+	* baseboards/i386-sid.exp: specify gdb start symbol
+
+2001-10-20  Thomas Fitzsimmons  <fitzsim@redhat.com>
+
+	* baseboards/i386-sid.exp: add gdb support
+
+2001-10-03  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* lib/remote.exp: Fi typo in construction of arguments to
+	remote_file.
+
+2001-09-27  Thomas Fitzsimmons  <fitzsim@redhat.com>
+
+	* baseboards/i386-sid.exp: add new baseboard
+
+2001-09-10  Joern Rennecke (amylaar@redhat.com)
+
+	* baseboards/h8300-sim.exp (uses_underscores): Set.
+	(text_size): Similarly.
+
+2001-08-02  Dave Brolley  <brolley@redhat.com>
+
+	* config/sim.exp: Rename loader to cpu-loader.
+
+2001-08-02  Angela Marie Thomas <angela@cygnus.com>
+
+	* baseboards/basic-sid.exp (find_rawsid): Correctly find files when
+	testing in objdir.
+	
+2001-07-27  John Healy  <jhealy@redhat.com>
+
+	* baseboards/basic-sid.exp (find_rawsid): Fixed error in that was
+	causing a problem when setting SID_LIBRARY_PATH.
+
+2001-06-12  Jim Blandy  <jimb@redhat.com>
+
+	* baseboards/frv-sim.exp: Enable GDB tests that require inferior
+	I/O to be working: don't set gdb,noinferiorio.
+
+	* baseboards/frv-sim.exp: Increase the GDB testing timeout to 60
+	seconds.
+
+2001-05-31  Eric Christopher  <echristo@redhat.com>
+
+	* baseboards/mips-sim-idt64.ld: Just use "-Tidt64.ld" or
+	"-Tidtecoff.ld" as appropriate.
+
+2001-05-28  Felix Lee  <flee@redhat.com>
+
+	* baseboards/ip2k-sim.exp: just use "-Tsim.ld".
+
+2001-04-18  Michael Snyder  <msnyder@redhat.com>
+
+	* baseboards/linux-libremote.exp: Directory in which to find
+	the server has been renamed from "native" to "unix".
+
+2001-02-16  matthew green  <mrg@redhat.com>
+
+	* baseboards/basic-sid.exp (find_sid_conf): New proc.
+	(find_rawsid): New proc.
+	* config/sim.exp (sim_load): Handle sim,protocol of `sid'.
+
+2001-01-24  Fernando Nasser  <fnasser@redhat.com>
+
+	From Gabriel Dos Reis  <gdr@codesourcery.com>
+	* lib/dg.exp (dg-trim-dirname): New function.
+	(dg-test): Use it to rip directory-name out of file name.
+
+2001-01-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* baseboards/sh64-sim.exp (ieee_multilib_flags): Set to -mieee.
+
+2000-12-26  Alexandre Oliva  <aoliva@redhat.com>
+
+	* baseboards/sh64-sim.exp (gcc,stack_size): Set to a smaller
+	value than the address of the end of the stack.
+
+2000-12-20  Richard Henderson  <rth@redhat.com>
+
+	* baseboards/unix.exp: Set ieee_multilib_flags for alpha*.
+
+2000-11-30  Drew Moseley  <dmoseley@redhat.com>
+
+	* baseboards/mn10300-cygmon.exp: Set do_reload_on_run to 1.
+	Set use_cygmon to 1.
+
+2000-11-27  Felix Lee  <flee@redhat.com>
+
+	* config/gdb-comm.exp (gdb_comm_load): Different test for load
+	success.
+
+	* lib/libgloss.exp (get_multilibs): Typo.
+
+	* config/dos.exp (dos_load): Add another cygwin1.dll location.
+
+	* lib/telnet.exp (telnet_open): Don't force kerberos telnet.
+
+2000-11-17  Rudy Folden   <rfolden@redhat.com>
+
+	* baseboards/sh-linux.exp: New file.
+	* config/sh-linux.exp: New file.
+	* lib/kermit.exp: Updated for use with sh-linux tests
+
+2000-10-19  Michael Snyder  <msnyder@cleaver.cygnus.com>
+
+	* baseboards/linux-gdbserver.exp: New file.
+	* baseboards/linux-libremote.exp: New file.
+
+2000-09-11  Angela Marie Thomas <angela@cygnus.com>
+
+	* baseboards/vx386.exp: New file.
+
+2000-08-02  Jimmy Guo  <guo@hpcleara.cup.hp.com>
+
+        * lib/framework.exp (setup_xfail): Relax PRMS string pattern
+        to allow a more general bug ID specification (without '-').
+
+        * lib/framework.exp (pass): make compiler_conditional_xfail_data
+        a global, corresponding to a recent change to 'proc fail'.
+
+2000-12-16  Alexandre Oliva  <aoliva@redhat.com>
+
+	* baseboards/sh64-sim.exp (gcc,stack_size): Set.
+
+2000-11-22  Ben Elliston  <bje@redhat.com>
+
+	* baseboards/sh64-sim.exp (target_install): Use sh64-elf now.
+
+2000-11-01  Ben Elliston  <bje@redhat.com>
+
+	* baseboards/sh64-sim.exp: New file.
+
+2000-09-03  Michael Meissner  <meissner@redhat.com>
+
+	* baseboards/frv-sim.exp: Remove setting uses_underscores.
+
+2000-08-23  Mark Salter  <msalter@redhat.com>
+
+	* baseboards/frv-tiger.exp: New file.
+
+2000-07-26  Clinton Popetz  <cpopetz@cygnus.com>
+
+	* testglue.c: Include stdlib.h.
+
+2000-07-17  Frank Ch. Eigler  <fche@redhat.com>
+
+	* example/Makefile.am (SUBDIRS): Remove to prevent automatic recursion
+	into `calc'.
+	(all-local): Add at least `calc' building back.
+	* example/Makefile.in: Regenerated.
+
+2000-06-04  Michael Meissner  <meissner@redhat.com>
+
+	* baseboards/frv-tomcat.exp (cflags): Add -mcpu=tomcat.
+	(ldscript): Ditto.
+
+2000-05-19  Felix Lee  <flee@cygnus.com>
+
+	* lib/target.exp (target_link): fix remote host bug.
+
+2000-05-04  Mark Salter  <msalter@redhat.com>
+
+	* baseboards/dve39-cygmon.exp: New file.
+
+2000-05-08  Ben Elliston  <bje@redhat.com>
+
+	* baseboards/basic-sid.exp: New file.
+
+2000-04-25  Felix Lee  <flee@cygnus.com>
+
+	* baseboards/tx39-sim.exp: Use idt, not dve linker script.  Delete
+	misleading comments and null statements.
+
+2000-04-13  Felix Lee  <flee@cygnus.com>
+
+	* contrib/test-tool: don't pass -v -v to dejagnu.  chews up too
+	much disk space.
+
+2000-04-10  Frank Ch. Eigler  <fche@redhat.com>
+
+	* baseboards/mips-sim.exp (ldscript): Use -Tfoo, not -Wl,-Tfoo.
+	(needs_status_wrapper): Set it.
+	* config/sim.exp (sim_load): Treat absence of "EXIT" wrapper message
+	as a failure.
+
+2000-02-21  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* DEJAGNU-HACK-RULES: New file.
+
+2000-01-19  Ben Elliston  <bje@cygnus.com>
+
+	* baseboards/m68k-sid.exp: New file.
+
+1999-12-16  Michael Meissner  <meissner@cygnus.com>
+
+	* baseboards/frv-sim.exp: Use exit status rather than using a
+	wrapper.
+
+1999-11-29  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* baseboards/arm-sid.exp: Use new board_info to pass default
+	sid endianness.
+	* baseboards/mips-sid.exp: Ditto.
+
+1999-11-26  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* baseboards/arm-sid.exp: Add multilib_options to set default
+	"-msoft-float -mlittle-endian".
+	* baseboards/mips-sid.exp: Ditto for "-msoft-float -meb".
+	Set the linker script too.  Tell gdb about no mipsfpu.
+
+1999-11-09  Mark Salter  <msalter@cygnus.com>
+
+	* baseboards/frv-tomcat.exp: New file for cygmon on tomcat board.
+
+1999-11-02  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* baseboards/arm-sid.exp: Move most content to config/sid.exp.
+	* baseboards/mips-sid.exp: New file.  Parallel arm-sid.exp.
+	* baseboards/m32r-sid.exp: Simplify & parallel arm-sid.exp.
+	* config/sid.exp: Collect common setup for baseboards/*-sid.exp 
+	
+1999-10-11  Andrew Cagney  <cagney@amy.cygnus.com>
+
+	* baseboards/arm-sid.exp: Load generic "sid" config last.
+
+1999-10-05  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* config/sid.exp: Set gdb_protocol, gdb,big_rx_buffers.
+
+1999-08-17  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* config/sid.exp: Use a randomized TCP port number.  Set noargs.
+
+1999-08-08  Ben Elliston  <bje@cygnus.com>
+
+	* config/sid.exp: SID isn't really a simulator--it's more like a
+	remote board. Connect to a default end-point of localhost:8888.
+
+1999-08-06  Ben Elliston  <bje@cygnus.com>
+
+	* baseboards/arm-sid.exp: Get config from config/sid.exp.
+	* config/sid.exp: New file.
+
+1999-06-30  Michael Meissner  <meissner@cygnus.com>
+
+	* baseboards/frv-sim.exp (gcc,no_trampolines): Don't set, we now
+	implement trampolines.
+
+1999-06-28  Catherine Moore  <clm@cygnus.com>
+
+	* baseboards/frv-sim.exp (gcc,stack_size): Set to 5000.
+	(gcc,no_trampolines): Set to 1.
+
+1999-06-27  Catherine Moore  <clm@cygnus.com>
+
+	* baseboards/frv-sim.exp (uses_underscores): Set.
+	(gcc,timeout): Set to 800.
+
+1999-05-06  Dave Brolley  <brolley@cygnus.com>
+
+	* baseboards/frv-sim.exp,baseboards/frv-elf.exp: New files.
+
+1999-03-30  Ben Elliston  <bje@cygnus.com>
+
+	* baseboards/arm-sid.exp: New file for arm-on-sid testing.
+
+1999-03-08  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* baseboards/m32r-sid.exp: New file for m32r-on-sid testing.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

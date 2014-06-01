@@ -1,0 +1,168 @@
+2007-08-23  DJ Delorie  <dj@redhat.com>
+
+	Issue 128201
+	* cp1.c (value_fpr): Don't warn about size mismatches when we're
+	using 32 bit FP registers.
+
+2004-04-13  Kevin Buettner  <kevinb@redhat.com>
+
+	* interp.c (sim_open, sim_create_inferior): Adjust type of ``abfd''
+	from ``struct _bfd *'' to ``struct bfd *''.
+
+2002-09-25  Richard Sandiford  <rsandifo@redhat.com>
+
+	* vr.igen: In multipliy-accumulate instructions, set the GPR
+	destination to either LO or HI.
+	(SET_Macc): Set whole of LO and HI.
+	(High32Bits, Low32Bits): Remove.
+	(CLZ): Use VL4_8.
+
+2002-08-22  Richard Sandiford  <rsandifo@redhat.com>
+
+	* mips.igen: (check_mt_hilo): Don't check for mfhi and mflo conflicts
+	on the vr5500.
+	(check_mult_hilo, check_div_hilo): Likewise.
+	* m3264.igen (MUL, MADD, MADDU, MSUB, MSUBU): Include vr5500.
+
+2002-08-17  Richard Sandiford  <rsandifo@redhat.com>
+
+	* vr.igen (ROR, RORV): Apply EXTEND32 to the result.
+
+2002-08-17  Richard Sandiford  <rsandifo@redhat.com>
+
+	* configure.in: Define TARGET_ENABLE_FR=1 for all VR targets.
+	* configure: Regenerate.
+	* mips.igen (DSRLV, DSUBU, LD, LW, SD, SW): Include vr5500.
+	(ADD.fmt, CEIL.L.fmt, CEIL.W, CVT.W.fmt, LWXC1): Likewise.
+	(MOV.fmt, MOVZ.fmt, NEG.fmt, TRUNC.L.fmt, TRUNC.W): Likewise.
+	(BC0F, BC0FL, CACHE, MTC0): Likewise.
+	* vr.igen (MUL): Split into MULa and MULb.  Use the vr5xxx
+	opcode for MULb.
+	(MULU, MULHI, MULHIU): Likewise.
+	(MACCc, MACCUc, MACCHIc, MACCHIUc): New vr5400 and vr5500 versions.
+	(MACCa, MACCUa, MACCHIa, MACCHIUa): Remove vr5400 and vr5500 here.
+	(MSAC): Fix opcode.
+
+2002-08-15  Dave Brolley  <brolley@redhat.com>
+
+	* vr.igen (MulAcc): Add *vr5500.
+	(SET_MulAcc): Ditto.
+	(SignedMultiply): Ditto.
+	(UNsignedMultiply): Ditto.
+	(Low32Bits): Ditto.
+	(High32Bits): Ditto.
+	(SSNOP): Remove.
+	* mips.igen (check_mt_hilo): Add *vr5500.
+	(check_mf_hilo): Ditto.
+	(check_mult_hilo): Ditto.
+	(check_div_hilo): Ditto.
+	(BC1a): Not for *vr5500.
+	(CxC1): Ditto.
+	(DMxC1): Ditto.
+	(MxC1): Ditto.
+	* Makefile.in (SIM_VR_OBJ): New variable.
+	(BUILT_SRC_FROM_VR): Ditto.
+	(SIM_VR_ALL): Ditto.
+	(tmp-vr): New target.
+	(tmp-m32-vr): Ditto.
+	(tmp-m16-vr): Ditto.
+	(tmp-itable-vr): Ditto.
+	(tmp-run-vr): Ditto.
+	(clean-extra): clean $(BUILT_SRC_FROM_VR).
+	* configure.in (mips64vr-*-*, mips64vrel-*-*): Use the new VR generator.
+	* configure: Regenerated.
+	* vr_run.c: New file.
+
+2002-07-26  Richard Sandiford  <rsandifo@redhat.com>
+
+	* configure.in (mips64vr-*-elf, mips64vrel-*-elf): New targets.
+	* configure: Regenerated.
+
+2002-06-24  Richard Sandiford  <rsandifo@redhat.com>
+
+	* interp.c, tconfig.in: Update path of "callback.h" and "remote-sim.h".
+
+74a662,668
+2000-04-12  Frank Ch. Eigler  <fche@redhat.com>
+
+
+
+1998-12-16  Gavin Romig-Koch  <gavin@cygnus.com>
+
+
+Sat Jul 25 16:03:14 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* vr5400.igen: Move instructions to vr.igen
+	* Makefile.in (IGEN_INCLUDE): Remove vr5400.igen.
+Fri Mar  6 08:30:58 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mdmx.igen (SHFL.REPA.fmt, SHFL.REPB.fmt): Fix bit fields.
+
+Fri Feb 20 16:27:17 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mdmx.igen: Tag all functions as requiring either with mdmx or
+ 	vr5400 processor.
+
+Sun Feb  1 16:47:51 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mdmx.igen: Mark all instructions as 64bit/fp specific.
+
+Sun Feb  1 11:15:29 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mdmx.igen (get_scale): Pass CPU_ to semantic_illegal instead of
+ 	`sd'.
+	(ByteAlign): Use StoreFPR, pass args in correct order.
+
+Sat Dec 13 15:18:51 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* vr5400.igen (Low32Bits, High32Bits): Sign extend extracted 32
+ 	bit values.
+
+Fri Dec 12 12:26:07 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* configure.in (sim_igen_filter): Multi-sim vr5000 - vr5000 or
+	vr5400 with the vr5000 as the default.
+
+Tue Dec  9 12:02:12 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (sim_igen_filter): Multi-sim vr5400 - vr5000 or
+ 	vr5400.
+
+Wed Nov 26 11:00:23 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mdmx.igen (value_vr): Correct sim_io_eprintf format argument.
+	(value_cc, store_cc): Implement.
+
+	* sim-main.h: Add 8*3*8 bit accumulator.
+
+	* vr5400.igen: Move mdmx instructins from here
+	* mdmx.igen: To here - new file. Add/fix missing instructions.
+	* mips.igen: Include mdmx.igen.
+	* Makefile.in (IGEN_INCLUDE): Add mdmx.igen.
+
+1089a2432,2434
+1115a2461,2464
+Thu Nov  6 16:36:35 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* vr5400.igen (vr): Add missing cia argument to value_fpr.
+	(do_select): Rename function select.
+
+Mon Oct 27 17:53:59 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* vr5400.igen: New file.
+
+Mon Oct 27 13:53:59 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* mips.igen: Tag all mipsIV instructions with vr5400 model.
+
+	* configure.in: Add mips64vr5400 target.
+	* configure: Re-generate.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+End:
+5a6,26

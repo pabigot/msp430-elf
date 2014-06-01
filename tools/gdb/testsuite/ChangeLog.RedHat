@@ -1,0 +1,155 @@
+2008-02-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.base/gdb1555.exp: Remove sanitized code which skips test
+	if non-native.  The upstream version now contains a similar
+	test.
+
+2005-05-23  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in: Provide default defintions of host_alias and
+	target_alias if they have not been set.
+
+2004-03-03  Fred Fish  <fnf@redhat.com>
+
+	* gdb.asm/asm-source.exp: Use untested for missing multilib
+	support.
+
+2004-02-27  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/chng-syms.exp: Add expect condition to match failing
+	case that isn't a timeout.
+
+2004-02-25  Fred Fish  <fnf@redhat.com>
+
+	* gdb.base/gdb1555.exp: Skip test if not a native target.
+
+2004-02-04  Fred Fish  <fnf@redhat.com>
+
+	* gdb.arch/gdb1431.c: Add underbar prefixed version of global
+	function symbols and update copyright years.
+	* gdb.arch/gdb1291.c: Ditto.
+
+2003-02-05  Andrew Cagney  <ac131313@redhat.com>
+
+	* gdb.base/gcov.exp: Rewrite to work with v2 gcov.
+
+2003-01-20  Kevin Buettner  <kevinb@redhat.com>
+
+	* config/libremote_server.exp (gdbserver_download): Fix typo which
+	prevented RSH from getting set when an ``rsh_prog'' exists.
+
+2002-06-07  Corinna Vinschen  <vinschen@redhat.com>
+
+	* gdb.base/charset.c (main): Add call to malloc() to accomodate targets
+	which don't link with it by default.
+
+2002-04-17  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/charset.exp (all_charset_names, charset_exists): New
+        functions.  Use them instead of accessing the `charsets' array
+        directly.
+
+2002-02-25  Jackie Smith Cashion  <jsmith@redhat.com>
+
+	* config/libremote_server.exp: Add rsh_prog, rcp_prog, nfsdir comments.
+	(gdb_load): Change $gdbserver redirection from ">& /dev/null" to
+	"/dev/null 2>&1".
+	(gdbserver_download): Add support for "cp" as download utility.
+
+2002-01-02  Jim Blandy  <jimb@redhat.com>
+
+	* gdb.base/charset.exp: Check that we don't use the ISO 8859-1
+        `print_literally' function for ASCII.
+        
+Mon Dec 31 17:02:13 2001  Jeffrey A Law  (law@redhat.com)
+
+	* gdb.disasm/hppa2.exp: Update to account for various
+	assembler fixes over the last year.
+	* gdb.disasm/hppa2.s: Likewise.
+
+2001-12-19  Jim Blandy  <jimb@redhat.com>
+
+        * gdb.base/charset.exp, gdb.base/charset.c: New files.
+        
+2001-12-07  Kevin Buettner  <kevinb@redhat.com>
+
+	From Elena Zannoni  <ezannoni@redhat.com>:
+	* config/libremote_server.exp (gdb_load): Use ``hostname'' instead of
+	``address'' to get the target to connect to.  Also, add code
+	for setting ``solib-absolute-prefix''.
+
+	* config/libremote_server.exp (gdb_load): Get the username to
+	connect as via ``username''.
+	(gdbserver_spawn, gdbserver_download): New procs.
+	(gdb_load): Call new procs gdbserver_download and gdbserver_spawn
+	instead of standard_download and standard_spawn.
+
+	From Brendan Conoboy  <bld@redhat.com>:
+	* config/libremote_server.exp: Use rcp_prog/rsh_prog if defined.
+
+2001-09-21  Elena Zannoni  <ezannoni@redhat.com>
+
+        2001-08-31  Michael Chastain  (chastain@redhat.com)
+        * config/libremote_server.exp: Increase libremote server loading
+        time from 2 seconds to 5 seconds.
+        Fix DOS ^J^M end-of-line markers.
+
+        2001-08-27  Michael Chastain  (chastain@redhat.com)
+        * config/libremote_server.exp: New file.
+
+Sat Sep 18 11:16:16 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.disasm/hppa2.exp: Fix expect strings for depd, depdi tests.
+
+	* gdb.disasm/hppa2.exp: Expect new syntax for fmemLR tests.
+
+	* gdb.disasm/hppa2.exp: Do not expect ",*" for a completer for PA2.0
+	instructions.
+
+	* gdb.disasm/hppa2.exp: Expect new syntax for indexed FP load/store
+	test and short FP load/store test.
+
+	* gdb.disasm/hppa2.s: Use .code instead of space/subspace
+	for sectioning.  Fix add instructions to be valid PA2.0 syntax.
+	* gdb.disasm/hppa2.exp: Update "add" and "sub" expected strings per
+	recent changes to the new syntax opcodes.
+
+Tue Jun  1 10:28:00 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.disasm/hppa2.s: Add PA2.0 "depd" and "depdi" tests.
+	* gdb.disasm/hppa2.exp: Corresponding changes.
+
+Fri May 28 11:59:46 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* gdb.disasm/hppa2.exp: Add PA2.0 "cmpb" and "cmpib" tests.
+	* gdb.disasm/hppa2.s: Corresponding changes.
+
+	* gdb.disasm/hppa2.s: Add some tests for PA2.0 instructions and
+	completers.
+	* gdb.disasm/hppa2.exp: Corresponding changes.
+
+	* gdb.disasm/hppa2.s: New testfile.
+	* gdb.disasm/hppa2.exp: New disassembler testsuite.
+	* gdb.disasm/hppa.exp: Do not run this test anymore.
+
+1999-05-17  Keith Seitz  <keiths@cygnus.com>
+
+	* config/mcore.exp: New file
+
+1999-03-03  James Ingham  <jingham@cygnus.com>
+
+	* browser.test: Fixed up to match the new function browser.
+	This is not done yet...
+
+	* srcwin.test: Check for errors when the bbox is called for a text 
+	item that is not on screen (so bbox is "").  Return something more 
+	useful.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

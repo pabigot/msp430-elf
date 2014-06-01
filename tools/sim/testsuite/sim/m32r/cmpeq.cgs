@@ -1,0 +1,22 @@
+# m32r testcase for cmpeq $src1,$src2
+# mach(): m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global cmpeq
+cmpeq:
+	mvi_h_condbit 0
+	mvi_h_gr r4, 12
+	mvi_h_gr r5, 12
+	cmpeq r4, r5
+	bc ok
+not_ok:
+	fail
+ok:
+	mvi_h_gr r5, 11
+	cmpeq r4, r5
+	bc not_ok
+
+	pass

@@ -1,0 +1,1316 @@
+; Cypress Cy16 CPU description.  -*- Scheme -*-
+; Copyright (C) 2002 Red Hat, Inc.
+; This file is part of CGEN.
+; See file COPYING.CGEN for details.
+
+(include "simplify.inc")
+
+; define-arch must appear first
+(define-arch
+  (name cy16) ; name of cpu family
+  (comment "Cypress Cy16")
+  (default-alignment forced)
+  ; should be #t, but the long insns make this impossible.
+  (insn-lsb0? #f)
+  (machs sl11r)
+  (isas cy16)
+)
+
+; Instruction set parameters.
+
+(define-isa
+  (name cy16)
+  (comment "Cypress Cy16 ISA")
+  (default-insn-word-bitsize 16)
+  (default-insn-bitsize 16)
+  (base-insn-bitsize 16)
+  (liw-insns 1)
+  (parallel-insns 1)
+)
+
+; Cpu family definitions.
+
+(define-cpu
+  ; cpu names must be distinct from the architecture name and machine names.
+  (name cy16bf)
+  (comment "Cypress Cy16")
+  (endian little)
+  (insn-endian little)
+  (word-bitsize 16)
+)
+
+(define-mach
+  (name sl11r)
+  (comment "Cypress SL11R")
+  (cpu cy16bf)
+  (bfd-name "sl11r")
+)
+
+; Model
+
+(define-model
+  (name sl11r) (comment "Cypress SL11R") (attrs)
+  (mach sl11r)
+  (pipeline all "" () ((fetch) (decode) (execute) (writeback)))
+  (unit u-exec "Execution Unit" ()
+        1 1 ; issue done
+        () ; state
+        () ; inputs
+        () ; outputs
+        () ; profile action (default)
+        )
+)
+
+
+; Attributes
+(define-attr
+  (for insn)
+  (type boolean)
+  (name NO-DEST-WRITE)
+  (comment "insn does not write to destination operand")
+)
+(define-attr
+  (for insn)
+  (type boolean)
+  (name SP-SIDE-EFFECT)
+  (comment "insn modifies r15 (sp) as a side effect")
+)
+
+; Instruction fields.
+;
+(dnf f-opcode         "opcode"                ()  0  4)
+(dnf f-opcode-4-3     "extended opcode"       ()  4  3)
+(dnf f-opcode-4-4     "extended opcode"       ()  4  4)
+(dnf f-opcode-7-3     "extended opcode"       ()  7  3)
+(dnf f-opcode-8-1     "extended opcode"       ()  8  1)
+(dnf f-opcode-8-2     "extended opcode"       ()  8  2)
+(dnf f-opcode-8-4     "extended opcode"       ()  8  4)
+(dnf f-opcode-10-6    "extended opcode"       () 10  6)
+(dnf f-opcode-12-4    "extended opcode"       () 12  4)
+
+; General source operands
+(dnf f-source         "source operand"            ()  4  6)
+(dnf f-source-amode   "source addressing mode"    ()  4  2)
+(dnf f-source-bw      "source byte/word selector" ()  6  1)
+(dnf f-source-gr      "source general register"   ()  6  4)
+(df  f-source-ar      "source address register"   ()  7  3 UINT
+     ((value pc) (and USI value #x7)) ; encode
+     ((value pc) (or  USI value #x8)) ; decode
+)
+(df  f-source-immed   "source immediate" () 16 16  INT #f #f)
+(df  f-source-addr-1  "source address 1" () 16 16 UINT #f #f)
+(df  f-immed3         "source immediate" ()  7  3 UINT
+     ((value pc) (sub USI value 1)) ; encode
+     ((value pc) (add USI value 1)) ; decode
+)
+
+; General destination operands
+(dnf f-dest           "destination operand"            () 10  6)
+(dnf f-dest-amode     "destination addressing mode"    () 10  2)
+(dnf f-dest-bw        "destination byte/word selector" () 12  1)
+(dnf f-dest-gr        "destination register"           () 12  4)
+(df  f-dest-ar        "destination address register"   () 13  3 UINT
+     ((value pc) (and USI value #x7)) ; encode
+     ((value pc) (or  USI value #x8)) ; decode
+)
+(df  f-dest-immed     "destination immediate" () 16 16 UINT
+     ((value pc) (and USI value #xffff)) ; encode
+     #f) ; decode
+(df  f-dest-addr-1    "destination address 1" () 16 16 UINT #f #f)
+(df  f-dest-addr-2    "destination address 2" () 32 16 UINT #f #f)
+
+; Misc operands
+(dnf f-cccc  "branch condition"   ()  4  4)
+(dnf f-v     "interrupt vector"   ()  9  7)
+
+; This offset is relative to the start of the next insn (pc + 2)
+(df  f-offset-7 "pc relative offset" (PCREL-ADDR)  9  7 INT
+     ((value pc) (sra WI (sub WI value (add pc 2)) 1)) ; encode
+     ((value pc) (add WI (sll WI value 1) (add pc 2))) ; decode
+)
+
+; Enums.
+;
+; Main opcode - several insns share the same opcodes
+(define-normal-insn-enum insn-opcode "main opcode enum" () OP_ f-opcode
+ (
+   (MOV   #x0)   (ADD   #x1)   (ADDC  #x2)   (SUB   #x3)   (SUBB  #x4)
+   (CMP   #x5)   (AND   #x6)   (TEST  #x7)   (OR    #x8)   (XOR   #x9)
+   (Jcc   #xc)   (JccL  #xc)   (Rcc   #xc)   (Ccc   #xa)   (INT   #xa)
+   (SHR   #xd)   (SHL   #xd)   (ROR   #xd)   (ROL   #xd)   (ADDI  #xd)
+   (SUBI  #xd)   (NOT   #xd)   (NEG   #xd)   (CBW   #xd)   (STI   #xd)
+   (CLI   #xd)   (STC   #xd)   (CLC   #xd)
+ )
+)
+; Secondary opcodes
+(define-normal-insn-enum insn-opcode-4-3 "opcode starting at bit 4 for 3 bits"
+  () OP-4-3_ f-opcode-4-3
+ (
+   (SHR   #x0)   (SHL   #x1)   (ROR   #x2)   (ROL   #x3)   (ADDI  #x4)
+   (SUBI  #x5)   (NOT   #x7)   (NEG   #x7)   (CBW   #x7)
+ )
+)
+(define-normal-insn-enum insn-opcode-4-4 "opcode starting at bit 4 for 4 bits"
+  () OP-4-4_ f-opcode-4-4
+ (
+   (INT   #xf)   (STI   #xf)   (CLI   #xf)   (STC   #xf)   (CLC   #xf)
+ )
+)
+(define-normal-insn-enum insn-opcode-7-3 "opcode starting at bit 7 for 3 bits"
+  () OP-7-3_ f-opcode-7-3
+ (
+   (NOT   #x0)   (NEG   #x1)   (CBW   #x4)
+ )
+)
+(define-normal-insn-enum insn-opcode-8-1 "opcode starting at bit 8 for 1 bit"
+  () OP-8-1_ f-opcode-8-1
+ (
+   (INT   #x0)  (Jcc   #x0)
+ )
+)
+(define-normal-insn-enum insn-opcode-8-2 "opcode starting at bit 8 for 2 bits"
+  () OP-8-2_ f-opcode-8-2
+ (
+   (Ccc   #x2)  (Rcc   #x2)  (JccL  #x2)
+ )
+)
+(define-normal-insn-enum insn-opcode-8-4 "opcode starting at bit 8 for 4 bits"
+  () OP-8-4_ f-opcode-8-4
+ (
+   (STI   #xc)   (CLI   #xc)   (STC   #xc)   (CLC   #xc)
+ )
+)
+(define-normal-insn-enum insn-opcode-10-6 "opcode starting at bit 10 for 6 bits"
+  () OP-10-6_ f-opcode-10-6
+ (
+   (Rcc   #x17)
+ )
+)
+(define-normal-insn-enum insn-opcode-12-4 "opcode starting at bit 12 for 4 bits"
+  () OP-12-4_ f-opcode-12-4
+ (
+   (STI   #x0)   (CLI   #x1)   (STC   #x2)   (CLC   #x3)
+ )
+)
+
+; Hardware pieces.
+; These entries list the elements of the raw hardware.
+; They're also used to provide tables and other elements of the assembly
+; language.
+;
+; Program counter must be explicitely defined
+(dnh h-pc "program counter" (PC PROFILE) (pc) () () ())
+
+; General registers - These are mapped to memory via the REGBANK register (also
+; in memory).
+(define-keyword
+  (name gr-names)
+  (print-name h-gr)
+  (prefix "")
+  (values (sp 15)
+          (r0  0) (r1  1) (r2   2) (r3   3) (r4   4) (r5   5) (r6   6) (r7   7)
+          (r00 0) (r01 1) (r02  2) (r03  3) (r04  4) (r05  5) (r06  6) (r07  7)
+	  (r8  8) (r9  9) (r10 10) (r11 11) (r12 12) (r13 13) (r14 14) (r15 15)
+	  (r08 8) (r09 9))
+)
+; Probably want to handle the memory mapping via the SID memory mapper for
+; performance reasons.
+(define-hardware
+  (name h-gr)
+  (comment "general registers")
+; (attrs VIRTUAL)
+  (type register HI (16))
+  (indices extern-keyword gr-names)
+; (get (index) (c-call HI "h_gr_get_handler" index))
+; (set (index newval) (c-call VOID "h_gr_set_handler" index newval))
+)
+
+; Address registers. These are a subset of the general registers.
+(define-keyword
+  (name ar-names)
+  (print-name h-ar)
+  (prefix "")
+  (values (sp 15)
+	  (r8 8) (r9 9) (r10 10) (r11 11) (r12 12) (r13 13) (r14 14) (r15 15))
+)
+(define-hardware
+  (name h-ar)
+  (comment "address registers")
+  (attrs PROFILE VIRTUAL)
+  (type register HI (16))
+  (indices extern-keyword ar-names)
+  (get (index) (reg h-gr index))
+  (set (index newval) (set (reg h-gr index) newval))
+)
+; These bits are actually part of the FLAGS register (which is mapped into
+; memory at address 0xc000) but are accessed more often than the entire
+; register, so define them directly. We can assemble
+; the FLAGS register from its components when necessary.
+(dsh h-z "zero        bit" () (register BI))
+(dsh h-c "carry       bit" () (register BI))
+(dsh h-o  "overflow   bit" () (register BI))
+(dsh h-s  "sign       bit" () (register BI))
+(dsh h-i  "interrupts bit" () (register BI))
+
+; The REGBANK register is mapped into memory at address 0xc002, but it is
+; better for performance if we maintain it in the cpu.
+(dsh h-regbank "REGBANK register" () (register HI))
+
+; Dummy hardware used to select byte/word operands on insns
+;
+(define-hardware
+  (name h-bw)
+  (comment "Byte/word selector dummy hardware")
+  (type immediate (UINT 1))
+  (values keyword "" (("w" 0) ("W" 0) ("" 0) ("b" 1) ("B" 1)))
+)
+(define-hardware
+  (name h-w)
+  (comment "Word selector dummy hardware")
+  (type immediate (UINT 1))
+  (values keyword "" (("w" 0) ("W" 0) ("" 0)))
+)
+
+; Instruction Operands.
+; These entries provide a layer between the assembler and the raw hardware
+; description, and are used to refer to hardware elements in the semantic
+; code.  Usually there's a bit of over-specification, but in more complicated
+; instruction sets there isn't.
+;
+; Derived operands representing addressing modes for source and target of many
+; insns.
+(define-pmacro (addressing-mode-operands which)
+  (begin
+    ; Supporting operands
+    (dnop (.sym which -gr) (.str which " register") () h-gr
+	  (.sym f- which -gr))
+    (dnop (.sym which -ar) (.str which " address register") () h-ar
+	  (.sym f- which -ar))
+    (dnop (.sym which -bw) (.str which " byte/word selector") () h-bw
+	  (.sym f- which -bw))
+    (dnop (.sym which -w) (.str which " word selector") () h-w f-nil)
+    (dnop (.sym which -addr-1) (.str which " direct address") () h-uint
+	  (.sym f- which -addr-1))
+    ; The parse handler allows hex values greater than 0x7fff to be accepted.
+    ; The print handler prints the values in hex.
+    (define-operand
+      (name (.sym which -immed))
+      (comment "immediate value")
+      (attrs)
+      (type h-sint)
+      (index (.sym f- which -immed))
+      (handlers (parse "immediate") (print "immediate"))
+    )
+    ; Same as {source|dest}-addr-1, except that it does not consume a
+    ; "+<register>" at the end of the expression.
+    (define-operand
+      (name (.sym which -pre-index-1))
+      (comment "index before base register")
+      (attrs)
+      (type h-uint)
+      (index (.sym f- which -addr-1))
+      (handlers (parse "pre_index"))
+    )
+    ; Same as {source|dest}-ar except that it can't be r15
+    (dnop (.sym which -ar-no-sp) (.str which " address register") () h-ar
+	  (.sym f- which -ar))
+    ; Register addressing mode
+    (dndo (.sym which -register)
+	  HI
+	  ((.sym which -gr))
+	  (.str "${" which "-gr}")
+	  (.sym f- which)
+	  (+ ((.sym f- which -amode) 0) (.sym which -gr))
+	  (eq (.sym f- which -amode) 0)
+	  ; getter
+	  (c-call HI "read_gr" (index-of (.sym which -gr)))
+	  ; setter
+	  (c-call VOID "write_gr" (index-of (.sym which -gr)) newval)
+    )
+    ; Direct 1
+    (dndo (.sym which -direct-1)
+	  HI
+	  ((.sym which -bw) (.sym which -addr-1))
+	  (.str "${" which "-bw}[${" which "-addr-1}]")
+	  (.sym f- which)
+	  (+ ((.sym f- which -amode) 2) (.sym which -bw)
+	     ((.sym f- which -ar) 7) (.sym which -addr-1))
+	  (andif (eq (.sym f- which -amode) 2)
+		 (eq (.sym f- which -ar) 7))
+	  ; getter
+	  (c-call HI (.str "read_memory_" which)
+		  (.sym which -addr-1) (.sym which -bw))
+	  ; setter
+	  (c-call VOID "write_memory"
+		  (.sym which -addr-1) (.sym which -bw) newval)
+    )
+    ; Indirect word
+    (dndo (.sym which -indirect-word)
+	  HI
+	  ((.sym which -ar))
+	  (.str "${" which "-w}[${" which "-ar}]")
+	  (.sym f- which)
+	  (+ ((.sym f- which -amode) 1) ((.sym f- which -bw) 0) (.sym which -ar))
+	  (andif (eq (.sym f- which -amode) 1) (eq (.sym f- which -bw) 0))
+	  ; getter
+	  (c-call HI (.str "read_memory_" which)
+		  (index-of (.sym which -ar)) -1 0 0)
+	  ; setter
+	  (c-call VOID "write_memory" (index-of (.sym which -ar)) -1 0 0 newval)
+    )
+    ; Indirect byte - r15 is not allowed as the base register for this mode.
+    ; Use {source|dest}-ar-no-sp as the operand to handle this.  Parse r15
+    ; successfully to avoid reparsing this as the 'direct' addressing mode and
+    ; catch the error later in tc-cy16.c.
+    (dndo (.sym which -indirect-byte)
+	  HI
+	  ((.sym which -ar-no-sp))
+	  (.str "b[${" which "-ar-no-sp}]")
+	  (.sym f- which)
+	  (+ ((.sym f- which -amode) 1) ((.sym f- which -bw) 1)
+	     (.sym which -ar-no-sp))
+	  (andif (eq (.sym f- which -amode) 1)
+		 (andif (eq (.sym f- which -bw) 1)
+			(ne (.sym f- which -ar) 7)))
+	  ; getter
+	  (c-call HI (.str "read_memory_" which)
+		  (index-of (.sym which -ar-no-sp)) -1 1 0)
+	  ; setter
+	  (c-call VOID "write_memory" (index-of (.sym which -ar-no-sp)) -1 1 0
+		  newval)
+    )
+    ; Indirect byte/word with index 1
+    (dndo (.sym which -indirect-with-index-1)
+	  HI
+	  ((.sym which -bw) (.sym which -ar) (.sym which -addr-1))
+	  (.str "${" which "-bw}[${" which "-ar}+${" which "-addr-1}]")
+	  (.sym f- which)
+	  (+ ((.sym f- which -amode) 3) (.sym which -bw)
+	     (.sym which -ar) (.sym which -addr-1))
+	  (eq (.sym f- which -amode) 3)
+	  ; getter
+	  (c-call HI (.str "read_memory_" which) (index-of (.sym which -ar))
+		  (.sym which -addr-1) (.sym which -bw) 0)
+	  ; setter
+	  (c-call VOID "write_memory" (index-of (.sym which -ar))
+		  (.sym which -addr-1) (.sym which -bw) 0 newval)
+    )
+    (dndo (.sym which -index-with-indirect-1)
+	  HI
+	  ((.sym which -bw)  (.sym which -pre-index-1) (.sym which -ar))
+	  (.str "${" which "-bw}[${" which "-pre-index-1}+${" which "-ar}]")
+	  (.sym f- which)
+	  (+ ((.sym f- which -amode) 3) (.sym which -bw)
+	     (.sym which -ar) (.sym which -pre-index-1))
+	  (eq (.sym f- which -amode) 3)
+	  ; getter
+	  (c-call HI (.str "read_memory_" which) (index-of (.sym which -ar))
+		  (.sym which -pre-index-1) (.sym which -bw) 0)
+	  ; setter
+	  (c-call VOID "write_memory" (index-of (.sym which -ar-no-sp))
+		  (.sym which -pre-index-1) (.sym which -bw) 0 newval)
+    )
+    ; Indirect byte/word with auto increment
+    ; r15 is not allowed as the base register for this mode.
+    ; Use {source|dest}-ar-no-sp as the operand to handle this.  Parse r15
+    ; successfully to avoid reparsing this as the 'direct' addressing mode and
+    ; catch the error later in tc-cy16.c.
+    (dndo (.sym which -indirect-with-auto-incr)
+	  HI
+	  ((.sym which -bw) (.sym which -ar-no-sp))
+	  (.str "${" which "-bw}[${" which "-ar-no-sp}++]")
+	  (.sym f- which)
+	  (+ ((.sym f- which -amode) 2) (.sym which -bw) (.sym which -ar-no-sp))
+	  (andif (eq (.sym f- which -amode) 2)
+		 (ne (.sym f- which -ar) 7))
+	  ; getter
+	  (c-call HI (.str "read_memory_" which)
+		  (index-of (.sym which -ar-no-sp)) -1 (.sym which -bw) 1)
+	  ; setter
+	  (c-call VOID "write_memory" (index-of (.sym which -ar-no-sp)) -1
+		   (.sym which -bw) 1 newval)
+    )
+    ; Immediate operand
+    (dndo (.sym which -immediate)
+	  HI
+	  ((.sym which -immed))
+	  (.str "${" which "-immed}")
+	  (.sym f- which)
+	  (+ ((.sym f- which -amode) 1) ((.sym f- which -bw) 1)
+	     ((.sym f- which -ar) 7) (.sym which -immed))
+	  (andif (eq (.sym f- which -amode) 1)
+		 (andif (eq (.sym f- which -bw) 1)
+			(eq (.sym f- which -ar) 7)))
+	  (trunc HI (.sym which -immed))
+	  () ; no setter
+    )
+  )
+)
+
+(addressing-mode-operands source)
+(addressing-mode-operands dest)
+
+; The destination operand may be a second direct address which follows the insn
+; and the source operand.
+(dnop dest-addr-2 "dest direct address 2"   () h-uint f-dest-addr-2)
+(dndo dest-direct-2
+      HI
+      (dest-bw dest-addr-2)
+      "${dest-bw}[${dest-addr-2}]"
+      f-dest
+      (+ (f-dest-amode 2) dest-bw (f-dest-ar 7) dest-addr-2)
+      (andif (eq f-dest-amode 2)
+	     (eq f-dest-ar 7))
+      ; getter
+      (c-call HI "read_memory_dest" dest-addr-2 dest-bw)
+      ; setter
+      (c-call VOID "write_memory" dest-addr-2 dest-bw newval)
+)
+; The destination operand may be a second indirect address with index which
+; follows the insn and the source operand.
+(dndo dest-indirect-with-index-2
+      HI
+      (dest-bw dest-ar dest-addr-2)
+      "${dest-bw}[${dest-ar}+${dest-addr-2}]"
+      f-dest
+      (+ (f-dest-amode 3) dest-bw dest-ar dest-addr-2)
+      (eq f-dest-amode 3)
+      ; getter
+      (c-call HI "read_memory_dest" (index-of dest-ar) dest-addr-2 dest-bw 0)
+      ; setter
+      (c-call VOID "write_memory" (index-of dest-ar) dest-addr-2 dest-bw 0
+	      newval)
+)
+; Same as dest-addr-2, except that it does not consume a
+; "+<register>" at the end of the expression.
+(define-operand
+  (name dest-pre-index-2)
+  (comment "index before base register")
+  (attrs)
+  (type h-uint)
+  (index f-dest-addr-2)
+  (handlers (parse "pre_index"))
+)
+(dndo dest-index-with-indirect-2
+      HI
+      (dest-bw dest-pre-index-2 dest-ar)
+      "${dest-bw}[${dest-pre-index-2}+${dest-ar}]"
+      f-dest
+      (+ (f-dest-amode 3) dest-bw dest-ar dest-pre-index-2)
+      (eq f-dest-amode 3)
+      ; getter
+      (c-call HI "read_memory_dest" (index-of dest-ar) dest-pre-index-2 dest-bw 0)
+      ; setter
+      (c-call VOID "write_memory" (index-of dest-ar) dest-pre-index-2 dest-bw 0
+	      newval)
+)
+
+; Special operand for the immediate on long jump insns (j*).
+; The parse handler accepts only hard-coded addresses. Expressions involving
+; labels are passed on to be handled by the label-7 operand.
+(define-operand
+  (name long-jump-immed)
+  (comment "long jump immediate")
+  (attrs)
+  (type h-sint)
+  (index f-dest-immed)
+  (handlers (parse "long_jump_immed")
+	    (print "long_jump_immed"))
+)
+(dndo long-jump-immediate
+      HI
+      (long-jump-immed)
+      "${long-jump-immed}"
+      f-dest
+      (+ (f-dest-amode 1) (f-dest-bw 1) (f-dest-ar 7) long-jump-immed)
+      (andif (eq f-dest-amode 1)
+	     (andif (eq f-dest-bw 1)
+		    (eq f-dest-ar 7)))
+      (trunc HI long-jump-immed)
+      () ; no setter
+)
+; Now define the derived operands which use the alternatives defined above.
+;
+; When parsing, the choices in anyof operands get tried in the
+; order in which they are specified, so we must order them such that they are
+; tried in the following order which allows them to be parsed correctly.
+;
+; 1) register                         0 additional fields
+; 2) indirect (word/byte)             0 additional fields
+; 3) indirect with auto (byte/word)   0 additional fields
+; 4) indirect with index (byte/word)  1 additional field
+; 5) direct (word/byte)               1 additional field
+; 6) immediate (source only)          1 additional field
+;
+; In order to correctly pair source operands with destination operands we
+; must further divide these into groups containing equal positioning of
+; additional ifields. This is because the location of additional ifields for
+; the destination depends on the existence of additional ifields for the source.
+;
+; General destination operand -- may not be an immediate
+(define-anyof-operand
+  (name dest-operands-all)
+  (comment "operand for branch insns")
+  (mode HI)
+  (choices dest-register
+	   dest-indirect-word
+	   dest-indirect-byte
+	   dest-indirect-with-auto-incr
+	   dest-indirect-with-index-1
+	   dest-index-with-indirect-1
+	   dest-direct-1
+  )
+)
+; No additional ifields
+(define-anyof-operand
+  (name dest-operands-simple)
+  (comment "destination operand for two-operand and one-operand insns")
+  (mode HI)
+  (choices dest-register
+	   dest-indirect-word
+	   dest-indirect-byte
+	   dest-indirect-with-auto-incr
+  )
+)
+; indirect with index in additional field 1
+(define-anyof-operand
+  (name dest-operands-indirect-with-index-1)
+  (comment "destination operand for two-operand and one-operand insns")
+  (mode HI)
+  (choices dest-indirect-with-index-1
+	   dest-index-with-indirect-1
+  )
+)
+; indirect with index in additional field 2
+(define-anyof-operand
+  (name dest-operands-indirect-with-index-2)
+  (comment "destination operand for two-operand and one-operand insns")
+  (mode HI)
+  (choices dest-indirect-with-index-2
+	   dest-index-with-indirect-2
+  )
+)
+; direct in additional field 1
+(define-anyof-operand
+  (name dest-operands-direct-1)
+  (comment "destination operand for two-operand and one-operand insns")
+  (mode HI)
+  (choices dest-direct-1)
+)
+; direct in additional field 2
+(define-anyof-operand
+  (name dest-operands-direct-2)
+  (comment "destination operand for two-operand and one-operand insns")
+  (mode HI)
+  (choices dest-direct-2)
+)
+
+; The operand for a long branch or explicit long jump -- may be an immediate
+(define-anyof-operand
+  (name dest-branch)
+  (comment "operand for branch insns")
+  (mode HI)
+  (choices dest-register
+	   dest-indirect-word
+	   dest-indirect-byte
+	   dest-indirect-with-auto-incr
+	   dest-indirect-with-index-1
+	   dest-index-with-indirect-1
+	   dest-direct-1
+	   dest-immediate
+  )
+)
+; The operand for a long jump
+(define-anyof-operand
+  (name dest-jump)
+  (comment "operand for jump insns")
+  (mode HI)
+  (choices dest-register
+	   dest-indirect-word
+	   dest-indirect-byte
+	   dest-indirect-with-auto-incr
+	   dest-indirect-with-index-1
+	   dest-index-with-indirect-1
+	   dest-direct-1
+	   long-jump-immediate
+  )
+)
+
+; Source operands. Group these according to the parse order described above as
+; well as by existence of additional ifields.
+;
+; All source operands
+(define-anyof-operand
+  (name source-operands-all)
+  (comment "all source operands")
+  (mode HI)
+  (choices source-register
+	   source-indirect-word
+	   source-indirect-byte
+	   source-indirect-with-auto-incr
+	   source-indirect-with-index-1
+	   source-index-with-indirect-1
+	   source-direct-1
+	   source-immediate
+  )
+)
+; Source operands with no additional ifields
+(define-anyof-operand
+  (name source-operands-simple)
+  (comment "all source operands")
+  (mode HI)
+  (choices source-register
+	   source-indirect-word
+	   source-indirect-byte
+	   source-indirect-with-auto-incr
+  )
+)
+; Source operands with 1 additional ifield
+(define-anyof-operand
+  (name source-operands-complex)
+  (comment "all source operands with an additional ifield")
+  (mode HI)
+  (choices source-indirect-with-index-1
+	   source-index-with-indirect-1
+	   source-direct-1
+	   source-immediate
+  )
+)
+
+; Miscellaneous operands
+(dnop v       "interrupt vector"          ()      h-uint  f-v)
+(dnop label-7 "7 bit pc relative address" (RELAX) h-iaddr f-offset-7)
+
+(define-operand
+  (name immed3)
+  (comment "3 bit source immediate: range 1-8")
+  (attrs)
+  (type h-uint)
+  (index f-immed3)
+  ; The parse handler is solely for the purpose of issuing an error when out of
+  ; range.  The ifield check reports the range as 0-7 because of the encoding
+  ; rtl.
+  (handlers (parse "immed3"))
+)
+
+; Virtual hardware operands
+(dnop z "zero       bit" (SEM-ONLY) h-z f-nil)
+(dnop c "carry      bit" (SEM-ONLY) h-c f-nil)
+(dnop o "overflow   bit" (SEM-ONLY) h-o f-nil)
+(dnop s "sign       bit" (SEM-ONLY) h-s f-nil)
+(dnop i "interrupts bit" (SEM-ONLY) h-i f-nil)
+
+; Instruction definitions.
+;
+; Useful macros
+(define-pmacro (set-z-and-s x)
+  (sequence ()
+	    (set z (zflag x))
+	    (set s (nflag x)))
+)
+; Multi insns get tried in the reverse order in which they are specified, so
+; order them in the reverse order in which parsing must be attempted.
+(dni (mov5)
+     "Move data"
+     ()
+     "mov ${dest-operands-direct-2},${source-operands-complex}"
+     (+ OP_MOV source-operands-complex dest-operands-direct-2)
+     (set dest-operands-direct-2 source-operands-complex)
+     ()
+)
+(dni (mov4)
+     "Move data"
+     ()
+     "mov ${dest-operands-direct-1},${source-operands-simple}"
+     (+ OP_MOV source-operands-simple dest-operands-direct-1)
+     (set dest-operands-direct-1 source-operands-simple)
+     ()
+)
+(dni (mov3)
+     "Move data"
+     ()
+     "mov ${dest-operands-indirect-with-index-2},${source-operands-complex}"
+     (+ OP_MOV source-operands-complex dest-operands-indirect-with-index-2)
+     (set dest-operands-indirect-with-index-2 source-operands-complex)
+     ()
+)
+(dni (mov2)
+     "Move data"
+     ()
+     "mov ${dest-operands-indirect-with-index-1},${source-operands-simple}"
+     (+ OP_MOV source-operands-simple dest-operands-indirect-with-index-1)
+     (set dest-operands-indirect-with-index-1 source-operands-simple)
+     ()
+)
+(dni (mov1)
+     "Move data"
+     ()
+     "mov ${dest-operands-simple},${source-operands-all}"
+     (+ OP_MOV source-operands-all dest-operands-simple)
+     (set dest-operands-simple source-operands-all)
+     ()
+)
+; Would have liked to use macro insns here, but it seems that CGEN will not
+; handle anyof or derived operands in macro insns  :-(
+(dni (push)
+     "Push a value to [r15]"
+     (ALIAS)
+     "push ${source-operands-all}"
+     ; f-dest-ar is encoded as 8 less than its value
+     (+ OP_MOV source-operands-all (f-dest-amode 1) (f-dest-bw 0) (f-dest-ar 7))
+     (c-call VOID "write_memory" 15 -1 0 0 source-operands-all)
+     ()
+)
+(dni (pop)
+     "Pop a value from [r15]"
+     (ALIAS)
+     "pop ${dest-operands-all}"
+     ; f-source-ar is encoded as 8 less than its value
+     (+ OP_MOV (f-source-amode 1) (f-source-bw 0) (f-source-ar 7) dest-operands-all)
+     (set dest-operands-all (c-call HI "read_memory_source" 15 -1 0 0))
+     ()
+)
+; Use mov r0,r0 as a nop insn
+; Would have liked to use macro insns here, but it seems that CGEN will not
+; handle anyof or derived operands in macro insns  :-(
+(dni (nop)
+     "nop"
+     (ALIAS)
+     "nop"
+     (+ OP_MOV
+	(f-source-amode 0) (f-source-bw 0) (f-source-gr 0)
+	(f-dest-amode 0) (f-dest-bw 0) (f-dest-gr 0))
+     (nop)
+     ()
+)
+
+(dni (int)
+     "Generate software interrupt"
+     ()
+     "int ${v}"
+     (+ OP_INT OP-4-4_INT OP-8-1_INT v)
+     (c-call "do_int" pc v)
+     ()
+)
+
+; Binary operation semantics setting SOCZ flags
+(define-pmacro (binary-op-socz-semantics op arg1 arg2 result)
+  (sequence ((HI tmp1) (HI tmp2) (HI tmp3))
+	    ; Arguments may have side effects. Reference each only once!
+	    ; And reference arg2 first, since its side effects happen first.
+	    (set tmp2 arg2)
+	    (set tmp1 arg1)
+	    (set tmp3 (op HI tmp1 tmp2))
+	    (set o ((.sym op -oflag) HI tmp1 tmp2 0))
+	    (set c ((.sym op -cflag) HI tmp1 tmp2 0))
+	    (set-z-and-s tmp3)
+	    (set result tmp3))
+)
+
+; Define an instance of a binary operation insn
+(define-pmacro (binary-insn-socz name num opcode source dest comment)
+  (dni (.sym name num)
+       comment
+       ()
+       (.str name " ${" dest "},${" source "}")
+       (+ opcode source dest)
+       (binary-op-socz-semantics name dest source dest)
+       ()
+  )
+)
+
+; Define an arithmetic insn
+(define-pmacro (arith-insn name opcode comment)
+  (begin
+    ; Multi insns get tried in the reverse order in which they are specified, so
+    ; order them from least to most restrictive.
+    (binary-insn-socz name 5 opcode source-operands-complex dest-operands-direct-2 comment)
+    (binary-insn-socz name 4 opcode source-operands-simple  dest-operands-direct-1 comment)
+    (binary-insn-socz name 3 opcode source-operands-complex dest-operands-indirect-with-index-2 comment)
+    (binary-insn-socz name 2 opcode source-operands-simple  dest-operands-indirect-with-index-1 comment)
+    (binary-insn-socz name 1 opcode source-operands-all     dest-operands-simple comment)
+  )
+)
+
+(arith-insn add OP_ADD "addition")
+(arith-insn sub OP_SUB "subtraction")
+
+; Binary operation with carry semantics setting SOCZ flags
+(define-pmacro (binary-carry-op-socz-semantics op arg1 arg2 result)
+  (sequence ((HI tmp1) (HI tmp2) (HI tmp3))
+	    ; Arguments may have side effects. Reference each only once!
+	    ; And reference arg2 first, since its side effects happen first.
+	    (set tmp2 arg2)
+	    (set tmp1 arg1)
+	    (set tmp3 ((.sym op c) HI tmp1 tmp2 c))
+	    (set o ((.sym op -oflag) HI tmp1 tmp2 c))
+	    (set c ((.sym op -cflag) HI tmp1 tmp2 c))
+	    (set-z-and-s tmp3)
+	    (set result tmp3))
+)
+
+; Define an instance of a binary operation insn
+(define-pmacro (binary-carry-insn-socz name suffix num opcode source dest comment)
+  (dni (.sym name suffix num)
+       comment
+       ()
+       (.str name suffix " ${" dest "},${" source "}")
+       (+ opcode source dest)
+       (binary-carry-op-socz-semantics name dest source dest)
+       ()
+  )
+)
+
+; Define an arithmetic insn with carry
+(define-pmacro (arith-carry-insn name suffix opcode comment)
+  (begin
+    ; Multi insns get tried in the reverse order in which they are specified, so
+    ; order them from least to most restrictive.
+    (binary-carry-insn-socz name suffix 5 opcode source-operands-complex dest-operands-direct-2 comment)
+    (binary-carry-insn-socz name suffix 4 opcode source-operands-simple  dest-operands-direct-1 comment)
+    (binary-carry-insn-socz name suffix 3 opcode source-operands-complex dest-operands-indirect-with-index-2 comment)
+    (binary-carry-insn-socz name suffix 2 opcode source-operands-simple  dest-operands-indirect-with-index-1 comment)
+    (binary-carry-insn-socz name suffix 1 opcode source-operands-all     dest-operands-simple comment)
+  )
+)
+
+(arith-carry-insn add c OP_ADDC "addition with carry")
+(arith-carry-insn sub b OP_SUBB "subtraction with carry")
+
+(define-pmacro (cmp-insn num source dest)
+  (dni (.sym cmp num)
+       "Compare data"
+       (NO-DEST-WRITE)
+       (.str "cmp ${" dest "},${" source "}")
+       (+ OP_CMP source dest)
+       (sequence ((HI tmp))
+		 (binary-op-socz-semantics sub dest source tmp))
+       ()
+  )
+)
+
+; Multi insns get tried in the reverse order in which they are specified, so
+; order them from least to most restrictive.
+(cmp-insn 5 source-operands-complex dest-operands-direct-2)
+(cmp-insn 4 source-operands-simple  dest-operands-direct-1)
+(cmp-insn 3 source-operands-complex dest-operands-indirect-with-index-2)
+(cmp-insn 2 source-operands-simple  dest-operands-indirect-with-index-1)
+(cmp-insn 1 source-operands-all     dest-operands-simple)
+
+; Binary operation semantics setting SZ flags
+(define-pmacro (binary-op-sz-semantics op arg1 arg2 result)
+  (sequence ((HI tmp1) (HI tmp2) (HI tmp3))
+	    ; Arguments may have side effects. Reference each only once!
+	    ; And reference arg2 first, since its side effects happen first.
+	    (set tmp2 arg2)
+	    (set tmp1 arg1)
+	    (set tmp3 (op HI tmp1 tmp2))
+	    (set-z-and-s tmp3)
+	    (set result tmp3))
+)
+
+; Define an instance of a binary operation insn setting sz flags
+(define-pmacro (binary-insn-sz name num opcode source dest comment)
+  (dni (.sym name num)
+       comment
+       ()
+       (.str name " ${" dest "},${" source "}")
+       (+ opcode source dest)
+       (binary-op-sz-semantics name dest source dest)
+       ()
+  )
+)
+
+; Define a logical insn
+(define-pmacro (logical-insn name opcode comment)
+  (begin
+    ; Multi insns get tried in the reverse order in which they are specified, so
+    ; order them from least to most restrictive.
+    (binary-insn-sz name 5 opcode source-operands-complex dest-operands-direct-2 comment)
+    (binary-insn-sz name 4 opcode source-operands-simple  dest-operands-direct-1 comment)
+    (binary-insn-sz name 3 opcode source-operands-complex dest-operands-indirect-with-index-2 comment)
+    (binary-insn-sz name 2 opcode source-operands-simple  dest-operands-indirect-with-index-1 comment)
+    (binary-insn-sz name 1 opcode source-operands-all     dest-operands-simple comment)
+  )
+)
+
+(logical-insn and OP_AND "logical and")
+(logical-insn or  OP_OR  "logical or")
+(logical-insn xor OP_XOR "logical xor")
+
+(define-pmacro (test-insn num source dest)
+  (dni (.sym test num)
+       "Compare data"
+       (NO-DEST-WRITE)
+       (.str "test ${" dest "},${" source "}")
+       (+ OP_TEST source dest)
+       (sequence ((HI tmp))
+		 (binary-op-sz-semantics and dest source tmp))
+       ()
+  )
+)
+
+; Multi insns get tried in the reverse order in which they are specified, so
+; order them from least to most restrictive.
+(test-insn 5 source-operands-complex dest-operands-direct-2)
+(test-insn 4 source-operands-simple  dest-operands-direct-1)
+(test-insn 3 source-operands-complex dest-operands-indirect-with-index-2)
+(test-insn 2 source-operands-simple  dest-operands-indirect-with-index-1)
+(test-insn 1 source-operands-all     dest-operands-simple)
+
+; Branch insns
+;
+; First define the branch conditions
+(define-normal-insn-enum cccc "branch condition enums" () CCCC_ f-cccc
+  (
+   (z  #x0) (nz #x1) (c  #x2) (nc #x3) (s  #x4) (ns #x5) (o  #x6) (no #x7)
+   (a  #x8) (be #x9) (g  #xa) (ge #xb) (l  #xc) (le #xd)
+   (unconditional #xf)
+   ; Some alternate mnemonics
+   (e  #x0) (ne  #x1) (b  #x2) (nb #x3) (ae #x3) (nbe #x8) (na #x9) (nle #xa)
+   (nl #xb) (nge #xc) (ng #xd)
+  )
+)
+; Use this macro to define branch insns for each condition
+(define-pmacro (branch-ops cond test attr)
+  (begin
+    ; Jump insns
+    (dni (.sym j cond l)
+	 (.str "j" cond "l long")
+	 (.splice (.unsplice attr) NO-DEST-WRITE)
+	 (.str "j" cond "l ${dest-branch}")
+	 (+ OP_JccL (.sym CCCC_ cond) OP-8-2_JccL dest-branch)
+	 (if test
+	     (set pc dest-branch))
+	 ()
+    )
+    ; Alias for the above insn. Allows the 'L' suffix to be dropped
+    (dni (.sym j cond l-alias)
+	 (.str "j" cond " long")
+	 (NO-DEST-WRITE ALIAS NO-DIS)
+	 (.str "j" cond " ${dest-jump}")
+	 (+ OP_JccL (.sym CCCC_ cond) OP-8-2_JccL dest-jump)
+	 (if test
+	     (set pc dest-jump))
+	 ()
+    )
+    (dni (.sym j cond s)
+	 (.str "j" cond "s")
+	 (.splice (.unsplice attr) NO-DEST-WRITE)
+	 (.str "j" cond "s ${label-7}")
+	 (+ OP_Jcc (.sym CCCC_ cond) OP-8-1_Jcc label-7)
+	 (if test
+	     (set pc label-7))
+	 ()
+    )
+    ; Alias for the above insn. Allows the 'S' suffix to be dropped and is
+    ; relaxable to a long jump, if necessary.
+    (dni (.sym j cond)
+	 (.str "j" cond)
+	 (RELAXABLE NO-DEST-WRITE ALIAS NO-DIS)
+	 (.str "j" cond " ${label-7}")
+	 (+ OP_Jcc (.sym CCCC_ cond) OP-8-1_Jcc label-7)
+	 (if test
+	     (set pc label-7))
+	 ()
+    )
+    ; Call insns
+    (dni (.sym c cond)
+	 (.str "c" cond)
+	 (.splice (.unsplice attr) NO-DEST-WRITE SP-SIDE-EFFECT)
+	 (.str "c" cond " ${dest-branch}")
+	 (+ OP_Ccc (.sym CCCC_ cond) OP-8-2_Ccc dest-branch)
+	 (if test
+	     (sequence ((HI dest))
+		       (set dest dest-branch)
+		       ; write_memory will pre-decrement r15 automatically
+		       (c-call VOID "write_memory" 15 -1 0 0
+			       (add pc (c-call SI "length_of_call_insn" pc)))
+		       (set pc dest)))
+	 ()
+    )
+    ; Return insns
+    (dni (.sym r cond)
+	 (.str "r" cond)
+	 (.splice (.unsplice attr) NO-DEST-WRITE)
+	 (.str "r" cond)
+	 (+ OP_Rcc (.sym CCCC_ cond) OP-8-2_Rcc OP-10-6_Rcc)
+	 ; read_memory_source will post-increment r15 automatically
+	 (if test
+	     (set pc (c-call HI "read_memory_source" 15 0 0 1)))
+	 ()
+    )
+  )
+)
+
+; Some alternate mnemonics
+(branch-ops e   z                        (ALIAS NO-DIS))
+(branch-ops ne  (not z)                  (ALIAS NO-DIS))
+(branch-ops b   c                        (ALIAS NO-DIS))
+(branch-ops nb  (not c)                  (ALIAS NO-DIS))
+(branch-ops ae  (not c)                  (ALIAS NO-DIS))
+(branch-ops nbe (andif (not z) (not c))  (ALIAS NO-DIS))
+(branch-ops na  (orif z c)               (ALIAS NO-DIS))
+(branch-ops nle (andif (eq o s) (not z)) (ALIAS NO-DIS))
+(branch-ops nl  (eq o s)                 (ALIAS NO-DIS))
+(branch-ops nge (ne o s)                 (ALIAS NO-DIS))
+(branch-ops ng  (orif (ne o s) z)        (ALIAS NO-DIS))
+
+(branch-ops z  z                        ())
+(branch-ops nz (not z)                  ())
+(branch-ops c  c                        ())
+(branch-ops nc (not c)                  ())
+(branch-ops s  s                        ())
+(branch-ops ns (not s)                  ())
+(branch-ops o  o                        ())
+(branch-ops no (not o)                  ())
+(branch-ops a  (andif (not z) (not c))  ())
+(branch-ops be (orif z c)               ())
+(branch-ops g  (andif (eq o s) (not z)) ())
+(branch-ops ge (eq o s)                 ())
+(branch-ops l  (ne o s)                 ())
+(branch-ops le (orif (ne o s) z)        ())
+
+; jmp, call and ret insns must be handled separately since their suffixes do
+; not match
+(dni jmpl
+     "long jmpl"
+     (NO-DEST-WRITE)
+     "jmpl ${dest-branch}"
+     (+ OP_JccL CCCC_unconditional OP-8-2_JccL dest-branch)
+     (set pc dest-branch)
+     ()
+)
+; Alias for the above insn. Allows the 'L' suffix to be dropped
+(dni jmpl-alias
+     "long jmp"
+     (NO-DEST-WRITE ALIAS NO-DIS)
+     "jmp ${dest-jump}"
+     (+ OP_JccL CCCC_unconditional OP-8-2_JccL dest-jump)
+     (set pc dest-jump)
+     ()
+)
+(dni jmps
+     "short jmps"
+     (NO-DEST-WRITE)
+     "jmps ${label-7}"
+     (+ OP_Jcc CCCC_unconditional OP-8-1_Jcc label-7)
+     (set pc label-7)
+     ()
+)
+; Alias for the above insn. Allows the 'S' suffix to be dropped and is
+; relaxable to a long jump, if necessary.
+(dni jmp
+     "short jmp"
+     (NO-DEST-WRITE ALIAS NO-DIS RELAXABLE)
+     "jmp ${label-7}"
+     (+ OP_Jcc CCCC_unconditional OP-8-1_Jcc label-7)
+     (set pc label-7)
+     ()
+)
+(dni call
+     "call"
+     (NO-DEST-WRITE SP-SIDE-EFFECT)
+     "call ${dest-branch}"
+     (+ OP_Ccc CCCC_unconditional OP-8-2_Ccc dest-branch)
+     (sequence ((HI dest))
+	       (set dest dest-branch)
+	       ; write_memory will pre-decrement r15 automatically
+	       (c-call VOID "write_memory" 15 -1 0 0
+		       (add pc (c-call SI "length_of_call_insn" pc)))
+	       (set pc dest))
+     ()
+)
+(dni ret
+     "ret"
+     (NO-DEST-WRITE)
+     "ret"
+     (+ OP_Rcc CCCC_unconditional OP-8-2_Rcc OP-10-6_Rcc)
+     ; read_memory_source will post-increment r15 automatically
+     (set pc (c-call HI "read_memory_source" 15 0 0 1))
+     ()
+)
+
+; Shift and Rotate insns
+(dni (shr)
+     "Shift right"
+     ()
+     "shr ${dest-operands-all},${immed3}"
+     (+ OP_SHR OP-4-3_SHR immed3 dest-operands-all)
+     (sequence ((HI tmp))
+	       ; Arguments may have side effects. Reference each only once!
+	       (set tmp dest-operands-all)
+	       (set c (and (sra tmp (sub immed3 1)) 1))
+	       (set tmp (sra HI tmp immed3))
+	       (set-z-and-s tmp)
+	       (set dest-operands-all tmp))
+     ()
+)
+(dni (shl)
+     "Shift left"
+     ()
+     "shl ${dest-operands-all},${immed3}"
+     (+ OP_SHL OP-4-3_SHL immed3 dest-operands-all)
+     (sequence ((HI tmp))
+	       ; Arguments may have side effects. Reference each only once!
+	       (set tmp dest-operands-all)
+	       (set c (and (srl tmp (sub 16 immed3)) 1))
+	       (set tmp (sll HI tmp immed3))
+	       (set-z-and-s tmp)
+	       (set dest-operands-all tmp))
+     ()
+)
+(dni (ror)
+     "Rotate Right"
+     ()
+     "ror ${dest-operands-all},${immed3}"
+     (+ OP_ROR OP-4-3_ROR immed3 dest-operands-all)
+     (sequence ((HI tmp))
+	       ; Arguments may have side effects. Reference each only once!
+	       (set tmp dest-operands-all)
+	       (set c (and (sra tmp (sub immed3 1)) 1))
+	       (set tmp (ror HI tmp immed3))
+	       (set-z-and-s tmp)
+	       (set dest-operands-all tmp))
+     ()
+)
+(dni (rol)
+     "Rotate Left"
+     ()
+     "rol ${dest-operands-all},${immed3}"
+     (+ OP_ROL OP-4-3_ROL immed3 dest-operands-all)
+     (sequence ((HI tmp))
+	       ; Arguments may have side effects. Reference each only once!
+	       (set tmp dest-operands-all)
+	       (set c (and (srl tmp (sub 16 immed3)) 1))
+	       (set tmp (rol HI tmp immed3))
+	       (set-z-and-s tmp)
+	       (set dest-operands-all tmp))
+     ()
+)
+; Add/Sub immediate
+(dni (addi)
+     "Add Immediate"
+     ()
+     "addi ${dest-operands-all},${immed3}"
+     (+ OP_ADDI OP-4-3_ADDI immed3 dest-operands-all)
+     (sequence ((HI tmp))
+	       ; Arguments may have side effects. Reference each only once!
+	       (set tmp dest-operands-all)
+	       (set tmp (add HI tmp immed3))
+	       (set-z-and-s tmp)
+	       (set dest-operands-all tmp))
+     ()
+)
+(dni (subi)
+     "Sub Immediate"
+     ()
+     "subi ${dest-operands-all},${immed3}"
+     (+ OP_SUBI OP-4-3_SUBI immed3 dest-operands-all)
+     (sequence ((HI tmp))
+	       ; Arguments may have side effects. Reference each only once!
+	       (set tmp dest-operands-all)
+	       (set tmp (sub HI tmp immed3))
+	       (set-z-and-s tmp)
+	       (set dest-operands-all tmp))
+     ()
+)
+; Would have liked to use macro insns here, but it seems that CGEN will not
+; handle anyof or derived operands in macro insns  :-(
+(dni (inc)
+     "Increment by 1"
+     (ALIAS)
+     "inc ${dest-operands-all}"
+     ; f-immed3 is encoded as 1 less than its value
+     (+ OP_ADDI OP-4-3_ADDI (f-immed3 0) dest-operands-all)
+     (sequence ((HI tmp))
+	       ; Arguments may have side effects. Reference each only once!
+	       (set tmp dest-operands-all)
+	       (set tmp (add HI tmp 1))
+	       (set-z-and-s tmp)
+	       (set dest-operands-all tmp))
+     ()
+)
+(dni (dec)
+     "Decrement by 1"
+     (ALIAS)
+     "dec ${dest-operands-all}"
+     ; f-immed3 is encoded as 1 less than its value
+     (+ OP_SUBI OP-4-3_SUBI (f-immed3 0) dest-operands-all)
+     (sequence ((HI tmp))
+	       ; Arguments may have side effects. Reference each only once!
+	       (set tmp dest-operands-all)
+	       (set tmp (sub HI tmp 1))
+	       (set-z-and-s tmp)
+	       (set dest-operands-all tmp))
+     ()
+)
+; Negation insns
+(dni (not)
+     "1's complement"
+     ()
+     "not ${dest-operands-all}"
+     (+ OP_NOT OP-4-3_NOT OP-7-3_NOT dest-operands-all)
+     (sequence ((HI tmp))
+	       ; Arguments may have side effects. Reference each only once!
+	       (set tmp dest-operands-all)
+	       (set tmp (inv tmp))
+	       (set-z-and-s tmp)
+	       (set dest-operands-all tmp))
+     ()
+)
+(dni (neg)
+     "2's complement"
+     ()
+     "neg ${dest-operands-all}"
+     (+ OP_NEG OP-4-3_NEG OP-7-3_NEG dest-operands-all)
+     (binary-op-socz-semantics sub 0 dest-operands-all dest-operands-all)
+     ()
+)
+; Sign extension
+(dni (cbw)
+     "Sign extend byte to word"
+     ()
+     "cbw ${dest-operands-all}"
+     (+ OP_CBW OP-4-3_CBW OP-7-3_CBW dest-operands-all)
+     (sequence ((HI tmp))
+	       ; Arguments may have side effects. Reference each only once!
+	       (set tmp dest-operands-all)
+	       (set tmp (ext HI (trunc QI tmp)))
+	       (set-z-and-s tmp)
+	       (set dest-operands-all tmp))
+     ()
+)
+; Miscellaneous Insns
+(dni (sti)
+     "Enable interrupts"
+     ()
+     "sti"
+     (+ OP_STI OP-4-4_STI OP-8-4_STI OP-12-4_STI)
+     (set i 1)
+     ()
+)
+(dni (cli)
+     "Disable interrupts"
+     ()
+     "cli"
+     (+ OP_CLI OP-4-4_CLI OP-8-4_CLI OP-12-4_CLI)
+     (set i 0)
+     ()
+)
+(dni (stc)
+     "Set Carry"
+     ()
+     "stc"
+     (+ OP_STC OP-4-4_STC OP-8-4_STC OP-12-4_STC)
+     (set c 1)
+     ()
+)
+(dni (clc)
+     "Clear Carry"
+     ()
+     "clc"
+     (+ OP_CLC OP-4-4_CLC OP-8-4_CLC OP-12-4_CLC)
+     (set c 0)
+     ()
+)

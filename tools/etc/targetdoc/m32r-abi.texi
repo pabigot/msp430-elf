@@ -1,0 +1,547 @@
+@c Copyright (C) 1996 Cygnus Solutions
+
+@menu
+* Introduction::
+* Low Level System Information::
+* Object Files::
+* Program Loading and Dynamic Linking::
+@end menu
+
+@node Introduction
+@section Mitsubishi @sc{M32R} Application Binary Interface (Draft)
+
+@display
+Version: 0.2
+Date: 961021
+Author: Doug Evans
+Email: dje@@cygnus.com
+@end display
+
+This document is a draft of the Mitsubishi @sc{M32R} Application Binary
+Interface (ABI).
+
+Note that this is not an official document for anything other than the
+GNU toolchain.  However, it is intended to be generally applicable.
+
+The reader is assumed to have access to the following documents.
+
+@enumerate 1
+@item
+AT&T System V Application Binary Interface;
+Published by Prentice Hall
+(ISBN: 0-13-877598-2)
+
+@item
+AT&T System V Application Binary Interface,
+SPARC Processor Supplement;
+Published by Prentice Hall
+(ISBN 0-13-877630-X)
+
+@item
+AT&T System V Application Binary Interface,
+MIPS Processor Supplement;
+Published by Prentice Hall
+(ISBN 0-13-880170-3)
+@footnote{This book is apparently out of print.  Attempts are being made
+to find the relevant details in electronic form.}
+@end enumerate
+
+These documents provide more than we need since they define an ABI for
+Unix systems, but we can use them as a base for defining an ABI for
+embedded systems like the @sc{M32R}.  The processor specific information
+is, of course, not relevant to the @sc{M32R}, but we will use the @sc{SPARC}
+and @sc{MIPS} processor supplements as guides both in content and in the
+style of this manual.  The main document (1) defines the ELF object file
+format which is used on the @sc{M32R} and other things of a general nature
+upon which the processor supplements are built.
+
+The following @sc{M32R} processor documents are also refered to:
+
+@enumerate 4
+@item M32R/D Family User's Manual
+Mitsubishi Electronic Device Group
+@*
+First Edition, January 12, 1996
+
+@c @item board man
+@c FIXME
+@end enumerate
+
+The rest of this document will follow the general format of System V ABI
+Processor Supplements.  In many cases, we will refer directly to the above
+documents.
+
+Unresolved issues will be denoted with "???".
+
+@node Low Level System Information
+@section Low Level System Information
+
+@menu
+* Data Representation::
+* Function Calling Sequence::
+* Coding Examples::
+@end menu
+
+@node Data Representation
+@subsection Data Representation
+
+@subheading Byte Order
+
+The Mitsubishi @sc{M32R} is "big endian".
+
+@subheading Fundamental Types
+
+Refer to the SPARC ABI Supplement, page 3-2, figure 3-1 "Scalar Types".
+All information is identical except for the following:
+
+@table @bullet
+@item
+the alignment of the @code{double} data type is 4, not 8
+@item
+the size of the @code{long double} data type is 8, not 16
+@item
+the alignment of the @code{long double} data type is 4, not 8
+@end table
+
+This document defines a "word" to be a four byte quantity.
+
+Floating point data representation is IEEE 754.
+
+GNU C supports the following additional data types.  They are not part
+of this ABI as not all C compilers support them.  Nor are they in the
+ANSI/ISO C standard and portable code should not use them.
+
+@smallexample
+C data type = long long, sizeof = 8, alignment = 4
+C data type = __complex__ int, sizeof = 8, alignment = 4
+C data type = __complex__ float, sizeof = 8, alignment = 4
+C data type = __complex__ double, sizeof = 16, alignment = 4
+@end smallexample
+
+??? For future considerations, may wish to increase the alignment
+of @code{long long}, @code{double}, @code{long double}, and
+@code{__complex__ double} to 8.  This will impact several things
+(like parameter passing) but a decision needs to be made soon.
+
+See the GNU C manual for more information on these data types.
+
+@subheading Aggregates and Unions
+
+Refer to the SPARC ABI Supplement, page 3-3 "Aggregates and Unions".
+Except that 8 byte values are 4 byte aligned, all information is identical.
+
+@subheading Bit-Fields
+
+Refer to the SPARC ABI Supplement, page 3-5 "Bit-Fields".
+All information is identical.
+
+@node Function Calling Sequence
+@subsection Function Calling Sequence
+
+@subheading CPU Registers
+
+@smallexample
+Register Name       Use
+(software name)
+------------------------------------------------------------
+r0 - r3             Used for passing arguments to functions.
+                    Additional arguments are passed on the
+                    stack (see below).  r0,r1 is also used
+                    to return the result of function calls.
+                    The values of these registers are not
+                    preserved across function calls.
+
+r4 - r7             Temporary registers for expression evaluation.
+                    The values of these registers are not preserved
+                    across function calls.
+
+                    r6 is also reserved for use as a temp in the
+                    PIC calling sequence (if ever necessary)
+                    and may not be used in the function calling
+                    sequence or prologue of functions.
+
+                    r7 is also used as the static chain pointer
+                    in nested functions (a GNU C extension)
+                    and may not be used in the function calling
+                    sequence or prologue of functions.
+
+r8 - r11            Temporary registers for expression evaluation.
+                    The values of these registers are preserved
+                    across function calls.
+
+r12                 Temporary register for expression evaluation.
+                    Its value is preserved across function calls.
+                    It is also reserved for use as potential
+                    "global pointer".
+
+r13 (fp)            Frame pointer.
+
+r14 (lr)            Link register.
+                    This register contains the return address
+                    in function calls.
+
+r15 (sp)            Stack pointer.
+
+Special CPU Registers
+---------------------
+
+condition bit       This is a 1 bit register that contains the
+                    result of compare instructions.
+
+accumulator         This is a 64 bit register that contains the
+                    result of multiply/accumulate instructions.
+@end smallexample
+
+@subheading Floating Point Registers
+
+The current @sc{M32R} has no floating point registers.
+However, this ABI does not preclude them in any way.
+
+@subheading The Stack Frame
+
+@enumerate
+@item
+The stack grows downwards from high addresses to low addresses.
+@item
+A leaf function need not allocate a stack frame if it doesn't need one.
+@item
+A frame pointer need not be allocated.
+@item
+The stack pointer shall always be aligned to 4 byte boundaries.
+@item
+The register save area shall be aligned to a 4 byte boundary.
+@end enumerate
+
+Stack frames for functions that take a fixed number of arguments
+look like:
+
+@smallexample
+            Before call                     After call
+        +---------------------+      +---------------------+
+        |                     |      |                     |
+  high  | local variables,    |      | local variables,    |
+  mem   | reg save area, etc. |      | reg save area, etc. |
+        |                     |      |                     |
+        +---------------------+      +---------------------+
+        |                     |      |                     |
+        | arguments on stack  |      | arguments on stack  |
+        |                     |      |                     |
+ SP,FP->+---------------------+      +---------------------+
+                                     |                     |
+                                     | register save area  |
+                                     |                     |
+                                     +---------------------+
+                                     |                     |
+                                     | local variables     |
+                                     |                     |
+                                     +---------------------+
+                                     |                     |
+                                     | alloca allocations  |
+                                     |                     |
+                                     +---------------------+
+                                     |                     |
+  low                                | arguments on stack  |
+  memory                             |                     |
+                              SP,FP->+---------------------+
+
+Note that FP points to the same location as SP.          
+
+Stack frames for functions that take a variable number of
+arguments look like:
+
+            Before call                     After call
+        +---------------------+      +---------------------+
+        |                     |      |                     |
+  high  | local variables,    |      | local variables,    |
+  mem   | reg save area, etc. |      | reg save area, etc. |
+        |                     |      |                     |
+        +---------------------+      +---------------------+
+        |                     |      |                     |
+        | arguments on stack  |      | arguments on stack  |
+        |                     |      |                     |
+ SP,FP->+---------------------+      +---------------------+
+                                     |                     |
+                                     | save area for       |
+                                     | anonymous parms     |
+                                     | passed in registers |
+                                     | (the size of this   |
+                                     |  area may be zero)  |
+                                     |                     |
+                                     +---------------------+
+                                     |                     |
+                                     | register save area  |
+                                     |                     |
+                                     +---------------------+
+                                     |                     |
+                                     | local variables     |
+                                     |                     |
+                                     +---------------------+
+                                     |                     |
+                                     | alloca allocations  |
+                                     |                     |
+                                     +---------------------+
+                                     |                     |
+  low                                | arguments on stack  |
+  memory                             |                     |
+                              SP,FP->+---------------------+
+@end smallexample
+
+@subheading Argument Passing
+
+Arguments are passed to a function using first registers and then memory
+if the argument passing registers are used up.  Each register is assigned
+an argument until all are used.   Unused argument registers have undefined
+values on entry.  The following rules must be adhered to.
+
+@enumerate
+@item
+Quantities of size 8 bytes or less are passed in registers if available,
+then memory.  Larger quantities are passed by reference.
+
+@item
+Arguments passed by reference are passed by making a copy on the stack
+and then passing a pointer to that copy.
+
+@item
+If a data type would overflow the register arguments, then it is
+passed in registers and memory.
+
+e.g. A @code{long long} data type passed in r3 would be passed in
+r3 and the first 4 bytes of the stack.
+
+@item
+Arguments passed on the stack begin at @code{sp} with respect to the
+caller.
+
+@item
+Each argument passed on the stack is aligned on a 4 byte boundary.
+
+@item
+Space for all arguments is rounded up to a multiple of 4 bytes.
+@end enumerate
+
+@subheading Function Return Values
+
+Integers, floating point values, and aggregates of 8 bytes or less
+are returned in register r0 (and r1 if necessary).
+
+Aggregates larger than 8 bytes are returned by having the caller pass
+the address of a buffer to hold the value in r0 as an "invisible" first
+argument.  All arguments are then shifted down by one.  The address of
+this buffer is returned in r0.
+
+@subheading Operating System Interface
+
+Since this is an embedded system much of this section is irrelevant.
+
+Software Trap Types
+
+@table @bullet
+@item
+Trap number 0 is currently reserved for implementing system calls.
+@item
+Trap number 1 is currently reserved for implementing breakpoints.
+@end table
+
+@node Coding Examples
+@subsection Coding Examples
+
+The general descriptive text in either (2) or (3) apply here.
+
+@subheading Function Calls
+
+Absolute Direct Calls:
+
+@smallexample
+C                               Assembly
+extern void function ();
+function ();                    bl function
+@end smallexample
+
+Absolute Indirect Calls:
+
+@smallexample
+C                               Assembly
+extern void (*ptr) ();
+(*ptr)();                       ld24 r4,#ptr
+                                ld r5,@@r4
+                                jl r5
+@end smallexample
+
+Switch Tables:
+
+Absolute code model:
+
+@smallexample
+C                               Assembly
+void foo ()
+@{
+...
+switch (j)                      ld r4,[j]
+@c extra space before cmpui is on purpose
+@{                               cmpui r4,#4
+case 0:                         bnc .Ldef
+        ...                     slli r4,#2
+case 2:                         ld24 r5,#.Ltab
+        ...                     add r4,r5
+case 3:                         ld r4,@@r4
+        ...                     jmp r4
+default:
+        ...
+@}
+...
+@}
+                                .section .rodata
+                        .Ltab:  .word .Lcase0
+                                .word .Ldef
+                                .word .Lcase2
+                                .word .Lcase3
+@end smallexample
+
+@subheading Dynamic Allocation of Stack Space
+
+While C does not require dynamic stack allocation within a function,
+this ABI supports them.  The stack pointer must be kept aligned to 4
+byte boundaries.
+
+@node Object Files
+@section Object Files
+
+@menu
+* ELF Header::
+* Sections::
+* Relocation::
+@end menu
+
+@node ELF Header
+@subsection ELF Header
+
+@smallexample
+M32R Identification, e_ident[]:
+
+e_ident[EI_CLASS] = ELFCLASS32
+e_ident[EI_DATA]  = ELFDATA2MSB
+
+Processor identification, e_machine:
+
+EM_CYGNUS_M32R = 0x9041
+
+Processor Specific Flags, e_flags:
+
+There are currently no processor specific flags.
+
+@end smallexample
+
+@node Sections
+@subsection Sections
+
+@subheading Section Types
+
+There are currently no processor specific section types.
+
+@subheading Section Flags
+
+There are currently no processor specific section flags.
+
+@subheading Special Sections
+
+There are currently no processor specific sections.
+
+@node Relocation
+@subsection Relocation
+
+The MIPS and SPARC ABIs are useful here for describing relocation
+in general.
+
+@subheading Relocation Types
+
+Relocation Fields:
+
+@smallexample
++----------------------------+
+|           word32           |
+|31                         0|
++----------------------------+
+
++----------------------------+
+|       |       targ24       |
+|31     |23                 0|
++----------------------------+
+
++--------------+
+|      | disp8 |
+|15    |7     0|
++--------------+
+
++----------------------------+
+|             |    disp16    |
+|31           |15           0|
++----------------------------+
+
++----------------------------+
+|       |       disp24       |
+|31     |23                 0|
++----------------------------+
+
+The symbols used to describe the various relocation
+have the following meanings.
+
+A       The addend used in computing the relocation.
+
+P       The place (section offset or address) of the
+        storage unit being relocated (computed using
+        r_offset).
+
+S       The value of the symbol being relocated.
+
+The M32R uses Elf32_Rel relocation entries, the relocated
+field holds the addend.
+
+Name            Value   Field           Calculation
+---------------------------------------------------
+R_M32R_NONE      0       none            none
+R_M32R_16        1       V-word16        A + S
+R_M32R_32        2       V-word32        A + S
+R_M32R_24        3       V-targ24        A + S
+R_M32R_10_PCREL  4       V-disp8         (A + S - (P & -4)) >> 2
+R_M32R_18_PCREL  5       V-disp16        (A + S - P) >> 2
+R_M32R_26_PCREL  6       V-disp24        (A + S - P) >> 2
+
+NOTE: The values are subject to change before the ABI
+is finished.
+
+@end smallexample
+
+@node Program Loading and Dynamic Linking
+@section Program Loading and Dynamic Linking
+
+@menu
+* Program Loading::
+* Program Header::
+@end menu
+
+@node Program Loading
+@subsection Program Loading
+
+??? It's not clear what to say here given that this is an embedded
+system with no virtual memory.  Execution begins at location 0.
+Beyond that the program is on its own.
+
+@node Program Header
+@subsection Program Header
+
+@subheading Segment Contents
+
+@smallexample
+Text Segment
+        header
+        .init
+        .text
+        .fini
+        .rodata
+
+Data Segment
+        header
+        .data
+        .bss
+@end smallexample

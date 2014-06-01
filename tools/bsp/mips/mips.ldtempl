@@ -1,0 +1,175 @@
+#ifdef BSP_STARTFILES
+STARTUP(BSP_STARTFILES)
+#endif
+#ifdef BSP_GROUP
+GROUP(BSP_GROUP)
+#endif
+#ifndef BSP_TEXT_START
+#define BSP_TEXT_START
+#endif
+#ifndef BSP_DATA_START
+#define BSP_DATA_START ALIGN(8)
+#endif
+SECTIONS
+{
+  .text BSP_TEXT_START :
+  {
+    *(.rom_vec)      /* ROM vectors */
+    *(.rom_vectors)  /* ROM vectors */
+    CREATE_OBJECT_SYMBOLS
+    *(.bsp_init)    /* board-specific init code */
+    *(.text)
+    *(.gnu.linkonce.t*)
+    *(.mips16.fn.*)
+    *(.mips16.call.*)
+
+    *(.rodata)
+    *(.glue_7t)
+    *(.glue_7)
+    *(.rdata)
+
+    . = ALIGN(8);
+
+    KEEP (*(.init))
+    KEEP (*(.fini))
+
+    *(.gcc_except_table)
+
+    _etext = .;
+    PROVIDE (etext = .);
+
+    *(.sdata2)
+    *(.sbss2)
+
+    . = ALIGN(8);
+
+  }
+
+  .ctors    :
+  {
+    /* gcc uses crtbegin.o to find the start of
+       the constructors, so we make sure it is
+       first.  Because this is a wildcard, it
+       doesn't matter if the user does not
+       actually link against crtbegin.o; the
+       linker won't look for a file to match a
+       wildcard.  The wildcard also means that it
+       doesn't matter which directory crtbegin.o
+       is in.  */
+
+    KEEP (*crtbegin.o(.ctors))
+
+    /* We don't want to include the .ctor section from
+       from the crtend.o file until after the sorted ctors.
+       The .ctor section from the crtend file contains the
+       end of ctors marker and it must be last */
+
+    KEEP (*(EXCLUDE_FILE (*crtend.o) .ctors))
+    KEEP (*(SORT(.ctors.*)))
+    KEEP (*(.ctors))
+  }
+
+  .dtors    :
+  {
+    KEEP (*crtbegin.o(.dtors))
+    KEEP (*(EXCLUDE_FILE (*crtend.o) .dtors))
+    KEEP (*(SORT(.dtors.*)))
+    KEEP (*(.dtors))
+  }
+
+  rom_data_start = .;
+  PROVIDE(_rom_data_start = rom_data_start);
+  PROVIDE(__rom_data_start = rom_data_start);
+
+  .data BSP_DATA_START : AT( rom_data_start )
+  {
+    PROVIDE(_ram_data_start = .);
+    PROVIDE(__ram_data_start = .);
+
+    *(.ram_vec)      /* RAM vectors */
+    *(.ram_vectors)  /* RAM vectors */
+    *(.data)
+    *(.fixup)
+    *(.got1)
+    *(.got2)
+    *(.got)
+
+    *(.eh_frame)
+
+    /*
+     * Global pointer for MIPS stuff
+     */
+    . = ALIGN(8);
+    _gp = . + 0x8000;
+    __global = _gp;
+    *(.lit8)
+    *(.lit4)
+    *(.sdata)
+
+    . = ALIGN(8);
+
+    PROVIDE(_ram_data_end = .);
+    PROVIDE(__ram_data_end = .);
+  }
+
+  .bss               :
+  {
+    PROVIDE(_bss_start = .);
+    PROVIDE(__bss_start = .);
+
+    *(.sbss)
+    *(.scommon)
+    *(.bss)
+    *(COMMON)
+
+    . = ALIGN(8);
+    PROVIDE(_bss_end = .);
+    PROVIDE(__bss_end = .);
+    PROVIDE(_end = .);
+    PROVIDE(__end = .);
+  }
+
+  /*
+   * Stabs debugging sections.
+   */
+  .stab 0            : { *(.stab)		}
+  .stabstr 0         : { *(.stabstr)		}
+  .stab.excl 0       : { *(.stab.excl)		}
+  .stab.exclstr 0    : { *(.stab.exclstr)	}
+  .stab.index 0      : { *(.stab.index)		}
+  .stab.indexstr 0   : { *(.stab.indexstr)	}
+  .comment 0         : { *(.comment)		}
+
+  /*
+   * DWARF debug sections.
+   * Symbols in the DWARF debugging sections are relative to 
+   * the beginning of the section so we begin them at 0.
+   */
+
+  /* DWARF 1 */
+  .debug          0  : { *(.debug)		}
+  .line           0  : { *(.line)		}
+
+  /* GNU DWARF 1 extensions */
+  .debug_srcinfo  0  : { *(.debug_srcinfo)	}
+  .debug_sfnames  0  : { *(.debug_sfnames)	}
+
+  /* DWARF 1.1 and DWARF 2 */
+  .debug_aranges  0  : { *(.debug_aranges)	}
+  .debug_pubnames 0  : { *(.debug_pubnames)	}
+
+  /* DWARF 2 */
+  .debug_info     0  : { *(.debug_info)		}
+  .debug_abbrev   0  : { *(.debug_abbrev)	}
+  .debug_line     0  : { *(.debug_line)		}
+  .debug_frame    0  : { *(.debug_frame)	}
+  .debug_str      0  : { *(.debug_str)		}
+  .debug_loc      0  : { *(.debug_loc)		}
+  .debug_macinfo  0  : { *(.debug_macinfo)	}
+
+  /* SGI/MIPS DWARF 2 extensions */
+  .debug_weaknames 0 : { *(.debug_weaknames)	}
+  .debug_funcnames 0 : { *(.debug_funcnames)	}
+  .debug_typenames 0 : { *(.debug_typenames)	}
+  .debug_varnames  0 : { *(.debug_varnames)	}
+}

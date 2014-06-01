@@ -1,0 +1,37 @@
+2001-02-27  Will Cohen  <wcohen@redhat.com>
+
+	* ChangeLog: New file.
+	* README: New file.
+	* Makefile.in: New file.
+	* compiler.h: New file.
+	* config.h: New file.
+	* config.in: New file.
+	* configure: New file.
+	* gencpu.c: New file.
+	* missing.c: New file.
+	* custom.h: New file.
+	* fpp.c: New file.
+	* include/autoconf.h: New file.
+	* include/debug.h: New file.
+	* include/ersatz.h: New file.
+	* include/memory.h: New file.
+	* include/options.h: New file.
+	* include/readcpu.h: New file.
+	* include/sysdeps.h: New file.
+	* include/uae.h: New file.
+	* include/uaeexe.h: New file.
+	* include/zfile.h: New file.
+	* interp.c: New file.
+	* machdep/m68k.h: New file.
+	* machdep/maccess.h: New file.
+	* machdep/rpt.h: New file.
+	* md-fpp.h: New file.
+	* memory.c: New file.
+	* newcpu.c: New file.
+	* newcpu.h: New file.
+	* readcpu.c: New file.
+	* support.c: New file.
+	* sysconfig.h: New file.
+	* table68k: New file.
+	* target.h: New file.
+	* build68k.c: New file.

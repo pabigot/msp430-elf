@@ -1,0 +1,699 @@
+2013-11-07  DJ Delorie  <dj@redhat.com>
+
+	* msp430/Makefile.in (copy_scripts_to_objdir): Install per-mcu
+	scripts in $objdir for in-tree testing.
+
+2013-10-22  DJ Delorie  <dj@redhat.com>
+
+	* msp430/Makefile.in (crt0-minrt.o, crtn-minrt.o): New.  Build
+	from crt0.S with -DMINRT.
+	* msp430/crt0.S: Support -DMINRT that omits all init/fini logic.
+	* msp430/crtn.S: Likewise.
+
+2013-10-18  DJ Delorie  <dj@redhat.com>
+
+	* msp430/memory.ld: New.
+	* msp430/peripherals.ld: New.
+	* msp430/Makefile.in: Install them.
+
+2013-06-05  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/msp430F5438A-l.ld: Fix keep/sort syntax.
+	* msp430/msp430F5438A-s.ld: Likewise.
+	* msp430/mspxl-sim.ld: Likewise.
+
+2013-06-04  DJ Delorie  <dj@redhat.com>
+
+	* msp430/crt0.S: Make __crt0_call_exit global.
+
+	* msp430/msp430.ld: Fix keep/sort syntax.
+	* msp430/msp430-sim.ld: Likewise.
+
+2013-06-04  DJ Delorie  <dj@redhat.com>
+
+	* msp430/crt0.S: Expand section patterns to be four digits, to
+	allow users to insert startup code at various points in the
+	startup sequence.
+
+2013-06-04  DJ Delorie  <dj@redhat.com>
+
+	* msp430/Makefile.in (CRT_OBJS): Expand.
+	(crt_%.o): New rule pattern.  Build multiple objects from crt0.S.
+	* msp430/crt0.S: Re-integrate .bss and .data init, further break
+	down needed functions into separate objects.
+	* msp430/msp430.ld: Wildcard all .crt_* sections, sorted.
+	* msp430/msp430-sim.ld: Likewise.
+
+2013-05-23  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/Makefile.in (SCRIPTS): Add intr_vectors.ld
+	* msp430/intr_vectors.ld: New.
+	* msp430/msp430-sim.ld: Include intr_vectors.ld
+	(.resetvec): Delete.
+	(.tm_clone_table): Add.
+	* msp430/msp430.ld: Likewise.
+	* msp430/msp430xl-sim.ld: Likewise.
+	* msp430/msp430F5438A-s.ld: Likewise.
+	* msp430/msp430F5438A-l.ld: Likewise.
+
+2013-05-21  Nick Clifton  <nickc@redhat.com>
+
+	Issue 1368293
+	* msp430/Makefile.in (LIB_CRT): Define.
+	(CRT_OBJS): Define.
+	(all): Add LIB_CRT.
+	(install): Likewise.
+	* msp430/crt0.S: Move .bss initialization code into crt_bss.S.
+	Move data copying code into crt_movedata.S.
+	Create specific section names for initialisation code.
+	* msp430/msp430-sim.ld (.text): Add explicit entries for .crt_init,
+	.crt_bss, .crt_movedata and .crt_main sections.
+	* msp430/msp430xl-sim.ld: Likewise.
+	* msp430/msp430.ld: Likewise.
+	* msp430/msp430F5438A-l.ld: Likewise.
+	* msp430/msp430F5438A-s.ld: Likewise.
+	* msp430/crt_bss.S: New.
+	* msp430/crt_movedata.S: New.
+
+2013-03-13  Kevin Buettner  <kevinb@redhat.com>
+
+	* msp430/crt0.S (__start): Add DJ's suggested code for disabling
+	the watchdog timer.
+
+	* msp430/nosyscalls.S (_exit): Remove software breakpoint
+	instruction.
+
+2013-03-12  DJ Delorie  <dj@redhat.com>
+
+	* msp430/nosyscalls.S: New.
+	* msp430/memmodel.h: Add movx_ macro.
+	* msp430/Makefile.in: Build libnosys.a ourselves so we can include
+	our CIO functions.
+	* configure.in: Don't build libnosys/ for msp430.
+	* configure: Likewise.
+
+2013-02-28  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/crt0.S (__start): Clear r15 before calling memset and memmove.
+
+2013-02-25  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/crt0.S (__start): Set argc to 0 before calling main.
+
+2013-02-19  DJ Delorie  <dj@redhat.com>
+
+	* msp430/msp430F5438A-s.ld: New.
+	* msp430/msp430F5438A-l.ld: New.
+	* msp430/Makefile.in: Install them.
+
+2013-02-19  DJ Delorie  <dj@redhat.com>
+
+	* msp430/msp430xl-sim.ld: Move ROM to high memory and expand, RAM
+	to low.  Add .lowtext section for startup hook.
+
+2013-02-12  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/msp430xl-sim.ld: Add TI special sections.
+
+2013-02-11  DJ Delorie  <dj@redhat.com>
+
+	* msp430/write.c: Change CIO to int16 length.
+	* msp430/cio.h: Likwise.
+
+2013-02-11  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/msp430-sim.ld: Fix typo in assignment of .bss sections.
+
+2013-02-11  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/msp430.ld: Add TI special sections.
+	* msp430/msp430-sim.ld: Likewise.
+
+2013-02-08  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/sbrk.c: Abort when the stack and heaps collide.
+
+2013-01-18  DJ Delorie  <dj@redhat.com>
+
+	* msp430/cio.h: New.
+	* msp430/cio.c: New.
+	* msp430/write.c: New.
+	* msp430/Makefile.in: Build them.
+	* msp430/syscalls.S (write): Don't use this one.
+
+2013-01-16  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/crt0.S (__start): Skip memmove if not needed.
+	* msp430/memmodel.h: Add comment.
+
+2013-01-11  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/syscalls.S: Include memmodel.h.
+	(_isatty): Use ret_ instead of RET.
+	(getpid): Likewise.
+
+2013-01-10  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/msp430xl-sim.ld: New file.
+	* msp430/Makefile.in (SCRIPTS): Add msp430xl-sim.ld.
+	* msp430/crt0.S: Rename start to __start and make global.
+	Use memmove rather than memcpy to copy data from ROM.
+
+2013-01-10  DJ Delorie  <dj@redhat.com>
+
+	* msp430/crt0.S: Move startup from .text to .lowtext, force
+	resetvec to load.
+	* msp430/msp430-sim.ld: Add .lowtext to .text.  Remove unneeded sections.
+	* msp430/msp430.ld: Add .lowtext to .text.  Remove unneeded sections.
+
+2012-12-20  DJ Delorie  <dj@redhat.com>
+
+	* msp430/crt0.S: Add init/fini support.
+	* msp430/crtn.S: Add init/fini support.
+	* msp430/memmodel.h: New.
+
+2012-12-07  DJ Delorie  <dj@redhat.com>
+
+	* msp430/crt0.S (start): Provide both 430 and 430X versions.
+
+2012-11-06  DJ Delorie  <dj@redhat.com>
+
+	* msp430/epilogue.S: Moved to libgcc.
+	* msp430/mpy.c: Likewise.
+	* msp430/slli.S: Likewise.
+	* msp430/srai.S: Likewise.
+	* msp430/srli.S: Likewise.
+	* msp430/Makefile.in: Update.
+
+2012-10-18  DJ Delorie  <dj@redhat.com>
+
+	* msp430/msp430-sim.ld (.text): Align to a word boundary.
+	* msp430/msp430.ld (.text): Align to a word boundary.
+	* msp430/syscalls.S: Add getpid, kill,  and _isatty.
+
+2012-10-08  DJ Delorie  <dj@redhat.com>
+
+	* msp430/Makefile.in (SIM_OBJS): Add epilogue, srli, slai, slli,
+	sbrk, and mpy objects.
+	* msp430/crt0.S: Clear .bss.
+	* msp430/syscalls.S: Add fstat, lseek, and isatty.
+	* msp430/epilogue.S: New.
+	* msp430/mpy.S: New.
+	* msp430/sbrk.S: New.
+	* msp430/slli.S: New.
+	* msp430/srai.S: New.
+	* msp430/srli.S: New.
+
+2012-10-02  DJ Delorie  <dj@redhat.com>
+
+	* configure.in: Add msp430.
+	* configure: Regenerate.
+	* msp430: New Directory.
+	* msp430/*: New
+
+2012-08-31  Nick Clifton  <nickc@redhat.com>
+
+	* v850/crt0.S: Initialize the FPSR.
+
+2012-08-29  Nick Clifton  <nickc@redhat.com>
+
+	* v850/crt0.S: Add support for v850e3v5 architecture.
+
+2012-06-29  Nick Clifton  <nickc@redhat.com>
+
+	* v850/sim.ld: Add _heap_start.
+
+2010-09-17  Nick Clifton  <nickc@redhat.com>
+
+	* xstormy16/sim_hiram.ld: Import from sanyo-09r1 branch.
+	* xstormy16/sim_rom.ld: Add a __bss_end symbol at the end of the
+	.bss section.
+	* xstormy16/sim_high.ld: Likewise.
+	* xstormy16/crt0.S: Do not initialise the .bss section if it is
+	empty.
+	HALT if attempting to copy more than 64K of data or initialise
+	more than 64K of .bss space.
+
+2010-08-10  Nick Clifton  <nickc@redhat.com>
+
+	* rx/rx.ld: Replace MEMORY with PHDRS in order to support GOLD.
+
+2010-08-03  Nick Clifton  <nickc@redhat.com>
+
+	* rx/crt0.S: Switch to text mode at end.
+	* rx/rx-sim.ld: Explain program header support.
+
+2010-07-30  Nick Clifton  <nickc@redhat.com>
+
+	* rx/crt0.S (.section .note): New section to work around GOLD bug.
+	* rx/rx-sim.ld: Fixes for compatibility with GOLD: Remove MEMORY
+	directives.  Add PHDRS directives.
+
+2010-05-19  Nick Clifton  <nickc@redhat.com>
+
+	* xstormy16/Makefile.in (crt0_stub.o, xstormy16_stub.o): Provide a
+	specific rule for building these objects to override the use of
+	32-bit pointers.
+	* xstormy16/crt0.s: Rename to crt0.S.
+	* xstormy16/crt0_stub.s: Rename to crt0_stub.S.
+	* xstormy16/configure.in: Depend upon crt0.S.
+	* xstormy16/configure: Regenerate.
+
+2010-04-23  Nick Clifton  <nickc@redhat.com>
+
+	* mips/syscalls.c (gettimeofday): New stub function.
+	(link, unlink, sigprocmask): Likewise.
+
+2009-01-09  DJ Delorie  <dj@redhat.com>
+
+	* m32c/Makefile.in: Missing commit from 2008-09-24.
+
+2009-01-09  Kevin Buettner  <kevinb@redhat.com>
+
+	* frv/configure, i386/configure, m32c/configure, rs6000/configure:
+	Regenerate using autoconf-2.61.  The command used in each directory
+	was "autoconf -I ..".
+
+2008-10-09  Nick Clifton  <nickc@redhat.com>
+
+	* mn10300/Makefile.in: Add rule for building crt1.o which adds
+	-ffixed-a2 to the gcc command line.
+
+2008-05-19  Nick Clifton  <nickc@redhat.com>
+
+	* doc/Makefile.in (install-info): Make sure that the destination
+	info directory exists before installing files into it.
+
+2007-10-03  Nick Clifton  <nickc@redhat.com>
+
+	* frv/crt0.S (__dso_handle): Define.
+
+2007-09-21  Nick Clifton  <nickc@redhat.com>
+
+	* iq2000/crt0.S (___dso_handle): Define.
+	* mn10300/crt0.S (___dso_handle): Define.
+
+2006-10-27  DJ Delorie  <dj@redhat.com>
+
+	* mep/aclocal.m4: New.
+	* mep/configure.in: Update for autoconf 2.59.
+	* mep/configure: Regenerate.
+
+2006-10-27  Dave Brolley  <brolley@redhat.com>
+
+	* Merge the following change from a Red Hat branch:
+	2005-06-06  Dave Brolley  <brolley@redhat.com>
+
+	* syscall.h (SYS_reconfig): New macro.
+
+2006-09-25  Dave Brolley  <brolley@redhat.com>
+
+	* Merge the following changes:
+	2004-06-11  DJ Delorie  <dj@redhat.com>
+
+	* mep/handlers.c: Remove reset handler, move to...
+	* mep/h_reset.c: New file.
+	* mep/Makefile.in: Build it.
+
+	2004-05-23  DJ Delorie  <dj@redhat.com>
+
+	* mep/sim-crt0.S (_reset): Define at _start if NOVEC.
+
+	2004-05-19  DJ Delorie  <dj@redhat.com>
+
+	* mep/gmap_default.ld: Add HWINIT section, move entry to _reset.
+
+2006-09-08  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: Fix typos.
+	* configure: Regenerate.
+
+2005-08-22  Dave Brolley  <brolley@redhat.com>
+
+	* mep/syscalls.S (SYS__Sid_config): New macro.
+	(_Sid_config): Add using the S macro.
+	* Makefile.in: Regenerated using MeP-Integrator.
+	* Contribute the following:
+
+	2005-04-22  Richard Sandiford  <rsandifo@redhat.com>
+
+	* mep/fmax.ld, mep/simple.ld: New files, automatically
+	generated by MeP-Integrator.
+
+2004-08-20  Dave Brolley  <brolley@redhat.com>
+
+	* Revert previous patch except for .Ldo_repeat_icache and .Lend_mepc3.
+
+2004-08-11  Dave Brolley  <brolley@redhat.com>
+
+	* mep/sim-crt0.S (_data_cache_all_invalidate): New constant.
+	(_insn_cache_all_invalidate): New constant.
+	(_start): Use the 'cache' instruction to invalidate the caches on h1
+	cores.
+	(.Lend_mepc3): Renamed to .Lend_mepc3_ic.
+	(.Ldo_repeat_icache): Align the code so that the entire 'repeat' loop
+	is aligned on an 8 byte boundary.
+	(.Lno_dc_mepc3): Renamed to .Lend_mepc3_dc.
+
+2004-06-21  Dave Brolley  <brolley@redhat.com>
+
+	* mep/sim-crt0.S (_start): Check for ID.ID less than 3 when checking
+	for MeP-c3 and above implementations of the icache and dcache.
+	* mep/gmap_default.ld (.vec_warm): Now added by MeP-Integrator only if
+	necessary.
+
+2004-04-29  Dave Brolley  <brolley@redhat.com>
+
+	* mep/sim-crt0.S (_start): Compute cache line sizes for C3 cores.
+
+2004-04-16  Stan Cox  <scox@redhat.com>
+
+	* mep/Makefile.in (SCRIPTS): Remove init.hs.
+
+2004-04-11  Stan Cox  <scox@redhat.com>
+
+	* mep/Makefile.in (sim-crt0.o): Add sdram-crt0.o and simsdram-crt0.o.
+	* mep/sim-crt0.S (_exception_table): Add _handler_DSP and _handler_COP.
+
+2004-04-08  Dave Brolley  <brolley@redhat.com>
+
+	* mep/sim-crt0.S (_start): Make sure that cache size is in $0 for
+	non-c3 cores.
+
+2004-04-01  Dave Brolley  <brolley@redhat.com>
+
+	* mep/sim-crt0.S (_start): Save the cache size in $3 and use it when
+	computing the number of tags to initialize. Do this for both icache and
+	dcache.
+
+2004-03-22  Stan Cox  <scox@redhat.com>
+
+	* mep/Makefile.in (sim-crt0.o): Dependency on sim-crt0.S and init.hs.
+
+2004-03-16  Stan Cox  <scox@redhat.com>
+
+	* mep/Makefile.in (LIBNOSYS): New.
+
+2004-03-03  Stan Cox  <scox@redhat.com>
+
+	* mep/simnovec-crt0.S: New.
+	mep/sim-crt0.S: Add NOVEC.
+
+2004-03-01  Stan Cox  <scox@redhat.com>
+
+	* mep/sim-crt0.S: Add __enable_icache, __enable_dcache, exception
+	and interrupt vector setup, icache and dcache setup,
+	_exception_table, and _interrupt_table.
+	* mep/handlers.c: New.
+	* mep/init.hs: New.
+	* Makefile.in: Add handlers.c and init.hs.
+
+2003-12-02  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv/crt0.S (_start): Fix use of FDPIC conditionals.  Move the set of
+	gr11 outside the FDPIC conditional.  Avoid clobbering gr4 too early.
+
+2003-11-14  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv/crt0.S: Fix fdpic sp calculation.
+
+2003-11-07  Dave Brolley  <brolley@redhat.com>
+
+	* mep/Makefile.in (install): Install gmap_default.tmpl and
+	gmap_default.ld
+
+2003-11-05  Alexandre Oliva  <aoliva@redhat.com>
+
+	* frv/crt0.S: Use __stacksize, not __stack, to initialize sp on
+	FDPIC.  Update comments on computing _GLOBAL_OFFSET_TABLE_.  Don't
+	fixup ctors nor dtors on FDPIC.
+
+2003-11-05  Stan Cox  <scox@redhat.com>
+
+	* mep/gmap_default.ld: Add ALIGN(8) to .vtext and .vftext.
+
+2003-10-05  Stan Cox  <scox@redhat.com>
+
+	* mep/sbrk.c (is_addr_0): New.
+
+	2003-05-02  Dave Brolley  <brolley@redhat.com>
+
+	* mep/min.ld: Remove __stack[1-11].
+	* mep/gmap_default.ld: Ditto.
+
+2003-09-19  Alexandre Oliva  <aoliva@redhat.com>
+
+	* frv/crt0.S (_start): Set up gr15 only for FDPIC.
+
+	* frv/crt0.S (_start): Save _GLOBAL_OFFSET_TABLE_ in gr17, and set
+	gr15 before function calls.
+
+2003-09-19  DJ Delorie  <dj@redhat.com>, Alexandre Oliva  <aoliva@redhat.com>
+
+	* frv/crt0.S (_start): Set up gr15 with _GLOBAL_OFFSET_TABLE_'s
+	value.
+
+2003-05-27  DJ Delorie  <dj@redhat.com>
+
+	* mep/Makefile.in (install): Only install linker scripts for the
+	default multlib.
+
+2003-05-21  Richard Sandiford  <rsandifo@redhat.com>
+
+	* mep/gmap_default.ld: Add a .debug_ranges section statement.
+	* mep/min.ld: Likewise.
+
+2003-04-28  DJ Delorie  <dj@redhat.com>
+
+	* mep/read.c: New.
+	* mep/write.c: New.
+	* mep/syscalls.S: Map read and write syscalls to __mep_read and
+	__mep_write so we can intercept them in the two new files.
+	* Makefile.in: Add read.o and write.o
+
+2003-02-06  Dave Brolley  <brolley@redhat.com>
+
+	* mep/min.ld: Support 12 modules. Correct stack alignment.
+	* mep/gmap_default.ld: Correct stack alignment. Add markers for stack
+	table generation.
+
+2002-12-13  Richard Sandiford  <rsandifo@redhat.com>
+
+	* mips/configure.in (mips64vr(el)-*-elf): Don't use vr4300.S.
+	* mips/configure: Regenerate.
+	* mips/vr4300.S: Revert 2002-07-26 change.
+	* mips/vr5xxx.S: Likewise.
+
+2002-11-22  Ben Elliston  <bje@redhat.com>
+
+	* mep/syscalls.S (S): Use new system call opcode.
+	* mep/sim-crt0.S (_exit_loop): Likewise.
+
+2002-07-26  Richard Sandiford  <rsandifo@redhat.com>
+
+	* mips/configure.in (mips64vr-*-elf, mips64vrel-*-elf): New targets.
+	* mips/configure: Regenerate.
+	* mips/vr4300.S: Wrap in #if __mips==3.
+	* mips/vr5xxx.S: Likewise __mips==4.
+
+2002-06-10  DJ Delorie  <dj@redhat.com>
+
+	* mep/min.ld: Change .vfar to .vftext
+	* mep/gmap_default.ld: Likewise.
+
+2002-05-29  DJ Delorie  <dj@redhat.com>
+
+	* mep/min.ld: Add .vfar support.
+	* mep/gmap_default.ld: Likewise.
+
+2002-05-14  Graydon Hoare  <graydon@redhat.com>
+
+	* mep/min.ld (.rostacktab): Un-direct from SDRAM.
+
+2002-05-02  Graydon Hoare  <graydon@redhat.com>
+
+	* mep/gmap_default.ld (.rostacktab): Direct to SDRAM memory.
+	* mep/min.ld (.rostacktab): Direct to SDRAM memory.
+
+2002-04-30  Graydon Hoare  <graydon@redhat.com>
+
+	* mep/min.ld: Split stack into 6 pieces, load __stack_table
+	with pointers into each (to be switched on by CPU ID at startup).
+	* mep/gmap_default.ld: Likewise.
+	* mep/sim-crt0.S (_start): Do processor-specific stack pointer
+	switch on startup.
+
+2002-04-18  Graydon Hoare  <graydon@redhat.com>
+
+	* mep/gmap_default.ld: Update comments to reflect policy of always
+	generating custom gmap link scripts.
+
+2002-04-11  Dave Brolley  <brolley@redhat.com>
+
+	* mep/gmap_default.ld: Default stack size is now 1M.  Fixed problem
+	with undefined __heap.
+
+2002-04-09  Dave Brolley  <brolley@redhat.com>
+
+	* mep/gmap_default.ld: New default linker script.
+
+2002-03-08  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* iq2000/Makefile.in: Add install of sim.ld script.
+	* iq2000/sim.ld: New script to allow C executables to run
+	under the simulator.
+
+2002-01-29  Michael Meissner  <meissner@redhat.com>
+
+	* mips/configure.in (mips64vr5400*-*-*): Delete 5400 specific
+	configuration, use standard 5xxx configuration.
+	* mips/configure: Regenerate.
+
+	* mips/pmon.S (__sizemem): Delete 5400 specific version.
+
+2001-11-16 Stan Cox  <scox@redhat.com>
+
+	* libgloss/iq2000/crt1.c (struct object): Define for eh frames.
+	(_main): Call __register_frame_info to register frames.
+	* libgloss/iq2000/_exit.c (_exit): Deregister eh frames.
+
+2001-11-14  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* iq2000/Makefile.in: Add support for gettime.o.
+
+2001-10-30  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* iq2000/Makefile.in: Remove script reference as there is
+	no ld script.
+	* iq2000/crt0.S: Fix bug whereby jal to _main is in delay
+	slot of bss clearing loop branch.  Also add nop to _main
+	jump delay slot.  Rearrange insns for call to main so
+	delay slot is used.
+
+2001-10-29  Frank Ch. Eigler  <fche@redhat.com>
+
+	* mep/Makefile.in: Pass -gdwarf-2 to assember while building .S files.
+	* mep/sim-crt0.S: Fix mov/or3->movh/or3 throughout for addresses.
+	* mep/sbrk.c: Rewrite for __heap/__heap_end sensitivity and error
+	handling.
+
+	* mn10300/asb2305.ld: Added ASB2305 support.
+	* mn10300/configure: Ditto.
+	* mn10300/configure.in: Ditto.
+2001-10-25  DJ Delorie  <dj@redhat.com>
+
+	* mep/min.ld: Support .srodata.
+
+	* mep/sim-crt0.S (_start): Initialize sbss and farbss separately.
+	* mep/min.ld: Provide start/end symbols for farbss.
+
+	* mep/min.ld: Support .frodata.  Remove useless search dir.
+
+2001-10-23  Stan Cox  <scox@redhat.com>
+
+	* iq2000/crt0.S (_start): Load main's return value in exit's delay slot.
+	* ip2000/trap.c (__trap0): Load parameters as separate asm statements.
+
+2001-10-18  DJ Delorie  <dj@redhat.com>
+
+	* mep/Makefile.in (install): Install the linker scripts.
+	* mep/min.ld: New.
+
+2001-10-11  Frank Ch. Eigler  <fche@redhat.com>
+
+	* mep/sim-crt0.S (_exit): Prevent infinite _exit recursion.
+
+2001-10-08  Stan Cox  <scox@redhat.com>
+
+	* iq2000/sbrk.c (_sbrk): Return ENOMEM instead of calling abort.
+
+2001-09-26  DJ Delorie  <dj@redhat.com>
+
+	* mep/sim-crt0.S (_start): Zero out BSS.
+
+2001-09-13  DJ Delorie  <dj@redhat.com>
+
+	* mep/syscalls.S: Use c-style comments.
+
+2001-09-12  DJ Delorie  <dj@redhat.com>
+
+	* mep/mep-bb.c: include time.h
+
+2001-09-12  Stan Cox  <scox@redhat.com>
+
+	* configure.in: Added iq2000 configuration.
+	* configure: Regenerated.
+	* iq2000/{Makefile.in, _exit.c, access.c, chmod.c, chown.c, close.c,
+	configure, configure.in, creat.c, crt0.S, crt1.c, execv.c, execve.c,
+	fork.c, fstat.c, getpid.c, gettime.c, isatty.c, kill.c, lseek.c,
+	open.c, pipe.c, read.c, sbrk.c, stat.c, test.c, time.c, times.c,
+	trap.c, trap.h, unlink.c, utime.c, wait.c, write.c}: New files.
+
+2001-06-26  DJ Delorie  <dj@redhat.com>
+
+	* mep/gmon-io.h: New.
+	* mep/mep-gmon.c: New.
+	* mep/mep-bb.c: New.
+	* mep/Makefile.in: Build them.
+
+2001-05-31  DJ Delorie  <dj@redhat.com>
+
+	* mep/sim-crt0.S: Use __stack symbol from ld.  Initialize $gp and
+	$tp.  Remove __sdabase, __tpbase (moved to ld).
+
+2001-05-22  DJ Delorie  <dj@redhat.com>
+
+	* mep/syscalls.S: Make functions weak, in case the program
+	wants to override them individually.
+
+2001-05-11  DJ Delorie  <dj@redhat.com>
+
+	* mep/sim-crt0.S (_start): Move stack top away from end of memory
+	region to avoid executing trampolines in last cache line.  Copy
+	return value of main to first argument of exit.
+	* mep/Makefile.in: Add dependencies on sim-crt0.S to crt0.S.
+	Ditto crtn.
+
+2001-05-07  DJ Delorie  <dj@redhat.com>
+
+	* mep/sim-crt0.S: Use movh, not movu, to set $sp.
+	* mep/syscalls.S: Support errno also.
+
+2001-05-04  DJ Delorie  <dj@redhat.com>
+
+	* configure.in: Add mep.
+	* configure: regenerate.
+	* mep/Makefile.in: New file.
+	* mep/configure.in: Ditto.
+	* mep/configure: Ditto.
+	* mep/crt0.S: Ditto.
+	* mep/crtn.S: Ditto.
+	* mep/isatty.c: Ditto.
+	* mep/sbrk.c: Ditto.
+	* mep/sim-crt0.S: Ditto.
+	* mep/sim-crtn.S: Ditto.
+	* mep/syscalls.S: Ditto.
+
+	* mn10300/asb2303.ld: New file.  Linker script for the ASB2303
+	AM33/2.00 board.
+
+	* mn10300/configure.in: Add support for asb2303 board script.
+
+Mon Dec 15 16:23:39 1997  Jeffrey A Law  (law@cygnus.com)
+
+	* mips/pmon.S (__sizemem) [R5400]: Do nothing if LSI is defined.
+
+Fri Nov 14 16:05:13 1997  Ken Raeburn  <raeburn@cygnus.com>
+
+	* mips/configure.in: Handle VR5400.
+	* mips/configure: Regenerated.
+	* mips/pmon.S (__sizemem) [R5400]: Just indicate a meg of RAM.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

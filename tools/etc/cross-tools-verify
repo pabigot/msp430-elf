@@ -1,0 +1,4 @@
+verify()
+{
+    echo "Verify not run for cross-targets."
+}

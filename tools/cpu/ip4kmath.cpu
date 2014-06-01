@@ -1,0 +1,2408 @@
+; IP math coprocessor description.  -*- Scheme -*-
+; Copyright (C) 2000, 2001 Red Hat, Inc.
+; This file is part of CGEN.
+; See file COPYING.CGEN for details.
+
+(include "simplify.inc")
+
+(define-arch
+  (name ip4kmath)
+  (comment "Ubicom Virtual Peripheral Engine (IP) Math Coprocessor")
+  (insn-lsb0? #t)
+  (machs ip4000mcp)
+  (isas scalar vector)
+)
+
+(define-isa
+  (name scalar)
+  (comment "IP math coprocessor scalar instructions")
+  (base-insn-bitsize 32)
+  (parallel-insns 2)
+)
+
+(define-isa
+  (name vector)
+  (comment "IP math coprocessor vector instructions")
+  (base-insn-bitsize 32)
+  (parallel-insns 2)
+)
+
+(define-cpu
+  (name ip4kmathbf)
+  (comment "IP Math Coprocessor")
+  (endian big)
+  (word-bitsize 16)
+)
+
+(define-mach
+  (name ip4000mcp)
+  (comment "IP 4000 Math Coprocessor")
+  (cpu ip4kmathbf)
+  (bfd-name "ip4kmath")
+  (isas scalar vector)
+)
+
+(define-model
+  (name ip4000mcp)
+  (comment "IP 4000 Math Coprocessor")
+  (mach ip4000mcp)
+  (unit u-exec "Execution Unit" ()
+	1 1 ; issue done
+	() () () ())
+)
+
+
+; Scalar Fields
+
+; define-normal-scalar-field
+(define-pmacro (dnsf name comment attrs start length)
+  (dnf name comment (.splice (.unsplice attrs) (ISA scalar)) start length)
+)
+
+; Parallel set
+(define-pmacro (pset dest src) (set (delay 0 dest) src))
+
+; Parallel set for scalar loads - 2 cycle latency
+(define-pmacro (pset-sload dest src) (set (delay 2 dest) src))
+
+; Parallel set for vector loads - 2 cycle latency
+(define-pmacro (pset-vload dest src) (set (delay 2 dest) src))
+
+; Parallel set for accumulator results.
+; 0 cycle latency for integer results
+; 1 cycle latency for fractional results
+(define-pmacro (pset-acc dest src is)
+  (if (and is 2)
+      (set (delay 0 dest) src); integer result
+      (set (delay 1 dest) src); fractional result
+  )
+)
+
+(dnsf f-dc-s            "4-bit unused slot"             () 31  4)
+(dnsf f-op-s		"6-bit opcode"			() 27  6)
+(dnsf f-imm16t-s	"16-bit immediate top 4"	() 20  4)
+(dnsf f-srcdest-s	"5-bit src/dest"		() 16  5)
+(dnsf f-imm16b-s	"16-bit immediate bottom 12"	() 11 12)
+(dnsf f-dest-s		"5-bit destination"		() 21  5)
+(dnsf f-src1-s		"5-bit source 1"		() 16  5)
+(dnsf f-reg-s           "ldreg/streg register"          () 11  4)
+(dnsf f-SRs2-s          "3 op insn source register"     () 21  5)
+(dnsf f-SRs1-s          "3 op insn source register"     () 16  5)
+(dnsf f-SRd-s           "3 op insn dest   register"     () 11  5)
+(dnsf f-cc-s            "branch conditions"             () 21  4)
+(dnsf f-ebits-s		"3-bit E"			() 11  3)
+(dnsf f-pibit-s		"1-bit P/I"			()  8  1)
+(dnsf f-offset8-s	"8-bit offset"			()  7  8)
+(dnsf f-offset12-s	"12-bit offset"			() 11 12)
+(dnsf f-src2-s		"5-bit source 2"		() 11  5)
+(dnsf f-opext1-s	"1-bit opcode extension"	() 21  1)
+(dnsf f-opext7-s	"7-bit opcode extension"	()  6  7)
+(dnsf f-srcv-s          "5-bit vector source"           () 11  5)
+(dnsf f-destv-s         "5-bit vector destination"      () 21  5)
+(dnsf f-srcdestv-s	"5-bit src/dest"		() 16  5)
+(dnsf f-lut-part-s	"1-bit part selector"		()  6  1)
+(dnsf f-misc-5-6-s	"6-bit unused field"	        ()  5  6)
+(dnsf f-misc-16-1-s	"1-bit unused field"	        () 16  1)
+(dnsf f-misc-17-1-s	"1-bit unused field"	        () 17  1)
+
+; This offset is relative to the start of the vliw containing the current
+; scalar insn, which is pc-4 bytes.
+(df  f-offset16-s "16 bit pc relative signed offset"
+     ((ISA scalar) PCREL-ADDR) 15 16 INT
+     ((value pc) (sub HI value (sub HI pc 4)))
+     ((value pc) (add HI value (sub HI pc 4)))
+)
+
+; Vector Fields
+
+; define-normal-vector-field
+(define-pmacro (dnvf name comment attrs start length)
+  (dnf name comment (.splice (.unsplice attrs) (ISA vector)) start length)
+)
+
+(dnvf f-dc-v            "5-bit unused slot"             () 31  4)
+(dnvf f-op-v		"6-bit opcode"			() 27  6)
+(dnvf f-dest-v		"5-bit destination"		() 21  5)
+(dnvf f-src1-v		"5-bit source 1"		() 16  5)
+(dnvf f-src2-v		"5-bit source 2"		() 11  5)
+(dnvf f-ebits-v		"3-bit E"			()  6  3)
+(dnvf f-enable-v	"1-bit enable element"		()  3  1)
+(dnvf f-ebits+enable-v	"3-bit E + enable flag"		()  6  4)
+(dnvf f-opext-v		"3-bit opcode extension"	()  2  3)
+
+(define-multi-ifield
+  (name f-imm16-s)
+  (comment "16 bit immediate")
+  (attrs (ISA scalar))
+  (mode UINT)
+  (subfields f-imm16t-s f-imm16b-s)
+  (insert (sequence ()
+                    (set (ifield f-imm16t-s) (srl (ifield f-imm16-s) (const 12)))
+                    (set (ifield f-imm16b-s) (and (ifield f-imm16-s) (const #xfff)))
+          )
+  )
+  (extract (sequence ()
+                     (set (ifield f-imm16-s) (or (sll (ifield f-imm16t-s) (const 12)) (ifield f-imm16b-s)))
+           )
+  )
+)
+
+; Used in the VEXG insn which is a special case of the VEXGA insn in which the
+; source and target are the same register. The insert expression writes the
+; same register number into both the source and target register field. The
+; extract sequence simply uses the target register field.
+(define-multi-ifield
+  (name f-reg-vexg-v)
+  (comment "Source and target register for VEXG insn")
+  (attrs (ISA vector))
+  (mode UINT)
+  (subfields f-src2-v f-dest-v)
+  (insert (sequence ()
+                    (set (ifield f-src2-v) (ifield f-reg-vexg-v))
+                    (set (ifield f-dest-v) (ifield f-reg-vexg-v))))
+  (extract (set (ifield f-reg-vexg-v) (ifield f-src2-v)))
+)
+
+; Hardware
+
+(define-hardware
+  (name h-pc)
+  (comment "Program counter")
+  (attrs (ISA scalar,vector) PC)
+  (type pc)
+)
+
+; Scalar hardware
+; The status register as a whole.  It is computed from the individual status
+; bits defined below.
+(define-hardware
+  (name h-cpsr)
+  (comment "Scalar status register")
+  (attrs PROFILE VIRTUAL (ISA scalar,vector))
+  (type register UQI)
+  (indices keyword "" ((cpsr 0)))
+  (get () (c-call QI "get_h_cpsr"))
+  (set (newval) (c-call VOID "set_h_cpsr" newval))
+)
+
+(define-hardware
+  (name h-nbit)
+  (comment "negative bit")
+  (attrs (ISA scalar,vector))
+  (type register BI)
+)
+
+(define-hardware
+  (name h-zbit)
+  (comment "zero bit")
+  (attrs (ISA scalar,vector))
+  (type register BI)
+)
+
+(define-hardware
+  (name h-vbit)
+  (comment "overflow bit")
+  (attrs (ISA scalar,vector))
+  (type register BI)
+)
+
+(define-hardware
+  (name h-cbit)
+  (comment "carry bit")
+  (attrs (ISA scalar,vector))
+  (type register BI)
+)
+
+(define-pmacro (h-grname num) ((.str "r" num) num))
+(define-hardware
+  (name h-gr)
+  (comment "Scalar general purpose registers")
+  (attrs (ISA scalar,vector))
+  (type register HI (32))
+  (indices keyword ""
+	   (.map h-grname (.iota 32)))
+)
+
+; Vector hardware
+
+(define-pmacro (h-vrname num) ((.str "vr" num) num))
+(define-hardware
+  (name h-vr)
+  (comment "Vector registers - 32 x 8 x 16bits")
+  (attrs (ISA scalar,vector))
+  (type register HI (256)) ; 256 = (* 32 8)
+  ;; Don't naively define 256 indices for this hardware element.
+  ;; This 256-element array attempts to model a 32x8 2D array of 16 bits each.
+  ;; Operand parsers are needed to map "vr14" into the number 14, however that
+  ;; number cannot be used as an index into this array.   See the REG_VR macro
+  ;; instead.
+  (indices keyword ""
+	   (.map h-vrname (.iota 32)))
+)
+
+(define-pmacro (REG_VR h-vr-pseudo elemnum)
+  (reg h-vr (add (mul 8 (index-of h-vr-pseudo)) elemnum))
+)
+
+
+(define-pmacro (h-vaccname num) ((.str "vacc" num) num))
+(define-hardware
+  (name h-vacc)
+  (comment "Vector accumulator - 8 x 48bits")
+  (attrs (ISA scalar,vector))
+  (type register DI (8))
+  (indices keyword ""
+	   (.map h-vaccname (.iota 8)))
+)
+
+; In the hardware, these 8 bits are together in a byte.  The
+; load/store instructions need to map between that and this expanded
+; representation.
+
+(define-hardware
+  (name h-vz)
+  (comment "Vector equal register")
+  (attrs (ISA scalar,vector))
+  (type register BI (8))
+)
+
+(define-hardware
+  (name h-vc)
+  (comment "Vector carry register")
+  (attrs (ISA scalar,vector))
+  (type register BI (8))
+)
+
+(define-hardware
+  (name h-vcmp)
+  (comment "Vector compare register")
+  (attrs (ISA scalar,vector))
+  (type register BI (8))
+)
+
+; Carry out from accumulator addition
+; Set by all accumulator additions.
+(define-hardware
+  (name h-vc48)
+  (comment "Vector carry register")
+  (attrs (ISA scalar,vector))
+  (type register BI (8))
+)
+
+; Shifted carry out from accumulator addition.
+; Set by VSHTA.
+; Used and then cleared by all accumulator additions.
+(define-hardware
+  (name h-vc32)
+  (comment "Vector carry register")
+  (attrs (ISA scalar,vector))
+  (type register BI (8))
+)
+
+; Virtual registers referenced by the ldreg and streg insns.  The handlers map
+; the requests to the appropriate actual registers.
+(define-hardware
+  (name h-reg)
+  (comment "Source/target registers for ldreg/streg")
+  (attrs PROFILE VIRTUAL (ISA scalar,vector))
+  (type register UQI (4))
+  (indices keyword "" ((vc 0) (vz 1) (vcmp 2) (sr 3)))
+  (get (index) (c-call QI "get_h_reg" index))
+  (set (index newval) (c-call VOID "set_h_reg" index newval))
+)
+
+; Dummy hardware used to define integer/fractional and shift/noshift suffixes
+; for vector insns.
+;
+(define-hardware
+  (name h-is)
+  (comment "arithmetic mode dummy hardware")
+  (attrs (ISA vector))
+  (type immediate (UINT 3))
+  (values keyword "" (("" 0) (".s" 1) (".i" 2) (".is" 3)))
+)
+
+; Dummy hardware used to define high/low byte selectors for vector insns.
+;
+(define-hardware
+  (name h-hl)
+  (comment "high/low selector dummy hardware")
+  (attrs (ISA vector))
+  (type immediate (UINT 3))
+  (values keyword "" ((".ll" 0) (".lh" 1) (".hl" 2) (".hh" 3) ))
+)
+
+; Dummy hardware used to define part numbers for accumulator operations.
+;
+(define-hardware
+  (name h-pn)
+  (comment "accumulator part number selector dummy hardware")
+  (attrs (ISA vector))
+  (type immediate (UINT 3))
+  (values keyword "" ((".p0" 0) (".p1" 1) (".p2" 2)))
+)
+
+; Scalar operands
+
+; define-normal-scalar-operand
+(define-pmacro (dnsop name comment attrs hw indx)
+  (dnop name comment (.splice (.unsplice attrs) (ISA scalar)) hw indx)
+)
+
+(define-normal-insn-enum insn-op-s "scalar insn opcode enums" ((ISA scalar)) OP_ f-op-s
+ (
+   (NOP      #x00)  (LDABS    #x01)  (LD       #x02)  (LDVBL    #x03)
+   (LDVBU    #x04)  (LDVBX    #x05)  (LDVW     #x06)
+   (JMP      #x08)  (JMPCC    #x09)  (JSR      #x0a)  (LDREG    #x0b)
+   (LDV2W    #x0c)  (LDV4W    #x0d)  (LDV4AW   #x0e)
+                    (STABS    #x11)  (ST       #x12)  (STVBL    #x13)
+   (STVBU    #x14)                   (STVW     #x16)
+                                                      (STREG    #x1b)
+   (STV2W    #x1c)  (STV4W    #x1d)  (STV4AW   #x1e)  (3OP      #x1f)
+                                                      (LDV8BL   #x23)
+   (LDV8BU   #x24)  (LDV8BX   #x25)  (LDV8W    #x26)  (LDI      #x27)
+   (LDVLUT   #x28)                                    (LDV8BLPI #x2b)
+   (LDV8BUPI #x2c)  (LDV8BXPI #x2d)  (LDV8WPI  #x2e)  (ADDIORI  #x2f)
+                                                      (STV8BL   #x33)
+   (STV8BU   #x34)                   (STV8W    #x36)  (ANDIXORI #x37)
+   (STVLUT   #x38)                                    (STV8BLPI #x3b)
+   (STV8BUPI #x3c)                   (STV8WPI  #x3e)  (STOP     #x3f)
+ )
+)
+
+(define-normal-insn-enum insn-opext7-s "scalar insn opcode extention enums"
+  ((ISA scalar)) OPE7_ f-opext7-s
+ (
+   (AND #x00)  (OR  #x01)  (XOR #x02)  (LSL #x03)
+   (LSR #x04)  (ASR #x05)  (ADD #x06)  (SUB #x07)
+ )
+)
+
+(define-normal-insn-enum insn-opext1-s "scalar insn opcode extention enums"
+  ((ISA scalar)) OPE1_ f-opext1-s
+ (
+   ("0" #x0)  ("1" #x1)
+ )
+)
+
+; cc-s: branch conditions
+(define-normal-insn-enum cc-s "branch condition enums" () CC_ f-cc-s
+  (
+   "f"  "cc" "cs" "eq" "ge" "gt" "hi" "le"
+   "ls" "lt" "mi" "ne" "pl" "t"  "vc" "vs"
+  )
+)
+
+(dnsop op-s        "6-bit opcode"               ()   h-uint  f-op-s)
+(dnsop imm16t-s    "16-bit immediate top 4"     ()   h-uint  f-imm16t-s)
+(dnsop imm16b-s    "16-bit immediate bottom 12" ()   h-uint  f-imm16b-s)
+(define-operand (name imm16-s) (comment "16-bit immediate") (attrs (ISA scalar))
+  (type h-uint) (index f-imm16-s) (handlers (parse "imm16") (print "dollarhex")))
+(define-operand (name ebits-s) (comment "3-bit E") (attrs (ISA scalar))
+  (type h-uint) (index f-ebits-s) (handlers (print "decimal")))
+(dnsop pibit-s     "1-bit P/I"                  ()   h-uint  f-pibit-s)
+(define-operand (name offset8-s) (comment "8-bit offset") (attrs (ISA scalar))
+  (type h-uint)  (index f-offset8-s) (handlers (print "dollarhex")))
+(define-operand (name offset8-postinc-s) (comment "8-bit offset") (attrs (ISA scalar))
+  (type h-uint)  (index f-offset8-s) (handlers (parse "offset_postinc") (print "dollarhex")))
+(define-operand (name offset12-s) (comment "12-bit offset") (attrs (ISA scalar))
+  (type h-uint)  (index f-offset12-s) (handlers (print "dollarhex")))
+(define-operand (name offset12-postinc-s) (comment "12-bit offset") (attrs (ISA scalar))
+  (type h-uint)  (index f-offset12-s) (handlers (parse "offset_postinc") (print "dollarhex")))
+
+(dnsop opext1-s    "1-bit opcode extension"     ()   h-uint  f-opext1-s)
+(dnsop opext7-s    "7-bit opcode extension"     ()   h-uint  f-opext7-s)
+(dnsop srcdest-s   "5-bit src/dest"             ()   h-gr    f-srcdest-s)
+(dnsop dest-s      "5-bit destination"          ()   h-gr    f-dest-s)
+(dnsop src1-s      "5-bit source 1"             ()   h-gr    f-src1-s)
+(dnsop src2-s      "5-bit source 2"             ()   h-gr    f-src2-s)
+(dnsop SRs2-s      "3 op insn source register"  ()   h-gr    f-SRs2-s)
+(dnsop SRs1-s      "3 op insn source register"  ()   h-gr    f-SRs1-s)
+(dnsop SRd-s       "3 op insn dest   register"  ()   h-gr    f-SRd-s)
+(dnsop srcv-s      "5-bit vector source"        ()   h-vr    f-srcv-s)
+(dnsop destv-s     "5-bit vector destination"   ()   h-vr    f-destv-s)
+(dnsop srcdestv-s  "5-bit vector src/dest"      ()   h-vr    f-srcdestv-s)
+(dnsop reg-s       "ldreg/streg register"       ()   h-reg   f-reg-s)
+(dnsop offset16-s  "16 bit pc relative offset"  ()   h-iaddr f-offset16-s)
+(dnsop lut-part-s  "part selector for LUT insns"()   h-uint  f-lut-part-s)
+
+; Status bits
+(dnsop nbit        "negative bit"       (SEM-ONLY)   h-nbit  f-nil)
+(dnsop zbit        "zero     bit"       (SEM-ONLY)   h-zbit  f-nil)
+(dnsop vbit        "overflow bit"       (SEM-ONLY)   h-vbit  f-nil)
+(dnsop cbit        "carry    bit"       (SEM-ONLY)   h-cbit  f-nil)
+
+; define-normal-vector-operand
+(define-pmacro (dnvop name comment attrs hw indx)
+  (dnop name comment (.splice (.unsplice attrs) (ISA vector)) hw indx)
+)
+
+(define-normal-insn-enum insn-op-v "vector insn opcode enums" ((ISA vector)) OP_ f-op-v
+  (
+   (VNOP    #x00)  (VADD    #x01)  (VADDC   #x02)  (VADDC2  #x03)
+   (VADDC4  #x04)  (VADDC8  #x05)  (VABSDA  #x06)  (VACC    #x07)
+   (VSELLT  #x08)  (VCPCEQ  #x09)  (VCPCNE  #x0a)  (VSELGE  #x0b)
+   (VSUB    #x0c)  (VMUL    #x0d)  (VSUBACC #x0e)  (VMAC    #x0f)
+   (VAND    #x10)  (VNAND   #x11)  (VOR     #x12)  (VNOR    #x13)
+   (VXOR    #x14)  (VXNOR   #x15)  (VXORSUM #x16)  (VGLB    #x17)
+   (VMERGE  #x18)                                  (VSHTA   #x1b)
+   (VEXGA   #x1c)  (VRND    #x1d)  (VRNDPOS #x1e)  (VRNDNEG #x1f)
+  )
+)
+
+(dnvop op-v        "6-bit opcode"               ()   h-uint  f-op-v)
+(dnvop dest-v      "5-bit detination"           ()   h-vr    f-dest-v)
+(dnvop src1-v      "5-bit source 1"             ()   h-vr    f-src1-v)
+(dnvop src2-v      "5-bit source 2"             ()   h-vr    f-src2-v)
+(dnvop reg-vexg-v  "5-bit source/target"        ()   h-vr    f-reg-vexg-v)
+(dnvop ebits-v     "3-bit E"                    ()   h-uint  f-ebits-v)
+(dnvop enable-v    "1-bit enable element"       ()   h-uint  f-enable-v)
+(dnvop is-v        "arithmetic mode bits"       ()   h-is    f-opext-v)
+(dnvop hl-v        "high/low selector"          ()   h-hl    f-opext-v)
+(dnvop pn-v        "accumulator part selector"  ()   h-pn    f-opext-v)
+
+;;; XXX: Can't do the following, since the enable-v operands, and the f-enable-v ifields
+;;;      are not accessible in the proper scopes in the generated runtime.
+;;;
+;;; (define-hardware
+;;;   (name h-elements-v)
+;;;   (comment "vector elements selector")
+;;;   (attrs (ISA vector) VIRTUAL)
+;;;   (type register QI (8))
+;;;   (get (index) (if QI (ne (const QI 0) enable-v) 
+;;; 		   (and QI ebits-v #x7)
+;;; 		   (and QI index #x7)))
+;;;   (set (index newval) (nop))
+;;; )
+
+;;; (define-operand (name elements-v) (comment "vector elements selector") (attrs (ISA vector)) 
+;;;  (type h-elements-v) (index f-ebits+enable-v)
+;;;  (handlers (parse "vector_elements") (print "vector_elements")))
+
+;;; So instead:
+
+(define-operand (name elements-v) (comment "vector elements selector") (attrs (ISA vector)) 
+  (type h-uint) (index f-ebits+enable-v)
+  (handlers (parse "vector_elements") (print "vector_elements")))
+(define-operand (name accpart-v) (comment "accumulator part selector") (attrs (ISA vector)) 
+  (type h-uint) (index f-ebits-v) (handlers (parse "acc_part") (print "decimal")))
+(define-operand (name shift-v) (comment "shift selector") (attrs (ISA vector)) 
+  (type h-uint) (index f-opext-v) (handlers (parse "shift_selector") (print "decimal")))
+
+; Decode the element-enable bit in vector instructions.  This bit
+; selects the broadcast vs. element-by-element mode for the 
+; second source operand.
+(define-pmacro (vector-src2-row row)
+  (if QI (ne (const QI 0) (ifield f-enable-v))
+      (and QI (ifield f-ebits-v) #x7)
+      (and QI row #x7)))
+
+; ip4kmath specific insn attributes:
+(define-attr
+  (for insn)
+  (type boolean)
+  (name NOT-IN-DELAY-SLOT)
+  (comment "insn can't go in delay slot")
+)
+; We need this because most insns in this ISA have delayed semantics and so they
+; already have the DELAY-SLOT builtin attribute.
+(define-attr
+  (for insn)
+  (type boolean)
+  (name HAS-BRANCH-DELAY-SLOT)
+  (comment "insn has a branch delay slot")
+)
+
+; Instructions
+
+; Cover macro to dni to indicate these are all scalar vs vector insns.
+; dnsi: define-normal-scalar-insn
+; dnvi: define-normal-vector-insn
+
+(define-pmacro (dni-isa xname xcomment xattrs xsyntax xformat xsemantics isa)
+  (define-insn
+    (name xname)
+    (comment xcomment)
+    (.splice attrs (.unsplice xattrs) (ISA isa))
+    (syntax xsyntax)
+    (format xformat)
+    (semantics xsemantics)
+    )
+)
+
+(define-pmacro (dnsi xname xcomment xattrs xsyntax xformat xsemantics xtiming)
+  (dni-isa xname xcomment xattrs xsyntax
+	   (.splice (.unsplice xformat) (f-dc-s 0))
+	   xsemantics scalar)
+)
+(define-pmacro (dnvi xname xcomment xattrs xsyntax xformat xsemantics xtiming)
+  (dni-isa xname xcomment xattrs xsyntax
+	   (.splice (.unsplice xformat) (f-dc-v 0))
+	   xsemantics vector)
+)
+
+; and, or, xor
+(define-pmacro (logical-op-3 op opc)
+  (begin
+    (dnsi (.sym op)
+         (.str op " rd,rs1,rs2")
+         ()
+         (.str op " ${SRd-s},${SRs1-s},${SRs2-s}")
+         (+ OP_3OP SRs2-s SRs1-s SRd-s opc)
+         (sequence ((HI result))
+                   (set result (op HI SRs1-s SRs2-s))
+                   (pset SRd-s result)
+                   (pset zbit (eq result 0))
+                   (pset nbit (lt result 0)))
+         ()
+    )
+  )
+)
+
+(logical-op-3 and OPE7_AND)
+(logical-op-3 or  OPE7_OR)
+(logical-op-3 xor OPE7_XOR)
+
+(dnsi add
+      "add rd,rs1,rs2"
+      ()
+      "add ${SRd-s},${SRs1-s},${SRs2-s}"
+      (+ OP_3OP SRs2-s SRs1-s SRd-s OPE7_ADD)
+      (sequence ((HI result))
+		(pset cbit (add-cflag HI SRs1-s SRs2-s 0))
+		(pset vbit (add-oflag HI SRs1-s SRs2-s 0))
+		(set result (add HI SRs1-s SRs2-s))
+		(pset SRd-s result)
+		(pset zbit (eq result 0))
+		(pset nbit (lt result 0)))
+      ()
+)
+(dnsi sub
+      "sub rd,rs1,rs2"
+      ()
+      "sub ${SRd-s},${SRs1-s},${SRs2-s}"
+      (+ OP_3OP SRs2-s SRs1-s SRd-s OPE7_SUB)
+      (sequence ((HI result))
+		; cbit is set opposite of what you might expect in this ISA.
+		(pset cbit (not (sub-cflag HI SRs1-s SRs2-s 0)))
+		(pset vbit (sub-oflag HI SRs1-s SRs2-s 0))
+		(set result (sub HI SRs1-s SRs2-s))
+		(pset SRd-s result)
+		(pset zbit (eq result 0))
+		(pset nbit (lt result 0)))
+      ()
+)
+
+(dnsi lsl
+      "lsl rd,rs"
+      ()
+      "lsl ${SRd-s},${SRs1-s}"
+      (+ OP_3OP (f-SRs2-s 0) SRs1-s SRd-s OPE7_LSL)
+      (sequence ((HI result))
+		(set result (sll HI SRs1-s 1))
+		(pset SRd-s result)
+		(pset zbit (eq result 0))
+		(pset nbit (lt result 0))
+		)
+      ()
+)
+
+(dnsi lsr
+      "lsr rd,rs"
+      ()
+      "lsr ${SRd-s},${SRs1-s}"
+      (+ OP_3OP (f-SRs2-s 0) SRs1-s SRd-s OPE7_LSR)
+      (sequence ((HI result))
+		(set result (srl HI SRs1-s 1))
+		(pset SRd-s result)
+		(pset zbit (eq result 0))
+		(pset nbit (lt result 0))
+		)
+      ()
+)
+
+(dnsi asr
+      "asr rd,rs"
+      ()
+      "asr ${SRd-s},${SRs1-s}"
+      (+ OP_3OP (f-SRs2-s 0) SRs1-s SRd-s OPE7_ASR)
+      (sequence ((HI result))
+		(set result (sra HI SRs1-s 1))
+		(pset SRd-s result)
+		(pset zbit (eq result 0))
+		(pset nbit (lt result 0))
+		)
+      ()
+)
+
+
+; andi, ori, xori
+(define-pmacro (logical-op-imm op opc ope)
+  (begin
+    (dnsi (.sym op -imm)
+         (.str op "i rd,#imm-16")
+         ()
+         (.str op "i ${srcdest-s},#${imm16-s}")
+         (+ opc ope imm16t-s srcdest-s imm16b-s)
+         (sequence ((HI result))
+                   (set result (op HI srcdest-s imm16-s))
+                   (pset srcdest-s result)
+                   (pset zbit (eq result 0))
+                   (pset nbit (lt result 0)))
+         ()
+    )
+  )
+)
+
+(logical-op-imm and OP_ANDIXORI OPE1_0)
+(logical-op-imm or  OP_ADDIORI  OPE1_1)
+(logical-op-imm xor OP_ANDIXORI OPE1_1)
+
+; addi
+(define-pmacro (arithmetic-op-imm op opc ope)
+  (begin
+    (dnsi (.sym op -imm)
+         (.str op "i rd,#imm-16")
+         ()
+         (.str op "i ${srcdest-s},#${imm16-s}")
+         (+ opc ope imm16t-s srcdest-s imm16b-s)
+         (sequence ((HI result))
+                   (pset cbit ((.sym op -cflag) HI srcdest-s imm16-s 0))
+                   (pset vbit ((.sym op -oflag) HI srcdest-s imm16-s 0))
+                   (set result (op HI srcdest-s imm16-s))
+                   (pset srcdest-s result)
+                   (pset zbit (eq result 0))
+                   (pset nbit (lt result 0)))
+         ()
+    )
+  )
+)
+
+(arithmetic-op-imm add OP_ADDIORI OPE1_0)
+
+; jmp
+(dnsi (jmp)
+      "jmp (rn)"
+      (HAS-BRANCH-DELAY-SLOT NOT-IN-DELAY-SLOT)
+      "jmp (${src1-s})"
+      (+ OP_JMP (f-dest-s 0) src1-s (f-imm16b-s 0))
+      (set (delay 1 pc) src1-s)
+      ()
+)
+
+(dnsi (jsr)
+     ("jsr rm,rn")
+     (HAS-BRANCH-DELAY-SLOT NOT-IN-DELAY-SLOT)
+     "jsr ${dest-s},${offset16-s}"
+     (+ OP_JSR dest-s (f-misc-16-1-s 0) offset16-s)
+     (sequence ()
+	       ; Branch and return are relative to the address of the vliw
+	       ; containing this insn. In the simulator, this is pc, however
+	       ; in the disassembler this is (pc-4) and that's how the ifield
+	       ; was extracted.  So add an extra 4 onto the address here to
+	       ; compensate.
+	       (pset dest-s (add pc 16))
+	       (set (delay 1 pc) (add offset16-s 4)))
+     ()
+)
+
+; Branch Conditions
+(define-pmacro (test-f ) (const BI 0))
+(define-pmacro (test-cc) (not cbit))
+(define-pmacro (test-cs) cbit)
+(define-pmacro (test-eq) zbit)
+(define-pmacro (test-ge) (or (and nbit vbit) (and (not nbit) (not vbit))))
+(define-pmacro (test-gt) (or (and (and nbit vbit) (not zbit))
+			     (and (and (not nbit) (not vbit)) (not zbit))))
+(define-pmacro (test-hi) (and cbit (not zbit)))
+(define-pmacro (test-le) (or (or zbit (and nbit (not vbit)))
+			     (and (not nbit) vbit)))
+(define-pmacro (test-ls) (or (not cbit) zbit))
+(define-pmacro (test-lt) (or (and nbit (not vbit)) (and (not nbit) vbit)))
+(define-pmacro (test-mi) nbit)
+(define-pmacro (test-ne) (not zbit))
+(define-pmacro (test-pl) (not nbit))
+(define-pmacro (test-t ) (const BI 1))
+(define-pmacro (test-vc) (not vbit))
+(define-pmacro (test-vs) vbit)
+
+; jmpcc
+(define-pmacro (jmp-cc cond cc)
+  (dnsi (.sym jmp cc)
+	(.str "jmp" cc " offset16")
+	(HAS-BRANCH-DELAY-SLOT NOT-IN-DELAY-SLOT)
+	(.str "jmp" cc " ${offset16-s}")
+	(+ OP_JMPCC (.sym CC_ cc) (f-misc-17-1-s 0) (f-misc-16-1-s 0)
+	   offset16-s)
+	(if (cond)
+	    ; Branch and return are relative to the address of the vliw
+	    ; containing this insn, which is pc-4.
+	    (set (delay 1 pc) (add offset16-s 4)))
+	()
+  )
+)
+
+(jmp-cc test-f  f)
+(jmp-cc test-cc cc)
+(jmp-cc test-cs cs)
+(jmp-cc test-eq eq)
+(jmp-cc test-ge ge)
+(jmp-cc test-gt gt)
+(jmp-cc test-hi hi)
+(jmp-cc test-le le)
+(jmp-cc test-ls ls)
+(jmp-cc test-lt lt)
+(jmp-cc test-mi mi)
+(jmp-cc test-ne ne)
+(jmp-cc test-pl pl)
+(jmp-cc test-t  t )
+(jmp-cc test-vc vc)
+(jmp-cc test-vs vs)
+
+(dnmi jmplo "jmplo $label"
+      (NO-DIS (ISA scalar))
+      "jmplo ${offset16-s}"
+      (emit jmpcc offset16-s)
+)
+
+(dnmi jmphs "jmphs $label"
+      (NO-DIS (ISA scalar))
+      "jmphs ${offset16-s}"
+      (emit jmpcs offset16-s)
+)
+
+(dnsi (nop)
+     ("nop")
+     ()
+     ("nop")
+     (+ OP_NOP (f-dest-s 0) (f-imm16b-s 0) (f-srcdest-s 0))
+     (nop)
+     ()
+)
+
+(dnsi (stop)
+      ("stop")
+      ()
+      ("stop #${imm16-s}")
+      (+ OP_STOP OPE1_1 imm16-s (f-srcdest-s 0))
+      (c-call "do_stop" pc imm16-s)
+      ()
+)
+
+(dnsi (ldabs)
+     ("ld address")
+     ()
+     "ld ${srcdest-s},${imm16-s}"
+     (+ OP_LDABS OPE1_0 srcdest-s imm16-s)
+     (pset-sload srcdest-s (mem HI imm16-s))
+     ()
+)
+
+(dnsi (ld)
+     ("ld rd, offset(rm)")
+     ()
+     "ld ${dest-s},${offset8-s}(${src1-s})"
+     (+ OP_LD dest-s src1-s (f-ebits-s 0) offset8-s (f-pibit-s 0))
+     (sequence ((HI ea))
+               (set ea (add src1-s offset8-s))
+               (pset-sload dest-s (mem HI ea)))
+     ()
+)
+
+(dnsi (ld++)
+     ("ld rd, (rm)offset++")
+     ()
+     "ld ${dest-s},(${src1-s})${offset8-postinc-s}++"
+     (+ OP_LD dest-s src1-s (f-ebits-s 0) offset8-postinc-s (f-pibit-s 1))
+     (sequence ((HI ea))
+               (set ea src1-s)
+	       (pset src1-s (add src1-s offset8-postinc-s))
+               (pset-sload dest-s (mem HI ea)))
+     ()
+)
+
+(dnsi (ldi)
+     ("ldi rd,#imm-16")
+     ()
+     "ldi ${srcdest-s},#${imm16-s}"
+     (+ OP_LDI OPE1_0 imm16-s srcdest-s)
+     (pset srcdest-s imm16-s)
+     ()
+)
+
+(dnsi (ldreg)
+     ("ldreg rd,REG")
+     ()
+     "ldreg ${dest-s},${reg-s}"
+     (+ OP_LDREG dest-s (f-srcdest-s 0) reg-s (f-offset8-s 0))
+     (pset dest-s reg-s)
+     ()
+)
+
+(dnsi (stabs)
+     ("st at address")
+     ()
+     "st ${imm16-s},${srcdest-s}"
+     (+ OP_STABS OPE1_0 srcdest-s imm16-s)
+     (pset (mem HI imm16-s) srcdest-s)
+     ()
+)
+
+(dnsi (st)
+     ("st offset(rs),rd")
+     ()
+     "st ${offset8-s}(${src1-s}),${dest-s}"
+     (+ OP_ST dest-s src1-s (f-ebits-s 0) offset8-s (f-pibit-s 0))
+     (sequence ((HI ea))
+               (set ea (add src1-s offset8-s))
+               (pset (mem HI ea) dest-s))
+     ()
+)
+
+(dnsi (st++)
+     ("st (rs)offset++,rd")
+     ()
+     "st (${src1-s})${offset8-postinc-s}++,${dest-s}"
+     (+ OP_ST dest-s src1-s (f-ebits-s 0) offset8-postinc-s (f-pibit-s 1))
+     (sequence ((HI ea))
+               (set ea src1-s)
+	       (pset src1-s (add src1-s offset8-postinc-s))
+               (pset (mem HI ea) dest-s))
+     ()
+)
+
+(dnsi (streg)
+     ("streg rd,REG")
+     ()
+     "streg ${reg-s},${dest-s}"
+     (+ OP_STREG dest-s (f-srcdest-s 0) reg-s (f-offset8-s 0))
+     (pset reg-s dest-s)
+     ()
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Vector register load instructions
+
+(dnsi (ldvbl)
+     ("ldvbl vrm[element],offset(rn)")
+     ()
+     "ldvbl ${destv-s}[${ebits-s}],${offset8-s}(${src1-s})"
+     (+ OP_LDVBL destv-s src1-s ebits-s (f-pibit-s 0) offset8-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset8-s))
+               (pset-vload (REG_VR destv-s ebits-s) (zext HI (mem QI ea))))
+     ()
+)
+(dnsi (ldvbl++)
+     ("ldvbl vrm[element],(rn)offset++")
+     ()
+     "ldvbl ${destv-s}[${ebits-s}],(${src1-s})${offset8-postinc-s}++"
+     (+ OP_LDVBL destv-s src1-s ebits-s (f-pibit-s 1) offset8-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+	       (pset src1-s (add src1-s offset8-postinc-s))
+               (pset-vload (REG_VR destv-s ebits-s) (zext HI (mem QI ea))))
+     ()
+)
+(dnsi (ldvbu)
+     ("ldvbu vrm[element],offset(rn)")
+     ()
+     "ldvbu ${destv-s}[${ebits-s}],${offset8-s}(${src1-s})"
+     (+ OP_LDVBU destv-s src1-s ebits-s (f-pibit-s 0) offset8-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset8-s))
+               (pset-vload (REG_VR destv-s ebits-s) (sll (mem QI ea) 8)))
+     ()
+)
+(dnsi (ldvbu++)
+     ("ldvbu vrm[element],(rn)offset++")
+     ()
+     "ldvbu ${destv-s}[${ebits-s}],(${src1-s})${offset8-postinc-s}++"
+     (+ OP_LDVBU destv-s src1-s ebits-s (f-pibit-s 1) offset8-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset8-postinc-s))
+               (pset-vload (REG_VR destv-s ebits-s) (sll (mem QI ea) 8)))
+     ()
+)
+(dnsi (ldvbx)
+     ("ldvbx vrm[element],offset(rn)")
+     ()
+     "ldvbx ${destv-s}[${ebits-s}],${offset8-s}(${src1-s})"
+     (+ OP_LDVBX destv-s src1-s ebits-s (f-pibit-s 0) offset8-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset8-s))
+               (pset-vload (REG_VR destv-s ebits-s) (ext HI (mem QI ea))))
+     ()
+)
+(dnsi (ldvbx++)
+     ("ldvbx vrm[element],(rn)offset++")
+     ()
+     "ldvbx ${destv-s}[${ebits-s}],(${src1-s})${offset8-postinc-s}++"
+     (+ OP_LDVBX destv-s src1-s ebits-s (f-pibit-s 1) offset8-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset8-postinc-s))
+               (pset-vload (REG_VR destv-s ebits-s) (ext HI (mem QI ea))))
+     ()
+)
+(dnsi (ldvw)
+     ("ldvw vrm[element],offset(rn)")
+     ()
+     "ldvw ${destv-s}[${ebits-s}],${offset8-s}(${src1-s})"
+     (+ OP_LDVW destv-s src1-s ebits-s (f-pibit-s 0) offset8-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset8-s))
+               (pset-vload (REG_VR destv-s ebits-s) (mem HI ea)))
+     ()
+)
+(dnsi (ldvw++)
+     ("ldvw vrm[element],(rn)offset++")
+     ()
+     "ldvw ${destv-s}[${ebits-s}],(${src1-s})${offset8-postinc-s}++"
+     (+ OP_LDVW destv-s src1-s ebits-s (f-pibit-s 1) offset8-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset8-postinc-s))
+               (pset-vload (REG_VR destv-s ebits-s) (mem HI ea)))
+     ()
+)
+(dnsi (ldv2w)
+     ("ldv2w vrm[element],offset(rn)")
+     ()
+     "ldv2w ${destv-s}[${ebits-s}],${offset8-s}(${src1-s})"
+     (+ OP_LDV2W destv-s src1-s ebits-s (f-pibit-s 0) offset8-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset8-s))
+	       (pset-vload (REG_VR destv-s (add ebits-s 0)) (mem HI (add ea 0)))
+	       (pset-vload (REG_VR destv-s (add ebits-s 1)) (mem HI (add ea 2))))
+     ()
+)
+(dnsi (ldv2w++)
+     ("ldv2w vrm[element],(rn)offset++")
+     ()
+     "ldv2w ${destv-s}[${ebits-s}],(${src1-s})${offset8-postinc-s}++"
+     (+ OP_LDV2W destv-s src1-s ebits-s (f-pibit-s 1) offset8-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset8-postinc-s))
+	       (pset-vload (REG_VR destv-s (add ebits-s 0)) (mem HI (add ea 0)))
+	       (pset-vload (REG_VR destv-s (add ebits-s 1)) (mem HI (add ea 2))))
+     ()
+)
+(dnsi (ldv4w)
+     ("ldv4w vrm[element],offset(rn)")
+     ()
+     "ldv4w ${destv-s}[${ebits-s}],${offset8-s}(${src1-s})"
+     (+ OP_LDV4W destv-s src1-s ebits-s (f-pibit-s 0) offset8-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset8-s))
+	       (pset-vload (REG_VR destv-s (add ebits-s 0)) (mem HI (add ea 0)))
+	       (pset-vload (REG_VR destv-s (add ebits-s 1)) (mem HI (add ea 2)))
+	       (pset-vload (REG_VR destv-s (add ebits-s 2)) (mem HI (add ea 4)))
+	       (pset-vload (REG_VR destv-s (add ebits-s 3)) (mem HI (add ea 6))))
+      ()
+)
+(dnsi (ldv4w++)
+     ("ldv4w vrm[element],(rn)offset++")
+     ()
+     "ldv4w ${destv-s}[${ebits-s}],(${src1-s})${offset8-postinc-s}++"
+     (+ OP_LDV4W destv-s src1-s ebits-s (f-pibit-s 1) offset8-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset8-postinc-s))
+	       (pset-vload (REG_VR destv-s (add ebits-s 0)) (mem HI (add ea 0)))
+	       (pset-vload (REG_VR destv-s (add ebits-s 1)) (mem HI (add ea 2)))
+	       (pset-vload (REG_VR destv-s (add ebits-s 2)) (mem HI (add ea 4)))
+	       (pset-vload (REG_VR destv-s (add ebits-s 3)) (mem HI (add ea 6))))
+      ()
+)
+(dnsi (ldv4aw)
+     ("ldv4aw vrm[element],offset(rn)")
+     ()
+     "ldv4aw ${destv-s}[${ebits-s}],${offset8-s}(${src1-s})"
+     (+ OP_LDV4AW destv-s src1-s ebits-s (f-pibit-s 0) offset8-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset8-s))
+	       (pset-vload (REG_VR destv-s (add ebits-s 0)) (mem HI (add ea 0)))
+	       (pset-vload (REG_VR destv-s (add ebits-s 1)) (mem HI (add ea 4)))
+	       (pset-vload (REG_VR destv-s (add ebits-s 2)) (mem HI (add ea 8)))
+	       (pset-vload (REG_VR destv-s (add ebits-s 3)) (mem HI (add ea 12))))
+      ()
+)
+(dnsi (ldv4aw++)
+     ("ldv4aw vrm[element],(rn)offset++")
+     ()
+     "ldv4aw ${destv-s}[${ebits-s}],(${src1-s})${offset8-postinc-s}++"
+     (+ OP_LDV4AW destv-s src1-s ebits-s (f-pibit-s 1) offset8-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset8-postinc-s))
+	       (pset-vload (REG_VR destv-s (add ebits-s 0)) (mem HI (add ea 0)))
+	       (pset-vload (REG_VR destv-s (add ebits-s 1)) (mem HI (add ea 4)))
+	       (pset-vload (REG_VR destv-s (add ebits-s 2)) (mem HI (add ea 8)))
+	       (pset-vload (REG_VR destv-s (add ebits-s 3)) (mem HI (add ea 12))))
+      ()
+)
+(dnsi (ldv8w)
+     ("ldv8w vrm,offset(rn)")
+     ()
+     "ldv8w ${destv-s},${offset12-s}(${src1-s})"
+     (+ OP_LDV8W destv-s src1-s offset12-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset12-s))
+	       (pset-vload (REG_VR destv-s 0) (mem HI (add ea 0)))
+	       (pset-vload (REG_VR destv-s 1) (mem HI (add ea 2)))
+	       (pset-vload (REG_VR destv-s 2) (mem HI (add ea 4)))
+	       (pset-vload (REG_VR destv-s 3) (mem HI (add ea 6)))
+	       (pset-vload (REG_VR destv-s 4) (mem HI (add ea 8)))
+	       (pset-vload (REG_VR destv-s 5) (mem HI (add ea 10)))
+	       (pset-vload (REG_VR destv-s 6) (mem HI (add ea 12)))
+	       (pset-vload (REG_VR destv-s 7) (mem HI (add ea 14))))
+      ()
+)
+(dnsi (ldv8w++)
+     ("ldv8w vrm,(rn)offset++")
+     ()
+     "ldv8w ${destv-s},(${src1-s})${offset12-postinc-s}++"
+     (+ OP_LDV8WPI destv-s src1-s offset12-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset12-postinc-s))
+	       (pset-vload (REG_VR destv-s 0) (mem HI (add ea 0)))
+	       (pset-vload (REG_VR destv-s 1) (mem HI (add ea 2)))
+	       (pset-vload (REG_VR destv-s 2) (mem HI (add ea 4)))
+	       (pset-vload (REG_VR destv-s 3) (mem HI (add ea 6)))
+	       (pset-vload (REG_VR destv-s 4) (mem HI (add ea 8)))
+	       (pset-vload (REG_VR destv-s 5) (mem HI (add ea 10)))
+	       (pset-vload (REG_VR destv-s 6) (mem HI (add ea 12)))
+	       (pset-vload (REG_VR destv-s 7) (mem HI (add ea 14))))
+      ()
+)
+(dnsi (ldv8bl)
+     ("ldv8bl vrm,offset(rn)")
+     ()
+     "ldv8bl ${destv-s},${offset12-s}(${src1-s})"
+     (+ OP_LDV8BL destv-s src1-s offset12-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset12-s))
+	       (pset-vload (REG_VR destv-s 0) (zext HI (mem QI (add ea 0))))
+	       (pset-vload (REG_VR destv-s 1) (zext HI (mem QI (add ea 1))))
+	       (pset-vload (REG_VR destv-s 2) (zext HI (mem QI (add ea 2))))
+	       (pset-vload (REG_VR destv-s 3) (zext HI (mem QI (add ea 3))))
+	       (pset-vload (REG_VR destv-s 4) (zext HI (mem QI (add ea 4))))
+	       (pset-vload (REG_VR destv-s 5) (zext HI (mem QI (add ea 5))))
+	       (pset-vload (REG_VR destv-s 6) (zext HI (mem QI (add ea 6))))
+	       (pset-vload (REG_VR destv-s 7) (zext HI (mem QI (add ea 7)))))
+      ()
+)
+(dnsi (ldv8bl++)
+     ("ldv8bl vrm,(rn)offset++")
+     ()
+     "ldv8bl ${destv-s},(${src1-s})${offset12-postinc-s}++"
+     (+ OP_LDV8BLPI destv-s src1-s offset12-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset12-postinc-s))
+	       (pset-vload (REG_VR destv-s 0) (zext HI (mem QI (add ea 0))))
+	       (pset-vload (REG_VR destv-s 1) (zext HI (mem QI (add ea 1))))
+	       (pset-vload (REG_VR destv-s 2) (zext HI (mem QI (add ea 2))))
+	       (pset-vload (REG_VR destv-s 3) (zext HI (mem QI (add ea 3))))
+	       (pset-vload (REG_VR destv-s 4) (zext HI (mem QI (add ea 4))))
+	       (pset-vload (REG_VR destv-s 5) (zext HI (mem QI (add ea 5))))
+	       (pset-vload (REG_VR destv-s 6) (zext HI (mem QI (add ea 6))))
+	       (pset-vload (REG_VR destv-s 7) (zext HI (mem QI (add ea 7)))))
+      ()
+)
+(dnsi (ldv8bu)
+     ("ldv8bu vrm,offset(rn)")
+     ()
+     "ldv8bu ${destv-s},${offset12-s}(${src1-s})"
+     (+ OP_LDV8BU destv-s src1-s offset12-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset12-s))
+	       (pset-vload (REG_VR destv-s 0) (sll (mem QI (add ea 0)) 8))
+	       (pset-vload (REG_VR destv-s 1) (sll (mem QI (add ea 1)) 8))
+	       (pset-vload (REG_VR destv-s 2) (sll (mem QI (add ea 2)) 8))
+	       (pset-vload (REG_VR destv-s 3) (sll (mem QI (add ea 3)) 8))
+	       (pset-vload (REG_VR destv-s 4) (sll (mem QI (add ea 4)) 8))
+	       (pset-vload (REG_VR destv-s 5) (sll (mem QI (add ea 5)) 8))
+	       (pset-vload (REG_VR destv-s 6) (sll (mem QI (add ea 6)) 8))
+	       (pset-vload (REG_VR destv-s 7) (sll (mem QI (add ea 7)) 8)))
+      ()
+)
+(dnsi (ldv8bu++)
+     ("ldv8bu vrm,(rn)offset++")
+     ()
+     "ldv8bu ${destv-s},(${src1-s})${offset12-postinc-s}++"
+     (+ OP_LDV8BUPI destv-s src1-s offset12-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset12-postinc-s))
+	       (pset-vload (REG_VR destv-s 0) (sll (mem QI (add ea 0)) 8))
+	       (pset-vload (REG_VR destv-s 1) (sll (mem QI (add ea 1)) 8))
+	       (pset-vload (REG_VR destv-s 2) (sll (mem QI (add ea 2)) 8))
+	       (pset-vload (REG_VR destv-s 3) (sll (mem QI (add ea 3)) 8))
+	       (pset-vload (REG_VR destv-s 4) (sll (mem QI (add ea 4)) 8))
+	       (pset-vload (REG_VR destv-s 5) (sll (mem QI (add ea 5)) 8))
+	       (pset-vload (REG_VR destv-s 6) (sll (mem QI (add ea 6)) 8))
+	       (pset-vload (REG_VR destv-s 7) (sll (mem QI (add ea 7)) 8)))
+      ()
+)
+(dnsi (ldv8bx)
+     ("ldv8bx vrm,offset(rn)")
+     ()
+     "ldv8bx ${destv-s},${offset12-s}(${src1-s})"
+     (+ OP_LDV8BX destv-s src1-s offset12-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset12-s))
+	       (pset-vload (REG_VR destv-s 0) (ext HI (mem QI (add ea 0))))
+	       (pset-vload (REG_VR destv-s 1) (ext HI (mem QI (add ea 1))))
+	       (pset-vload (REG_VR destv-s 2) (ext HI (mem QI (add ea 2))))
+	       (pset-vload (REG_VR destv-s 3) (ext HI (mem QI (add ea 3))))
+	       (pset-vload (REG_VR destv-s 4) (ext HI (mem QI (add ea 4))))
+	       (pset-vload (REG_VR destv-s 5) (ext HI (mem QI (add ea 5))))
+	       (pset-vload (REG_VR destv-s 6) (ext HI (mem QI (add ea 6))))
+	       (pset-vload (REG_VR destv-s 7) (ext HI (mem QI (add ea 7)))))
+      ()
+)
+(dnsi (ldv8bx++)
+     ("ldv8bx vrm,(rn)offset++")
+     ()
+     "ldv8bx ${destv-s},(${src1-s})${offset12-postinc-s}++"
+     (+ OP_LDV8BXPI destv-s src1-s offset12-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset12-postinc-s))
+	       (pset-vload (REG_VR destv-s 0) (ext HI (mem QI (add ea 0))))
+	       (pset-vload (REG_VR destv-s 1) (ext HI (mem QI (add ea 1))))
+	       (pset-vload (REG_VR destv-s 2) (ext HI (mem QI (add ea 2))))
+	       (pset-vload (REG_VR destv-s 3) (ext HI (mem QI (add ea 3))))
+	       (pset-vload (REG_VR destv-s 4) (ext HI (mem QI (add ea 4))))
+	       (pset-vload (REG_VR destv-s 5) (ext HI (mem QI (add ea 5))))
+	       (pset-vload (REG_VR destv-s 6) (ext HI (mem QI (add ea 6))))
+	       (pset-vload (REG_VR destv-s 7) (ext HI (mem QI (add ea 7)))))
+      ()
+)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Vector register store instructions
+(dnsi (stvbl)
+     ("stvbl offset(rn),vrm[element]")
+     ()
+     "stvbl ${offset8-s}(${src1-s}),${destv-s}[${ebits-s}]"
+     (+ OP_STVBL destv-s src1-s ebits-s (f-pibit-s 0) offset8-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset8-s))
+               (pset (mem QI ea) (subword QI (REG_VR destv-s ebits-s) 1))) ; 1=lsb
+     ()
+)
+(dnsi (stvbl++)
+     ("stvbl (rn)offset++,vrm[element]")
+     ()
+     "stvbl (${src1-s})${offset8-postinc-s}++,${destv-s}[${ebits-s}]"
+     (+ OP_STVBL destv-s src1-s ebits-s (f-pibit-s 1) offset8-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset8-postinc-s))
+               (pset (mem QI ea) (subword QI (REG_VR destv-s ebits-s) 1))) ; 1=lsb
+     ()
+)
+(dnsi (stvbu)
+     ("stvbu offset(rn),vrm[element]")
+     ()
+     "stvbu ${offset8-s}(${src1-s}),${destv-s}[${ebits-s}]"
+     (+ OP_STVBU destv-s src1-s ebits-s (f-pibit-s 0) offset8-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset8-s))
+               (pset (mem QI ea) (subword QI (REG_VR destv-s ebits-s) 0))) ; 0=msb
+     ()
+)
+(dnsi (stvbu++)
+     ("stvbu (rn)offset++,vrm[element]")
+     ()
+     "stvbu (${src1-s})${offset8-postinc-s}++,${destv-s}[${ebits-s}]"
+     (+ OP_STVBU destv-s src1-s ebits-s (f-pibit-s 1) offset8-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset8-postinc-s))
+               (pset (mem QI ea) (subword QI (REG_VR destv-s ebits-s) 0))) ; 0=msb
+     ()
+)
+(dnsi (stvw)
+     ("stvw offset(rn),vrm[element]")
+     ()
+     "stvw ${offset8-s}(${src1-s}),${destv-s}[${ebits-s}]"
+     (+ OP_STVW destv-s src1-s ebits-s (f-pibit-s 0) offset8-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset8-s))
+               (pset (mem HI ea) (REG_VR destv-s ebits-s)))
+     ()
+)
+(dnsi (stvw++)
+     ("stvw (rn)offset++,vrm[element]")
+     ()
+     "stvw (${src1-s})${offset8-postinc-s}++,${destv-s}[${ebits-s}]"
+     (+ OP_STVW destv-s src1-s ebits-s (f-pibit-s 1) offset8-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset8-postinc-s))
+               (pset (mem HI ea) (REG_VR destv-s ebits-s)))
+     ()
+)
+(dnsi (stv2w)
+     ("stv2w offset(rn),vrm[element]")
+     ()
+     "stv2w ${offset8-s}(${src1-s}),${destv-s}[${ebits-s}]"
+     (+ OP_STV2W destv-s src1-s ebits-s (f-pibit-s 0) offset8-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset8-s))
+               (pset (mem HI (add ea 0)) (REG_VR destv-s (add ebits-s 0)))
+               (pset (mem HI (add ea 2)) (REG_VR destv-s (add ebits-s 1))))
+     ()
+)
+(dnsi (stv2w++)
+     ("stv2w (rn)offset++,vrm[element]")
+     ()
+     "stv2w (${src1-s})${offset8-postinc-s}++,${destv-s}[${ebits-s}]"
+     (+ OP_STV2W destv-s src1-s ebits-s (f-pibit-s 1) offset8-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset8-postinc-s))
+               (pset (mem HI (add ea 0)) (REG_VR destv-s (add ebits-s 0)))
+               (pset (mem HI (add ea 2)) (REG_VR destv-s (add ebits-s 1))))
+     ()
+)
+(dnsi (stv8w)
+     ("stv8w offset(rn),vrm")
+     ()
+     "stv8w ${offset12-s}(${src1-s}),${destv-s}"
+     (+ OP_STV8W destv-s src1-s offset12-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset12-s))
+               (pset (mem HI ea) (REG_VR destv-s 0))
+               (pset (mem HI (add ea 2)) (REG_VR destv-s 1))
+               (pset (mem HI (add ea 4)) (REG_VR destv-s 2))
+               (pset (mem HI (add ea 6)) (REG_VR destv-s 3))
+               (pset (mem HI (add ea 8)) (REG_VR destv-s 4))
+               (pset (mem HI (add ea 10)) (REG_VR destv-s 5))
+               (pset (mem HI (add ea 12)) (REG_VR destv-s 6))
+               (pset (mem HI (add ea 14)) (REG_VR destv-s 7)))
+     ()
+)
+(dnsi (stv8w++)
+     ("stv8w (rn)offset++,vrm")
+     ()
+     "stv8w (${src1-s})${offset12-postinc-s}++,${destv-s}"
+     (+ OP_STV8WPI destv-s src1-s offset12-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset12-postinc-s))
+               (pset (mem HI ea) (REG_VR destv-s 0))
+               (pset (mem HI (add ea 2)) (REG_VR destv-s 1))
+               (pset (mem HI (add ea 4)) (REG_VR destv-s 2))
+               (pset (mem HI (add ea 6)) (REG_VR destv-s 3))
+               (pset (mem HI (add ea 8)) (REG_VR destv-s 4))
+               (pset (mem HI (add ea 10)) (REG_VR destv-s 5))
+               (pset (mem HI (add ea 12)) (REG_VR destv-s 6))
+               (pset (mem HI (add ea 14)) (REG_VR destv-s 7)))
+     ()
+)
+(dnsi (stv8bl)
+     ("stv8bl offset(rn),vrm")
+     ()
+     "stv8bl ${offset12-s}(${src1-s}),${destv-s}"
+     (+ OP_STV8BL destv-s src1-s offset12-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset12-s))
+               (pset (mem QI ea) (REG_VR destv-s 0))
+               (pset (mem QI (add ea 1)) (REG_VR destv-s 1))
+               (pset (mem QI (add ea 2)) (REG_VR destv-s 2))
+               (pset (mem QI (add ea 3)) (REG_VR destv-s 3))
+               (pset (mem QI (add ea 4)) (REG_VR destv-s 4))
+               (pset (mem QI (add ea 5)) (REG_VR destv-s 5))
+               (pset (mem QI (add ea 6)) (REG_VR destv-s 6))
+               (pset (mem QI (add ea 7)) (REG_VR destv-s 7)))
+     ()
+)
+(dnsi (stv8bl++)
+     ("stv8bl (rn)offset++,vrm")
+     ()
+     "stv8bl (${src1-s})${offset12-postinc-s}++,${destv-s}"
+     (+ OP_STV8BLPI destv-s src1-s offset12-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset12-postinc-s))
+               (pset (mem QI ea) (REG_VR destv-s 0))
+               (pset (mem QI (add ea 1)) (REG_VR destv-s 1))
+               (pset (mem QI (add ea 2)) (REG_VR destv-s 2))
+               (pset (mem QI (add ea 3)) (REG_VR destv-s 3))
+               (pset (mem QI (add ea 4)) (REG_VR destv-s 4))
+               (pset (mem QI (add ea 5)) (REG_VR destv-s 5))
+               (pset (mem QI (add ea 6)) (REG_VR destv-s 6))
+               (pset (mem QI (add ea 7)) (REG_VR destv-s 7)))
+     ()
+)
+(dnsi (stv8bu)
+     ("stv8bu offset(rn),vrm")
+     ()
+     "stv8bu ${offset12-s}(${src1-s}),${destv-s}"
+     (+ OP_STV8BU destv-s src1-s offset12-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset12-s))
+               (pset (mem QI ea) (srl (REG_VR destv-s 0) 8))
+               (pset (mem QI (add ea 1)) (srl (REG_VR destv-s 1) 8))
+               (pset (mem QI (add ea 2)) (srl (REG_VR destv-s 2) 8))
+               (pset (mem QI (add ea 3)) (srl (REG_VR destv-s 3) 8))
+               (pset (mem QI (add ea 4)) (srl (REG_VR destv-s 4) 8))
+               (pset (mem QI (add ea 5)) (srl (REG_VR destv-s 5) 8))
+               (pset (mem QI (add ea 6)) (srl (REG_VR destv-s 6) 8))
+               (pset (mem QI (add ea 7)) (srl (REG_VR destv-s 7) 8)))
+     ()
+)
+(dnsi (stv8bu++)
+     ("stv8bu (rn)offset++,vrm")
+     ()
+     "stv8bu (${src1-s})${offset12-postinc-s}++,${destv-s}"
+     (+ OP_STV8BUPI destv-s src1-s offset12-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset12-postinc-s))
+               (pset (mem QI ea) (srl (REG_VR destv-s 0) 8))
+               (pset (mem QI (add ea 1)) (srl (REG_VR destv-s 1) 8))
+               (pset (mem QI (add ea 2)) (srl (REG_VR destv-s 2) 8))
+               (pset (mem QI (add ea 3)) (srl (REG_VR destv-s 3) 8))
+               (pset (mem QI (add ea 4)) (srl (REG_VR destv-s 4) 8))
+               (pset (mem QI (add ea 5)) (srl (REG_VR destv-s 5) 8))
+               (pset (mem QI (add ea 6)) (srl (REG_VR destv-s 6) 8))
+               (pset (mem QI (add ea 7)) (srl (REG_VR destv-s 7) 8)))
+     ()
+)
+(dnsi (stv4w)
+     ("stv4w offset(rn),vrm[element]")
+     ()
+     "stv4w ${offset8-s}(${src1-s}),${destv-s}[${ebits-s}]"
+     (+ OP_STV4W destv-s src1-s ebits-s (f-pibit-s 0) offset8-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset8-s))
+               (if (eq ebits-s 0)
+		   (sequence ()
+			     (pset (mem HI ea) (REG_VR destv-s 0))
+			     (pset (mem HI (add ea 2)) (REG_VR destv-s 1))
+			     (pset (mem HI (add ea 4)) (REG_VR destv-s 2))
+			     (pset (mem HI (add ea 6)) (REG_VR destv-s 3)))
+		   (if (eq ebits-s 4)
+		       (sequence ()
+				 (pset (mem HI ea) (REG_VR destv-s 4))
+				 (pset (mem HI (add ea 2)) (REG_VR destv-s 5))
+				 (pset (mem HI (add ea 4)) (REG_VR destv-s 6))
+				 (pset (mem HI (add ea 6)) (REG_VR destv-s 7)))
+		       (error "invalid value for field ebits-s"))))
+      ()
+)
+(dnsi (stv4w++)
+     ("stv4w (rn)offset++,vrm[element]")
+     ()
+     "stv4w (${src1-s})${offset8-postinc-s}++,${destv-s}[${ebits-s}]"
+     (+ OP_STV4W destv-s src1-s ebits-s (f-pibit-s 1) offset8-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset8-postinc-s))
+               (if (eq ebits-s 0)
+		   (sequence ()
+			     (pset (mem HI ea) (REG_VR destv-s 0))
+			     (pset (mem HI (add ea 2)) (REG_VR destv-s 1))
+			     (pset (mem HI (add ea 4)) (REG_VR destv-s 2))
+			     (pset (mem HI (add ea 6)) (REG_VR destv-s 3)))
+		   (if (eq ebits-s 4)
+		       (sequence ()
+				 (pset (mem HI ea) (REG_VR destv-s 4))
+				 (pset (mem HI (add ea 2)) (REG_VR destv-s 5))
+				 (pset (mem HI (add ea 4)) (REG_VR destv-s 6))
+				 (pset (mem HI (add ea 6)) (REG_VR destv-s 7)))
+		       (error "invalid value for field ebits-s"))))
+      ()
+)
+(dnsi (stv4aw)
+     ("stv4aw offset(rn),vrm[element]")
+     ()
+     "stv4aw ${offset8-s}(${src1-s}),${destv-s}[${ebits-s}]"
+     (+ OP_STV4AW destv-s src1-s ebits-s (f-pibit-s 0) offset8-s)
+     (sequence ((HI ea))
+               (set ea (add src1-s offset8-s))
+               (if (eq ebits-s 0)
+		   (sequence ()
+			     (pset (mem HI ea) (REG_VR destv-s 0))
+			     (pset (mem HI (add ea 4)) (REG_VR destv-s 1))
+			     (pset (mem HI (add ea 8)) (REG_VR destv-s 2))
+			     (pset (mem HI (add ea 12)) (REG_VR destv-s 3)))
+		   (if (eq ebits-s 4)
+		       (sequence ()
+				 (pset (mem HI ea) (REG_VR destv-s 4))
+				 (pset (mem HI (add ea 4)) (REG_VR destv-s 5))
+				 (pset (mem HI (add ea 8)) (REG_VR destv-s 6))
+				 (pset (mem HI (add ea 12)) (REG_VR destv-s 7)))
+		       (error "invalid value for field ebits-s"))))
+      ()
+)
+(dnsi (stv4aw++)
+     ("stv4aw (rn)offset++,vrm[element]")
+     ()
+     "stv4aw (${src1-s})${offset8-postinc-s}++,${destv-s}[${ebits-s}]"
+     (+ OP_STV4AW destv-s src1-s ebits-s (f-pibit-s 1) offset8-postinc-s)
+     (sequence ((HI ea))
+               (set ea src1-s)
+               (pset src1-s (add src1-s offset8-postinc-s))
+               (if (eq ebits-s 0)
+		   (sequence ()
+			     (pset (mem HI ea) (REG_VR destv-s 0))
+			     (pset (mem HI (add ea 4)) (REG_VR destv-s 1))
+			     (pset (mem HI (add ea 8)) (REG_VR destv-s 2))
+			     (pset (mem HI (add ea 12)) (REG_VR destv-s 3)))
+		   (if (eq ebits-s 4)
+		       (sequence ()
+				 (pset (mem HI ea) (REG_VR destv-s 4))
+				 (pset (mem HI (add ea 4)) (REG_VR destv-s 5))
+				 (pset (mem HI (add ea 8)) (REG_VR destv-s 6))
+				 (pset (mem HI (add ea 12)) (REG_VR destv-s 7)))
+		       (error "invalid value for field ebits-s"))))
+      ()
+)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Vector lookup table address calculation.
+;
+; The 'elem' is used to select an element from the 'src' vector from which
+; the high order byte is selected (if 'part' is 1) or the low order byte is
+; selected. This byte is the row number in a 256 x 8 table of 2 byte words.
+; 'elem' is used again to select a word from the row. 'base' is the address
+; of the table itself and gets aligned down to a 4k boundary.
+ 
+(define-pmacro (lut-element-address base src elem part)
+  (add (and base (inv (sub 4096 1))) ; base address
+       (add (mul elem 2) ; element offset
+	    (mul (and (srl (REG_VR src elem) (mul part 8)) #xff) 16))) ; row num
+)
+
+(dnsi (ldvlut)
+     ("ldvlut vrm,vrs[part](rn)")
+     ()
+     "ldvlut ${destv-s},${srcv-s}[${lut-part-s}](${src1-s})"
+     (+ OP_LDVLUT destv-s src1-s srcv-s lut-part-s (f-misc-5-6-s 0))
+     (sequence ()
+	       (pset-vload (REG_VR destv-s 0)
+		     (mem HI (lut-element-address src1-s srcv-s 0 lut-part-s)))
+	       (pset-vload (REG_VR destv-s 1)
+		     (mem HI (lut-element-address src1-s srcv-s 1 lut-part-s)))
+	       (pset-vload (REG_VR destv-s 2)
+		     (mem HI (lut-element-address src1-s srcv-s 2 lut-part-s)))
+	       (pset-vload (REG_VR destv-s 3)
+		     (mem HI (lut-element-address src1-s srcv-s 3 lut-part-s)))
+	       (pset-vload (REG_VR destv-s 4)
+		     (mem HI (lut-element-address src1-s srcv-s 4 lut-part-s)))
+	       (pset-vload (REG_VR destv-s 5)
+		     (mem HI (lut-element-address src1-s srcv-s 5 lut-part-s)))
+	       (pset-vload (REG_VR destv-s 6)
+		     (mem HI (lut-element-address src1-s srcv-s 6 lut-part-s)))
+	       (pset-vload (REG_VR destv-s 7)
+		     (mem HI (lut-element-address src1-s srcv-s 7 lut-part-s))))
+     ()
+)
+
+(dnsi (stvlut)
+     ("stvlut vri[part](rn),vrs")
+     ()
+     "stvlut ${srcv-s}[${lut-part-s}](${src1-s}),${destv-s}"
+     (+ OP_STVLUT destv-s src1-s srcv-s lut-part-s (f-misc-5-6-s 0))
+     (sequence ()
+	       (pset (mem HI (lut-element-address src1-s srcv-s 0 lut-part-s))
+		     (REG_VR destv-s 0))
+	       (pset (mem HI (lut-element-address src1-s srcv-s 1 lut-part-s))
+		     (REG_VR destv-s 1))
+	       (pset (mem HI (lut-element-address src1-s srcv-s 2 lut-part-s))
+		     (REG_VR destv-s 2))
+	       (pset (mem HI (lut-element-address src1-s srcv-s 3 lut-part-s))
+		     (REG_VR destv-s 3))
+	       (pset (mem HI (lut-element-address src1-s srcv-s 4 lut-part-s))
+		     (REG_VR destv-s 4))
+	       (pset (mem HI (lut-element-address src1-s srcv-s 5 lut-part-s))
+		     (REG_VR destv-s 5))
+	       (pset (mem HI (lut-element-address src1-s srcv-s 6 lut-part-s))
+		     (REG_VR destv-s 6))
+	       (pset (mem HI (lut-element-address src1-s srcv-s 7 lut-part-s))
+		     (REG_VR destv-s 7)))
+     ()
+)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-pmacro (REG_VACC_PART elemnum part)
+  (and HI #xffff (srl (reg h-vacc elemnum) (mul 16 part)))
+)
+(define-pmacro (REG_VACC_PART_OVERWRITTEN elemnum part part-value)
+  (sra DI ; extend sign
+       (sll DI
+	    (or DI
+		(and (reg h-vacc elemnum)
+		     (inv (sll DI #xffff (mul 16 part)))) ; keep old parts
+		(sll DI (and DI part-value #xffff)
+		     (mul 16 part))) ; overwrite new part
+	    16)
+       16)
+)
+
+; Operations used in ip4kmath manual
+;
+; clamp signed to 16 bits
+(define-pmacro (CS16 value)
+  (if HI (gt value 32767)
+      32767
+      (if HI (lt value -32768)
+	  -32768
+	  value))
+)
+
+; round and clamp signed to 16 bits
+(define-pmacro (RC16 value is)
+  (and HI #xffff
+       (if HI (and is 2)
+	   (srl value 16)
+	   (CS16 (add (sra value 16)
+		      (and (srl value 15) 1)))))
+)
+
+; Extract the operands for a vector operation
+(define-pmacro (get-vector-operands elemnum src1 src2 targ1 targ2 is)
+  (sequence ()
+	    (set targ1 (REG_VR src1 elemnum))
+	    (set targ2 (REG_VR src2 (vector-src2-row elemnum)))
+	    (if (and is 2) ; unsigned
+		(sequence ()
+			  (set targ1 (and targ1 #xffff))
+			  (set targ2 (and targ2 #xffff)))))
+)
+
+; Perform a typical vector element operation and set carry flag.
+(define-pmacro (vector-op-zc elemnum result op src1 src2 is issub)
+  (sequence ((DI val1) (DI val2))
+	    ; Determine the operands
+	    (get-vector-operands elemnum src1 src2 val1 val2 is)
+	    ; Set the carry bit
+	    (if issub
+		(pset (reg h-vc elemnum) (not ((.sym op -cflag) HI val1 val2 0)))
+		(pset (reg h-vc elemnum) ((.sym op -cflag) HI val1 val2 0)))
+	    ; Perform the operation
+	    (set result (op val1 val2))
+	    (pset (reg h-vz elemnum) (eq result 0)))
+)
+
+; Perform a typical vector element operation with carry and reset carry flag.
+(define-pmacro (vector-carryop-zc elemnum result op src1 src2 carry is issub)
+  (sequence ((DI val1) (DI val2) (BI newcarry))
+	    ; Determine the operands
+	    (get-vector-operands elemnum src1 src2 val1 val2 is)
+	    ; Perform the operation
+	    (set result ((.sym op c) val1 val2 carry))
+	    ; Set the carry bit.  Must happen last in case this carry bit
+	    ; was used in the actual operation.
+	    (set newcarry ((.sym op -cflag) HI val1 val2 carry))
+	    (if issub
+		(set newcarry (not newcarry)))
+	    (pset (reg h-vc elemnum) newcarry)
+	    (pset (reg h-vz elemnum) (eq result 0)))
+)
+
+; Convert the result of a vector operation to the format of the accumulator.
+; Handle integer vs fractional and scaling as requested.
+(define-pmacro (vector-ext result value shift is)
+  (sequence ()
+	    (set result (sll DI value shift))
+	    ; Scale the result, if specified
+	    (if (and is 1)
+		(set result (sra DI result 1))))
+)
+
+; Add the given value to the accumulator for this element.
+; Return the result in 'value'.
+; Use and clear vc32
+; Set vc48
+(define-pmacro (vector-accumulate-result elemnum value)
+  (sequence ((DI vc32) (BI vc48))
+	    ; Add the value to the accumulator
+	    (set vc48 (add-cflag (reg h-vacc elemnum) value 0))
+	    (set value (add (reg h-vacc elemnum) value))
+	    ; Carry in vc32 at bit position 32
+	    ; Careful!!! vc48 may have been set by the previous addition!
+	    (set vc32 (sll DI (and (reg h-vc32 elemnum) 1) 32))
+	    (set vc48 (or vc48 (add-cflag value vc32 0)))
+	    (set value (add value vc32))
+	    ; Set vc48. Clear vc32.
+	    (pset (reg h-vc48 elemnum) vc48)
+	    (pset (reg h-vc32 elemnum) 0))
+)
+
+; Perform a typical vector accumulate operation setting zero and carry flags,
+; handling fractional vs integer and scaling, if requested.
+(define-pmacro (vector-acc-calc-zc elemnum dest op src1 src2 is issub)
+  (sequence ((HI vresult) (DI result) (DI addend))
+	    ; Perform the operation and set the c flag for the vector element
+	    (vector-op-zc elemnum result op src1 src2 is issub)
+	    (vector-ext addend result 16 is)
+	    ; Add the addend to the accumulator
+	    (vector-accumulate-result elemnum addend)
+	    ; Round and clamp the result for the vector element
+	    (set vresult (RC16 addend is))
+	    ; Store the result in the accumulator and the vector
+	    ; Set the z flag for the vector element
+	    (pset (reg h-vacc elemnum) addend)
+	    (pset-acc (REG_VR dest elemnum) vresult is))
+)
+
+; Perform a typical vector operation setting zero and carry flags,
+; handling fractional vs integer and scaling, if requested.
+(define-pmacro (vector-calc-zc elemnum dest op src1 src2 is issub)
+  (sequence ((HI vresult) (DI result) (DI addend))
+	    ; Perform the operation and set the c flag for the vector element
+	    (vector-op-zc elemnum result op src1 src2 is issub)
+	    (vector-ext addend result 16 is)
+	    ; Round and clamp the result for the vector element
+	    (set vresult (RC16 addend is))
+	    ; Store the result in the accumulator and the vector
+	    ; Set the z flag for the vector element
+	    (pset (reg h-vacc elemnum) addend)
+	    (pset-acc (REG_VR dest elemnum) vresult is))
+)
+
+; Perform a typical vector operation with carry, setting zero and carry flags,
+; handling fractional vs integer and scaling, if requested.
+(define-pmacro (vector-carry-calc-zc elemnum dest op src1 src2 carry is issub)
+  (sequence ((HI vresult) (DI result) (DI addend))
+	    ; Perform the operation and set the c flag for the vector element
+	    (vector-carryop-zc elemnum result op src1 src2 carry is issub)
+	    (vector-ext addend result 16 is)
+	    ; Round and clamp the result for the vector element
+	    (set vresult (RC16 addend is))
+	    ; Store the result in the accumulator and the vector
+	    ; Set the z flag for the vector element
+	    (pset (reg h-vacc elemnum) addend)
+	    (pset-acc (REG_VR dest elemnum) vresult is))
+)
+
+; Perform an extended precision vector add with carry, setting zero and
+; carry flags, handling fractional vs integer and scaling, if requested.
+(define-pmacro (vector-n-carry-calc-zc n elemnum dest op src1 src2 is issub)
+  (sequence ((SI elem) (BI carry))
+	    ; Calculate the carry bit. It is the carry bit of the next lower
+	    ; order bit, unless we are on an extended element boundary.
+	    (set elem (sub 7 elemnum))
+	    (set carry (if BI (and elem (sub n 1))
+			   (reg h-vc (add elemnum 1))
+			   0))
+	    (vector-carry-calc-zc elemnum dest op src1 src2 carry is issub))
+)
+
+; Vector Instructions
+;
+(define-pmacro (vabsda-calc elemnum dest src1 src2)
+  (sequence ((HI vresult) (DI result) (DI addend) (DI val1) (DI val2))
+	    ; Determine the operands
+	    (get-vector-operands elemnum src1 src2 val1 val2 0)
+	    ; Set the carry bit
+	    (pset (reg h-vc elemnum) (not (sub-cflag HI val1 val2 0)))
+	    ; Perform the operation
+	    (set result (abs (sub val1 val2)))
+	    (pset (reg h-vz elemnum) (eq 0 result))
+	    (vector-ext addend result 16 0)
+	    ; Add the addend to the accumulator
+	    (vector-accumulate-result elemnum addend)
+	    ; Round and clamp the result for the vector element
+	    (set vresult (RC16 addend 0))
+	    ; Store the result in the accumulator and the vector
+	    (pset (reg h-vacc elemnum) addend)
+	    (pset-acc (REG_VR dest elemnum) vresult 0))
+)
+
+(dnvi (vabsda)
+     ("vabsda vrd,vrs1,vrs2[element]")
+     ()
+     "vabsda ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VABSDA dest-v src1-v src2-v elements-v (f-opext-v 0))
+     (sequence ()
+               (vabsda-calc 0 dest-v src1-v src2-v)
+               (vabsda-calc 1 dest-v src1-v src2-v)
+               (vabsda-calc 2 dest-v src1-v src2-v)
+               (vabsda-calc 3 dest-v src1-v src2-v)
+               (vabsda-calc 4 dest-v src1-v src2-v)
+               (vabsda-calc 5 dest-v src1-v src2-v)
+               (vabsda-calc 6 dest-v src1-v src2-v)
+               (vabsda-calc 7 dest-v src1-v src2-v))
+     ()
+)
+
+(define-pmacro (vacc-calc elemnum dest src1 src2 is)
+  (vector-acc-calc-zc elemnum dest add src1 src2 is 0)
+)
+
+(dnvi (vacc)
+     ("vacc vrd,vrs1,vrs2[element]")
+     ()
+     "vacc${is-v} ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VACC dest-v src1-v src2-v elements-v is-v)
+     (sequence ()
+               (vacc-calc 0 dest-v src1-v src2-v is-v)
+               (vacc-calc 1 dest-v src1-v src2-v is-v)
+               (vacc-calc 2 dest-v src1-v src2-v is-v)
+               (vacc-calc 3 dest-v src1-v src2-v is-v)
+               (vacc-calc 4 dest-v src1-v src2-v is-v)
+               (vacc-calc 5 dest-v src1-v src2-v is-v)
+               (vacc-calc 6 dest-v src1-v src2-v is-v)
+               (vacc-calc 7 dest-v src1-v src2-v is-v))
+     ()
+)
+
+(define-pmacro (vadd-calc elemnum dest src1 src2 is)
+  (vector-calc-zc elemnum dest add src1 src2 is 0)
+)
+
+(dnvi (vadd)
+     ("vadd vrd,vrs1,vrs2[element]")
+     ()
+     "vadd${is-v} ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VADD dest-v src1-v src2-v elements-v is-v)
+     (sequence ()
+               (vadd-calc 0 dest-v src1-v src2-v is-v)
+               (vadd-calc 1 dest-v src1-v src2-v is-v)
+               (vadd-calc 2 dest-v src1-v src2-v is-v)
+               (vadd-calc 3 dest-v src1-v src2-v is-v)
+               (vadd-calc 4 dest-v src1-v src2-v is-v)
+               (vadd-calc 5 dest-v src1-v src2-v is-v)
+               (vadd-calc 6 dest-v src1-v src2-v is-v)
+               (vadd-calc 7 dest-v src1-v src2-v is-v))
+     ()
+)
+
+(define-pmacro (vaddc-calc elemnum dest src1 src2 is)
+  (sequence ((BI carry))
+	    (set carry (reg h-vc elemnum))
+	    (vector-carry-calc-zc elemnum dest add src1 src2 carry is 0))
+)
+
+(dnvi (vaddc)
+     ("vaddc vrd,vrs1,vrs2[element]")
+     ()
+     "vaddc${is-v} ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VADDC dest-v src1-v src2-v elements-v is-v)
+     (sequence ()
+               (vaddc-calc 0 dest-v src1-v src2-v is-v)
+               (vaddc-calc 1 dest-v src1-v src2-v is-v)
+               (vaddc-calc 2 dest-v src1-v src2-v is-v)
+               (vaddc-calc 3 dest-v src1-v src2-v is-v)
+               (vaddc-calc 4 dest-v src1-v src2-v is-v)
+               (vaddc-calc 5 dest-v src1-v src2-v is-v)
+               (vaddc-calc 6 dest-v src1-v src2-v is-v)
+               (vaddc-calc 7 dest-v src1-v src2-v is-v))
+     ()
+)
+
+(define-pmacro (vaddcn-calc n elemnum dest src1 src2 is)
+  (vector-n-carry-calc-zc n elemnum dest add src1 src2 is 0)
+)
+
+(define-pmacro (vaddcn n)
+  (dnvi (.sym vaddc n)
+	(.str "vaddc" n " vrd,vrs1,vrs2[element]")
+	()
+	(.str "vaddc" n "${is-v} ${dest-v},${src1-v},${src2-v}${elements-v}")
+	(+ (.sym OP_VADDC n) dest-v src1-v src2-v elements-v is-v)
+	(sequence ()
+		  (vaddcn-calc n 0 dest-v src1-v src2-v is-v)
+		  (vaddcn-calc n 1 dest-v src1-v src2-v is-v)
+		  (vaddcn-calc n 2 dest-v src1-v src2-v is-v)
+		  (vaddcn-calc n 3 dest-v src1-v src2-v is-v)
+		  (vaddcn-calc n 4 dest-v src1-v src2-v is-v)
+		  (vaddcn-calc n 5 dest-v src1-v src2-v is-v)
+		  (vaddcn-calc n 6 dest-v src1-v src2-v is-v)
+		  (vaddcn-calc n 7 dest-v src1-v src2-v is-v))
+	()
+  )
+)
+
+(vaddcn 2)
+(vaddcn 4)
+(vaddcn 8)
+
+(define-pmacro (vexga-calc elemnum dest src part)
+  (sequence ((HI reg-result)
+	     (DI acc-result))
+	    (set reg-result (REG_VACC_PART elemnum part))
+	    (set acc-result (REG_VACC_PART_OVERWRITTEN
+			     elemnum part (REG_VR src
+						  (vector-src2-row elemnum))))
+	    (pset (REG_VR dest elemnum) reg-result)
+	    (pset (reg h-vacc elemnum) acc-result)
+	    )
+)
+
+(dnvi (vexga)
+      ("vexga.Pn vrd,vrs2[element]")
+      ()
+      "vexga${pn-v} ${dest-v},${src2-v}${elements-v}"
+      (+ OP_VEXGA dest-v (f-src1-v 0) src2-v elements-v pn-v)
+      (sequence ()
+		(vexga-calc 0 dest-v src2-v pn-v)
+		(vexga-calc 1 dest-v src2-v pn-v)
+		(vexga-calc 2 dest-v src2-v pn-v)
+		(vexga-calc 3 dest-v src2-v pn-v)
+		(vexga-calc 4 dest-v src2-v pn-v)
+		(vexga-calc 5 dest-v src2-v pn-v)
+		(vexga-calc 6 dest-v src2-v pn-v)
+		(vexga-calc 7 dest-v src2-v pn-v)
+		)
+      ()
+)
+
+; Could not generate this using a macro insn due to CGEN limitations.
+(dnvi vexg
+      ("vexg.Pn vrd")
+      (NO-DIS ALIAS)
+      "vexg${pn-v} ${reg-vexg-v}"
+      (+ OP_VEXGA reg-vexg-v (f-src1-v 0) (f-ebits+enable-v 0) pn-v)
+      (sequence ()
+		(vexga-calc 0 reg-vexg-v reg-vexg-v pn-v)
+		(vexga-calc 1 reg-vexg-v reg-vexg-v pn-v)
+		(vexga-calc 2 reg-vexg-v reg-vexg-v pn-v)
+		(vexga-calc 3 reg-vexg-v reg-vexg-v pn-v)
+		(vexga-calc 4 reg-vexg-v reg-vexg-v pn-v)
+		(vexga-calc 5 reg-vexg-v reg-vexg-v pn-v)
+		(vexga-calc 6 reg-vexg-v reg-vexg-v pn-v)
+		(vexga-calc 7 reg-vexg-v reg-vexg-v pn-v)
+		)
+      ()
+)
+
+(define-pmacro (vmul-calc elemnum dest src1 src2 is)
+  (sequence ((DI result) (DI addend) (SI shift) (DI val1) (DI val2))
+	    ; Determine the operands
+	    (get-vector-operands elemnum src1 src2 val1 val2 is)
+	    ; Perform the operation
+	    ; S.15 * S.15 = S.30.  note 64-bit signed mul
+	    (set result (mul val1 val2))
+	    ; Convert to the format of the accumulator
+	    (if (and is 2) ; unsigned
+		(set shift 0)
+		(set shift 1))
+	    (vector-ext addend result shift is)
+	    ; Store the addend to the accumulator
+	    (pset (reg h-vacc elemnum) addend)
+	    ; Round and clamp the result for the vector element
+	    (if (and is 2)
+		(pset (REG_VR dest elemnum) (and addend #xffff))
+		(pset-acc (REG_VR dest elemnum) (RC16 addend is) is)))
+)
+
+(dnvi (vmul)
+     ("vmul vrd,vrs1,vrs2[element]")
+     ()
+     "vmul${is-v} ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VMUL dest-v src1-v src2-v elements-v is-v)
+     (sequence ()
+		(vmul-calc 0 dest-v src1-v src2-v is-v)
+		(vmul-calc 1 dest-v src1-v src2-v is-v)
+		(vmul-calc 2 dest-v src1-v src2-v is-v)
+		(vmul-calc 3 dest-v src1-v src2-v is-v)
+		(vmul-calc 4 dest-v src1-v src2-v is-v)
+		(vmul-calc 5 dest-v src1-v src2-v is-v)
+		(vmul-calc 6 dest-v src1-v src2-v is-v)
+		(vmul-calc 7 dest-v src1-v src2-v is-v))
+     ()
+)
+
+(define-pmacro (vmac-calc elemnum dest src1 src2 is)
+  (sequence ((DI result) (DI addend) (SI shift) (DI val1) (DI val2))
+	    ; Determine the operands
+	    (get-vector-operands elemnum src1 src2 val1 val2 is)
+	    ; Perform the operation
+	    ; S.15 * S.15 = S.30.  note 64-bit signed mul
+	    (set result (mul val1 val2))
+	    ; Convert to the format of the accumulator
+	    (if (and is 2) ; unsigned
+		(set shift 0)
+		(set shift 1))
+	    (vector-ext addend result shift is)
+	    ; Add the addend to the accumulator
+	    (vector-accumulate-result elemnum addend)
+	    (pset (reg h-vacc elemnum) addend)
+	    ; Round and clamp the result for the vector element
+	    (if (and is 2) ; unsigned
+		(pset (REG_VR dest elemnum) (and addend #xffff))
+		(pset-acc (REG_VR dest elemnum) (RC16 addend is) is)))
+)
+
+(dnvi (vmac)
+     ("vmac vrd,vrs1,vrs2[element]")
+     ()
+     "vmac${is-v} ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VMAC dest-v src1-v src2-v elements-v is-v)
+     (sequence ()
+		(vmac-calc 0 dest-v src1-v src2-v is-v)
+		(vmac-calc 1 dest-v src1-v src2-v is-v)
+		(vmac-calc 2 dest-v src1-v src2-v is-v)
+		(vmac-calc 3 dest-v src1-v src2-v is-v)
+		(vmac-calc 4 dest-v src1-v src2-v is-v)
+		(vmac-calc 5 dest-v src1-v src2-v is-v)
+		(vmac-calc 6 dest-v src1-v src2-v is-v)
+		(vmac-calc 7 dest-v src1-v src2-v is-v))
+     ()
+)
+
+(define-pmacro (vector-16galois elemnum dest src1 src2 hl)
+  (sequence ((UQI left) (UQI right) (UQI res0) (UQI res1))
+	    ; bottom byte
+	    (set left (subword UQI (subword UHI (REG_VR src1 elemnum) 0) 1))
+	    (if (and hl 1)
+		(set right (subword UQI (subword UHI (REG_VR src2 (vector-src2-row elemnum)) 0) 0))
+		(set right (subword UQI (subword UHI (REG_VR src2 (vector-src2-row elemnum)) 0) 1)))
+	    (set res0 (c-call UQI "galois_multiply" left right))
+	    ; top byte
+	    (set left (subword UQI (subword UHI (REG_VR src1 elemnum) 0) 0))
+	    (if (and hl 2)
+		(set right (subword UQI (subword UHI (REG_VR src2 (vector-src2-row elemnum)) 0) 0))
+		(set right (subword UQI (subword UHI (REG_VR src2 (vector-src2-row elemnum)) 0) 1)))
+	    (set res1 (c-call UQI "galois_multiply" left right))
+	    ; construct result
+	    (pset (REG_VR dest elemnum) (join UHI UQI res1 res0)))
+
+)
+
+(dnvi (vglb)
+     ("vglb vrd,vrs1,vrs2[element]")
+     ()
+     "vglb${hl-v} ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VGLB dest-v src1-v src2-v elements-v hl-v)
+     (sequence ()
+	       (vector-16galois 0 dest-v src1-v src2-v hl-v)
+	       (vector-16galois 1 dest-v src1-v src2-v hl-v)
+	       (vector-16galois 2 dest-v src1-v src2-v hl-v)
+	       (vector-16galois 3 dest-v src1-v src2-v hl-v)
+	       (vector-16galois 4 dest-v src1-v src2-v hl-v)
+	       (vector-16galois 5 dest-v src1-v src2-v hl-v)
+	       (vector-16galois 6 dest-v src1-v src2-v hl-v)
+	       (vector-16galois 7 dest-v src1-v src2-v hl-v)
+	       )
+     ()
+)
+
+(define-pmacro (vsub-calc elemnum dest src1 src2 is)
+  (vector-calc-zc elemnum dest sub src1 src2 is 1)
+)
+
+(dnvi (vsub)
+     ("vsub vrd,vrs1,vrs2[element]")
+     ()
+     "vsub${is-v} ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VSUB dest-v src1-v src2-v elements-v is-v)
+     (sequence ()
+		(vsub-calc 0 dest-v src1-v src2-v is-v)
+		(vsub-calc 1 dest-v src1-v src2-v is-v)
+		(vsub-calc 2 dest-v src1-v src2-v is-v)
+		(vsub-calc 3 dest-v src1-v src2-v is-v)
+		(vsub-calc 4 dest-v src1-v src2-v is-v)
+		(vsub-calc 5 dest-v src1-v src2-v is-v)
+		(vsub-calc 6 dest-v src1-v src2-v is-v)
+		(vsub-calc 7 dest-v src1-v src2-v is-v))
+     ()
+)
+
+(define-pmacro (vsubacc-calc elemnum dest src1 src2 is)
+  (vector-acc-calc-zc elemnum dest sub src1 src2 is 1)
+)
+
+(dnvi (vsubacc)
+     ("vsubacc vrd,vrs1,vrs2[element]")
+     ()
+     "vsubacc${is-v} ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VSUBACC dest-v src1-v src2-v elements-v is-v)
+     (sequence ()
+		(vsubacc-calc 0 dest-v src1-v src2-v is-v)
+		(vsubacc-calc 1 dest-v src1-v src2-v is-v)
+		(vsubacc-calc 2 dest-v src1-v src2-v is-v)
+		(vsubacc-calc 3 dest-v src1-v src2-v is-v)
+		(vsubacc-calc 4 dest-v src1-v src2-v is-v)
+		(vsubacc-calc 5 dest-v src1-v src2-v is-v)
+		(vsubacc-calc 6 dest-v src1-v src2-v is-v)
+		(vsubacc-calc 7 dest-v src1-v src2-v is-v))
+     ()
+)
+
+(define-pmacro (vector-binop-z elemnum dest op src1 src2)
+  (sequence ((HI result))
+	    (set result (op (REG_VR src1 elemnum) 
+			    (REG_VR src2 (vector-src2-row elemnum))))
+	    (pset (REG_VR dest elemnum) result)
+	    (pset (reg h-vz elemnum) (eq 0 result))
+	    )
+  
+)
+
+(dnvi (vand)
+     ("vand vrd,vrs1,vrs2[element]")
+     ()
+     "vand ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VAND dest-v src1-v src2-v elements-v (f-opext-v 0))
+     (sequence ()
+               (vector-binop-z 0 dest-v and src1-v src2-v)
+               (vector-binop-z 1 dest-v and src1-v src2-v)
+               (vector-binop-z 2 dest-v and src1-v src2-v)
+               (vector-binop-z 3 dest-v and src1-v src2-v)
+               (vector-binop-z 4 dest-v and src1-v src2-v)
+               (vector-binop-z 5 dest-v and src1-v src2-v)
+               (vector-binop-z 6 dest-v and src1-v src2-v)
+               (vector-binop-z 7 dest-v and src1-v src2-v))
+     ()
+)
+
+
+(define-pmacro (nand a b) (inv (and a b)))
+(dnvi (vnand)
+     ("vnand vrd,vrs1,vrs2[element]")
+     ()
+     "vnand ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VNAND dest-v src1-v src2-v elements-v (f-opext-v 0))
+     (sequence ()
+               (vector-binop-z 0 dest-v nand src1-v src2-v)
+               (vector-binop-z 1 dest-v nand src1-v src2-v)
+               (vector-binop-z 2 dest-v nand src1-v src2-v)
+               (vector-binop-z 3 dest-v nand src1-v src2-v)
+               (vector-binop-z 4 dest-v nand src1-v src2-v)
+               (vector-binop-z 5 dest-v nand src1-v src2-v)
+               (vector-binop-z 6 dest-v nand src1-v src2-v)
+               (vector-binop-z 7 dest-v nand src1-v src2-v))
+     ()
+)
+
+
+(dnvi (vor)
+     ("vor vrd,vrs1,vrs2[element]")
+     ()
+     "vor ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VOR dest-v src1-v src2-v elements-v (f-opext-v 0))
+     (sequence ()
+               (vector-binop-z 0 dest-v or src1-v src2-v)
+               (vector-binop-z 1 dest-v or src1-v src2-v)
+               (vector-binop-z 2 dest-v or src1-v src2-v)
+               (vector-binop-z 3 dest-v or src1-v src2-v)
+               (vector-binop-z 4 dest-v or src1-v src2-v)
+               (vector-binop-z 5 dest-v or src1-v src2-v)
+               (vector-binop-z 6 dest-v or src1-v src2-v)
+               (vector-binop-z 7 dest-v or src1-v src2-v))
+     ()
+)
+
+
+(define-pmacro (nor a b) (inv (or a b)))
+(dnvi (vnor)
+     ("vnor vrd,vrs1,vrs2[element]")
+     ()
+     "vnor ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VNOR dest-v src1-v src2-v elements-v (f-opext-v 0))
+     (sequence ()
+               (vector-binop-z 0 dest-v nor src1-v src2-v)
+               (vector-binop-z 1 dest-v nor src1-v src2-v)
+               (vector-binop-z 2 dest-v nor src1-v src2-v)
+               (vector-binop-z 3 dest-v nor src1-v src2-v)
+               (vector-binop-z 4 dest-v nor src1-v src2-v)
+               (vector-binop-z 5 dest-v nor src1-v src2-v)
+               (vector-binop-z 6 dest-v nor src1-v src2-v)
+               (vector-binop-z 7 dest-v nor src1-v src2-v))
+     ()
+)
+
+
+(define-pmacro (xnor a b) (inv (xor a b)))
+(dnvi (vxnor)
+     ("vxnor vrd,vrs1,vrs2[element]")
+     ()
+     "vxnor ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VXNOR dest-v src1-v src2-v elements-v (f-opext-v 0))
+     (sequence ()
+               (vector-binop-z 0 dest-v xnor src1-v src2-v)
+               (vector-binop-z 1 dest-v xnor src1-v src2-v)
+               (vector-binop-z 2 dest-v xnor src1-v src2-v)
+               (vector-binop-z 3 dest-v xnor src1-v src2-v)
+               (vector-binop-z 4 dest-v xnor src1-v src2-v)
+               (vector-binop-z 5 dest-v xnor src1-v src2-v)
+               (vector-binop-z 6 dest-v xnor src1-v src2-v)
+               (vector-binop-z 7 dest-v xnor src1-v src2-v))
+     ()
+)
+
+(dnvi (vxor)
+     ("vxor vrd,vrs1,vrs2[element]")
+     ()
+     "vxor ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VXOR dest-v src1-v src2-v elements-v (f-opext-v 0))
+     (sequence ()
+               (vector-binop-z 0 dest-v xor src1-v src2-v)
+               (vector-binop-z 1 dest-v xor src1-v src2-v)
+               (vector-binop-z 2 dest-v xor src1-v src2-v)
+               (vector-binop-z 3 dest-v xor src1-v src2-v)
+               (vector-binop-z 4 dest-v xor src1-v src2-v)
+               (vector-binop-z 5 dest-v xor src1-v src2-v)
+               (vector-binop-z 6 dest-v xor src1-v src2-v)
+               (vector-binop-z 7 dest-v xor src1-v src2-v))
+     ()
+)
+
+(dnvi (vxorsum)
+     ("vxorsum vrd,vrs1,vrs2[element]")
+     ()
+     "vxorsum ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VXORSUM dest-v src1-v src2-v elements-v (f-opext-v 0))
+     (sequence ((HI xor-result))
+	       ; First accumulate the xor of all the vector elements
+	       (set xor-result (xor
+				(xor
+				 (xor
+				  (xor (REG_VR src1-v 0) (REG_VR src2-v (vector-src2-row 0)))
+				  (xor (REG_VR src1-v 1) (REG_VR src2-v (vector-src2-row 1))))
+				 (xor
+				  (xor (REG_VR src1-v 2) (REG_VR src2-v (vector-src2-row 2)))
+				  (xor (REG_VR src1-v 3) (REG_VR src2-v (vector-src2-row 3)))))
+				(xor
+				 (xor
+				  (xor (REG_VR src1-v 4) (REG_VR src2-v (vector-src2-row 4)))
+				  (xor (REG_VR src1-v 5) (REG_VR src2-v (vector-src2-row 5))))
+				 (xor
+				  (xor (REG_VR src1-v 6) (REG_VR src2-v (vector-src2-row 6)))
+				  (xor (REG_VR src1-v 7) (REG_VR src2-v (vector-src2-row 7)))))))
+	       ; Now XOR each byte of the result
+	       (set xor-result (and (xor xor-result (srl xor-result 8)) #xff))
+	       (pset (REG_VR dest-v 7) xor-result)
+	       (pset (reg h-vz 7) (eq 0 xor-result))
+	       ;; The rest of the outputs are all zero.
+	       (pset (REG_VR dest-v 0) 0) (pset (reg h-vz 0) 1)
+	       (pset (REG_VR dest-v 1) 0) (pset (reg h-vz 1) 1)
+	       (pset (REG_VR dest-v 2) 0) (pset (reg h-vz 2) 1)
+	       (pset (REG_VR dest-v 3) 0) (pset (reg h-vz 3) 1)
+	       (pset (REG_VR dest-v 4) 0) (pset (reg h-vz 4) 1)
+	       (pset (REG_VR dest-v 5) 0) (pset (reg h-vz 5) 1)
+	       (pset (REG_VR dest-v 6) 0) (pset (reg h-vz 6) 1))
+     ()
+)
+
+(dnvi (vnop)
+      ("vnop")
+      ()
+      "vnop"
+      (+ OP_VNOP (f-dest-v 0) (f-src1-v 0) (f-src2-v 0)
+	 (f-ebits-v 0) (f-enable-v 0) (f-opext-v 0))
+      (nop)
+      ()
+)
+
+(define-pmacro (vrnd-calc elemnum uncond cond-operator dest shift src2)
+  (sequence ((DI acc-result))
+	    (set acc-result (reg h-vacc elemnum))
+	    (if (or uncond (cond-operator (reg h-vacc elemnum) 0))
+		(sequence ((SI round-value)) 
+			  (set round-value
+			       (REG_VR src2 (vector-src2-row elemnum)))
+			  (if (ne shift 0) 
+			      (set round-value (sll round-value 16)))
+			  (set acc-result (add acc-result round-value))
+			  (pset (reg h-vacc elemnum) acc-result)))
+	    (pset-acc (REG_VR dest elemnum) (RC16 acc-result 0) 0))
+)
+
+(dnvi (vrndpos)
+     ("vrndpos vrd,shift,vrs2[element]")
+     ()
+     "vrndpos ${dest-v},${shift-v},${src2-v}${elements-v}"
+     (+ OP_VRNDPOS dest-v (f-src1-v 0) src2-v elements-v shift-v)
+     (sequence ()
+               (vrnd-calc 0 0 gt dest-v shift-v src2-v)
+               (vrnd-calc 1 0 gt dest-v shift-v src2-v)
+               (vrnd-calc 2 0 gt dest-v shift-v src2-v)
+               (vrnd-calc 3 0 gt dest-v shift-v src2-v)
+               (vrnd-calc 4 0 gt dest-v shift-v src2-v)
+               (vrnd-calc 5 0 gt dest-v shift-v src2-v)
+               (vrnd-calc 6 0 gt dest-v shift-v src2-v)
+               (vrnd-calc 7 0 gt dest-v shift-v src2-v))
+     ()
+)
+
+(dnvi (vrndneg)
+     ("vrndneg vrd,vrs1,vrs2[element]")
+     ()
+     "vrndneg ${dest-v},${shift-v},${src2-v}${elements-v}"
+     (+ OP_VRNDNEG dest-v (f-src1-v 0) src2-v elements-v shift-v)
+     (sequence ()
+               (vrnd-calc 0 0 lt dest-v shift-v src2-v)
+               (vrnd-calc 1 0 lt dest-v shift-v src2-v)
+               (vrnd-calc 2 0 lt dest-v shift-v src2-v)
+               (vrnd-calc 3 0 lt dest-v shift-v src2-v)
+               (vrnd-calc 4 0 lt dest-v shift-v src2-v)
+               (vrnd-calc 5 0 lt dest-v shift-v src2-v)
+               (vrnd-calc 6 0 lt dest-v shift-v src2-v)
+               (vrnd-calc 7 0 lt dest-v shift-v src2-v))
+     ()
+)
+
+(dnvi (vrnd)
+     ("vrnd vrd,vrs1,vrs2[element]")
+     ()
+     "vrnd ${dest-v},${shift-v},${src2-v}${elements-v}"
+     (+ OP_VRND dest-v (f-src1-v 0) src2-v elements-v shift-v)
+     (sequence ()
+	       ;; note that the cond-operator argument (eq) is irrelevant.
+               (vrnd-calc 0 1 eq dest-v shift-v src2-v)
+               (vrnd-calc 1 1 eq dest-v shift-v src2-v)
+               (vrnd-calc 2 1 eq dest-v shift-v src2-v)
+               (vrnd-calc 3 1 eq dest-v shift-v src2-v)
+               (vrnd-calc 4 1 eq dest-v shift-v src2-v)
+               (vrnd-calc 5 1 eq dest-v shift-v src2-v)
+               (vrnd-calc 6 1 eq dest-v shift-v src2-v)
+               (vrnd-calc 7 1 eq dest-v shift-v src2-v))
+     ()
+)
+
+(define-pmacro (vcpc-calc elemnum cond-operator dst src1 src2)
+  (sequence ((HI val1) (HI val2))
+	    (get-vector-operands elemnum src1 src2 val1 val2 0)
+	    (pset (REG_VR dst elemnum) val2)
+	    (pset (reg h-vcmp elemnum) (cond-operator val1 val2)))
+)
+
+(dnvi (vcpceq)
+     ("vcpceq vrd,vrs1,vrs2[element]")
+     ()
+     "vcpceq ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VCPCEQ dest-v src1-v src2-v elements-v (f-opext-v 0))
+     (sequence ()
+               (vcpc-calc 0 eq dest-v src1-v src2-v)
+               (vcpc-calc 1 eq dest-v src1-v src2-v)
+               (vcpc-calc 2 eq dest-v src1-v src2-v)
+               (vcpc-calc 3 eq dest-v src1-v src2-v)
+               (vcpc-calc 4 eq dest-v src1-v src2-v)
+               (vcpc-calc 5 eq dest-v src1-v src2-v)
+               (vcpc-calc 6 eq dest-v src1-v src2-v)
+               (vcpc-calc 7 eq dest-v src1-v src2-v))
+     ()
+)
+
+(dnvi (vcpcne)
+     ("vcpcne vrd,vrs1,vrs2[element]")
+     ()
+     "vcpcne ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VCPCNE dest-v src1-v src2-v elements-v (f-opext-v 0))
+     (sequence ()
+	       ; Note that the source operands are reversed!!!!
+               (vcpc-calc 0 ne dest-v src2-v src1-v)
+               (vcpc-calc 1 ne dest-v src2-v src1-v)
+               (vcpc-calc 2 ne dest-v src2-v src1-v)
+               (vcpc-calc 3 ne dest-v src2-v src1-v)
+               (vcpc-calc 4 ne dest-v src2-v src1-v)
+               (vcpc-calc 5 ne dest-v src2-v src1-v)
+               (vcpc-calc 6 ne dest-v src2-v src1-v)
+               (vcpc-calc 7 ne dest-v src2-v src1-v))
+     ()
+)
+
+(define-pmacro (vsel-calc elemnum cond-operator dst src1 src2)
+  (sequence ((HI val1) (HI val2))
+	    (get-vector-operands elemnum src1 src2 val1 val2 0)
+	    (if (cond-operator val1 val2)
+		(sequence () 
+			  (pset (reg h-vcmp elemnum) 1)
+			  (pset (REG_VR dst elemnum) val1))
+		(sequence ()
+			  (pset (reg h-vcmp elemnum) 0)
+			  (pset (REG_VR dst elemnum) val2))))
+)
+
+(dnvi (vsellt)
+     ("vsellt vrd,vrs1,vrs2[element]")
+     ()
+     "vsellt ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VSELLT dest-v src1-v src2-v elements-v (f-opext-v 0))
+     (sequence ()
+               (vsel-calc 0 lt dest-v src1-v src2-v)
+               (vsel-calc 1 lt dest-v src1-v src2-v)
+               (vsel-calc 2 lt dest-v src1-v src2-v)
+               (vsel-calc 3 lt dest-v src1-v src2-v)
+               (vsel-calc 4 lt dest-v src1-v src2-v)
+               (vsel-calc 5 lt dest-v src1-v src2-v)
+               (vsel-calc 6 lt dest-v src1-v src2-v)
+               (vsel-calc 7 lt dest-v src1-v src2-v))
+     ()
+)
+
+(dnvi (vselge)
+     ("vselge vrd,vrs1,vrs2[element]")
+     ()
+     "vselge ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VSELGE dest-v src1-v src2-v elements-v (f-opext-v 0))
+     (sequence ()
+               (vsel-calc 0 ge dest-v src1-v src2-v)
+               (vsel-calc 1 ge dest-v src1-v src2-v)
+               (vsel-calc 2 ge dest-v src1-v src2-v)
+               (vsel-calc 3 ge dest-v src1-v src2-v)
+               (vsel-calc 4 ge dest-v src1-v src2-v)
+               (vsel-calc 5 ge dest-v src1-v src2-v)
+               (vsel-calc 6 ge dest-v src1-v src2-v)
+               (vsel-calc 7 ge dest-v src1-v src2-v))
+     ()
+)
+
+(define-pmacro (vmerge-calc elemnum dst src1 src2)
+  (if (reg h-vcmp elemnum)
+      (pset (REG_VR dst elemnum) (REG_VR src1 elemnum))
+      (pset (REG_VR dst elemnum) (REG_VR src2 (vector-src2-row elemnum))))
+)
+
+(dnvi (vmerge)
+     ("vmerge vrd,vrs1,vrs2[element]")
+     ()
+     "vmerge ${dest-v},${src1-v},${src2-v}${elements-v}"
+     (+ OP_VMERGE dest-v src1-v src2-v elements-v (f-opext-v 0))
+     (sequence ()
+               (vmerge-calc 0 dest-v src1-v src2-v)
+               (vmerge-calc 1 dest-v src1-v src2-v)
+               (vmerge-calc 2 dest-v src1-v src2-v)
+               (vmerge-calc 3 dest-v src1-v src2-v)
+               (vmerge-calc 4 dest-v src1-v src2-v)
+               (vmerge-calc 5 dest-v src1-v src2-v)
+               (vmerge-calc 6 dest-v src1-v src2-v)
+               (vmerge-calc 7 dest-v src1-v src2-v))
+     ()
+)
+
+(define-pmacro (vshta-calc elemnum dst src2)
+  (sequence ((HI p0) (HI src))
+	       (set p0 (REG_VACC_PART elemnum 0))
+	       (set src (REG_VR src2 (vector-src2-row elemnum)))
+	       (pset (REG_VR dst elemnum) p0)
+	       (pset (reg h-vacc elemnum)
+		     (or DI (and DI (srl DI (reg h-vacc elemnum) 16) #xffffffff)
+			 (srl DI (sll DI src 48) 16))) ; preserve sign
+	       (pset (reg h-vc32 elemnum) (reg h-vc48 elemnum)))
+)
+
+(dnvi (vshta)
+     ("vshta vrd,vrs2[element]")
+     ()
+     "vshta ${dest-v},${src2-v}${elements-v}"
+     (+ OP_VSHTA dest-v (f-src1-v 0) src2-v elements-v (f-opext-v 0))
+     (sequence ()
+               (vshta-calc 0 dest-v src2-v)
+               (vshta-calc 1 dest-v src2-v)
+               (vshta-calc 2 dest-v src2-v)
+               (vshta-calc 3 dest-v src2-v)
+               (vshta-calc 4 dest-v src2-v)
+               (vshta-calc 5 dest-v src2-v)
+               (vshta-calc 6 dest-v src2-v)
+               (vshta-calc 7 dest-v src2-v))
+     ()
+)

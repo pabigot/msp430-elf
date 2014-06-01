@@ -1,0 +1,21 @@
+# m32r testcase for mvtaclo $src1,$accs
+# mach(): m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global mvtaclo_a
+mvtaclo_a:
+	mvi_h_accum0 0, 0
+	mvi_h_accum1 0, 0
+
+	mvi_h_gr r4, 0x11223344
+
+	mvtaclo r4, a0
+	test_h_accum0 0, 0x11223344
+
+	mvtaclo r4, a1
+	test_h_accum1 0, 0x11223344
+
+	pass

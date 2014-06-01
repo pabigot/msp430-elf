@@ -1,0 +1,1994 @@
+; Samsung CALMRISC16 CPU description.  -*- Scheme -*-
+; Copyright (C) 2000 Red Hat, Inc.
+; This file is part of CGEN.
+; See file COPYING.CGEN for details.
+
+(include "simplify.inc")
+
+; define-arch must appear first
+
+(define-arch
+  (name calmrisc16) ; name of cpu family
+  (comment "Samsung CALMRISC16")
+  (default-alignment forced)
+  ; The manual specifies the ISA in lsb0 notation, but that makes it
+  ; tricky (impossible?) to specify insns of different lengths.
+  (insn-lsb0? #f)
+  (machs calmrisc16)
+  (isas calmrisc16)
+)
+
+(define-isa
+  (name calmrisc16)
+  (default-insn-word-bitsize 16)
+  (default-insn-bitsize 16)
+  (base-insn-bitsize 16)
+  (decode-assist (0 1 2 3 8 9 10 11)) ; Initial bitnumbers to decode insns by.
+  (liw-insns 1)       ; The calmrisc16 fetches  1 insn at a time.
+  (parallel-insns 1)  ; The calmrisc16 executes 1 insn at a time.
+)
+
+(define-cpu
+  ; cpu names must be distinct from the architecture name and machine names.
+  ; The "b" suffix stands for "base" and is the convention.
+  ; The "f" suffix stands for "family" and is the convention.
+  (name calmrisc16bf)
+  (comment "Samsung CALMRISC16 base family")
+  (endian big)
+  (word-bitsize 16)
+)
+
+(define-mach
+  (name calmrisc16)
+  (comment "Generic CALMRISC16 cpu")
+  (cpu calmrisc16bf)
+)
+
+; Model descriptions.
+;
+(define-model
+  (name calmrisc16) (comment "calmrisc16") (attrs)
+  (mach calmrisc16)
+
+  (pipeline all "" () ((fetch) (decode) (execute) (writeback)))
+
+  ; `state' is a list of variables for recording model state
+  ; (state)
+  (unit u-exec "Execution Unit" ()
+	1 1 ; issue done
+	() ; state
+	() ; inputs
+	() ; outputs
+	() ; profile action (default)
+	)
+)
+
+; Instruction fields.
+;
+; Attributes:
+; PCREL-ADDR: pc relative value (for reloc and disassembly purposes)
+; ABS-ADDR: absolute address (for reloc and disassembly purposes?)
+; RESERVED: bits are not used to decode insn, must be all 0
+
+; Main opcodes in 4 bit chunks
+(dnf f-op1 "opcode" ()  0 4)
+(dnf f-op2 "opcode" ()  4 4)
+(dnf f-op3 "opcode" ()  8 4)
+(dnf f-op4 "opcode" () 12 4)
+
+; Secondary opcodes. Random offsets and widths
+(dnf f-op0-3  "opcode" ()  0 3)
+(dnf f-op4-1  "opcode" ()  4 1)
+(dnf f-op4-3  "opcode" ()  4 3)
+(dnf f-op8-1  "opcode" ()  8 1)
+(dnf f-op8-2  "opcode" ()  8 2)
+(dnf f-op8-3  "opcode" ()  8 3)
+(dnf f-op9-1  "opcode" ()  9 1)
+(dnf f-op12-1 "opcode" () 12 1)
+
+; General register fields
+(dnf f-Rn  "general register"        ()  4 4)
+(dnf f-Rn1 "general register"        () 12 4)
+(dnf f-Rm  "general register"        () 12 4)
+(dnf f-Dn  "general registers r0-r7" ()  5 3)
+(dnf f-Dn1 "general registers r0-r7" () 13 3)
+
+(df  f-H "r6 or r7 for bnzd" ()  7 1 UINT
+     ((value pc) (sub UWI value 6)) ; encode
+     ((value pc) (add UWI value 6)) ; decode
+)
+
+; A multi-field representing a list of general registers to be pushed
+(dnf  f-Rlist-Rm "Rm for push insn" ()  4 4)
+(dnf  f-Rlist-Rn "Rn for push insn" () 13 3)
+(dnmf f-Rlist "Register list for push insn" () UINT
+      (f-Rlist-Rm f-Rlist-Rn)
+      (sequence () ; insert
+		(set (ifield f-Rlist-Rm) (srl (ifield f-Rlist) 3))
+		(set (ifield f-Rlist-Rn) (and (ifield f-Rlist) 7))
+		)
+      (sequence () ; extract
+		(set (ifield f-Rlist) (or (sll (ifield f-Rlist-Rm) 3)
+					  (ifield f-Rlist-Rn)))
+		)
+)
+
+; Extension register fields
+(df f-En "Extension registers e8-e15" () 13 3 UINT
+    ((value pc) (sub UWI value 8)) ; encode
+    ((value pc) (add UWI value 8)) ; decode
+)
+
+; Address register fields
+(df  f-An "address register" ()  5 3 UINT
+     ((value pc) (sub UWI value 8)) ; encode
+     ((value pc) (add UWI value 8)) ; decode
+)
+(df  f-An1 "address register" () 13 3 UINT
+     ((value pc) (sub UWI value 8)) ; encode
+     ((value pc) (add UWI value 8)) ; decode
+)
+(df  f-An2 "address register" ()  9 3 UINT
+     ((value pc) (sub UWI value 8)) ; encode
+     ((value pc) (add UWI value 8)) ; decode
+)
+
+; A multi-field representing a list of address registers to be pushed
+(dnf  f-Alist-Am "Am for push insn" ()  5 3)
+(dnf  f-Alist-An "An for push insn" () 13 3)
+(dnmf f-Alist "Register list for push insn" () UINT
+      (f-Alist-Am f-Alist-An)
+      (sequence () ; insert
+		(set (ifield f-Alist-Am) (srl (ifield f-Alist) 3))
+		(set (ifield f-Alist-An) (and (ifield f-Alist) 7))
+		)
+      (sequence () ; extract
+		(set (ifield f-Alist) (or (sll (ifield f-Alist-Am) 3)
+					  (ifield f-Alist-An)))
+		)
+)
+
+; Special register fields
+(dnf f-Rs  "special register" () 12 4)
+
+; Immediate fields
+(dnf  f-imm5  "5  bit unsigned" () 11  5)
+(dnf  f-imm5c "5  bit unsigned" ()  7  5)
+(dnf  f-imm6  "6  bit unsigned" () 10  6)
+(dnf  f-imm7  "7  bit unsigned" ()  9  7)
+(dnf  f-imm8  "8  bit unsigned" ()  8  8)
+(dnf  f-imm13 "13 bit unsigned" ()  3 13)
+(dnf  f-imm16 "16 bit unsigned" () 16 16)
+(dnf  f-imm22 "22 bit address"  () 10 22)
+
+(dnf  f-disp4 "4  bit unsigned" () 12  4)
+(dnf  f-disp8 "8  bit unsigned" ()  8  8)
+
+(df  f-eoffset8 "8 bit signed pc relative offset" (PCREL-ADDR) 9 7 INT
+     ((value pc) (sra SI (sub value (add pc 2)) 1)) ; encode
+     ((value pc) (add SI (sll value 1) (add pc 2))) ; decode
+)
+
+(df  f-eoffset11 "11 bit signed pc relative offset" (PCREL-ADDR) 6 10 INT
+     ((value pc) (sra SI (sub value (add pc 2)) 1)) ; encode
+     ((value pc) (add SI (sll value 1) (add pc 2))) ; decode
+)
+
+(df  f-eoffset13 "13 bit signed pc relative offset" (PCREL-ADDR) 4 12 INT
+     ((value pc) (sra SI (sub value (add pc 2)) 1)) ; encode
+     ((value pc) (add SI (sll value 1) (add pc 2))) ; decode
+)
+
+(df  f-edisp5 "5 bit unsigned offset" () 12 4 UINT
+     ((value pc) (srl USI value 1)) ; encode
+     ((value pc) (sll USI value 1)) ; decode
+)
+
+(df  f-edisp9 "9 bit unsigned offset" ()  8 8 UINT
+     ((value pc) (srl USI value 1)) ; encode
+     ((value pc) (sll USI value 1)) ; decode
+)
+
+(dnf  f-disp16 "16 bit unsigned offset" () 16 16)
+
+; Comparison mode fields
+(dnf  f-cmode1 "3 bit comparison mode" () 9 3)
+(dnf  f-cmode2 "3 bit comparison mode" () 5 3)
+
+; Branch mode fields
+(dnf  f-bmode "2 bit branch mode"     () 3 2)
+(dnf  f-d     "1 bit delay indicator" () 5 1)
+
+; Misc fields
+(dnf  f-bs3 "bit selector"       () 13 3)
+(dnf  f-ec2 "external condition" ()  7 2)
+
+
+; Insn Enums.
+; Opcodes
+(define-normal-insn-enum insn-op1 "insn op enums" () OP1_ f-op1
+ (
+ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F"
+ )
+)
+(define-normal-insn-enum insn-op2 "insn op enums" () OP2_ f-op2
+ (
+ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F"
+ )
+)
+(define-normal-insn-enum insn-op3 "insn op enums" () OP3_ f-op3
+ (
+ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F"
+ )
+)
+(define-normal-insn-enum insn-op4 "insn op enums" () OP4_ f-op4
+ (
+ "0" "1" "2" "3" "4" "5" "6" "7" "8" "9" "A" "B" "C" "D" "E" "F"
+ )
+)
+; Secondary opcodes
+(define-normal-insn-enum insn-op0-3 "insn op enums" () OP0-3_ f-op0-3
+ (
+ "0" "1" "2" "3" "4" "5" "6" "7"
+ )
+)
+(define-normal-insn-enum insn-op4-1 "insn op enums" () OP4-1_ f-op4-1
+ (
+ "0" "1"
+ )
+)
+(define-normal-insn-enum insn-op4-3 "insn op enums" () OP4-3_ f-op4-3
+ (
+ "0" "1" "2" "3" "4" "5" "6" "7"
+ )
+)
+(define-normal-insn-enum insn-op8-1 "insn op enums" () OP8-1_ f-op8-1
+ (
+ "0" "1"
+ )
+)
+(define-normal-insn-enum insn-op8-2 "insn op enums" () OP8-2_ f-op8-2
+ (
+ "0" "1" "2" "3"
+ )
+)
+(define-normal-insn-enum insn-op8-3 "insn op enums" () OP8-3_ f-op8-3
+ (
+ "0" "1" "2" "3" "4" "5" "6" "7"
+ )
+)
+(define-normal-insn-enum insn-op9-1 "insn op enums" () OP9-1_ f-op9-1
+ (
+ "0" "1"
+ )
+)
+(define-normal-insn-enum insn-op12-1 "insn op enums" () OP12-1_ f-op12-1
+ (
+ "0" "1"
+ )
+)
+; Comparison modes
+(define-normal-insn-enum insn-cmode1 "comparison mode enums" () CMODE1_ f-cmode1
+ (
+ "ge" "gt" "uge" "ugt" "eq"
+ )
+)
+(define-normal-insn-enum insn-cmode2 "comparison mode enums" () CMODE2_ f-cmode2
+ (
+ "ge" "gt" "uge" "ugt" "eq"
+ )
+)
+; Branch modes
+(define-normal-insn-enum insn-bmode "branch mode enums" () BR_ f-bmode
+ (
+ "reserved" "a" "f" "t"
+ )
+)
+(define-normal-insn-enum insn-d "delay indicator enums" () D_ f-d
+ (
+ "0" "1"
+ )
+)
+; Misc enums
+(define-normal-insn-enum insn-bs3 "SR bit number enum" () BS3_ f-bs3
+ (
+ "fe" "ie" "te" "v" "z0" "z1" "pm"
+ )
+)
+
+; Hardware pieces.
+; These entries list the elements of the raw hardware.
+; They're also used to provide tables and other elements of the assembly
+; language.
+
+; Define a hard register
+(define-pmacro (hard-register class prefix regnum mode)
+  (define-hardware
+    (name (.sym h- prefix regnum))
+    (comment (.str "Hard register " prefix regnum))
+    (attrs VIRTUAL)
+    (type register mode)
+    (indices keyword "" (((.sym prefix regnum) regnum)))
+    (get () (reg (.sym h- class r) regnum))
+    (set (newval) (set (reg (.sym h- class r) regnum) newval))
+  )
+)
+
+(dnh h-pc "program counter" (PC PROFILE) (pc) () () ())
+
+; General registers
+(define-keyword
+  (name gr-names)
+  (print-name h-gr)
+  (prefix "")
+  (values (r0 0) (r1 1) (r2 2) (r3 3) (r4 4) (r5 5) (r6 6) (r7 7)
+	  (r8 8) (r9 9) (r10 10) (r11 11) (r12 12) (r13 13) (r14 14) (r15 15))
+)
+
+(define-hardware
+  (name h-gr)
+  (comment "general registers")
+  (attrs PROFILE CACHE-ADDR)
+  (type register HI (16))
+  (indices extern-keyword gr-names)
+)
+
+(hard-register g r 0  HI) ; r0
+(hard-register g r 1  HI) ; r1
+
+; Extension registers
+; These are extensions of general registers r8-r15.
+(define-keyword
+  (name er-names)
+  (print-name h-er)
+  (prefix "")
+  (values (e8 8) (e9 9) (e10 10) (e11 11) (e12 12) (e13 13) (e14 14) (e15 15))
+)
+
+(define-hardware
+  (name h-er)
+  (comment "Extension registers")
+  (type register HI (16))
+  (indices extern-keyword er-names)
+  ; Only 6 unsigned bits are maintained in the er registers.
+  (set (index newval)
+       (set (raw-reg h-er index) (and newval #x3f)))
+)
+
+; Address registers
+; These are the concatenation of general and extension registers 8-15
+(define-keyword
+  (name ar-names)
+  (print-name h-ar)
+  (prefix "")
+  (values (lr 14) (sp 15)
+	  (a8 8) (a9 9) (a10 10) (a11 11) (a12 12) (a13 13) (a14 14) (a15 15))
+)
+
+(define-hardware
+  (name h-ar)
+  (comment "address registers")
+  (attrs VIRTUAL)
+  (type register USI (16))
+  (indices extern-keyword ar-names)
+  (get (index)
+       (or USI (sll USI (reg h-er index) 16) (and USI (reg h-gr index) #xffff)))
+  (set (index newval)
+       (sequence ()
+		 (set (reg h-er index) (srl newval 16))
+		 (set (reg h-gr index) newval)))
+)
+
+(hard-register a a  8 USI) ; a8
+(hard-register a a 14 USI) ; a14
+; hard register a15 may be specified as a15 or sp
+(define-hardware
+  (name h-a15)
+  (comment "Hard register a15")
+  (attrs VIRTUAL)
+  (type register USI)
+  (indices keyword "" ((sp 0) (a15 0))) ; must be zero to disassemble correctly
+  (get () (reg h-ar 15))
+  (set (newval) (set (reg h-ar 15) newval))
+)
+
+; Special registers
+(define-keyword
+  (name spr-names)
+  (print-name h-spr)
+  (prefix "")
+  (values (spcl_fiq 0) (spch_fiq 1) (ssr_fiq 2)
+	  (spcl_irq 4) (spch_irq 5) (ssr_irq 6)
+	  (ssr_swi 10))
+)
+
+(define-hardware
+  (name h-spr)
+  (comment "special registers")
+  (attrs PROFILE CACHE-ADDR)
+  (type register UHI (16))
+  (indices extern-keyword spr-names)
+)
+
+; Define a hard special register
+(define-pmacro (hard-special-register regname class regnum)
+  (define-hardware
+    (name (.sym h- regname - class))
+    (comment (.str "Hard register " regname "_" class))
+    (attrs VIRTUAL)
+    (type register UHI)
+    (indices keyword "" (((.sym regname _ class) regnum)))
+    (get () (reg h-spr regnum))
+    (set (newval) (set (reg h-spr regnum) newval))
+  )
+)
+
+(hard-special-register spcl fiq  0)
+(hard-special-register spch fiq  1)
+(hard-special-register ssr  fiq  2)
+(hard-special-register spcl irq  4)
+(hard-special-register spch irq  5)
+(hard-special-register ssr  irq  6)
+(hard-special-register ssr  swi 10)
+
+; These bits are actually part of the SR register but are accessed more
+; often than the entire register, so define them directly. We can assemble
+; the SR register from its components when necessary.
+(dsh h-t  "true            bit" () (register BI))
+(dsh h-z1 "zero            bit" () (register BI))
+(dsh h-z0 "zero            bit" () (register BI))
+(dsh h-v  "overflow        bit" () (register BI))
+; These SR bits are restricted.  Set handlers enforce this
+(define-hardware
+  (name h-pm)
+  (comment "Privileged mode bit")
+  (attrs)
+  (type register BI)
+  (set (newval) (if (reg h-pm) (set (raw-reg h-pm) newval)))
+)
+(define-hardware
+  (name h-te)
+  (comment "Trace Enable bit")
+  (attrs)
+  (type register BI)
+  (set (newval) (if (reg h-pm) (set (raw-reg h-te) newval)))
+)
+(define-hardware
+  (name h-ie)
+  (comment "IRQ Enable bit")
+  (attrs)
+  (type register BI)
+  (set (newval) (if (reg h-pm) (set (raw-reg h-ie) newval)))
+)
+(define-hardware
+  (name h-fe)
+  (comment "FIQ Enable bit")
+  (attrs)
+  (type register BI)
+  (set (newval) (if (reg h-pm) (set (raw-reg h-fe) newval)))
+)
+
+; The SR register as a whole
+(define-hardware
+  (name h-sr)
+  (comment "Status register")
+  (attrs VIRTUAL)
+  (type register HI)
+  (indices keyword "" ((sr 0)))
+  (get () (c-call HI "@cpu@_h_sr_get_handler"))
+  (set (newval) (c-call VOID "@cpu@_h_sr_set_handler" newval))
+)
+
+; Virtual hardware to represent external conditions for the bra(d) insns
+(define-hardware
+  (name h-ec2)
+  (comment "External conditions")
+  (attrs VIRTUAL)
+  (type register USI)
+  (indices keyword "" ((ec0 0) (ec1 1) (ec2 2) (ec3 3)))
+  (get () (const 0))
+  (set (newval) (nop))
+)
+
+
+; Instruction Operands.
+; These entries provide a layer between the assembler and the raw hardware
+; description, and are used to refer to hardware elements in the semantic
+; code.  Usually there's a bit of over-specification, but in more complicated
+; instruction sets there isn't.
+
+; CALMRISC16 specific operand attributes:
+
+; ??? Convention says this should be o-sr, but then the insn definitions
+; should refer to o-sr which is clumsy.  The "o-" could be implicit, but
+; then it should be implicit for all the symbols here, but then there would
+; be confusion between (f-)simm8 and (h-)simm8.
+; So for now the rule is exactly as it appears here.
+
+; General register operands
+(dnop Rn  "general register"            () h-gr f-Rn)
+(dnop Rn1 "general register"            () h-gr f-Rn1)
+(dnop Ri  "general register"            () h-gr f-Rn1)
+(dnop Ri1 "general register"            () h-gr f-Rn)
+(dnop Rj  "general register"            () h-gr f-Rn1)
+(dnop Rm  "general register"            () h-gr f-Rm)
+(dnop Dn  "general registers r0-r7"     () h-gr f-Dn)
+(dnop Dn1 "general registers r0-r7"     () h-gr f-Dn1)
+(dnop Di  "general registers r0-r7"     () h-gr f-Dn)
+(dnop Di1 "general registers r0-r7"     () h-gr f-Dn1)
+(dnop H   "r6 or r7 for bnzd"           () h-gr f-H)
+
+(define-operand 
+  (name    Rlist)
+  (comment "General register list for the push insn")
+  (attrs)
+  (type    h-uint)
+  (index   f-Rlist)
+  (handlers (parse "Rlist")
+	    (print "Rlist"))
+)
+
+; Extension register operands
+(dnop En "extension registers e8-e15" () h-er f-En)
+(dnop Ei "extension registers e8-e15" () h-er f-En)
+
+; Address register operands
+(dnop An  "address register" () h-ar f-An)
+(dnop An1 "address register" () h-ar f-An1)
+(dnop An2 "address register" () h-ar f-An2)
+(dnop Ai  "address register" () h-ar f-An1)
+(dnop Ai1 "address register" () h-ar f-An2)
+
+(define-operand 
+  (name    Alist)
+  (comment "Address register list for the push insn")
+  (attrs)
+  (type    h-uint)
+  (index   f-Alist)
+  (handlers (parse "Alist")
+	    (print "Alist"))
+)
+
+; Special register operands
+(dnop Rs "special register" () h-spr f-Rs)
+
+; Immediate operands
+(dnop imm5c "5  bit unsigned immediate" () h-uint f-imm5c)
+(dnop imm22 "22 bit address"            () h-uint f-imm22)
+
+(define-operand 
+  (name    eimm22)
+  (comment "22 bit unsigned immediate or 22 bit negative immediate")
+  (attrs)
+  (type    h-uint)
+  (index   f-imm22)
+  (handlers (parse "eimm22"))
+)
+
+; imm5 is parsed using parse_small_immediate because insns which
+; use it has multiple identical forms, including one which uses imm16. We
+; need to reject %hi and %lo here. Otherwise the general operand parsing issues
+; an error message before parse_imm16 gets a crack at it.
+(define-operand 
+  (name    imm5)
+  (comment "5 bit unsigned immediate")
+  (attrs)
+  (type    h-uint)
+  (index   f-imm5)
+  (handlers (parse "small_immediate"))
+)
+
+; imm6, imm7 and imm8 are parsed using parse_medium_immediate which allows
+; %hi but not %lo.
+(define-operand 
+  (name    imm6)
+  (comment "6 bit unsigned immediate")
+  (attrs)
+  (type    h-uint)
+  (index   f-imm6)
+  (handlers (parse "medium_immediate"))
+)
+
+(define-operand 
+  (name    imm7)
+  (comment "7 bit unsigned immediate")
+  (attrs)
+  (type    h-uint)
+  (index   f-imm7)
+  (handlers (parse "medium_immediate"))
+)
+
+(define-operand 
+  (name    imm8)
+  (comment "8 bit unsigned immediate")
+  (attrs)
+  (type    h-uint)
+  (index   f-imm8)
+  (handlers (parse "medium_immediate"))
+)
+
+; The parse functions for imm16 and eimm16 allow both %hi and %lo.
+(define-operand 
+  (name    imm16)
+  (comment "16 bit unsigned immediate")
+  (attrs)
+  (type    h-uint)
+  (index   f-imm16)
+  (handlers (parse "imm16"))
+)
+
+(define-operand 
+  (name    eimm16)
+  (comment "16 bit unsigned immediate or 16 bit negative immediate")
+  (attrs)
+  (type    h-uint) ; Value is still unsigned even if specified as negative
+  (index   f-imm16)
+  (handlers (parse "eimm16"))
+)
+
+; imm13 has a restricted range which must be checked.
+(define-operand 
+  (name    imm13)
+  (comment "13 bit unsigned immediate")
+  (attrs)
+  (type    h-uint)
+  (index   f-imm13)
+  (handlers (parse "imm13"))
+)
+
+(dnop elabel8  " 8 bit pc relative address"  () h-iaddr f-eoffset8)
+(dnop elabel11 "11 bit pc relative address"  () h-iaddr f-eoffset11)
+(dnop elabel13 "13 bit pc relative address"  () h-iaddr f-eoffset13)
+
+(dnop disp4 "4 bit unsigned offset"  () h-uint f-disp4)
+(dnop disp8 "8 bit unsigned offset"  () h-uint f-disp8)
+
+(dnop edisp5 "5 bit unsigned offset"  () h-uint f-edisp5)
+(dnop edisp9 "9 bit unsigned offset"  () h-uint f-edisp9)
+(dnop disp16 "16 bit unsigned offset" () h-uint f-disp16)
+
+; misc operands
+(dnop bs3 "3 bit bit selector"       () h-uint f-bs3)
+(dnop ec2 "2 bit external condition" () h-ec2  f-ec2)
+
+; Hardware-only operands
+(dnop t  "true            bit" (SEM-ONLY) h-t  f-nil)
+(dnop pm "privileged mode bit" (SEM-ONLY) h-pm f-nil)
+(dnop z1 "zero            bit" (SEM-ONLY) h-z1 f-nil)
+(dnop z0 "zero            bit" (SEM-ONLY) h-z0 f-nil)
+(dnop v  "overflow        bit" (SEM-ONLY) h-v  f-nil)
+(dnop te "TRQ enable      bit" (SEM-ONLY) h-te f-nil)
+(dnop ie "IRQ enable      bit" (SEM-ONLY) h-ie f-nil)
+(dnop fe "FIQ enable      bit" (SEM-ONLY) h-fe f-nil)
+
+; Hard register operands
+(define-pmacro (hard-register-operand reg)
+  (define-operand 
+    (name     reg)
+    (comment  (.str "Hard register " reg))
+    (attrs    SEM-ONLY)
+    (type     (.sym h- reg))
+    (index    f-nil)
+  )
+)
+
+(hard-register-operand sr)
+(hard-register-operand r0)
+(hard-register-operand r1)
+(hard-register-operand a8)
+(hard-register-operand a14)
+(dnop sp "Hard register sp" () h-a15 f-nil) ; not SEM-ONLY
+(hard-register-operand spcl-fiq)
+(hard-register-operand spch-fiq)
+(hard-register-operand ssr-fiq)
+(hard-register-operand spcl-irq)
+(hard-register-operand spch-irq)
+(hard-register-operand ssr-irq)
+(hard-register-operand ssr-swi)
+
+; Instruction definitions.
+;
+; Notes:
+; - dni is short for "define-normal-instruction"
+
+; CALMRISC16 specific insn attributes:
+
+(define-attr
+  (for insn)
+  (type boolean)
+  (name NOT-IN-DELAY-SLOT)
+  (comment "insn can't go in delay slot")
+)
+
+; Useful macros
+;----------------------------------------------------------------------------
+; Set z0/z1 based on the contents of r6/r7
+(define-pmacro (set-z reg)
+  (if (eq (index-of reg) 6)
+      (set z0 (eq reg 0))
+      (if (eq (index-of reg) 7)
+	  (set z1 (eq reg 0))))
+)
+
+; Access Program and Data memory separately
+(define-pmacro (p-mem mode address)
+  (mem mode (c-raw-call USI "@cpu@_program_address" address)))
+
+(define-pmacro (d-mem mode address)
+  (mem mode (c-raw-call USI "@cpu@_data_address" address)))
+
+; Status bits (in SR register)
+; ---------------------------------------------------------------------------
+; Clear, set and test SR bits
+(define-pmacro (SRops bit)
+  (begin
+    (dni (.sym clrsr bit)
+	 (.str "Clear " bit "bit")
+	 ()
+	 (.str "clrsr " bit)
+	 (+ OP1_9 OP2_E OP3_8 OP12-1_0 (.sym BS3_ bit))
+	 (set bit 0)
+	 ()
+    )
+    (dni (.sym setsr bit)
+	 (.str "Set " bit "bit")
+	 ()
+	 (.str "setsr " bit)
+	 (+ OP1_9 OP2_E OP3_8 OP12-1_1 (.sym BS3_ bit))
+	 (set bit 1)
+	 ()
+    )
+    (dni (.sym tstsr bit)
+	 (.str "Test " bit "bit")
+	 ()
+	 (.str "tstsr " bit)
+	 (+ OP1_9 OP2_E OP3_9 OP12-1_0 (.sym BS3_ bit))
+	 (set t (not bit))
+	 ()
+    )
+  )
+)
+
+(SRops fe)
+(SRops ie)
+(SRops te)
+(SRops v)
+(SRops z0)
+(SRops z1)
+(SRops pm)
+
+; Arithmetic
+; ---------------------------------------------------------------------------
+; General Register with General Register
+(dni addgrgr
+     "add general register with general register"
+     ()
+     ("add $Rn,$Ri")
+     (+ OP1_8 Rn OP3_0 Ri)
+     (sequence ()
+	       (set v  (add-oflag Rn Ri 0))
+	       (set t  (add-cflag Rn Ri 0))
+	       (set Rn (add Rn Ri))
+	       (set-z Rn))
+     ()
+)
+
+(dni subgrgr
+     "subtract general register from general register"
+     ()
+     ("sub $Rn,$Ri")
+     (+ OP1_8 Rn OP3_1 Ri)
+     (sequence ()
+	       (set v  (sub-oflag Rn Ri 0))
+	       (set t  (not (sub-cflag Rn Ri 0))) ; borrow is ~t
+	       (set Rn (sub Rn Ri))
+	       (set-z Rn))
+     ()
+)
+
+; General Register with General Register and Carry
+(dni addgrgrc
+     "add general register with general register and carry"
+     ()
+     "adc $Rn,$Ri"
+     (+ OP1_8 Rn OP3_2 Ri)
+     (sequence ((HI tmp))
+	       (set tmp (addc      Rn Ri t))
+	       (set v   (add-oflag Rn Ri t))
+	       (set t   (add-cflag Rn Ri t))
+	       (set Rn tmp)
+	       (set-z Rn))
+     ()
+)
+
+(dni subgrgrc
+     "subtract general register with general register and carry"
+     ()
+     "sbc $Rn,$Ri"
+     (+ OP1_8 Rn OP3_3 Ri)
+     (sequence ((HI tmp))
+	       ; borrow is ~t
+	       (set tmp (subc      Rn Ri (not t)))
+	       (set v   (sub-oflag Rn Ri (not t)))
+	       (set t   (not (sub-cflag Rn Ri (not t))))
+	       (set Rn tmp)
+	       (set-z Rn))
+     ()
+)
+
+(dni muluu
+     "Multiply unsigned general register with unsigned general register"
+     ()
+     "mul uu,$Dn,$Di1"
+     (+ OP1_A OP4-1_0 Dn OP3_D OP12-1_0 Di1)
+     (set Dn (mul (and Dn #xff) (and Di1 #xff)))
+     ()
+)
+
+(dni mulus
+     "Multiply unsigned general register with signed general register"
+     ()
+     "mul us,$Dn,$Di1"
+     (+ OP1_A OP4-1_0 Dn OP3_D OP12-1_1 Di1)
+     (set Dn (mul (and Dn #xff) (trunc QI Di1)))
+     ()
+)
+
+(dni mulsu
+     "Multiply signed general register with unsigned general register"
+     ()
+     "mul su,$Dn,$Di1"
+     (+ OP1_A OP4-1_1 Dn OP3_D OP12-1_0 Di1)
+     (set Dn (mul (trunc QI Dn) (and Di1 #xff)))
+     ()
+)
+
+(dni mulss
+     "Multiply signed general register with signed general register"
+     ()
+     "mul ss,$Dn,$Di1"
+     (+ OP1_A OP4-1_1 Dn OP3_D OP12-1_1 Di1)
+     (set Dn (mul (trunc QI Dn) (trunc QI Di1)))
+     ()
+)
+
+; General Register with 7 bit immediate
+(dni addgri7
+     "add general register with 7 bit immediate"
+     ()
+     "add $Rn,$imm7"
+     (+ OP1_0 Rn OP8-1_0 imm7)
+     (sequence ()
+	       (set v (add-oflag Rn imm7 0))
+	       (set t (add-cflag Rn imm7 0))
+	       (set Rn (add Rn imm7))
+	       (set-z Rn))
+     ()
+)
+
+(dni subgri7
+     "sub general register with 7 bit immediate"
+     ()
+     "sub $Rn,$imm7"
+     (+ OP1_0 Rn OP8-1_1 imm7)
+     (sequence ()
+	       (set v (sub-oflag Rn imm7 0))
+	       (set t (not (sub-cflag Rn imm7 0))) ; borrow is ~t
+	       (set Rn (sub Rn imm7))
+	       (set-z Rn))
+     ()
+)
+
+; General Register with 16 bit immediate
+(define-pmacro (arith-gr-imm16 op opcode)
+  (dni (.sym op gri16)
+       (.str op " general register with 16 bit immediate")
+       (NOT-IN-DELAY-SLOT)
+       (.str op " $Rn1,$eimm16")
+       (+ OP1_8 opcode OP3_F Rn1 eimm16)
+       (sequence ()
+		 (set v ((.sym op -oflag) Rn1 eimm16 0))
+		 (set t ((.sym op -cflag) Rn1 eimm16 0))
+		 (set Rn1 (op Rn1 eimm16))
+		 (set-z Rn1))
+       ()
+  )
+)
+
+(arith-gr-imm16 add OP2_0)
+; No sub $Rn1,$imm16  ??
+
+; General Register with 16 bit immediate and carry
+(dni addgri16c
+     "add general register with 16 bit immediate and carry"
+     (NOT-IN-DELAY-SLOT)
+     "adc $Rn1,$eimm16"
+     (+ OP1_8 OP2_2 OP3_F Rn1 eimm16)
+     (sequence ((HI tmp))
+	       (set tmp (addc      Rn1 eimm16 t))
+	       (set v   (add-oflag Rn1 eimm16 t))
+	       (set t   (add-cflag Rn1 eimm16 t))
+	       (set Rn1 tmp)
+	       (set-z Rn1))
+     ()
+)
+
+(dni subgri16c
+     "subtract general register with 16 bit immediate and carry"
+     (NOT-IN-DELAY-SLOT)
+     "sbc $Rn1,$eimm16"
+     (+ OP1_8 OP2_3 OP3_F Rn1 eimm16)
+     (sequence ((HI tmp))
+	       ; borrow is ~t
+	       (set tmp (subc      Rn1 eimm16 (not t)))
+	       (set v   (sub-oflag Rn1 eimm16 (not t)))
+	       (set t   (not (sub-cflag Rn1 eimm16 (not t))))
+	       (set Rn1 tmp)
+	       (set-z Rn1))
+     ()
+)
+
+; Address Register with General Register
+(define-pmacro (arith-ar-gr op opcode)
+  (dni (.sym op argr)
+       (.str op " address register with general register")
+       ()
+       (.str op " $An,$Ri")
+       (+ OP1_A opcode An OP3_C Ri)
+       (set An (op USI An (zext USI Ri)))
+       ()
+  )
+)
+
+(arith-ar-gr add OP4-1_0)
+(arith-ar-gr sub OP4-1_1)
+
+; Address register and immediate. There are two identical forms, one of which
+; is a 16 bit insn (which we would like to try first) and the other is a 32 bit
+; insn (which we will use if we have to).
+(define-pmacro (arith-ar-imm5 op opcode)
+  (dni (.sym op ari5)
+       (.str op " address register with 5 bit immediate")
+       ()
+       (.str op " $An,$imm5")
+       (+ OP1_A OP4-1_1 An opcode imm5)
+       (set An (op An imm5))
+       ()
+  )
+)
+
+(arith-ar-imm5 add OP8-3_2)
+(arith-ar-imm5 sub OP8-3_3)
+
+(define-pmacro (arith-ar-imm16 op opcode)
+  (dni (.sym op ari16)
+       (.str op " address register with 16 bit immediate")
+       (NOT-IN-DELAY-SLOT)
+       (.str op " $An1,$imm16")
+       (+ OP1_8 OP2_1 OP3_F opcode An1 imm16)
+       (set An1 (op An1 imm16))
+       ()
+  )
+)
+
+(arith-ar-imm16 add OP12-1_0)
+(arith-ar-imm16 sub OP12-1_1)
+
+; Unary ops on general registers
+(dni com
+     "Ones compliment of general register"
+     ()
+     "com $Rn1"
+     (+ OP1_8 OP2_C OP3_E Rn1)
+     (sequence ()
+	       (set Rn1 (inv Rn1))
+	       (set t (eq Rn1 0))
+	       (set-z Rn1))
+     ()
+)
+
+(dni com2
+     "Twos compliment of general register"
+     ()
+     "com2 $Rn1"
+     (+ OP1_8 OP2_D OP3_E Rn1)
+     (sequence ()
+	       (set Rn1 (inv Rn1))
+	       (set t   (add-cflag Rn1 1 0))
+	       (set Rn1 (add Rn1 1))
+	       (set-z Rn1))
+     ()
+)
+
+(dni comc
+     "Compliment of general register with carry"
+     ()
+     "comc $Rn1"
+     (+ OP1_8 OP2_E OP3_E Rn1)
+     (sequence ((HI tmp))
+	       (set Rn1 (inv Rn1))
+	       (set tmp (add       Rn1 t))
+	       (set t   (add-cflag Rn1 t 0))
+	       (set Rn1 tmp)
+	       (set-z Rn1))
+     ()
+)
+
+(dnmi dec "Decrement general register" (NO-DIS)
+      "dec $Rn"
+      (emit subgri7 Rn (imm7 1))
+)
+
+(dni decc
+     "Decrement general register based on carry"
+     ()
+     "decc $Rn1"
+     (+ OP1_8 OP2_B OP3_E Rn1)
+     (sequence ((HI tmp))
+	       ; borrow is ~t
+	       (set tmp (subc      Rn1 0 (not t)))
+	       (set v   (sub-oflag Rn1 0 (not t)))
+	       (set t   (not (sub-cflag Rn1 0 (not t))))
+	       (set Rn1 tmp)
+	       (set-z Rn1))
+     ()
+)
+
+(dnmi inc "Increment general register" (NO-DIS)
+      "inc $Rn"
+      (emit addgri7 Rn (imm7 1))
+)
+
+(dni incc
+     "Increment general register with carry"
+     ()
+     "incc $Rn1"
+     (+ OP1_8 OP2_A OP3_E Rn1)
+     (sequence ((HI tmp))
+	       (set tmp (addc      Rn1 0 t))
+	       (set v   (add-oflag Rn1 0 t))
+	       (set t   (add-cflag Rn1 0 t))
+	       (set Rn1 tmp)
+	       (set-z Rn1))
+     ()
+)
+
+(dni dt
+     "Decrement and test general register"
+     ()
+     "dt $Rn1"
+     (+ OP1_8 OP2_9 OP3_E Rn1)
+     (sequence ()
+	       (set v   (sub-oflag Rn1 1 0))
+	       (set Rn1 (sub Rn1 1))
+	       (set t   (eq Rn1 0))
+	       (set-z   Rn1))
+     ()
+)
+
+(dni ext
+     "Sign extend 8->16 bits in general register"
+     ()
+     "ext $Rn1"
+     (+ OP1_8 OP2_F OP3_E Rn1)
+     (sequence ()
+	       (set Rn1 (ext HI (trunc QI Rn1)))
+	       (set-z   Rn1))
+     ()
+)
+
+; Right shift/rotate
+(define-pmacro (shift-rotate-right name op opcode comment)
+  (dni name
+       comment
+       ()
+       (.str name " $Rn1")
+       (+ OP1_8 opcode OP3_E Rn1)
+       (sequence ()
+		 (set t (and Rn1 1))
+		 (set Rn1 (op UHI Rn1 1)))
+       ()
+  )
+)
+
+(shift-rotate-right rr  ror OP2_0 "Rotate right one bit")
+(shift-rotate-right sr  srl OP2_4 "Shift  right logical one bit")
+(shift-rotate-right sra sra OP2_5 "Shift  right arithmetic one bit")
+
+(dni srb
+     "Shift right by 1 byte"
+     ()
+     "srb $Rn1"
+     (+ OP1_8 OP2_3 OP3_E Rn1)
+     (sequence ()
+	       (set t (and (srl Rn1 7) 1))
+	       (set Rn1 (srl UHI Rn1 8)))
+     ()
+)
+
+(dni slb
+     "Shift left by 1 byte"
+     ()
+     "slb $Rn1"
+     (+ OP1_8 OP2_8 OP3_E Rn1)
+     (sequence ()
+	       (set t (and (srl Rn1 8) 1))
+	       (set Rn1 (sll UHI Rn1 8)))
+     ()
+)
+
+(dni rrc
+     "Rotate right one bit with carry"
+     ()
+     "rrc $Rn1"
+     (+ OP1_8 OP2_2 OP3_E Rn1)
+     (sequence ((SI tmp))
+	       (set tmp t)
+	       (set t (and Rn1 1))
+	       (set Rn1 (srl UHI Rn1 1))
+	       (set Rn1 (or Rn1 (sll tmp 15))))
+     ()
+)
+
+(dni rl
+     "Rotate left one bit"
+     ()
+     "rl $Rn1"
+     (+ OP1_8 OP2_1 OP3_E Rn1)
+     (sequence ()
+	       (set t (and (srl Rn1 15) 1))
+	       (set Rn1 (rol UHI Rn1 1)))
+     ()
+)
+
+; Logic
+; ---------------------------------------------------------------------------
+; General Register with general register
+(define-pmacro (logic-gr-gr op opcode)
+  (dni (.sym op grgr)
+       (.str op " general register with general register")
+       ()
+       (.str op " $Rn,$Ri")
+       (+ OP1_8 Rn opcode Ri)
+       (sequence ()
+		 (set Rn (op Rn Ri))
+		 (set t (eq Rn 0))
+		 (set-z Rn))
+       ()
+  )
+)
+
+(logic-gr-gr and OP3_4)
+(logic-gr-gr  or OP3_5)
+(logic-gr-gr xor OP3_6)
+
+(dni tstgrgr
+     "Test general register with general register"
+     ()
+     "tst $Rn,$Ri"
+     (+ OP1_8 Rn OP3_7 Ri)
+     (set t (eq (and Rn Ri) 0))
+     ()
+)
+
+; General Register with 8 bit immediate
+(define-pmacro (logic-gr-imm8 op opcode)
+  (dni (.sym op gri8)
+       (.str op " general register with 8 bit immediate")
+       ()
+       (.str op " r0,$imm8")
+       (+ OP1_9 opcode imm8)
+       (sequence ()
+		 (set r0 (op r0 imm8))
+		 (set t (eq (and r0 #xff) 0)))
+       ()
+  )
+)
+
+(logic-gr-imm8 and OP2_8)
+(logic-gr-imm8 or  OP2_9)
+(logic-gr-imm8 xor OP2_A)
+
+(dni tstgri8
+     "Test general register with 8 bit immediate"
+     ()
+     "tst r0,$imm8"
+     (+ OP1_9 OP2_B imm8)
+     (set t (eq (and r0 imm8) 0))
+     ()
+)
+
+; General Register with 16 bit immediate
+(define-pmacro (logic-gr-imm16 op opcode)
+  (dni (.sym op gri16)
+       (.str op " general register with 16 bit immediate")
+       (NOT-IN-DELAY-SLOT)
+       (.str op " $Rn1,$eimm16")
+       (+ OP1_8 opcode OP3_F Rn1 eimm16)
+       (sequence ()
+		 (set Rn1 (op Rn1 eimm16))
+		 (set t (eq Rn1 0))
+		 (set-z Rn1))
+       ()
+  )
+)
+
+(logic-gr-imm16 and OP2_4)
+(logic-gr-imm16 or  OP2_5)
+(logic-gr-imm16 xor OP2_6)
+
+(dni tstgri16
+     "Test general register with 16 bit immediate"
+     (NOT-IN-DELAY-SLOT)
+     "tst $Rn1,$eimm16"
+     (+ OP1_8 OP2_7 OP3_F Rn1 eimm16)
+     (set t (eq (and Rn1 eimm16) 0))
+     ()
+)
+
+; Loads
+; ---------------------------------------------------------------------------
+; Load words from memory
+(define-pmacro (load-word-addr-disp disp opc)
+  (begin
+    (dni (.sym ldwa disp)
+	 (.str "Load word from address plus " disp "displacement")
+	 ()
+	 (.str "ldw $Rn,@[$Ai1+$" disp "]")
+	 (+ OP1_4 Rn opc Ai1 disp)
+	 (set Rn (d-mem HI (add Ai1 (zext SI disp))))
+	 ()
+    )
+    (dni (.sym ldaa disp)
+	 (.str "Load address from address plus " disp "displacement")
+	 ()
+	 (.str "ldw $An,@[$Ai1+$" disp "]")
+	 (+ OP1_6 OP4-1_1 An opc Ai1 disp)
+	 ; Load it in two parts to avoid forced 32 bit alignment
+	 (sequence ((SI offset))
+		   (set offset (add Ai1 (zext SI disp)))
+		   (set An (or (sll (d-mem HI offset) 16)
+			       (and (d-mem HI (add offset 2)) #xffff))))
+	 ()
+    )
+  )
+)
+
+(load-word-addr-disp Rj     OP8-1_1)
+(load-word-addr-disp edisp5 OP8-1_0)
+
+(dni ldwspedisp9
+     "Load word to general register from SP plus edisp9 displacement"
+     ()
+     "ldw $Rn,@[$sp+$edisp9]"
+     (+ OP1_2 Rn edisp9)
+     (set Rn (d-mem HI (add sp edisp9)))
+     ()
+)
+
+(dni ldw-gr-a-disp16
+     "Load word from address plus disp16 displacement"
+     (NOT-IN-DELAY-SLOT)
+     (.str "ldw $Rn,@[$Ai+$disp16]")
+     (+ OP1_A Rn OP3_2 OP12-1_0 Ai disp16)
+     (set Rn (d-mem HI (add Ai disp16)))
+     ()
+)
+
+(dni ldw-ar-a-disp16
+     "Load address from address plus disp16 displacement"
+     (NOT-IN-DELAY-SLOT)
+     (.str "ldw $An,@[$Ai+$disp16]")
+     (+ OP1_A OP4-1_1 An OP3_3 OP12-1_0 Ai disp16)
+     ; Load it in two parts to avoid forced 32 bit alignment
+     (sequence ((SI offset))
+	       (set offset (add Ai disp16))
+	       (set An (or (sll (d-mem HI offset) 16)
+			   (and (d-mem HI (add offset 2)) #xffff))))
+     ()
+)
+
+; Load bytes from memory
+(define-pmacro (load-byte-addr-disp disp opc)
+  (dni (.sym ldba disp)
+       (.str "Load byte from address plus " disp "displacement")
+       ()
+       (.str "ldb $Dn,@[$Ai1+$" disp "]")
+       (+ OP1_6 OP4-1_0 Dn opc Ai1 disp)
+       (set Dn (d-mem UQI (add Ai1 (zext SI disp))))
+       ()
+  )
+)
+
+(load-byte-addr-disp Rj    OP8-1_1)
+(load-byte-addr-disp disp4 OP8-1_0)
+
+(dni ldba8disp8
+     "Load byte into r0 from a8 plus disp8 displacement"
+     ()
+     (.str "ldb r0,@[a8+$disp8]")
+     (+ OP1_9 OP2_C disp8)
+     (set r0 (d-mem UQI (add a8 disp8)))
+     ()
+)
+
+(dni ldbadisp16
+     "Load byte from address plus disp16 displacement"
+     (NOT-IN-DELAY-SLOT)
+     (.str "ldb $Dn,@[$Ai+$disp16]")
+     (+ OP1_A OP4-1_0 Dn OP3_3 OP12-1_0 Ai disp16)
+     (set Dn (d-mem UQI (add Ai disp16)))
+     ()
+)
+
+; Load from registers. These must be defined before the load immediates,
+; otherwise the register names appear to be labels to the assembler.
+(dni ldEnDi
+     "Load an extension register from a general register"
+     ()
+     "ld $En,$Di"
+     (+ OP1_A OP4-1_0 Di OP3_1 OP12-1_1 En)
+     (set En Di)
+     ()
+)
+
+(dni ldDnEi
+     "Load a general register from an extension register"
+     ()
+     "ld $Dn,$Ei"
+     (+ OP1_A OP4-1_0 Dn OP3_1 OP12-1_0 Ei)
+     (sequence ()
+	       (set Dn Ei)
+	       (set-z Dn))
+     ()
+)
+
+(dni ldRnRi
+     "Load one general register into another"
+     ()
+     "ld $Rn,$Ri"
+     (+ OP1_8 Rn OP3_D Ri)
+     (sequence ()
+	       (set Rn Ri)
+	       (set-z Rn))
+     ()
+)
+
+(dni ldAnAi
+     "Load one address register into another"
+     ()
+     "ld $An,$Ai"
+     (+ OP1_A OP4-1_1 An OP3_1 OP12-1_1 Ai)
+     (set An Ai)
+     ()
+)
+
+(dni ldAnpc
+     "Load the program counter into an address register"
+     ()
+     "ld $An1,pc"
+     (+ OP1_9 OP2_E OP3_F OP12-1_0 An1)
+     (set An1 (add pc 4))
+     ()
+)
+
+; Load special registers to and from r0
+(dni ldr0srx
+     "Load r0 from special register"
+     ()
+     "ld r0,$Rs"
+     (+ OP1_9 OP2_E OP3_A Rs)
+     (set r0 Rs)
+     ()
+)
+
+(dni ldsrxr0
+     "Load special register from r0"
+     ()
+     "ld $Rs,r0"
+     (+ OP1_9 OP2_E OP3_B Rs)
+     (set Rs r0)
+     ()
+)
+
+(dni ldsrr0
+     "Load status register from r0"
+     ()
+     "ld sr,r0"
+     (+ OP1_9 OP2_E OP3_9 OP4_B)
+     (set sr r0)
+     ()
+)
+
+(dni ldr0sr
+     "Load r0 from status register"
+     ()
+     "ld r0,sr"
+     (+ OP1_9 OP2_E OP3_9 OP4_A)
+     (set r0 sr)
+     ()
+)
+
+; Load immediate. There are two identical forms, one of which is a 16 bit insn
+; (which we would like to try first) and the other is a 32 bit insn (which
+; we will use if we have to).
+(dni ldi8
+     "load 8 bit immediate"
+     ()
+     "ld $Rn,$imm8"
+     (+ OP1_1 Rn imm8)
+     (sequence ()
+	       (set Rn imm8)
+	       (set-z Rn))
+     ()
+)
+
+(dni ldi16
+     "load 16 bit immediate"
+     (NOT-IN-DELAY-SLOT)
+     "ld $Rn1,$eimm16"
+     (+ OP1_8 OP2_D OP3_F Rn1 eimm16)
+     (sequence ()
+	       (set Rn1 eimm16)
+	       (set-z Rn1))
+     ()
+)
+
+(dni lda22
+     "load 22 bit immediate address"
+     (NOT-IN-DELAY-SLOT)
+     "ld $An,$eimm22"
+     (+ OP1_A OP4-1_1 An OP8-2_2 eimm22)
+     (set An eimm22)
+     ()
+)
+
+; Pop registers from the stack (from where sp (a15) points).
+(dni popgr
+     "Pop general register(s) from the stack"
+     ()
+     "pop $Rlist"
+     (+ OP1_A OP3_E OP12-1_0 Rlist)
+     (c-call VOID "@cpu@_pop_gr" pc Rlist)
+     ()
+)
+(dni popar
+     "Pop address register(s) from the stack"
+     ()
+     "pop $Alist"
+     (+ OP1_A OP4-1_1 OP3_E OP12-1_1 Alist)
+     (c-call VOID "@cpu@_pop_ar" pc Rlist)
+     ()
+)
+
+; Load from program memory
+(dni ldc
+     "Load a general register from program memory"
+     ()
+     "ldc $Rn,@$Ai"
+     (+ OP1_A Rn OP3_0 OP12-1_0 Ai)
+     (set Rn (p-mem HI Ai))
+     ()
+)
+
+; Stores
+; ---------------------------------------------------------------------------
+; Store words
+(define-pmacro (store-word-addr-disp disp opc)
+  (begin
+    (dni (.sym stwa disp)
+	 (.str "Store word to address plus " disp "displacement")
+	 ()
+	 (.str "ldw @[$An2+$" disp "],$Ri1")
+	 (+ OP1_5 Ri1 opc An2 disp)
+	 (set (d-mem HI (add An2 (zext SI disp))) Ri1)
+	 ()
+    )
+    (dni (.sym staa disp)
+	 (.str "Store address to address plus " disp "displacement")
+	 ()
+	 (.str "ldw @[$Ai1+$" disp "],$An")
+	 (+ OP1_7 OP4-1_1 An opc Ai1 disp)
+	 ; Store it in two parts to avoid forced 32 bit alignment
+	 (sequence ((SI offset))
+		   (set offset (add Ai1 (zext SI disp)))
+		   (set (d-mem HI offset) (srl An 16))
+		   (set (d-mem HI (add offset 2)) An))
+	 ()
+    )
+  )
+)
+
+(store-word-addr-disp Rj     OP8-1_1)
+(store-word-addr-disp edisp5 OP8-1_0)
+
+(dni stwspedisp9
+     "Store word from general register to SP plus edisp9 displacement"
+     ()
+     "ldw @[$sp+$edisp9],$Ri1"
+     (+ OP1_3 Ri1 edisp9)
+     (set (d-mem HI (add sp edisp9)) Ri1)
+     ()
+)
+
+(dni stwadisp16
+     "Store word to address plus disp16 displacement"
+     (NOT-IN-DELAY-SLOT)
+     (.str "ldw @[$An1+$disp16],$Ri1")
+     (+ OP1_A Ri1 OP3_2 OP12-1_1 An1 disp16)
+     (set (d-mem HI (add An1 disp16)) Ri1)
+     ()
+)
+
+(dni stw-ar-a-disp16
+     "Store address to address plus disp16 displacement"
+     (NOT-IN-DELAY-SLOT)
+     (.str "ldw @[$Ai+$disp16],$An")
+     (+ OP1_A OP4-1_1 An OP3_3 OP12-1_1 Ai disp16)
+     ; Store it in two parts to avoid forced 32 bit alignment
+     (sequence ((SI offset))
+	       (set offset (add Ai disp16))
+	       (set (d-mem HI offset) (srl An 16))
+	       (set (d-mem HI (add offset 2)) An))
+     ()
+)
+
+; Store bytes
+(define-pmacro (store-byte-addr-disp disp opc)
+  (dni (.sym stba disp)
+       (.str "Store byte to address plus " disp "displacement")
+       ()
+       (.str "ldb @[$An2+$" disp "],$Di")
+       (+ OP1_7 OP4-1_0 Di opc An2 disp)
+       (set (d-mem QI (add An2 (zext SI disp))) (trunc QI Di))
+       ()
+  )
+)
+
+(store-byte-addr-disp Rm    OP8-1_1)
+(store-byte-addr-disp disp4 OP8-1_0)
+
+(dni stba8disp8
+     "Store byte from r0 to a8 plus disp8 displacement"
+     ()
+     (.str "ldb @[a8+$disp8],r0")
+     (+ OP1_9 OP2_D disp8)
+     (set (d-mem QI (add a8 disp8)) (trunc QI r0))
+     ()
+)
+
+(dni stbadisp16
+     "Store byte to address plus disp16 displacement"
+     (NOT-IN-DELAY-SLOT)
+     (.str "ldb @[$An1+$disp16],$Di")
+     (+ OP1_A OP4-1_0 Di OP3_3 OP12-1_1 An1 disp16)
+     (set (d-mem QI (add An1 disp16)) (trunc QI Di))
+     ()
+)
+
+; Push registers onto the stack (to where sp (a15) points).
+(dni pushgr
+     "Push general register(s) onto the stack"
+     ()
+     "push $Rlist"
+     (+ OP1_A OP3_F OP12-1_0 Rlist)
+     (c-call VOID "@cpu@_push_gr" pc Rlist)
+     ()
+)
+(dni pushar
+     "Push address register(s) onto the stack"
+     ()
+     "push $Alist"
+     (+ OP1_A OP4-1_1 OP3_F OP12-1_1 Alist)
+     (c-call VOID "@cpu@_push_ar" pc Rlist)
+     ()
+)
+
+; Direct memory operations
+; ---------------------------------------------------------------------------
+; Operations on bits
+(dni bitr
+     "Reset bit in memory"
+     ()
+     "bitr @[a8+r1],$bs3"
+     (+ OP1_9 OP2_E OP3_0 OP12-1_0 bs3)
+     (sequence ((UQI tmp) (UQI mask) (SI address))
+	       (set address (add a8 r1))
+	       (set tmp (d-mem UQI address))
+	       (set t (and (inv (srl tmp bs3)) 1))
+	       (set mask (inv (sll 1 bs3)))
+	       (set (d-mem UQI address) (and tmp mask)))
+     ()
+)
+
+(dni bits
+     "Set bit in memory"
+     ()
+     "bits @[a8+r1],$bs3"
+     (+ OP1_9 OP2_E OP3_0 OP12-1_1 bs3)
+     (sequence ((UQI tmp) (UQI mask) (SI address))
+	       (set address (add a8 r1))
+	       (set tmp (d-mem UQI address))
+	       (set t (and (inv (srl tmp bs3)) 1))
+	       (set mask (sll 1 bs3))
+	       (set (d-mem UQI address) (or tmp mask)))
+     ()
+)
+
+(dni bitc
+     "Compliment bit in memory"
+     ()
+     "bitc @[a8+r1],$bs3"
+     (+ OP1_9 OP2_E OP3_1 OP12-1_0 bs3)
+     (sequence ((UQI tmp) (UQI mask) (SI address))
+	       (set address (add a8 r1))
+	       (set tmp (d-mem UQI address))
+	       (set t (and (inv (srl tmp bs3)) 1))
+	       (set mask (sll 1 bs3))
+	       (set (d-mem UQI address) (xor tmp mask)))
+     ()
+)
+
+(dni bitt
+     "Test bit in memory"
+     ()
+     "bitt @[a8+r1],$bs3"
+     (+ OP1_9 OP2_E OP3_1 OP12-1_1 bs3)
+     (sequence ((UQI tmp) (SI address))
+	       (set address (add a8 r1))
+	       (set tmp (d-mem UQI address))
+	       (set t (and (inv (srl tmp bs3)) 1)))
+     ()
+)
+
+; Comparison insns
+; ---------------------------------------------------------------------------
+; Compare general registers with each other
+; Must be defined before the compare gr-immed insn below so that
+; the latter will be parsed correctly
+(define-pmacro (compare-gr-gr mode cond)
+  (dni (.sym cmp mode gr)
+       (.str "compare register with immediate: " mode)
+       ()
+       (.str "cmp " mode ",$Rn,$Ri")
+       (+ OP1_8 Rn OP8-1_1 (.sym CMODE1_ mode) Ri)
+       (set t (cond Rn Ri))
+       ()
+  )
+)
+
+(compare-gr-gr  ge  ge)
+(compare-gr-gr  gt  gt)
+(compare-gr-gr uge geu)
+(compare-gr-gr ugt gtu)
+(compare-gr-gr  eq  eq)
+
+; Compare general registers with 6 bit immediate
+; Must be defined after the compare-gr-gr insns above
+; so that it will be parsed correctly
+(dni cmpgegrimm6
+     "Compare general register with 6 bit immediate"
+     ()
+     "cmp ge,$Dn,$imm6"
+     (+ OP1_A OP4-1_0 Dn OP8-2_1 imm6)
+     (set t (ge Dn imm6))
+     ()
+)
+
+; Compare general registers with 8 bit immediate
+; Must be defined after the compare-gr-gr and cmpgegrimm6 insns above
+; so that it will be parsed correctly
+(dni cmpeqgrimm8
+     "Compare general register with 8 bit immediate"
+     ()
+     "cmp eq,$Dn,$imm8"
+     (+ OP1_9 OP4-1_0 Dn imm8)
+     (set t (eq Dn imm8))
+     ()
+)
+
+; Compare general registers with 16 bit immediate
+; Must be defined after the compare-gr-gr and compare-gr-immed insns above
+; so that it will be parsed correctly
+(define-pmacro (compare-gr-imm16 mode cond)
+  (dni (.sym cmp mode i16)
+       (.str "compare register with register: " mode)
+       (NOT-IN-DELAY-SLOT)
+       (.str "cmp " mode ",$Rn1,$eimm16")
+       (+ OP1_8 OP4-1_1 (.sym CMODE2_ mode) OP3_F Rn1 eimm16)
+       (set t (cond Rn1 eimm16))
+       ()
+  )
+)
+
+(compare-gr-imm16  ge  ge)
+(compare-gr-imm16  gt  gt)
+(compare-gr-imm16 uge geu)
+(compare-gr-imm16 ugt gtu)
+(compare-gr-imm16  eq  eq)
+
+; Compare address registers with each other
+(dni cmpeqarar
+     "Compare address registerd with each other"
+     ()
+     "cmp eq,$An,$Ai"
+     (+ OP1_A OP4-1_1 An OP3_1 OP12-1_0 Ai)
+     (set t (eq An Ai))
+     ()
+)
+
+; Compare address registers with immediate
+(dni cmpeqa22
+     "Compare address register with immediate"
+     (NOT-IN-DELAY-SLOT)
+     "cmp eq,$An,$eimm22"
+     (+ OP1_A OP4-1_0 An OP8-2_2 eimm22)
+     (set t (eq An eimm22))
+     ()
+)
+
+; Branch insns
+; ---------------------------------------------------------------------------
+; Branch on external conditions
+(dni braext
+     "Branch on external conditions"
+     (NOT-IN-DELAY-SLOT)
+     "bra $ec2,$elabel8"
+     (+ OP1_C OP4-3_0 ec2 elabel8)
+     (nop) ; do nothing. No way to check external conditions
+     ()
+)
+
+(dni bradext
+     "Branch on external conditions with delay slot"
+     (NOT-IN-DELAY-SLOT)
+     "brad $ec2,$elabel8"
+     (+ OP1_C OP4-3_2 ec2 elabel8)
+     (nop) ; do nothing. No way to check external conditions
+     ()
+)
+
+; Conditional branches with and without delay slots
+(define-pmacro (branch type cond comment)
+  (begin
+    (dni (.sym br type)
+	 (.str comment ", no delay slot")
+	 (NOT-IN-DELAY-SLOT)
+	 (.str "br" type " $elabel11")
+	 (+ OP0-3_6 (.sym BR_ type) D_0 elabel11)
+	 (if cond (set pc elabel11))
+	 ()
+    )
+    (dni (.sym br type d)
+	 (.str comment ", with delay slot")
+	 (NOT-IN-DELAY-SLOT)
+	 (.str "br" type "d $elabel11")
+	 (+ OP0-3_6 (.sym BR_ type) D_1 elabel11)
+	 (delay 1 (if cond (set pc elabel11)))
+	 ()
+    )
+  )
+)
+
+(branch a (const BI 1) "branch always")
+(branch t t            "branch if true")
+(branch f (not t)      "branch if false")
+
+(dni bnzd
+     "Branch if not zero with delay slot"
+     (NOT-IN-DELAY-SLOT)
+     "bnzd $H,$elabel8"
+     (+ OP1_C OP4-3_3 H OP8-1_0 elabel8)
+     (delay 1
+	    (sequence ()
+		      (if (eq (index-of H) 6)
+			  (if (eq z0 0)
+			      (set pc elabel8))
+			  (if (eq z1 0)
+			      (set pc elabel8)))
+		      (set H (sub H 1))
+		      (set-z H)))
+     ()
+)
+
+; Conditional jumps
+(define-pmacro (conditional-jump name cond)
+  (begin
+    (dni (.sym name Ai)
+	 "Conditional jump to address register"
+	 (NOT-IN-DELAY-SLOT)
+	 (.str name " $Ai")
+	 (+ OP1_8 OP2_6 OP3_E (.sym OP12-1_ cond) Ai)
+	 (if (eq t cond) (set pc Ai))
+	 ()
+    )
+    (dni (.sym name imm22)
+	 "Conditional jump to label"
+	 (NOT-IN-DELAY-SLOT)
+	 (.str name " $imm22")
+	 (+ OP1_9 OP2_F OP8-1_0 (.sym OP9-1_ cond) imm22)
+	 (if (eq t cond) (set pc imm22))
+	 ()
+    )
+  )
+)
+
+(conditional-jump jpf 0)
+(conditional-jump jpt 1)
+
+; Unconditional jump
+(dni jmpAi
+     "Unconditional jump to address register"
+     (NOT-IN-DELAY-SLOT)
+     "jmp $Ai"
+     (+ OP1_8 OP2_7 OP3_E OP12-1_0 Ai)
+     (set pc Ai)
+     ()
+)
+
+(dni jmpimm22
+     "Unconditional jump to label"
+     (NOT-IN-DELAY-SLOT)
+     "jmp $imm22"
+     (+ OP1_9 OP2_F OP8-2_2 imm22)
+     (set pc imm22)
+     ()
+)
+
+; Jump to subroutine
+(dni jsrAi
+     "Unconditional jump to subroutine at address register"
+     (NOT-IN-DELAY-SLOT)
+     "jsr $Ai"
+     (+ OP1_8 OP2_7 OP3_E OP12-1_1 Ai)
+     (sequence ()
+	       (set a14 (add pc 2))
+	       (set pc Ai))
+     ()
+)
+
+(dni jsrimm22
+     "Unconditional jump to subroutine at label"
+     (NOT-IN-DELAY-SLOT)
+     "jsr $imm22"
+     (+ OP1_9 OP2_F OP8-2_3 imm22)
+     (sequence ()
+	       (set a14 (add pc 4))
+	       (set pc imm22))
+     ()
+)
+
+(dni bsrd
+     "Unconditional branch to subroutine with delay slot"
+     (NOT-IN-DELAY-SLOT)
+     "bsrd $elabel13"
+     (+ OP1_B elabel13)
+     (sequence ()
+	       (set a14 (add pc 4))
+	       (delay 1 (set pc elabel13)))
+     ()
+)
+
+; Return from subroutine with delay slot
+(dni retd
+     "Return from subroutine with delay slot"
+     (NOT-IN-DELAY-SLOT)
+     "retd"
+     (+ OP1_9 OP2_E OP3_9 OP4_F)
+     (delay 1 (set pc a14))
+     ()
+)
+
+; Traps
+; ---------------------------------------------------------------------------
+; Software interrupt
+(dni swi
+     "software interrupt"
+     (NOT-IN-DELAY-SLOT)
+     "swi $imm6"
+     (+ OP1_9 OP2_E OP8-2_1 imm6)
+     (sequence ()
+	       ; This is defered to calmrisc16_swi because for the breakpoint
+	       ; case we want to change as little of the machine state as
+	       ; possible.
+	       ; We still should indicate what is modified by this insn.
+	       ;
+	       ;(clobber sr_swi)
+	       ;(clobber a14)
+	       ;(clobber ie)
+	       ;(clobber te)
+ 	       ; calmrisc16_swi handles operating vs user mode
+	       (set WI pc (c-call WI "calmrisc16_swi" pc imm6)))
+     ()
+)
+
+(define-pmacro (return-from-trap trap opcode)
+  (dni (.sym ret trap)
+       (.str "Return from " trap "trap")
+       (NOT-IN-DELAY-SLOT)
+       (.str "ret_" trap)
+       (+ OP1_9 OP2_E OP3_9 opcode)
+       (sequence ()
+		 (set sr (.sym ssr- trap))
+		 (set pc (or (sll (.sym spch- trap) 16)
+			     (and (.sym spcl- trap) #xffff))))
+       ()
+  )
+)
+
+(return-from-trap fiq OP4_C) ; ret_fiq
+(return-from-trap irq OP4_D) ; ret_irq
+
+(dni ret-swi
+     "Return from swi"
+     (NOT-IN-DELAY-SLOT)
+     "ret_swi"
+     (+ OP1_9 OP2_E OP3_9 OP4_E)
+     (sequence ()
+	       (set sr ssr-swi)
+	       (set pc a14))
+     ()
+)
+
+; Break
+(dni break
+     "Suspend for 1 cycle"
+     (NOT-IN-DELAY-SLOT)
+     "break"
+     (+ OP1_9 OP2_E OP3_9 OP4_9)
+     (c-call VOID "calmrisc16_break")
+     ()
+)
+
+; Misc
+; ---------------------------------------------------------------------------
+(dni nop
+     "nop"
+     ()
+     "nop"
+     (+ OP1_9 OP2_E OP3_9 OP4_8)
+     (nop)
+     ()
+)
+
+; Load coprocessor data
+(dni cldr
+     "Load a general register from a coprocessor register"
+     ()
+     "cld $Dn1,$imm5c"
+     (+ OP1_E OP4-3_0 imm5c OP12-1_0 Dn1)
+     (set Dn1 0) ; default result
+     ()
+)
+
+; Store coprocessor data
+(dni cldw
+     "Store a general register into a coprocessor register"
+     ()
+     "cld $imm5c,$Di1"
+     (+ OP1_E OP4-3_0 imm5c OP12-1_1 Di1)
+     (nop) ; nothing to do
+     ()
+)
+
+; Coprocessor operations
+; Must be declared after the coprocessor loads in order to disassemble
+; correctly
+(dni cop
+     "co processor operation"
+     ()
+     "cop $imm13"
+     (+ OP0-3_7 imm13)
+     (nop) ; nothing to do
+     ()
+)
+
+; Peripheral operation
+(dni sys
+     "System peripheral operation"
+     ()
+     "sys $imm5"
+     (+ OP1_9 OP2_E OP8-3_1 imm5)
+     (nop) ; nothing to do
+     ()
+)

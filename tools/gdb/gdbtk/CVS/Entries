@@ -1,0 +1,25 @@
+/ChangeLog/1.114/Wed Sep  5 23:24:32 2012//Tmsp430-130322-branch
+/ChangeLog-2001/1.1/Thu Jan  3 20:45:20 2002//Tmsp430-130322-branch
+/ChangeLog-2002/1.1/Wed Mar 19 23:00:34 2003//Tmsp430-130322-branch
+/ChangeLog-2003/1.1/Tue Apr 13 16:39:06 2004//Tmsp430-130322-branch
+/ChangeLog-2004/1.1/Fri May 13 17:22:23 2005//Tmsp430-130322-branch
+/ChangeLog-2005/1.1/Mon Oct  9 23:35:41 2006//Tmsp430-130322-branch
+/ChangeLog-2006/1.1/Sat Feb 16 00:06:36 2008//Tmsp430-130322-branch
+/ChangeLog-2007/1.1/Sat Feb 16 00:06:36 2008//Tmsp430-130322-branch
+/ChangeLog-2008/1.1/Tue Jul  7 19:23:55 2009//Tmsp430-130322-branch
+/ChangeLog-2009/1.1/Fri Apr  1 00:28:45 2011//Tmsp430-130322-branch
+/ChangeLog-2010/1.1/Mon Apr 11 22:59:03 2011//Tmsp430-130322-branch
+/ChangeLog-2011/1.1/Wed Sep  5 23:24:32 2012//Tmsp430-130322-branch
+/ChangeLog.RedHat/1.7/Wed Feb 22 05:30:02 2012//Tmsp430-130322-branch
+/Makefile.am/1.1/Thu Aug 15 22:08:32 2002//Tmsp430-130322-branch
+/Makefile.in/1.4/Fri Apr  1 00:28:45 2011//Tmsp430-130322-branch
+/README/1.4/Fri Apr  1 00:28:45 2011//Tmsp430-130322-branch
+/TODO/1.1/Thu Mar  1 00:38:03 2001//Tmsp430-130322-branch
+/aclocal.m4/1.4/Fri Apr  1 00:28:45 2011//Tmsp430-130322-branch
+/configure/1.6/Fri Apr  1 00:28:45 2011//Tmsp430-130322-branch
+/configure.ac/1.1/Fri May 13 17:22:23 2005//Tmsp430-130322-branch
+/gdb.rc/1.1/Fri Feb  4 13:52:34 2000//Tmsp430-130322-branch
+/gdbtool.ico/1.1/Fri Feb  4 13:52:34 2000/-kb/Tmsp430-130322-branch
+D/generic////
+D/library////
+D/plugins////

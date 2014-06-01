@@ -1,0 +1,712 @@
+2013-03-04  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/generic.em: Only enable relaxation when not performing
+	a relocatable link.
+
+2013-02-11  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/elf32msp430.sc: Add TI special sections.
+	* scripttempl/elf32msp430_3.sc: Likewise.
+
+2013-02-08  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am: Add scriptempl/v850elf.em to V850 target.
+	* Makefile.in: Regenerate.
+	* emulparams/v850.sh (EXTRA_EM_FILE): Define.
+	* emulparams/v850_rh850.sh (EXTRA_EM_FILE): Define.
+	* emultempl/v850.em: New file.
+	* scripttempl/v850.sc: Keep the .note.renesas section.
+	* scripttempl/v850_rh850.sc: Likewise.
+
+2013-01-10  Nick Clifton  <nickc@redhat.com>
+
+	* libgloss/msp430/msp430xl-sim.ld: New file.
+	* Makefile.am: Add emsp430X.c
+	* Makefile.in: Regenerate.
+	* configure.tgt (msp430-*-*): Add msp430X to targ_extra_emuls.
+	* emulparams/msp430all.sh: Add entry for msp430X.
+	* scripttempl/elf32msp430.sc: Add support for msp430X.
+
+2012-12-19  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/elf32msp430.sc (.MSP430.attributes): Define.
+
+2012-12-07  Nick Clifton  <nickc@redhat.com>
+
+	* ldmain.c (multiple_definition): Only disable relaxation if it
+	was enabled by the user.
+	* ldmain.h (RELAXATION_ENABLED_BY_USER): New definition.
+	(TARGET_ENABLE_RELAXATION): New definition.
+	(RELAXATION_ENABLED): Consider relaxation enabled if requested by
+	either the user or the target.
+	* emultempl/generic.em (before_parse): Enable relaxation by
+	default for the msp430 target.
+
+2012-10-17  Nick Clifton  <nickc@redhat.com>
+
+	Issue 3223603
+	* emultempl/rxelf.em (no_flag_mismatch_warnings): Initialise to
+	true.
+	(OPTION_FLAG_MISMATCH_WARNINGS): Define.
+	(PARSE_AND_LIST_LONGOPTS): Add flag-mismatch-warnings.
+	(PARSE_AND_LIST_ARHS_CASES): Handle OPTION_FLAG_MISMATCH_WARNINGS.
+
+2012-10-16  Nick Clifton  <nickc@redhat.com>
+
+	* emulparams/v850_rh850.sh (ARCH): Fix definition.
+
+2012-09-11  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.am: Add ev850_rh850.c.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add v850_rh850 emulation.
+	* emulparams/v850_rh850.sh: New.
+	* scripttempl/v850_rh850.sc: New.
+
+2010-09-17  Nick Clifton  <nickc@redhat.com>
+
+	* scripttempl/xstormy16.sc (__bss_end): Define.
+
+2009-02-18  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/elf32.em: Default to stripping all local symbols for
+	the MN10300 targets.
+
+2006-12-08  Dave Brolley  <brolley@redhat.com>
+
+	* emulparams/elf32mep.sh (OTHER_SDATA_SECTIONS): PROVIDE
+	__sdabase here.
+	 (OTHER_READONLY_SECTIONS): Set __stack here...
+	(OTHER_END_SYMBOLS): ...not here.
+
+2005-08-07  Nick Clifton  <nickc@redhat.com>
+
+	* ldlang.c (lang_size_sections_1): Handle the case when
+	expld.result.section is NULL.
+
+2005-07-29  Dave Brolley  <brolley@redhat.com>
+
+	* emulparams/elf32mep.sh (SCRIPT_NAME): Set to 'mep'.
+	(OTHER_SDATA_SECTIONS): Add code to check for overflow of tiny
+	sections.
+	* Makefile.am (eelf32mep.c): Use scripttempl.mep.sc.
+	* Makefile.in: Regenerate.
+	* scripttempl/mep.sc: New file.
+
+2005-02-03  Jim Blandy  <jimb@redhat.com>
+
+	* configure: Regenerate using autoconf 2.13, as used in the public
+	sources.  (In 2.13, one must call config.sub by saying "/bin/sh
+	$ac_config_sub"; in 2.59, the "/bin/sh" is already included
+	in $ac_config_sub, so you must *not* call the shell explicitly;
+	doing so would give you "/bin/sh /bin/sh path-to-config.sub",
+	which is an error.)
+
+2004-05-10  Stan Cox  <scox@redhat.com>
+
+	* emulparams/elf32mrisc1.sh (OTHER_RELOCATING_SECTIONS): Remove.
+	(OTHER_SECTIONS): Define.
+
+2004-03-10  Alexandre Oliva  <aoliva@redhat.com>
+
+	* ldexp.c (exp_fold_tree): Don't refrain from PROVIDing a symbol
+	just because it's type is bfd_link_hash_new.
+
+2003-11-28  Alexandre Oliva  <aoliva@redhat.com>
+
+	* emulparams/elf32frvfd.sh (EMBEDDED): Clear.
+
+2003-11-05  Alexandre Oliva  <aoliva@redhat.com>
+
+	* emulparams/elf32frvfd.sh (STACK_ADDR): Unset.
+	(MAXPAGESIZE): Set to 64Kb.
+	(OTHER_READONLY_SECTIONS): Define __ROFIXUP_LIST__ and
+	__ROFIXUP_END__.  Don't map .rofixup.got any more.
+	* emulparams/elf32frv.sh (NOP): Set.
+
+2003-10-31  Alexandre Oliva  <aoliva@redhat.com>
+
+	* configure.tgt: Add frv-*-*linux*.
+
+2003-09-30  Alexandre Oliva  <aoliva@redhat.com>
+
+	* Makefile.am (ALL_EMULATIONS): Added eelf32frvfd.o.
+	(eelf32frvfd.c): New.
+	* configure.tgt <frv-*-*>: Added it to targ_extra_emuls.
+	* emulparams/elf32frv.sh: Reverted previous two patches.
+	* emulparams/elf32frvfd.sh: New.
+	* Makefile.in: Rebuilt.
+
+2003-09-18  Alexandre Oliva  <aoliva@redhat.com>
+
+	* emulparams/elf32frv.sh (OTHER_READONLY_SECTIONS): Added
+	.rofixup.got to .rofixup.
+
+2003-09-15  Alexandre Oliva  <aoliva@redhat.com>
+
+	* emulparams/elf32frv.sh (MAXPAGESIZE): Make it 256KiB, not 256B.
+	(TEMPLATE_NAME, GENERATE_SHLIB_SCRIPT): Set.
+
+2003-06-04  Richard Sandiford  <rsandifo@redhat.com>
+
+	* configure.tgt (h8300*): Add h8300sxn emulations.
+	* Makefile.am (ALL_EMULATIONS): Add eh8300sxn.o and eh8300sxnelf.o.
+	(eh8300sxn.c, eh8300sxnelf.c): New rules.
+	* Makefile.in: Regenerate.
+	* emulparams/h8300sxnelf.sh, emulparams/h8300sxn.sh: New files.
+
+2003-05-21  Richard Sandiford  <rsandifo@redhat.com>
+
+	* emulparams/elf32mep.sh (TEMPLATE_NAME): Define.
+
+2003-05-02  Dave Brolley  <brolley@redhat.com>
+
+	* emulparams/elf32mep.sh (OTHER_READONLY_SECTIONS): Remove
+	__stack[1-11].
+
+2003-03-13  Alexandre Oliva  <aoliva@redhat.com>
+
+	* configure.tgt: Add h8300sx and h8300sxelf in the right place.
+
+2003-02-28  Bernd Schmidt  <bernds@redhat.com>
+
+	* emulparams/h8300sx.sh: New file.
+
+2003-02-27  Michael Snyder  <msnyder@redhat.com>
+
+	* Makefile.am: Add h8300sx and h8300sxelf emulations.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Add h8300sx and h8300sxelf emulations.
+	* emulparams/h8300sxelf.sh: New file.
+	* scripttempl/h8300sx.sc: New file.
+
+2003-02-06  Dave Brolley  <brolley@redhat.com>
+
+	* emulparams/elf32mep.sh (OTHER_READONLY_SECTIONS): Support 12 modules.
+	Correct stack alignment.
+
+2002-08-20  Nick Clifton  <nickc@redhat.com>
+
+	* emulparams/armelf.sh (OTHER_READONLY_SYMBOLS): Define.
+	* emulparams/armelf_linux.sh (OTHER_READONLY_SYMBOLS): Define.
+
+2002-06-10  DJ Delorie  <dj@redhat.com>
+
+	* emulparams/elf32mep.sh (OTHER_TEXT_SECTIONS): Change .vfar to
+	.vftext.
+
+2002-05-29  DJ Delorie  <dj@redhat.com>
+
+	* emulparams/elf32mep.sh (OTHER_TEXT_SECTIONS): Add .vfar.
+
+2002-05-21  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* scripttempl/armcoff.sc (.data): Double word align.
+	(.bss): Double word align.
+
+2002-05-01  Graydon Hoare  <graydon@redhat.com>
+
+       * emulparams/elf32mep.sh (OTHER_READONLY_SECTIONS): Add .rostacktab.
+
+2002-05-06  Dave Brolley  <brolley@redhat.com>
+
+	* emulparams/elf32mep.sh (OTHER_END_SYMBOLS): Use to define __stack,
+	__heap and __heap_end.
+
+2002-03-19  DJ Delorie  <dj@redhat.com>
+
+	* emulparams/elf32mep.sh (OTHER_BSS_SECTIONS): Check size of near segment.
+
+2002-02-19  Frank Ch. Eigler  <fche@redhat.com>
+
+	* emulparams/elf32mep.sh: Add .based/.tiny size limit assertions.
+
+2002-01-24  Alexandre Oliva  <aoliva@redhat.com>
+
+	* emulparams/shelf32.sh (STACK_ADDR): Define as formerly defined
+	in OTHER_RELOCATABLE_SECTIONS.
+
+2002-01-18  Alexandre Oliva  <aoliva@redhat.com>
+
+	* emulparams/shelf32.sh (STACK_ADDR): Define.
+	(OTHER_RELOCATABLE_SECTIONS): Renamed to...
+	(OTHER_SECTIONS): this.  Removed stack settings.
+	* emulparams/shelf64.sh (OTHER_RELOCATABLE_SECTIONS): Do not set.
+	(OTHER_SECTIONS): Reset after sourcing shelf32.sh.
+
+2001-11-06  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* ChangeLog.Cygnus: Add po/fr.po and po/sv.po files, missed
+	from previous merge.
+
+2001-10-31  Geoffrey Keating  <geoffk@redhat.com>
+
+	* scripttempl/xstormy16.sc: Allocate space for the stack below _end.
+
+2001-10-29  Frank Ch. Eigler  <fche@redhat.com>
+
+	* emulparams/elf32mep.sh (__heap, __heap_end): Provide start/end
+	symbols for heap -- see also libgloss/mep/sbrk.c.
+
+2001-10-25  DJ Delorie  <dj@redhat.com>
+
+	* emulparams/elf32mep.sh (OTHER_TEXT_SECTIONS): Support .srodata.
+
+	* emulparams/elf32mep.sh (OTHER_BSS_SECTIONS): Provide start/end
+	symbols for farbss.
+
+	* emulparams/elf32mep.sh (OTHER_TEXT_SECTIONS): Support .frodata.
+
+2001-08-22  Alexandre Oliva  <aoliva@redhat.com>
+
+	* emulparams/elf32am33lin.sh: Adjust to match kernel parameters.
+
+2001-08-14  Richard Henderson  <rth@redhat.com>
+
+	* emulparams/elf32xstormy16.sh (EXTRA_EM_FILE): Add needrelax.em.
+	* Makefile.am (eelf32xstormy16.c): Depend on it.
+
+2001-08-12  Richard Henderson  <rth@redhat.com>
+
+	* emulparams/elf32xstormy16.sh: Use elf32.em.
+	* scripttempl/xstormy16.sc: Place .plt before .text.
+
+2001-07-27  Geoffrey Keating  <geoffk@redhat.com>
+
+	* emulparams/elf32xstormy16.sh: Use xstormy16.sc.
+	* scripttempl/xstormy16.sc: New file.
+
+2001-06-21  Geoffrey Keating  <geoffk@redhat.com>
+
+	* emulparams/elf32xstormy16.sh (TEXT_START_ADDR): Set to 0x8000,
+	where the reset vector is.
+	(__stack): Set to 0x7f00, just under the I/O space.
+
+2001-06-11  DJ Delorie  <dj@redhat.com>
+
+	* emulparams/elf32mep.sh (OTHER_TEXT_SECTIONS): Merge far
+	functions.
+	(OTHER_READWRITE_SECTIONS): Include .gnu.linkonce.*.
+
+2001-06-02  Anthony Green  <green@redhat.com>
+
+	* emulparams/elf32frv.sh (DATA_START_SYMBOLS): Define.
+
+2001-06-01  Geoffrey Keating  <geoffk@redhat.com>
+
+	* Makefile.am: Add xstormy16 linker emulation.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Use xstormy16 emulation for xstormy16 targets.
+	* ld/emulparams/elf32xstormy16.sh: New file.
+
+2001-05-23  Anthony Green  <green@redhat.com>
+
+	* emulparams/elf32mep.sh (DATA_START_SYMBOLS): Define.
+
+2001-05-31  DJ Delorie  <dj@redhat.com>
+
+	* emulparams/elf32mep.sh: Move stack, add __sdabase and __tpbase
+	symbols, add .based, .far, and .farbss sections.
+
+2001-05-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* configure.host (am33_2.0-*-linux*): Added.
+	* configure.tgt (am33_2.0-*-linux*): Likewise.
+	* emulparams/elf32am33lin.sh: New.
+	* Makefile.am (eelf32am33lin.c): New rule.
+	* Makefile.in: Rebuilt.
+
+2001-05-03  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* configure: Regenerate.
+	* config.in: Regenerate.
+
+2001-05-02  DJ Delorie  <dj@redhat.com>
+
+	* configure.tgt: Change target_emul to targ_emul.
+
+2001-04-17  Alexandre Oliva  <aoliva@redhat.com>
+
+	* emulparams/mn10300.sh (TEMPLATE_NAME): Define.
+	(GENERATE_SHLIB_SCRIPT): Likewise.
+
+2001-04-03  Ben Elliston  <bje@redhat.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf32mep.o.
+	(eelf32mep.c): New target.
+	* Makefile.in: Regenerate.
+	* configure.tgt: Handle mep-*-elf.
+	* emulparams/elf32mep.sh: New file.
+
+2001-03-12  DJ Delorie  <dj@redhat.com>
+
+	* emultempl/sh64elf.em (sh64_elf_$_before_allocation): Disable
+	relaxing if any shmedia or mixed sections are found.
+
+2001-03-07  DJ Delorie  <dj@redhat.com>
+
+	* emultempl/sh64elf.em (sh64_elf_before_allocation): Pass f to
+	einfo.  Gracefully decline to output to non-elf formats.
+
+2001-03-06  Hans-Peter Nilsson  <hpn@redhat.com>
+
+	* emulparams/shelf64.sh (OTHER_RELOCATING_SECTIONS) <.stack>:
+	Default to _end aligned to next multiple of 0x40000, plus 0x40000.
+	* emulparams/shelf32.sh: Ditto.
+
+2001-01-14  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* emulparams/shelf32.sh (OTHER_RELOCATING_SECTIONS): Tweak
+	comment.
+
+2001-01-10  Ben Elliston  <bje@redhat.com>
+
+	* emulparams/shelf32.sh (OTHER_RELOCATING_SECTIONS): Avoid
+	non-portable shell constructs. From Hans-Peter Nilsson.
+
+2001-01-09  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* emulparams/shelf64.sh (EXTRA_EM_FILE): Define empty.
+
+	* Makefile.am (eshelf64.c, eshlelf64.c, eshlelf32.c): Adjust
+	dependencies to the shell script include chain.
+	* Makefile.in: Regenerate.
+
+2001-01-06  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* emultempl/sh64elf.em: Update and tweak comments.
+	(sh64_elf_${EMULATION_NAME}_after_allocation): Always allocate and
+	make a .cranges section SEC_IN_MEMORY.
+
+2000-12-30  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* emultempl/sh64elf.em
+	(sh64_elf_${EMULATION_NAME}_before_allocation): Don't stop when
+	.cranges section found to be necessary; continue and set stored
+	section contents flags for sections with non-mixed contents.
+	Use a struct sh64_section_data container and sh64_elf_section_data
+	to store contents-type flags.
+	Remove unused update of "isec".
+	(sh64_elf_${EMULATION_NAME}_after_allocation): Only process
+	sections marked SHF_SH5_ISA32_MIXED.  Use sh64_elf_section_data to
+	access contents-type flags.  Assert that the associated container
+	is initialized.  Use that container, not elf_gp_size, to hold size
+	of linker-generated cranges contents.
+
+2000-12-18  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* emultempl/sh64elf.em
+	(sh64_elf_${EMULATION_NAME}_before_allocation): Exit early if
+	there's already a .cranges section.  When section flag difference
+	is found, don't NULL-check cranges a second time.  Tweak comments.
+	(sh64_elf_${EMULATION_NAME}_after_allocation): Use size after
+	merging, not max size, as size of ld-generated .cranges contents.
+	Don't set ELF section flags in output section.  When checking for
+	needed .cranges descriptors, don't use a variable; compare
+	incoming ELF section flags directly to SHF_SH5_ISA32_MIXED.  Tweak
+	comments.
+
+2000-12-18  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* emultempl/sh64elf.em: New file.
+	* Makefile.am (eshelf32.c, eshlelf32.c): Adjust dependencies.
+	* Makefile.in: Regenerate.
+
+	* emulparams/shelf32.sh (OUTPUT_FORMAT): Only set if not set.
+	(OTHER_RELOCATING_SECTIONS): Ditto.
+	(EXTRA_EM_FILE): New, set to sh64elf if not set.
+	* emulparams/shlelf32.sh: Stub out all settings except
+	OUTPUT_FORMAT.  Source shelf32.sh.
+	* emulparams/shelf64.sh: Similar, but also keep ELF_SIZE and
+	OTHER_RELOCATING_SECTIONS.
+	(OTHER_RELOCATING_SECTIONS): Remove .cranges.
+	* emulparams/shlelf64.sh: Stub out all settings except
+	OUTPUT_FORMAT.  Source shelf64.sh.
+
+2000-12-15  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* emulparams/shelf64.sh (OTHER_RELOCATING_SECTIONS): Include
+	.cranges section.
+	(DATA_START_SYMBOLS): Define, provide ___data.
+	(OTHER_READONLY_SYMBOLS): Define, provide ___rodata and align to 8
+	for consecutive .data section.
+	(OTHER_GOT_SECTIONS): Define, align to 8 for consecutive .bss
+	section after .data section.
+	* emulparams/shlelf64.sh: Ditto.
+	* emulparams/shelf32.sh: Ditto.
+ 	(ALIGNMENT): Define to 8.
+	* emulparams/shelf32.sh: Ditto.
+
+2000-12-12  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* configure.tgt (sh64-*-elf*): Assign targ_extra_libpath to get
+	built-in linker scripts.
+
+2000-11-30  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* emulparams/shlelf64.sh: New.
+	* emulparams/shelf64.sh: New.
+	* configure.tgt (sh64-*-elf*): Add shelf64 and shlelf64 to
+	targ_extra_emuls.
+	* Makefile.am: Add support for shlelf64 and shelf64.
+	* Makefile.in: Regenerate.
+
+2000-11-29  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* configure.tgt (sh64-*-elf*): Add shelf as default.
+	Add shlelf to targ_extra_emuls.
+
+2000-11-27  Nick Clifton  <nickc@redhat.com>
+
+	* configure.tgt: Remove xscale sanitization.
+
+2000-11-24  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* emulparams/shelf32.sh: New file.
+	* emulparams/shlelf32.sh: New file.
+	* Makefile.am: Add support for shlelf32 and shelf32.
+	* configure.tgt: Map sh64-*-elf* to shlelf32 and shelf32.
+	* Makefile.in: Regenerate.
+
+2000-09-01  Chandrakala Chavva  <cchavva@redhat.com>
+
+	* lexsup.c: New option OPTION_TARGET_HELP. Prints all target specific
+	options.
+
+2000-08-18  Timothy Wall  <twall@redhat.com>
+
+	* emulparams/elf64_aix.sh: Renamed from elf64_m64.sh.  Change BFD
+	target name.
+	* Makefile.am: Propagate rename.
+	* Makefile.in: Regenerted.
+	* configure.tgt: Propagate rename.
+	* configure.host: Propagate rename.
+
+2000-08-17  Michael Meissner  <meissner@redhat.com>
+
+	* emulparams/elf32frv.sh (OTHER_RELOCATING_SECTIONS): Provide both
+	_stack and __stack for -fleading-underscore support.
+	(OTHER_GOT_SYMBOLS): Also add gp as an alias for _gp.
+
+2000-08-15  Niibe Yutaka  <gniibe@m17n.org>, Kaz Kojima  <kkojima@rr.iij4u.or.jp>, Alexandre Oliva  <aoliva@redhat.com>
+
+	* configure.tgt (sh-*-linux*): Added.
+	* Makefile.am: Added eshelf_linux and eshlelf_linux.
+	* Makefile.in: Rebuilt.
+	* emulparams/shelf_linux.sh: New file.
+	* emulparams/shlelf_linux.sh: New file.
+
+2000-08-01  Michael Meissner  <meissner@redhat.com>
+
+	* emulparams/elf32frv.sh (OTHER_READONLY_SECTIONS):  Include
+	.rofixup.
+
+2000-07-16  Timothy Wall  <twall@cygnus.com>
+
+	* Makefile.am (ALL_64_EMULATIONS): Add monterey.
+	* Makefile.in: Regenerate.
+	* configure.host: Add monterey configuration.
+	* configure.tgt: Add monterey configuration.
+	* emulparams/elf64_m64.sh: New.
+
+2000-06-22  Catherine Moore  <clm@redhat.com>
+
+        * emulparams/elf32frv.sh (OTHER_READONLY_SECTIONS):  Include
+	.rofixup.
+
+Mon May  1 17:40:27 2000  Jim Wilson  <wilson@cygnus.com>
+
+	* configure.host (ia64-*-linux-*): Change dynamic linker name from
+	ld-linux.so to ld-linux-ia64.so.  Change gcc to ${CC}.
+
+2000-02-28  Jim Blandy  <jimb@redhat.com>
+
+	* emulparams/elf32frv.sh (OTHER_EXCLUDE_FILES): Omit the comma
+	before *frvend.o.
+
+2000-02-25 Andreas Schwab  <schwab@suse.de>
+
+	* configure.host: Add entry for ia64-*-linux-gnu*.
+
+2000-02-16  Richard Henderson  <rth@cygnus.com>
+
+	* emulparms/elf64_ia64.sh (OTHER_PLT_RELOC_SECTIONS): Renamed
+	from OTHER_GOT_RELOC_SECTIONS.
+
+2000-01-05  Catherine Moore  <clm@cygnus.com>
+
+	* emulparams/elf32frv.sh (OTHER_EXCLUDE_FILES): Define.
+
+1999-12-16  Timothy Wall  <twall@cygnus.com>
+
+	* ldlang.c (lang_set_startof): make sure "sizeof" symbol has value
+	  in bytes/words instead of octets.
+	* gen-doc.texi, ld.texinfo: update info files
+        * ldexp.c (fold_name): adjust SIZEOF to really return bytes
+          and not octets
+        * emultempl/ticoff.em: rename "coff-format" to "format" to avoid
+          option conflicts
+        * emulparams/tic54xcoff.sh: change "tic54x" to "c54x"
+        * Makefile.in/Makefile.am: update renamed file entries
+        * configure.tgt: recognize c54x; change emul to c54xcoff from
+          tic54xcoff
+	* ldwrite.c (build_link_order): removed obsolete placeholder
+          statement; link_order->size is in octets, and so doesn't
+          need to be adjusted for byte.
+
+1999-12-30  Nick Clifton  <nickc@cygnus.com>
+
+	* pe.em: Add arm-wince-pe specific support.
+
+1999-12-15  Nick Clifton  <nickc@cygnus.com>
+
+	* ldfile.c (ldfile_open_file): Support libraries named *.lib.
+
+1999-12-13  Nick Clifton  <nickc@cygnus.com>
+
+	* pe-dll.c: Include support for ARM-PE
+	* emultempl/pe.em: Include support for ARM-PE
+
+1999-12-07  Nick Clifton  <nickc@cygnus.com>
+
+	* emulparams/elf32mcore.sh: Include getopt.h.
+
+1999-11-02  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.tgt (targ_extra_ofiles): Add support for strongarm-pe
+	toolchain.
+
+1999-10-15  Benjamin Kosnik  <bkoz@unworthy.cygnus.com>
+ 	    Ulrich Drepper <drepper@cygnus.com>
+
+	* configure.tgt: Add UnixWare support.
+	* configure.host: Same.
+
+1999-09-21  Doug Evans  <devans@casey.cygnus.com>
+
+	* configure.in (EXTRA_SHLIB_EXTENSION): Don't define if there is none.
+	* configure: Rebuild.
+
+Thu Sep 16 10:59:56 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* emulparms/elf64hppa.sh: Wrap all symbols defined by this script
+	inside PROVIDE statements.
+
+1999-09-16  Tom Tromey  <tromey@cygnus.com>
+
+	* acconfig.h: Removed again.
+
+	* configure, config.in: Rebuilt.
+	* configure.in: Added doc string to EXTRA_SHLIB_EXTENSION
+	definition.
+
+1999-09-13  Tim Wall <twall@tiac.net>
+
+        * scripttempl/tic54xcoff.sc: set default flags so init/uninit
+          sections get the right default memory region.  add
+          compatibility symbols.
+        * ldlang.c: propagate input section blocking to output; some
+	  octets vs bytes cleanup.  print section size in bytes, not
+	  octets.  allow lma addresses to overlap if their pages
+	  differ.  use lma_region as a default run_region if only
+	  lma_region is specified.
+        * ldgram.y: pass back BLOCK and ALIGN expressions instead of
+          just their values
+        * ldexp.c: handle BLOCK expressions
+	* ld.texinfo: add documentation for "AT > MEMSPEC", "ALIGN",
+	  "BLOCK", and "PAGE N".  Describe --coff-format output switch.
+
+1999-08-26  Tim Wall <twall@tiac.net>
+
+	* ldlang.c: fix lma_region to default to NULL, rather than the
+	  result of a "*default*" lookup.
+
+1999-08-26  Brendan Kehoe  <brendan@cygnus.com>
+
+	Additional changes with the
+		lma memspec, blocking twall@tiac.net
+	set to make these compile properly.
+	* emultempl/elf32.em (gld${EMULATION_NAME}_place_orphan): Add
+ 	missing three trailing args to
+ 	lang_leave_output_section_statement.
+	* emultempl/armelf.em (gld${EMULATION_NAME}_place_orphan): Likewise.
+	* emultempl/pe.em (gld_${EMULATION_NAME}_place_orphan): Likewise.
+
+1999-08-20  Tim Wall <twall@cygnus.com>
+
+	* ldlang.[ch], ldgram.y: Add "AT > MEMSPEC" (lma memspec) and "PAGE N"
+          (memory pages) handling.  ALIGN_K and BLOCK added to
+          post-section options so that ALIGN and BLOCK may be applied
+          to a memory region allocation instead of a hard address.
+	* emultempl/ticoff.em: NEW general emul for TI COFF targets
+
+1999-07-31  Tim Wall <twall@cygnus.com>
+
+        General changes allow targets with other than one octet per
+	byte to be handled cleanly.
+
+	* Makefile.am: new target tic54x
+	* Makefile.in: regenerate
+	* configure.tgt: new target tic54x
+	* ldlang.c: access bfd_octets_per_byte as needed
+	* ldwrite.c: access bfd_octets_per_byte as needed
+	* emulparams/tic54xcoff.sh: NEW target
+	* scripttempl/tic54xcoff.sc: NEW target
+
+1999-07-26  Catherine Moore  <clm@cygnus.com>
+
+	* emulparams/elf32frv.sh (OTHER_GOT_SYMBOLS): Define.
+
+1999-07-14  Richard Henderson  <rth@cygnus.com>
+
+	* emulparams/elf64_ia64.sh (DATA_ADDR): Unalign on page.
+	(OTHER_GOT_SYMBOLS): PROVIDE __gp.
+	(OTHER_GOT_SECTIONS): For .IA_64.pltoff.
+	(OTHER_GOT_RELOC_SECTIONS): For .rela.IA_64.pltoff.
+	(OTHER_READONLY_SECTIONS): For .opd.
+
+1999-07-12  Nick Clifton  <nickc@cygnus.com>
+
+	* configure.tgt: Add XScale target.
+
+1999-06-27  Catherine Moore  <clm@cygnus.com>
+
+	* emulparams/elf32frv.h (OTHER_BSS_END_SYMBOLS): Define.
+
+1999-06-11  Jim Wilson  <wilson@cygnus.com>
+
+	* emulparams/elf64_ia64.sh (MAXPAGESIZE): Reduce from 0x10000000 to
+	0x10000.
+	(DATA_PLT): Delete.
+
+1999-06-03  David Mosberger  <davidm@hpl.hp.com>
+
+	* Makefile.am: Add ia64.
+	* configure.tgt: Likewise.
+	* emulparams/elf64_ia64.sh: New file.
+
+1999-05-11  DJ Delorie  <dj@cygnus.com>
+
+	* configure.tgt: add sh-pe and mips-pe (Windows CE) support
+	* Makefile.am, Makefile: ditto
+	* emultempl/pe.em: ditto
+	* pe-dll.c: ditto
+	(generate_reloc): support the rest of the reloc types
+	* emultempl/pe.em: add .pdata section
+	* emulparams/shpe.sh: new
+	* emulparams/mipspe.sh: new
+
+Thu Apr 29 17:08:58 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* Makefile.am (ALL_EMULATIONS): Add eelf32frv.o.
+	* configure.tgt: Add support for frv.
+	* emulparams/elf32frv.sh: New file.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

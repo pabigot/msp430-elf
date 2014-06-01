@@ -1,0 +1,19 @@
+%rename lib                 old_lib
+%rename cpp                 old_cpp
+%rename link                old_link
+
+*lib:
+--start-group -lykb -lc -lgcc --end-group %(old_lib)
+
+*cpp:
+-D__MISSING_SYSCALL_NAMES__ -D__CPU_MPC6XX__ -D__BOARD_YKB__ -D__MPC106_MAP_B__ -D__HAVE_FPU__ %(old_cpp)
+
+*startfile_default:
+ecrti%O%s ykb-crt0%O%s
+
+*endfile_default:
+ecrtn.o%s
+
+*link:
+-T bsp.ld%s -Ttext 0x10000 %(old_link)
+

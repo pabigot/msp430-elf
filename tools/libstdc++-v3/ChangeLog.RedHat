@@ -1,0 +1,71 @@
+2008-07-30  Nick Clifton  <nickc@redhat.com>
+
+	* src/atomic.cc (__atomic_flag_for): Add support for targets with
+	16-bit ints.
+
+2008-06-05  Nick Clifton  <nickc@redhat.com>
+
+	* include/backward/iostream.h: Temporarily restore until G++
+	testsuite is updated to use the correct versions of these headers.
+	* include/backward/fstream.h: Likewise.
+	* include/backward/ostream.h: Likewise.
+	* include/backward/stream.h: Likewise.
+
+2008-04-07  DJ Delorie  <dj@redhat.com>
+
+	* configure: Regenerate.
+
+2004-07-23  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate after recent merge.
+
+2004-06-17  Alexandre Oliva  <aoliva@redhat.com>
+
+	* include/bits/istream.tcc (getline): Make sure arguments passed
+	to min/max have the same type.
+	* include/bits/locale_facets.tcc (__verify_grouping): Likewise.
+	* include/bits/stl_deque.h (_Deque_base::_Deque_base): Likewise.
+
+2003-12-29  Nick Clifton  <nickc@redhat.com>
+
+	* libmath/mathconf.h: Add parameter to nan() prototype.
+
+2003-10-01  Eric Christopher  <echristo@redhat.com>
+
+        * config/cpu/sh/atomicity.h (__exchange_and_add): Remove 'm'
+        constraint.
+
+2003-07-09  Alexandre Oliva  <aoliva@redhat.com>
+
+	* config/cpu/sh/atomicity.h: New.  Use movli and movco on SH4a.
+
+2002-03-18  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* configure: Regenerate.
+
+2001-10-23  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* configure: Regenerate.
+
+2001-07-06  Frank Ch. Eigler  <fche@redhat.com>
+
+	* src/Makefile.am: Added dummy install-info target.
+	* src/Makefile.in: Regenerated.
+
+2001-06-29  J"orn Rennecke <amylaar@redhat.com>
+
+	* libsupc++/eh_personality.cc (parse_lsda_header):
+	Don't add two pointers.
+	(check_exception_spec): Don't pass pointer as second argument
+	to get_ttype_entry.
+	(PERSONALITY_FUNCTION): Don't add two pointers.
+	Use casts when assining a pointer to an integer.
+	Don't pass pointer as third argument to _Unwind_SetGR.
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

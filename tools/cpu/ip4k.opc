@@ -1,0 +1,750 @@
+/* IP4K opcode support.  -*- C -*-
+   Copyright (C) 2000, 2001, 2002 Red Hat, Inc.
+   This file is part of CGEN.  */
+
+/* This file is an addendum to ip4k.cpu.  Heavy use of C code isn't
+   appropriate in .cpu files, so it resides here.  This especially applies
+   to assembly/disassembly where parsing/printing can be quite involved.
+   Such things aren't really part of the specification of the cpu, per se,
+   so .cpu files provide the general framework and .opc files handle the
+   nitty-gritty details as necessary.
+
+   Each section is delimited with start and end markers.
+
+   <arch>-opc.h additions use: "-- opc.h"
+   <arch>-opc.c additions use: "-- opc.c"
+   <arch>-asm.c additions use: "-- asm.c"
+   <arch>-dis.c additions use: "-- dis.c"
+   <arch>-ibd.h additions use: "-- ibd.h".  */
+
+/* -- opc.h */
+
+/* Allows reason codes to be output when assembler errors occur.  */
+#define CGEN_VERBOSE_ASSEMBLER_ERRORS
+
+/* Override disassembly hashing */
+
+#define CGEN_DIS_HASH_SIZE 32
+#define CGEN_DIS_HASH(buf,value) ip4k_dis_hash (buf, value)
+
+#define CGEN_ASM_HASH_SIZE 509
+#define CGEN_ASM_HASH(insn) ip4k_asm_hash (insn)
+
+extern unsigned int ip4k_dis_hash (const char *, CGEN_INSN_INT);
+extern unsigned int ip4k_asm_hash (const char *insn);
+
+/* Structure used to map between directly addressable registers and
+   their human-readable names.  Used by both the assembler and the
+   disassembler. */
+struct ip4k_cgen_data_space_map
+{
+  long address;
+  char *name;
+  int  type;
+};
+
+extern struct ip4k_cgen_data_space_map ip4k_cgen_data_space_map[];
+
+#define A0_ADDRESS 0x80
+#define A1_ADDRESS (A0_ADDRESS + 4)
+#define A2_ADDRESS (A0_ADDRESS + 8)
+#define A3_ADDRESS (A0_ADDRESS + 12)
+#define A4_ADDRESS (A0_ADDRESS + 16)
+#define A5_ADDRESS (A0_ADDRESS + 20)
+#define A6_ADDRESS (A0_ADDRESS + 24)
+#define A7_ADDRESS (A0_ADDRESS + 28)
+
+/* XXX */
+typedef unsigned char UQI;
+
+
+/* -- opc.c */
+
+#include "safe-ctype.h"
+
+unsigned int
+ip4k_dis_hash (const char * buf,
+	       CGEN_INSN_INT value ATTRIBUTE_UNUSED)
+{
+  unsigned int hash = (*buf >> 3);
+  return hash % CGEN_DIS_HASH_SIZE;
+}
+
+
+/* A better hash function for instruction mnemonics.  */
+
+unsigned int
+ip4k_asm_hash (const char * insn)
+{
+  unsigned int hash;
+  const char* m = insn;
+
+  /* For certain instructions, the variations are coded as operands
+     and so only the mnemonic will have been used to seed the hash table.
+     Examples of this are the jmp family and the int instruction.
+     If we suspect we may have these instructions, just use the first 3 chars.  */
+  if (*m == 'j' || *m == 'i')
+    {
+      int i = 0;
+      for (hash = 0; *m && ! ISSPACE (*m) && i < 3; m++, ++i)
+        hash = (hash * 23) ^ (0x1F & TOLOWER (*m));
+    }
+  else
+    {
+      for (hash = 0; *m && ! ISSPACE (*m); m++)
+        hash = (hash * 23) ^ (0x1F & TOLOWER (*m));
+    }
+
+  /* printf ("%s %d\n", insn, (hash % CGEN_ASM_HASH_SIZE)); */
+
+  return hash % CGEN_ASM_HASH_SIZE;
+}
+
+/* -- asm.c */
+
+#include "safe-ctype.h"
+
+/* Directly addressable registers on the IP4K.  */
+
+#define RW  0  /* Read/write.  */
+#define RO  1  /* Read-only.   */
+#define WO  2  /* Write-only.  */
+
+struct ip4k_cgen_data_space_map ip4k_cgen_data_space_map[] =
+{
+  { 0x0,		"d0",  RW, },	/* Data registers.  */
+  /* d1, d2 and d3 are later.  */
+  { 0x10,		"d4",  RW, },
+  { 0x14,		"d5",  RW, },
+  { 0x18,		"d6",  RW, },
+  { 0x1c,		"d7",  RW, },
+  { 0x20,		"d8",  RW, },
+  { 0x24,		"d9",  RW, },
+  { 0x28,		"d10", RW, },
+  { 0x2c,		"d11", RW, },
+  { 0x30,		"d12", RW, },
+  { 0x34,		"d13", RW, },
+  { 0x38,		"d14", RW, },
+  { 0x3c,		"d15", RW, },
+  { 0x40,		"d16", RW, },
+  { 0x44,		"d17", RW, },
+  { 0x48,		"d18", RW, },
+  { 0x4c,		"d19", RW, },
+  { 0x50,		"d20", RW, },
+  { 0x54,		"d21", RW, },
+  { 0x58,		"d22", RW, },
+  { 0x5c,		"d23", RW, },
+  { 0x60,		"d24", RW, },
+  { 0x64,		"d25", RW, },
+  { 0x68,		"d26", RW, },
+  { 0x6c,		"d27", RW, },
+  { 0x70,		"d28", RW, },
+  { 0x74,		"d29", RW, },
+  { 0x78,		"d30", RW, },
+  { 0x7c,		"d31", RW, },
+  { 0x4,		"d1",  RW, },	/* Put them here where they work.  */
+  { 0x8,		"d2",  RW, },
+  { 0xc,		"d3",  RW, },
+  { A0_ADDRESS,		"a0",  RW, },	/* Address registers.  */
+  { A1_ADDRESS,		"a1",  RW, },
+  { A2_ADDRESS, 	"a2",  RW, },
+  { A3_ADDRESS,		"a3",  RW, },
+  { A4_ADDRESS,		"a4",  RW, },
+  { A5_ADDRESS,		"a5",  RW, },
+  { A6_ADDRESS,		"a6",  RW, },
+  { A7_ADDRESS,		"sp",  RW, },	/* SP is a7; first so we use it.  */
+  { A7_ADDRESS,		"a7",  RW, },
+  { 0xa0,		"mac_hi", RW, },
+  { 0xa4,		"mac_lo", RW, },
+  { 0xa8,         	"mac_rc16", RW, },
+  { 0xac,         	"source3", RW, },
+  { 0xac,         	"source_3", RW, },
+  { 0xb0,         	"context_cnt", RO,},
+  { 0xb0,         	"inst_cnt", RO,},
+  { 0xb4,		"csr", RW, },
+  { 0xb8,         	"rosr", RO, },
+  { 0xbc,		"iread_data", RW, },
+  { 0xc0,		"int_mask0", RW, },
+  { 0xc4,		"int_mask1", RW, },
+  /* 0xc8 - 0xcf reserved for future interrupt masks.  */
+  { 0xd0,         	"pc", RW, },
+  /* 0xd4 - ff reserved.  */
+  { 0x100,        	"chip_id", RO, },
+  { 0x104,		"int_stat0", RO, },
+  { 0x108,		"int_stat1", RO, },
+  /* 0x10c - 0x113 reserved for future interrupt masks.  */
+  { 0x114,        	"int_set0", WO, },
+  { 0x118,        	"int_set1", WO, },
+  /* 0x11c - 0x123 reserved for future interrupt set.  */
+  { 0x124,        	"int_clr0", WO, },
+  { 0x128,        	"int_clr1", WO, },
+  /* 0x13c - 0x133 reserved for future interrupt clear.  */
+  { 0x134,		"global_ctrl", RW, },
+  { 0x13c,      	"mt_active_set", WO, },
+  { 0x140,      	"mt_active_clr", WO, },
+  { 0x138,      	"mt_active", RO, },
+  { 0x148,        	"mt_dbg_active_set", WO, },
+  { 0x144,        	"mt_dbg_active", RO, },
+  { 0x14C,        	"mt_en", RW, },
+  { 0x150,        	"mt_hpri", RW, }, 
+  { 0x150,        "mt_pri", RW, }, 
+  { 0x154,        "mt_hrt", RW, },
+  { 0x154,        "mt_sched", RW, },
+  { 0x15C,        "mt_break_clr", WO, },
+  { 0x158,        "mt_break", RO, },
+  { 0x160,        "mt_single_step", RW, },
+  { 0x164,        "mt_min_del_en", RW, },
+  { 0x168,        "pipe_busy", RO, },
+  { 0x16c,        "clock_ctrl", RW, },
+  { 0x178,        "dcapt_tnum", RO, },
+  { 0x174,        "dcapt_pc", RO, },
+  { 0x170,        "dcapt", RW, },
+  /* 0x17c - 0x1ff reserved.  */
+  { 0x17c,        "random_seed", RO, },
+  /* 0x200 - 0x27f is set aside for ports.  */
+  /* 0x280 - 0x2ff is set aside for timers.  */
+  { 0x280,        "tctrl", RW, },
+  { 0x284,        "watchdog", RW, },
+  { 0x288,        "global_timer", RO,},
+  { 0x290,        "timer1_base", RW, },
+  { 0x2a0,        "timer2_base", RW, },
+  { 0x2b0,        "timer3_base", RW, },
+  { 0x2c0,        "timer4_base", RW, },
+  { 0x2d0,        "timer_alarm0", RW, },
+  { 0x2d4,        "timer_alarm1", RW, },
+  { 0x2d8,        "timer_alarm2", RW, },
+  { 0x2dc,        "timer_alarm3", RW, },
+  { 0x2e0,        "timer_alarm4", RW, },
+  { 0x2e4,        "timer_alarm5", RW, },
+  { 0x2e8,        "timer_alarm6", RW, },
+  { 0x2ec,        "timer_alarm7", RW, },
+  /* 0x300 - 0x31f is set aside for serial ports.  */
+  /* 0x320 - 0x3ff reserved.  */
+  { 0x0,		0, RW, },
+};
+
+/* Parse signed 4 bit immediate value, being careful (hacky)
+   to avoid eating a `++' that might be present. */
+
+static const char *
+parse_imm4 (CGEN_CPU_DESC cd,
+	    const char **strp,
+	    int opindex,
+	    long *valuep,
+	    int size)
+{
+  const char *errmsg;
+  char *plusplus;
+  long value;
+
+  plusplus = strstr(*strp, "++");
+  if (plusplus)
+    *plusplus = 0;
+  errmsg = cgen_parse_signed_integer (cd, strp, opindex, &value);
+  if (plusplus)
+    *plusplus = '+';
+
+  if (errmsg == NULL)
+    {
+      if ((size == 2 && (value % 2))
+	  || (size == 4 && (value % 4)))
+	errmsg = _("unaligned increment");
+      else if ((size == 1 && (value < -8 || value > 7))
+	       || (size == 2 && (value < -16 || value > 15))
+	       || (size == 4 && (value < -32 || value > 31)))
+	errmsg = _("out of bounds increment");
+      else
+        *valuep = value;
+    }
+  return errmsg;
+}
+
+/* As above, for single byte addresses.  */
+
+static const char *
+parse_imm4_1 (CGEN_CPU_DESC cd,
+	      const char **strp,
+	      int opindex,
+	      long *valuep)
+{
+  return parse_imm4 (cd, strp, opindex, valuep, 1);
+}
+
+/* As above, for half-word addresses.  */
+
+static const char *
+parse_imm4_2 (CGEN_CPU_DESC cd,
+	      const char **strp,
+	      int opindex,
+	      long *valuep)
+{
+  return parse_imm4 (cd, strp, opindex, valuep, 2);
+}
+
+/* As above, for word addresses.  */
+
+static const char *
+parse_imm4_4 (CGEN_CPU_DESC cd,
+	      const char **strp,
+	      int opindex,
+	      long *valuep)
+{
+  return parse_imm4 (cd, strp, opindex, valuep, 4);
+}
+
+/* Parse a direct address.  This can be either `$xx' or a Register
+   Mnemonic.  */
+
+static const char *
+parse_direct_addr (CGEN_CPU_DESC cd,
+		   const char **strp,
+		   int opindex,
+		   long *valuep,
+		   int isdest)
+{
+  const char *errmsg = NULL;
+  long value;
+  struct ip4k_cgen_data_space_map *cur;
+  size_t len;
+
+  /* First, try to look for the literal register name.  */
+  for (cur = ip4k_cgen_data_space_map; cur->name; cur++)
+    if (strncasecmp (cur->name, *strp, (len = strlen (cur->name))) == 0
+	&& ! ISALNUM ((*strp)[len]) && (*strp)[len] != '_' )
+      {
+	*strp += len;
+        /* Fail if specifying a read-only register as a destination.  */
+	if (isdest && cur->type == RO)
+	  return _("attempt to write to read-only register");
+	value = cur->address;
+	errmsg = NULL;
+	break;
+      }
+  
+  /* Not found: try parsing it as a literal.  */
+  if (cur->name == NULL)
+    {
+      char *plusplus;
+      if (**strp == '(')
+	return _("parentheses are reserved for indirect addressing");
+
+      /* We want to avoid parsing a negative post-increment expression as a numeric
+	 expression because the parser assumes zeroes exist between the pluses and
+	 issues an extraneous warning message.  */
+      plusplus = strstr (*strp, "++");
+      if (plusplus)
+	*plusplus = 0;
+      errmsg = cgen_parse_signed_integer (cd, strp, opindex, &value);
+      if (plusplus)
+	*plusplus = '+';
+
+      if (errmsg)
+	return errmsg;
+    }
+
+  value &= 0x3ff;
+  *valuep = value;
+  return errmsg;
+}
+
+static const char *
+parse_d_direct_addr (CGEN_CPU_DESC cd,
+		     const char **strp,
+		     int opindex,
+		     unsigned long *valuep)
+{
+  return parse_direct_addr (cd, strp, opindex, (long *) valuep, 1);
+}
+
+static const char *
+parse_s1_direct_addr (CGEN_CPU_DESC cd,
+		      const char **strp,
+		      int opindex,
+		      unsigned long *valuep)
+{
+  return parse_direct_addr (cd, strp, opindex, (long *) valuep, 0);
+}
+
+/* Support for source-1 and destination operand 7-bit immediates for indirect addressing.  */
+static const char *imm7_1_rangemsg = "7-bit byte immediate value out of range";
+static const char *imm7_2_rangemsg = "7-bit halfword immediate value out of range";
+static const char *imm7_4_rangemsg = "7-bit word immediate value out of range";
+static const char *imm7_2_maskmsg  = "7-bit halfword immediate not a multiple of 2";
+static const char *imm7_4_maskmsg  = "7-bit word immediate not a multiple of 4";
+
+/* Parse 7-bit immediates, allow %lo() operator.  */
+
+static const char *
+parse_imm7_basic (CGEN_CPU_DESC cd,
+		  const char **strp,
+		  int opindex,
+		  unsigned long *valuep,
+		  const char *rangemsg,
+		  const char *maskmsg,
+		  unsigned long max,
+		  int mask,
+		  int reloc)
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type = CGEN_PARSE_OPERAND_RESULT_NUMBER;
+  unsigned long value;
+
+  /* In this case we want low 7-bits to accompany the 24-bit immediate of a moveai instruction. */
+  if (strncasecmp (*strp, "%lo(", 4) == 0)
+    {
+      bfd_vma val;
+
+      *strp += 4;
+      errmsg = cgen_parse_address (cd, strp, opindex, reloc,
+				   &result_type, & val);
+      if (**strp != ')')
+	return _("missing `)'");
+      value = val;
+      ++*strp;
+      if (errmsg == NULL
+  	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value &= 0x7f;  /* Always want 7 bits, regardless of imm7 type.  */
+      *valuep = value;
+      return errmsg;
+    }
+  else
+    {
+      if (**strp == '(')
+	return _("parentheses are reserved for indirect addressing");
+
+      errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, & value);
+    }
+
+  if (errmsg == NULL)
+    {
+      if (value > max || (long) value < 0)
+	return rangemsg;
+      if (value & mask)
+	return maskmsg;
+    }
+
+  *valuep = value & max;
+  return errmsg;
+}
+
+/* Single byte imm7.  */
+
+static const char *
+parse_imm7_1_s (CGEN_CPU_DESC cd,
+		const char **strp,
+		int opindex,
+		unsigned long *valuep)
+{
+  return parse_imm7_basic (cd, strp, opindex, valuep, _(imm7_1_rangemsg),
+			   NULL, 0x7f, 0, BFD_RELOC_IP4K_LO7_S);
+}
+
+/* Halfword imm7.  */
+
+static const char *
+parse_imm7_2_s (CGEN_CPU_DESC cd,
+		const char **strp,
+		int opindex,
+		unsigned long *valuep)
+{
+  return parse_imm7_basic (cd, strp, opindex, valuep, 
+			   _(imm7_2_rangemsg),
+			   _(imm7_2_maskmsg),
+			   0xfe, 0x1, BFD_RELOC_IP4K_LO7_2_S);
+}
+
+/* Word imm7.  */
+
+static const char *
+parse_imm7_4_s (CGEN_CPU_DESC cd,
+		const char **strp,
+		int opindex,
+		unsigned long *valuep)
+{
+  return parse_imm7_basic (cd, strp, opindex, valuep, 
+			   _(imm7_4_rangemsg),
+			   _(imm7_4_maskmsg),
+			   0x1fc, 0x3, BFD_RELOC_IP4K_LO7_4_S);
+}
+
+/* Single byte dest imm7.  */
+
+static const char *
+parse_imm7_1_d (CGEN_CPU_DESC cd,
+		const char **strp,
+		int opindex,
+		unsigned long *valuep)
+{
+  return parse_imm7_basic (cd, strp, opindex, valuep, _(imm7_1_rangemsg),
+			   NULL, 0x7f, 0, BFD_RELOC_IP4K_LO7_D);
+}
+
+/* Halfword dest imm7.  */
+
+static const char *
+parse_imm7_2_d (CGEN_CPU_DESC cd,
+		const char **strp,
+		int opindex,
+		unsigned long *valuep)
+{
+  return parse_imm7_basic (cd, strp, opindex, valuep, 
+			   _(imm7_2_rangemsg),
+			   _(imm7_2_maskmsg),
+			   0xfe, 0x1, BFD_RELOC_IP4K_LO7_2_D);
+}
+
+/* Word dest imm7.  */
+
+static const char *
+parse_imm7_4_d (CGEN_CPU_DESC cd,
+		const char **strp,
+		int opindex,
+		unsigned long *valuep)
+{
+  return parse_imm7_basic (cd, strp, opindex, valuep, 
+			   _(imm7_4_rangemsg),
+			   _(imm7_4_maskmsg),
+			   0x1fc, 0x3, BFD_RELOC_IP4K_LO7_4_D);
+}
+
+/* Parse 16-bit immediate, allow %hi() or %lo() operators.  */
+
+static const char *
+parse_imm16 (CGEN_CPU_DESC cd,
+	     const char **strp,
+	     int opindex,
+	     long *valuep)
+{
+  bfd_vma val;
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type = CGEN_PARSE_OPERAND_RESULT_NUMBER;
+  long value;
+
+  if (strncasecmp (*strp, "%hi(", 4) == 0)
+    {
+      *strp += 4;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_HI16,
+				   &result_type, & val);
+      if (**strp != ')')
+	return _("missing `)'");
+      value = val;
+      ++*strp;
+      if (errmsg == NULL
+  	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value >>= 16;
+      *valuep = value;
+      return errmsg;
+    }
+  else if (strncasecmp (*strp, "%lo(", 4) == 0)
+    {
+      *strp += 4;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_LO16,
+				   &result_type, & val);
+      if (**strp != ')')
+	return _("missing `)'");
+      value = val;
+      ++*strp;
+      if (errmsg == NULL
+  	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value &= 0xffff;
+      *valuep = value;
+      return errmsg;
+    }
+  else
+    {
+      errmsg = cgen_parse_signed_integer (cd, strp, opindex, &value);
+    }
+
+  if (errmsg == NULL
+      && (value > 65535 || value < -32768))
+    return _("16-bit immediate value out of range");
+
+  *valuep = value & 0xffff;
+  return errmsg;
+}
+
+/* Parse 24-bit immediate for moveai instruction and allow %hi() operator.  */
+
+static const char *
+parse_imm24 (CGEN_CPU_DESC cd,
+	     const char **strp,
+	     int opindex,
+	     unsigned long *valuep)
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type = CGEN_PARSE_OPERAND_RESULT_NUMBER;
+  bfd_vma value;
+
+  if (strncasecmp (*strp, "%hi(", 4) == 0)
+    {
+      *strp += 4;
+      errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_IP4K_HI24,
+				   &result_type, &value);
+      if (**strp != ')')
+	return _("missing `)'");
+      ++*strp;
+      if (errmsg == NULL
+  	  && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+	value >>= 7;
+      *valuep = value;
+      return errmsg;
+    }
+  else
+    {
+      unsigned long val;
+
+      errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, &val);
+      value = val;
+    }
+
+  if (errmsg == NULL
+      && ((long) value > 16777215 || (long) value < 0))
+    return _("24-bit immediate value out of range");
+
+  *valuep = value;
+  return errmsg;
+}
+
+static const char *
+parse_offset21 (CGEN_CPU_DESC cd,
+		const char **strp,
+		int opindex,
+		int reloc ATTRIBUTE_UNUSED,
+		enum cgen_parse_operand_result *type_addr ATTRIBUTE_UNUSED,
+		bfd_vma *valuep)
+{
+  const char *errmsg;
+  enum cgen_parse_operand_result result_type = CGEN_PARSE_OPERAND_RESULT_NUMBER;
+  bfd_vma value;
+
+  if (**strp == '#')
+    {
+      unsigned long val = value;
+
+      ++*strp;
+      errmsg = cgen_parse_unsigned_integer (cd, strp, opindex, &val);
+      value = val;
+    }
+  else
+    errmsg = cgen_parse_address (cd, strp, opindex, BFD_RELOC_IP4K_21_PCREL,
+				 & result_type, & value);
+
+  if (errmsg == NULL && result_type == CGEN_PARSE_OPERAND_RESULT_NUMBER)
+    {
+      /* We treat jmp #constant as being jump to pc + constant * 4.  */
+      if ((long) value > 1048575 || (long) value < -1048576)
+        return _("21-bit relative offset out of range");
+    }
+
+  *valuep = value & 0x7fffff; /* Address is actually 23 bits before shift.  */
+  return errmsg;
+}
+
+static const char *
+parse_offset16 (CGEN_CPU_DESC cd,
+		const char **strp,
+		int opindex,
+		long *valuep)
+{
+  const char *errmsg;
+  long value;
+
+  errmsg = cgen_parse_signed_integer (cd, strp, opindex, & value);
+
+  if (errmsg == NULL)
+    {
+      /* Ensure calli constant within limits and is multiple of 4.  */
+      if (value & 0x3)
+	return _("calli offset must be multiple of 4");
+      if (value > 131071 || value < -131072)
+        return _("16-bit calli offset out of range");
+    }
+
+  *valuep = value & 0x3ffff; /* Address is actually 18 bits before shift.  */
+  return errmsg;
+}
+
+static const char *
+parse_imm8 (CGEN_CPU_DESC cd,
+	    const char **strp,
+	    int opindex,
+	    long *valuep)
+{
+  const char *errmsg;
+  long value;
+  int no_sign = 0;
+
+  if (**strp == '0' && TOUPPER (*(*strp+1)) == 'X')
+    no_sign = 1;
+
+  errmsg = cgen_parse_signed_integer (cd, strp, opindex, &value);
+
+  if (errmsg == NULL)
+    {
+      if ((no_sign && (long) value > 255)
+	  || (!no_sign && (long) value > 127) || (long) value < -128)
+        return _("8-bit immediate value out of range");
+    }
+
+  *valuep = value & 0xff;
+  return errmsg;
+}
+
+/* -- dis.c */
+
+/* Output a signed 4 bit integer.  */
+
+static void
+print_imm4 (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+	    void * dis_info,
+	    long value,
+	    unsigned int attrs ATTRIBUTE_UNUSED,
+	    bfd_vma pc ATTRIBUTE_UNUSED,
+	    int length ATTRIBUTE_UNUSED)
+{
+  disassemble_info *info = (disassemble_info *) dis_info;
+
+  (*info->fprintf_func) (info->stream, "%d", (int) value);
+}
+
+/* Output an unsigned 7-bit integer.  */
+
+static void
+print_imm7 (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+	    void * dis_info,
+	    long value,
+	    unsigned int attrs ATTRIBUTE_UNUSED,
+	    bfd_vma pc ATTRIBUTE_UNUSED,
+	    int length ATTRIBUTE_UNUSED)
+{
+  disassemble_info *info = (disassemble_info *) dis_info;
+
+  if (value != 0)
+    (*info->fprintf_func) (info->stream, "%ld", value);
+}
+
+/* Output either a register or a 11bit literal immediate value.  */
+
+static void
+print_direct_addr (CGEN_CPU_DESC cd ATTRIBUTE_UNUSED,
+		   void * dis_info,
+		   long value,
+		   unsigned int attrs ATTRIBUTE_UNUSED,
+		   bfd_vma pc ATTRIBUTE_UNUSED,
+		   int length ATTRIBUTE_UNUSED)
+{
+  disassemble_info *info = (disassemble_info *) dis_info;
+  struct ip4k_cgen_data_space_map *cur;
+
+  value &= 0x3ff;
+  for (cur = ip4k_cgen_data_space_map; cur->name; cur++)
+    if (value == cur->address)
+      {
+        (*info->fprintf_func) (info->stream, "%s", cur->name);
+        return;
+      }
+  (*info->fprintf_func) (info->stream, "#%lx", value);
+}
+
+/* -- */
+

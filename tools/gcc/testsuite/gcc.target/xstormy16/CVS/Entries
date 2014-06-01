@@ -1,0 +1,8 @@
+/below100.S/1.4/Tue Dec 30 09:45:24 2008//Tmsp430-130322-branch
+/below100.ld/1.1/Sun Jan 23 16:41:49 2005//Tmsp430-130322-branch
+/below_100.c/1.2/Sun Jan 23 16:41:49 2005//Tmsp430-130322-branch
+/bp.c/1.2/Sun Jan 23 16:41:49 2005//Tmsp430-130322-branch
+/xstormy16.exp/1.6.4.1/Wed Mar 27 01:22:59 2013//Tmsp430-130322-branch
+D/bss_below100////
+D/data_below100////
+D/sfr////

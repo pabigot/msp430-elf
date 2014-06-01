@@ -1,0 +1,34 @@
+# this file contain variable assignments for values that affect a software
+# release at Cygnus
+# 
+# it is included in a makefile, as well as being sourced by a shell script,
+# so please make sure that all variable assignments are suitable for BOTH
+# environments.
+
+### Top-level install directory
+INSTALL_ROOT=/opt/redhat
+
+### Top-level vault directory
+VAULT_ROOT=/opt/redhat/release-vault
+
+### Variables for each product, might change this later
+CDK_BUNDLE=comp-tools
+CDK_MODULE=comp-tools
+CDK_RELEASE=msp430-130423-272
+CDK_PREFIX=${INSTALL_ROOT}/${CDK_RELEASE}
+CDK_VAULT=${VAULT_ROOT}/${CDK_RELEASE}
+CDK_TAG=${CDK-RELEASE}-release
+
+UTOOLS_BUNDLE=user-tools
+UTOOLS_MODULE=user-tools
+UTOOLS_RELEASE=TBD-YYMMDD
+UTOOLS_PREFIX=${INSTALL_ROOT}/${UTOOLS_RELEASE}
+UTOOLS_VAULT=${VAULT_ROOT}/${UTOOLS_RELEASE}
+UTOOLS_TAG=${UTOOLS_RELEASE}-release
+
+FOUNDRY_BUNDLE=foundry
+FOUNDRY_MODULE=foundry
+FOUNDRY_RELEASE=TBD-YYMMDD
+FOUNDRY_PREFIX=${INSTALL_ROOT}/${FOUNDRY_RELEASE}
+FOUNDRY_VAULT=${VAULT_ROOT}/${FOUNDRY_RELEASE}/${FOUNDRY_BUNDLE}
+FOUNDRY_TAG=${FOUNDRY_RELEASE}-release

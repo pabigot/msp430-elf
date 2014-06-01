@@ -1,0 +1,504 @@
+2013-03-14  Nick Clifton  <nickc@redhat.com>
+
+	Issue 3575233
+	* rl78.h (RL78_RELAXA_CMP): New define.
+	(RL78_RELAXA_ARITH): New define.
+
+2013-02-11  Nick Clifton  <nickc@redhat.com>
+
+	* msp430.h (SHT_MSP430_SEC_FLAGS): Define.
+	(SHT_MSP430_SYM_ALIASES): Define.
+
+2013-02-08  Nick Clifton  <nickc@redhat.com>
+
+	* v850.h (SHT_RENESAS_INFO): Define.
+	(V850_NOTE_SECNAME): Define.
+	(SIZEOF_V850_NOTE): Define.
+	(V850_NOTE_NAME): Define.
+	(enum v850_notes): New type.
+
+2013-02-01  Nick Clifton  <nickc@redhat.com>
+
+	* msp430.h (R_MSP430_SYM_DIFF): New.
+	(R_MSP430X_SYM_DIFF): New.
+
+2012-12-19  Nick Clifton  <nickc@redhat.com>
+
+	* msp430.h (SHT_MSP430_ATTRIBUTES): Define.
+	(OFBA_MSPABI_Tag_ISA): Define
+	(OFBA_MSPABI_Tag_Code_Model): Define
+	(OFBA_MSPABI_Tag_Data_Model): Define
+
+2012-12-11  Nick Clifton  <nickc@redhat.com>
+
+	* msp430.h (E_MSP430_MACH_MSP430x20): New MCU machine number.
+	(E_MSP430_MACH_MSP430x22): Likewise.
+	(E_MSP430_MACH_MSP430x23): Likewise.
+	(E_MSP430_MACH_MSP430x24): Likewise.
+	(E_MSP430_MACH_MSP430x26): Likewise.
+	(E_MSP430_MACH_MSP430x46): Likewise.
+	(E_MSP430_MACH_MSP430x47): Likewise.
+	(E_MSP430_MACH_MSP430x54): Likewise.
+
+2012-11-26  Nick Clifton  <nickc@redhat.com>
+
+	* msp430.h: Add MSP430X relocations.
+
+2012-10-17  Nick Clifton  <nickc@redhat.com>
+
+	Issue 3223603
+	* rx.h (E_FLAG_RX_ABI): Define.
+
+2012-09-13  Nick Clifton  <nickc@redhat.com>
+
+	* v850.h: Add RH850 ABI relocations and e_flags values.
+
+2012-08-29  Nick Clifton  <nickc@redhat.com>
+
+	* v850.h (E_V850E3V5_ARCH): Define.
+
+2011-07-25  Nick Clifton  <nickc@redhat.com>
+
+	* common.h (EM_78K0R): Add.
+	(EM_M16C_OLD): Add.
+	(EM_M32C_OLD): Add.
+
+2009-06-03  Nick Clifton  <nickc@redhat.com>
+
+	Import TLS support from am33-04r2 branch.
+
+	* mn10300.h: Add TLS relocs.
+
+2005-08-22  Dave Brolley  <brolley@redhat.com>
+
+	* mep.h (EF_MEP_CPU_C4): New macro.
+	(EF_MEP_CPU_H1): Change to 0x10000000.
+
+2005-04-22  Richard Sandiford  <rsandifo@redhat.com>
+
+	* mep.h (EF_MEP_LIBRARY): New flag.
+	(EF_MEP_ALL_FLAGS): Update accordingly.
+
+2004-07-29  Alexandre Oliva  <aoliva@redhat.com>
+
+	* sh.h (EF_SH_INVALID): Remove, unused.
+
+2004-06-22  Stan Cox  <scox@redhat.com>
+	* elf/ms1.h (EF_MS1_CPU_MRISC): New.
+	(EF_MS1_CPU_MRISC2, EF_MS1_CPU_MASK): Likewise.
+
+2004-06-21  Dave Brolley  <brolley@redhat.com>
+
+	* mep.h (EF_MEP_CPU_MASK, EF_MEP_CPU_MEP, EF_MEP_CPU_C2) 
+	(EF_MEP_CPU_C3, EF_MEP_CPU_H1, EF_MEP_INDEX_MASK) 
+	(EF_MEP_ALL_FLAGS): New macros.
+
+2004-05-13  Michael Snyder  <msnyder@redhat.com>
+
+	* common.h (EM_MS1): Add ms1 target.
+	* ms1.h: New file.
+
+2004-02-24  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh.h (EF_SH_INVALID): Redefine again (-1).
+	(EF_SH_MERGE_MACH): Add merging SH2A_NOFPU and SH2E to SH2A.
+	Replace 7 by EF_SH_INVALID.
+
+2004-02-24  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh.h (EF_SH_INVALID): Reinvent again.
+	(EF_SH_MERGE_MACH): Don't allow merging SH2A with SH3E.
+
+2004-02-23  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh.h (EF_SH_INVALID): Drop again.
+	(EF_SH_MERGE_MACH): Handle combinations of equal sh2a types, too.
+	Return an invalid FPU type (15) if sh2a doesn't merge well.
+
+2004-02-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh.h (EF_SH_MERGE_MACH): Fix compiler warning.
+
+2004-02-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh.h (EF_SH_INVALID): Define to indicate a non-mergeable condition.
+	(EF_SH_MERGE_MACH): Take EF_SH2A and EF_SH2A_NOFPU into account.
+
+2004-02-18  Corinna Vinschen  <vinschen@redhat.com>
+
+	* sh.h (EF_SH2A_NOFPU): New.
+
+2003-04-23  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv.h (EF_FRV_CPU_FR450): Renamed from EF_FRV_CPU_FR451.
+
+2003-04-21  Richard Sandiford  <rsandifo@redhat.com>
+
+	* frv.h (EF_FRV_CPU_FR405, EF_FRV_CPU_FR451): Define.
+
+2003-12-01  Michael Snyder  <msnyder@redhat.com>
+
+	* sh.h (EF_SH2A): New.
+
+2003-09-18  Alexandre Oliva  <aoliva@redhat.com>
+
+	* frv.h (EF_FRV_FDPIC): New macro.
+	(EF_FRV_PIC_FLAGS): Adjust.
+
+2003-08-25  Dave Brolley  <brolley@redhat.com>
+
+	* frv.h (EF_FRV_CPU_FR550): New macro.
+
+2003-08-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* frv.h (R_FRV_FUNCDESC_VALUE, R_FRV_FUNCDESC_GOTOFF12,
+	R_FRV_FUNCDESC_GOTOFFLO, R_FRV_FUNCDESC_GOTOFFHI, R_FRV_GOTOFF12,
+	R_FRV_GOTOFFLO, R_FRV_GOTOFFHI): New.
+
+2003-08-04  Alexandre Oliva  <aoliva@redhat.com>
+
+	* frv.h (R_FRV_GOT12, R_FRV_GOTHI, R_FRV_GOTLO, R_FRV_FUNCDESC,
+	R_FRV_FUNCDESC_GOT12, R_FRV_FUNCDESC_GOTHI, R_FRV_FUNCDESC_GOTLO):
+	New.
+
+2003-07-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* sh.h (EF_SH4_NOFPU, EF_SH4A_NOFPU): New.
+	(EF_SH_MERGE_MACH): Combine them.
+	
+2003-06-26  Alexandre Oliva  <aoliva@redhat.com>
+
+	* sh.h (EF_SH_HAS_DSP): Don't match EF_SH4A.
+
+2003-06-10  Alexandre Oliva  <aoliva@redhat.com>
+
+	* sh.h (EF_SH4AL_DSP): Moved to the HAS_DSP range.
+	(EF_SH4A): Renumbered.
+
+2003-06-06  Michael Snyder  <msnyder@redhat.com>
+
+	* sh.h (EF_SH3A, EF_SH4A): New flags.
+
+2003-06-04  Richard Sandiford  <rsandifo@redhat.com>
+
+	* h8.h (E_H8_MACH_H8300SXN): New flag.
+
+2003-02-27  Bernd Schmidt  <bernds@redhat.com>
+
+	* h8.h (E_H8_MACH_H8300SX): New.
+
+2002-09-30  Richard Sandiford  <rsandifo@redhat.com>
+
+	* mips.h (E_MIPS_MACH_5000, E_MIPS_MACH_4181): Remove.
+
+2002-09-26  Richard Sandiford  <rsandifo@redhat.com>
+
+	* mips.h (E_MIPS_MACH_4121): Rename to E_MIPS_MACH_4120.
+
+2002-07-16  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* v850.h (E_V850E1_ARCH): Define.
+
+2002-01-24  graydon hoare  <graydon@redhat.com>
+
+	* common.h (STT_RELC): Redefine.
+	(STT_SRELC) Define.
+
+2002-01-23  Alexandre Oliva  <aoliva@redhat.com>
+
+	* sh.h (R_SH_GOTPLT32, R_SH_GOT_LOW16, R_SH_GOT_MEDLOW16,
+	R_SH_GOT_MEDHI16, R_SH_GOT_HI16, R_SH_GOTPLT_LOW16,
+	R_SH_GOTPLT_MEDLOW16, R_SH_GOTPLT_MEDHI16, R_SH_GOTPLT_HI16,
+	R_SH_PLT_LOW16, R_SH_PLT_MEDLOW16, R_SH_PLT_MEDHI16,
+	R_SH_PLT_HI16, R_SH_GOTOFF_LOW16, R_SH_GOTOFF_MEDLOW16,
+	R_SH_GOTOFF_MEDHI16, R_SH_GOTOFF_HI16, R_SH_GOTPC_LOW16,
+	R_SH_GOTPC_MEDLOW16, R_SH_GOTPC_MEDHI16, R_SH_GOTPC_HI16,
+	R_SH_GOT10BY4, R_SH_GOTPLT10BY4, R_SH_GOT10BY8,
+	R_SH_GOTPLT10BY8, R_SH_COPY64, R_SH_GLOB_DAT64, R_SH_JMP_SLOT64,
+	R_SH_RELATIVE64): New relocs.
+	(R_SH_FIRST_INVALID_RELOC_4): Adjust.
+
+2001-10-04  graydon hoare  <graydon@redhat.com>
+
+	* common.h (STT_RELC): Define.
+	(R_RELC) Define.
+
+2001-09-28  Richard Henderson  <rth@redhat.com>
+
+	* mep.h (SHF_MEP_VLIW, SEC_MEP_VLIW): New.
+
+2001-08-20  Dave Brolley  <brolley@redhat.com>
+
+	* frv.h (EF_FRV_NOPACK): New macro.
+	(EF_FRV_ALL_FLAGS): Add EF_FRV_NOPACK.
+
+2001-08-12  Richard Henderson  <rth@redhat.com>
+
+	* xstormy16.h (R_XSTORMY16_FPTR16): New.
+	(R_XSTORMY16_GNU_VTINHERIT, R_XSTORMY16_GNU_VTENTRY): Renumber.
+
+2001-08-01  Aldy Hernandez  <aldyh@redhat.com>
+
+       * mips.h (E_MIPS_MACH_5500): New macro.
+
+2001-07-12  DJ Delorie  <dj@redhat.com>
+
+	* mep.h (R_MEP_GNU_VTINHERIT, R_MEP_GNU_VTENTRY): Mark as no-overflow.
+
+2001-06-25  DJ Delorie  <dj@redhat.com>
+
+	* mep.h: Add vtable relocs.
+
+2001-06-20  Geoffrey Keating  <geoffk@redhat.com>
+
+	* xstormy16.h: Change R_XSTORMY16_REL_24 to R_XSTORMY16_24.
+
+2001-06-20  Frank Ch. Eigler  <fche@redhat.com>
+
+	* common.h (STT_RELC): New symbol type value.
+
+2001-06-01  Geoffrey Keating  <geoffk@redhat.com>
+
+	* common.h (EM_XSTORMY16): Define.
+	* xstormy16.h: New file.
+
+2001-05-23  Dave Brolley  <brolley@redhat.com>
+
+	* frv.h: Add R_FRV_GPRELU12.
+
+2001-05-16  Alexandre Oliva  <aoliva@redhat.com>
+
+	* sh.h: Renumbered and renamed some SH5 relocations to
+	match official numbers and names; moved unmaching ones to the
+	range 0xf2-0xff.
+
+2001-05-10  DJ Delorie  <dj@redhat.com>
+
+	* mep.h: Fix bit offsets for HI16*, make them no-overflow.  Add
+	comment about mep-relocs.pl.
+
+2001-05-01  DJ Delorie  <dj@redhat.com>
+
+	* mep.h: Add MeP-specific relocs.
+
+2001-04-05  Dave Brolley  <brolley@redhat.com>
+
+	* frv.h (EF_FRV_CPU_FR400): New macro.
+
+2001-03-22  Ben Elliston  <bje@redhat.com>
+
+	* mep.h: New file.
+
+2001-03-20  Ben Elliston  <bje@redhat.com>
+
+	* common.h (EM_CYGNUS_MEP): Define.
+
+2001-01-06  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* sh.h (sh64_get_contents_type): Declare.
+	(sh64_address_is_shmedia): Prototype moved here from
+	include/opcode/dis-asm.h.
+
+2000-12-30  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* sh.h (sh64_elf_crange): New type.
+	(struct sh64_section_data): New.
+	(sh64_elf_section_data): New macro.
+	(EF_SH5): Rename back from EF_SH64.
+
+2000-12-20  Chandrakala Chavva  <cchavva@cygnus.com>
+
+	* mips.h (END_RELOC_NUMBERS) : E_MIPS_MACH_4181 new macro.
+
+2000-12-18  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* sh.h (SHF_SH5_ISA32_MIXED, SHT_SH5_CR_SORTED,
+	SH64_CRANGES_SECTION_NAME, SH64_CRANGE_SIZE,
+	SH64_CRANGE_CR_ADDR_OFFSET, SH64_CRANGE_CR_SIZE_OFFSET,
+	SH64_CRANGE_CR_TYPE_OFFSET): New macros.
+
+2000-12-12  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* sh.h (EF_SH64): Don't define EF_SH64_ABI64.
+
+2000-11-27  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* sh.h (EF_SH64_32BIT_ABI, EF_SH64_64BIT_ABI): Delete.
+	(EF_SH64_ABI64): New.
+
+2000-11-23  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* sh.h (EF_SH64): Rename from EF_SH5.
+	(EF_SH64_32BIT_ABI): New.
+	(EF_SH64_64BIT_ABI): New.
+	(R_SH_PT_16, R_SH_SHMEDIA_CODE
+	R_SH_IMMU5, R_SH_IMMS6, R_SH_IMMU6, R_SH_IMMS10, R_SH_IMMS10BY2,
+	R_SH_IMMS10BY4, R_SH_IMMS10BY8, R_SH_IMMS16, R_SH_IMMU16,
+	R_SH_IMM_LOW16, R_SH_IMM_LOW16_PCREL, R_SH_IMM_MEDLOW16,
+	R_SH_IMM_MEDLOW16_PCREL, R_SH_IMM_MEDHI16, R_SH_IMM_MEDHI16_PCREL,
+	R_SH_IMM_HI16, R_SH_IMM_HI16_PCREL, R_SH_64, R_SH_64_PCREL): New
+	relocs.
+
+2000-09-01  Ben Elliston  <bje@redhat.com>
+
+	* sh.h (EF_SH5): Define.
+
+2000-08-11  Alexandre Oliva  <aoliva@redhat.com>
+
+	* sh.h (R_SH_GOT32, R_SH_PLT32, R_SH_COPY, R_SH_GLOB_DAT,
+	R_SH_JMP_SLOT, R_SH_RELATIVE, R_SH_GOTOFF, R_SH_GOTPC): New relocs.
+	(R_SH_FIRST_INVALID_RELOC): Adjust.
+
+2000-08-07  Nick Clifton  <nickc@cygnus.com>
+
+	* ppc.h: Remove spurious CYGNUS LOCAL comments.
+	* v850.h: Likewise.
+
+2001-05-16  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf/mn10300.h: Introduce GOTPC16, GOTOFF24, GOTOFF16 and
+	PLT16, and rename GOTPC to GOTPC32 and GOTOFF to GOTOFF32.
+	Renumbered all relocs.
+
+2000-05-08  Michael Meissner  <meissner@redhat.com>
+
+	* frv.h (EF_FRV_BIGPIC): New flag for -fPIC.
+	(EF_FRV_LIBPIC): New flag for -mlibrary-pic.
+	(EF_FRV_G0): New flag for -G 0.
+	(EF_FRV_CPU_TOMCAT): New cpu variant.
+	(EF_FRV_PIC_FLAGS): Or together all pic flags.
+	(EF_FRV_ALL_FLAGS): Add new bits.
+
+2001-04-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* elf/mn10300.h (R_MN10300_GOTPC, R_MN10300_GOTOFF,
+	R_MN10300_PLT32, R_MN10300_GOT32, R_MN10300_GOT24,
+	R_MN10300_GOT16, R_MN10300_COPY, R_MN10300_GLOB_DAT,
+	R_MN10300_JMP_SLOT, R_MN10300_RELATIVE): New relocs.
+
+2000-04-01  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* mn10300.h (E_MN10300_MACH_AM33_2): Renamed from
+	E_MN10300_MACH_AM332.
+
+2000-03-31  Alexandre Oliva  <aoliva@cygnus.com>
+
+	* mn10300.h (E_MN10300_MACH_AM332): Defined.
+
+2000-03-10  Geoffrey Keating  <geoffk@cygnus.com>
+
+	* mips.h: Add R_MIPS_GNU_REL_HI16, R_MIPS_GNU_REL_LO16,
+ 	R_MIPS_GNU_REL16_S2, R_MIPS_PC64 and R_MIPS_PC32 relocation
+ 	numbers.
+
+Wed Dec  1 03:02:15 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* mn10300.h (E_MN10300_MACH_AM33): Define.
+
+1999-11-29  Michael Meissner  <meissner@cygnus.com>
+
+	* frv.h (EF_FRV_CPU_SIMPLE): Add new definition.
+
+1999-10-26  Michael Meissner  <meissner@cygnus.com>
+
+	* frv.h (EF_FRV_MULADD): Add new flag bit.
+	(EF_FRV_ALL_FLAGS): Ditto.
+
+Mon Oct 11 22:42:37 1999  Jeffrey A Law  (law@cygnus.com)
+
+	* hppa.h (PF_HP_PAGE_SIZE): Define.
+	(PF_HP_FAR_SHARED, PF_HP_NEAR_SHARED, PF_HP_CODE): Likewise.
+	(PF_HP_MODIFY, PF_HP_LAZYSWAP, PF_HP_SBP): Likewise.
+
+1999-09-15  Ulrich Drepper  <drepper@cygnus.com>
+
+	* hppa.h: Add DT_HP_GST_SIZE, DT_HP_GST_VERSION, and DT_HP_GST_HASHVAL.
+
+1999-08-29  Michael Meissner  <meissner@cygnus.com>
+
+	* frv.h (EF_FRV_{PIC,NON_PIC_RELOCS}): Add new bits.
+	(EF_FRV_ALL_FLAGS): Ditto.
+
+1999-08-25  Catherine Moore  <clm@cygnus.com>
+
+        * frv.h:  Renumber relocs.  Delete unused relocs.
+        Add gprel relocs.
+
+1999-08-22  Michael Meissner  <meissner@cygnus.com>
+
+	* frv.h (EF_FRV_CPU*): Top byte of the flags field is now
+	identifies the CPU (frv500, etc.).
+
+1999-07-29  Catherine Moore  <clm@cygnus.com>
+
+	* frv.h (R_FRV_LO_PC16, R_FRV_HI_PC16): New relocs.
+
+1999-07-26  Catherine Moore  <clm@cygnus.com>
+
+	* frv.h (R_FRV_SDA): New reloc.  Shift some reloc numbers.
+
+1999-07-16  Michael Meissner  <meissner@cygnus.com>
+
+	* frv.h: Reformat some comments.
+
+1999-07-15  Richard Henderson  <rth@cygnus.com>
+
+	* ia64.h: Clarify the status of HP/UX definitions.
+
+1999-07-14  Richard Henderson  <rth@cygnus.com>
+
+	* ia64.h (PF_IA_64_NORECOV): Typo in macro name.
+	(R_IA64_LTOFF22X, R_IA64_LDXMOV): New.
+
+1999-07-06  Michael Meissner  <meissner@cygnus.com>
+
+	* frv.h (EF_FRV_DOUBLE): Add -mdouble flag.
+	(EF_FRV_MEDIA): Add -mmedia flag.
+	(EF_FRV_ALL_FLAGS): Add mask of all flag bits currently
+	defined.
+	
+1999-06-28  Michael Meissner  <meissner@cygnus.com>
+
+	* frv.h (EF_FRV_{GPR,FPR,DWORD}*: Add frv flags.
+
+1999-06-21  Richard Henderson  <rth@cygnus.com>
+
+	* ia64.h (PF_IA64_NORECOV, DT_IA_64_PLT_RESERVE): Define.
+	(R_IA64_LTV32*): Fix numbers.
+
+1999-06-15  Richard Henderson  <rth@cygnus.com>
+
+	* ia64.h: Sync with March 1998 SVR4 processor supplement.
+
+1999-06-03  David Mosberger  <davidm@hpl.hp.com>
+
+	* ia64.h: New file.
+
+1999-05-25  Catherine Moore  <clm@cygnus.com>
+
+	* frv.h (R_FRV_16): Define.
+	(R_FRV_LABEL16): Define.
+	(R_FRV_LABEL24): Define.
+	(R_FRV_LO16): Define.
+	(R_FRV_HI16): Define.
+
+Thu Apr 29 17:08:30 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* common.h (EM_CYGNUS_FRV): New macro.
+	* frv.h: New file.
+
+1998-12-13  Gavin Romig-Koch  <gavin@cygnus.com>
+
+	* mips.h (E_MIPS_MACH_4121): New.
+
+Mon Dec 15 15:07:49 1997  Nick Clifton  <nickc@cygnus.com>
+
+	* m32r.h (E_M32RX_ARCH): New flag for m32rx architecture.
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

@@ -1,0 +1,35 @@
+# Load the tool-specific configuration for this board, as well as the
+# generic configuration. This will define any routines needed by the
+# tool to communicate with the board.
+load_generic_config "mips-linux"
+
+# Use no multilib options by default.
+process_multilib_options ""
+
+set add_flags "";
+
+# Can't do hardware watchpoints, in general
+set_board_info gdb,no_hardware_watchpoints 1;
+
+# can't do a jump to start
+set_board_info gdb,do_reload_on_run 1
+
+
+# The default compiler for this target.
+set_board_info compiler "[find_gcc]"
+
+# The GDB protocol used with this board.
+set_board_info gdb_protocol "remote"
+
+# There's no support for argument-passing.
+set_board_info noargs 1
+
+# Can't do input.
+set_board_info gdb,noinferiorio 1
+
+# Nor does it have real signals.
+set_board_info gdb,nosignals 1
+
+# And use a stub
+set_board_info use_gdb_stub 1;
+

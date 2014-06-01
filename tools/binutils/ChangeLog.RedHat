@@ -1,0 +1,216 @@
+2013-03-22  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (uses_msp430x_relocs): Fix expression evaluation.
+
+2013-02-25  Nick Clifton  <nickc@redhat.com>
+
+	* objdump.c (remove_useless_symbols): Treat assembler local labels
+	are useless.
+
+2013-02-14  DJ Delorie  <dj@redhat.com>
+
+	* readelf.c (process_section_headers): msp430 is always 4-byte
+	addresses.
+
+2013-02-11  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (uses_msp430x_relocs): New function.
+	(get_msp430x_section_type_name): Add TI special sections.
+	(display_raw_attribute): New function.
+	(process_attributes): Use it.
+
+2013-02-06  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (target_specific_reloc_handling): Add support for
+	MSP430 sym_diff relocs.
+
+2012-12-19  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_msp430x_section_type_name): New function.
+	(get_section_type_name): Use it.
+	(display_msp430x_attribute): New function.
+	(process_msp430x_specific): New function.
+	(process_arch_specific): Use it.
+
+2012-12-05  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_section_headers): Use 2 byte address for
+	MSP430, 4 byte for MSP430X.
+	* dwarf.c (display_debug_frames): Use fc->ptr_size to calculate
+	number if digits to display when showing addresses.
+
+2012-11-26  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c: Add support for MSP430X.
+
+2012-10-17  Nick Clifton  <nickc@redhat.com>
+
+	Issue 3223603
+	* readelf.c (get_machine_flags): Add support for E_FLAG_RX_ABI.
+
+2012-09-13  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c: Add support for RH850 relocs and e_flags.
+	(get_machine_flags): Fix thinko.
+
+2012-08-29  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c: Add support for the v850e3v5 architecture.
+
+2009-05-27  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (display_debug_section): Check the type of the section
+	being dumped.  Do not dump sections with the NOBITS type.
+
+2008-05-01  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (print_symbol): Add code to display non-printing
+	characters.
+
+2004-07-29  Alexandre Oliva  <aoliva@redhat.com>
+
+	* readelf.c (get_machine_flags <EM_SH>): Handle EF_SH2A and
+	EF_SH2A_NOFPU.
+
+2003-10-29  Dave Brolley  <brolley@redhat.com>
+
+	* configure.in: Define SKIP_ZEROES and SKIP_ZEROES_AT_END for mep.
+	* configure: Regenerated.
+
+2003-07-08  Alexandre Oliva  <aoliva@redhat.com>
+
+	* readelf.c (get_machine_flags <EM_SH)): Handle EF_SH4_NOFPU and
+	EF_SH4A_NOFPU.
+	
+2003-06-12  Alexandre Oliva  <aoliva@redhat.com>
+
+	* readelf.c (get_machine_flags <EM_SH>): Print SH ISA name.
+
+2002-10-02  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (process_program_headers): Provide alternative
+	heuristic to map sections to segments.
+
+2002-09-30  Richard Sandiford  <rsandifo@redhat.com>
+
+	* readelf.c (get_machine_flags): Remove E_MIPS_MACH_5000 handling.
+
+2002-07-18  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (get_machine_flags): Recognise V850E1 machine type.
+
+2002-02-14  Graydon Hoare  <graydon@redhat.com>
+
+	* objdump.c (objdump_print_addr_with_sym): Back out last
+	change; leave in vendor branch.
+
+2002-02-11  Graydon Hoare  <graydon@redhat.com>
+
+	* objdump.c (objdump_print_addr_with_sym): Add "0x" prefix
+	in output.
+	
+2002-01-23  Graydon Hoare  <graydon@redhat.com>
+
+	* readelf.c (get_symbol_type): Add signed complex symbol support.
+
+2001-11-14  Geoffrey Keating  <geoffk@redhat.com>
+
+	* readelf.c (guess_is_rela): Add support for stormy16.
+	(dump_relocations): Likewise.
+	(get_machine_name): Likewise.
+
+2001-11-06  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* Add po/fr.po and po/tr.po files, missed from previous
+	merge.
+
+2001-10-03  graydon hoare  <graydon@redhat.com>
+
+	* readelf.c (dump_relocations): Add complex relocations support.
+	(get_symbol_type): Likewise.
+
+2001-09-18  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* readelf.c (get_machine_flags): Remove spurious mips3264 code.
+
+2001-09-13  Eric Christopher  <echristo@redhat.com>
+
+	* readelf.c (get_machine_flags): Remove references to
+	E_MIPS_MACH_MIPS32_4K
+
+2001-06-20  Frank Ch. Eigler  <fche@redhat.com>
+
+	* readelf.c (get_symbol_binding): Detect STT_RELC.
+
+2001-04-03  Ben Elliston  <bje@redhat.com>
+
+	* readelf.c: Include "elf/mep.h".
+	(guess_is_rela): Handle EM_CYGNUS_MEP.
+	(get_machine_name): Ditto.
+	(dump_relocations): Ditto.
+
+2000-06-13  Syd Polk  <spolk@redhat.com>
+
+	* aclocal.m4 configure: Regenerate with correct libtool.
+
+2000-05-23  matthew green  <mrg@redhat.com>
+
+	* Makefile.in: Regenerate.
+	* aclocal.m4: Likewise.
+	* configure: Likewise.
+	
+2000-04-21  Richard Henderson  <rth@cygnus.com>
+	    David Mosberger  <davidm@hpl.hp.com>
+
+	* Makefile.am (readelf.o): Add elf/ia64.h.
+	* Makefile.in: Rebuild.
+	* readelf.c: Include elf/ia64.h.
+	(guess_is_rela, dump_relocations): Handle EM_IA_64.
+	
+1999-12-15  Tim Wall <twall@cygnus.com>
+
+	* Merge from ibmdsp branch
+        * objdump.c (show_line): changed value passed to
+          bfd_find_nearest_line to be an address instead of an
+          octet offset.
+        * objdump.c (dump_data): octet counter was scaled the wrong direction
+
+1999-09-14  Michael Meissner  <meissner@cygnus.com>
+
+	* configure.in (Canonicalization of target names): Remove adding
+	${CONFIG_SHELL} in front of $ac_config_sub, since autoconfig 2.14
+	generates $ac_config_sub with a ${CONFIG_SHELL} already.
+	* configure: Regenerate.
+
+1999-07-31  Tim Wall <twall@cygnus.com>
+	* objdump.c: Handle multiple-octet bytes.  When calculating an
+	  address offset, convert the number of octets to the number
+	  of target bytes.
+	  Show section BLOCK/CLINK flags and load page.
+	
+1999-07-14  Richard Henderson  <rth@cygnus.com>
+
+	* Makefile.am (readelf.o): Depend on elf/ia64.h too.
+	* readelf.c: Add appropriate IA64 hooks.
+
+1999-05-26  Catherine Moore  <clm@cygnus.com>
+
+	* Makefile.am: Add dependency of readelf.c on elf/frv.h
+	* Makefile.in: Regenerate.
+	* readelf.c (dump_relocations): Support EM_CYGNUS_FRV.
+	(get_machine_name): Likewise.
+
+1999-05-11  DJ Delorie  <dj@cygnus.com>
+
+	* configure.in, configure: add sh-pe and mips-pe (Windows CE) support
+	* dlltool.c: ditto
+	* rescoff.c (write_coff_file): ditto
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

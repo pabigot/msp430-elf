@@ -1,0 +1,85 @@
+# Expect script for ld-am33 tests
+#   Copyright (C) 2003 Free Software Foundation
+#
+# This file is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#
+
+if {!([istarget "am33*-*-*"]) && !([istarget "am34*-*-*"]) } {
+    return
+}
+
+# Set up a list as described in ld-lib.exp
+
+set am33_tests {
+    {
+	"am33 string merging"
+	"--relax"
+	""
+	{ "i36434.s" "i36434-2.s" }
+	{ {objdump -dz i36434.d} }
+	"i36434.x"
+    }
+    {
+	"difference of two symbols"
+	"-Ttext 0"
+	""
+	{ "i112045-1.s" }
+	{ {objdump -d i112045-1.d} }
+	"i112045-1.x"
+    }
+    {
+	"(shared) difference of two symbols"
+	"-shared"
+	""
+	{ "i112045-2.s" }
+	{ {objdump -R i112045-2.d} }
+	"i112045-2.x"
+    }
+}
+
+run_ld_link_tests $am33_tests
+
+proc i126256-test { } {
+    global CC
+    global srcdir
+    global subdir
+
+    set tmpdir tmpdir
+    set testname "Issue 126256 - seg fault whilst linking one shared library into another when relaxation is enabled."
+
+    if { ![ld_compile "$CC -mrelax -fPIC" $srcdir/$subdir/i126256-1.c $tmpdir/i126256-1.o] } {
+	unresolved $testname
+    	return
+    }
+
+    if { ![ld_compile "$CC -mrelax -fPIC" $srcdir/$subdir/i126256-2.c $tmpdir/i126256-2.o] } {
+	unresolved $testname
+    	return
+    }
+    
+    if { ![ld_simple_link $CC $tmpdir/i126256-1.so "-shared $tmpdir/i126256-1.o"]} {
+        unresolved $testname
+    	return
+    }
+
+    if { ![ld_simple_link $CC $tmpdir/i126256-2.so "--relax -shared $tmpdir/i126256-2.o $tmpdir/i126256-1.so"]} {
+        fail $testname
+    	return
+    }
+
+    pass $testname
+}
+
+i126256-test

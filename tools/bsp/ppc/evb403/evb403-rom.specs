@@ -1,0 +1,19 @@
+%rename lib                 old_lib
+%rename cpp                 old_cpp
+%rename link                old_link
+
+*lib:
+--start-group -levb403 -lc -lgcc --end-group %(old_lib)
+
+*cpp:
+-D__MISSING_SYSCALL_NAMES__ -D__CPU_PPC4XX__ -D__BOARD_EVB403__ %(old_cpp)
+
+*startfile_default:
+ecrti%O%s evb403-start%O%s
+
+*endfile_default:
+ecrtn.o%s
+
+*link:
+-T bsp.ld%s -Ttext 0xfff80000 -Tdata 0x4000 %(old_link)
+

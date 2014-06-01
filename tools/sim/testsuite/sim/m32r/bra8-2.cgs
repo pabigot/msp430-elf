@@ -1,0 +1,15 @@
+# m32r testcase for bra $disp8
+# mach(): m32rx
+
+	.include "testutils.inc"
+
+	start
+
+	.global bra8
+bra8:
+	mvi_h_gr r4, 0
+	bra.s foo || addi r4,#1
+foo:
+	test_h_gr r4,1
+
+	pass

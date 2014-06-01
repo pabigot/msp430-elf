@@ -1,0 +1,86 @@
+2004-05-13  Michael Snyder  <msnyder@redhat.com>
+
+	* dis-asm.h: Add ms1 target.
+
+2003-09-29  Dave Brolley  <brolley@redhat.com>
+
+	* dis-asm.h (disassemble_info): insn_sets now (void *) to allow for
+	more exotic underlying types to be used.
+
+2001-06-05  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* dis-asm.h: Restore accidentally deleted code.
+
+2001-06-01  Geoffrey Keating  <geoffk@redhat.com>
+
+	* dis-asm.h (print_insn_xstormy16): New prototype.
+
+2001-03-26  Ben Elliston  <bje@redhat.com>
+
+	* dis-asm.h (print_insn_mep): Declare.
+
+2001-01-06  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* dis-asm.h (sh64_address_is_shmedia): Move prototype to
+	include/elf/sh.h.
+
+2000-12-30  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* dis-asm.h (sh64_address_is_shmedia): New prototype.
+
+2000-12-19  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* dis-asm.h (struct disassemble_info): New member "section".
+	(INIT_DISASSEMBLE_INFO_NO_ARCH): Initialize private_data member.
+	Initialize section member.
+
+2000-12-07  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+
+	* sim-sh64.h: New file.
+
+2000-11-25  Hans-Peter Nilsson  <hpn@cygnus.com>
+
+	* dis-asm.h (print_insn_sh64): New prototype.
+	(print_insn_sh64l): New prototype.
+	(print_insn_sh64x_media): New prototype.
+
+2000-05-27  matthew green  <mrg@redhat.com>
+
+	(CGEN_MAX_SYNTAX_BYTES): Define as 40 now.
+
+2000-02-14  Chandra Chavva  <cchavva@cygnus.com>
+
+	* opcode/d30v (FLAG_NOT_WITH_ADDSUBppp): Redefined as operation cannot 
+	be combined in parallel with ADD/SUBppp.
+
+1999-07-31  Tim Wall <twall@tiac.net>
+
+	* dis-asm.h: added octets_per_byte field to disasm_info struct
+
+Thu Jun 17 12:17:12 1999  Jim Wilson  <wilson@cygnus.com>
+
+	* elf/ia64.h (R_IA64_GPREL32MSB, R_IA64_GPREL32LSB): Correct numbers.
+
+1999-06-10  Bob Manson  <manson@charmed.cygnus.com>
+
+	* opcode/ia64.h: Add IA64_TYPE_DYN.  
+	(struct ia64_opcode): Replace next with ent_index.
+ 	(ia64_find_opcode, ia64_find_next_opcode, ia64_free_opcode):
+	Declare.
+
+1999-06-03  David Mosberger  <davidm@hpl.hp.com>
+
+	* dis-asm.h (print_insn_ia64): Declare.
+
+1999-05-11  Catherine Moore  <clm@cygnus.com>
+
+	* dis-asm.h (print_insn_frv): Declare.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

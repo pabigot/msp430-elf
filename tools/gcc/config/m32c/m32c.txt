@@ -1,0 +1,42 @@
+Stack Frame:
+
+		|
+	$sp ->	-----------------------
+		| locals, etc.
+		-----------------------
+		| register saves
+	$fp ->	-----------------------
+		| saved $fp
+		-----------------------
+		| return address
+		-----------------------
+		| arg1
+		-----------------------
+		| arg2 (etc)
+
+
+Arguments
+
+(only integer/pointer types can be passed in registers)
+
+arg1	QImode	$r1l	*if* prototyped and named
+	HImode	$r1	*if* prototyped and named
+	others	stack
+arg2	HImode	$r2	*if* prototyped and named
+	others	stack
+arg3+		stack
+
+Return Values
+
+(only integer/pointer/real types can be returned in registers)
+
+QImode	$r0l
+HImode	$r0
+SImode	$r2r0
+TImode	$r3r2r1r0 (note ordering!)
+struct	pass address on stack
+
+function foo() is named $foo if args are passed in registers, or _foo
+otherwise.
+
+All registers seem to be call-clobbered.

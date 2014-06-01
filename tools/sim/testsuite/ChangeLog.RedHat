@@ -1,0 +1,2658 @@
+2004-06-16  Alexandre Oliva  <aoliva@redhat.com>
+
+	* sim/h8sx: Removed directory, obsoleted by sim/h8300.
+
+2004-04-23  Richard Sandiford  <rsandifo@redhat.com>
+
+	* sim/frv/allinsn.exp (mach): Rename fr451 to fr450.
+	* sim/frv/fr400/allinsn.exp (mach): Likewise.
+	* sim/frv/mqlclrhs.cgs: Update accordingly.
+	* sim/frv/mqlmths.cgs: Likewise.
+	* sim/frv/mqsllhi.cgs: Likewise.
+	* sim/frv/mqsrahi.cgs: Likewise.
+
+2004-04-23  Richard Sandiford  <rsandifo@redhat.com>
+
+	* sim/frv/allinsn.exp (all_machs): Add fr405 and fr451.
+	* sim/fr400/allinsn.exp (all_machs): Likewise.
+	* sim/frv/rst*.cgs: Disable by changing mach to "removed".
+	* sim/frv/mqlclrhs.cgs: New test.
+	* sim/frv/mqlmths.cgs: New test.
+	* sim/frv/mqsllhi.cgs: New test.
+	* sim/frv/mqsrahi.cgs: New test.
+	* sim/fr400/addss.cgs (mach): Require fr405.
+	* sim/fr400/scutss.cgs: Likewise.
+	* sim/fr400/slass.cgs: Likewise.
+	* sim/fr400/smass.cgs: Likewise.
+	* sim/fr400/smsss.cgs: Likewise.
+	* sim/fr400/smu.cgs: Likewise.
+	* sim/fr400/subss.cgs: Likewise.
+	* sim/interrupts/fp_exception.cgs: Replace fmadds with .word.
+	* sim/interrupts/fp_exception-fr550.cgs: Likewise.
+
+2003-10-02  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/cmaddhss.cgs: Not applicable for fr550.
+	* sim/frv/cmaddhus.cgs: Ditto.
+	* sim/frv/cmcpxiu.cgs: Ditto.
+	* sim/frv/cmcpxru.cgs: Ditto.
+	* sim/frv/cmmachs.cgs: Ditto.
+	* sim/frv/cmmachu.cgs: Ditto.
+	* sim/frv/cmqmachs.cgs: Ditto.
+	* sim/frv/cmqmachu.cgs: Ditto.
+	* sim/frv/cmsubhss.cgs: Ditto.
+	* sim/frv/cmsubhus.cgs: Ditto.
+	* sim/frv/mabshs.cgs: Ditto.
+	* sim/frv/maddhss.cgs: Ditto.
+	* sim/frv/maddhus.cgs: Ditto.
+	* sim/frv/mdaddaccs.cgs: Ditto.
+	* sim/frv/mdasaccs.cgs: Ditto.
+	* sim/frv/mdsubaccs.cgs: Ditto.
+	* sim/frv/mmachs.cgs: Ditto.
+	* sim/frv/mmachu.cgs: Ditto.
+	* sim/frv/mmrdhs.cgs: Ditto.
+	* sim/frv/mmrdhu.cgs: Ditto.
+	* sim/frv/mqmachs.cgs: Ditto.
+	* sim/frv/mqmachu.cgs: Ditto.
+	* sim/frv/mqmacxhs.cgs: Ditto.
+	* sim/frv/mqxmachs.cgs: Ditto.
+	* sim/frv/mqxmacxhs.cgs: Ditto.
+	* sim/frv/msubhss.cgs: Ditto.
+	* sim/frv/msubhus.cgs: Ditto.
+	* sim/frv/mtrap.cgs: Ditto.
+	* sim/frv/fr400/udiv.cgs: Ditto.
+	* sim/frv/fr400/udivi.cgs: Ditto.
+	* sim/frv/fr500/cmqaddhss.cgs: Ditto.
+	* sim/frv/fr500/cmqaddhus.cgs: Ditto.
+	* sim/frv/fr500/cmqsubhss.cgs: Ditto.
+	* sim/frv/fr500/cmqsubhus.cgs: Ditto.
+	* sim/frv/fr500/mqaddhss.cgs: Ditto.
+	* sim/frv/fr500/mqaddhus.cgs: Ditto.
+	* sim/frv/fr500/mqsubhss.cgs: Ditto.
+	* sim/frv/fr500/mqsubhus.cgs: Ditto.
+	* sim/frv/fr550/maddaccs.cgs: Ditto.
+	* sim/frv/fr550/masaccs.cgs: Ditto.
+	* sim/frv/fr550/msubaccs.cgs: Ditto.
+	* sim/frv/interrupts/badalign.cgs: Ditto.
+	* sim/frv/interrupts/compound.cgs: Ditto.
+	* sim/frv/interrupts/data_store_error.cgs: Ditto.
+	* sim/frv/interrupts/fp_exception.cgs: Ditto.
+	* sim/frv/interrupts/illinsn.cgs: Ditto.
+	* sim/frv/interrupts/insn_access_error-fr550.cgs: Correct
+	to match fr550 spec.
+	* sim/frv/fr550/cmaddhss.cgs: New testcase for fr550.
+	* sim/frv/fr550/cmaddhus.cgs: Ditto.
+	* sim/frv/fr550/cmcpxiu.cgs: Ditto.
+	* sim/frv/fr550/cmcpxru.cgs: Ditto.
+	* sim/frv/fr550/cmmachs.cgs: Ditto.
+	* sim/frv/fr550/cmmachu.cgs: Ditto.
+	* sim/frv/fr550/cmqaddhss.cgs: Ditto.
+	* sim/frv/fr550/cmqaddhus.cgs: Ditto.
+	* sim/frv/fr550/cmqmachs.cgs: Ditto.
+	* sim/frv/fr550/cmqmachu.cgs: Ditto.
+	* sim/frv/fr550/cmqsubhss.cgs: Ditto.
+	* sim/frv/fr550/cmqsubhus.cgs: Ditto.
+	* sim/frv/fr550/cmsubhss.cgs: Ditto.
+	* sim/frv/fr550/cmsubhus.cgs: Ditto.
+	* sim/frv/fr550/mabshs.cgs: Ditto.
+	* sim/frv/fr550/maddhss.cgs: Ditto.
+	* sim/frv/fr550/maddhus.cgs: Ditto.
+	* sim/frv/fr550/mdaddaccs.cgs: Ditto.
+	* sim/frv/fr550/mdasaccs.cgs: Ditto.
+	* sim/frv/fr550/mdsubaccs.cgs: Ditto.
+	* sim/frv/fr550/mmachs.cgs: Ditto.
+	* sim/frv/fr550/mmachu.cgs: Ditto.
+	* sim/frv/fr550/mmrdhs.cgs: Ditto.
+	* sim/frv/fr550/mmrdhu.cgs: Ditto.
+	* sim/frv/fr550/mqaddhss.cgs: Ditto.
+	* sim/frv/fr550/mqaddhus.cgs: Ditto.
+	* sim/frv/fr550/mqmachs.cgs: Ditto.
+	* sim/frv/fr550/mqmachu.cgs: Ditto.
+	* sim/frv/fr550/mqmacxhs.cgs: Ditto.
+	* sim/frv/fr550/mqsubhss.cgs: Ditto.
+	* sim/frv/fr550/mqsubhus.cgs: Ditto.
+	* sim/frv/fr550/mqxmachs.cgs: Ditto.
+	* sim/frv/fr550/mqxmacxhs.cgs: Ditto.
+	* sim/frv/fr550/msubhss.cgs: Ditto.
+	* sim/frv/fr550/msubhus.cgs: Ditto.
+	* sim/frv/fr550/mtrap.cgs: Ditto.
+	* sim/frv/interrupts/badalign-fr550.cgs: Ditto.
+	* sim/frv/interrupts/compound-fr550.cgs: Ditto.
+	* sim/frv/interrupts/data_store_error-fr550.cgs: Ditto.
+	* sim/frv/interrupts/fp_exception-fr550.cgs: Ditto.
+
+2003-09-30  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/frv/fr400/scutss.cgs: New test, cut iacc0.
+	* sim/frv/fr400/slass.cgs: New test, sla with saturation.
+
+2003-09-25  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/interrupts/insn_access_error.cgs: Only for fr400 and fr500 now.
+	* sim/frv/interrupts/insn_access_error-fr550.cgs: New testcase for fr550.
+	* sim/frv/fr500/dcpl.cgs: Only for frv and fr500 now.
+	* sim/frv/fr500/dcul.cgs: Only for frv and fr500 now.
+	* sim/frv/fr550/dcpl.cgs: New testcase for fr550.
+	* sim/frv/fr550/dcul.cgs: New testcase for fr550.
+
+2003-09-17  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/frv/fr400/smu.cgs: New file, test multiply to iacc0.
+	* sim/frv/fr400/smass.cgs: New file, test multiply/add to iacc0.
+	* sim/frv/fr400/smsss.cgs: New file, test multiply/sub to iacc0.
+
+2003-09-15  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/fr550/udiv.cgs: New test for fr550.
+	* sim/frv/fr550/udivi.cgs: New test for fr550.
+	* sim/frv/udiv.cgs: Now for frv, fr500, fr400 only.
+	* sim/frv/udivi.cgs: Now for frv, fr500, fr400 only.
+	
+2003-09-11  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/frv/fr400/addss.cgs: New file, test add with saturation.
+	* sim/frv/fr400/subss.cgs: New file, test sub with saturation.
+	* sim/frv/fr400/movgs.cgs: New file, test with IACC0.
+	* sim/frv/fr400/movsg.cgs: New file, test with IACC0.
+
+2003-09-09  Dave Brolley  <brolley@redhat.com>
+
+	* fr550: New test subdirectory.
+	
+2003-09-03  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/frv/branch.pcgs (mach): Add fr550.
+	* sim/frv/call.pcgs (mach): Add fr550.
+	* sim/frv/cfabss.cgs (mach): Add fr550.
+	* sim/frv/cfadds.cgs (mach): Add fr550.
+	* sim/frv/cfcmps.cgs (mach): Add fr550.
+	* sim/frv/cfdivs.cgs (mach): Add fr550.
+	* sim/frv/cfitos.cgs (mach): Add fr550.
+	* sim/frv/cfmas.cgs (mach): Add fr550.
+	* sim/frv/cfmovs.cgs (mach): Add fr550.
+	* sim/frv/cfmss.cgs (mach): Add fr550.
+	* sim/frv/cfmuls.cgs (mach): Add fr550.
+	* sim/frv/cfnegs.cgs (mach): Add fr550.
+	* sim/frv/cfsqrts.cgs (mach): Add fr550.
+	* sim/frv/cfstoi.cgs (mach): Add fr550.
+	* sim/frv/cfsubs.cgs (mach): Add fr550.
+	* sim/frv/fabss.cgs (mach): Add fr550.
+	* sim/frv/fadds.cgs (mach): Add fr550.
+	* sim/frv/fcmps.cgs (mach): Add fr550.
+	* sim/frv/fdadds.cgs (mach): Add fr550.
+	* sim/frv/fdcmps.cgs (mach): Add fr550.
+	* sim/frv/fdivs.cgs (mach): Add fr550.
+	* sim/frv/fdmulcs.cgs (mach): Add fr550.
+	* sim/frv/fdmuls.cgs (mach): Add fr550.
+	* sim/frv/fdsads.cgs (mach): Add fr550.
+	* sim/frv/fdsubs.cgs (mach): Add fr550.
+	* sim/frv/fitos.cgs (mach): Add fr550.
+	* sim/frv/fmas.cgs (mach): Add fr550.
+	* sim/frv/fmovs.cgs (mach): Add fr550.
+	* sim/frv/fmss.cgs (mach): Add fr550.
+	* sim/frv/fmuls.cgs (mach): Add fr550.
+	* sim/frv/fnegs.cgs (mach): Add fr550.
+	* sim/frv/fnop.cgs (mach): Add fr550.
+	* sim/frv/fsqrts.cgs (mach): Add fr550.
+	* sim/frv/fstoi.cgs (mach): Add fr550.
+	* sim/frv/fsubs.cgs (mach): Add fr550.
+	* sim/frv/lrbranch.pcgs (mach): Add fr550.
+	* sim/frv/mhsethih.cgs (mach): Add fr550.
+	* sim/frv/mhsetloh.cgs (mach): Add fr550.
+	* sim/frv/mqxmachs.cgs (mach): Add fr550.
+	* sim/frv/nfadds.cgs (mach): Add fr550.
+	* sim/frv/nfdadds.cgs (mach): Add fr550.
+	* sim/frv/nfdivs.cgs (mach): Add fr550.
+	* sim/frv/nfdmulcs.cgs (mach): Add fr550.
+	* sim/frv/nfdmuls.cgs (mach): Add fr550.
+	* sim/frv/nfdsads.cgs (mach): Add fr550.
+	* sim/frv/nfdsubs.cgs (mach): Add fr550.
+	* sim/frv/nfitos.cgs (mach): Add fr550.
+	* sim/frv/nfmas.cgs (mach): Add fr550.
+	* sim/frv/nfmss.cgs (mach): Add fr550.
+	* sim/frv/nfmuls.cgs (mach): Add fr550.
+	* sim/frv/nfsqrts.cgs (mach): Add fr550.
+	* sim/frv/nfstoi.cgs (mach): Add fr550.
+	* sim/frv/nfsubs.cgs (mach): Add fr550.
+	* sim/frv/nsdiv.cgs (mach): Add fr550.
+	* sim/frv/nsdivi.cgs (mach): Add fr550.
+	* sim/frv/nudiv.cgs (mach): Add fr550.
+	* sim/frv/nudivi.cgs (mach): Add fr550.
+	* sim/frv/stdf.pcgs (mach): Add fr550.
+	* sim/frv/fr400/allinsn.exp (all_machs): Add fr550.
+	* sim/frv/interrupts/badalign.cgs (mach): Add fr550.
+	* sim/frv/interrupts/compound.cgs (mach): Add fr550.
+	* sim/frv/interrupts/data_store_error.cgs (mach): Add fr550.
+	* sim/frv/interrupts/fp_exception.cgs (mach): Add fr550.
+	* sim/frv/interrupts/illinsn.cgs (mach): Add fr550.
+	* sim/frv/interrupts/insn_access_error.cgs (mach): Add fr550.
+	* sim/frv/interrupts/mp_exception.cgs (mach): Add fr550.
+	* sim/frv/interrupts/reset.cgs (mach): Add fr550.
+	* sim/frv/interrupts/timer.cgs (mach): Add fr550.
+
+2003-08-27  Michael Snyder  <msnyder@redhat.com>
+
+	* sim/frv/cmpba.cgs (mach): Add fr550.
+	* sim/frv/cmpb.cgs (mach): Add fr550.
+	* sim/frv/dcef.cgs (mach): Add fr550.
+	* sim/frv/dcei.cgs (mach): Add fr550.
+	* sim/frv/icei.cgs (mach): Add fr550.
+	* sim/frv/mabshs.cgs (mach): Add fr550.
+	* sim/frv/maddaccs.cgs (mach): Add fr550.
+	* sim/frv/masaccs.cgs (mach): Add fr550.
+	* sim/frv/mcplhi.cgs (mach): Add fr550.
+	* sim/frv/mcpli.cgs (mach): Add fr550.
+	* sim/frv/mdaddaccs.cgs (mach): Add fr550.
+	* sim/frv/mdasaccs.cgs (mach): Add fr550.
+	* sim/frv/mdcutssi.cgs (mach): Add fr550.
+	* sim/frv/mdrotli.cgs (mach): Add fr550.
+	* sim/frv/mdsubaccs.cgs (mach): Add fr550.
+	* sim/frv/mhdseth.cgs (mach): Add fr550.
+	* sim/frv/mhdsets.cgs (mach): Add fr550.
+	* sim/frv/mhsethis.cgs (mach): Add fr550.
+	* sim/frv/mhsetlos.cgs (mach): Add fr550.
+	* sim/frv/mqmacxhs.cgs (mach): Add fr550.
+	* sim/frv/mqsaths.cgs (mach): Add fr550.
+	* sim/frv/mqxmachs.cgs (mach): Add fr550.
+	* sim/frv/mqxmacxhs.cgs (mach): Add fr550.
+	* sim/frv/msubaccs.cgs (mach): Add fr550.
+
+2003-08-26  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/allinsn.exp (all_machs): Add fr550.
+	* sim/frv/interrupts.exp (all_machs): Add fr550.
+	* sim/frv/parallel.exp (all_machs): Add fr550.
+	* sim/frv/fr500/allinsn.exp (all_machs): Add fr550.
+
+2003-02-06  Michael Snyder  <msnyder@redhat.com>
+
+	* testsuite/h8sx: New directory.
+
+2002-05-23  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* sim/arm/xscale/blx.cgs: New test - created from case 107343.
+
+2002-05-08  matthew green  <mrg@redhat.com>
+
+	* sim/ppc/altivec.exp: New file, tests AltiVec instructions.
+	* sim/ppc/testutils.inc: New file, common test framework.
+	* sim/ppc/altivec/*.s: New AltiVec test cases.
+
+2002-04-19  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* sim/arm/iwmmxt/wsad.cgs: Update after changing behaviour of WSAD
+	to always zero top word of result.
+
+2002-04-18  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* sim/arm/xscale/mia.cgs:
+	* sim/arm/xscale/miaph.cgs:
+	* sim/arm/iwmmxt/tmia.cgs:
+	* sim/arm/iwmmxt/tmiaph.cgs:
+	* sim/arm/iwmmxt/wsub.cgs:
+	Update expected results after fixing bugs in simulator.
+
+2002-04-05  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* sim/arm/mra.cgs: Moved....
+	* sim/arm/iwmmxt/tbcst.cgs: New file.
+	* sim/arm/iwmmxt/textrm.cgs: New file.
+	* sim/arm/iwmmxt/tinsr.cgs: New file.
+	* sim/arm/iwmmxt/tmia.cgs: New file.
+	* sim/arm/iwmmxt/tmiaph.cgs: New file.
+	* sim/arm/iwmmxt/tmiaxy.cgs: New file.
+	* sim/arm/iwmmxt/tmovmsk.cgs: New file.
+	* sim/arm/iwmmxt/wacc.cgs: New file.
+	* sim/arm/iwmmxt/wadd.cgs: New file.
+	* sim/arm/iwmmxt/waligni,cgs: New file.
+	* sim/arm/iwmmxt/walignr.cgs: New file.
+	* sim/arm/iwmmxt/wavg2.cgs: New file.
+	* sim/arm/iwmmxt/wcmpeq.cgs: New file.
+	* sim/arm/xscale: New directory.
+	* sim/arm/xscale/mia.cgs: New file.
+	* sim/arm/xscale/miaph.cgs: New file.
+	* sim/arm/xscale/miaxy.cgs: New file.
+	* sim/arm/xscale/mra.cgs: ... To Here
+	* sim/arm/xscale/testutils.inc: New file.
+	* sim/arm/xscale/xscale.exp: New file.
+
+2002-04-04  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* sim/arm/iwmmxt/wpack.cgs: New test.
+	* sim/arm/iwmmxt/wror.cgs: New test.
+	* sim/arm/iwmmxt/wsad.cgs: New test.
+	* sim/arm/iwmmxt/wshufh.cgs: New test.
+	* sim/arm/iwmmxt/wsll.cgs: New test.
+	* sim/arm/iwmmxt/wsra.cgs: New test.
+	* sim/arm/iwmmxt/wsrl.cgs: New test.
+	* sim/arm/iwmmxt/wsub.cgs: New test.
+	* sim/arm/iwmmxt/wunpckeh.cgs: New test.
+	* sim/arm/iwmmxt/wunpckih.cgs: New test.
+	* sim/arm/iwmmxt/wcmpgt.cgs: New test,
+	* sim/arm/iwmmxt/wmac.cgs: New test,
+	* sim/arm/iwmmxt/wmadd.cgs: New test,
+	* sim/arm/iwmmxt/wmax.cgs: New test,
+	* sim/arm/iwmmxt/wmin.cgs: New test,
+	* sim/arm/iwmmxt/wmov.cgs: New test,
+	* sim/arm/iwmmxt/wmul.cgs: New test,
+
+2002-04-03  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* sim/arm/allinsn.exp: Also run tests if target is an XScale.
+	* sim/arm/misc.exp: Also run tests if target is an XScale.
+	* sim/arm/thumb/allthumb.exp: Also run tests if target is an XScale.
+
+2002-04-03  Nick Clifton  <nickc@cambridge.redhat.com>
+
+	* sim/arm/mra.cgs: Enable Coprocessors before using XScale insn.
+	* sim/arm/iwmmxt/iwmmxt.exp: New file.  Run iWMMXt tests.
+	* sim/arm/iwmmxt/testutils.inc: New file.  Copied from ARM directory.
+	* sim/arm/iwmmxt/wor.cgs: New file.  Test WOR instruction.
+
+2001-10-09  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/interrupts/fp_exception.cgs: Clear FSR0.QNE.
+	* sim/frv/interrupts/fp_exception.cgs: Clear MSR0.MTT.
+	* sim/frv/interrupts/data_store_error.cgs: Don't check EPCR.
+	* sim/frv/interrupts/illinsn.cgs: Valid on fr500 machine only.
+	* sim/frv/interrupts/insn_access_error.cgs: Valid on fr500 and fr400.
+	* sim/frv/interrupts/reset.cgs: Valid on fr500 and fr400.
+	* sim/frv/interrupts/timer.cgs: Valid on fr500 and fr400.
+	* sim/frv/mbtohe.cgs: Valid on frv machine only.
+	* sim/frv/cmbtohe.cgs: Valid on frv machine only.
+	* sim/frv/mdunpackh.cgs: Valid on frv machine only.
+	* sim/frv/nfdcmps.cgs: Valid on frv machine only.
+	* sim/frv/fr500/*.cgs: Include ../testutils.inc.
+	* sim/frv/fr500/allinsn.exp: New tests for fr500 only.
+	* sim/frv/mclracc-fr500.cgs: Moved to sim/frv/fr500/mclracc.cgs.
+	* sim/frv/fr400: New tests for fr400 only.
+
+2001-08-20  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/interrupts/Ipipe.cgs: Only test fr400 and fr500.
+	* sim/frv/ici.cgs (ici): Test it properly now that scache is flushed
+	in unison with the insn cache.
+
+2001-08-02  John Healy  <jhealy@redhat.com>
+
+	* lib/sim-defs.exp (sim_run): Changed "set loader file" to
+	"set cpu-loader file" to reflect name change of loader component.
+
+2001-08-02  Dave Brolley  <brolley@redhat.com>
+
+	* lib/sim-defs.exp: Rename loader to cpu-loader.
+
+2001-05-23  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/mhsethih.cgs: New testcase.
+	* sim/frv/mdasaccs.cgs: New testcase.
+	* sim/frv/mqxmacxhs.cgs: New testcase.
+	* sim/frv/maddaccs.cgs: New testcase.
+	* sim/frv/mcpli.cgs: New testcase.
+	* sim/frv/mhdsets.cgs: New testcase.
+	* sim/frv/mqsaths.cgs: New testcase.
+	* sim/frv/mhdseth.cgs: New testcase.
+	* sim/frv/mqxmachs.cgs: New testcase.
+	* sim/frv/mcplhi.cgs: New testcase.
+	* sim/frv/mhsetlos.cgs: New testcase.
+	* sim/frv/mdaddaccs.cgs: New testcase.
+	* sim/frv/msubaccs.cgs: New testcase.
+	* sim/frv/mabshs.cgs: New testcase.
+	* sim/frv/mhsethis.cgs: New testcase.
+	* sim/frv/mqmacxhs.cgs: New testcase.
+	* sim/frv/mhsetloh.cgs: New testcase.
+	* sim/frv/mdrotli.cgs: New testcase.
+	* sim/frv/mdsubaccs.cgs: New testcase.
+	* sim/frv/mdcutssi.cgs: New testcase.
+	* sim/frv/masaccs.cgs: New testcase.
+
+2001-05-15  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/fr500/cmqaddhss.cgs: Moved from sim/frv.
+	* sim/frv/fr500/cmqaddhus.cgs: Ditto
+	* sim/frv/fr500/cmqsubhss.cgs: Ditto
+	* sim/frv/fr500/cmqsubhus.cgs: Ditto
+	* sim/frv/fr500/dcpl.cgs: Ditto
+	* sim/frv/fr500/dcul.cgs: Ditto
+	* sim/frv/fr500/mqaddhss.cgs: Ditto
+	* sim/frv/fr500/mqaddhus.cgs: Ditto
+	* sim/frv/fr500/mqsubhss.cgs: Ditto
+	* sim/frv/fr500/mqsubhus.cgs: Ditto
+	* sim/frv/fr500.exp: New test subdirectory.
+	* sim/frv/dcei.cgs: New testcase.
+	* sim/frv/cmpb.cgs: New testcase.
+	* sim/frv/dcef.cgs: New testcase.
+	* sim/frv/cmpba.cgs: New testcase.
+	* sim/frv/icei.cgs: New testcase.
+	* sim/frv/branch.pcgs: Mark for fr500 and frv machines only.
+	* sim/frv/call.pcgs: Ditto.
+	* sim/frv/cfabss.cgs: Ditto.
+	* sim/frv/cfadds.cgs: Ditto.
+	* sim/frv/cfcmps.cgs: Ditto.
+	* sim/frv/cfdivs.cgs: Ditto.
+	* sim/frv/cfitos.cgs: Ditto.
+	* sim/frv/cfmas.cgs: Ditto.
+	* sim/frv/cfmovs.cgs: Ditto.
+	* sim/frv/cfmss.cgs: Ditto.
+	* sim/frv/cfmuls.cgs: Ditto.
+	* sim/frv/cfnegs.cgs: Ditto.
+	* sim/frv/cfsqrts.cgs: Ditto.
+	* sim/frv/cfstoi.cgs: Ditto.
+	* sim/frv/cfsubs.cgs: Ditto.
+	* sim/frv/cmbtohe.cgs: Ditto.
+	* sim/frv/dcf.cgs: Ditto.
+	* sim/frv/fabss.cgs: Ditto.
+	* sim/frv/fadds.cgs: Ditto.
+	* sim/frv/fcmps.cgs: Ditto.
+	* sim/frv/fdadds.cgs: Ditto.
+	* sim/frv/fdcmps.cgs: Ditto.
+	* sim/frv/fdivs.cgs: Ditto.
+	* sim/frv/fdmulcs.cgs: Ditto.
+	* sim/frv/fdmuls.cgs: Ditto.
+	* sim/frv/fdsads.cgs: Ditto.
+	* sim/frv/fdsubs.cgs: Ditto.
+	* sim/frv/fitos.cgs: Ditto.
+	* sim/frv/fmas.cgs: Ditto.
+	* sim/frv/fmovs.cgs: Ditto.
+	* sim/frv/fmss.cgs: Ditto.
+	* sim/frv/fmuls.cgs: Ditto.
+	* sim/frv/fnegs.cgs: Ditto.
+	* sim/frv/fnop.cgs: Ditto.
+	* sim/frv/fsqrts.cgs: Ditto.
+	* sim/frv/fstoi.cgs: Ditto.
+	* sim/frv/fsubs.cgs: Ditto.
+	* sim/frv/lrbranch.pcgs: Ditto.
+	* sim/frv/mbtohe.cgs: Ditto.
+	* sim/frv/mdunpackh.cgs: Ditto.
+	* sim/frv/nfadds.cgs: Ditto.
+	* sim/frv/nfdadds.cgs: Ditto.
+	* sim/frv/nfdcmps.cgs: Ditto.
+	* sim/frv/nfdivs.cgs: Ditto.
+	* sim/frv/nfdmulcs.cgs: Ditto.
+	* sim/frv/nfdmuls.cgs: Ditto.
+	* sim/frv/nfdsads.cgs: Ditto.
+	* sim/frv/nfdsubs.cgs: Ditto.
+	* sim/frv/nfitos.cgs: Ditto.
+	* sim/frv/nfmas.cgs: Ditto.
+	* sim/frv/nfmss.cgs: Ditto.
+	* sim/frv/nfmuls.cgs: Ditto.
+	* sim/frv/nfsqrts.cgs: Ditto.
+	* sim/frv/nfstoi.cgs: Ditto.
+	* sim/frv/nfsubs.cgs: Ditto.
+	* sim/frv/nsdiv.cgs: Ditto.
+	* sim/frv/nsdivi.cgs: Ditto.
+	* sim/frv/nudiv.cgs: Ditto.
+	* sim/frv/nudivi.cgs: Ditto.
+	* sim/frv/stdf.pcgs: Ditto.
+	* sim/frv/interrupts/compound.cgs: Ditto.
+	* sim/frv/interrupts/mp_exception.cgs: Ditto.
+	* sim/frv/mtrap.cgs: Rewite to so it can run on all machines.
+	* sim/frv/interrupts.exp: Fix comment regarding suffixes.
+
+2001-04-27  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/testutils.inc: Don't pack branch insns. Not allowed on fr400.
+
+2001-04-24  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/interrupts/reset.cgs (reset): Test the value of PSR.PS after
+	the reset interrupt.
+
+2001-04-23  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/sdiv.cgs (sdiv): Reflect that isr.dtt bits are accumlated now.
+	* sim/frv/sdivi.cgs (sdivi): Ditto.
+
+2001-04-10  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/mrdacc.cgs: Modify to use a restricted subset of registers
+	which is available on all machines.
+	* sim/frv/mrdaccg.cgs: Ditto.
+	* sim/frv/nsdiv.cgs: Ditto.
+	* sim/frv/nsdivi.cgs: Ditto.
+	* sim/frv/nudiv.cgs: Ditto.
+	* sim/frv/nudivi.cgs: Ditto.
+	* sim/frv/rst.cgs: Ditto.
+	* sim/frv/rstd.cgs: Ditto.
+	* sim/frv/rstdf.cgs: Ditto.
+	* sim/frv/rstf.cgs: Ditto.
+	* sim/frv/rstq.cgs: Ditto.
+	* sim/frv/rstqf.cgs: Ditto.
+	* sim/frv/stqfi.cgs: Ditto.
+	* sim/frv/stqi.cgs: Ditto.
+	* sim/frv/testutils.inc: Ditto.
+	* sim/frv/interrupts/badalign.cgs: Ditto.
+	* sim/frv/interrupts/mp_exception.cgs: Ditto.
+	* sim/frv/interrupts/shadow_regs.cgs: Ditto.
+
+2001-04-05  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/*cpxi*.cgs: Adjust for corrected insn semantics.
+
+2001-04-05  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/allinsn.exp: Add machine fr400.
+	* sim/frv/interrupts.exp: Add machine fr400.
+	* sim/frv/parallel.exp: Add machine fr400.
+
+2001-02-16  matthew green  <mrg@redhat.com>
+
+	* lib/sim-defs.exp (sim_run): Add new `cmd' argument, which is
+	used on the simulation command line onlyh.  Old `prog' argument
+	is used to find the binary for upload.
+	(run_sim_test): If the `sim,protocol' is `sid', pass the binary
+	name as a simulator option command, not as the executable.
+
+2000-05-18  Felix Lee  <flee@cygnus.com>
+
+	* sim/arm/allinsn.exp: make sure testutils.inc is available for
+	remote hosts.
+
+2000-04-20  Nick Clifton  <nickc@cygnus.com>
+
+	* sim/arm/allinsn.exp: Support StrongARM targets.
+
+2000-11-22  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/c*ck*.cgs: Set target CR to undefined (b'01') before each
+	 test.
+
+
+2000-11-01  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/allinsn.exp: Set cpu_option to -mcpu.
+
+2000-09-05  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/break.cgs: Pass unconditionally. 'break' can no longer be
+	tested since it is the debugger breakpoint insn.
+	* sim/frv/testutils.inc (pass): use \@ to generate a label number.
+
+2000-07-26  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/*.cgs: Replace CRx with CCx.
+
+2000-06-21  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/branch.pcgs: Use Softune syntax only.
+	* sim/frv/call.pcgs: Use Softune syntax only.
+	* sim/frv/cjmpl.cgs: Use Softune syntax only.
+	* sim/frv/icul.cgs: Use Softune syntax only.
+	* sim/frv/jmpil.cgs: Use Softune syntax only.
+	* sim/frv/jmpl.cgs: Use Softune syntax only.
+	* sim/frv/jmpl.pcgs: Use Softune syntax only.
+	* sim/frv/lrbranch.pcgs: Use Softune syntax only.
+	* sim/frv/rett.cgs: Use Softune syntax only.
+	* sim/frv/testutils.inc: Use Softune syntax only.
+	* sim/frv/interrupts/illinsn.cgs: Use Softune syntax only.
+	* sim/frv/interrupts/insn_access_error.cgs: Use Softune syntax only.
+	* sim/frv/interrupts/shadow_regs.cgs: Use Softune syntax only.
+	* sim/frv/bcralr.cgs: Use Softune syntax only.
+	* sim/frv/bra.cgs: Use Softune syntax only.
+	* sim/frv/bralr.cgs: Use Softune syntax only.
+	* sim/frv/cckra.cgs: Use Softune syntax only.
+	* sim/frv/cfckra.cgs: Use Softune syntax only.
+	* sim/frv/ckra.cgs: Use Softune syntax only.
+	* sim/frv/fbra.cgs: Use Softune syntax only.
+	* sim/frv/fbralr.cgs: Use Softune syntax only.
+	* sim/frv/fcbralr.cgs: Use Softune syntax only.
+	* sim/frv/fckra.cgs: Use Softune syntax only.
+	* sim/frv/ftira.cgs: Use Softune syntax only.
+	* sim/frv/ftra.cgs: Use Softune syntax only.
+	* sim/frv/tira.cgs: Use Softune syntax only.
+	* sim/frv/tra.cgs: Use Softune syntax only.
+	* sim/frv/bcnevlr.cgs: Removed.
+	* sim/frv/bnev.cgs: Removed.
+	* sim/frv/bnevlr.cgs: Removed.
+	* sim/frv/ccknev.cgs: Removed.
+	* sim/frv/cfcknev.cgs: Removed.
+	* sim/frv/cknev.cgs: Removed.
+	* sim/frv/fbnev.cgs: Removed.
+	* sim/frv/fbnevlr.cgs: Removed.
+	* sim/frv/fcbnevlr.cgs: Removed.
+	* sim/frv/fcknev.cgs: Removed.
+	* sim/frv/ftinev.cgs: Removed.
+	* sim/frv/ftnev.cgs: Removed.
+	* sim/frv/tinev.cgs: Removed.
+	* sim/frv/tnev.cgs: Removed.
+	* sim/frv/commitfra.cgs: Removed.
+	* sim/frv/commitgra.cgs: Removed.
+	* sim/frv/bcralr1.cgs: Removed.
+	* sim/frv/bra1.cgs: Removed.
+	* sim/frv/bralr1.cgs: Removed.
+	* sim/frv/cckra1.cgs: Removed.
+	* sim/frv/cfckra1.cgs: Removed.
+	* sim/frv/ckra1.cgs: Removed.
+	* sim/frv/fbra1.cgs: Removed.
+	* sim/frv/fbralr1.cgs: Removed.
+	* sim/frv/fcbralr1.cgs: Removed.
+	* sim/frv/fckra1.cgs: Removed.
+	* sim/frv/ftira1.cgs: Removed.
+	* sim/frv/ftra1.cgs: Removed.
+	* sim/frv/tira1.cgs: Removed.
+	* sim/frv/tra1.cgs: Removed.
+	* sim/frv/jmpil1.cgs: Removed.
+	* sim/frv/jmpl1.cgs: Removed.
+	* sim/frv/cjmpl1.cgs: Removed.
+
+2000-06-21  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/interrupts/Ipipe.cgs (pack): Set the packing bit on this
+	insn at execution time to avoid assembler detecting the error.
+	* sim/frv/interrupts/fp_exception.cgs (pack): Set the packing bit on
+	this insn at execution time to avoid assembler detecting the error.
+	* sim/frv/interrupts/fp_exception.cgs (ill1): Don't use .p on this insn.
+	* sim/frv/testutils.inc (set_gr_mem): New macro.
+	(set_mem_gr): New macro.
+
+2000-06-15  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/testutils.inc: Use short form of 'tira' insn.
+
+2000-06-07  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/interrupts/reset.cgs: Flush the data cache after setting the
+	reset register in order to cause the reset interrupt.
+
+2000-05-19  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/cjmpl.cgs: Test alignment of target address.
+	* sim/frv/cjmpl1.cgs: Test alignment of target address.
+	* sim/frv/jmpil.cgs: Test alignment of target address.
+	* sim/frv/jmpil1.cgs: Test alignment of target address.
+	* sim/frv/jmpl.cgs: Test alignment of target address.
+	* sim/frv/jmpl1.cgs: Test alignment of target address.
+	* sim/frv/cmhtob.cgs: Test reversed target byte order.
+	* sim/frv/mhtob.cgs: Test reversed target byte order.
+	* sim/frv/nsdiv.cgs: Test NE flags cleared when interrupt is masked.
+
+2000-04-20  Nick Clifton  <nickc@cygnus.com>
+
+	* sim/arm/mra.cgs (mar_mra): Test StrongARM-2 MRA and MAR
+	instructions.
+
+2000-04-03  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/commitfa.cgs: Test handler for commit_exception.
+	* sim/frv/commitfr.cgs: Test handler for commit_exception.
+	* sim/frv/commitfra.cgs: Test handler for commit_exception.
+	* sim/frv/commitga.cgs: Test handler for commit_exception.
+	* sim/frv/commitgr.cgs: Test handler for commit_exception.
+	* sim/frv/commitgra.cgs: Test handler for commit_exception.
+
+2000-03-30  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/interrupts/badalign.cgs: Test correct esr registers.
+	* sim/frv/interrupts/compound.cgs: Test correct esr registers.
+	* sim/frv/interrupts/data_store_error.cgs: Test correct esr registers.
+	* sim/frv/interrupts/fp_exception.cgs: Test correct esr registers.
+
+2000-03-24  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/interrupts/fp_exception.cgs (bad): Test that target is not
+	updated after divide by zero. Test that target is updated after
+	inexact exception.
+	* sim/frv/interrupts/badalign.cgs (align): Test that address register
+	is updated for load with update, even after an exception.
+	* sim/frv/sdiv.cgs (sdiv): Comment that target is updated after
+	divide by overflow exception. Test that target is not updated after
+	divide by zero.
+
+2000-03-23  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/interrupts/illinsn.cgs: For fr500 only.
+	* sim/frv/interrupts/fp_exception.cgs (bad): Use fqst and fqop.
+	* sim/frv/interrupts/compound.cgs (dividei): Use fqst and fqop.
+	* sim/frv/nfsqrts.cgs (nfsqrts): Use fqst and fqop.
+	* sim/frv/testutils.inc (load_float_constants2): New macro.
+	(load_float_constants3): New macro.
+	* sim/frv/fditos.cgs: New testcase.
+	* sim/frv/fdstoi.cgs: New testcase.
+	* sim/frv/fdnegs.cgs: New testcase.
+	* sim/frv/fdmovs.cgs: New testcase.
+	* sim/frv/fdabss.cgs: New testcase.
+	* sim/frv/fdsqrts.cgs: New testcase.
+	* sim/frv/fmad.cgs: New testcase.
+	* sim/frv/mcop1.cgs: New testcase.
+	* sim/frv/cfmadds.cgs: New testcase.
+	* sim/frv/fmsd.cgs: New testcase.
+	* sim/frv/nfditos.cgs: New testcase.
+	* sim/frv/mcop2.cgs: New testcase.
+	* sim/frv/cfmsubs.cgs: New testcase.
+	* sim/frv/nfdstoi.cgs: New testcase.
+	* sim/frv/cop1.cgs: New testcase.
+	* sim/frv/nfmadds.cgs: New testcase.
+	* sim/frv/nfmsubs.cgs: New testcase.
+	* sim/frv/nfdsqrts.cgs: New testcase.
+	* sim/frv/cop2.cgs: New testcase.
+	* sim/frv/fdmadds.cgs: New testcase.
+	* sim/frv/fdmas.cgs: New testcase.
+	* sim/frv/fdmss.cgs: New testcase.
+	* sim/frv/nfdmadds.cgs: New testcase.
+	* sim/frv/nfdmas.cgs: New testcase.
+	* sim/frv/nfdmss.cgs: New testcase.
+
+2000-03-09  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/interrupts/compound.cgs (dividei): Test fqst0 and fqop0.
+	* sim/frv/movgs.cgs (movgs): Test alternate forms of referencing an
+	SPR register.
+
+2000-03-08  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/interrupts/compound.cgs: Clear ISR.EMAM.
+	* sim/frv/interrupts/badalign.cgs: Test masking of
+	mem_address_not_aligned (ISR.EMAM).
+
+2000-03-08  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/csdiv.cgs: Test division_exception handling.
+	* sim/frv/nsdiv.cgs: Test division_exception handling.
+	* sim/frv/nsdivi.cgs: Test division_exception handling.
+	* sim/frv/nudiv.cgs: Test division_exception handling.
+	* sim/frv/nudivi.cgs: Test division_exception handling.
+	* sim/frv/sdiv.cgs: Test division_exception handling.
+	* sim/frv/sdivi.cgs: Test division_exception handling.
+	* sim/frv/udiv.cgs: Test division_exception handling.
+	* sim/frv/udivi.cgs: Test division_exception handling.
+	* sim/frv/dcf.cgs: Retain existing hsr0 bits when enabling the cache.
+
+2000-02-29  Dave Brolley <brolley@redhat.com>
+
+	* sim/frv/testutils.inc (and_gr_immed): New macro.
+	(set_fr_immed): New macro.
+	(set_acc_immed): New macro.
+	(set_accg_immed): New macro.
+	(test_acc_immed): New macro.
+	(test_acc_limmed): New macro.
+	(test_accg_immed): New macro.
+	* sim/frv/break.cgs: Update to respect SPR access constraints.
+	* sim/frv/cmcpxis.cgs: Ditto.
+	* sim/frv/cmcpxiu.cgs: Ditto.
+	* sim/frv/cmcpxrs.cgs: Ditto.
+	* sim/frv/cmcpxru.cgs: Ditto.
+	* sim/frv/cmmachs.cgs: Ditto.
+	* sim/frv/cmmachu.cgs: Ditto.
+	* sim/frv/cmmulhs.cgs: Ditto.
+	* sim/frv/cmmulhu.cgs: Ditto.
+	* sim/frv/cmqmachs.cgs: Ditto.
+	* sim/frv/cmqmachu.cgs: Ditto.
+	* sim/frv/cmqmulhs.cgs: Ditto.
+	* sim/frv/cmqmulhu.cgs: Ditto.
+	* sim/frv/mclracc-fr500.cgs: Ditto.
+	* sim/frv/mclracc.cgs: Ditto.
+	* sim/frv/mcpxis.cgs: Ditto.
+	* sim/frv/mcpxiu.cgs: Ditto.
+	* sim/frv/mcpxrs.cgs: Ditto.
+	* sim/frv/mcpxru.cgs: Ditto.
+	* sim/frv/mcut.cgs: Ditto.
+	* sim/frv/mcuti.cgs: Ditto.
+	* sim/frv/mcutss.cgs: Ditto.
+	* sim/frv/mcutssi.cgs: Ditto.
+	* sim/frv/mmachs.cgs: Ditto.
+	* sim/frv/mmachu.cgs: Ditto.
+	* sim/frv/mmrdhs.cgs: Ditto.
+	* sim/frv/mmrdhu.cgs: Ditto.
+	* sim/frv/mmulhs.cgs: Ditto.
+	* sim/frv/mmulhu.cgs: Ditto.
+	* sim/frv/mmulxhs.cgs: Ditto.
+	* sim/frv/mmulxhu.cgs: Ditto.
+	* sim/frv/movgs.cgs: Ditto.
+	* sim/frv/movsg.cgs: Ditto.
+	* sim/frv/mqcpxis.cgs: Ditto.
+	* sim/frv/mqcpxiu.cgs: Ditto.
+	* sim/frv/mqcpxrs.cgs: Ditto.
+	* sim/frv/mqcpxru.cgs: Ditto.
+	* sim/frv/mqmachs.cgs: Ditto.
+	* sim/frv/mqmachu.cgs: Ditto.
+	* sim/frv/mqmulhs.cgs: Ditto.
+	* sim/frv/mqmulhu.cgs: Ditto.
+	* sim/frv/mqmulxhs.cgs: Ditto.
+	* sim/frv/mqmulxhu.cgs: Ditto.
+	* sim/frv/mrdacc.cgs: Ditto.
+	* sim/frv/mrdaccg.cgs: Ditto.
+	* sim/frv/mwtacc.cgs: Ditto.
+	* sim/frv/mwtaccg.cgs: Ditto.
+	* sim/frv/interrupts/badalign.cgs: Ditto.
+	* sim/frv/interrupts/privileged_instruction.cgs: Ditto.
+	* sim/frv/interrupts/reset.cgs: Ditto.
+	* sim/frv/interrupts/rett.cgs: Ditto.
+	* sim/frv/interrupts/shadow_regs.cgs: Ditto.
+
+2000-02-17  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/interrupts/insn_access_error.cgs: Update offset of
+	interrupt handler for insn_access_error to match version 1.3a
+	of the architecture spec.
+
+2000-01-20  Dave Brolley  <brolley@redhat.com>
+
+	* sim/frv/interrupts/reset.cgs: Test both software and hardware
+	resets and both restart addresses.
+
+2000-01-03  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/interrupts/timer.cgs (align): Enable external interrupts
+	14 and 15.
+	* sim/frv/testutils.inc (_start): Disable external interrupts by
+	default.
+
+1999-12-17  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/mclracc.cgs: Only acc0-acc8 implemented.
+	* sim/frv/mclracc-fr500.cgs: New test case.
+	* sim/frv/interrupts/timer.cgs: New test case.
+	* sim/frv/interrupts/reset.cgs: New test case.
+
+1999-12-13  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/cmcpxis.cgs: Treat accg registers as unsigned 8 bits.
+	* sim/frv/cmcpxrs.cgs: Ditto.
+	* sim/frv/cmmachs.cgs: Ditto.
+	* sim/frv/cmmulhs.cgs: Ditto.
+	* sim/frv/cmqmachs.cgs: Ditto.
+	* sim/frv/cmqmulhs.cgs: Ditto.
+	* sim/frv/mclracc.cgs: Ditto.
+	* sim/frv/mcpxis.cgs: Ditto.
+	* sim/frv/mcpxrs.cgs: Ditto.
+	* sim/frv/mcut.cgs: Ditto.
+	* sim/frv/mcuti.cgs: Ditto.
+	* sim/frv/mcutss.cgs: Ditto.
+	* sim/frv/mcutssi.cgs: Ditto.
+	* sim/frv/mmachs.cgs: Ditto.
+	* sim/frv/mmrdhs.cgs: Ditto.
+	* sim/frv/mmulhs.cgs: Ditto.
+	* sim/frv/mmulxhs.cgs: Ditto.
+	* sim/frv/mqcpxis.cgs: Ditto.
+	* sim/frv/mqcpxrs.cgs: Ditto.
+	* sim/frv/mqmachs.cgs: Ditto.
+	* sim/frv/mqmulhs.cgs: Ditto.
+	* sim/frv/mqmulxhs.cgs: Ditto.
+	* sim/frv/mwtacc.cgs: Ditto.
+	* sim/frv/mwtaccg.cgs: Ditto.
+	* sim/frv/fnop.cgs: New testcase.
+
+1999-12-10  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/interrupts/shadow_regs.cgs: New testcase.
+	* sim/frv/interrupts/Ipipe.cgs: Change esfr0 to esfr1.
+	* sim/frv/interrupts/badalign.cgs: Change esfr0 to esfr1.
+	* sim/frv/interrupts/compound.cgs: Change esfr0 to esfr1.
+	* sim/frv/interrupts/data_store_error.cgs: Change esfr0 to esfr1.
+	* sim/frv/interrupts/fp_exception.cgs: Change esfr0 to esfr1.
+	* sim/frv/interrupts/illinsn.cgs: Change esfr0 to esfr1.
+	* sim/frv/interrupts/insn_access_error.cgs: Change esfr0 to esfr1.
+	* sim/frv/interrupts/privileged_instruction.cgs: Change esfr0 to esfr1.
+	* sim/frv/interrupts/regalign.cgs: Change esfr0 to esfr1.
+	* sim/frv/interrupts/rett.cgs: Change esfr0 to esfr1.
+	* sim/frv/testutils.inc (_start): Enable all registers in hsr0. Turn
+	on PSR.ESR to enable shadow registers.
+	* sim/frv/mhtob.cgs: Reflect latest ISA.
+	* sim/frv/cmhtob.cgs: Reflect latest ISA.
+	* sim/frv/scan.cgs: Reflect latest ISA.
+	* sim/frv/scani.cgs: Reflect latest ISA.
+	* sim/frv/cscan.cgs: Reflect latest ISA.
+
+1999-12-07  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/interrupts/insn_access_error.cgs: Update memory-region option.
+	* sim/frv/interrupts/illinsn.cgs): Disable the caches.
+	* sim/frv/testutils.inc (start): Enable insn and data caches in
+	copy-back mode.
+	(lock_insn_cache): New macro.
+	(lock_data_cache): New macro.
+	(lock_invalidate_cache): New macro.
+	(lock_flush_cache): New macro.
+	(set_bctrlr_0_0): Flush the data cache after writing.
+	* sim/frv/dcf.cgs: New testcase.
+	* sim/frv/dci.cgs: New testcase.
+	* sim/frv/ici.cgs: New testcase.
+	* sim/frv/icpl.cgs: New testcase.
+	* sim/frv/dcpl.cgs: New testcase.
+	* sim/frv/dcul.cgs: New testcase.
+	* sim/frv/icul.cgs: New testcase.
+	* frv-elf/cache.s: New testcase.
+
+1999-11-29  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc (start): Enable all fp_exceptions except
+	"imprecise".
+	* sim/frv/interrupts/fp_exception.cgs: Disable division by 0 exception
+	on the first divs insn.
+	* sim/frv/nfsqrts.cgs: Test FQ registers.
+	* sim/frv/nfsubs.cgs: Test NE flags.
+	* sim/frv/nfsubs.cgs: Test NE flags.
+	* sim/frv/nfmss.cgs: Test NE flags.
+	* sim/frv/nfmas.cgs: Test NE flags.
+	* sim/frv/nfdsubs.cgs: Test NE flags.
+	* sim/frv/nfdsads.cgs: Test NE flags.
+	* sim/frv/nfdmuls.cgs: Test NE flags.
+	* sim/frv/nfdmulcs.cgs: Test NE flags.
+	* sim/frv/nfdivs.cgs: Test NE flags.
+	* sim/frv/nfddivs.cgs: Test NE flags.
+	* sim/frv/nfadds.cgs: Test NE flags.
+	* sim/frv/nfdadds.cgs: Test NE flags.
+
+1999-11-26  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc (load_float_constants1): New macro.
+	* sim/frv/fabsd.cgs: Load double constants.
+	* sim/frv/fnegd.cgs: Load double constants.
+	* sim/frv/bar.cgs: New testcase.
+	* sim/frv/fmas.cgs: New testcase.
+	* sim/frv/fmss.cgs: New testcase.
+	* sim/frv/fdadds.cgs: New testcase.
+	* sim/frv/fdsubs.cgs: New testcase.
+	* sim/frv/fdmuls.cgs: New testcase.
+	* sim/frv/fddivs.cgs: New testcase.
+	* sim/frv/fdcmps.cgs: New testcase.
+	* sim/frv/fdsads.cgs: New testcase.
+	* sim/frv/fdmulcs.cgs: New testcase.
+	* sim/frv/cfitos.cgs: New testcase.
+	* sim/frv/cfstoi.cgs: New testcase.
+	* sim/frv/cfmovs.cgs: New testcase.
+	* sim/frv/cfabss.cgs: New testcase.
+	* sim/frv/cfnegs.cgs: New testcase.
+	* sim/frv/cfadds.cgs: New testcase.
+	* sim/frv/cfsubs.cgs: New testcase.
+	* sim/frv/cfmuls.cgs: New testcase.
+	* sim/frv/cfdivs.cgs: New testcase.
+	* sim/frv/cfcmps.cgs: New testcase.
+	* sim/frv/cfsqrts.cgs: New testcase.
+	* sim/frv/cfmas.cgs: New testcase.
+	* sim/frv/cfmss.cgs: New testcase.
+	* sim/frv/nfitos.cgs: New testcase.
+	* sim/frv/nfstoi.cgs: New testcase.
+	* sim/frv/nfsqrts.cgs: New testcase.
+	* sim/frv/nfadds.cgs: New testcase.
+	* sim/frv/nfdivs.cgs: New testcase.
+	* sim/frv/nfsubs.cgs: New testcase.
+	* sim/frv/nfmas.cgs: New testcase.
+	* sim/frv/nfmuls.cgs: New testcase.
+	* sim/frv/nfdadds.cgs: New testcase.
+	* sim/frv/nfdsubs.cgs: New testcase.
+	* sim/frv/nfmss.cgs: New testcase.
+	* sim/frv/nfdmuls.cgs: New testcase.
+	* sim/frv/nfddivs.cgs: New testcase.
+	* sim/frv/nfdsads.cgs: New testcase.
+	* sim/frv/nfdmulcs.cgs: New testcase.
+	* sim/frv/membar.cgs: New testcase.
+
+1999-11-24  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/cmand.cgs: New testcase.
+	* sim/frv/cmor.cgs: New testcase.
+	* sim/frv/cmxor.cgs: New testcase.
+	* sim/frv/cmnot.cgs: New testcase.
+	* sim/frv/cmaddhss.cgs: New testcase.
+	* sim/frv/cmaddhus.cgs: New testcase.
+	* sim/frv/cmsubhss.cgs: New testcase.
+	* sim/frv/cmsubhus.cgs: New testcase.
+	* sim/frv/cmqaddhss.cgs: New testcase.
+	* sim/frv/cmqaddhus.cgs: New testcase.
+	* sim/frv/cmqsubhss.cgs: New testcase.
+	* sim/frv/cmqsubhus.cgs: New testcase.
+	* sim/frv/cmmulhs.cgs: New testcase.
+	* sim/frv/cmmulhu.cgs: New testcase.
+	* sim/frv/cmmachs.cgs: New testcase.
+	* sim/frv/cmmachu.cgs: New testcase.
+	* sim/frv/cmqmulhs.cgs: New testcase.
+	* sim/frv/cmqmulhu.cgs: New testcase.
+	* sim/frv/cmqmachs.cgs: New testcase.
+	* sim/frv/cmqmachu.cgs: New testcase.
+	* sim/frv/cmcpxrs.cgs: New testcase.
+	* sim/frv/cmcpxru.cgs: New testcase.
+	* sim/frv/cmcpxis.cgs: New testcase.
+	* sim/frv/cmcpxiu.cgs: New testcase.
+	* sim/frv/cmexpdhw.cgs: New testcase.
+	* sim/frv/cmexpdhd.cgs: New testcase.
+	* sim/frv/cmbtoh.cgs: New testcase.
+	* sim/frv/cmhtob.cgs: New testcase.
+	* sim/frv/cmbtohe.cgs: New testcase.
+
+1999-11-23  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/interrupts/illinsn.cgs: Use opcode 7E for illegal instruction.
+	* sim/frv/mexpdhw.cgs: New testcase.
+	* sim/frv/mexpdhd.cgs: New testcase.
+	* sim/frv/maveh.cgs: New testcase.
+	* sim/frv/msllhi.cgs: New testcase.
+	* sim/frv/msrlhi.cgs: New testcase.
+	* sim/frv/msrahi.cgs: New testcase.
+	* sim/frv/msaths.cgs: New testcase.
+	* sim/frv/msathu.cgs: New testcase.
+	* sim/frv/mcut.cgs: New testcase.
+	* sim/frv/mcutss.cgs: New testcase.
+	* sim/frv/mcuti.cgs: New testcase.
+	* sim/frv/mcutssi.cgs: New testcase.
+
+1999-11-22  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/interrupts/mp_exception.cgs: Test for more interrupts.
+	* sim/frv/mclracc.cgs: New testcase.
+	* sim/frv/mqcpxrs.cgs: New testcase.
+	* sim/frv/mqcpxru.cgs: New testcase.
+	* sim/frv/mqcpxis.cgs: New testcase.
+	* sim/frv/mqcpxiu.cgs: New testcase.
+	* sim/frv/mpackh.cgs: New testcase.
+	* sim/frv/munpackh.cgs: New testcase.
+	* sim/frv/mbtohe.cgs: New testcase.
+	* sim/frv/mdpackh.cgs: New testcase.
+	* sim/frv/mdunpackh.cgs: New testcase.
+	* sim/frv/mrdacc.cgs: New testcase.
+	* sim/frv/mbtoh.cgs: New testcase.
+	* sim/frv/mrdaccg.cgs: New testcase.
+	* sim/frv/mhtob.cgs: New testcase.
+	* sim/frv/mwtacc.cgs: New testcase.
+	* sim/frv/mwtaccg.cgs: New testcase.
+
+1999-11-18  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/interrupts/mp_exception.cgs: Test more insns for interrupts.
+	* sim/frv/mmulxhs.cgs: Test acc1 and accg1.
+	* sim/frv/mqmulhs.cgs: New testcase.
+	* sim/frv/mqmulhu.cgs: New testcase.
+	* sim/frv/mqmulxhs.cgs: New testcase.
+	* sim/frv/mqmulxhu.cgs: New testcase.
+	* sim/frv/mqmachs.cgs: New testcase.
+	* sim/frv/mqmachu.cgs: New testcase.
+	* sim/frv/mcpxrs.cgs: New testcase.
+	* sim/frv/mcpxru.cgs: New testcase.
+	* sim/frv/mcpxis.cgs: New testcase.
+	* sim/frv/mcpxiu.cgs: New testcase.
+
+1999-11-17  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/mmulhs.cgs: Test acc1 register.
+	* sim/frv/maddhss.cgs: Test MSR.SIE fields.
+	* sim/frv/maddhus.cgs: Test MSR.SIE fields.
+	* sim/frv/msubhss.cgs: Test MSR.SIE fields.
+	* sim/frv/msubhus.cgs: Test MSR.SIE fields.
+	* sim/frv/interrupts/mp_exception.cgs: Test MSR.SIE fields.
+	* sim/frv/mmulxhs.cgs: New testcase.
+	* sim/frv/mmulxhu.cgs: New testcase.
+	* sim/frv/mmachs.cgs: New testcase.
+	* sim/frv/mmachu.cgs: New testcase.
+	* sim/frv/mmrdhs.cgs: New testcase.
+	* sim/frv/mmrdhu.cgs: New testcase.
+	* sim/frv/mqaddhss.cgs: New testcase.
+	* sim/frv/mqaddhus.cgs: New testcase.
+	* sim/frv/mqsubhus.cgs: New testcase.
+	* sim/frv/mqsubhss.cgs: New testcase.
+
+1999-11-15  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/mcmpsh.cgs: New testcase.
+	* sim/frv/mcmpuh.cgs: New testcase.
+	* sim/frv/mtrap.cgs: New testcase.
+	* sim/frv/maddhss.cgs: New testcase.
+	* sim/frv/maddhus.cgs: New testcase.
+	* sim/frv/msubhss.cgs: New testcase.
+	* sim/frv/msubhus.cgs: New testcase.
+	* sim/frv/mmulhs.cgs: New testcase.
+	* sim/frv/mmulhu.cgs: New testcase.
+	* sim/frv/interrupts/mp_exception.cgs: New testcase.
+
+1999-11-10  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/break.cgs: New testcase.
+	* sim/frv/interrupts/rett.cgs: New testcase.
+
+1999-11-09  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/interrupts/fp_exception.cgs: Test FSR0 and FQ resgisters.
+	* sim/frv/interrupts/compound.cgs: Add fp_exception.
+
+1999-11-04  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/interrupts/privileged_instruction.cgs: For frv machine only.
+	* sim/frv/interrupts/regalign.cgs: For frv machine only.
+	* sim/frv/ccalll.cgs: Fix branch address offsets.
+
+1999-11-04  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc (test_spr_bits): New macro.
+	* sim/frv/cstq.cgs: Fix alignment problems.
+	* sim/frv/cldq.cgs: Fix alignment problems.
+	* sim/frv/interrupts.exp: New testsuite.
+	* sim/frv/interrupts/Ipipe.cgs: New testcase
+	* sim/frv/interrupts/badalign.cgs: New testcase
+	* sim/frv/interrupts/compound.cgs: New testcase
+	* sim/frv/interrupts/data_store_error.cgs: New testcase
+	* sim/frv/interrupts/fp_exception.cgs: New testcase
+	* sim/frv/interrupts/illinsn.cgs: New testcase
+	* sim/frv/interrupts/insn_access_error.cgs: New testcase
+	* sim/frv/interrupts/privileged_instruction.cgs: New testcase
+	* sim/frv/interrupts/regalign.cgs: New testcase
+
+1999-11-03  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/bra1.cgs: New testcase.
+	* sim/frv/bno.cgs: New testcase.
+	* sim/frv/fckra1.cgs: New testcase.
+	* sim/frv/fbra1.cgs: New testcase.
+	* sim/frv/fbno.cgs: New testcase.
+	* sim/frv/bralr1.cgs: New testcase.
+	* sim/frv/fckno.cgs: New testcase.
+	* sim/frv/cckra1.cgs: New testcase.
+	* sim/frv/bnolr.cgs: New testcase.
+	* sim/frv/fbralr1.cgs: New testcase.
+	* sim/frv/fbnolr.cgs: New testcase.
+	* sim/frv/bcralr1.cgs: New testcase.
+	* sim/frv/cckno.cgs: New testcase.
+	* sim/frv/cfckra1.cgs: New testcase.
+	* sim/frv/bcnolr.cgs: New testcase.
+	* sim/frv/fcbralr1.cgs: New testcase.
+	* sim/frv/cfckno.cgs: New testcase.
+	* sim/frv/nop.cgs: New testcase.
+	* sim/frv/fcbnolr.cgs: New testcase.
+	* sim/frv/jmpl1.cgs: New testcase.
+	* sim/frv/cjmpl1.cgs: New testcase.
+	* sim/frv/calll.cgs: New testcase.
+	* sim/frv/jmpil1.cgs: New testcase.
+	* sim/frv/ccalll.cgs: New testcase.
+	* sim/frv/callil.cgs: New testcase.
+	* sim/frv/tra1.cgs: New testcase.
+	* sim/frv/tira1.cgs: New testcase.
+	* sim/frv/tno.cgs: New testcase.
+	* sim/frv/ftino.cgs: New testcase.
+	* sim/frv/commitga.cgs: New testcase.
+	* sim/frv/ret.cgs: New testcase.
+	* sim/frv/tino.cgs: New testcase.
+	* sim/frv/mnop.cgs: New testcase.
+	* sim/frv/ftra1.cgs: New testcase.
+	* sim/frv/ftira1.cgs: New testcase.
+	* sim/frv/cmp.cgs: New testcase.
+	* sim/frv/ftno.cgs: New testcase.
+	* sim/frv/commitfa.cgs: New testcase.
+	* sim/frv/ckra1.cgs: New testcase.
+	* sim/frv/ckno.cgs: New testcase.
+	* sim/frv/cmpi.cgs: New testcase.
+	* sim/frv/ccmp.cgs: New testcase.
+	* sim/frv/mov.cgs: New testcase.
+	* sim/frv/cmov.cgs: New testcase.
+
+1999-10-26  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/commitfr.cgs: Not valid for FR500.
+	* sim/frv/commitfra.cgs: Not valid for FR500.
+	* sim/frv/commitgr.cgs: Not valid for FR500.
+	* sim/frv/commitgra.cgs: Not valid for FR500.
+	* sim/frv/clrfa.cgs: Not valid for FR500.
+	* sim/frv/clrfr.cgs: Not valid for FR500.
+	* sim/frv/clrga.cgs: Not valid for FR500.
+	* sim/frv/clrgr.cgs: Not valid for FR500.
+	* sim/frv/nldq.cgs: Not valid for FR500.
+	* sim/frv/nldqf.cgs: Not valid for FR500.
+	* sim/frv/nldqfi.cgs: Not valid for FR500.
+	* sim/frv/nldqfu.cgs: Not valid for FR500.
+	* sim/frv/nldqi.cgs: Not valid for FR500.
+	* sim/frv/nldqu.cgs: Not valid for FR500.
+	* sim/frv/nldsb.cgs: Not valid for FR500.
+	* sim/frv/nldsbi.cgs: Not valid for FR500.
+	* sim/frv/nldsbu.cgs: Not valid for FR500.
+	* sim/frv/nldsh.cgs: Not valid for FR500.
+	* sim/frv/nldshi.cgs: Not valid for FR500.
+	* sim/frv/nldshu.cgs: Not valid for FR500.
+	* sim/frv/nldu.cgs: Not valid for FR500.
+	* sim/frv/nldub.cgs: Not valid for FR500.
+	* sim/frv/nldubi.cgs: Not valid for FR500.
+	* sim/frv/nldubu.cgs: Not valid for FR500.
+	* sim/frv/nlduh.cgs: Not valid for FR500.
+	* sim/frv/nlduhi.cgs: Not valid for FR500.
+	* sim/frv/nlduhu.cgs: Not valid for FR500.
+	* sim/frv/nld.cgs: Not valid for FR500.
+	* sim/frv/nldbf.cgs: Not valid for FR500.
+	* sim/frv/nldbfi.cgs: Not valid for FR500.
+	* sim/frv/nldbfu.cgs: Not valid for FR500.
+	* sim/frv/nldd.cgs: Not valid for FR500.
+	* sim/frv/nlddf.cgs: Not valid for FR500.
+	* sim/frv/nlddfi.cgs: Not valid for FR500.
+	* sim/frv/nlddfu.cgs: Not valid for FR500.
+	* sim/frv/nlddi.cgs: Not valid for FR500.
+	* sim/frv/nlddu.cgs: Not valid for FR500.
+	* sim/frv/nldf.cgs: Not valid for FR500.
+	* sim/frv/nldfi.cgs: Not valid for FR500.
+	* sim/frv/nldfu.cgs: Not valid for FR500.
+	* sim/frv/nldhf.cgs: Not valid for FR500.
+	* sim/frv/nldhfi.cgs: Not valid for FR500.
+	* sim/frv/nldhfu.cgs: Not valid for FR500.
+	* sim/frv/nldi.cgs: Not valid for FR500.
+
+1999-10-18  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc (_start): Turn on psr.nem, psr.cm, psr.ef,
+	psr.em
+	(inc_spr_immed): New macro.
+	* sim/frv/fsqrtd.cgs: Misaligned register.
+	* sim/frv/cstdu.cgs: Used wrong register. Misaligned sp.
+	* sim/frv/cstd.cgs: Used wrong register.
+
+1999-10-07  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc: Use sethi/setlo in parallel.
+	* sim/frv/sethilo.pcgs: New testcase.
+
+1999-10-05  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/rst.cgs: Not valid for FR500.
+	* sim/frv/rstb.cgs: Not valid for FR500.
+	* sim/frv/rstbf.cgs: Not valid for FR500.
+	* sim/frv/rstd.cgs: Not valid for FR500.
+	* sim/frv/rstdf.cgs: Not valid for FR500.
+	* sim/frv/rstf.cgs: Not valid for FR500.
+	* sim/frv/rsth.cgs: Not valid for FR500.
+	* sim/frv/rsthf.cgs: Not valid for FR500.
+
+1999-10-04  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc: Conform to pipeline constraints.
+	* sim/frv/branch.pcgs: Conform to pipeline constraints.
+	* sim/frv/lrbranch.pcgs: Conform to pipeline constraints.
+	* sim/frv/call.pcgs: Conform to pipeline constraints.
+	* sim/frv/jmpl.pcgs: Conform to pipeline constraints.
+	* sim/frv/std.pcgs: Conform to pipeline constraints.
+	* sim/frv/stdc.pcgs: Conform to pipeline constraints.
+	* sim/frv/stdf.pcgs: Conform to pipeline constraints.
+	* sim/frv/stq.pcgs: Conform to pipeline constraints.
+	* sim/frv/stqc.pcgs: Conform to pipeline constraints.
+	* sim/frv/stqf.pcgs: Conform to pipeline constraints.
+
+Thu Sep 30 18:13:42 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/add.pcgs (add): Only 2 integer insns in parallel.
+
+Mon Sep 27 17:10:19 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc (set_psr_et): New macro. Sets PSR.ET bit.
+	* sim/frv/fteq.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftge.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftgt.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftieq.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftige.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftigt.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftile.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftilg.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftilt.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftine.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftio.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftira.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftiu.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftiue.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftiug.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftiuge.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftiul.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftle.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftlg.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftlt.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftne.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/fto.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftra.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftu.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftue.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftug.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftuge.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftul.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/ftule.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/rett.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tc.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/teq.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tge.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tgt.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/thi.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tic.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tieq.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tige.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tigt.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tihi.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tile.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tils.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tilt.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tin.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tinc.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tine.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tinv.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tip.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tira.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tiv.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tle.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tls.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tlt.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tn.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tnc.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tne.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tnv.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tp.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tra.cgs: Set PSR.ET before using trap insns.
+	* sim/frv/tv.cgs: Set PSR.ET before using trap insns.
+
+1999-09-15  Doug Evans  <devans@casey.cygnus.com>
+
+	* sim/arm/b.cgs: New testcase.
+	* sim/arm/bic.cgs: New testcase.
+	* sim/arm/bl.cgs: New testcase.
+
+Tue Sep 14 16:53:32 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc: Streamline code and add parallelism.
+
+Tue Sep 14 14:33:42 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/tra.cgs (tra): Add test for pcsr.
+	* sim/frv/stqc.pcgs: New testcase.
+	* sim/frv/std.pcgs: New testcase.
+	* sim/frv/stdf.pcgs: New testcase.
+	* sim/frv/stdc.pcgs: New testcase.
+	* sim/frv/stq.pcgs: New testcase.
+	* sim/frv/stqf.pcgs: New testcase.
+
+Fri Sep 10 17:10:06 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/parallel.exp: Parallel tests.
+	* sim/frv/branch.pcgs: New testcase.
+	* sim/frv/add.pcgs: New testcase.
+	* sim/frv/lrbranch.pcgs: New testcase.
+	* sim/frv/jmpl.pcgs: New testcase.
+	* sim/frv/call.pcgs: New testcase.
+
+1999-09-09  Doug Evans  <devans@casey.cygnus.com>
+
+	* sim/arm/add.cgs: New testcase.
+	* sim/arm/and.cgs: New testcase.
+
+1999-09-06  Doug Evans  <devans@casey.cygnus.com>
+
+	* sim/arm/testutils.inc: Testsuite utilities.
+	* sim/arm/adc.cgs: New testcase.
+
+Thu Sep  2 18:15:53 1999  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure: Regenerated to track ../common/aclocal.m4 changes.
+
+Tue Aug 31 17:56:33 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc (set_bctrlr_0_0): New macro.
+	* sim/frv/rett.cgs: New testcase.
+	* sim/frv/fteq.cgs: Use set_bctrlr_0_0.
+	* sim/frv/ftge.cgs: Ditto.
+	* sim/frv/ftgt.cgs: Ditto.
+	* sim/frv/ftieq.cgs: Ditto.
+	* sim/frv/ftige.cgs: Ditto.
+	* sim/frv/ftigt.cgs: Ditto.
+	* sim/frv/ftile.cgs: Ditto.
+	* sim/frv/ftilg.cgs: Ditto.
+	* sim/frv/ftilt.cgs: Ditto.
+	* sim/frv/ftine.cgs: Ditto.
+	* sim/frv/ftinev.cgs: Ditto.
+	* sim/frv/ftio.cgs: Ditto.
+	* sim/frv/ftira.cgs: Ditto.
+	* sim/frv/ftiu.cgs: Ditto.
+	* sim/frv/ftiue.cgs: Ditto.
+	* sim/frv/ftiug.cgs: Ditto.
+	* sim/frv/ftiuge.cgs: Ditto.
+	* sim/frv/ftiul.cgs: Ditto.
+	* sim/frv/ftle.cgs: Ditto.
+	* sim/frv/ftlg.cgs: Ditto.
+	* sim/frv/ftlt.cgs: Ditto.
+	* sim/frv/ftne.cgs: Ditto.
+	* sim/frv/ftnev.cgs: Ditto.
+	* sim/frv/fto.cgs: Ditto.
+	* sim/frv/ftra.cgs: Ditto.
+	* sim/frv/ftu.cgs: Ditto.
+	* sim/frv/ftue.cgs: Ditto.
+	* sim/frv/ftug.cgs: Ditto.
+	* sim/frv/ftuge.cgs: Ditto.
+	* sim/frv/ftul.cgs: Ditto.
+	* sim/frv/ftule.cgs: Ditto.
+	* sim/frv/tc.cgs: Ditto.
+	* sim/frv/teq.cgs: Ditto.
+	* sim/frv/tge.cgs: Ditto.
+	* sim/frv/tgt.cgs: Ditto.
+	* sim/frv/thi.cgs: Ditto.
+	* sim/frv/tic.cgs: Ditto.
+	* sim/frv/tieq.cgs: Ditto.
+	* sim/frv/tige.cgs: Ditto.
+	* sim/frv/tigt.cgs: Ditto.
+	* sim/frv/tihi.cgs: Ditto.
+	* sim/frv/tile.cgs: Ditto.
+	* sim/frv/tils.cgs: Ditto.
+	* sim/frv/tilt.cgs: Ditto.
+	* sim/frv/tin.cgs: Ditto.
+	* sim/frv/tinc.cgs: Ditto.
+	* sim/frv/tine.cgs: Ditto.
+	* sim/frv/tinev.cgs: Ditto.
+	* sim/frv/tinv.cgs: Ditto.
+	* sim/frv/tip.cgs: Ditto.
+	* sim/frv/tira.cgs: Ditto.
+	* sim/frv/tiv.cgs: Ditto.
+	* sim/frv/tle.cgs: Ditto.
+	* sim/frv/tls.cgs: Ditto.
+	* sim/frv/tlt.cgs: Ditto.
+	* sim/frv/tn.cgs: Ditto.
+	* sim/frv/tnc.cgs: Ditto.
+	* sim/frv/tne.cgs: Ditto.
+	* sim/frv/tnev.cgs: Ditto.
+	* sim/frv/tnv.cgs: Ditto.
+	* sim/frv/tp.cgs: Ditto.
+	* sim/frv/tra.cgs: Ditto.
+	* sim/frv/tv.cgs: Ditto.
+
+1999-08-30  Doug Evans  <devans@casey.cygnus.com>
+
+	* sim/arm/thumb/allthumb.exp: New driver for thumb testcases.
+	* sim/arm/allinsn.exp: New driver for arm testcases.
+
+	* lib/sim-defs.exp (run_sim_test): Rename all_machs arg to
+	requested_machs, now is list of machs to run tests for.
+	Delete locals AS,ASFLAGS,LD,LDFLAGS.  Use target_assemble
+	and target_link instead.
+
+1999-08-29  Doug Evans  <devans@casey.cygnus.com>
+
+	* sim/frv/allinsn.exp: No longer specify --architecture,--model.
+
+1999-08-27  Doug Evans  <devans@casey.cygnus.com>
+
+	* sim/frv/*.cgs: Pass -mcpu=frv to gas as appropriate.
+
+Thu Aug 19 18:01:34 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/allinsn.exp: Pass --architecture and --model options for frv
+	mach.
+	* sim/frv/cldq.cgs: Change mach to frv.
+	* sim/frv/cldqu.cgs: Change mach to frv.
+	* sim/frv/cstq.cgs: Change mach to frv.
+	* sim/frv/fabsd.cgs: Change mach to frv.
+	* sim/frv/faddd.cgs: Change mach to frv.
+	* sim/frv/fcmpd.cgs: Change mach to frv.
+	* sim/frv/fdivd.cgs: Change mach to frv.
+	* sim/frv/fdtoi.cgs: Change mach to frv.
+	* sim/frv/fitod.cgs: Change mach to frv.
+	* sim/frv/fmaddd.cgs: Change mach to frv.
+	* sim/frv/fmadds.cgs: Change mach to frv.
+	* sim/frv/fmovd.cgs: Change mach to frv.
+	* sim/frv/fmsubd.cgs: Change mach to frv.
+	* sim/frv/fmsubs.cgs: Change mach to frv.
+	* sim/frv/fmuld.cgs: Change mach to frv.
+	* sim/frv/fnegd.cgs: Change mach to frv.
+	* sim/frv/fsqrtd.cgs: Change mach to frv.
+	* sim/frv/fsubd.cgs: Change mach to frv.
+	* sim/frv/ldc.cgs: Change mach to frv.
+	* sim/frv/ldcu.cgs: Change mach to frv.
+	* sim/frv/lddc.cgs: Change mach to frv.
+	* sim/frv/lddcu.cgs: Change mach to frv.
+	* sim/frv/ldq.cgs: Change mach to frv.
+	* sim/frv/ldqc.cgs: Change mach to frv.
+	* sim/frv/ldqcu.cgs: Change mach to frv.
+	* sim/frv/ldqf.cgs: Change mach to frv.
+	* sim/frv/ldqfi.cgs: Change mach to frv.
+	* sim/frv/ldqfu.cgs: Change mach to frv.
+	* sim/frv/ldqi.cgs: Change mach to frv.
+	* sim/frv/ldqu.cgs: Change mach to frv.
+	* sim/frv/movfgq.cgs: Change mach to frv.
+	* sim/frv/movgfq.cgs: Change mach to frv.
+	* sim/frv/nldq.cgs: Change mach to frv.
+	* sim/frv/nldqf.cgs: Change mach to frv.
+	* sim/frv/nldqfi.cgs: Change mach to frv.
+	* sim/frv/nldqfu.cgs: Change mach to frv.
+	* sim/frv/nldqi.cgs: Change mach to frv.
+	* sim/frv/nldqu.cgs: Change mach to frv.
+	* sim/frv/rstq.cgs: Change mach to frv.
+	* sim/frv/rstqf.cgs: Change mach to frv.
+	* sim/frv/stc.cgs: Change mach to frv.
+	* sim/frv/stcu.cgs: Change mach to frv.
+	* sim/frv/stdc.cgs: Change mach to frv.
+	* sim/frv/stdcu.cgs: Change mach to frv.
+	* sim/frv/stq.cgs: Change mach to frv.
+	* sim/frv/stqc.cgs: Change mach to frv.
+	* sim/frv/stqcu.cgs: Change mach to frv.
+	* sim/frv/stqf.cgs: Change mach to frv.
+	* sim/frv/stqfi.cgs: Change mach to frv.
+	* sim/frv/stqfu.cgs: Change mach to frv.
+	* sim/frv/stqi.cgs: Change mach to frv.
+	* sim/frv/stqu.cgs: Change mach to frv.
+
+Tue Aug 10 13:46:16 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc: Use new %hi, %lo syntax.
+
+1999-07-16  Ben Elliston  <bje@cygnus.com>
+
+	* sim/arm/misaligned1.ms: New test case.
+	* sim/arm/misaligned2.ms: Likewise.
+	* sim/arm/misaligned3.ms: Likewise.
+
+Fri Jul 16 14:56:57 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/mor.cgs: New testcase.
+	* sim/frv/mand.cgs: New testcase.
+	* sim/frv/mrotli.cgs: New testcase.
+	* sim/frv/mwcut.cgs: New testcase.
+	* sim/frv/mrotri.cgs: New testcase.
+	* sim/frv/mxor.cgs: New testcase.
+	* sim/frv/mnot.cgs: New testcase.
+	* sim/frv/mwcuti.cgs: New testcase.
+
+1999-07-16  Ben Elliston  <bje@cygnus.com>
+
+	* sim/arm/misc.exp: Enable basic tests.
+
+Wed Jul  7 17:02:14 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/smulicc.cgs: Correct expected condition codes.
+	* sim/frv/umulicc.cgs: Correct expected condition codes.
+
+Tue Jul  6 16:14:35 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/fmovs.cgs: Adjust nan result for new floating point
+ 	implementation.
+	* sim/frv/fmovd.cgs: Adjust nan result for new floating point
+ 	implementation.
+	* sim/frv/fdtoi.cgs: Add new scenario for fr0.
+
+Wed Jun 30 16:01:14 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/ldd.cgs: Load into GR0 is a no-op.
+	* sim/frv/lddc.cgs: Load into GR0 is a no-op.
+	* sim/frv/lddf.cgs: Load into GR0 is a no-op.
+	* sim/frv/ldq.cgs: Load into GR0 is a no-op.
+	* sim/frv/ldqc.cgs: Load into GR0 is a no-op.
+	* sim/frv/ldqf.cgs: Load into GR0 is a no-op.
+	* sim/frv/rst.cgs: Don't seat nesr0 before tests.
+	* sim/frv/rstb.cgs: Don't seat nesr0 before tests.
+	* sim/frv/rstbf.cgs: Don't seat nesr0 before tests.
+	* sim/frv/rstd.cgs: Don't seat nesr0 before tests.
+	* sim/frv/rstdf.cgs: Don't seat nesr0 before tests.
+	* sim/frv/rstf.cgs: Don't seat nesr0 before tests.
+	* sim/frv/rsth.cgs: Don't seat nesr0 before tests.
+	* sim/frv/rsthf.cgs: Don't seat nesr0 before tests.
+	* sim/frv/rstq.cgs: Don't seat nesr0 before tests.
+	* sim/frv/rstqf.cgs: Don't seat nesr0 before tests.
+
+Tue Jun 29 16:57:29 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc (set_fr_fr): New macro.
+	(set_dfr_dfr): New macro.
+	(set_dfr_mem): New macro.
+	(test_dfr_dfr): New macro.
+	(double_constants): New macro.
+	(load_double_constants): New macro.
+	(feps): Correct value.
+	(fneps): Correct value.
+	* sim/frv/fmovs.cgs: Correct result.
+	* sim/frv/fsqrtd.cgs: New testcase.
+	* sim/frv/fmadds.cgs: New testcase.
+	* sim/frv/fitod.cgs: New testcase.
+	* sim/frv/fmsubs.cgs: New testcase.
+	* sim/frv/fmuld.cgs: New testcase.
+	* sim/frv/fcmpd.cgs: New testcase.
+	* sim/frv/faddd.cgs: New testcase.
+	* sim/frv/fdtoi.cgs: New testcase.
+	* sim/frv/fdivd.cgs: New testcase.
+	* sim/frv/fmovd.cgs: New testcase.
+	* sim/frv/fsubd.cgs: New testcase.
+	* sim/frv/fnegd.cgs: New testcase.
+	* sim/frv/fabsd.cgs: New testcase.
+	* sim/frv/fmaddd.cgs: New testcase.
+	* sim/frv/fmsubd.cgs: New testcase.
+
+1999-06-28  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc (set_fr_mem): New macro.
+	(test_fr_fr): New macro.
+	(float_constants): New macro.
+	(load_float_constants): New macro.
+	* sim/frv/fabss.cgs: New testcase.
+	* sim/frv/fadds.cgs: New testcase.
+	* sim/frv/fcmps.cgs: New testcase.
+	* sim/frv/fitos.cgs: New testcase.
+	* sim/frv/fmovs.cgs: New testcase.
+	* sim/frv/fnegs.cgs: New testcase.
+	* sim/frv/fsqrts.cgs: New testcase.
+	* sim/frv/fstoi.cgs: New testcase.
+	* sim/frv/fsubs.cgs: New testcase.
+	* sim/frv/fmuls.cgs: New testcase.
+	* sim/frv/fdivs.cgs: New testcase.
+
+Tue Jun 22 16:25:11 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/*ck*.cgs: Adjust to corrected *ck* insn syntax.
+
+Fri Jun 18 17:47:26 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/csdiv.cgs: Adjust for gr0 forced to zero.
+	* sim/frv/nsdiv.cgs: Ditto.
+	* sim/frv/sdiv.cgs: Ditto.
+	* sim/frv/sethi.cgs: Ditto.
+	* sim/frv/setlo.cgs: Ditto.
+	* sim/frv/setlos.cgs: Ditto.
+	* sim/frv/std.cgs: Ditto.
+	* sim/frv/stq.cgs: Ditto.
+	* sim/frv/testutils.inc: Use proper syscalls interface.
+
+Fri Jun 18 14:41:42 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/rstb.cgs: New testcase.
+	* sim/frv/rstd.cgs: New testcase.
+	* sim/frv/rsth.cgs: New testcase.
+	* sim/frv/rstbf.cgs: New testcase.
+	* sim/frv/rst.cgs: New testcase.
+	* sim/frv/rstq.cgs: New testcase.
+	* sim/frv/nsdiv.cgs: New testcase.
+	* sim/frv/rsthf.cgs: New testcase.
+	* sim/frv/nudiv.cgs: New testcase.
+	* sim/frv/rstf.cgs: New testcase.
+	* sim/frv/nsdivi.cgs: New testcase.
+	* sim/frv/rstdf.cgs: New testcase.
+	* sim/frv/nudivi.cgs: New testcase.
+	* sim/frv/rstqf.cgs: New testcase.
+	* sim/frv/clrgr.cgs: New testcase.
+	* sim/frv/clrga.cgs: New testcase.
+	* sim/frv/clrfr.cgs: New testcase.
+	* sim/frv/clrfa.cgs: New testcase.
+	* sim/frv/commitgr.cgs: New testcase.
+	* sim/frv/commitgra.cgs: New testcase.
+	* sim/frv/commitfr.cgs: New testcase.
+	* sim/frv/commitfra.cgs: New testcase.
+
+1999-06-16  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc (test_spr_gr): New Macro.
+	* sim/frv/nldu.cgs: New testcase.
+	* sim/frv/nldsb.cgs: New testcase.
+	* sim/frv/nldub.cgs: New testcase.
+	* sim/frv/nldd.cgs: New testcase.
+	* sim/frv/nldsh.cgs: New testcase.
+	* sim/frv/nldq.cgs: New testcase.
+	* sim/frv/nlduh.cgs: New testcase.
+	* sim/frv/nldsbu.cgs: New testcase.
+	* sim/frv/nld.cgs: New testcase.
+	* sim/frv/nldubu.cgs: New testcase.
+	* sim/frv/nlddu.cgs: New testcase.
+	* sim/frv/nldshu.cgs: New testcase.
+	* sim/frv/nlduhu.cgs: New testcase.
+	* sim/frv/nlddi.cgs: New testcase.
+	* sim/frv/nldi.cgs: New testcase.
+	* sim/frv/nldqi.cgs: New testcase.
+	* sim/frv/nldqu.cgs: New testcase.
+	* sim/frv/nldsbi.cgs: New testcase.
+	* sim/frv/nldbf.cgs: New testcase.
+	* sim/frv/nldubi.cgs: New testcase.
+	* sim/frv/nldshi.cgs: New testcase.
+	* sim/frv/nldhf.cgs: New testcase.
+	* sim/frv/nldbfu.cgs: New testcase.
+	* sim/frv/nlduhi.cgs: New testcase.
+	* sim/frv/nldf.cgs: New testcase.
+	* sim/frv/nldhfu.cgs: New testcase.
+	* sim/frv/nlddf.cgs: New testcase.
+	* sim/frv/nldqf.cgs: New testcase.
+	* sim/frv/nldfu.cgs: New testcase.
+	* sim/frv/nlddfu.cgs: New testcase.
+	* sim/frv/nldqfu.cgs: New testcase.
+	* sim/frv/nldbfi.cgs: New testcase.
+	* sim/frv/nldhfi.cgs: New testcase.
+	* sim/frv/nldfi.cgs: New testcase.
+	* sim/frv/nlddfi.cgs: New testcase.
+	* sim/frv/nldqfi.cgs: New testcase.
+
+Wed Jun  9 18:14:31 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc (set_gr_immed): Allow immediates of any range.
+	* sim/frv/ckc.cgs: Adjust for corrected syntax.
+	* sim/frv/ckeq.cgs: Ditto.
+	* sim/frv/ckge.cgs: Ditto.
+	* sim/frv/ckgt.cgs: Ditto.
+	* sim/frv/ckhi.cgs: Ditto.
+	* sim/frv/ckle.cgs: Ditto.
+	* sim/frv/ckls.cgs: Ditto.
+	* sim/frv/cklt.cgs: Ditto.
+	* sim/frv/ckn.cgs: Ditto.
+	* sim/frv/cknc.cgs: Ditto.
+	* sim/frv/ckne.cgs: Ditto.
+	* sim/frv/cknev.cgs: Ditto.
+	* sim/frv/cknv.cgs: Ditto.
+	* sim/frv/ckp.cgs: Ditto.
+	* sim/frv/ckra.cgs: Ditto.
+	* sim/frv/ckv.cgs: Ditto.
+	* sim/frv/fckra.cgs: New testcase.
+	* sim/frv/cckra.cgs: New testcase.
+	* sim/frv/fcknev.cgs: New testcase.
+	* sim/frv/cfcknev.cgs: New testcase.
+	* sim/frv/fckne.cgs: New testcase.
+	* sim/frv/ccknev.cgs: New testcase.
+	* sim/frv/fckeq.cgs: New testcase.
+	* sim/frv/cfckra.cgs: New testcase.
+	* sim/frv/fcklg.cgs: New testcase.
+	* sim/frv/cckeq.cgs: New testcase.
+	* sim/frv/fckue.cgs: New testcase.
+	* sim/frv/fckul.cgs: New testcase.
+	* sim/frv/cckne.cgs: New testcase.
+	* sim/frv/fckge.cgs: New testcase.
+	* sim/frv/cfckne.cgs: New testcase.
+	* sim/frv/fcklt.cgs: New testcase.
+	* sim/frv/cckle.cgs: New testcase.
+	* sim/frv/fckuge.cgs: New testcase.
+	* sim/frv/fckug.cgs: New testcase.
+	* sim/frv/cckgt.cgs: New testcase.
+	* sim/frv/fckle.cgs: New testcase.
+	* sim/frv/cfckeq.cgs: New testcase.
+	* sim/frv/fckgt.cgs: New testcase.
+	* sim/frv/ccklt.cgs: New testcase.
+	* sim/frv/fckule.cgs: New testcase.
+	* sim/frv/fcku.cgs: New testcase.
+	* sim/frv/fcko.cgs: New testcase.
+	* sim/frv/cckge.cgs: New testcase.
+	* sim/frv/cfcklg.cgs: New testcase.
+	* sim/frv/cckls.cgs: New testcase.
+	* sim/frv/cckhi.cgs: New testcase.
+	* sim/frv/cfckue.cgs: New testcase.
+	* sim/frv/cckc.cgs: New testcase.
+	* sim/frv/ccknc.cgs: New testcase.
+	* sim/frv/cfckul.cgs: New testcase.
+	* sim/frv/cckn.cgs: New testcase.
+	* sim/frv/cckp.cgs: New testcase.
+	* sim/frv/cfckge.cgs: New testcase.
+	* sim/frv/cckv.cgs: New testcase.
+	* sim/frv/ccknv.cgs: New testcase.
+	* sim/frv/cfcklt.cgs: New testcase.
+	* sim/frv/cfckuge.cgs: New testcase.
+	* sim/frv/cfckug.cgs: New testcase.
+	* sim/frv/cfckle.cgs: New testcase.
+	* sim/frv/cfckgt.cgs: New testcase.
+	* sim/frv/cfckule.cgs: New testcase.
+	* sim/frv/cfcku.cgs: New testcase.
+	* sim/frv/cfcko.cgs: New testcase.
+
+Tue Jun  8 18:15:19 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/ckc.cgs: New testcase.
+	* sim/frv/ckn.cgs: New testcase.
+	* sim/frv/cknev.cgs: New testcase.
+	* sim/frv/ckra.cgs: New testcase.
+	* sim/frv/ckeq.cgs: New testcase.
+	* sim/frv/ckne.cgs: New testcase.
+	* sim/frv/ckle.cgs: New testcase.
+	* sim/frv/ckgt.cgs: New testcase.
+	* sim/frv/cklt.cgs: New testcase.
+	* sim/frv/ckge.cgs: New testcase.
+	* sim/frv/ckls.cgs: New testcase.
+	* sim/frv/ckhi.cgs: New testcase.
+	* sim/frv/cknc.cgs: New testcase.
+	* sim/frv/ckp.cgs: New testcase.
+	* sim/frv/ckv.cgs: New testcase.
+	* sim/frv/cknv.cgs: New testcase.
+
+Tue Jun  8 15:42:01 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/csmulcc.cgs: Test for Z bit set correctly.
+	* sim/frv/smulcc.cgs: Ditto.
+	* sim/frv/umulcc.cgs: Ditto.
+	* sim/frv/andcr.cgs: Test for corrected logic.
+	* sim/frv/andncr.cgs: Ditto.
+	* sim/frv/nandcr.cgs: Ditto.
+	* sim/frv/nandncr.cgs: Ditto.
+
+Tue Jun  8 13:53:44 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/clddu.cgs: Add check that base register is not updated
+	if it is also the target register.
+	* sim/frv/cldqu.cgs: Ditto.
+	* sim/frv/cldsbu.cgs: Ditto.
+	* sim/frv/cldshu.cgs: Ditto.
+	* sim/frv/cldu.cgs: Ditto.
+	* sim/frv/cldubu.cgs: Ditto.
+	* sim/frv/clduhu.cgs: Ditto.
+
+Mon Jun  7 18:35:33 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/lddu.cgs: Add check that base register is not updated
+	if it is also the target register.
+	* sim/frv/ldqu.cgs: Ditto.
+	* sim/frv/ldsbu.cgs: Ditto.
+	* sim/frv/ldshu.cgs: Ditto.
+	* sim/frv/ldu.cgs: Ditto.
+	* sim/frv/ldubu.cgs: Ditto.
+	* sim/frv/lduhu.cgs: Ditto.
+
+Mon Jun  7 17:10:06 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/cmovfg.cgs: New testcase.
+	* sim/frv/cmovgf.cgs: New testcase.
+	* sim/frv/cmovgfd.cgs: New testcase.
+	* sim/frv/cmovfgd.cgs: New testcase.
+	* sim/frv/cjmpl.cgs: New testcase.
+
+1999-06-07  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/cldf.cgs: New testcase.
+	* sim/frv/cldbf.cgs: New testcase.
+	* sim/frv/cldhf.cgs: New testcase.
+	* sim/frv/cldbfu.cgs: New testcase.
+	* sim/frv/clddf.cgs: New testcase.
+	* sim/frv/cldhfu.cgs: New testcase.
+	* sim/frv/cstb.cgs: New testcase.
+	* sim/frv/cldfu.cgs: New testcase.
+	* sim/frv/csth.cgs: New testcase.
+	* sim/frv/clddfu.cgs: New testcase.
+	* sim/frv/cstd.cgs: New testcase.
+	* sim/frv/cst.cgs: New testcase.
+	* sim/frv/cstq.cgs: New testcase.
+	* sim/frv/cstbu.cgs: New testcase.
+	* sim/frv/csthu.cgs: New testcase.
+	* sim/frv/cstbf.cgs: New testcase.
+	* sim/frv/cstu.cgs: New testcase.
+	* sim/frv/cstf.cgs: New testcase.
+	* sim/frv/cstdu.cgs: New testcase.
+	* sim/frv/cswap.cgs: New testcase.
+	* sim/frv/csthf.cgs: New testcase.
+	* sim/frv/cscan.cgs: New testcase.
+	* sim/frv/cstdf.cgs: New testcase.
+	* sim/frv/cstbfu.cgs: New testcase.
+	* sim/frv/csthfu.cgs: New testcase.
+	* sim/frv/cstfu.cgs: New testcase.
+	* sim/frv/cstdfu.cgs: New testcase.
+
+Thu Jun  3 17:34:25 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/cldsb.cgs: New testcase.
+	* sim/frv/cldsbu.cgs: New testcase.
+	* sim/frv/cldub.cgs: New testcase.
+	* sim/frv/cldsh.cgs: New testcase.
+	* sim/frv/cldubu.cgs: New testcase.
+	* sim/frv/clduh.cgs: New testcase.
+	* sim/frv/cld.cgs: New testcase.
+	* sim/frv/cldshu.cgs: New testcase.
+	* sim/frv/cldd.cgs: New testcase.
+	* sim/frv/cldq.cgs: New testcase.
+	* sim/frv/clduhu.cgs: New testcase.
+	* sim/frv/cldu.cgs: New testcase.
+	* sim/frv/clddu.cgs: New testcase.
+	* sim/frv/cldqu.cgs: New testcase
+
+Wed Jun  2 17:51:51 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/caddcc.cgs: New testcase.
+	* sim/frv/cand.cgs: New testcase.
+	* sim/frv/csubcc.cgs: New testcase.
+	* sim/frv/csll.cgs: New testcase.
+	* sim/frv/csmulcc.cgs: New testcase.
+	* sim/frv/cudiv.cgs: New testcase.
+	* sim/frv/cor.cgs: New testcase.
+	* sim/frv/csllcc.cgs: New testcase.
+	* sim/frv/cxor.cgs: New testcase.
+	* sim/frv/csrl.cgs: New testcase.
+	* sim/frv/cnot.cgs: New testcase.
+	* sim/frv/csra.cgs: New testcase.
+	* sim/frv/candcc.cgs: New testcase.
+	* sim/frv/corcc.cgs: New testcase.
+	* sim/frv/cxorcc.cgs: New testcase.
+	* sim/frv/csrlcc.cgs: New testcase.
+	* sim/frv/csracc.cgs: New testcase.
+
+Tue Jun  1 18:01:07 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc (test_spr_addr): Use set_gr_addr.
+	* sim/frv/tira.cgs: Complete testcase.
+	* sim/frv/tra.cgs: Complete testcase.
+	* sim/frv/tiv.cgs: New testcase.
+	* sim/frv/fbnevlr.cgs: New testcase.
+	* sim/frv/fbralr.cgs: New testcase.
+	* sim/frv/fcbralr.cgs: New testcase.
+	* sim/frv/fbnelr.cgs: New testcase.
+	* sim/frv/fcbnelr.cgs: New testcase.
+	* sim/frv/fbeqlr.cgs: New testcase.
+	* sim/frv/fcbeqlr.cgs: New testcase.
+	* sim/frv/fblglr.cgs: New testcase.
+	* sim/frv/fcblglr.cgs: New testcase.
+	* sim/frv/fbuelr.cgs: New testcase.
+	* sim/frv/fcbuelr.cgs: New testcase.
+	* sim/frv/fbullr.cgs: New testcase.
+	* sim/frv/fcbullr.cgs: New testcase.
+	* sim/frv/fbgelr.cgs: New testcase.
+	* sim/frv/fcbgelr.cgs: New testcase.
+	* sim/frv/fbltlr.cgs: New testcase.
+	* sim/frv/fcbnevlr.cgs: New testcase.
+	* sim/frv/fcbltlr.cgs: New testcase.
+	* sim/frv/fbugelr.cgs: New testcase.
+	* sim/frv/jmpl.cgs: New testcase.
+	* sim/frv/fbuglr.cgs: New testcase.
+	* sim/frv/fcbuglr.cgs: New testcase.
+	* sim/frv/fblelr.cgs: New testcase.
+	* sim/frv/fcblelr.cgs: New testcase.
+	* sim/frv/fbgtlr.cgs: New testcase.
+	* sim/frv/fcbgtlr.cgs: New testcase.
+	* sim/frv/fbulelr.cgs: New testcase.
+	* sim/frv/tnev.cgs: New testcase.
+	* sim/frv/fbulr.cgs: New testcase.
+	* sim/frv/fbolr.cgs: New testcase.
+	* sim/frv/jmpil.cgs: New testcase.
+	* sim/frv/tinev.cgs: New testcase.
+	* sim/frv/call.cgs: New testcase.
+	* sim/frv/teq.cgs: New testcase.
+	* sim/frv/ftnev.cgs: New testcase.
+	* sim/frv/tne.cgs: New testcase.
+	* sim/frv/tieq.cgs: New testcase.
+	* sim/frv/tle.cgs: New testcase.
+	* sim/frv/ftinev.cgs: New testcase.
+	* sim/frv/fcbugelr.cgs: New testcase.
+	* sim/frv/tgt.cgs: New testcase.
+	* sim/frv/tine.cgs: New testcase.
+	* sim/frv/tlt.cgs: New testcase.
+	* sim/frv/ftra.cgs: New testcase.
+	* sim/frv/tge.cgs: New testcase.
+	* sim/frv/fcbulelr.cgs: New testcase.
+	* sim/frv/tile.cgs: New testcase.
+	* sim/frv/fcbulr.cgs: New testcase.
+	* sim/frv/tls.cgs: New testcase.
+	* sim/frv/fcbolr.cgs: New testcase.
+	* sim/frv/ftne.cgs: New testcase.
+	* sim/frv/thi.cgs: New testcase.
+	* sim/frv/tigt.cgs: New testcase.
+	* sim/frv/tc.cgs: New testcase.
+	* sim/frv/tic.cgs: New testcase.
+	* sim/frv/tnc.cgs: New testcase.
+	* sim/frv/ftira.cgs: New testcase.
+	* sim/frv/tn.cgs: New testcase.
+	* sim/frv/tin.cgs: New testcase.
+	* sim/frv/tp.cgs: New testcase.
+	* sim/frv/tv.cgs: New testcase.
+	* sim/frv/tilt.cgs: New testcase.
+	* sim/frv/tip.cgs: New testcase.
+	* sim/frv/tnv.cgs: New testcase.
+	* sim/frv/fteq.cgs: New testcase.
+	* sim/frv/tige.cgs: New testcase.
+	* sim/frv/tils.cgs: New testcase.
+	* sim/frv/ftlg.cgs: New testcase.
+	* sim/frv/tihi.cgs: New testcase.
+	* sim/frv/ftine.cgs: New testcase.
+	* sim/frv/ftue.cgs: New testcase.
+	* sim/frv/tinc.cgs: New testcase.
+	* sim/frv/ftul.cgs: New testcase.
+	* sim/frv/ftieq.cgs: New testcase.
+	* sim/frv/tinv.cgs: New testcase.
+	* sim/frv/ftge.cgs: New testcase.
+	* sim/frv/ftlt.cgs: New testcase.
+	* sim/frv/ftilg.cgs: New testcase.
+	* sim/frv/ftuge.cgs: New testcase.
+	* sim/frv/ftug.cgs: New testcase.
+	* sim/frv/ftiue.cgs: New testcase.
+	* sim/frv/ftle.cgs: New testcase.
+	* sim/frv/ftgt.cgs: New testcase.
+	* sim/frv/ftiul.cgs: New testcase.
+	* sim/frv/ftule.cgs: New testcase.
+	* sim/frv/ftu.cgs: New testcase.
+	* sim/frv/ftige.cgs: New testcase.
+	* sim/frv/fto.cgs: New testcase.
+	* sim/frv/ftilt.cgs: New testcase.
+	* sim/frv/ftiuge.cgs: New testcase.
+	* sim/frv/ftiug.cgs: New testcase.
+	* sim/frv/ftile.cgs: New testcase.
+	* sim/frv/ftigt.cgs: New testcase.
+	* sim/frv/ftiu.cgs: New testcase.
+	* sim/frv/ftio.cgs: New testcase.
+
+Mon May 31 17:59:19 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc (_start): New TBR: 0xff000.
+	(set_spr_addr): New macro.
+	* sim/frv/tira.cgs: Complete testcase.
+	* sim/frv/bctrlr.cgs: New testcase.
+	* sim/frv/bcnevlr.cgs: New testcase.
+	* sim/frv/bralr.cgs: New testcase.
+	* sim/frv/bcralr.cgs: New testcase.
+	* sim/frv/bnevlr.cgs: New testcase.
+	* sim/frv/beqlr.cgs: New testcase.
+	* sim/frv/bceqlr.cgs: New testcase.
+	* sim/frv/bnelr.cgs: New testcase.
+	* sim/frv/blelr.cgs: New testcase.
+	* sim/frv/bcnelr.cgs: New testcase.
+	* sim/frv/bgtlr.cgs: New testcase.
+	* sim/frv/bltlr.cgs: New testcase.
+	* sim/frv/bclelr.cgs: New testcase.
+	* sim/frv/bgelr.cgs: New testcase.
+	* sim/frv/blslr.cgs: New testcase.
+	* sim/frv/bcgtlr.cgs: New testcase.
+	* sim/frv/bhilr.cgs: New testcase.
+	* sim/frv/bclr.cgs: New testcase.
+	* sim/frv/bnclr.cgs: New testcase.
+	* sim/frv/bnlr.cgs: New testcase.
+	* sim/frv/bplr.cgs: New testcase.
+	* sim/frv/bcltlr.cgs: New testcase.
+	* sim/frv/bvlr.cgs: New testcase.
+	* sim/frv/bnvlr.cgs: New testcase.
+	* sim/frv/bcgelr.cgs: New testcase.
+	* sim/frv/bclslr.cgs: New testcase.
+	* sim/frv/bchilr.cgs: New testcase.
+	* sim/frv/bcclr.cgs: New testcase.
+	* sim/frv/bcnclr.cgs: New testcase.
+	* sim/frv/bcnlr.cgs: New testcase.
+	* sim/frv/bcplr.cgs: New testcase.
+	* sim/frv/bcvlr.cgs: New testcase.
+	* sim/frv/bcnvlr.cgs: New testcase.
+
+1999-05-31  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/cadd.cgs: New testcase.
+	* sim/frv/csub.cgs: New testcase.
+	* sim/frv/csmul.cgs: New testcase.
+	* sim/frv/csdiv.cgs: New testcase.
+
+Thu May 27 17:46:12 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc: Try to use new hi(), lo(), support.
+	* sim/frv/scan.cgs: New testcase.
+	* sim/frv/scani.cgs: New testcase.
+	* sim/frv/andcr.cgs: New testcase.
+	* sim/frv/orcr.cgs: New testcase.
+	* sim/frv/xorcr.cgs: New testcase.
+	* sim/frv/nandcr.cgs: New testcase.
+	* sim/frv/norcr.cgs: New testcase.
+	* sim/frv/andncr.cgs: New testcase.
+	* sim/frv/orncr.cgs: New testcase.
+	* sim/frv/nandncr.cgs: New testcase.
+	* sim/frv/norncr.cgs: New testcase.
+	* sim/frv/notcr.cgs: New testcase.
+
+1999-05-25  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc (set_spr_immed): New macro.
+	 (test_spr_immed): New macro.
+	 (test_spr_addr): New macro.
+	 (set_fcc): New macro.
+	 (test_fcc): New macro.
+	* sim/frv/beq.cgs: Complete testcase.
+	* sim/frv/stcu.cgs: Complete testcase.
+	* sim/frv/stdcu.cgs: Complete testcase.
+	* sim/frv/stqcu.cgs: Complete testcase.
+	* sim/frv/tira.cgs: Complete testcase.
+	* sim/frv/lddc.cgs: New testcase.
+	* sim/frv/ldqc.cgs: New testcase.
+	* sim/frv/bnev.cgs: New testcase.
+	* sim/frv/ldcu.cgs: New testcase.
+	* sim/frv/bra.cgs: New testcase.
+	* sim/frv/lddcu.cgs: New testcase.
+	* sim/frv/fbne.cgs: New testcase.
+	* sim/frv/ldqcu.cgs: New testcase.
+	* sim/frv/bne.cgs: New testcase.
+	* sim/frv/fbeq.cgs: New testcase.
+	* sim/frv/ble.cgs: New testcase.
+	* sim/frv/bgt.cgs: New testcase.
+	* sim/frv/fblg.cgs: New testcase.
+	* sim/frv/blt.cgs: New testcase.
+	* sim/frv/bge.cgs: New testcase.
+	* sim/frv/fbue.cgs: New testcase.
+	* sim/frv/bls.cgs: New testcase.
+	* sim/frv/bhi.cgs: New testcase.
+	* sim/frv/fbul.cgs: New testcase.
+	* sim/frv/bc.cgs: New testcase.
+	* sim/frv/bnc.cgs: New testcase.
+	* sim/frv/fbge.cgs: New testcase.
+	* sim/frv/bn.cgs: New testcase.
+	* sim/frv/fblt.cgs: New testcase.
+	* sim/frv/bp.cgs: New testcase.
+	* sim/frv/fbug.cgs: New testcase.
+	* sim/frv/bv.cgs: New testcase.
+	* sim/frv/fble.cgs: New testcase.
+	* sim/frv/bnv.cgs: New testcase.
+	* sim/frv/fbgt.cgs: New testcase.
+	* sim/frv/fbnev.cgs: New testcase.
+	* sim/frv/fbu.cgs: New testcase.
+	* sim/frv/fbra.cgs: New testcase.
+	* sim/frv/fbuge.cgs: New testcase.
+	* sim/frv/fbule.cgs: New testcase.
+	* sim/frv/fbo.cgs: New testcase.
+
+Thu May 20 17:23:29 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc (test_cpr_limmed): New macro.
+	* sim/frv/ldc.cgs: New testcase.
+	* sim/frv/ldqfi.cgs: New testcase.
+	* sim/frv/lddfi.cgs: New testcase.
+	* sim/frv/ldfi.cgs: New testcase.
+	* sim/frv/ldhfi.cgs: New testcase.
+	* sim/frv/ldbfi.cgs: New testcase.
+	* sim/frv/ldqfu.cgs: New testcase.
+	* sim/frv/lddfu.cgs: New testcase.
+	* sim/frv/ldfu.cgs: New testcase.
+	* sim/frv/ldhfu.cgs: New testcase.
+	* sim/frv/ldbfu.cgs: New testcase.
+	* sim/frv/ldqf.cgs: New testcase.
+	* sim/frv/lddf.cgs: New testcase.
+	* sim/frv/ldf.cgs: New testcase.
+
+Thu May 20 16:41:18 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc: New macros.
+	* sim/frv/stfu.cgs: New testcase.
+	* sim/frv/sth.cgs: New testcase.
+	* sim/frv/swap.cgs: New testcase.
+	* sim/frv/st.cgs: New testcase.
+	* sim/frv/std.cgs: New testcase.
+	* sim/frv/movfgq.cgs: New testcase.
+	* sim/frv/stq.cgs: New testcase.
+	* sim/frv/swapi.cgs: New testcase.
+	* sim/frv/stbu.cgs: New testcase.
+	* sim/frv/lddi.cgs: New testcase.
+	* sim/frv/movgf.cgs: New testcase.
+	* sim/frv/sthu.cgs: New testcase.
+	* sim/frv/movgfq.cgs: New testcase.
+	* sim/frv/stu.cgs: New testcase.
+	* sim/frv/stdu.cgs: New testcase.
+	* sim/frv/movfg.cgs: New testcase.
+	* sim/frv/stqu.cgs: New testcase.
+	* sim/frv/movgfd.cgs: New testcase.
+	* sim/frv/stbi.cgs: New testcase.
+	* sim/frv/sthi.cgs: New testcase.
+	* sim/frv/movgs.cgs: New testcase.
+	* sim/frv/movfgd.cgs: New testcase.
+	* sim/frv/sti.cgs: New testcase.
+	* sim/frv/ldqi.cgs: New testcase.
+	* sim/frv/stdi.cgs: New testcase.
+	* sim/frv/movsg.cgs: New testcase.
+	* sim/frv/stqi.cgs: New testcase.
+	* sim/frv/stbf.cgs: New testcase.
+	* sim/frv/ldsb.cgs: New testcase.
+	* sim/frv/sthf.cgs: New testcase.
+	* sim/frv/ldub.cgs: New testcase.
+	* sim/frv/stf.cgs: New testcase.
+	* sim/frv/ldbf.cgs: New testcase.
+	* sim/frv/stdf.cgs: New testcase.
+	* sim/frv/stqf.cgs: New testcase.
+	* sim/frv/stbfu.cgs: New testcase.
+	* sim/frv/ldsh.cgs: New testcase.
+	* sim/frv/sthfu.cgs: New testcase.
+	* sim/frv/ldhf.cgs: New testcase.
+	* sim/frv/lduh.cgs: New testcase.
+	* sim/frv/ld.cgs: New testcase.
+	* sim/frv/stdfu.cgs: New testcase.
+	* sim/frv/stqfu.cgs: New testcase.
+	* sim/frv/stbfi.cgs: New testcase.
+	* sim/frv/sthfi.cgs: New testcase.
+	* sim/frv/stfi.cgs: New testcase.
+	* sim/frv/stdfi.cgs: New testcase.
+	* sim/frv/stqfi.cgs: New testcase.
+	* sim/frv/ldsbu.cgs: New testcase.
+	* sim/frv/ldubu.cgs: New testcase.
+	* sim/frv/stc.cgs: New testcase.
+	* sim/frv/stdc.cgs: New testcase.
+	* sim/frv/stqc.cgs: New testcase.
+	* sim/frv/stcu.cgs: New testcase.
+	* sim/frv/stdcu.cgs: New testcase.
+	* sim/frv/stqcu.cgs: New testcase.
+	* sim/frv/ldshu.cgs: New testcase.
+	* sim/frv/lduhu.cgs: New testcase.
+	* sim/frv/ldu.cgs: New testcase.
+	* sim/frv/ldd.cgs: New testcase.
+	* sim/frv/ldq.cgs: New testcase.
+	* sim/frv/lddu.cgs: New testcase.
+	* sim/frv/ldqu.cgs: New testcase.
+	* sim/frv/ldi.cgs: New testcase.
+	* sim/frv/ldsbi.cgs: New testcase.
+	* sim/frv/ldubi.cgs: New testcase.
+	* sim/frv/ldshi.cgs: New testcase.
+	* sim/frv/lduhi.cgs: New testcase.
+
+1999-05-18  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc: New macros.
+	* sim/frv/srli.cgs: Complete testcase.
+	* sim/frv/sllcc.cgs: New testcase.
+	* sim/frv/srlcc.cgs: New testcase.
+	* sim/frv/stb.cgs: New testcase.
+	* sim/frv/sracc.cgs: New testcase.
+	* sim/frv/slli.cgs: New testcase.
+	* sim/frv/srai.cgs: New testcase.
+	* sim/frv/sllicc.cgs: New testcase.
+	* sim/frv/srlicc.cgs: New testcase.
+	* sim/frv/sraicc.cgs: New testcase.
+
+Thu May 13 17:18:01 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc: New macros.
+	* sim/frv/add.cgs: Complete testcase.
+	* sim/frv/and.cgs: Complete testcase.
+	* sim/frv/beq.cgs: Complete testcase.
+	* sim/frv/sethi.cgs: Complete testcase.
+	* sim/frv/setlo.cgs: Complete testcase.
+	* sim/frv/srl.cgs: Complete testcase.
+	* sim/frv/subcc.cgs: Complete testcase.
+	* sim/frv/subicc.cgs: Complete testcase.
+	* sim/frv/addicc.cgs: New testcase.
+	* sim/frv/sub.cgs: New testcase.
+	* sim/frv/smul.cgs: New testcase.
+	* sim/frv/addxcc.cgs: New testcase.
+	* sim/frv/sdiv.cgs: New testcase.
+	* sim/frv/smulcc.cgs: New testcase.
+	* sim/frv/addcc.cgs: New testcase.
+	* sim/frv/subx.cgs: New testcase.
+	* sim/frv/addx.cgs: New testcase.
+	* sim/frv/subxcc.cgs: New testcase.
+	* sim/frv/umul.cgs: New testcase.
+	* sim/frv/addi.cgs: New testcase.
+	* sim/frv/addxicc.cgs: New testcase.
+	* sim/frv/umulcc.cgs: New testcase.
+	* sim/frv/addxi.cgs: New testcase.
+	* sim/frv/subi.cgs: New testcase.
+	* sim/frv/smulicc.cgs: New testcase.
+	* sim/frv/subxicc.cgs: New testcase.
+	* sim/frv/subxi.cgs: New testcase.
+	* sim/frv/smuli.cgs: New testcase.
+	* sim/frv/umulicc.cgs: New testcase.
+	* sim/frv/umuli.cgs: New testcase.
+	* sim/frv/udiv.cgs: New testcase.
+	* sim/frv/sdivi.cgs: New testcase.
+	* sim/frv/udivi.cgs: New testcase.
+	* sim/frv/andcc.cgs: New testcase.
+	* sim/frv/orcc.cgs: New testcase.
+	* sim/frv/or.cgs: New testcase.
+	* sim/frv/xorcc.cgs: New testcase.
+	* sim/frv/xor.cgs: New testcase.
+	* sim/frv/not.cgs: New testcase.
+	* sim/frv/andi.cgs: New testcase.
+	* sim/frv/andicc.cgs: New testcase.
+	* sim/frv/ori.cgs: New testcase.
+	* sim/frv/oricc.cgs: New testcase.
+	* sim/frv/xori.cgs: New testcase.
+	* sim/frv/xoricc.cgs: New testcase.
+	* sim/frv/sll.cgs: New testcase.
+	* sim/frv/sra.cgs: New testcase.
+
+1999-05-10  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv/testutils.inc: New macros.
+	* sim/frv/add.cgs: Use pass/fail.
+	* sim/frv/subicc.cgs: New test.
+	* sim/frv/subcc.cgs: New test.
+	* sim/frv/beq.cgs: New test.
+
+Thu May  6 16:40:51 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/frv: New testsuite.
+
+1999-04-21  Doug Evans  <devans@casey.cygnus.com>
+
+	* sim/m32r/nop.cgs: Add missing nop insn.
+
+Mon Mar 22 13:28:56 1999  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30/stb.cgs: Correct for unaligned access.
+	* sim/fr30/sth.cgs: Correct for unaligned access.
+	* sim/fr30/ldub.cgs: Fix typo: lduh->ldub. Correct
+	for unaligned access.
+	* sim/fr30/and.cgs: Test unaligned access.
+
+Fri Feb  5 12:41:11 1999  Doug Evans  <devans@canuck.cygnus.com>
+
+	* lib/sim-defs.exp (sim_run): Print simulator arguments log message.
+
+1999-01-05  Doug Evans  <devans@casey.cygnus.com>
+
+	* lib/sim-defs.exp (run_sim_test): New arg all_machs.
+	* sim/fr30/allinsn.exp: Update.
+	* sim/fr30/misc.exp: Update.
+	* sim/m32r/allinsn.exp: Update.
+	* sim/m32r/misc.exp: Update.
+
+Fri Dec 18 17:19:34 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30/ldres.cgs: New testcase.
+	* sim/fr30/copld.cgs: New testcase.
+	* sim/fr30/copst.cgs: New testcase.
+	* sim/fr30/copsv.cgs: New testcase.
+	* sim/fr30/nop.cgs: New testcase.
+	* sim/fr30/andccr.cgs: New testcase.
+	* sim/fr30/orccr.cgs: New testcase.
+	* sim/fr30/addsp.cgs: New testcase.
+	* sim/fr30/stilm.cgs: New testcase.
+	* sim/fr30/extsb.cgs: New testcase.
+	* sim/fr30/extub.cgs: New testcase.
+	* sim/fr30/extsh.cgs: New testcase.
+	* sim/fr30/extuh.cgs: New testcase.
+	* sim/fr30/enter.cgs: New testcase.
+	* sim/fr30/leave.cgs: New testcase.
+	* sim/fr30/xchb.cgs: New testcase.
+	* sim/fr30/dmovb.cgs: New testcase.
+	* sim/fr30/dmov.cgs: New testcase.
+	* sim/fr30/dmovh.cgs: New testcase.
+
+Thu Dec 17 17:18:43 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30/testutils.inc (take_branch{_d},no_branch{_d}): New macros.
+	* sim/fr30/ret.cgs: Add tests fir ret:d.
+	* sim/fr30/inte.cgs: New testcase.
+	* sim/fr30/reti.cgs: New testcase.
+	* sim/fr30/bra.cgs: New testcase.
+	* sim/fr30/bno.cgs: New testcase.
+	* sim/fr30/beq.cgs: New testcase.
+	* sim/fr30/bne.cgs: New testcase.
+	* sim/fr30/bc.cgs: New testcase.
+	* sim/fr30/bnc.cgs: New testcase.
+	* sim/fr30/bn.cgs: New testcase.
+	* sim/fr30/bp.cgs: New testcase.
+	* sim/fr30/bv.cgs: New testcase.
+	* sim/fr30/bnv.cgs: New testcase.
+	* sim/fr30/blt.cgs: New testcase.
+	* sim/fr30/bge.cgs: New testcase.
+	* sim/fr30/ble.cgs: New testcase.
+	* sim/fr30/bgt.cgs: New testcase.
+	* sim/fr30/bls.cgs: New testcase.
+	* sim/fr30/bhi.cgs: New testcase.
+
+Tue Dec 15 17:47:13 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30/div.cgs (int): Add signed division scenario.
+	* sim/fr30/int.cgs (int): Complete testcase.
+	* sim/fr30/testutils.inc (_start): Initialize tbr.
+	(test_s_user,test_s_system,set_i,test_i): New macros.
+
+1998-12-14  Doug Evans  <devans@casey.cygnus.com>
+
+	* lib/sim-defs.exp (run_sim_test): New option xerror, for expected
+	errors.  Translate \n sequences in expected output to newline char.
+	(slurp_options): Make parentheses optional.
+	(sim_run): Look for board_info sim,options.
+	* sim/fr30/hello.ms: Add trailing \n to expected output.
+	* sim/m32r/hello.ms: Ditto.
+	* sim/m32r/hw-trap.ms: Ditto.
+
+	* sim/m32r/trap.cgs: Properly align trap2_handler.
+
+	* sim/m32r/uread16.ms: New testcase.
+	* sim/m32r/uread32.ms: New testcase.
+	* sim/m32r/uwrite16.ms: New testcase.
+	* sim/m32r/uwrite32.ms: New testcase.
+
+1998-12-14  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30/call.cgs: Test ret here as well.
+	* sim/fr30/ld.cgs: Remove bogus comment.
+	* sim/fr30/testutils.inc (save_rp,restore_rp): New macros.
+	* sim/fr30/div.ms: New testcase.
+	* sim/fr30/st.cgs: New testcase.
+	* sim/fr30/sth.cgs: New testcase.
+	* sim/fr30/stb.cgs: New testcase.
+	* sim/fr30/mov.cgs: New testcase.
+	* sim/fr30/jmp.cgs: New testcase.
+	* sim/fr30/ret.cgs: New testcase.
+	* sim/fr30/int.cgs: New testcase.
+
+Thu Dec 10 18:46:25 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30/div0s.cgs: New testcase.
+	* sim/fr30/div0u.cgs: New testcase.
+	* sim/fr30/div1.cgs: New testcase.
+	* sim/fr30/div2.cgs: New testcase.
+	* sim/fr30/div3.cgs: New testcase.
+	* sim/fr30/div4s.cgs: New testcase.
+	* sim/fr30/testutils.inc (mvi_h_dr,set_dbits,test_dbits): New Macros.
+
+Tue Dec  8 13:16:53 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30/testutils.inc (set_s_user): Correct Mask.
+	(set_s_system): Correct Mask.
+	* sim/fr30/ld.cgs (ld): Move previously failing test back
+	into place.
+	* sim/fr30/ldm0.cgs: New testcase.
+	* sim/fr30/ldm1.cgs: New testcase.
+	* sim/fr30/stm0.cgs: New testcase.
+	* sim/fr30/stm1.cgs: New testcase.
+
+Thu Dec  3 14:20:03 1998  Dave Brolley  <brolley@cygnus.com>
+
+	* sim/fr30/ld.cgs: Implement more loads.
+	* sim/fr30/call.cgs: New testcase.
+	* sim/fr30/testutils.inc (testr_h_dr): New macro.
+	(set_s_user,set_s_system): New macros.
+
+	* sim/fr30: New Directory.
+
+Wed Nov 18 10:50:19 1998  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* common/bits-gen.c (main): Add BYTE_ORDER so that it matches
+ 	recent sim/common/sim-basics.h changes.
+	* common/Makefile.in: Update.
+
+Fri Oct 30 00:37:31 1998  Felix Lee  <flee@cygnus.com>
+
+	* lib/sim-defs.exp (sim_run): download target program to remote
+ 	host, if necessary.  for unix-driven win32 testing.
+
+Tue Sep 15 14:56:22 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/m32r/testutils.inc (test_h_gr): Use mvaddr_h_gr.
+	* sim/m32r/rte.cgs: Test bbpc,bbpsw.
+	* sim/m32r/trap.cgs: Test bbpc,bbpsw.
+
+Fri Jul 31 17:49:13 1998  Felix Lee  <flee@cygnus.com>
+
+	* lib/sim-defs.exp (sim_run): remote_spawn, use writeto instead of
+ 	writeonly.
+
+Tue Jul 28 10:04:09 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/m32r/mulwhi-a.cgs: New testcase.
+	* sim/m32r/mulwlo-a.cgs: New testcase.
+	* sim/m32r/macwhi-a.cgs: New testcase.
+	* sim/m32r/macwlo-a.cgs: New testcase.
+
+Fri Jul 24 09:40:34 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.in (clean,mostlyclean): Change leading spaces to a tab.
+
+Wed Jul  1 15:57:54 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* sim/m32r/hw-trap.ms: New testcase.
+
+Tue Jun 16 15:44:01 1998 Jillian Ye <jillian@cygnus.com>
+
+	* lib/sim-defs.exp: Print out timeout setting info when "-v" is used.
+
+Thu Jun 11 15:24:53 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* lib/sim-defs.exp (sim_run): Argument env_vals renamed to options,
+	which is now a list of options controlling the behaviour of sim_run.
+
+Wed Jun 10 10:53:20 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* sim/m32r/addx.cgs: Add another test.
+	* sim/m32r/jmp.cgs: Add another test.
+	* sim/m32r/bra8-2.cgs: New testcase.
+	* sim/m32r/hello.ms: Run on m32rx too.
+
+Mon Jun  8 16:08:27 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/m32r/trap.cgs: Test trap 2.
+
+Mon Jun  1 18:54:22 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* lib/sim-defs.exp (sim_run): Add possible environment variable
+ 	list to simulator run.
+
+Thu May 28 14:59:46 1998 Jillian Ye <jillian@cygnus.com>
+
+        * Makefile.in: Take RUNTEST out of FLAG_TO_PASS
+                       so that make check can be invoked recursively.
+
+Thu May 14 11:48:35 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* config/default.exp (CC,SIM): Delete.
+
+	* lib/sim-defs.exp (sim_run): Fix handling of output redirection.
+	New arg prog_opts.  All callers updated.
+
+Fri May  8 18:10:28 1998  Jillian Ye <jillian@cygnus.com>
+
+	* Makefile.in: Made "check" the target of two
+          dependencies (test1, test2) so that test2 get a chance to
+          run even when test1 failed if "make -k check" is used.
+
+Fri May  8 14:41:28 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* lib/sim-defs.exp (sim_version): Simplify.
+	(sim_run): Implement.
+	(run_sim_test): Use sim_run.
+	(sim_compile): New proc.
+
+Mon May  4 17:59:11 1998  Frank Ch. Eigler  <fche@cygnus.com>
+
+	* config/default.exp: Added C compiler settings.
+
+Wed Apr 22 12:26:28 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.in (TARGET_FLAGS_TO_PASS): Delete LIBS, LDFLAGS.
+
+Tue Apr 21 10:49:03 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* lib/sim-defs.exp (run_sim_test): Don't exit early if one mach fails,
+	try all machs.
+
+	* sim/m32r/addx.cgs: Test (-1)+(-1)+1.
+
+Fri Apr 17 16:00:52 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/m32r/mv[ft]achi.cgs: Fix expected result
+	(sign extension of top 8 bits).
+	* sim/m32r/mv[ft]achi-a.cgs: Ditto.
+
+Tue Apr 14 14:06:34 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/m32r/maclh1.cgs: Fix testcase.
+	* sim/m32r/maclh1-2.cgs: New testcase.
+
+Tue Mar  3 19:09:09 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* sim/m32r/sat.cgs: Change sath to sat.
+
+Wed Feb 25 11:01:17 1998  Doug Evans  <devans@canuck.cygnus.com>
+
+	* Makefile.in (RUNTEST): Fix path to runtest.
+
+
+Fri Feb 20 11:00:02 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* sim/m32r/unlock.cgs: Fixed test.
+	* sim/m32r/mvfc.cgs: Fixed test.
+	* sim/m32r/remu.cgs: Fixed test.
+
+	* sim/m32r/bnc24.cgs: Test long BNC instruction.
+	* sim/m32r/bnc8.cgs: Test short BNC instruction.
+	* sim/m32r/ld-plus.cgs: Test LD instruction.
+	* sim/m32r/macwhi.cgs: Test MACWHI instruction.
+	* sim/m32r/macwlo.cgs: Test MACWLO instruction.
+	* sim/m32r/mulwhi.cgs: Test MULWHI instruction.
+	* sim/m32r/mulwlo.cgs: Test MULWLO instruction.
+	* sim/m32r/mvfachi.cgs: Test MVFACHI instruction.
+	* sim/m32r/mvfaclo.cgs: Test MVFACLO instruction.
+	* sim/m32r/mvtaclo.cgs: Test MVTACLO instruction.
+	* sim/m32r/addv.cgs: Test ADDV instruction.
+	* sim/m32r/addv3.cgs: Test ADDV3 instruction.
+	* sim/m32r/addx.cgs: Test ADDX instruction.
+	* sim/m32r/lock.cgs: Test LOCK instruction.
+	* sim/m32r/neg.cgs: Test NEG instruction.
+	* sim/m32r/not.cgs: Test NOT instruction.
+	* sim/m32r/unlock.cgs: Test UNLOCK instruction.
+	* sim/m32r/mvfachi-a.cgs: Test extended MVFACHI instruction.
+	* sim/m32r/mvfaclo-a.cgs: Test extended MVFACLO instruction.
+	* sim/m32r/mvtachi-a.cgs: Test extended MVTACHI instruction.
+	* sim/m32r/mvtaclo-a.cgs: Test extended MVTACLO instruction.
+Thu Feb 19 11:15:45 1998  Nick Clifton  <nickc@cygnus.com>
+
+	* sim/m32r/testutils.inc (mvaddr_h_gr): new macro to load an
+	address into a general register.
+
+	* sim/m32r/or3.cgs: Test OR3 instruction.
+	* sim/m32r/rach.cgs: Test RACH instruction.
+	* sim/m32r/rem.cgs: Test REM instruction.
+	* sim/m32r/sub.cgs: Test SUB instruction.
+	* sim/m32r/mv.cgs: Test MV instruction.
+	* sim/m32r/mul.cgs: Test MUL instruction.
+	* sim/m32r/bl24.cgs: Test long BL instruction.
+	* sim/m32r/bl8.cgs: Test short BL instruction.
+	* sim/m32r/blez.cgs: Test BLEZ instruction.
+	* sim/m32r/bltz.cgs: Test BLTZ instruction.
+	* sim/m32r/bne.cgs: Test BNE instruction.
+	* sim/m32r/bnez.cgs: Test BNEZ instruction.
+	* sim/m32r/bra24.cgs: Test long BRA instruction.
+	* sim/m32r/bra8.cgs: Test short BRA instruction.
+	* sim/m32r/jl.cgs: Test JL instruction.
+	* sim/m32r/or.cgs: Test OR instruction.
+	* sim/m32r/jmp.cgs: Test JMP instruction.
+	* sim/m32r/and.cgs: Test AND instruction.
+	* sim/m32r/and3.cgs: Test AND3 instruction.
+	* sim/m32r/beq.cgs: Test BEQ instruction.
+	* sim/m32r/beqz.cgs: Test BEQZ instruction.
+	* sim/m32r/bgez.cgs: Test BGEZ instruction.
+	* sim/m32r/bgtz.cgs: Test BGTZ instruction.
+	* sim/m32r/cmp.cgs: Test CMP instruction.
+	* sim/m32r/cmpi.cgs: Test CMPI instruction.
+	* sim/m32r/cmpu.cgs: Test CMPU instruction.
+	* sim/m32r/cmpui.cgs: Test CMPUI instruction.
+	* sim/m32r/div.cgs: Test DIV instruction.
+	* sim/m32r/divu.cgs: Test DIVU instruction.
+	* sim/m32r/cmpeq.cgs: Test CMPEQ instruction.
+	* sim/m32r/sll.cgs: Test SLL instruction.
+	* sim/m32r/sll3.cgs: Test SLL3 instruction.
+	* sim/m32r/slli.cgs: Test SLLI instruction.
+	* sim/m32r/sra.cgs: Test SRA instruction.
+	* sim/m32r/sra3.cgs: Test SRA3 instruction.
+	* sim/m32r/srai.cgs: Test SRAI instruction.
+	* sim/m32r/srl.cgs: Test SRL instruction.
+	* sim/m32r/srl3.cgs: Test SRL3 instruction.
+	* sim/m32r/srli.cgs: Test SRLI instruction.
+	* sim/m32r/xor3.cgs: Test XOR3 instruction.
+	* sim/m32r/xor.cgs: Test XOR instruction.
+	* sim/m32r/jnc.cgs: Test JNC instruction.
+	* sim/m32r/jc.cgs: Test JC instruction.
+	* sim/m32r/cmpz.cgs: Test CMPZ instruction.
+	* sim/m32r/bcl24.cgs: Test long version of BCL instruction
+	* sim/m32r/bcl8.cgs: Test short BCL instruction.
+	* sim/m32r/bncl24.cgs: Test long BNCL instruction.
+	* sim/m32r/bncl8.cgs: Test short BNCL instruction.
+	* sim/m32r/divh.cgs: Test DIVH instruction.
+	* sim/m32r/rach-dsi.cgs: Test extended RACH instruction.
+Tue Feb 17 12:46:05 1998  Doug Evans  <devans@seba.cygnus.com>
+
+	* config/default.exp: New file.
+	* lib/sim-defs.exp: New file.
+	* sim/m32r/*: m32r dejagnu simulator testsuite.
+
+	* Makefile.in (build_alias): Define.
+	(arch): Define.
+	(RUNTEST_FOR_TARGET): Delete.
+	(RUNTEST): Fix.
+	(check): Depend on site.exp.  Run dejagnu.
+	(site.exp): New target.
+	* configure.in (arch): Define from target_cpu.
+	* configure: Regenerate.
+
+Wed Sep 17 10:21:26 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* common/bits-gen.c (gen_bit): Pass in the full name of the macro.
+	(gen_mask): Ditto.
+
+	* common/bits-tst.c (main): Add tests for LSSEXT, MSSEXT.
+	(calc): Add support for 8 bit version of macros.
+	(main): Add tests for 8 bit versions of macros.
+	(check_sext): Check SEXT of zero clears bits.
+
+	* common/bits-gen.c (main): Generate tests for 8 bit versions of
+ 	macros.
+
+Thu Sep 11 13:04:40 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* common/Make-common.in: New file, provide generic rules for
+ 	running checks.
+
+Mon Sep  1 16:43:55 1997  Andrew Cagney  <cagney@b1.cygnus.com>
+
+	* configure.in (configdirs): Test for the target directory instead
+ 	of matching on a target.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

@@ -1,0 +1,10 @@
+A D/libm.paranoia////
+A D/libm.sac////
+A D/newlib.argz////
+A D/newlib.math////
+A D/newlib.net////
+R D/newlib.net////
+R D/newlib.math////
+R D/newlib.argz////
+R D/libm.sac////
+R D/libm.paranoia////

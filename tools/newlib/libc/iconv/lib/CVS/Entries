@@ -1,0 +1,16 @@
+/Makefile.am/1.5/Sun Jun 18 17:06:43 2006//Tmsp430-130322-branch
+/Makefile.in/1.19/Sun Mar 17 22:14:27 2013//Tmsp430-130322-branch
+/aliasesbi.c/1.1/Fri Jun 25 21:37:19 2004//Tmsp430-130322-branch
+/aliasesi.c/1.1/Fri Jun 25 21:37:19 2004//Tmsp430-130322-branch
+/conv.h/1.2/Sun Dec 20 16:07:28 2009//Tmsp430-130322-branch
+/encnames.h/1.1/Fri Jun 25 21:37:19 2004//Tmsp430-130322-branch
+/encoding.deps/1.1/Fri Jun 25 21:37:19 2004//Tmsp430-130322-branch
+/endian.h/1.3/Fri Jun 25 21:37:19 2004//Tmsp430-130322-branch
+/iconv.c/1.5/Sun Sep 27 21:21:24 2009//Tmsp430-130322-branch
+/iconvnls.c/1.2/Mon Sep 13 17:12:26 2004//Tmsp430-130322-branch
+/iconvnls.h/1.2/Mon Sep 13 17:12:26 2004//Tmsp430-130322-branch
+/local.h/1.4/Sun Dec 20 16:07:28 2009//Tmsp430-130322-branch
+/nullconv.c/1.1/Fri Jun 25 21:37:19 2004//Tmsp430-130322-branch
+/ucsconv.c/1.2/Sun Dec 20 16:07:28 2009//Tmsp430-130322-branch
+/ucsconv.h/1.2/Sun Dec 20 16:07:28 2009//Tmsp430-130322-branch
+D

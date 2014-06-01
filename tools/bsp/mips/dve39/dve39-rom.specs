@@ -1,0 +1,16 @@
+%rename lib                 old_lib
+%rename cpp                 old_cpp
+%rename link                old_link
+
+*lib:
+--start-group -ldve39 -lc -lgcc --end-group %(old_lib)
+
+*cpp:
+-D__CPU_R3900__ -D__BOARD_DVE39__ -D__BOARD_HEADER__=\<bsp/dve39.h\> -D__MISSING_SYSCALL_NAMES__ %(old_cpp)
+
+*startfile:
+crtbegin%O%s dve39-start%O%s
+
+*link:
+-T mips.ld%s -Ttext 0xbfc00000 -Tdata 0x80000100 %(old_link)
+

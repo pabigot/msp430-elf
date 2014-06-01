@@ -1,0 +1,126 @@
+
+
+
+
+Switch Settings
+---------------
+
+The Cygnus BSP uses SW1 on the FR30 motherboard to configure ethernet address
+and operating clock speed. SW1-4 through SW1-1 select the ethernet address
+or serial operation:
+
+  SW1-4 SW1-3 SW1-2 SW1-1    Ethernet Address
+  ----- ----- ----- -----    ----------------
+   OFF   OFF   OFF   OFF     No ethernet, use serial debug channel.
+   OFF   OFF   OFF    ON     00:00:0E:31:00:01
+   OFF   OFF    ON   OFF     00:00:0E:31:00:02
+   OFF   OFF    ON    ON     00:00:0E:31:00:03
+   OFF    ON   OFF   OFF     00:00:0E:31:00:04
+   OFF    ON   OFF    ON     00:00:0E:31:00:05
+   OFF    ON    ON   OFF     00:00:0E:31:00:06
+   OFF    ON    ON    ON     00:00:0E:31:00:07
+    ON   OFF   OFF   OFF     00:00:0E:31:00:08
+    ON   OFF   OFF    ON     00:00:0E:31:00:09
+    ON   OFF    ON   OFF     00:00:0E:31:00:0A
+    ON   OFF    ON    ON     00:00:0E:31:00:0B
+    ON    ON   OFF   OFF     00:00:0E:31:00:0C
+    ON    ON   OFF    ON     00:00:0E:31:00:0D
+    ON    ON    ON   OFF     00:00:0E:31:00:0E
+    ON    ON    ON    ON     00:00:0E:31:00:0F
+
+The BSP will attempt to find an IP address by using BOOTP. If no BOOTP or DHCP
+server answers the BOOTP request, then the BSP will fallback to using the
+serial debug channel.
+
+
+Clock operation can be specified with SW1-7 through SW1-5:
+
+  SW1-7 SW1-6 SW1-5   PLL(MHz)  CPU(MHz)  BUS(MHz)
+  ----- ----- -----   --------  --------  --------
+   OFF   OFF   OFF     50.00     50.00     25.00
+   OFF   OFF    ON     25.00     25.00     12.50
+   OFF    ON   OFF     12.50     12.50      6.25
+   OFF    ON    ON     25.00     25.00     25.00
+    ON   OFF   OFF     25.00     12.50     12.50
+    ON   OFF    ON     25.00      6.25      6.25
+    ON    ON   OFF     12.50     12.50     12.50
+    ON    ON    ON     12.50      6.25      6.25
+
+
+Serial Channel
+--------------
+The BSP uses the FR30 builtin serial port as a debug channel. This uses the
+9-pin connector on the CPU daugherboard. The baud rate is derived from the bus
+clock and the maximum baud rate is limited by that clock:
+
+    BUS CLK    MAX BAUD
+    -------    --------
+     25.00      57600
+     12.50      38400
+      6.25      19200
+
+The default baud rate is equal to the maximum baud rate supported for the
+selected bus clock speed.
+
+
+TCP Channel
+-----------
+The BSP may also be used with a TCP connection as the debug channel. In order
+to do this, the BSP must be able to find an IP (internet protocol) address.
+BOOTP is the protocol used by the Cygnus BSP to find an internet protocol
+address to use for the debug channel. BOOTP is a simple subset of the DHCP
+protocol which is also used by network devices to find their IP addresses.
+In order for CygMon to find an appropriate IP address, two conditions must
+be true:
+
+  - There must be a BOOTP or DHCP server running on a computer which is
+    visible from the network to which the FR30 eval board is attached.
+
+  - That server must be configured to assign an IP address to a device
+    using BOOTP with an ethernet address which the FR30 eval board is
+    using.
+
+Here is a sample DHCP server configuration (/etc/dhcpd.conf) from a linux
+system. It shows a setup for three fr30 eval boards named fr30board1,
+fr30board2, and fr30board3. IP addresses may be used instead of host names.
+
+#
+# DHCP server configuration.
+#
+allow bootp;
+
+subnet 192.168.1.0 netmask 255.255.255.0 {
+  host fr30board1 {
+    hardware ethernet 00:00:0e:31:00:01;
+    fixed-address fr30board1;
+  }
+  host fr30board2 {
+    hardware ethernet 00:00:0e:31:00:02;
+    fixed-address fr30board2;
+  }
+  host fr30board3 {
+    hardware ethernet 00:00:0e:31:00:03;
+    fixed-address fr30board3;
+  }
+}
+
+Even when configured to use a TCP channel, the BSP will still print a boot
+message to the serial channel. If the BOOTP process was successful and an
+IP address was found, a message "BOOTP found xxx.xxx.xxx.xxx" will be printed
+where xxx.xxx.xxx.xxx is the IP address assigned by the BOOTP or DHCP server.
+If the BOOTP process fails, a message indicating failure will be printed and
+the serial port will be used as the debug channel.
+
+Once the board finds an IP address it will respond to ICMP echo request
+packets (ping). This gives a simple means to test the health of the board 
+even when a program is being debugged.
+
+For debugging programs with gdb, TCP connections on TCP port 1000 are 
+supported. The target command for a tcp connection looks like:
+
+  (gdb) target remote xxx.xxx.xxx.xxx:1000
+
+where xxx.xxx.xxx.xxx is the IP address assigned to the board during the
+BOOTP process. It is also possible to use a host name instead of IP address.
+
+
