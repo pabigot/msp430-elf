@@ -56,7 +56,7 @@
 #ifndef __msp430x20x3
 #define __msp430x20x3
 
-#define __MSP430_HEADER_VERSION__ 1131
+#define __MSP430_HEADER_VERSION__ 1146      /* Beta-Build-Tag: #0006 */
 
 #define __MSP430_TI_HEADERS__
 

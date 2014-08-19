@@ -48,7 +48,7 @@
 #ifndef __MSP430i2031
 #define __MSP430i2031
 
-#define __MSP430_HEADER_VERSION__ 1131
+#define __MSP430_HEADER_VERSION__ 1146      /* Beta-Build-Tag: #0006 */
 
 #define __MSP430_TI_HEADERS__
 
@@ -137,6 +137,9 @@ extern "C" {
 /************************************************************
 * SPECIAL FUNCTION REGISTER ADDRESSES + CONTROL BITS
 ************************************************************/
+#define __MSP430_HAS_SFR__            /* Definition to show that Module is available */
+#define __MSP430_BASEADDRESS_SFR__ 0x0000
+#define SFR_BASE __MSP430_BASEADDRESS_SFR__
 
 #define IE1_                  0x0000    /* Interrupt Enable 1 */
 sfrb(IE1, IE1_);
@@ -153,6 +156,10 @@ sfrb(IFG1, IFG1_);
 #define BORIFG              (0x04)    /* Brown Out Reset Interrupt Flag */
 #define RSTIFG              (0x08)    /* Reset Interrupt Flag */
 #define NMIIFG              (0x10)    /* NMI Interrupt Flag */
+
+/* 5xx Compatibility defines */
+#define SFRIE1_L            IE1       /* Interrupt Enable 1 */
+#define SFRIFG1_L           IFG1      /* Interrupt Flag 1 */
 
 #define SYSJTAGDIS_           0x01FE    /* JTAG Disable Register */
 sfrw(SYSJTAGDIS, SYSJTAGDIS_);
@@ -394,7 +401,7 @@ sfrb(REFCAL1, REFCAL1_);
 #define BIASCURRENT3        (0x0080)  /* Bandgap bias current calibration Bit 3 */
 
 /************************************************************
-* DIGITAL I/O Port1_2
+* DIGITAL I/O Port1/2
 ************************************************************/
 #define __MSP430_HAS_PORT1__        /* Definition to show that Module is available */
 #define __MSP430_BASEADDRESS_PORT1__ 0x0010
@@ -402,43 +409,114 @@ sfrb(REFCAL1, REFCAL1_);
 #define __MSP430_HAS_PORT2__        /* Definition to show that Module is available */
 #define __MSP430_BASEADDRESS_PORT2__ 0x0010
 #define P2_BASE __MSP430_BASEADDRESS_PORT2__
+#define __MSP430_HAS_PORTA__        /* Definition to show that Module is available */
+#define __MSP430_BASEADDRESS_PORTA__ 0x0010
+#define PA_BASE __MSP430_BASEADDRESS_PORTA__
+#define __MSP430_HAS_P1SEL0__         /* Define for DriverLib */
+#define __MSP430_HAS_P2SEL0__         /* Define for DriverLib */
+#define __MSP430_HAS_PASEL0__         /* Define for DriverLib */
+#define __MSP430_HAS_P1SEL1__         /* Define for DriverLib */
+#define __MSP430_HAS_P2SEL1__         /* Define for DriverLib */
+#define __MSP430_HAS_PASEL1__         /* Define for DriverLib */
 
-#define P1IN_                 0x0010    /* Port 1 Input */
-const_sfrb(P1IN, P1IN_);
-#define P1OUT_                0x0012    /* Port 1 Output */
-sfrb(P1OUT, P1OUT_);
-#define P1DIR_                0x0014    /* Port 1 Direction */
-sfrb(P1DIR, P1DIR_);
-#define P1SEL0_               0x001A    /* Port 1 Selection 0 */
-sfrb(P1SEL0, P1SEL0_);
-#define P1SEL1_               0x001C    /* Port 1 Selection 1 */
-sfrb(P1SEL1, P1SEL1_);
-#define P1IV_                 0x001E    /* Port 1 Interrupt Vector */
-sfrb(P1IV, P1IV_);
-#define P1IES_                0x0028    /* Port 1 Interrupt Edge Select */
-sfrb(P1IES, P1IES_);
-#define P1IE_                 0x002A    /* Port 1 Interrupt Enable */
-sfrb(P1IE, P1IE_);
-#define P1IFG_                0x002C    /* Port 1 Interrupt Flag */
-sfrb(P1IFG, P1IFG_);
-#define P2IN_                 0x0011    /* Port 2 Input */
-const_sfrb(P2IN, P2IN_);
-#define P2OUT_                0x0013    /* Port 2 Output */
-sfrb(P2OUT, P2OUT_);
-#define P2DIR_                0x0015    /* Port 2 Direction */
-sfrb(P2DIR, P2DIR_);
-#define P2SEL0_               0x001B    /* Port 2 Selection 0 */
-sfrb(P2SEL0, P2SEL0_);
-#define P2SEL1_               0x001D    /* Port 2 Selection 1 */
-sfrb(P2SEL1, P2SEL1_);
-#define P2IV_                 0x002E    /* Port 2 Interrupt Vector */
-sfrb(P2IV, P2IV_);
-#define P2IES_                0x0029    /* Port 2 Interrupt Edge Select */
-sfrb(P2IES, P2IES_);
-#define P2IE_                 0x002B    /* Port 2 Interrupt Enable */
-sfrb(P2IE, P2IE_);
-#define P2IFG_                0x002D    /* Port 2 Interrupt Flag */
-sfrb(P2IFG, P2IFG_);
+#define PAIN_                 0x0010    /* Port A Input */
+const_sfrb(PAIN_L , PAIN_);
+const_sfrb(PAIN_H , PAIN_+1);
+const_sfrw(PAIN, PAIN_);
+#define PAOUT_                0x0012    /* Port A Output */
+sfrb(PAOUT_L , PAOUT_);
+sfrb(PAOUT_H , PAOUT_+1);
+sfrw(PAOUT, PAOUT_);
+#define PADIR_                0x0014    /* Port A Direction */
+sfrb(PADIR_L , PADIR_);
+sfrb(PADIR_H , PADIR_+1);
+sfrw(PADIR, PADIR_);
+#define PASEL0_               0x001A    /* Port A Selection 0 */
+sfrb(PASEL0_L , PASEL0_);
+sfrb(PASEL0_H , PASEL0_+1);
+sfrw(PASEL0, PASEL0_);
+#define PASEL1_               0x001C    /* Port A Selection 1 */
+sfrb(PASEL1_L , PASEL1_);
+sfrb(PASEL1_H , PASEL1_+1);
+sfrw(PASEL1, PASEL1_);
+#define PAIES_                0x0028    /* Port A Interrupt Edge Select */
+sfrb(PAIES_L , PAIES_);
+sfrb(PAIES_H , PAIES_+1);
+sfrw(PAIES, PAIES_);
+#define PAIE_                 0x002A    /* Port A Interrupt Enable */
+sfrb(PAIE_L , PAIE_);
+sfrb(PAIE_H , PAIE_+1);
+sfrw(PAIE, PAIE_);
+#define PAIFG_                0x002C    /* Port A Interrupt Flag */
+sfrb(PAIFG_L , PAIFG_);
+sfrb(PAIFG_H , PAIFG_+1);
+sfrw(PAIFG, PAIFG_);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#define P1IV_                 0x001E    /* Port 1 Interrupt Vector Word */
+sfrw(P1IV, P1IV_);
+#define P2IV_                 0x002E    /* Port 2 Interrupt Vector Word */
+sfrw(P2IV, P2IV_);
+#define P1IN                (PAIN_L)  /* Port 1 Input */
+#define P1OUT               (PAOUT_L) /* Port 1 Output */
+#define P1DIR               (PADIR_L) /* Port 1 Direction */
+#define P1SEL0              (PASEL0_L) /* Port 1 Selection 0 */
+#define P1SEL1              (PASEL1_L) /* Port 1 Selection 1 */
+#define P1IES               (PAIES_L) /* Port 1 Interrupt Edge Select */
+#define P1IE                (PAIE_L)  /* Port 1 Interrupt Enable */
+#define P1IFG               (PAIFG_L) /* Port 1 Interrupt Flag */
+
+//Definitions for P1IV
+#define P1IV_NONE            (0x0000)    /* No Interrupt pending */
+#define P1IV_P1IFG0          (0x0002)    /* P1IV P1IFG.0 */
+#define P1IV_P1IFG1          (0x0004)    /* P1IV P1IFG.1 */
+#define P1IV_P1IFG2          (0x0006)    /* P1IV P1IFG.2 */
+#define P1IV_P1IFG3          (0x0008)    /* P1IV P1IFG.3 */
+#define P1IV_P1IFG4          (0x000A)    /* P1IV P1IFG.4 */
+#define P1IV_P1IFG5          (0x000C)    /* P1IV P1IFG.5 */
+#define P1IV_P1IFG6          (0x000E)    /* P1IV P1IFG.6 */
+#define P1IV_P1IFG7          (0x0010)    /* P1IV P1IFG.7 */
+
+
+#define P2IN                (PAIN_H)  /* Port 2 Input */
+#define P2OUT               (PAOUT_H) /* Port 2 Output */
+#define P2DIR               (PADIR_H) /* Port 2 Direction */
+#define P2SEL0              (PASEL0_H) /* Port 2 Selection 0 */
+#define P2SEL1              (PASEL1_H) /* Port 2 Selection 1 */
+#define P2IES               (PAIES_H) /* Port 2 Interrupt Edge Select */
+#define P2IE                (PAIE_H)  /* Port 2 Interrupt Enable */
+#define P2IFG               (PAIFG_H) /* Port 2 Interrupt Flag */
+
+//Definitions for P2IV
+#define P2IV_NONE            (0x0000)    /* No Interrupt pending */
+#define P2IV_P2IFG0          (0x0002)    /* P2IV P2IFG.0 */
+#define P2IV_P2IFG1          (0x0004)    /* P2IV P2IFG.1 */
+#define P2IV_P2IFG2          (0x0006)    /* P2IV P2IFG.2 */
+#define P2IV_P2IFG3          (0x0008)    /* P2IV P2IFG.3 */
+#define P2IV_P2IFG4          (0x000A)    /* P2IV P2IFG.4 */
+#define P2IV_P2IFG5          (0x000C)    /* P2IV P2IFG.5 */
+#define P2IV_P2IFG6          (0x000E)    /* P2IV P2IFG.6 */
+#define P2IV_P2IFG7          (0x0010)    /* P2IV P2IFG.7 */
+
+
+
 
 /************************************************************
 * SD24_3 - Sigma Delta 24 Bit
@@ -613,7 +691,7 @@ sfrw(TA0CCR2, TA0CCR2_);
 
 #define MC_0                (0x0000)  /* Timer A mode control: 0 - Stop */
 #define MC_1                (0x0010)  /* Timer A mode control: 1 - Up to CCR0 */
-#define MC_2                (0x0020)  /* Timer A mode control: 2 - Continous up */
+#define MC_2                (0x0020)  /* Timer A mode control: 2 - Continuous up */
 #define MC_3                (0x0030)  /* Timer A mode control: 3 - Up/Down */
 #define ID_0                (0x0000)  /* Timer A input divider: 0 - /1 */
 #define ID_1                (0x0040)  /* Timer A input divider: 1 - /2 */
@@ -668,7 +746,7 @@ sfrw(TA0CCR2, TA0CCR2_);
 /************************************************************
 * Timer1_A3
 ************************************************************/
-#define __MSP430_HAS_T1A3__           /* Definition to show that Module is available */
+#define __MSP430_HAS_T1A3__            /* Definition to show that Module is available */
 #define __MSP430_BASEADDRESS_T1A3__ 0x0180
 #define TIMER_A1_BASE __MSP430_BASEADDRESS_T1A3__
 
@@ -693,12 +771,14 @@ sfrw(TA1CCR2, TA1CCR2_);
 
 /* Bits are already defined within the Timer0_Ax */
 
-/* T1_A3IV Definitions */
+/* TA1IV Definitions */
 #define TA1IV_NONE          (0x0000)    /* No Interrupt pending */
 #define TA1IV_TACCR1        (0x0002)    /* TA1CCR1_CCIFG */
 #define TA1IV_TACCR2        (0x0004)    /* TA1CCR2_CCIFG */
-#define TA1IV_6             (0x0006)    /* Reserved */
-#define TA1IV_8             (0x0008)    /* Reserved */
+#define TA1IV_3             (0x0006)    /* Reserved */
+#define TA1IV_4             (0x0008)    /* Reserved */
+#define TA1IV_5             (0x000A)    /* Reserved */
+#define TA1IV_6             (0x000C)    /* Reserved */
 #define TA1IV_TAIFG         (0x000E)    /* TA1IFG */
 
 /************************************************************

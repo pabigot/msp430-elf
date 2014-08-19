@@ -38,9 +38,10 @@
 * This file supports assembler and C development for
 * MSP430FR4133 devices.
 *
-* Texas Instruments, Version 1.0
+* Texas Instruments, Version 1.1
 *
 * Rev. 1.0, Setup
+* Rev. 1.1, replaced UCSSEL__ACLK with UCSSEL__MODCLK
 *
 ********************************************************************/
 
@@ -49,7 +50,7 @@
 
 
 
-#define __MSP430_HEADER_VERSION__ 1131
+#define __MSP430_HEADER_VERSION__ 1146      /* Beta-Build-Tag: #0006 */
 
 #define __MSP430_TI_HEADERS__
 
@@ -142,6 +143,7 @@ extern "C" {
 #define __MSP430_HAS_ADC__             /* Definition to show that Module is available */
 #define __MSP430_BASEADDRESS_ADC__ 0x0700
 #define ADC_BASE __MSP430_BASEADDRESS_ADC__
+#define __MSP430_HAS_ADC_CHANNELS_10__
 
 #define ADCCTL0_              0x0700    /* ADC Control 0 */
 sfrb(ADCCTL0_L , ADCCTL0_);
@@ -615,35 +617,33 @@ sfrw(CSCTL8, CSCTL8_);
 
 /* CSCTL1 Control Bits */
 #define DISMOD              (0x0001)    /* Disable Modulation */
-
-#define DCOFSEL0            (0x0002)    /* DCO frequency select Bit: 0 */
-#define DCOFSEL1            (0x0004)    /* DCO frequency select Bit: 1 */
-#define DCOFSEL2            (0x0080)    /* DCO frequency select Bit: 2 */
-#define DCOFTRIM0           (0x0010)    /* DCO frequency trim Bit: 0 */
-#define DCOFTRIM1           (0x0020)    /* DCO frequency trim Bit: 1 */
-#define DCOFTRIM2           (0x0040)    /* DCO frequency trim Bit: 2 */
+#define DCORSEL0            (0x0002)    /* DCO frequency range select Bit: 0 */
+#define DCORSEL1            (0x0004)    /* DCO frequency range select Bit: 1 */
+#define DCORSEL2            (0x0008)    /* DCO frequency range select Bit: 2 */
+#define DCOFTRIM0           (0x0010)    /* DCO frequency trim. Bit: 0 */
+#define DCOFTRIM1           (0x0020)    /* DCO frequency trim. Bit: 1 */
+#define DCOFTRIM2           (0x0040)    /* DCO frequency trim. Bit: 2 */
 #define DCOFTRIMEN          (0x0080)    /* DCO frequency trim enable */
 
 /* CSCTL1 Control Bits */
 #define DISMOD_L            (0x0001)    /* Disable Modulation */
-
-#define DCOFSEL0_L          (0x0002)    /* DCO frequency select Bit: 0 */
-#define DCOFSEL1_L          (0x0004)    /* DCO frequency select Bit: 1 */
-#define DCOFSEL2_L          (0x0080)    /* DCO frequency select Bit: 2 */
-#define DCOFTRIM0_L         (0x0010)    /* DCO frequency trim Bit: 0 */
-#define DCOFTRIM1_L         (0x0020)    /* DCO frequency trim Bit: 1 */
-#define DCOFTRIM2_L         (0x0040)    /* DCO frequency trim Bit: 2 */
+#define DCORSEL0_L          (0x0002)    /* DCO frequency range select Bit: 0 */
+#define DCORSEL1_L          (0x0004)    /* DCO frequency range select Bit: 1 */
+#define DCORSEL2_L          (0x0008)    /* DCO frequency range select Bit: 2 */
+#define DCOFTRIM0_L         (0x0010)    /* DCO frequency trim. Bit: 0 */
+#define DCOFTRIM1_L         (0x0020)    /* DCO frequency trim. Bit: 1 */
+#define DCOFTRIM2_L         (0x0040)    /* DCO frequency trim. Bit: 2 */
 #define DCOFTRIMEN_L        (0x0080)    /* DCO frequency trim enable */
 
 
-#define DCOFSEL_0           (0x0000)    /* DCO frequency select: 0 */
-#define DCOFSEL_1           (0x0002)    /* DCO frequency select: 1 */
-#define DCOFSEL_2           (0x0004)    /* DCO frequency select: 2 */
-#define DCOFSEL_3           (0x0006)    /* DCO frequency select: 3 */
-#define DCOFSEL_4           (0x0008)    /* DCO frequency select: 4 */
-#define DCOFSEL_5           (0x000A)    /* DCO frequency select: 5 */
-#define DCOFSEL_6           (0x000C)    /* DCO frequency select: 6 */
-#define DCOFSEL_7           (0x000E)    /* DCO frequency select: 7 */
+#define DCORSEL_0           (0x0000)    /* DCO frequency range select: 0 */
+#define DCORSEL_1           (0x0002)    /* DCO frequency range select: 1 */
+#define DCORSEL_2           (0x0004)    /* DCO frequency range select: 2 */
+#define DCORSEL_3           (0x0006)    /* DCO frequency range select: 3 */
+#define DCORSEL_4           (0x0008)    /* DCO frequency range select: 4 */
+#define DCORSEL_5           (0x000A)    /* DCO frequency range select: 5 */
+#define DCORSEL_6           (0x000C)    /* DCO frequency range select: 6 */
+#define DCORSEL_7           (0x000E)    /* DCO frequency range select: 7 */
 
 #define DCOFTRIM_0          (0x0000)    /* DCO frequency trim: 0 */
 #define DCOFTRIM_1          (0x0010)    /* DCO frequency trim: 1 */
@@ -653,7 +653,6 @@ sfrw(CSCTL8, CSCTL8_);
 #define DCOFTRIM_5          (0x0050)    /* DCO frequency trim: 5 */
 #define DCOFTRIM_6          (0x0060)    /* DCO frequency trim: 6 */
 #define DCOFTRIM_7          (0x0070)    /* DCO frequency trim: 7 */
-
 
 /* CSCTL2 Control Bits */
 #define FLLN0               (0x0001)    /* FLL Multipier Bit : 0 */
@@ -732,15 +731,12 @@ sfrw(CSCTL8, CSCTL8_);
 #define FLLREFDIV__128      (0x0003)    /* Reference Divider: f(LFCLK)/128 */
 #define FLLREFDIV__256      (0x0004)    /* Reference Divider: f(LFCLK)/256 */
 #define FLLREFDIV__512      (0x0005)    /* Reference Divider: f(LFCLK)/512 */
-#define FLLREFDIV__1024     (0x0006)    /* Reference Divider: f(LFCLK)/1024*/
 #define SELREF_0            (0x0000)    /* FLL Reference Clock Select 0 */
 #define SELREF_1            (0x0010)    /* FLL Reference Clock Select 1 */
 #define SELREF_2            (0x0020)    /* FLL Reference Clock Select 2 */
 #define SELREF_3            (0x0030)    /* FLL Reference Clock Select 3 */
 #define SELREF__XT1CLK      (0x0000)    /* Multiply Selected Loop Freq. By XT1CLK */
 #define SELREF__REFOCLK     (0x0010)    /* Multiply Selected Loop Freq. By REFOCLK */
-
-#define SELREF__XT2CLK      (0x0050)    /* Multiply Selected Loop Freq. By XT2CLK */
 
 
 /* CSCTL4 Control Bits */
@@ -827,11 +823,6 @@ sfrw(CSCTL8, CSCTL8_);
 #define XTS                 (0x0020)    /* 1: Selects high-freq. oscillator */
 #define XT1DRIVE0           (0x0040)    /* XT1 Drive Level mode Bit 0 */
 #define XT1DRIVE1           (0x0080)    /* XT1 Drive Level mode Bit 1 */
-#define XT2AUTOOFF          (0x0100)    /* XT2 automatic off enable */
-#define XT2AGCOFF           (0x0200)    /* XT2 Automatic Gain Control (AGC) disable */
-#define XT2BYPASS           (0x1000)    /* XT2 bypass mode : 0: internal 1:sourced from external pin */
-#define XT2DRIVE0           (0x4000)    /* XT2 Drive Level mode Bit 0 */
-#define XT2DRIVE1           (0x8000)    /* XT2 Drive Level mode Bit 1 */
 
 /* CSCTL6 Control Bits */
 #define XT1AUTOOFF_L        (0x0001)    /* XT1 automatic off enable */
@@ -841,51 +832,37 @@ sfrw(CSCTL8, CSCTL8_);
 #define XT1DRIVE0_L         (0x0040)    /* XT1 Drive Level mode Bit 0 */
 #define XT1DRIVE1_L         (0x0080)    /* XT1 Drive Level mode Bit 1 */
 
-/* CSCTL6 Control Bits */
-#define XT2AUTOOFF_H        (0x0001)    /* XT2 automatic off enable */
-#define XT2AGCOFF_H         (0x0002)    /* XT2 Automatic Gain Control (AGC) disable */
-#define XT2BYPASS_H         (0x0010)    /* XT2 bypass mode : 0: internal 1:sourced from external pin */
-#define XT2DRIVE0_H         (0x0040)    /* XT2 Drive Level mode Bit 0 */
-#define XT2DRIVE1_H         (0x0080)    /* XT2 Drive Level mode Bit 1 */
 
 #define XT1DRIVE_0          (0x0000)    /* XT1 Drive Level mode: 0 */
 #define XT1DRIVE_1          (0x0040)    /* XT1 Drive Level mode: 1 */
 #define XT1DRIVE_2          (0x0080)    /* XT1 Drive Level mode: 2 */
 #define XT1DRIVE_3          (0x00C0)    /* XT1 Drive Level mode: 3 */
-#define XT2DRIVE_0          (0x0000)    /* XT2 Drive Level mode: 0 */
-#define XT2DRIVE_1          (0x4000)    /* XT2 Drive Level mode: 1 */
-#define XT2DRIVE_2          (0x8000)    /* XT2 Drive Level mode: 2 */
-#define XT2DRIVE_3          (0xC000)    /* XT2 Drive Level mode: 3 */
 
 
 /* CSCTL7 Control Bits */
 #define DCOFFG              (0x0001)    /* DCO fault flag */
 #define XT1OFFG             (0x0002)    /* XT1 Low Frequency Oscillator Fault Flag */
-#define XT2OFFG             (0x0008)    /* High Frequency Oscillator 2 Fault Flag */
 #define FLLULIFG            (0x0010)    /* FLL unlock interrupt flag */
 #define ENSTFCNT1           (0x0040)    /* Enable start counter for XT1 */
-#define ENSTFCNT2           (0x0080)    /* Enable start counter for XT2 */
 #define FLLUNLOCK0          (0x0100)    /* FLL unlock condition Bit: 0 */
 #define FLLUNLOCK1          (0x0200)    /* FLL unlock condition Bit: 1 */
 #define FLLUNLOCKHIS0       (0x0400)    /* Unlock history Bit: 0 */
 #define FLLUNLOCKHIS1       (0x0800)    /* Unlock history Bit: 1 */
-#define FLLULIE             (0x1000)    /* FLL unlock interrupt enable */
+#define FLLULPUC            (0x1000)    /* FLL unlock PUC enable */
 #define FLLWARNEN           (0x2000)    /* Warning enable */
 
 /* CSCTL7 Control Bits */
 #define DCOFFG_L            (0x0001)    /* DCO fault flag */
 #define XT1OFFG_L           (0x0002)    /* XT1 Low Frequency Oscillator Fault Flag */
-#define XT2OFFG_L           (0x0008)    /* High Frequency Oscillator 2 Fault Flag */
 #define FLLULIFG_L          (0x0010)    /* FLL unlock interrupt flag */
 #define ENSTFCNT1_L         (0x0040)    /* Enable start counter for XT1 */
-#define ENSTFCNT2_L         (0x0080)    /* Enable start counter for XT2 */
 
 /* CSCTL7 Control Bits */
 #define FLLUNLOCK0_H        (0x0001)    /* FLL unlock condition Bit: 0 */
 #define FLLUNLOCK1_H        (0x0002)    /* FLL unlock condition Bit: 1 */
 #define FLLUNLOCKHIS0_H     (0x0004)    /* Unlock history Bit: 0 */
 #define FLLUNLOCKHIS1_H     (0x0008)    /* Unlock history Bit: 1 */
-#define FLLULIE_H           (0x0010)    /* FLL unlock interrupt enable */
+#define FLLULPUC_H          (0x0010)    /* FLL unlock PUC enable */
 #define FLLWARNEN_H         (0x0020)    /* Warning enable */
 
 #define FLLUNLOCK_0         (0x0000)    /* FLL unlock condition: 0 */
@@ -1222,6 +1199,24 @@ sfrw(LCDIV, LCDIV_);
 #define LCDBLKMOD_2         (0x0002)  /* LCD_E Blinking mode: All */
 #define LCDBLKMOD_3         (0x0003)  /* LCD_E Blinking mode: Switching */
 
+#define LCDBLKPRE_0         (0x0000)  /* LCD_E Clock pre-scaler for blinking frequency: 0 */
+#define LCDBLKPRE_1         (0x0004)  /* LCD_E Clock pre-scaler for blinking frequency: 1 */
+#define LCDBLKPRE_2         (0x0008)  /* LCD_E Clock pre-scaler for blinking frequency: 2 */
+#define LCDBLKPRE_3         (0x000C)  /* LCD_E Clock pre-scaler for blinking frequency: 3 */
+#define LCDBLKPRE_4         (0x0010)  /* LCD_E Clock pre-scaler for blinking frequency: 4 */
+#define LCDBLKPRE_5         (0x0014)  /* LCD_E Clock pre-scaler for blinking frequency: 5 */
+#define LCDBLKPRE_6         (0x0018)  /* LCD_E Clock pre-scaler for blinking frequency: 6 */
+#define LCDBLKPRE_7         (0x001C)  /* LCD_E Clock pre-scaler for blinking frequency: 7 */
+
+#define LCDBLKPRE__4        (0x0000)  /* LCD_E Clock pre-scaler for blinking frequency: 4   */
+#define LCDBLKPRE__8        (0x0004)  /* LCD_E Clock pre-scaler for blinking frequency: 8   */
+#define LCDBLKPRE__16       (0x0008)  /* LCD_E Clock pre-scaler for blinking frequency: 16  */
+#define LCDBLKPRE__32       (0x000C)  /* LCD_E Clock pre-scaler for blinking frequency: 32  */
+#define LCDBLKPRE__64       (0x0010)  /* LCD_E Clock pre-scaler for blinking frequency: 64  */
+#define LCDBLKPRE__128      (0x0014)  /* LCD_E Clock pre-scaler for blinking frequency: 128 */
+#define LCDBLKPRE__256      (0x0018)  /* LCD_E Clock pre-scaler for blinking frequency: 256 */
+#define LCDBLKPRE__512      (0x001C)  /* LCD_E Clock pre-scaler for blinking frequency: 512 */
+
 // LCDMEMCTL
 #define LCDDISP             (0x0001)  /* LCD_E LCD memory registers for display */
 #define LCDCLRM             (0x0002)  /* LCD_E Clear LCD memory */
@@ -1264,22 +1259,22 @@ sfrw(LCDIV, LCDIV_);
 #define LCDCPFSEL3_H        (0x0080)  /* Charge pump frequency selection Bit: 3 */
 
 /* Charge pump voltage selections */
-#define VLCD_0                 (0x0000)       /* VLCD = 2.60V */
-#define VLCD_1                 (0x0100)       /* VLCD = 2.66V */
-#define VLCD_2                 (0x0200)       /* VLCD = 2.72V */
-#define VLCD_3                 (0x0300)       /* VLCD = 2.78V */
-#define VLCD_4                 (0x0400)       /* VLCD = 2.84V */
-#define VLCD_5                 (0x0500)       /* VLCD = 2.90V */
-#define VLCD_6                 (0x0600)       /* VLCD = 2.96V */
-#define VLCD_7                 (0x0700)       /* VLCD = 3.02V */
-#define VLCD_8                 (0x0800)       /* VLCD = 3.08V */
-#define VLCD_9                 (0x0900)       /* VLCD = 3.14V */
-#define VLCD_10                (0x0A00)       /* VLCD = 3.20V */
-#define VLCD_11                (0x0B00)       /* VLCD = 3.26V */
-#define VLCD_12                (0x0C00)       /* VLCD = 3.32V */
-#define VLCD_13                (0x0D00)       /* VLCD = 3.38V */
-#define VLCD_14                (0x0E00)       /* VLCD = 3.44V */
-#define VLCD_15                (0x0F00)       /* VLCD = 3.50V */
+#define VLCD_0              (0x0000)  /* VLCD = 2.60V */
+#define VLCD_1              (0x0100)  /* VLCD = 2.66V */
+#define VLCD_2              (0x0200)  /* VLCD = 2.72V */
+#define VLCD_3              (0x0300)  /* VLCD = 2.78V */
+#define VLCD_4              (0x0400)  /* VLCD = 2.84V */
+#define VLCD_5              (0x0500)  /* VLCD = 2.90V */
+#define VLCD_6              (0x0600)  /* VLCD = 2.96V */
+#define VLCD_7              (0x0700)  /* VLCD = 3.02V */
+#define VLCD_8              (0x0800)  /* VLCD = 3.08V */
+#define VLCD_9              (0x0900)  /* VLCD = 3.14V */
+#define VLCD_10             (0x0A00)  /* VLCD = 3.20V */
+#define VLCD_11             (0x0B00)  /* VLCD = 3.26V */
+#define VLCD_12             (0x0C00)  /* VLCD = 3.32V */
+#define VLCD_13             (0x0D00)  /* VLCD = 3.38V */
+#define VLCD_14             (0x0E00)  /* VLCD = 3.44V */
+#define VLCD_15             (0x0F00)  /* VLCD = 3.50V */
 
 
 // LCDPCTL0
@@ -1510,133 +1505,236 @@ sfrw(LCDIV, LCDIV_);
 #define LCDCSS46_H          (0x0040)  /* Selects pin L46 as either common or segment line */
 #define LCDCSS47_H          (0x0080)  /* Selects pin L47 as either common or segment line */
 
-#define LCDM0_                0x0620    /* LCD Memory 0 */
-sfrb(LCDM0, LCDM0_);
+#define LCDM0W_               0x0620    /* LCD Memory 0/1 */
+sfrb(LCDM0W_L , LCDM0W_);
+sfrb(LCDM0W_H , LCDM0W_+1);
+sfrw(LCDM0W, LCDM0W_);
+#define LCDM0               LCDM0W_L  /* LCD Memory 0 */
+#define LCDM1               LCDM0W_H  /* LCD Memory 1 */
 #define LCDMEM_             LCDM0     /* LCD Memory */
 #ifndef __STDC__
 #define LCDMEM              LCDM0     /* LCD Memory (for assembler) */
 #else
 #define LCDMEM              ((volatile char*) &LCDM0) /* LCD Memory (for C) */
 #endif
-#define LCDM1_                0x0621    /* LCD Memory 1 */
-sfrb(LCDM1, LCDM1_);
-#define LCDM2_                0x0622    /* LCD Memory 2 */
-sfrb(LCDM2, LCDM2_);
-#define LCDM3_                0x0623    /* LCD Memory 3 */
-sfrb(LCDM3, LCDM3_);
-#define LCDM4_                0x0624    /* LCD Memory 4 */
-sfrb(LCDM4, LCDM4_);
-#define LCDM5_                0x0625    /* LCD Memory 5 */
-sfrb(LCDM5, LCDM5_);
-#define LCDM6_                0x0626    /* LCD Memory 6 */
-sfrb(LCDM6, LCDM6_);
-#define LCDM7_                0x0627    /* LCD Memory 7 */
-sfrb(LCDM7, LCDM7_);
-#define LCDM8_                0x0628    /* LCD Memory 8 */
-sfrb(LCDM8, LCDM8_);
-#define LCDM9_                0x0629    /* LCD Memory 9  */
-sfrb(LCDM9, LCDM9_);
-#define LCDM10_               0x062A    /* LCD Memory 10 */
-sfrb(LCDM10, LCDM10_);
-#define LCDM11_               0x062B    /* LCD Memory 11 */
-sfrb(LCDM11, LCDM11_);
-#define LCDM12_               0x062C    /* LCD Memory 12 */
-sfrb(LCDM12, LCDM12_);
-#define LCDM13_               0x062D    /* LCD Memory 13 */
-sfrb(LCDM13, LCDM13_);
-#define LCDM14_               0x062E    /* LCD Memory 14 */
-sfrb(LCDM14, LCDM14_);
-#define LCDM15_               0x062F    /* LCD Memory 15 */
-sfrb(LCDM15, LCDM15_);
-#define LCDM16_               0x0630    /* LCD Memory 16 */
-sfrb(LCDM16, LCDM16_);
-#define LCDM17_               0x0631    /* LCD Memory 17 */
-sfrb(LCDM17, LCDM17_);
-#define LCDM18_               0x0632    /* LCD Memory 18 */
-sfrb(LCDM18, LCDM18_);
-#define LCDM19_               0x0633    /* LCD Memory 19 */
-sfrb(LCDM19, LCDM19_);
-#define LCDM20_               0x0634    /* LCD Memory 20 */
-sfrb(LCDM20, LCDM20_);
-#define LCDM21_               0x0635    /* LCD Memory 21 */
-sfrb(LCDM21, LCDM21_);
-#define LCDM22_               0x0636    /* LCD Memory 22 */
-sfrb(LCDM22, LCDM22_);
-#define LCDM23_               0x0637    /* LCD Memory 23 */
-sfrb(LCDM23, LCDM23_);
-#define LCDM24_               0x0638    /* LCD Memory 24 */
-sfrb(LCDM24, LCDM24_);
-#define LCDM25_               0x0639    /* LCD Memory 25 */
-sfrb(LCDM25, LCDM25_);
-#define LCDM26_               0x063A    /* LCD Memory 26 */
-sfrb(LCDM26, LCDM26_);
-#define LCDM27_               0x063B    /* LCD Memory 27 */
-sfrb(LCDM27, LCDM27_);
-#define LCDM28_               0x063C    /* LCD Memory 28 */
-sfrb(LCDM28, LCDM28_);
-#define LCDM29_               0x063D    /* LCD Memory 29 */
-sfrb(LCDM29, LCDM29_);
-#define LCDM30_               0x063E    /* LCD Memory 30 */
-sfrb(LCDM30, LCDM30_);
-#define LCDM31_               0x063F    /* LCD Memory 31 */
-sfrb(LCDM31, LCDM31_);
-#define LCDM32_               0x0640    /* LCD Memory 32 */
-sfrb(LCDM32, LCDM32_);
-#define LCDM33_               0x0641    /* LCD Memory 33 */
-sfrb(LCDM33, LCDM33_);
-#define LCDM34_               0x0642    /* LCD Memory 34 */
-sfrb(LCDM34, LCDM34_);
-#define LCDM35_               0x0643    /* LCD Memory 35 */
-sfrb(LCDM35, LCDM35_);
-#define LCDM36_               0x0644    /* LCD Memory 36 */
-sfrb(LCDM36, LCDM36_);
-#define LCDM37_               0x0645    /* LCD Memory 37 */
-sfrb(LCDM37, LCDM37_);
-#define LCDM38_               0x0646    /* LCD Memory 38 */
-sfrb(LCDM38, LCDM38_);
-#define LCDM39_               0x0647    /* LCD Memory 39 */
-sfrb(LCDM39, LCDM39_);
+#define LCDM2W_               0x0622    /* LCD Memory 2/3 */
+sfrb(LCDM2W_L , LCDM2W_);
+sfrb(LCDM2W_H , LCDM2W_+1);
+sfrw(LCDM2W, LCDM2W_);
+#define LCDM2               LCDM2W_L  /* LCD Memory 2 */
+#define LCDM3               LCDM2W_H  /* LCD Memory 3 */
+#define LCDM4W_               0x0624    /* LCD Memory 4/5 */
+sfrb(LCDM4W_L , LCDM4W_);
+sfrb(LCDM4W_H , LCDM4W_+1);
+sfrw(LCDM4W, LCDM4W_);
+#define LCDM4               LCDM4W_L  /* LCD Memory 4 */
+#define LCDM5               LCDM4W_H  /* LCD Memory 5 */
+#define LCDM6W_               0x0626    /* LCD Memory 6/7 */
+sfrb(LCDM6W_L , LCDM6W_);
+sfrb(LCDM6W_H , LCDM6W_+1);
+sfrw(LCDM6W, LCDM6W_);
+#define LCDM6               LCDM6W_L  /* LCD Memory 6 */
+#define LCDM7               LCDM6W_H  /* LCD Memory 7 */
+#define LCDM8W_               0x0628    /* LCD Memory 8/9 */
+sfrb(LCDM8W_L , LCDM8W_);
+sfrb(LCDM8W_H , LCDM8W_+1);
+sfrw(LCDM8W, LCDM8W_);
+#define LCDM8               LCDM8W_L  /* LCD Memory 8 */
+#define LCDM9               LCDM8W_H  /* LCD Memory 9 */
+#define LCDM10W_              0x062A    /* LCD Memory 10/11 */
+sfrb(LCDM10W_L , LCDM10W_);
+sfrb(LCDM10W_H , LCDM10W_+1);
+sfrw(LCDM10W, LCDM10W_);
+#define LCDM10              LCDM10W_L /* LCD Memory 10 */
+#define LCDM11              LCDM10W_H /* LCD Memory 11 */
+#define LCDM12W_              0x062C    /* LCD Memory 12/13 */
+sfrb(LCDM12W_L , LCDM12W_);
+sfrb(LCDM12W_H , LCDM12W_+1);
+sfrw(LCDM12W, LCDM12W_);
+#define LCDM12              LCDM12W_L /* LCD Memory 12 */
+#define LCDM13              LCDM12W_H /* LCD Memory 13 */
+#define LCDM14W_              0x062E    /* LCD Memory 14/15 */
+sfrb(LCDM14W_L , LCDM14W_);
+sfrb(LCDM14W_H , LCDM14W_+1);
+sfrw(LCDM14W, LCDM14W_);
+#define LCDM14              LCDM14W_L /* LCD Memory 14 */
+#define LCDM15              LCDM14W_H /* LCD Memory 15 */
+#define LCDM16W_              0x0630    /* LCD Memory 16/17 */
+sfrb(LCDM16W_L , LCDM16W_);
+sfrb(LCDM16W_H , LCDM16W_+1);
+sfrw(LCDM16W, LCDM16W_);
+#define LCDM16              LCDM16W_L /* LCD Memory 16 */
+#define LCDM17              LCDM16W_H /* LCD Memory 17 */
+#define LCDM18W_              0x0632    /* LCD Memory 18/19 */
+sfrb(LCDM18W_L , LCDM18W_);
+sfrb(LCDM18W_H , LCDM18W_+1);
+sfrw(LCDM18W, LCDM18W_);
+#define LCDM18              LCDM18W_L /* LCD Memory 18 */
+#define LCDM19              LCDM18W_H /* LCD Memory 19 */
+#define LCDM20W_              0x0634    /* LCD Memory 20/21 */
+sfrb(LCDM20W_L , LCDM20W_);
+sfrb(LCDM20W_H , LCDM20W_+1);
+sfrw(LCDM20W, LCDM20W_);
+#define LCDM20              LCDM20W_L /* LCD Memory 20 */
+#define LCDM21              LCDM20W_H /* LCD Memory 21 */
+#define LCDM22W_              0x0636    /* LCD Memory 22/23 */
+sfrb(LCDM22W_L , LCDM22W_);
+sfrb(LCDM22W_H , LCDM22W_+1);
+sfrw(LCDM22W, LCDM22W_);
+#define LCDM22              LCDM22W_L /* LCD Memory 22 */
+#define LCDM23              LCDM22W_H /* LCD Memory 23 */
+#define LCDM24W_              0x0638    /* LCD Memory 24/25 */
+sfrb(LCDM24W_L , LCDM24W_);
+sfrb(LCDM24W_H , LCDM24W_+1);
+sfrw(LCDM24W, LCDM24W_);
+#define LCDM24              LCDM24W_L /* LCD Memory 24 */
+#define LCDM25              LCDM24W_H /* LCD Memory 25 */
+#define LCDM26W_              0x063A    /* LCD Memory 26/27 */
+sfrb(LCDM26W_L , LCDM26W_);
+sfrb(LCDM26W_H , LCDM26W_+1);
+sfrw(LCDM26W, LCDM26W_);
+#define LCDM26              LCDM26W_L /* LCD Memory 26 */
+#define LCDM27              LCDM26W_H /* LCD Memory 27 */
+#define LCDM28W_              0x063C    /* LCD Memory 28/29 */
+sfrb(LCDM28W_L , LCDM28W_);
+sfrb(LCDM28W_H , LCDM28W_+1);
+sfrw(LCDM28W, LCDM28W_);
+#define LCDM28              LCDM28W_L /* LCD Memory 28 */
+#define LCDM29              LCDM28W_H /* LCD Memory 29 */
+#define LCDM30W_              0x063E    /* LCD Memory 30/31 */
+sfrb(LCDM30W_L , LCDM30W_);
+sfrb(LCDM30W_H , LCDM30W_+1);
+sfrw(LCDM30W, LCDM30W_);
+#define LCDM30              LCDM30W_L /* LCD Memory 30 */
+#define LCDM31              LCDM30W_H /* LCD Memory 31 */
+#define LCDM32W_              0x0640    /* LCD Memory 32/33 */
+sfrb(LCDM32W_L , LCDM32W_);
+sfrb(LCDM32W_H , LCDM32W_+1);
+sfrw(LCDM32W, LCDM32W_);
+#define LCDM32              LCDM32W_L /* LCD Memory 32 */
+#define LCDM33              LCDM32W_H /* LCD Memory 33 */
+#define LCDM34W_              0x0642    /* LCD Memory 34/35 */
+sfrb(LCDM34W_L , LCDM34W_);
+sfrb(LCDM34W_H , LCDM34W_+1);
+sfrw(LCDM34W, LCDM34W_);
+#define LCDM34              LCDM34W_L /* LCD Memory 34 */
+#define LCDM35              LCDM34W_H /* LCD Memory 35 */
+#define LCDM36W_              0x0644    /* LCD Memory 36/37 */
+sfrb(LCDM36W_L , LCDM36W_);
+sfrb(LCDM36W_H , LCDM36W_+1);
+sfrw(LCDM36W, LCDM36W_);
+#define LCDM36              LCDM36W_L /* LCD Memory 36 */
+#define LCDM37              LCDM36W_H /* LCD Memory 37 */
+#define LCDM38W_              0x0646    /* LCD Memory 38/39 */
+sfrb(LCDM38W_L , LCDM38W_);
+sfrb(LCDM38W_H , LCDM38W_+1);
+sfrw(LCDM38W, LCDM38W_);
+#define LCDM38              LCDM38W_L /* LCD Memory 38 */
+#define LCDM39              LCDM38W_H /* LCD Memory 39 */
 
-#define LCDBM0_               0x0640    /* LCD Blinking Memory 0 */
-sfrb(LCDBM0, LCDBM0_);
-#define LCDBM1_               0x0641    /* LCD Blinking Memory 1 */
-sfrb(LCDBM1, LCDBM1_);
-#define LCDBM2_               0x0642    /* LCD Blinking Memory 2 */
-sfrb(LCDBM2, LCDBM2_);
-#define LCDBM3_               0x0643    /* LCD Blinking Memory 3 */
-sfrb(LCDBM3, LCDBM3_);
-#define LCDBM4_               0x0644    /* LCD Blinking Memory 4 */
-sfrb(LCDBM4, LCDBM4_);
-#define LCDBM5_               0x0645    /* LCD Blinking Memory 5 */
-sfrb(LCDBM5, LCDBM5_);
-#define LCDBM6_               0x0646    /* LCD Blinking Memory 6 */
-sfrb(LCDBM6, LCDBM6_);
-#define LCDBM7_               0x0647    /* LCD Blinking Memory 7 */
-sfrb(LCDBM7, LCDBM7_);
-#define LCDBM8_               0x0648    /* LCD Blinking Memory 8 */
-sfrb(LCDBM8, LCDBM8_);
-#define LCDBM9_               0x0649    /* LCD Blinking Memory 9  */
-sfrb(LCDBM9, LCDBM9_);
-#define LCDBM10_              0x064A    /* LCD Blinking Memory 10 */
-sfrb(LCDBM10, LCDBM10_);
-#define LCDBM11_              0x064B    /* LCD Blinking Memory 11 */
-sfrb(LCDBM11, LCDBM11_);
-#define LCDBM12_              0x064C    /* LCD Blinking Memory 12 */
-sfrb(LCDBM12, LCDBM12_);
-#define LCDBM13_              0x064D    /* LCD Blinking Memory 13 */
-sfrb(LCDBM13, LCDBM13_);
-#define LCDBM14_              0x064E    /* LCD Blinking Memory 14 */
-sfrb(LCDBM14, LCDBM14_);
-#define LCDBM15_              0x064F    /* LCD Blinking Memory 15 */
-sfrb(LCDBM15, LCDBM15_);
-#define LCDBM16_              0x0650    /* LCD Blinking Memory 16 */
-sfrb(LCDBM16, LCDBM16_);
-#define LCDBM17_              0x0651    /* LCD Blinking Memory 17 */
-sfrb(LCDBM17, LCDBM17_);
-#define LCDBM18_              0x0652    /* LCD Blinking Memory 18 */
-sfrb(LCDBM18, LCDBM18_);
-#define LCDBM19_              0x0653    /* LCD Blinking Memory 19 */
-sfrb(LCDBM19, LCDBM19_);
+#define LCDBM0W_              0x0640    /* LCD Blinking Memory 0/1 */
+sfrb(LCDBM0W_L , LCDBM0W_);
+sfrb(LCDBM0W_H , LCDBM0W_+1);
+sfrw(LCDBM0W, LCDBM0W_);
+#define LCDBM0              LCDBM0W_L /* LCD Blinking Memory 0 */
+#define LCDBM1              LCDBM0W_H /* LCD Blinking Memory 1 */
+#define LCDBMEM_            LCDBM0    /* LCD Blinking Memory */
+#ifndef __STDC__
+#define LCDBMEM             LCDBM0    /* LCD Blinking Memory (for assembler) */
+#else
+#define LCDBMEM             ((volatile char*) &LCDBM0) /* LCD Blinking Memory (for C) */
+#endif
+#define LCDBM2W_              0x0642    /* LCD Blinking Memory 2/3 */
+sfrb(LCDBM2W_L , LCDBM2W_);
+sfrb(LCDBM2W_H , LCDBM2W_+1);
+sfrw(LCDBM2W, LCDBM2W_);
+#define LCDBM2              LCDBM2W_L  /* LCD Blinking Memory 2 */
+#define LCDBM3              LCDBM2W_H  /* LCD Blinking Memory 3 */
+#define LCDBM4W_              0x0644    /* LCD Blinking Memory 4/5 */
+sfrb(LCDBM4W_L , LCDBM4W_);
+sfrb(LCDBM4W_H , LCDBM4W_+1);
+sfrw(LCDBM4W, LCDBM4W_);
+#define LCDBM4              LCDBM4W_L  /* LCD Blinking Memory 4 */
+#define LCDBM5              LCDBM4W_H  /* LCD Blinking Memory 5 */
+#define LCDBM6W_              0x0646    /* LCD Blinking Memory 6/7 */
+sfrb(LCDBM6W_L , LCDBM6W_);
+sfrb(LCDBM6W_H , LCDBM6W_+1);
+sfrw(LCDBM6W, LCDBM6W_);
+#define LCDBM6              LCDBM6W_L  /* LCD Blinking Memory 6 */
+#define LCDBM7              LCDBM6W_H  /* LCD Blinking Memory 7 */
+#define LCDBM8W_              0x0648    /* LCD Blinking Memory 8/9 */
+sfrb(LCDBM8W_L , LCDBM8W_);
+sfrb(LCDBM8W_H , LCDBM8W_+1);
+sfrw(LCDBM8W, LCDBM8W_);
+#define LCDBM8              LCDBM8W_L  /* LCD Blinking Memory 8 */
+#define LCDBM9              LCDBM8W_H  /* LCD Blinking Memory 9 */
+#define LCDBM10W_             0x064A    /* LCD Blinking Memory 10/11 */
+sfrb(LCDBM10W_L , LCDBM10W_);
+sfrb(LCDBM10W_H , LCDBM10W_+1);
+sfrw(LCDBM10W, LCDBM10W_);
+#define LCDBM10             LCDBM10W_L /* LCD Blinking Memory 10 */
+#define LCDBM11             LCDBM10W_H /* LCD Blinking Memory 11 */
+#define LCDBM12W_             0x064C    /* LCD Blinking Memory 12/13 */
+sfrb(LCDBM12W_L , LCDBM12W_);
+sfrb(LCDBM12W_H , LCDBM12W_+1);
+sfrw(LCDBM12W, LCDBM12W_);
+#define LCDBM12             LCDBM12W_L /* LCD Blinking Memory 12 */
+#define LCDBM13             LCDBM12W_H /* LCD Blinking Memory 13 */
+#define LCDBM14W_             0x064E    /* LCD Blinking Memory 14/15 */
+sfrb(LCDBM14W_L , LCDBM14W_);
+sfrb(LCDBM14W_H , LCDBM14W_+1);
+sfrw(LCDBM14W, LCDBM14W_);
+#define LCDBM14             LCDBM14W_L /* LCD Blinking Memory 14 */
+#define LCDBM15             LCDBM14W_H /* LCD Blinking Memory 15 */
+#define LCDBM16W_             0x0650    /* LCD Blinking Memory 16/17 */
+sfrb(LCDBM16W_L , LCDBM16W_);
+sfrb(LCDBM16W_H , LCDBM16W_+1);
+sfrw(LCDBM16W, LCDBM16W_);
+#define LCDBM16             LCDBM16W_L /* LCD Blinking Memory 16 */
+#define LCDBM17             LCDBM16W_H /* LCD Blinking Memory 17 */
+#define LCDBM18W_             0x0652    /* LCD Blinking Memory 18/19 */
+sfrb(LCDBM18W_L , LCDBM18W_);
+sfrb(LCDBM18W_H , LCDBM18W_+1);
+sfrw(LCDBM18W, LCDBM18W_);
+#define LCDBM18             LCDBM18W_L /* LCD Blinking Memory 18 */
+#define LCDBM19             LCDBM18W_H /* LCD Blinking Memory 19 */
+#define LCDBM20W_             0x0654    /* LCD Blinking Memory 20/21 */
+sfrb(LCDBM20W_L , LCDBM20W_);
+sfrb(LCDBM20W_H , LCDBM20W_+1);
+sfrw(LCDBM20W, LCDBM20W_);
+#define LCDBM20             LCDBM20W_L /* LCD Blinking Memory 20 */
+#define LCDBM21             LCDBM20W_H /* LCD Blinking Memory 21 */
+#define LCDBM22W_             0x0656    /* LCD Blinking Memory 22/23 */
+sfrb(LCDBM22W_L , LCDBM22W_);
+sfrb(LCDBM22W_H , LCDBM22W_+1);
+sfrw(LCDBM22W, LCDBM22W_);
+#define LCDBM22             LCDBM22W_L /* LCD Blinking Memory 22 */
+#define LCDBM23             LCDBM22W_H /* LCD Blinking Memory 23 */
+#define LCDBM24W_             0x0658    /* LCD Blinking Memory 24/25 */
+sfrb(LCDBM24W_L , LCDBM24W_);
+sfrb(LCDBM24W_H , LCDBM24W_+1);
+sfrw(LCDBM24W, LCDBM24W_);
+#define LCDBM24             LCDBM24W_L /* LCD Blinking Memory 24 */
+#define LCDBM25             LCDBM24W_H /* LCD Blinking Memory 25 */
+#define LCDBM26W_             0x065A    /* LCD Blinking Memory 26/27 */
+sfrb(LCDBM26W_L , LCDBM26W_);
+sfrb(LCDBM26W_H , LCDBM26W_+1);
+sfrw(LCDBM26W, LCDBM26W_);
+#define LCDBM26             LCDBM26W_L /* LCD Blinking Memory 26 */
+#define LCDBM27             LCDBM26W_H /* LCD Blinking Memory 27 */
+#define LCDBM28W_             0x065C    /* LCD Blinking Memory 28/29 */
+sfrb(LCDBM28W_L , LCDBM28W_);
+sfrb(LCDBM28W_H , LCDBM28W_+1);
+sfrw(LCDBM28W, LCDBM28W_);
+#define LCDBM28             LCDBM28W_L /* LCD Blinking Memory 28 */
+#define LCDBM29             LCDBM28W_H /* LCD Blinking Memory 29 */
+#define LCDBM30W_             0x065E    /* LCD Blinking Memory 30/31 */
+sfrb(LCDBM30W_L , LCDBM30W_);
+sfrb(LCDBM30W_H , LCDBM30W_+1);
+sfrw(LCDBM30W, LCDBM30W_);
+#define LCDBM30             LCDBM30W_L /* LCD Blinking Memory 30 */
+#define LCDBM31             LCDBM30W_H /* LCD Blinking Memory 31 */
+
 
 /* LCDIV Definitions */
 #define LCDIV_NONE         (0x0000)    /* No Interrupt pending */
@@ -1647,9 +1745,9 @@ sfrb(LCDBM19, LCDBM19_);
 /************************************************************
 * PMM - Power Management System for G6xx
 ************************************************************/
-#define __MSP430_HAS_PMM__            /* Definition to show that Module is available */
-#define __MSP430_BASEADDRESS_PMM__ 0x0120
-#define PMM_BASE __MSP430_BASEADDRESS_PMM__
+#define __MSP430_HAS_PMM_FRAM__       /* Definition to show that Module is available */
+#define __MSP430_BASEADDRESS_PMM_FRAM__ 0x0120
+#define PMM_BASE __MSP430_BASEADDRESS_PMM_FRAM__
 
 #define PMMCTL0_              0x0120    /* PMM Control 0 */
 sfrb(PMMCTL0_L , PMMCTL0_);
@@ -2884,7 +2982,7 @@ sfrw(UCB0IV, UCB0IV_);
 #define UCSSEL_2            (0x0080)    /* USCI 0 Clock Source: 2 */
 #define UCSSEL_3            (0x00C0)    /* USCI 0 Clock Source: 3 */
 #define UCSSEL__UCLK        (0x0000)    /* USCI 0 Clock Source: UCLK */
-#define UCSSEL__ACLK        (0x0040)    /* USCI 0 Clock Source: ACLK */
+#define UCSSEL__MODCLK      (0x0040)    /* USCI 0 Clock Source: MODCLK */
 #define UCSSEL__SMCLK       (0x0080)    /* USCI 0 Clock Source: SMCLK */
 
 
@@ -3384,6 +3482,31 @@ sfrw(WDTCTL, WDTCTL_);
 #define WDT_ARST_250        (WDTPW+WDTCNTCL+WDTSSEL0+WDTIS2+WDTIS0)                  /* 250ms   " */
 #define WDT_ARST_16         (WDTPW+WDTCNTCL+WDTSSEL0+WDTIS2+WDTIS1)                  /* 16ms    " */
 #define WDT_ARST_1_9        (WDTPW+WDTCNTCL+WDTSSEL0+WDTIS2+WDTIS1+WDTIS0)           /* 1.9ms   " */
+
+
+/************************************************************
+* TLV Descriptors
+************************************************************/
+#define __MSP430_HAS_TLV__              /* Definition to show that Module is available */
+#define TLV_BASE __MSP430_BASEADDRESS_TLV__
+
+#define TLV_START             (0x1A08)    /* Start Address of the TLV structure */
+#define TLV_END               (0x1AFF)    /* End Address of the TLV structure */
+
+#define TLV_LDTAG             (0x01)      /*  Legacy descriptor (1xx, 2xx, 4xx families) */
+#define TLV_PDTAG             (0x02)      /*  Peripheral discovery descriptor */
+#define TLV_Reserved3         (0x03)      /*  Future usage */
+#define TLV_Reserved4         (0x04)      /*  Future usage */
+#define TLV_BLANK             (0x05)      /*  Blank descriptor */
+#define TLV_Reserved6         (0x06)      /*  Future usage */
+#define TLV_Reserved7         (0x07)      /*  Serial Number */
+#define TLV_DIERECORD         (0x08)      /*  Die Record  */
+#define TLV_ADCCAL            (0x11)      /*  ADC12 calibration */
+#define TLV_ADC12CAL          (0x11)      /*  ADC12 calibration */
+#define TLV_ADC10CAL          (0x13)      /*  ADC10 calibration */
+#define TLV_REFCAL            (0x12)      /*  REF calibration */
+#define TLV_TAGEXT            (0xFE)      /*  Tag extender */
+#define TLV_TAGEND            (0xFF)      //  Tag End of Table
 
 
 /************************************************************

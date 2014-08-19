@@ -37,7 +37,7 @@
 #define __IN430_H__
 
 /* Definitions for projects using the GNU C/C++ compiler */
-#if !defined(_GNU_ASSEMBLER_)
+#if !defined(__ASSEMBLER__)
 
 /* Definitions of things which are intrinsics with IAR and CCS, but which don't 
    appear to be intrinsics with the RedHat GCC compiler */

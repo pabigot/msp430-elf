@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430G2553 devices. */
-/* Version: 1.131 */
+/* Version: 1.146    (Beta-Build-Tag: #0006) */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
@@ -68,7 +68,7 @@ MEMORY {
 
 SECTIONS
 {
-  __interrupt_vector_1   : { KEEP (*(__interrupt_vector_1 )) } > VECT1
+  __interrupt_vector_1   : { KEEP (*(__interrupt_vector_1 )) KEEP (*(__interrupt_vector_trapint)) } > VECT1
   __interrupt_vector_2   : { KEEP (*(__interrupt_vector_2 )) } > VECT2
   __interrupt_vector_3   : { KEEP (*(__interrupt_vector_3 )) KEEP (*(__interrupt_vector_port1)) } > VECT3
   __interrupt_vector_4   : { KEEP (*(__interrupt_vector_4 )) KEEP (*(__interrupt_vector_port2)) } > VECT4
@@ -190,18 +190,16 @@ SECTIONS
     *(.sbss .sbss.*)
     *(.bss .bss.* .gnu.linkonce.b.*)
     . = ALIGN(2);
+    *(COMMON)
     PROVIDE (__bssend = .);
-    _end = .;
-    PROVIDE (end = .);
   } > RAM
   PROVIDE (__bsssize = SIZEOF(.bss));
 
-  .noinit : {
+  .noinit (NOLOAD) : {
     . = ALIGN(2);
     PROVIDE (__noinit_start = .);
     *(.noinit)
     . = ALIGN(2);
-    *(COMMON)
     PROVIDE (__noinit_end = .);
     end = .;
   } > RAM

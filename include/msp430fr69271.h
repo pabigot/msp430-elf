@@ -38,7 +38,7 @@
 * This file supports assembler and C development for
 * MSP430FR69271 devices.
 *
-* Texas Instruments, Version 1.0
+* Texas Instruments, Version 1.1
 *
 * Rev. 1.0, Setup
 *
@@ -48,7 +48,7 @@
 #ifndef __MSP430FR69271
 #define __MSP430FR69271
 
-#define __MSP430_HEADER_VERSION__ 1131
+#define __MSP430_HEADER_VERSION__ 1146      /* Beta-Build-Tag: #0006 */
 
 #define __MSP430_TI_HEADERS__
 
@@ -2751,6 +2751,43 @@ sfrw(LCDCIV, LCDCIV_);
 #define LCDBLKMOD_2         (0x0002)  /* LCD_C Blinking mode: All */
 #define LCDBLKMOD_3         (0x0003)  /* LCD_C Blinking mode: Switching */
 
+#define LCDBLKPRE_0         (0x0000)  /* LCD_C Clock pre-scaler for blinking frequency: 0 */
+#define LCDBLKPRE_1         (0x0004)  /* LCD_C Clock pre-scaler for blinking frequency: 1 */
+#define LCDBLKPRE_2         (0x0008)  /* LCD_C Clock pre-scaler for blinking frequency: 2 */
+#define LCDBLKPRE_3         (0x000C)  /* LCD_C Clock pre-scaler for blinking frequency: 3 */
+#define LCDBLKPRE_4         (0x0010)  /* LCD_C Clock pre-scaler for blinking frequency: 4 */
+#define LCDBLKPRE_5         (0x0014)  /* LCD_C Clock pre-scaler for blinking frequency: 5 */
+#define LCDBLKPRE_6         (0x0018)  /* LCD_C Clock pre-scaler for blinking frequency: 6 */
+#define LCDBLKPRE_7         (0x001C)  /* LCD_C Clock pre-scaler for blinking frequency: 7 */
+
+#define LCDBLKPRE__512      (0x0000)  /* LCD_C Clock pre-scaler for blinking frequency: 512   */
+#define LCDBLKPRE__1024     (0x0004)  /* LCD_C Clock pre-scaler for blinking frequency: 1024  */
+#define LCDBLKPRE__2048     (0x0008)  /* LCD_C Clock pre-scaler for blinking frequency: 2048  */
+#define LCDBLKPRE__4096     (0x000C)  /* LCD_C Clock pre-scaler for blinking frequency: 4096  */
+#define LCDBLKPRE__8192     (0x0010)  /* LCD_C Clock pre-scaler for blinking frequency: 8192  */
+#define LCDBLKPRE__16384    (0x0014)  /* LCD_C Clock pre-scaler for blinking frequency: 16384 */
+#define LCDBLKPRE__32768    (0x0018)  /* LCD_C Clock pre-scaler for blinking frequency: 32768 */
+#define LCDBLKPRE__65536    (0x001C)  /* LCD_C Clock pre-scaler for blinking frequency: 65536 */
+
+#define LCDBLKDIV_0         (0x0000)  /* LCD_C Clock divider for blinking frequency: 0 */
+#define LCDBLKDIV_1         (0x0020)  /* LCD_C Clock divider for blinking frequency: 1 */
+#define LCDBLKDIV_2         (0x0040)  /* LCD_C Clock divider for blinking frequency: 2 */
+#define LCDBLKDIV_3         (0x0060)  /* LCD_C Clock divider for blinking frequency: 3 */
+#define LCDBLKDIV_4         (0x0080)  /* LCD_C Clock divider for blinking frequency: 4 */
+#define LCDBLKDIV_5         (0x00A0)  /* LCD_C Clock divider for blinking frequency: 5 */
+#define LCDBLKDIV_6         (0x00C0)  /* LCD_C Clock divider for blinking frequency: 6 */
+#define LCDBLKDIV_7         (0x00E0)  /* LCD_C Clock divider for blinking frequency: 7 */
+
+#define LCDBLKDIV__1        (0x0000)  /* LCD_C Clock divider for blinking frequency: /1 */
+#define LCDBLKDIV__2        (0x0020)  /* LCD_C Clock divider for blinking frequency: /2 */
+#define LCDBLKDIV__3        (0x0040)  /* LCD_C Clock divider for blinking frequency: /3 */
+#define LCDBLKDIV__4        (0x0060)  /* LCD_C Clock divider for blinking frequency: /4 */
+#define LCDBLKDIV__5        (0x0080)  /* LCD_C Clock divider for blinking frequency: /5 */
+#define LCDBLKDIV__6        (0x00A0)  /* LCD_C Clock divider for blinking frequency: /6 */
+#define LCDBLKDIV__7        (0x00C0)  /* LCD_C Clock divider for blinking frequency: /7 */
+#define LCDBLKDIV__8        (0x00E0)  /* LCD_C Clock divider for blinking frequency: /8 */
+
+
 // LCDCMEMCTL
 #define LCDDISP             (0x0001)  /* LCD_C LCD memory registers for display */
 #define LCDCLRM             (0x0002)  /* LCD_C Clear LCD memory */
@@ -4796,6 +4833,7 @@ sfrw(SYSRSTIV, SYSRSTIV_);
 #define SYSRSTIV_MPUSEG1IFG (0x002A)   /* SYSRSTIV : MPUSEG1IFG violation */
 #define SYSRSTIV_MPUSEG2IFG (0x002C)   /* SYSRSTIV : MPUSEG2IFG violation */
 #define SYSRSTIV_MPUSEG3IFG (0x002E)   /* SYSRSTIV : MPUSEG3IFG violation */
+#define SYSRSTIV_ACCTEIFG  (0x0030)    /* SYSRSTIV : ACCTEIFG access time error */
 
 /************************************************************
 * Timer0_A3

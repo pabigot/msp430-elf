@@ -49,7 +49,7 @@
 #define __msp430FR2XX_FR4XXGENERIC
 
 
-#define __MSP430_HEADER_VERSION__ 1131
+#define __MSP430_HEADER_VERSION__ 1146      /* Beta-Build-Tag: #0006 */
 
 #define __MSP430_TI_HEADERS__
 
@@ -457,54 +457,40 @@ extern "C" {
 #define OFS_CAPCHEN1          (0x0022)   /* Captivate Channel Enable Register 1 */
 #define OFS_CAPCHEN1_L         OFS_CAPCHEN1
 #define OFS_CAPCHEN1_H         OFS_CAPCHEN1+1
-#define OFS_CAPCHEN2          (0x0024)   /* Captivate Channel Enable Register 2 */
-#define OFS_CAPCHEN2_L         OFS_CAPCHEN2
-#define OFS_CAPCHEN2_H         OFS_CAPCHEN2+1
-#define OFS_CAPCHEN3          (0x0026)   /* Captivate Channel Enable Register 3 */
-#define OFS_CAPCHEN3_L         OFS_CAPCHEN3
-#define OFS_CAPCHEN3_H         OFS_CAPCHEN3+1
-#define OFS_CAPCHEN4          (0x0028)   /* Captivate Channel Enable Register 4 */
-#define OFS_CAPCHEN4_L         OFS_CAPCHEN4
-#define OFS_CAPCHEN4_H         OFS_CAPCHEN4+1
-#define OFS_CAPCHEN5          (0x002A)   /* Captivate Channel Enable Register 5 */
-#define OFS_CAPCHEN5_L         OFS_CAPCHEN5
-#define OFS_CAPCHEN5_H         OFS_CAPCHEN5+1
-#define OFS_CAPCHCTRL0        (0x0030)   /* Captivate Channel Control 0 */
+//#define   CAPCHEN2_O            (0x0024)   /* Captivate Channel Enable Register 2 */
+//#define   CAPCHEN3_O            (0x0026)   /* Captivate Channel Enable Register 3 */
+//#define   CAPCHEN4_O            (0x0028)   /* Captivate Channel Enable Register 4 */
+//#define   CAPCHEN5_O            (0x002A)   /* Captivate Channel Enable Register 5 */
+#define OFS_CAPCHACT0         (0x002C)   /* Captivate Channel Active 0 */
+#define OFS_CAPCHACT0_L        OFS_CAPCHACT0
+#define OFS_CAPCHACT0_H        OFS_CAPCHACT0+1
+#define OFS_CAPCHACT1         (0x002E)   /* Captivate Channel Active 1 */
+#define OFS_CAPCHACT1_L        OFS_CAPCHACT1
+#define OFS_CAPCHACT1_H        OFS_CAPCHACT1+1
+//#define   CAPCHACT2_O           (0x0030)   /* Captivate Channel Active 2 */
+//#define   CAPCHACT3_O           (0x0032)   /* Captivate Channel Active 3 */
+//#define   CAPCHACT4_O           (0x0034)   /* Captivate Channel Active 4 */
+//#define   CAPCHACT5_O           (0x0036)   /* Captivate Channel Active 5 */
+#define OFS_CAPCHCTRL0        (0x0038)   /* Captivate Channel Control 0 */
 #define OFS_CAPCHCTRL0_L       OFS_CAPCHCTRL0
 #define OFS_CAPCHCTRL0_H       OFS_CAPCHCTRL0+1
-#define OFS_CAPCHCTRL1        (0x0032)   /* Captivate Channel Control 1 */
+#define OFS_CAPCHCTRL1        (0x003A)   /* Captivate Channel Control 1 */
 #define OFS_CAPCHCTRL1_L       OFS_CAPCHCTRL1
 #define OFS_CAPCHCTRL1_H       OFS_CAPCHCTRL1+1
-#define OFS_CAPCHCTRL2        (0x0034)   /* Captivate Channel Control 2 */
-#define OFS_CAPCHCTRL2_L       OFS_CAPCHCTRL2
-#define OFS_CAPCHCTRL2_H       OFS_CAPCHCTRL2+1
-#define OFS_CAPCHCTRL3        (0x0036)   /* Captivate Channel Control 3 */
-#define OFS_CAPCHCTRL3_L       OFS_CAPCHCTRL3
-#define OFS_CAPCHCTRL3_H       OFS_CAPCHCTRL3+1
-#define OFS_CAPCHCTRL4        (0x0038)   /* Captivate Channel Control 4 */
-#define OFS_CAPCHCTRL4_L       OFS_CAPCHCTRL4
-#define OFS_CAPCHCTRL4_H       OFS_CAPCHCTRL4+1
-#define OFS_CAPCHCTRL5        (0x003A)   /* Captivate Channel Control 5 */
-#define OFS_CAPCHCTRL5_L       OFS_CAPCHCTRL5
-#define OFS_CAPCHCTRL5_H       OFS_CAPCHCTRL5+1
-#define OFS_CAPCHCTRL6        (0x003C)   /* Captivate Channel Control 6 */
-#define OFS_CAPCHCTRL6_L       OFS_CAPCHCTRL6
-#define OFS_CAPCHCTRL6_H       OFS_CAPCHCTRL6+1
-#define OFS_CAPCHCTRL7        (0x003E)   /* Captivate Channel Control 7 */
-#define OFS_CAPCHCTRL7_L       OFS_CAPCHCTRL7
-#define OFS_CAPCHCTRL7_H       OFS_CAPCHCTRL7+1
-#define OFS_CAPCHCTRL8        (0x0040)   /* Captivate Channel Control 8 */
-#define OFS_CAPCHCTRL8_L       OFS_CAPCHCTRL8
-#define OFS_CAPCHCTRL8_H       OFS_CAPCHCTRL8+1
-#define OFS_CAPCHCTRL9        (0x0042)   /* Captivate Channel Control 9 */
-#define OFS_CAPCHCTRL9_L       OFS_CAPCHCTRL9
-#define OFS_CAPCHCTRL9_H       OFS_CAPCHCTRL9+1
-#define OFS_CAPCHCTRL10       (0x0044)   /* Captivate Channel Control 10 */
-#define OFS_CAPCHCTRL10_L      OFS_CAPCHCTRL10
-#define OFS_CAPCHCTRL10_H      OFS_CAPCHCTRL10+1
-#define OFS_CAPCHCTRL11       (0x0046)   /* Captivate Channel Control 11 */
-#define OFS_CAPCHCTRL11_L      OFS_CAPCHCTRL11
-#define OFS_CAPCHCTRL11_H      OFS_CAPCHCTRL11+1
+//#define   CAPCHCTRL2_O          (0x003C)   /* Captivate Channel Control 2 */
+//#define   CAPCHCTRL3_O          (0x003E)   /* Captivate Channel Control 3 */
+//#define   CAPCHCTRL4_O          (0x0040)   /* Captivate Channel Control 4 */
+//#define   CAPCHCTRL5_O          (0x0042)   /* Captivate Channel Control 5 */
+#define OFS_CAPCHOFF0         (0x0044)   /* Captivate Channel Off 0 */
+#define OFS_CAPCHOFF0_L        OFS_CAPCHOFF0
+#define OFS_CAPCHOFF0_H        OFS_CAPCHOFF0+1
+#define OFS_CAPCHOFF1         (0x0046)   /* Captivate Channel Off 1 */
+#define OFS_CAPCHOFF1_L        OFS_CAPCHOFF1
+#define OFS_CAPCHOFF1_H        OFS_CAPCHOFF1+1
+//#define   CAPCHOFF2_O           (0x0048)   /* Captivate Channel Off 2 */
+//#define   CAPCHOFF3_O           (0x004A)   /* Captivate Channel Off 3 */
+//#define   CAPCHOFF4_O           (0x004C)   /* Captivate Channel Off 4 */
+//#define   CAPCHOFF5_O           (0x004E)   /* Captivate Channel Off 5 */
 #define OFS_CAPRATIO0         (0x0050)   /* Captivate Ratio Block 0 */
 #define OFS_CAPRATIO0_L        OFS_CAPRATIO0
 #define OFS_CAPRATIO0_H        OFS_CAPRATIO0+1
@@ -613,76 +599,76 @@ extern "C" {
 #define OFS_CAPCVD11          (0x00A6)   /* Captivate Conversion Data Register 11 */
 #define OFS_CAPCVD11_L         OFS_CAPCVD11
 #define OFS_CAPCVD11_H         OFS_CAPCVD11+1
-#define OFS_CAPFCINT0         (0x00B0)   /* Captivate Filtered Count Integer Value Register */
+#define OFS_CAPFCINT0         (0x00B0)   /* Captivate Filtered Count Integer Value Register 0 */
 #define OFS_CAPFCINT0_L        OFS_CAPFCINT0
 #define OFS_CAPFCINT0_H        OFS_CAPFCINT0+1
-#define OFS_CAPFCDEC0         (0x00B2)   /* Captivate Filtered Count Decimal Value Register */
+#define OFS_CAPFCDEC0         (0x00B2)   /* Captivate Filtered Count Decimal Value Register 0 */
 #define OFS_CAPFCDEC0_L        OFS_CAPFCDEC0
 #define OFS_CAPFCDEC0_H        OFS_CAPFCDEC0+1
-#define OFS_CAPFCINT1         (0x00B4)   /* Captivate Filtered Count Integer Value Register */
+#define OFS_CAPFCINT1         (0x00B4)   /* Captivate Filtered Count Integer Value Register 1 */
 #define OFS_CAPFCINT1_L        OFS_CAPFCINT1
 #define OFS_CAPFCINT1_H        OFS_CAPFCINT1+1
-#define OFS_CAPFCDEC1         (0x00B6)   /* Captivate Filtered Count Decimal Value Register */
+#define OFS_CAPFCDEC1         (0x00B6)   /* Captivate Filtered Count Decimal Value Register 1 */
 #define OFS_CAPFCDEC1_L        OFS_CAPFCDEC1
 #define OFS_CAPFCDEC1_H        OFS_CAPFCDEC1+1
-#define OFS_CAPFCINT2         (0x00B8)   /* Captivate Filtered Count Integer Value Register */
+#define OFS_CAPFCINT2         (0x00B8)   /* Captivate Filtered Count Integer Value Register 2 */
 #define OFS_CAPFCINT2_L        OFS_CAPFCINT2
 #define OFS_CAPFCINT2_H        OFS_CAPFCINT2+1
-#define OFS_CAPFCDEC2         (0x00BA)   /* Captivate Filtered Count Decimal Value Register */
+#define OFS_CAPFCDEC2         (0x00BA)   /* Captivate Filtered Count Decimal Value Register 2 */
 #define OFS_CAPFCDEC2_L        OFS_CAPFCDEC2
 #define OFS_CAPFCDEC2_H        OFS_CAPFCDEC2+1
-#define OFS_CAPFCINT3         (0x00BC)   /* Captivate Filtered Count Integer Value Register */
+#define OFS_CAPFCINT3         (0x00BC)   /* Captivate Filtered Count Integer Value Register 3 */
 #define OFS_CAPFCINT3_L        OFS_CAPFCINT3
 #define OFS_CAPFCINT3_H        OFS_CAPFCINT3+1
-#define OFS_CAPFCDEC3         (0x00BE)   /* Captivate Filtered Count Decimal Value Register */
+#define OFS_CAPFCDEC3         (0x00BE)   /* Captivate Filtered Count Decimal Value Register 3 */
 #define OFS_CAPFCDEC3_L        OFS_CAPFCDEC3
 #define OFS_CAPFCDEC3_H        OFS_CAPFCDEC3+1
-#define OFS_CAPFCINT4         (0x00C0)   /* Captivate Filtered Count Integer Value Register */
+#define OFS_CAPFCINT4         (0x00C0)   /* Captivate Filtered Count Integer Value Register 4 */
 #define OFS_CAPFCINT4_L        OFS_CAPFCINT4
 #define OFS_CAPFCINT4_H        OFS_CAPFCINT4+1
-#define OFS_CAPFCDEC4         (0x00C2)   /* Captivate Filtered Count Decimal Value Register */
+#define OFS_CAPFCDEC4         (0x00C2)   /* Captivate Filtered Count Decimal Value Register 4 */
 #define OFS_CAPFCDEC4_L        OFS_CAPFCDEC4
 #define OFS_CAPFCDEC4_H        OFS_CAPFCDEC4+1
-#define OFS_CAPFCINT5         (0x00C4)   /* Captivate Filtered Count Integer Value Register */
+#define OFS_CAPFCINT5         (0x00C4)   /* Captivate Filtered Count Integer Value Register 5 */
 #define OFS_CAPFCINT5_L        OFS_CAPFCINT5
 #define OFS_CAPFCINT5_H        OFS_CAPFCINT5+1
-#define OFS_CAPFCDEC5         (0x00C6)   /* Captivate Filtered Count Decimal Value Register */
+#define OFS_CAPFCDEC5         (0x00C6)   /* Captivate Filtered Count Decimal Value Register 5 */
 #define OFS_CAPFCDEC5_L        OFS_CAPFCDEC5
 #define OFS_CAPFCDEC5_H        OFS_CAPFCDEC5+1
-#define OFS_CAPFCINT6         (0x00C8)   /* Captivate Filtered Count Integer Value Register */
+#define OFS_CAPFCINT6         (0x00C8)   /* Captivate Filtered Count Integer Value Register 6 */
 #define OFS_CAPFCINT6_L        OFS_CAPFCINT6
 #define OFS_CAPFCINT6_H        OFS_CAPFCINT6+1
-#define OFS_CAPFCDEC6         (0x00CA)   /* Captivate Filtered Count Decimal Value Register */
+#define OFS_CAPFCDEC6         (0x00CA)   /* Captivate Filtered Count Decimal Value Register 6 */
 #define OFS_CAPFCDEC6_L        OFS_CAPFCDEC6
 #define OFS_CAPFCDEC6_H        OFS_CAPFCDEC6+1
-#define OFS_CAPFCINT7         (0x00CC)   /* Captivate Filtered Count Integer Value Register */
+#define OFS_CAPFCINT7         (0x00CC)   /* Captivate Filtered Count Integer Value Register 7 */
 #define OFS_CAPFCINT7_L        OFS_CAPFCINT7
 #define OFS_CAPFCINT7_H        OFS_CAPFCINT7+1
-#define OFS_CAPFCDEC7         (0x00CE)   /* Captivate Filtered Count Decimal Value Register */
+#define OFS_CAPFCDEC7         (0x00CE)   /* Captivate Filtered Count Decimal Value Register 7 */
 #define OFS_CAPFCDEC7_L        OFS_CAPFCDEC7
 #define OFS_CAPFCDEC7_H        OFS_CAPFCDEC7+1
-#define OFS_CAPFCINT8         (0x00D0)   /* Captivate Filtered Count Integer Value Register */
+#define OFS_CAPFCINT8         (0x00D0)   /* Captivate Filtered Count Integer Value Register 8 */
 #define OFS_CAPFCINT8_L        OFS_CAPFCINT8
 #define OFS_CAPFCINT8_H        OFS_CAPFCINT8+1
-#define OFS_CAPFCDEC8         (0x00D2)   /* Captivate Filtered Count Decimal Value Register */
+#define OFS_CAPFCDEC8         (0x00D2)   /* Captivate Filtered Count Decimal Value Register 8 */
 #define OFS_CAPFCDEC8_L        OFS_CAPFCDEC8
 #define OFS_CAPFCDEC8_H        OFS_CAPFCDEC8+1
-#define OFS_CAPFCINT9         (0x00D4)   /* Captivate Filtered Count Integer Value Register */
+#define OFS_CAPFCINT9         (0x00D4)   /* Captivate Filtered Count Integer Value Register 9 */
 #define OFS_CAPFCINT9_L        OFS_CAPFCINT9
 #define OFS_CAPFCINT9_H        OFS_CAPFCINT9+1
-#define OFS_CAPFCDEC9         (0x00D6)   /* Captivate Filtered Count Decimal Value Register */
+#define OFS_CAPFCDEC9         (0x00D6)   /* Captivate Filtered Count Decimal Value Register 9 */
 #define OFS_CAPFCDEC9_L        OFS_CAPFCDEC9
 #define OFS_CAPFCDEC9_H        OFS_CAPFCDEC9+1
-#define OFS_CAPFCINT10        (0x00D8)   /* Captivate Filtered Count Integer Value Register */
+#define OFS_CAPFCINT10        (0x00D8)   /* Captivate Filtered Count Integer Value Register 10 */
 #define OFS_CAPFCINT10_L       OFS_CAPFCINT10
 #define OFS_CAPFCINT10_H       OFS_CAPFCINT10+1
-#define OFS_CAPFCDEC10        (0x00DA)   /* Captivate Filtered Count Decimal Value Register */
+#define OFS_CAPFCDEC10        (0x00DA)   /* Captivate Filtered Count Decimal Value Register 10 */
 #define OFS_CAPFCDEC10_L       OFS_CAPFCDEC10
 #define OFS_CAPFCDEC10_H       OFS_CAPFCDEC10+1
-#define OFS_CAPFCINT11        (0x00DC)   /* Captivate Filtered Count Integer Value Register */
+#define OFS_CAPFCINT11        (0x00DC)   /* Captivate Filtered Count Integer Value Register 11 */
 #define OFS_CAPFCINT11_L       OFS_CAPFCINT11
 #define OFS_CAPFCINT11_H       OFS_CAPFCINT11+1
-#define OFS_CAPFCDEC11        (0x00DE)   /* Captivate Filtered Count Decimal Value Register */
+#define OFS_CAPFCDEC11        (0x00DE)   /* Captivate Filtered Count Decimal Value Register 11 */
 #define OFS_CAPFCDEC11_L       OFS_CAPFCDEC11
 #define OFS_CAPFCDEC11_H       OFS_CAPFCDEC11+1
 #define OFS_CAPLTAINT0        (0x00F0)   /* Captivate LTA Integer Value Register 0 */
@@ -940,38 +926,38 @@ extern "C" {
 #define CPHLEN2_H           (0x0004)  /* Configure Captivate block Bit 2 */
 #define CPHLEN3_H           (0x0008)  /* Configure Captivate block Bit 3 */
 
-#define TPHLEN_0           (0x0000)  /* Configure Captivate block: 0 */
-#define TPHLEN_1           (0x0001)  /* Configure Captivate block: 1 */
-#define TPHLEN_2           (0x0002)  /* Configure Captivate block: 2 */
-#define TPHLEN_3           (0x0003)  /* Configure Captivate block: 3 */
-#define TPHLEN_4           (0x0004)  /* Configure Captivate block: 4 */
-#define TPHLEN_5           (0x0005)  /* Configure Captivate block: 5 */
-#define TPHLEN_6           (0x0006)  /* Configure Captivate block: 6 */
-#define TPHLEN_7           (0x0007)  /* Configure Captivate block: 7 */
-#define TPHLEN_8           (0x0008)  /* Configure Captivate block: 8 */
-#define TPHLEN_9           (0x0009)  /* Configure Captivate block: 9 */
-#define TPHLEN_10           (0x000A)  /* Configure Captivate block: 10 */
-#define TPHLEN_11           (0x000B)  /* Configure Captivate block: 11 */
-#define TPHLEN_12           (0x000C)  /* Configure Captivate block: 12 */
-#define TPHLEN_13           (0x000D)  /* Configure Captivate block: 13 */
-#define TPHLEN_14           (0x000E)  /* Configure Captivate block: 14 */
-#define TPHLEN_15           (0x000F)  /* Configure Captivate block: 15 */
-#define CPHLEN_0           (0x0000)  /* Configure Captivate block: 0 */
-#define CPHLEN_1           (0x0100)  /* Configure Captivate block: 1 */
-#define CPHLEN_2           (0x0200)  /* Configure Captivate block: 2 */
-#define CPHLEN_3           (0x0300)  /* Configure Captivate block: 3 */
-#define CPHLEN_4           (0x0400)  /* Configure Captivate block: 4 */
-#define CPHLEN_5           (0x0500)  /* Configure Captivate block: 5 */
-#define CPHLEN_6           (0x0600)  /* Configure Captivate block: 6 */
-#define CPHLEN_7           (0x0700)  /* Configure Captivate block: 7 */
-#define CPHLEN_8           (0x0800)  /* Configure Captivate block: 8 */
-#define CPHLEN_9           (0x0900)  /* Configure Captivate block: 9 */
-#define CPHLEN_10           (0x0A00)  /* Configure Captivate block: 10 */
-#define CPHLEN_11           (0x0B00)  /* Configure Captivate block: 11 */
-#define CPHLEN_12           (0x0C00)  /* Configure Captivate block: 12 */
-#define CPHLEN_13           (0x0D00)  /* Configure Captivate block: 13 */
-#define CPHLEN_14           (0x0E00)  /* Configure Captivate block: 14 */
-#define CPHLEN_15           (0x0F00)  /* Configure Captivate block: 15 */
+#define TPHLEN_0            (0x0000)  /* Configure Captivate block: 0 */
+#define TPHLEN_1            (0x0001)  /* Configure Captivate block: 1 */
+#define TPHLEN_2            (0x0002)  /* Configure Captivate block: 2 */
+#define TPHLEN_3            (0x0003)  /* Configure Captivate block: 3 */
+#define TPHLEN_4            (0x0004)  /* Configure Captivate block: 4 */
+#define TPHLEN_5            (0x0005)  /* Configure Captivate block: 5 */
+#define TPHLEN_6            (0x0006)  /* Configure Captivate block: 6 */
+#define TPHLEN_7            (0x0007)  /* Configure Captivate block: 7 */
+#define TPHLEN_8            (0x0008)  /* Configure Captivate block: 8 */
+#define TPHLEN_9            (0x0009)  /* Configure Captivate block: 9 */
+#define TPHLEN_10            (0x000A)  /* Configure Captivate block: 10 */
+#define TPHLEN_11            (0x000B)  /* Configure Captivate block: 11 */
+#define TPHLEN_12            (0x000C)  /* Configure Captivate block: 12 */
+#define TPHLEN_13            (0x000D)  /* Configure Captivate block: 13 */
+#define TPHLEN_14            (0x000E)  /* Configure Captivate block: 14 */
+#define TPHLEN_15            (0x000F)  /* Configure Captivate block: 15 */
+#define CPHLEN_0            (0x0000)  /* Configure Captivate block: 0 */
+#define CPHLEN_1            (0x0100)  /* Configure Captivate block: 1 */
+#define CPHLEN_2            (0x0200)  /* Configure Captivate block: 2 */
+#define CPHLEN_3            (0x0300)  /* Configure Captivate block: 3 */
+#define CPHLEN_4            (0x0400)  /* Configure Captivate block: 4 */
+#define CPHLEN_5            (0x0500)  /* Configure Captivate block: 5 */
+#define CPHLEN_6            (0x0600)  /* Configure Captivate block: 6 */
+#define CPHLEN_7            (0x0700)  /* Configure Captivate block: 7 */
+#define CPHLEN_8            (0x0800)  /* Configure Captivate block: 8 */
+#define CPHLEN_9            (0x0900)  /* Configure Captivate block: 9 */
+#define CPHLEN_10            (0x0A00)  /* Configure Captivate block: 10 */
+#define CPHLEN_11            (0x0B00)  /* Configure Captivate block: 11 */
+#define CPHLEN_12            (0x0C00)  /* Configure Captivate block: 12 */
+#define CPHLEN_13            (0x0D00)  /* Configure Captivate block: 13 */
+#define CPHLEN_14            (0x0E00)  /* Configure Captivate block: 14 */
+#define CPHLEN_15            (0x0F00)  /* Configure Captivate block: 15 */
 
 /* CAPTCCTRL0 */
 #define CAPTIMEN            (0x0001)  /* Captivate timer enable */
@@ -1050,76 +1036,76 @@ extern "C" {
 #define CAPTCNTRSEL__2048   (0x1C00)  /* Captivate counter select: 2048 */
 
 /* CAPTMR0 */
-#define xCAPTMR0            (0x0001)  /* count of the Captivate timer Bit 0 */
-#define xCAPTMR1            (0x0002)  /* count of the Captivate timer Bit 1 */
-#define xCAPTMR2            (0x0004)  /* count of the Captivate timer Bit 2 */
-#define xCAPTMR3            (0x0008)  /* count of the Captivate timer Bit 3 */
-#define xCAPTMR4            (0x0010)  /* count of the Captivate timer Bit 4 */
-#define xCAPTMR5            (0x0020)  /* count of the Captivate timer Bit 5 */
-#define xCAPTMR6            (0x0040)  /* count of the Captivate timer Bit 6 */
-#define xCAPTMR7            (0x0080)  /* count of the Captivate timer Bit 7 */
-#define xCAPTMR8            (0x0100)  /* count of the Captivate timer Bit 8 */
-#define xCAPTMR9            (0x0200)  /* count of the Captivate timer Bit 9 */
-#define xCAPTMR10            (0x0400)  /* count of the Captivate timer Bit 10 */
-#define xCAPTMR11            (0x0800)  /* count of the Captivate timer Bit 11 */
-#define xCAPTMR12            (0x1000)  /* count of the Captivate timer Bit 12 */
-#define xCAPTMR13            (0x2000)  /* count of the Captivate timer Bit 13 */
-#define xCAPTMR14            (0x4000)  /* count of the Captivate timer Bit 14 */
-#define xCAPTMR15            (0x8000)  /* count of the Captivate timer Bit 15 */
+#define xCAPTMR0            (0x0001)  /* Count of the Captivate timer Bit 0 */
+#define xCAPTMR1            (0x0002)  /* Count of the Captivate timer Bit 1 */
+#define xCAPTMR2            (0x0004)  /* Count of the Captivate timer Bit 2 */
+#define xCAPTMR3            (0x0008)  /* Count of the Captivate timer Bit 3 */
+#define xCAPTMR4            (0x0010)  /* Count of the Captivate timer Bit 4 */
+#define xCAPTMR5            (0x0020)  /* Count of the Captivate timer Bit 5 */
+#define xCAPTMR6            (0x0040)  /* Count of the Captivate timer Bit 6 */
+#define xCAPTMR7            (0x0080)  /* Count of the Captivate timer Bit 7 */
+#define xCAPTMR8            (0x0100)  /* Count of the Captivate timer Bit 8 */
+#define xCAPTMR9            (0x0200)  /* Count of the Captivate timer Bit 9 */
+#define xCAPTMR10            (0x0400)  /* Count of the Captivate timer Bit 10 */
+#define xCAPTMR11            (0x0800)  /* Count of the Captivate timer Bit 11 */
+#define xCAPTMR12            (0x1000)  /* Count of the Captivate timer Bit 12 */
+#define xCAPTMR13            (0x2000)  /* Count of the Captivate timer Bit 13 */
+#define xCAPTMR14            (0x4000)  /* Count of the Captivate timer Bit 14 */
+#define xCAPTMR15            (0x8000)  /* Count of the Captivate timer Bit 15 */
 
-#define xCAPTMR0_L          (0x0001)  /* count of the Captivate timer Bit 0 */
-#define xCAPTMR1_L          (0x0002)  /* count of the Captivate timer Bit 1 */
-#define xCAPTMR2_L          (0x0004)  /* count of the Captivate timer Bit 2 */
-#define xCAPTMR3_L          (0x0008)  /* count of the Captivate timer Bit 3 */
-#define xCAPTMR4_L          (0x0010)  /* count of the Captivate timer Bit 4 */
-#define xCAPTMR5_L          (0x0020)  /* count of the Captivate timer Bit 5 */
-#define xCAPTMR6_L          (0x0040)  /* count of the Captivate timer Bit 6 */
-#define xCAPTMR7_L          (0x0080)  /* count of the Captivate timer Bit 7 */
+#define xCAPTMR0_L          (0x0001)  /* Count of the Captivate timer Bit 0 */
+#define xCAPTMR1_L          (0x0002)  /* Count of the Captivate timer Bit 1 */
+#define xCAPTMR2_L          (0x0004)  /* Count of the Captivate timer Bit 2 */
+#define xCAPTMR3_L          (0x0008)  /* Count of the Captivate timer Bit 3 */
+#define xCAPTMR4_L          (0x0010)  /* Count of the Captivate timer Bit 4 */
+#define xCAPTMR5_L          (0x0020)  /* Count of the Captivate timer Bit 5 */
+#define xCAPTMR6_L          (0x0040)  /* Count of the Captivate timer Bit 6 */
+#define xCAPTMR7_L          (0x0080)  /* Count of the Captivate timer Bit 7 */
 
-#define xCAPTMR8_H          (0x0001)  /* count of the Captivate timer Bit 8 */
-#define xCAPTMR9_H          (0x0002)  /* count of the Captivate timer Bit 9 */
-#define xCAPTMR10_H         (0x0004)  /* count of the Captivate timer Bit 10 */
-#define xCAPTMR11_H         (0x0008)  /* count of the Captivate timer Bit 11 */
-#define xCAPTMR12_H         (0x0010)  /* count of the Captivate timer Bit 12 */
-#define xCAPTMR13_H         (0x0020)  /* count of the Captivate timer Bit 13 */
-#define xCAPTMR14_H         (0x0040)  /* count of the Captivate timer Bit 14 */
-#define xCAPTMR15_H         (0x0080)  /* count of the Captivate timer Bit 15 */
+#define xCAPTMR8_H          (0x0001)  /* Count of the Captivate timer Bit 8 */
+#define xCAPTMR9_H          (0x0002)  /* Count of the Captivate timer Bit 9 */
+#define xCAPTMR10_H         (0x0004)  /* Count of the Captivate timer Bit 10 */
+#define xCAPTMR11_H         (0x0008)  /* Count of the Captivate timer Bit 11 */
+#define xCAPTMR12_H         (0x0010)  /* Count of the Captivate timer Bit 12 */
+#define xCAPTMR13_H         (0x0020)  /* Count of the Captivate timer Bit 13 */
+#define xCAPTMR14_H         (0x0040)  /* Count of the Captivate timer Bit 14 */
+#define xCAPTMR15_H         (0x0080)  /* Count of the Captivate timer Bit 15 */
 
 /* CAPTCR0 */
-#define CAPTCMP0           (0x0001)  /* data for the comparison to the timer value Bit 0 */
-#define CAPTCMP1           (0x0002)  /* data for the comparison to the timer value Bit 1 */
-#define CAPTCMP2           (0x0004)  /* data for the comparison to the timer value Bit 2 */
-#define CAPTCMP3           (0x0008)  /* data for the comparison to the timer value Bit 3 */
-#define CAPTCMP4           (0x0010)  /* data for the comparison to the timer value Bit 4 */
-#define CAPTCMP5           (0x0020)  /* data for the comparison to the timer value Bit 5 */
-#define CAPTCMP6           (0x0040)  /* data for the comparison to the timer value Bit 6 */
-#define CAPTCMP7           (0x0080)  /* data for the comparison to the timer value Bit 7 */
-#define CAPTCMP8           (0x0100)  /* data for the comparison to the timer value Bit 8 */
-#define CAPTCMP9           (0x0200)  /* data for the comparison to the timer value Bit 9 */
-#define CAPTCMP10           (0x0400)  /* data for the comparison to the timer value Bit 10 */
-#define CAPTCMP11           (0x0800)  /* data for the comparison to the timer value Bit 11 */
-#define CAPTCMP12           (0x1000)  /* data for the comparison to the timer value Bit 12 */
-#define CAPTCMP13           (0x2000)  /* data for the comparison to the timer value Bit 13 */
-#define CAPTCMP14           (0x4000)  /* data for the comparison to the timer value Bit 14 */
-#define CAPTCMP15           (0x8000)  /* data for the comparison to the timer value Bit 15 */
+#define CAPTCMP0           (0x0001)  /* Data for the comparison to the timer value Bit 0 */
+#define CAPTCMP1           (0x0002)  /* Data for the comparison to the timer value Bit 1 */
+#define CAPTCMP2           (0x0004)  /* Data for the comparison to the timer value Bit 2 */
+#define CAPTCMP3           (0x0008)  /* Data for the comparison to the timer value Bit 3 */
+#define CAPTCMP4           (0x0010)  /* Data for the comparison to the timer value Bit 4 */
+#define CAPTCMP5           (0x0020)  /* Data for the comparison to the timer value Bit 5 */
+#define CAPTCMP6           (0x0040)  /* Data for the comparison to the timer value Bit 6 */
+#define CAPTCMP7           (0x0080)  /* Data for the comparison to the timer value Bit 7 */
+#define CAPTCMP8           (0x0100)  /* Data for the comparison to the timer value Bit 8 */
+#define CAPTCMP9           (0x0200)  /* Data for the comparison to the timer value Bit 9 */
+#define CAPTCMP10           (0x0400)  /* Data for the comparison to the timer value Bit 10 */
+#define CAPTCMP11           (0x0800)  /* Data for the comparison to the timer value Bit 11 */
+#define CAPTCMP12           (0x1000)  /* Data for the comparison to the timer value Bit 12 */
+#define CAPTCMP13           (0x2000)  /* Data for the comparison to the timer value Bit 13 */
+#define CAPTCMP14           (0x4000)  /* Data for the comparison to the timer value Bit 14 */
+#define CAPTCMP15           (0x8000)  /* Data for the comparison to the timer value Bit 15 */
 
-#define CAPTCMP0_L          (0x0001)  /* data for the comparison to the timer value Bit 0 */
-#define CAPTCMP1_L          (0x0002)  /* data for the comparison to the timer value Bit 1 */
-#define CAPTCMP2_L          (0x0004)  /* data for the comparison to the timer value Bit 2 */
-#define CAPTCMP3_L          (0x0008)  /* data for the comparison to the timer value Bit 3 */
-#define CAPTCMP4_L          (0x0010)  /* data for the comparison to the timer value Bit 4 */
-#define CAPTCMP5_L          (0x0020)  /* data for the comparison to the timer value Bit 5 */
-#define CAPTCMP6_L          (0x0040)  /* data for the comparison to the timer value Bit 6 */
-#define CAPTCMP7_L          (0x0080)  /* data for the comparison to the timer value Bit 7 */
+#define CAPTCMP0_L          (0x0001)  /* Data for the comparison to the timer value Bit 0 */
+#define CAPTCMP1_L          (0x0002)  /* Data for the comparison to the timer value Bit 1 */
+#define CAPTCMP2_L          (0x0004)  /* Data for the comparison to the timer value Bit 2 */
+#define CAPTCMP3_L          (0x0008)  /* Data for the comparison to the timer value Bit 3 */
+#define CAPTCMP4_L          (0x0010)  /* Data for the comparison to the timer value Bit 4 */
+#define CAPTCMP5_L          (0x0020)  /* Data for the comparison to the timer value Bit 5 */
+#define CAPTCMP6_L          (0x0040)  /* Data for the comparison to the timer value Bit 6 */
+#define CAPTCMP7_L          (0x0080)  /* Data for the comparison to the timer value Bit 7 */
 
-#define CAPTCMP8_H          (0x0001)  /* data for the comparison to the timer value Bit 8 */
-#define CAPTCMP9_H          (0x0002)  /* data for the comparison to the timer value Bit 9 */
-#define CAPTCMP10_H         (0x0004)  /* data for the comparison to the timer value Bit 10 */
-#define CAPTCMP11_H         (0x0008)  /* data for the comparison to the timer value Bit 11 */
-#define CAPTCMP12_H         (0x0010)  /* data for the comparison to the timer value Bit 12 */
-#define CAPTCMP13_H         (0x0020)  /* data for the comparison to the timer value Bit 13 */
-#define CAPTCMP14_H         (0x0040)  /* data for the comparison to the timer value Bit 14 */
-#define CAPTCMP15_H         (0x0080)  /* data for the comparison to the timer value Bit 15 */
+#define CAPTCMP8_H          (0x0001)  /* Data for the comparison to the timer value Bit 8 */
+#define CAPTCMP9_H          (0x0002)  /* Data for the comparison to the timer value Bit 9 */
+#define CAPTCMP10_H         (0x0004)  /* Data for the comparison to the timer value Bit 10 */
+#define CAPTCMP11_H         (0x0008)  /* Data for the comparison to the timer value Bit 11 */
+#define CAPTCMP12_H         (0x0010)  /* Data for the comparison to the timer value Bit 12 */
+#define CAPTCMP13_H         (0x0020)  /* Data for the comparison to the timer value Bit 13 */
+#define CAPTCMP14_H         (0x0040)  /* Data for the comparison to the timer value Bit 14 */
+#define CAPTCMP15_H         (0x0080)  /* Data for the comparison to the timer value Bit 15 */
 
 /* CAPCNTMAX */
 #define CNTMAX0            (0x0001)  /* Maximum Count Value Register Bit 0 */
@@ -1151,8 +1137,695 @@ extern "C" {
 #define CNTMAX11_H          (0x0008)  /* Maximum Count Value Register Bit 11 */
 #define CNTMAX12_H          (0x0010)  /* Maximum Count Value Register Bit 12 */
 
+/* CAPFSMCTRL0 */
+#define LTABETA0            (0x0001)  /* These bits weight the value for the LTA data measurement. Bit 0 */
+#define LTABETA1            (0x0002)  /* These bits weight the value for the LTA data measurement. Bit 1 */
+#define LTABETA2            (0x0004)  /* These bits weight the value for the LTA data measurement. Bit 2 */
+#define LTACTRL0            (0x0008)  /* LTA control Bit 0 */
+#define LTACTRL1            (0x0010)  /* LTA control Bit 1 */
+#define CNTBETA0            (0x0100)  /* These bits weight the value for the filtered data measurement. Bit 0 */
+#define CNTBETA1            (0x0200)  /* These bits weight the value for the filtered data measurement. Bit 1 */
+#define CNTBETA2            (0x0400)  /* These bits weight the value for the filtered data measurement. Bit 2 */
+#define FSMBYPS             (0x0800)  /* Bypass the processing state machine */
+
+#define LTABETA0_L          (0x0001)  /* These bits weight the value for the LTA data measurement. Bit 0 */
+#define LTABETA1_L          (0x0002)  /* These bits weight the value for the LTA data measurement. Bit 1 */
+#define LTABETA2_L          (0x0004)  /* These bits weight the value for the LTA data measurement. Bit 2 */
+#define LTACTRL0_L          (0x0008)  /* LTA control Bit 0 */
+#define LTACTRL1_L          (0x0010)  /* LTA control Bit 1 */
+
+#define CNTBETA0_H          (0x0001)  /* These bits weight the value for the filtered data measurement. Bit 0 */
+#define CNTBETA1_H          (0x0002)  /* These bits weight the value for the filtered data measurement. Bit 1 */
+#define CNTBETA2_H          (0x0004)  /* These bits weight the value for the filtered data measurement. Bit 2 */
+#define FSMBYPS_H           (0x0008)  /* Bypass the processing state machine */
+
+#define LTABETA_0           (0x0000)  /* Filtered count beta value: 0 */
+#define LTABETA_1           (0x0001)  /* Filtered count beta value: 1 */
+#define LTABETA_2           (0x0002)  /* Filtered count beta value: 2 */
+#define LTABETA_3           (0x0003)  /* Filtered count beta value: 3 */
+#define LTABETA_4           (0x0004)  /* Filtered count beta value: 4 */
+#define LTABETA_5           (0x0005)  /* Filtered count beta value: 5 */
+#define LTABETA_6           (0x0006)  /* Filtered count beta value: 6 */
+#define LTABETA_7           (0x0007)  /* Filtered count beta value: 7 */
+
+#define LTACTRL_0           (0x0000)  /* LTA control: 0 */
+#define LTACTRL_1           (0x0008)  /* LTA control: 1 */
+#define LTACTRL_2           (0x0010)  /* LTA control: 2 */
+#define LTACTRL_3           (0x0018)  /* LTA control: 3 */
+
+#define CNTBETA_0           (0x0000)  /* Filtered count beta value: 0 */
+#define CNTBETA_1           (0x0100)  /* Filtered count beta value: 1 */
+#define CNTBETA_2           (0x0200)  /* Filtered count beta value: 2 */
+#define CNTBETA_3           (0x0300)  /* Filtered count beta value: 3 */
+#define CNTBETA_4           (0x0400)  /* Filtered count beta value: 4 */
+#define CNTBETA_5           (0x0500)  /* Filtered count beta value: 5 */
+#define CNTBETA_6           (0x0600)  /* Filtered count beta value: 6 */
+#define CNTBETA_7           (0x0700)  /* Filtered count beta value: 7 */
+
+/* CAPTHRHI */
+#define HITHRES0           (0x0001)  /* Upper threshold level Bit 0 */
+#define HITHRES1           (0x0002)  /* Upper threshold level Bit 1 */
+#define HITHRES2           (0x0004)  /* Upper threshold level Bit 2 */
+#define HITHRES3           (0x0008)  /* Upper threshold level Bit 3 */
+#define HITHRES4           (0x0010)  /* Upper threshold level Bit 4 */
+#define HITHRES5           (0x0020)  /* Upper threshold level Bit 5 */
+#define HITHRES6           (0x0040)  /* Upper threshold level Bit 6 */
+#define HITHRES7           (0x0080)  /* Upper threshold level Bit 7 */
+#define HITHRES8           (0x0100)  /* Upper threshold level Bit 8 */
+#define HITHRES9           (0x0200)  /* Upper threshold level Bit 9 */
+#define HITHRES10           (0x0400)  /* Upper threshold level Bit 10 */
+#define HITHRES11           (0x0800)  /* Upper threshold level Bit 11 */
+#define HITHRES12           (0x1000)  /* Upper threshold level Bit 12 */
+
+#define HITHRES0_L          (0x0001)  /* Upper threshold level Bit 0 */
+#define HITHRES1_L          (0x0002)  /* Upper threshold level Bit 1 */
+#define HITHRES2_L          (0x0004)  /* Upper threshold level Bit 2 */
+#define HITHRES3_L          (0x0008)  /* Upper threshold level Bit 3 */
+#define HITHRES4_L          (0x0010)  /* Upper threshold level Bit 4 */
+#define HITHRES5_L          (0x0020)  /* Upper threshold level Bit 5 */
+#define HITHRES6_L          (0x0040)  /* Upper threshold level Bit 6 */
+#define HITHRES7_L          (0x0080)  /* Upper threshold level Bit 7 */
+
+#define HITHRES8_H          (0x0001)  /* Upper threshold level Bit 8 */
+#define HITHRES9_H          (0x0002)  /* Upper threshold level Bit 9 */
+#define HITHRES10_H         (0x0004)  /* Upper threshold level Bit 10 */
+#define HITHRES11_H         (0x0008)  /* Upper threshold level Bit 11 */
+#define HITHRES12_H         (0x0010)  /* Upper threshold level Bit 12 */
+
+/* CAPTHRLO */
+#define LOTHRES0           (0x0001)  /* Lower threshold level Bit 0 */
+#define LOTHRES1           (0x0002)  /* Lower threshold level Bit 1 */
+#define LOTHRES2           (0x0004)  /* Lower threshold level Bit 2 */
+#define LOTHRES3           (0x0008)  /* Lower threshold level Bit 3 */
+#define LOTHRES4           (0x0010)  /* Lower threshold level Bit 4 */
+#define LOTHRES5           (0x0020)  /* Lower threshold level Bit 5 */
+#define LOTHRES6           (0x0040)  /* Lower threshold level Bit 6 */
+#define LOTHRES7           (0x0080)  /* Lower threshold level Bit 7 */
+#define LOTHRES8           (0x0100)  /* Lower threshold level Bit 8 */
+#define LOTHRES9           (0x0200)  /* Lower threshold level Bit 9 */
+#define LOTHRES10           (0x0400)  /* Lower threshold level Bit 10 */
+#define LOTHRES11           (0x0800)  /* Lower threshold level Bit 11 */
+#define LOTHRES12           (0x1000)  /* Lower threshold level Bit 12 */
+
+#define LOTHRES0_L          (0x0001)  /* Lower threshold level Bit 0 */
+#define LOTHRES1_L          (0x0002)  /* Lower threshold level Bit 1 */
+#define LOTHRES2_L          (0x0004)  /* Lower threshold level Bit 2 */
+#define LOTHRES3_L          (0x0008)  /* Lower threshold level Bit 3 */
+#define LOTHRES4_L          (0x0010)  /* Lower threshold level Bit 4 */
+#define LOTHRES5_L          (0x0020)  /* Lower threshold level Bit 5 */
+#define LOTHRES6_L          (0x0040)  /* Lower threshold level Bit 6 */
+#define LOTHRES7_L          (0x0080)  /* Lower threshold level Bit 7 */
+
+#define LOTHRES8_H          (0x0001)  /* Lower threshold level Bit 8 */
+#define LOTHRES9_H          (0x0002)  /* Lower threshold level Bit 9 */
+#define LOTHRES10_H         (0x0004)  /* Lower threshold level Bit 10 */
+#define LOTHRES11_H         (0x0008)  /* Lower threshold level Bit 11 */
+#define LOTHRES12_H         (0x0010)  /* Lower threshold level Bit 12 */
+
+/* CAPDETECT0 */
+#define CAPDTCT0           (0x0001)  /* Indicates a detected threshold on Captivate block 0 */
+#define CAPDTCT1           (0x0002)  /* Indicates a detected threshold on Captivate block 1 */
+#define CAPDTCT2           (0x0004)  /* Indicates a detected threshold on Captivate block 2 */
+#define CAPDTCT3           (0x0008)  /* Indicates a detected threshold on Captivate block 3 */
+#define CAPDTCT4           (0x0010)  /* Indicates a detected threshold on Captivate block 4 */
+#define CAPDTCT5           (0x0020)  /* Indicates a detected threshold on Captivate block 5 */
+#define CAPDTCT6           (0x0040)  /* Indicates a detected threshold on Captivate block 6 */
+#define CAPDTCT7           (0x0080)  /* Indicates a detected threshold on Captivate block 7 */
+#define CAPDTCT8           (0x0100)  /* Indicates a detected threshold on Captivate block 8 */
+#define CAPDTCT9           (0x0200)  /* Indicates a detected threshold on Captivate block 9 */
+#define CAPDTCT10           (0x0400)  /* Indicates a detected threshold on Captivate block 10 */
+#define CAPDTCT11           (0x0800)  /* Indicates a detected threshold on Captivate block 11 */
+
+#define CAPDTCT0_L          (0x0001)  /* Indicates a detected threshold on Captivate block 0 */
+#define CAPDTCT1_L          (0x0002)  /* Indicates a detected threshold on Captivate block 1 */
+#define CAPDTCT2_L          (0x0004)  /* Indicates a detected threshold on Captivate block 2 */
+#define CAPDTCT3_L          (0x0008)  /* Indicates a detected threshold on Captivate block 3 */
+#define CAPDTCT4_L          (0x0010)  /* Indicates a detected threshold on Captivate block 4 */
+#define CAPDTCT5_L          (0x0020)  /* Indicates a detected threshold on Captivate block 5 */
+#define CAPDTCT6_L          (0x0040)  /* Indicates a detected threshold on Captivate block 6 */
+#define CAPDTCT7_L          (0x0080)  /* Indicates a detected threshold on Captivate block 7 */
+
+#define CAPDTCT8_H          (0x0001)  /* Indicates a detected threshold on Captivate block 8 */
+#define CAPDTCT9_H          (0x0002)  /* Indicates a detected threshold on Captivate block 9 */
+#define CAPDTCT10_H         (0x0004)  /* Indicates a detected threshold on Captivate block 10 */
+#define CAPDTCT11_H         (0x0008)  /* Indicates a detected threshold on Captivate block 11 */
+
+/* CAPREFC */
+#define REFCAPEN0           (0x0001)  /* Enable reference circuit for a specific Captivate block Bit 0 */
+#define REFCAPEN1           (0x0002)  /* Enable reference circuit for a specific Captivate block Bit 1 */
+#define REFCAPEN2           (0x0004)  /* Enable reference circuit for a specific Captivate block Bit 2 */
+#define REFCAPEN3           (0x0008)  /* Enable reference circuit for a specific Captivate block Bit 3 */
+#define REFCAPSZ0           (0x0100)  /* Select calibration capacitances Bit 0 */
+#define REFCAPSZ1           (0x0200)  /* Select calibration capacitances Bit 1 */
+#define REFCAPSZ2           (0x0400)  /* Select calibration capacitances Bit 2 */
+
+#define REFCAPEN0_L         (0x0001)  /* Enable reference circuit for a specific Captivate block Bit 0 */
+#define REFCAPEN1_L         (0x0002)  /* Enable reference circuit for a specific Captivate block Bit 1 */
+#define REFCAPEN2_L         (0x0004)  /* Enable reference circuit for a specific Captivate block Bit 2 */
+#define REFCAPEN3_L         (0x0008)  /* Enable reference circuit for a specific Captivate block Bit 3 */
+
+#define REFCAPSZ0_H         (0x0001)  /* Select calibration capacitances Bit 0 */
+#define REFCAPSZ1_H         (0x0002)  /* Select calibration capacitances Bit 1 */
+#define REFCAPSZ2_H         (0x0004)  /* Select calibration capacitances Bit 2 */
+
+#define REFCAPEN_0          (0x0000)  /* Enable reference circuit for a specific Captivate block: 0 */
+#define REFCAPEN_1          (0x0001)  /* Enable reference circuit for a specific Captivate block: 1 */
+#define REFCAPEN_2          (0x0002)  /* Enable reference circuit for a specific Captivate block: 2 */
+#define REFCAPEN_3          (0x0003)  /* Enable reference circuit for a specific Captivate block: 3 */
+#define REFCAPEN_4          (0x0004)  /* Enable reference circuit for a specific Captivate block: 4 */
+#define REFCAPEN_5          (0x0005)  /* Enable reference circuit for a specific Captivate block: 5 */
+#define REFCAPEN_6          (0x0006)  /* Enable reference circuit for a specific Captivate block: 6 */
+#define REFCAPEN_7          (0x0007)  /* Enable reference circuit for a specific Captivate block: 7 */
+#define REFCAPEN_8          (0x0008)  /* Enable reference circuit for a specific Captivate block: 8 */
+#define REFCAPEN_9          (0x0009)  /* Enable reference circuit for a specific Captivate block: 9 */
+#define REFCAPEN_10          (0x000A)  /* Enable reference circuit for a specific Captivate block: 10 */
+#define REFCAPEN_11          (0x000B)  /* Enable reference circuit for a specific Captivate block: 11 */
+#define REFCAPEN_12          (0x000C)  /* Enable reference circuit for a specific Captivate block: 12 */
+#define REFCAPEN_13          (0x000D)  /* Enable reference circuit for a specific Captivate block: 13 */
+#define REFCAPEN_14          (0x000E)  /* Enable reference circuit for a specific Captivate block: 14 */
+#define REFCAPEN_15          (0x000F)  /* Enable reference circuit for a specific Captivate block: 15 */
+#define REFCAPSZ_0          (0x0000)  /* Select calibration capacitances: 0 */
+#define REFCAPSZ_1          (0x0100)  /* Select calibration capacitances: 1 */
+#define REFCAPSZ_2          (0x0200)  /* Select calibration capacitances: 2 */
+#define REFCAPSZ_3          (0x0300)  /* Select calibration capacitances: 3 */
+#define REFCAPSZ_4          (0x0400)  /* Select calibration capacitances: 4 */
+#define REFCAPSZ_5          (0x0500)  /* Select calibration capacitances: 5 */
+#define REFCAPSZ_6          (0x0600)  /* Select calibration capacitances: 6 */
+#define REFCAPSZ_7          (0x0700)  /* Select calibration capacitances: 7 */
+
+/* CAPCHEN0 */
+#define CH0EN0              (0x0001)  /* Enable channel CAP0.0 */
+#define CH0EN1              (0x0002)  /* Enable channel CAP0.1 */
+#define CH0EN2              (0x0004)  /* Enable channel CAP0.2 */
+#define CH0EN3              (0x0008)  /* Enable channel CAP0.3 */
+#define CH0EN4              (0x0010)  /* Enable channel CAP0.4 */
+#define CH0EN5              (0x0020)  /* Enable channel CAP0.5 */
+#define CH0EN6              (0x0040)  /* Enable channel CAP0.6 */
+#define CH0EN7              (0x0080)  /* Enable channel CAP0.7 */
+#define CH1EN0              (0x0100)  /* Enable channel CAP1.0 */
+#define CH1EN1              (0x0200)  /* Enable channel CAP1.1 */
+#define CH1EN2              (0x0400)  /* Enable channel CAP1.2 */
+#define CH1EN3              (0x0800)  /* Enable channel CAP1.3 */
+#define CH1EN4              (0x1000)  /* Enable channel CAP1.4 */
+#define CH1EN5              (0x2000)  /* Enable channel CAP1.5 */
+#define CH1EN6              (0x4000)  /* Enable channel CAP1.6 */
+#define CH1EN7              (0x8000)  /* Enable channel CAP1.7 */
+
+#define CH0EN0_L            (0x0001)  /* Enable channel CAP0.0 */
+#define CH0EN1_L            (0x0002)  /* Enable channel CAP0.1 */
+#define CH0EN2_L            (0x0004)  /* Enable channel CAP0.2 */
+#define CH0EN3_L            (0x0008)  /* Enable channel CAP0.3 */
+#define CH0EN4_L            (0x0010)  /* Enable channel CAP0.4 */
+#define CH0EN5_L            (0x0020)  /* Enable channel CAP0.5 */
+#define CH0EN6_L            (0x0040)  /* Enable channel CAP0.6 */
+#define CH0EN7_L            (0x0080)  /* Enable channel CAP0.7 */
+
+#define CH1EN0_H            (0x0001)  /* Enable channel CAP1.0 */
+#define CH1EN1_H            (0x0002)  /* Enable channel CAP1.1 */
+#define CH1EN2_H            (0x0004)  /* Enable channel CAP1.2 */
+#define CH1EN3_H            (0x0008)  /* Enable channel CAP1.3 */
+#define CH1EN4_H            (0x0010)  /* Enable channel CAP1.4 */
+#define CH1EN5_H            (0x0020)  /* Enable channel CAP1.5 */
+#define CH1EN6_H            (0x0040)  /* Enable channel CAP1.6 */
+#define CH1EN7_H            (0x0080)  /* Enable channel CAP1.7 */
+
+/* CAPCHEN1 */
+#define CH2EN0              (0x0001)  /* Enable channel CAP2.0 */
+#define CH2EN1              (0x0002)  /* Enable channel CAP2.1 */
+#define CH2EN2              (0x0004)  /* Enable channel CAP2.2 */
+#define CH2EN3              (0x0008)  /* Enable channel CAP2.3 */
+#define CH2EN4              (0x0010)  /* Enable channel CAP2.4 */
+#define CH2EN5              (0x0020)  /* Enable channel CAP2.5 */
+#define CH2EN6              (0x0040)  /* Enable channel CAP2.6 */
+#define CH2EN7              (0x0080)  /* Enable channel CAP2.7 */
+#define CH3EN0              (0x0100)  /* Enable channel CAP3.0 */
+#define CH3EN1              (0x0200)  /* Enable channel CAP3.1 */
+#define CH3EN2              (0x0400)  /* Enable channel CAP3.2 */
+#define CH3EN3              (0x0800)  /* Enable channel CAP3.3 */
+#define CH3EN4              (0x1000)  /* Enable channel CAP3.4 */
+#define CH3EN5              (0x2000)  /* Enable channel CAP3.5 */
+#define CH3EN6              (0x4000)  /* Enable channel CAP3.6 */
+#define CH3EN7              (0x8000)  /* Enable channel CAP3.7 */
+
+#define CH2EN0_L            (0x0001)  /* Enable channel CAP2.0 */
+#define CH2EN1_L            (0x0002)  /* Enable channel CAP2.1 */
+#define CH2EN2_L            (0x0004)  /* Enable channel CAP2.2 */
+#define CH2EN3_L            (0x0008)  /* Enable channel CAP2.3 */
+#define CH2EN4_L            (0x0010)  /* Enable channel CAP2.4 */
+#define CH2EN5_L            (0x0020)  /* Enable channel CAP2.5 */
+#define CH2EN6_L            (0x0040)  /* Enable channel CAP2.6 */
+#define CH2EN7_L            (0x0080)  /* Enable channel CAP2.7 */
+
+#define CH3EN0_H            (0x0001)  /* Enable channel CAP3.0 */
+#define CH3EN1_H            (0x0002)  /* Enable channel CAP3.1 */
+#define CH3EN2_H            (0x0004)  /* Enable channel CAP3.2 */
+#define CH3EN3_H            (0x0008)  /* Enable channel CAP3.3 */
+#define CH3EN4_H            (0x0010)  /* Enable channel CAP3.4 */
+#define CH3EN5_H            (0x0020)  /* Enable channel CAP3.5 */
+#define CH3EN6_H            (0x0040)  /* Enable channel CAP3.6 */
+#define CH3EN7_H            (0x0080)  /* Enable channel CAP3.7 */
+
+/* CAPCHACT0 */
+#define CH0ACT0             (0x0001)  /* Control function of activated Captivate channel CAP0.0 */
+#define CH0ACT1             (0x0002)  /* Control function of activated Captivate channel CAP0.1 */
+#define CH0ACT2             (0x0004)  /* Control function of activated Captivate channel CAP0.2 */
+#define CH0ACT3             (0x0008)  /* Control function of activated Captivate channel CAP0.3 */
+#define CH0ACT4             (0x0010)  /* Control function of activated Captivate channel CAP0.4 */
+#define CH0ACT5             (0x0020)  /* Control function of activated Captivate channel CAP0.5 */
+#define CH0ACT6             (0x0040)  /* Control function of activated Captivate channel CAP0.6 */
+#define CH0ACT7             (0x0080)  /* Control function of activated Captivate channel CAP0.7 */
+#define CH1ACT0             (0x0100)  /* Control function of activated Captivate channel CAP1.0 */
+#define CH1ACT1             (0x0200)  /* Control function of activated Captivate channel CAP1.1 */
+#define CH1ACT2             (0x0400)  /* Control function of activated Captivate channel CAP1.2 */
+#define CH1ACT3             (0x0800)  /* Control function of activated Captivate channel CAP1.3 */
+#define CH1ACT4             (0x1000)  /* Control function of activated Captivate channel CAP1.4 */
+#define CH1ACT5             (0x2000)  /* Control function of activated Captivate channel CAP1.5 */
+#define CH1ACT6             (0x4000)  /* Control function of activated Captivate channel CAP1.6 */
+#define CH1ACT7             (0x8000)  /* Control function of activated Captivate channel CAP1.7 */
+
+#define CH0ACT0_L           (0x0001)  /* Control function of activated Captivate channel CAP0.0 */
+#define CH0ACT1_L           (0x0002)  /* Control function of activated Captivate channel CAP0.1 */
+#define CH0ACT2_L           (0x0004)  /* Control function of activated Captivate channel CAP0.2 */
+#define CH0ACT3_L           (0x0008)  /* Control function of activated Captivate channel CAP0.3 */
+#define CH0ACT4_L           (0x0010)  /* Control function of activated Captivate channel CAP0.4 */
+#define CH0ACT5_L           (0x0020)  /* Control function of activated Captivate channel CAP0.5 */
+#define CH0ACT6_L           (0x0040)  /* Control function of activated Captivate channel CAP0.6 */
+#define CH0ACT7_L           (0x0080)  /* Control function of activated Captivate channel CAP0.7 */
+
+#define CH1ACT0_H           (0x0001)  /* Control function of activated Captivate channel CAP1.0 */
+#define CH1ACT1_H           (0x0002)  /* Control function of activated Captivate channel CAP1.1 */
+#define CH1ACT2_H           (0x0004)  /* Control function of activated Captivate channel CAP1.2 */
+#define CH1ACT3_H           (0x0008)  /* Control function of activated Captivate channel CAP1.3 */
+#define CH1ACT4_H           (0x0010)  /* Control function of activated Captivate channel CAP1.4 */
+#define CH1ACT5_H           (0x0020)  /* Control function of activated Captivate channel CAP1.5 */
+#define CH1ACT6_H           (0x0040)  /* Control function of activated Captivate channel CAP1.6 */
+#define CH1ACT7_H           (0x0080)  /* Control function of activated Captivate channel CAP1.7 */
+
+/* CAPCHACT1 */
+#define CH2ACT0             (0x0001)  /* Control function of activated Captivate channel CAP2.0 */
+#define CH2ACT1             (0x0002)  /* Control function of activated Captivate channel CAP2.1 */
+#define CH2ACT2             (0x0004)  /* Control function of activated Captivate channel CAP2.2 */
+#define CH2ACT3             (0x0008)  /* Control function of activated Captivate channel CAP2.3 */
+#define CH2ACT4             (0x0010)  /* Control function of activated Captivate channel CAP2.4 */
+#define CH2ACT5             (0x0020)  /* Control function of activated Captivate channel CAP2.5 */
+#define CH2ACT6             (0x0040)  /* Control function of activated Captivate channel CAP2.6 */
+#define CH2ACT7             (0x0080)  /* Control function of activated Captivate channel CAP2.7 */
+#define CH3ACT0             (0x0100)  /* Control function of activated Captivate channel CAP3.0 */
+#define CH3ACT1             (0x0200)  /* Control function of activated Captivate channel CAP3.1 */
+#define CH3ACT2             (0x0400)  /* Control function of activated Captivate channel CAP3.2 */
+#define CH3ACT3             (0x0800)  /* Control function of activated Captivate channel CAP3.3 */
+#define CH3ACT4             (0x1000)  /* Control function of activated Captivate channel CAP3.4 */
+#define CH3ACT5             (0x2000)  /* Control function of activated Captivate channel CAP3.5 */
+#define CH3ACT6             (0x4000)  /* Control function of activated Captivate channel CAP3.6 */
+#define CH3ACT7             (0x8000)  /* Control function of activated Captivate channel CAP3.7 */
+
+#define CH2ACT0_L           (0x0001)  /* Control function of activated Captivate channel CAP2.0 */
+#define CH2ACT1_L           (0x0002)  /* Control function of activated Captivate channel CAP2.1 */
+#define CH2ACT2_L           (0x0004)  /* Control function of activated Captivate channel CAP2.2 */
+#define CH2ACT3_L           (0x0008)  /* Control function of activated Captivate channel CAP2.3 */
+#define CH2ACT4_L           (0x0010)  /* Control function of activated Captivate channel CAP2.4 */
+#define CH2ACT5_L           (0x0020)  /* Control function of activated Captivate channel CAP2.5 */
+#define CH2ACT6_L           (0x0040)  /* Control function of activated Captivate channel CAP2.6 */
+#define CH2ACT7_L           (0x0080)  /* Control function of activated Captivate channel CAP2.7 */
+
+#define CH3ACT0_H           (0x0001)  /* Control function of activated Captivate channel CAP3.0 */
+#define CH3ACT1_H           (0x0002)  /* Control function of activated Captivate channel CAP3.1 */
+#define CH3ACT2_H           (0x0004)  /* Control function of activated Captivate channel CAP3.2 */
+#define CH3ACT3_H           (0x0008)  /* Control function of activated Captivate channel CAP3.3 */
+#define CH3ACT4_H           (0x0010)  /* Control function of activated Captivate channel CAP3.4 */
+#define CH3ACT5_H           (0x0020)  /* Control function of activated Captivate channel CAP3.5 */
+#define CH3ACT6_H           (0x0040)  /* Control function of activated Captivate channel CAP3.6 */
+#define CH3ACT7_H           (0x0080)  /* Control function of activated Captivate channel CAP3.7 */
+
+/* CAPCHCTRL0 */
+#define CH0CTRL0            (0x0001)  /* Channel control (TX/RX) CAP0.0 */
+#define CH0CTRL1            (0x0002)  /* Channel control (TX/RX) CAP0.1 */
+#define CH0CTRL2            (0x0004)  /* Channel control (TX/RX) CAP0.2 */
+#define CH0CTRL3            (0x0008)  /* Channel control (TX/RX) CAP0.3 */
+#define CH0CTRL4            (0x0010)  /* Channel control (TX/RX) CAP0.4 */
+#define CH0CTRL5            (0x0020)  /* Channel control (TX/RX) CAP0.5 */
+#define CH0CTRL6            (0x0040)  /* Channel control (TX/RX) CAP0.6 */
+#define CH0CTRL7            (0x0080)  /* Channel control (TX/RX) CAP0.7 */
+#define CH1CTRL0            (0x0100)  /* Channel control (TX/RX) CAP1.0 */
+#define CH1CTRL1            (0x0200)  /* Channel control (TX/RX) CAP1.1 */
+#define CH1CTRL2            (0x0400)  /* Channel control (TX/RX) CAP1.2 */
+#define CH1CTRL3            (0x0800)  /* Channel control (TX/RX) CAP1.3 */
+#define CH1CTRL4            (0x1000)  /* Channel control (TX/RX) CAP1.4 */
+#define CH1CTRL5            (0x2000)  /* Channel control (TX/RX) CAP1.5 */
+#define CH1CTRL6            (0x4000)  /* Channel control (TX/RX) CAP1.6 */
+#define CH1CTRL7            (0x8000)  /* Channel control (TX/RX) CAP1.7 */
+
+#define CH0CTRL0_L          (0x0001)  /* Channel control (TX/RX) CAP0.0 */
+#define CH0CTRL1_L          (0x0002)  /* Channel control (TX/RX) CAP0.1 */
+#define CH0CTRL2_L          (0x0004)  /* Channel control (TX/RX) CAP0.2 */
+#define CH0CTRL3_L          (0x0008)  /* Channel control (TX/RX) CAP0.3 */
+#define CH0CTRL4_L          (0x0010)  /* Channel control (TX/RX) CAP0.4 */
+#define CH0CTRL5_L          (0x0020)  /* Channel control (TX/RX) CAP0.5 */
+#define CH0CTRL6_L          (0x0040)  /* Channel control (TX/RX) CAP0.6 */
+#define CH0CTRL7_L          (0x0080)  /* Channel control (TX/RX) CAP0.7 */
+
+#define CH1CTRL0_H          (0x0001)  /* Channel control (TX/RX) CAP1.0 */
+#define CH1CTRL1_H          (0x0002)  /* Channel control (TX/RX) CAP1.1 */
+#define CH1CTRL2_H          (0x0004)  /* Channel control (TX/RX) CAP1.2 */
+#define CH1CTRL3_H          (0x0008)  /* Channel control (TX/RX) CAP1.3 */
+#define CH1CTRL4_H          (0x0010)  /* Channel control (TX/RX) CAP1.4 */
+#define CH1CTRL5_H          (0x0020)  /* Channel control (TX/RX) CAP1.5 */
+#define CH1CTRL6_H          (0x0040)  /* Channel control (TX/RX) CAP1.6 */
+#define CH1CTRL7_H          (0x0080)  /* Channel control (TX/RX) CAP1.7 */
+
+/* CAPCHCTRL1 */
+#define CH2CTRL0            (0x0001)  /* Channel control (TX/RX) CAP2.0 */
+#define CH2CTRL1            (0x0002)  /* Channel control (TX/RX) CAP2.1 */
+#define CH2CTRL2            (0x0004)  /* Channel control (TX/RX) CAP2.2 */
+#define CH2CTRL3            (0x0008)  /* Channel control (TX/RX) CAP2.3 */
+#define CH2CTRL4            (0x0010)  /* Channel control (TX/RX) CAP2.4 */
+#define CH2CTRL5            (0x0020)  /* Channel control (TX/RX) CAP2.5 */
+#define CH2CTRL6            (0x0040)  /* Channel control (TX/RX) CAP2.6 */
+#define CH2CTRL7            (0x0080)  /* Channel control (TX/RX) CAP2.7 */
+#define CH3CTRL0            (0x0100)  /* Channel control (TX/RX) CAP3.0 */
+#define CH3CTRL1            (0x0200)  /* Channel control (TX/RX) CAP3.1 */
+#define CH3CTRL2            (0x0400)  /* Channel control (TX/RX) CAP3.2 */
+#define CH3CTRL3            (0x0800)  /* Channel control (TX/RX) CAP3.3 */
+#define CH3CTRL4            (0x1000)  /* Channel control (TX/RX) CAP3.4 */
+#define CH3CTRL5            (0x2000)  /* Channel control (TX/RX) CAP3.5 */
+#define CH3CTRL6            (0x4000)  /* Channel control (TX/RX) CAP3.6 */
+#define CH3CTRL7            (0x8000)  /* Channel control (TX/RX) CAP3.7 */
+
+#define CH2CTRL0_L          (0x0001)  /* Channel control (TX/RX) CAP2.0 */
+#define CH2CTRL1_L          (0x0002)  /* Channel control (TX/RX) CAP2.1 */
+#define CH2CTRL2_L          (0x0004)  /* Channel control (TX/RX) CAP2.2 */
+#define CH2CTRL3_L          (0x0008)  /* Channel control (TX/RX) CAP2.3 */
+#define CH2CTRL4_L          (0x0010)  /* Channel control (TX/RX) CAP2.4 */
+#define CH2CTRL5_L          (0x0020)  /* Channel control (TX/RX) CAP2.5 */
+#define CH2CTRL6_L          (0x0040)  /* Channel control (TX/RX) CAP2.6 */
+#define CH2CTRL7_L          (0x0080)  /* Channel control (TX/RX) CAP2.7 */
+
+#define CH3CTRL0_H          (0x0001)  /* Channel control (TX/RX) CAP3.0 */
+#define CH3CTRL1_H          (0x0002)  /* Channel control (TX/RX) CAP3.1 */
+#define CH3CTRL2_H          (0x0004)  /* Channel control (TX/RX) CAP3.2 */
+#define CH3CTRL3_H          (0x0008)  /* Channel control (TX/RX) CAP3.3 */
+#define CH3CTRL4_H          (0x0010)  /* Channel control (TX/RX) CAP3.4 */
+#define CH3CTRL5_H          (0x0020)  /* Channel control (TX/RX) CAP3.5 */
+#define CH3CTRL6_H          (0x0040)  /* Channel control (TX/RX) CAP3.6 */
+#define CH3CTRL7_H          (0x0080)  /* Channel control (TX/RX) CAP3.7 */
+
+/* CAPCHOFF0 */
+#define CH0OFF0             (0x0001)  /* Channel control (High-Z/GND) CAP0.0 */
+#define CH0OFF1             (0x0002)  /* Channel control (High-Z/GND) CAP0.1 */
+#define CH0OFF2             (0x0004)  /* Channel control (High-Z/GND) CAP0.2 */
+#define CH0OFF3             (0x0008)  /* Channel control (High-Z/GND) CAP0.3 */
+#define CH0OFF4             (0x0010)  /* Channel control (High-Z/GND) CAP0.4 */
+#define CH0OFF5             (0x0020)  /* Channel control (High-Z/GND) CAP0.5 */
+#define CH0OFF6             (0x0040)  /* Channel control (High-Z/GND) CAP0.6 */
+#define CH0OFF7             (0x0080)  /* Channel control (High-Z/GND) CAP0.7 */
+#define CH1OFF0             (0x0100)  /* Channel control (High-Z/GND) CAP1.0 */
+#define CH1OFF1             (0x0200)  /* Channel control (High-Z/GND) CAP1.1 */
+#define CH1OFF2             (0x0400)  /* Channel control (High-Z/GND) CAP1.2 */
+#define CH1OFF3             (0x0800)  /* Channel control (High-Z/GND) CAP1.3 */
+#define CH1OFF4             (0x1000)  /* Channel control (High-Z/GND) CAP1.4 */
+#define CH1OFF5             (0x2000)  /* Channel control (High-Z/GND) CAP1.5 */
+#define CH1OFF6             (0x4000)  /* Channel control (High-Z/GND) CAP1.6 */
+#define CH1OFF7             (0x8000)  /* Channel control (High-Z/GND) CAP1.7 */
+
+#define CH0OFF0_L           (0x0001)  /* Channel control (High-Z/GND) CAP0.0 */
+#define CH0OFF1_L           (0x0002)  /* Channel control (High-Z/GND) CAP0.1 */
+#define CH0OFF2_L           (0x0004)  /* Channel control (High-Z/GND) CAP0.2 */
+#define CH0OFF3_L           (0x0008)  /* Channel control (High-Z/GND) CAP0.3 */
+#define CH0OFF4_L           (0x0010)  /* Channel control (High-Z/GND) CAP0.4 */
+#define CH0OFF5_L           (0x0020)  /* Channel control (High-Z/GND) CAP0.5 */
+#define CH0OFF6_L           (0x0040)  /* Channel control (High-Z/GND) CAP0.6 */
+#define CH0OFF7_L           (0x0080)  /* Channel control (High-Z/GND) CAP0.7 */
+
+#define CH1OFF0_H           (0x0001)  /* Channel control (High-Z/GND) CAP1.0 */
+#define CH1OFF1_H           (0x0002)  /* Channel control (High-Z/GND) CAP1.1 */
+#define CH1OFF2_H           (0x0004)  /* Channel control (High-Z/GND) CAP1.2 */
+#define CH1OFF3_H           (0x0008)  /* Channel control (High-Z/GND) CAP1.3 */
+#define CH1OFF4_H           (0x0010)  /* Channel control (High-Z/GND) CAP1.4 */
+#define CH1OFF5_H           (0x0020)  /* Channel control (High-Z/GND) CAP1.5 */
+#define CH1OFF6_H           (0x0040)  /* Channel control (High-Z/GND) CAP1.6 */
+#define CH1OFF7_H           (0x0080)  /* Channel control (High-Z/GND) CAP1.7 */
+
+/* CAPCHOFF1 */
+#define CH2OFF0             (0x0001)  /* Channel control (High-Z/GND) CAP2.0 */
+#define CH2OFF1             (0x0002)  /* Channel control (High-Z/GND) CAP2.1 */
+#define CH2OFF2             (0x0004)  /* Channel control (High-Z/GND) CAP2.2 */
+#define CH2OFF3             (0x0008)  /* Channel control (High-Z/GND) CAP2.3 */
+#define CH2OFF4             (0x0010)  /* Channel control (High-Z/GND) CAP2.4 */
+#define CH2OFF5             (0x0020)  /* Channel control (High-Z/GND) CAP2.5 */
+#define CH2OFF6             (0x0040)  /* Channel control (High-Z/GND) CAP2.6 */
+#define CH2OFF7             (0x0080)  /* Channel control (High-Z/GND) CAP2.7 */
+#define CH3OFF0             (0x0100)  /* Channel control (High-Z/GND) CAP3.0 */
+#define CH3OFF1             (0x0200)  /* Channel control (High-Z/GND) CAP3.1 */
+#define CH3OFF2             (0x0400)  /* Channel control (High-Z/GND) CAP3.2 */
+#define CH3OFF3             (0x0800)  /* Channel control (High-Z/GND) CAP3.3 */
+#define CH3OFF4             (0x1000)  /* Channel control (High-Z/GND) CAP3.4 */
+#define CH3OFF5             (0x2000)  /* Channel control (High-Z/GND) CAP3.5 */
+#define CH3OFF6             (0x4000)  /* Channel control (High-Z/GND) CAP3.6 */
+#define CH3OFF7             (0x8000)  /* Channel control (High-Z/GND) CAP3.7 */
+
+#define CH2OFF0_L           (0x0001)  /* Channel control (High-Z/GND) CAP2.0 */
+#define CH2OFF1_L           (0x0002)  /* Channel control (High-Z/GND) CAP2.1 */
+#define CH2OFF2_L           (0x0004)  /* Channel control (High-Z/GND) CAP2.2 */
+#define CH2OFF3_L           (0x0008)  /* Channel control (High-Z/GND) CAP2.3 */
+#define CH2OFF4_L           (0x0010)  /* Channel control (High-Z/GND) CAP2.4 */
+#define CH2OFF5_L           (0x0020)  /* Channel control (High-Z/GND) CAP2.5 */
+#define CH2OFF6_L           (0x0040)  /* Channel control (High-Z/GND) CAP2.6 */
+#define CH2OFF7_L           (0x0080)  /* Channel control (High-Z/GND) CAP2.7 */
+
+#define CH3OFF0_H           (0x0001)  /* Channel control (High-Z/GND) CAP3.0 */
+#define CH3OFF1_H           (0x0002)  /* Channel control (High-Z/GND) CAP3.1 */
+#define CH3OFF2_H           (0x0004)  /* Channel control (High-Z/GND) CAP3.2 */
+#define CH3OFF3_H           (0x0008)  /* Channel control (High-Z/GND) CAP3.3 */
+#define CH3OFF4_H           (0x0010)  /* Channel control (High-Z/GND) CAP3.4 */
+#define CH3OFF5_H           (0x0020)  /* Channel control (High-Z/GND) CAP3.5 */
+#define CH3OFF6_H           (0x0040)  /* Channel control (High-Z/GND) CAP3.6 */
+#define CH3OFF7_H           (0x0080)  /* Channel control (High-Z/GND) CAP3.7 */
+
+/* CAPRATIOx */
+#define RATIOP0            (0x0001)   /* Ratio selection P Bit: 0 */
+#define RATIOP1            (0x0002)   /* Ratio selection P Bit: 1 */
+#define RATIOP2            (0x0004)   /* Ratio selection P Bit: 2 */
+#define RATIOP3            (0x0008)   /* Ratio selection P Bit: 3 */
+#define RATIOP4            (0x0010)   /* Ratio selection P Bit: 4 */
+#define RATIOP5            (0x0020)   /* Ratio selection P Bit: 5 */
+#define RATION0            (0x0100)  /* Ratio selection N Bit: 0 */
+#define RATION1            (0x0200)  /* Ratio selection N Bit: 1 */
+#define RATION2            (0x0400)  /* Ratio selection N Bit: 2 */
+
+#define RATIOP0_L           (0x0001)   /* Ratio selection P Bit: 0 */
+#define RATIOP1_L           (0x0002)   /* Ratio selection P Bit: 1 */
+#define RATIOP2_L           (0x0004)   /* Ratio selection P Bit: 2 */
+#define RATIOP3_L           (0x0008)   /* Ratio selection P Bit: 3 */
+#define RATIOP4_L           (0x0010)   /* Ratio selection P Bit: 4 */
+#define RATIOP5_L           (0x0020)   /* Ratio selection P Bit: 5 */
+
+#define RATION0_H           (0x0001)  /* Ratio selection N Bit: 0 */
+#define RATION1_H           (0x0002)  /* Ratio selection N Bit: 1 */
+#define RATION2_H           (0x0004)  /* Ratio selection N Bit: 2 */
+
+#define RATIOP_0           (0x0000)  /* Ratio selection P: 0 */
+#define RATIOP_1           (0x0001)  /* Ratio selection P: 1 */
+#define RATIOP_2           (0x0002)  /* Ratio selection P: 2 */
+#define RATIOP_3           (0x0003)  /* Ratio selection P: 3 */
+#define RATIOP_4           (0x0004)  /* Ratio selection P: 4 */
+#define RATIOP_5           (0x0005)  /* Ratio selection P: 5 */
+#define RATIOP_6           (0x0006)  /* Ratio selection P: 6 */
+#define RATIOP_7           (0x0007)  /* Ratio selection P: 7 */
+#define RATIOP_8           (0x0008)  /* Ratio selection P: 8 */
+#define RATIOP_9           (0x0009)  /* Ratio selection P: 9 */
+#define RATIOP_10           (0x000A)  /* Ratio selection P: 10 */
+#define RATIOP_11           (0x000B)  /* Ratio selection P: 11 */
+#define RATIOP_12           (0x000C)  /* Ratio selection P: 12 */
+#define RATIOP_13           (0x000D)  /* Ratio selection P: 13 */
+#define RATIOP_14           (0x000E)  /* Ratio selection P: 14 */
+#define RATIOP_15           (0x000F)  /* Ratio selection P: 15 */
+#define RATIOP_16           (0x0010)  /* Ratio selection P: 16 */
+#define RATIOP_17           (0x0011)  /* Ratio selection P: 17 */
+#define RATIOP_18           (0x0012)  /* Ratio selection P: 18 */
+#define RATIOP_19           (0x0013)  /* Ratio selection P: 19 */
+#define RATIOP_20           (0x0014)  /* Ratio selection P: 20 */
+#define RATIOP_21           (0x0015)  /* Ratio selection P: 21 */
+#define RATIOP_22           (0x0016)  /* Ratio selection P: 22 */
+#define RATIOP_23           (0x0017)  /* Ratio selection P: 23 */
+#define RATIOP_24           (0x0018)  /* Ratio selection P: 24 */
+#define RATIOP_25           (0x0019)  /* Ratio selection P: 25 */
+#define RATIOP_26           (0x001A)  /* Ratio selection P: 26 */
+#define RATIOP_27           (0x001B)  /* Ratio selection P: 27 */
+#define RATIOP_28           (0x001C)  /* Ratio selection P: 28 */
+#define RATIOP_29           (0x001D)  /* Ratio selection P: 29 */
+#define RATIOP_30           (0x001E)  /* Ratio selection P: 30 */
+#define RATIOP_31           (0x001F)  /* Ratio selection P: 31 */
+#define RATIOP_32           (0x0020)  /* Ratio selection P: 32 */
+#define RATION_0           (0x0000)  /* Ratio selection N: 0 */
+#define RATION_1           (0x0100)  /* Ratio selection N: 1 */
+#define RATION_2           (0x0200)  /* Ratio selection N: 2 */
+#define RATION_3           (0x0300)  /* Ratio selection N: 3 */
+#define RATION_4           (0x0400)  /* Ratio selection N: 4 */
+#define RATION_5           (0x0500)  /* Ratio selection N: 5 */
+#define RATION_6           (0x0600)  /* Ratio selection N: 6 */
+#define RATION_7           (0x0700)  /* Ratio selection N: 7 */
 
 
+/* CAPPCCx */
+#define PCC0                (0x0001)  /* PCC selection for block Bit 0 */
+#define PCC1                (0x0002)  /* PCC selection for block Bit 1 */
+#define PCC2                (0x0004)  /* PCC selection for block Bit 2 */
+#define PCC3                (0x0008)  /* PCC selection for block Bit 3 */
+#define PCC4                (0x0010)  /* PCC selection for block Bit 4 */
+#define PCC5                (0x0020)  /* PCC selection for block Bit 5 */
+#define PCC6                (0x0040)  /* PCC selection for block Bit 6 */
+#define PCC7                (0x0080)  /* PCC selection for block Bit 7 */
+#define PCCSCL0             (0x0100)  /* PCC scale setting Bit 0 */
+#define PCCSCL1             (0x0200)  /* PCC scale setting Bit 1 */
+#define PCCDEC              (0x0400)  /* Decoder for PCC selection */
+
+#define PCC0_L              (0x0001)  /* PCC selection for block Bit 0 */
+#define PCC1_L              (0x0002)  /* PCC selection for block Bit 1 */
+#define PCC2_L              (0x0004)  /* PCC selection for block Bit 2 */
+#define PCC3_L              (0x0008)  /* PCC selection for block Bit 3 */
+#define PCC4_L              (0x0010)  /* PCC selection for block Bit 4 */
+#define PCC5_L              (0x0020)  /* PCC selection for block Bit 5 */
+#define PCC6_L              (0x0040)  /* PCC selection for block Bit 6 */
+#define PCC7_L              (0x0080)  /* PCC selection for block Bit 7 */
+
+#define PCCSCL0_H           (0x0001)  /* PCC scale setting Bit 0 */
+#define PCCSCL1_H           (0x0002)  /* PCC scale setting Bit 1 */
+#define PCCDEC_H            (0x0004)  /* Decoder for PCC selection */
+
+#define PCCSCL_0            (0x0000)  /* PCC scale setting: 0 */
+#define PCCSCL_1            (0x0100)  /* PCC scale setting: 1 */
+#define PCCSCL_2            (0x0200)  /* PCC scale setting: 2 */
+#define PCCSCL_3            (0x0300)  /* PCC scale setting: 3 */
+
+/* CAPCVDx */
+#define CVD0               (0x0001)  /* 12-bit conversion value Bit: 0 */
+#define CVD1               (0x0002)  /* 12-bit conversion value Bit: 1 */
+#define CVD2               (0x0004)  /* 12-bit conversion value Bit: 2 */
+#define CVD3               (0x0008)  /* 12-bit conversion value Bit: 3 */
+#define CVD4               (0x0010)  /* 12-bit conversion value Bit: 4 */
+#define CVD5               (0x0020)  /* 12-bit conversion value Bit: 5 */
+#define CVD6               (0x0040)  /* 12-bit conversion value Bit: 6 */
+#define CVD7               (0x0080)  /* 12-bit conversion value Bit: 7 */
+#define CVD8               (0x0100)  /* 12-bit conversion value Bit: 8 */
+#define CVD9               (0x0200)  /* 12-bit conversion value Bit: 9 */
+#define CVD10               (0x0400)  /* 12-bit conversion value Bit: 10 */
+#define CVD11               (0x0800)  /* 12-bit conversion value Bit: 11 */
+#define CVD12               (0x1000)  /* 12-bit conversion value Bit: 12 */
+#define CVDOVR              (0x2000)  /* Conversion data has been overwritten */
+
+#define CVD0_L              (0x0001)  /* 12-bit conversion value Bit: 0 */
+#define CVD1_L              (0x0002)  /* 12-bit conversion value Bit: 1 */
+#define CVD2_L              (0x0004)  /* 12-bit conversion value Bit: 2 */
+#define CVD3_L              (0x0008)  /* 12-bit conversion value Bit: 3 */
+#define CVD4_L              (0x0010)  /* 12-bit conversion value Bit: 4 */
+#define CVD5_L              (0x0020)  /* 12-bit conversion value Bit: 5 */
+#define CVD6_L              (0x0040)  /* 12-bit conversion value Bit: 6 */
+#define CVD7_L              (0x0080)  /* 12-bit conversion value Bit: 7 */
+
+#define CVD8_H              (0x0001)  /* 12-bit conversion value Bit: 8 */
+#define CVD9_H              (0x0002)  /* 12-bit conversion value Bit: 9 */
+#define CVD10_H             (0x0004)  /* 12-bit conversion value Bit: 10 */
+#define CVD11_H             (0x0008)  /* 12-bit conversion value Bit: 11 */
+#define CVD12_H             (0x0010)  /* 12-bit conversion value Bit: 12 */
+#define CVDOVR_H            (0x0020)  /* Conversion data has been overwritten */
+
+/* CAPFCINTx */
+#define FCINT0             (0x0001)  /* Filtered count integer value Bit: 0 */
+#define FCINT1             (0x0002)  /* Filtered count integer value Bit: 1 */
+#define FCINT2             (0x0004)  /* Filtered count integer value Bit: 2 */
+#define FCINT3             (0x0008)  /* Filtered count integer value Bit: 3 */
+#define FCINT4             (0x0010)  /* Filtered count integer value Bit: 4 */
+#define FCINT5             (0x0020)  /* Filtered count integer value Bit: 5 */
+#define FCINT6             (0x0040)  /* Filtered count integer value Bit: 6 */
+#define FCINT7             (0x0080)  /* Filtered count integer value Bit: 7 */
+#define FCINT8             (0x0100)  /* Filtered count integer value Bit: 8 */
+#define FCINT9             (0x0200)  /* Filtered count integer value Bit: 9 */
+#define FCINT10             (0x0400)  /* Filtered count integer value Bit: 10 */
+#define FCINT11             (0x0800)  /* Filtered count integer value Bit: 11 */
+#define FCINT12             (0x1000)  /* Filtered count integer value Bit: 12 */
+
+#define FCINT0_L            (0x0001)  /* Filtered count integer value Bit: 0 */
+#define FCINT1_L            (0x0002)  /* Filtered count integer value Bit: 1 */
+#define FCINT2_L            (0x0004)  /* Filtered count integer value Bit: 2 */
+#define FCINT3_L            (0x0008)  /* Filtered count integer value Bit: 3 */
+#define FCINT4_L            (0x0010)  /* Filtered count integer value Bit: 4 */
+#define FCINT5_L            (0x0020)  /* Filtered count integer value Bit: 5 */
+#define FCINT6_L            (0x0040)  /* Filtered count integer value Bit: 6 */
+#define FCINT7_L            (0x0080)  /* Filtered count integer value Bit: 7 */
+
+#define FCINT8_H            (0x0001)  /* Filtered count integer value Bit: 8 */
+#define FCINT9_H            (0x0002)  /* Filtered count integer value Bit: 9 */
+#define FCINT10_H           (0x0004)  /* Filtered count integer value Bit: 10 */
+#define FCINT11_H           (0x0008)  /* Filtered count integer value Bit: 11 */
+#define FCINT12_H           (0x0010)  /* Filtered count integer value Bit: 12 */
+
+/* CAPFCDECx */
+#define FCDEC0              (0x0100)  /* Filtered count decimal value Bit: 0 */
+#define FCDEC1              (0x0200)  /* Filtered count decimal value Bit: 1 */
+#define FCDEC2              (0x0400)  /* Filtered count decimal value Bit: 2 */
+#define FCDEC3              (0x0800)  /* Filtered count decimal value Bit: 3 */
+#define FCDEC4              (0x1000)  /* Filtered count decimal value Bit: 4 */
+#define FCDEC5              (0x2000)  /* Filtered count decimal value Bit: 5 */
+#define FCDEC6              (0x4000)  /* Filtered count decimal value Bit: 6 */
+#define FCDEC7              (0x8000)  /* Filtered count decimal value Bit: 7 */
+
+#define FCDEC0_H            (0x0001)  /* Filtered count decimal value Bit: 0 */
+#define FCDEC1_H            (0x0002)  /* Filtered count decimal value Bit: 1 */
+#define FCDEC2_H            (0x0004)  /* Filtered count decimal value Bit: 2 */
+#define FCDEC3_H            (0x0008)  /* Filtered count decimal value Bit: 3 */
+#define FCDEC4_H            (0x0010)  /* Filtered count decimal value Bit: 4 */
+#define FCDEC5_H            (0x0020)  /* Filtered count decimal value Bit: 5 */
+#define FCDEC6_H            (0x0040)  /* Filtered count decimal value Bit: 6 */
+#define FCDEC7_H            (0x0080)  /* Filtered count decimal value Bit: 7 */
+
+/* CAPLTAINTx */
+#define LTAINT0            (0x0001)  /* LTA integer value Bit: 0 */
+#define LTAINT1            (0x0002)  /* LTA integer value Bit: 1 */
+#define LTAINT2            (0x0004)  /* LTA integer value Bit: 2 */
+#define LTAINT3            (0x0008)  /* LTA integer value Bit: 3 */
+#define LTAINT4            (0x0010)  /* LTA integer value Bit: 4 */
+#define LTAINT5            (0x0020)  /* LTA integer value Bit: 5 */
+#define LTAINT6            (0x0040)  /* LTA integer value Bit: 6 */
+#define LTAINT7            (0x0080)  /* LTA integer value Bit: 7 */
+#define LTAINT8            (0x0100)  /* LTA integer value Bit: 8 */
+#define LTAINT9            (0x0200)  /* LTA integer value Bit: 9 */
+#define LTAINT10            (0x0400)  /* LTA integer value Bit: 10 */
+#define LTAINT11            (0x0800)  /* LTA integer value Bit: 11 */
+#define LTAINT12            (0x1000)  /* LTA integer value Bit: 12 */
+
+#define LTAINT0_L           (0x0001)  /* LTA integer value Bit: 0 */
+#define LTAINT1_L           (0x0002)  /* LTA integer value Bit: 1 */
+#define LTAINT2_L           (0x0004)  /* LTA integer value Bit: 2 */
+#define LTAINT3_L           (0x0008)  /* LTA integer value Bit: 3 */
+#define LTAINT4_L           (0x0010)  /* LTA integer value Bit: 4 */
+#define LTAINT5_L           (0x0020)  /* LTA integer value Bit: 5 */
+#define LTAINT6_L           (0x0040)  /* LTA integer value Bit: 6 */
+#define LTAINT7_L           (0x0080)  /* LTA integer value Bit: 7 */
+
+#define LTAINT8_H           (0x0001)  /* LTA integer value Bit: 8 */
+#define LTAINT9_H           (0x0002)  /* LTA integer value Bit: 9 */
+#define LTAINT10_H          (0x0004)  /* LTA integer value Bit: 10 */
+#define LTAINT11_H          (0x0008)  /* LTA integer value Bit: 11 */
+#define LTAINT12_H          (0x0010)  /* LTA integer value Bit: 12 */
+
+/* CAPLTADECx */
+#define LTADEC0             (0x0100)  /* LTA decimal value Bit: 0 */
+#define LTADEC1             (0x0200)  /* LTA decimal value Bit: 1 */
+#define LTADEC2             (0x0400)  /* LTA decimal value Bit: 2 */
+#define LTADEC3             (0x0800)  /* LTA decimal value Bit: 3 */
+#define LTADEC4             (0x1000)  /* LTA decimal value Bit: 4 */
+#define LTADEC5             (0x2000)  /* LTA decimal value Bit: 5 */
+#define LTADEC6             (0x4000)  /* LTA decimal value Bit: 6 */
+#define LTADEC7             (0x8000)  /* LTA decimal value Bit: 7 */
+
+#define LTADEC0_H           (0x0001)  /* LTA decimal value Bit: 0 */
+#define LTADEC1_H           (0x0002)  /* LTA decimal value Bit: 1 */
+#define LTADEC2_H           (0x0004)  /* LTA decimal value Bit: 2 */
+#define LTADEC3_H           (0x0008)  /* LTA decimal value Bit: 3 */
+#define LTADEC4_H           (0x0010)  /* LTA decimal value Bit: 4 */
+#define LTADEC5_H           (0x0020)  /* LTA decimal value Bit: 5 */
+#define LTADEC6_H           (0x0040)  /* LTA decimal value Bit: 6 */
+#define LTADEC7_H           (0x0080)  /* LTA decimal value Bit: 7 */
 
 /* CAPIE */
 #define EOCIEN              (0x0001)  /* End of conversion interrupt enable */
@@ -1182,15 +1855,13 @@ extern "C" {
 
 #define CAPMAXIFG_H         (0x0001)  /* Captivate maximum count interrupt flag */
 
-
-
 /* CAPIV Definitions */
 #define CAPIV_NONE          (0x0000)    /* No Interrupt pending */
 #define CAPIV_EOCIFG        (0x0002)    /* End of conversion interrupt, Flag = EOCIFG */
-#define CAPIV_CAPDTCTI      (0x0004)    /* Detection interrupt, Flag = CAPDTCTIFG */
-#define CAPIV_CAPTIFG       (0x0004)    /* Captivate Timer interrupt, Flag = CAPTIFG */
-#define CAPIV_CAPCNTRIFG    (0x0004)    /* Captivate Counter interrupt, Flag = CAPCNTRIFG */
-#define CAPIV_CAPMAXIFG     (0x0004)    /* max count value reached, Flag = CAPMAXIFG */
+#define CAPIV_CAPDTCTIFG    (0x0004)    /* Detection interrupt, Flag = CAPDTCTIFG */
+#define CAPIV_CAPTIFG       (0x0008)    /* Captivate Timer interrupt, Flag = CAPTIFG */
+#define CAPIV_CAPCNTRIFG    (0x000A)    /* Captivate Counter interrupt, Flag = CAPCNTRIFG */
+#define CAPIV_CAPMAXIFG     (0x000C)    /* max count value reached, Flag = CAPMAXIFG */
 
 
 #endif
@@ -1702,35 +2373,33 @@ extern "C" {
 
 /* CSCTL1 Control Bits */
 #define DISMOD              (0x0001)    /* Disable Modulation */
-
-#define DCOFSEL0            (0x0002)    /* DCO frequency select Bit: 0 */
-#define DCOFSEL1            (0x0004)    /* DCO frequency select Bit: 1 */
-#define DCOFSEL2            (0x0080)    /* DCO frequency select Bit: 2 */
-#define DCOFTRIM0           (0x0010)    /* DCO frequency trim Bit: 0 */
-#define DCOFTRIM1           (0x0020)    /* DCO frequency trim Bit: 1 */
-#define DCOFTRIM2           (0x0040)    /* DCO frequency trim Bit: 2 */
+#define DCORSEL0            (0x0002)    /* DCO frequency range select Bit: 0 */
+#define DCORSEL1            (0x0004)    /* DCO frequency range select Bit: 1 */
+#define DCORSEL2            (0x0008)    /* DCO frequency range select Bit: 2 */
+#define DCOFTRIM0           (0x0010)    /* DCO frequency trim. Bit: 0 */
+#define DCOFTRIM1           (0x0020)    /* DCO frequency trim. Bit: 1 */
+#define DCOFTRIM2           (0x0040)    /* DCO frequency trim. Bit: 2 */
 #define DCOFTRIMEN          (0x0080)    /* DCO frequency trim enable */
 
 /* CSCTL1 Control Bits */
 #define DISMOD_L            (0x0001)    /* Disable Modulation */
-
-#define DCOFSEL0_L          (0x0002)    /* DCO frequency select Bit: 0 */
-#define DCOFSEL1_L          (0x0004)    /* DCO frequency select Bit: 1 */
-#define DCOFSEL2_L          (0x0080)    /* DCO frequency select Bit: 2 */
-#define DCOFTRIM0_L         (0x0010)    /* DCO frequency trim Bit: 0 */
-#define DCOFTRIM1_L         (0x0020)    /* DCO frequency trim Bit: 1 */
-#define DCOFTRIM2_L         (0x0040)    /* DCO frequency trim Bit: 2 */
+#define DCORSEL0_L          (0x0002)    /* DCO frequency range select Bit: 0 */
+#define DCORSEL1_L          (0x0004)    /* DCO frequency range select Bit: 1 */
+#define DCORSEL2_L          (0x0008)    /* DCO frequency range select Bit: 2 */
+#define DCOFTRIM0_L         (0x0010)    /* DCO frequency trim. Bit: 0 */
+#define DCOFTRIM1_L         (0x0020)    /* DCO frequency trim. Bit: 1 */
+#define DCOFTRIM2_L         (0x0040)    /* DCO frequency trim. Bit: 2 */
 #define DCOFTRIMEN_L        (0x0080)    /* DCO frequency trim enable */
 
 
-#define DCOFSEL_0           (0x0000)    /* DCO frequency select: 0 */
-#define DCOFSEL_1           (0x0002)    /* DCO frequency select: 1 */
-#define DCOFSEL_2           (0x0004)    /* DCO frequency select: 2 */
-#define DCOFSEL_3           (0x0006)    /* DCO frequency select: 3 */
-#define DCOFSEL_4           (0x0008)    /* DCO frequency select: 4 */
-#define DCOFSEL_5           (0x000A)    /* DCO frequency select: 5 */
-#define DCOFSEL_6           (0x000C)    /* DCO frequency select: 6 */
-#define DCOFSEL_7           (0x000E)    /* DCO frequency select: 7 */
+#define DCORSEL_0           (0x0000)    /* DCO frequency range select: 0 */
+#define DCORSEL_1           (0x0002)    /* DCO frequency range select: 1 */
+#define DCORSEL_2           (0x0004)    /* DCO frequency range select: 2 */
+#define DCORSEL_3           (0x0006)    /* DCO frequency range select: 3 */
+#define DCORSEL_4           (0x0008)    /* DCO frequency range select: 4 */
+#define DCORSEL_5           (0x000A)    /* DCO frequency range select: 5 */
+#define DCORSEL_6           (0x000C)    /* DCO frequency range select: 6 */
+#define DCORSEL_7           (0x000E)    /* DCO frequency range select: 7 */
 
 #define DCOFTRIM_0          (0x0000)    /* DCO frequency trim: 0 */
 #define DCOFTRIM_1          (0x0010)    /* DCO frequency trim: 1 */
@@ -1740,7 +2409,6 @@ extern "C" {
 #define DCOFTRIM_5          (0x0050)    /* DCO frequency trim: 5 */
 #define DCOFTRIM_6          (0x0060)    /* DCO frequency trim: 6 */
 #define DCOFTRIM_7          (0x0070)    /* DCO frequency trim: 7 */
-
 
 /* CSCTL2 Control Bits */
 #define FLLN0               (0x0001)    /* FLL Multipier Bit : 0 */
@@ -1819,15 +2487,12 @@ extern "C" {
 #define FLLREFDIV__128      (0x0003)    /* Reference Divider: f(LFCLK)/128 */
 #define FLLREFDIV__256      (0x0004)    /* Reference Divider: f(LFCLK)/256 */
 #define FLLREFDIV__512      (0x0005)    /* Reference Divider: f(LFCLK)/512 */
-#define FLLREFDIV__1024     (0x0006)    /* Reference Divider: f(LFCLK)/1024*/
 #define SELREF_0            (0x0000)    /* FLL Reference Clock Select 0 */
 #define SELREF_1            (0x0010)    /* FLL Reference Clock Select 1 */
 #define SELREF_2            (0x0020)    /* FLL Reference Clock Select 2 */
 #define SELREF_3            (0x0030)    /* FLL Reference Clock Select 3 */
 #define SELREF__XT1CLK      (0x0000)    /* Multiply Selected Loop Freq. By XT1CLK */
 #define SELREF__REFOCLK     (0x0010)    /* Multiply Selected Loop Freq. By REFOCLK */
-
-#define SELREF__XT2CLK      (0x0050)    /* Multiply Selected Loop Freq. By XT2CLK */
 
 
 /* CSCTL4 Control Bits */
@@ -1914,11 +2579,6 @@ extern "C" {
 #define XTS                 (0x0020)    /* 1: Selects high-freq. oscillator */
 #define XT1DRIVE0           (0x0040)    /* XT1 Drive Level mode Bit 0 */
 #define XT1DRIVE1           (0x0080)    /* XT1 Drive Level mode Bit 1 */
-#define XT2AUTOOFF          (0x0100)    /* XT2 automatic off enable */
-#define XT2AGCOFF           (0x0200)    /* XT2 Automatic Gain Control (AGC) disable */
-#define XT2BYPASS           (0x1000)    /* XT2 bypass mode : 0: internal 1:sourced from external pin */
-#define XT2DRIVE0           (0x4000)    /* XT2 Drive Level mode Bit 0 */
-#define XT2DRIVE1           (0x8000)    /* XT2 Drive Level mode Bit 1 */
 
 /* CSCTL6 Control Bits */
 #define XT1AUTOOFF_L        (0x0001)    /* XT1 automatic off enable */
@@ -1928,51 +2588,37 @@ extern "C" {
 #define XT1DRIVE0_L         (0x0040)    /* XT1 Drive Level mode Bit 0 */
 #define XT1DRIVE1_L         (0x0080)    /* XT1 Drive Level mode Bit 1 */
 
-/* CSCTL6 Control Bits */
-#define XT2AUTOOFF_H        (0x0001)    /* XT2 automatic off enable */
-#define XT2AGCOFF_H         (0x0002)    /* XT2 Automatic Gain Control (AGC) disable */
-#define XT2BYPASS_H         (0x0010)    /* XT2 bypass mode : 0: internal 1:sourced from external pin */
-#define XT2DRIVE0_H         (0x0040)    /* XT2 Drive Level mode Bit 0 */
-#define XT2DRIVE1_H         (0x0080)    /* XT2 Drive Level mode Bit 1 */
 
 #define XT1DRIVE_0          (0x0000)    /* XT1 Drive Level mode: 0 */
 #define XT1DRIVE_1          (0x0040)    /* XT1 Drive Level mode: 1 */
 #define XT1DRIVE_2          (0x0080)    /* XT1 Drive Level mode: 2 */
 #define XT1DRIVE_3          (0x00C0)    /* XT1 Drive Level mode: 3 */
-#define XT2DRIVE_0          (0x0000)    /* XT2 Drive Level mode: 0 */
-#define XT2DRIVE_1          (0x4000)    /* XT2 Drive Level mode: 1 */
-#define XT2DRIVE_2          (0x8000)    /* XT2 Drive Level mode: 2 */
-#define XT2DRIVE_3          (0xC000)    /* XT2 Drive Level mode: 3 */
 
 
 /* CSCTL7 Control Bits */
 #define DCOFFG              (0x0001)    /* DCO fault flag */
 #define XT1OFFG             (0x0002)    /* XT1 Low Frequency Oscillator Fault Flag */
-#define XT2OFFG             (0x0008)    /* High Frequency Oscillator 2 Fault Flag */
 #define FLLULIFG            (0x0010)    /* FLL unlock interrupt flag */
 #define ENSTFCNT1           (0x0040)    /* Enable start counter for XT1 */
-#define ENSTFCNT2           (0x0080)    /* Enable start counter for XT2 */
 #define FLLUNLOCK0          (0x0100)    /* FLL unlock condition Bit: 0 */
 #define FLLUNLOCK1          (0x0200)    /* FLL unlock condition Bit: 1 */
 #define FLLUNLOCKHIS0       (0x0400)    /* Unlock history Bit: 0 */
 #define FLLUNLOCKHIS1       (0x0800)    /* Unlock history Bit: 1 */
-#define FLLULIE             (0x1000)    /* FLL unlock interrupt enable */
+#define FLLULPUC            (0x1000)    /* FLL unlock PUC enable */
 #define FLLWARNEN           (0x2000)    /* Warning enable */
 
 /* CSCTL7 Control Bits */
 #define DCOFFG_L            (0x0001)    /* DCO fault flag */
 #define XT1OFFG_L           (0x0002)    /* XT1 Low Frequency Oscillator Fault Flag */
-#define XT2OFFG_L           (0x0008)    /* High Frequency Oscillator 2 Fault Flag */
 #define FLLULIFG_L          (0x0010)    /* FLL unlock interrupt flag */
 #define ENSTFCNT1_L         (0x0040)    /* Enable start counter for XT1 */
-#define ENSTFCNT2_L         (0x0080)    /* Enable start counter for XT2 */
 
 /* CSCTL7 Control Bits */
 #define FLLUNLOCK0_H        (0x0001)    /* FLL unlock condition Bit: 0 */
 #define FLLUNLOCK1_H        (0x0002)    /* FLL unlock condition Bit: 1 */
 #define FLLUNLOCKHIS0_H     (0x0004)    /* Unlock history Bit: 0 */
 #define FLLUNLOCKHIS1_H     (0x0008)    /* Unlock history Bit: 1 */
-#define FLLULIE_H           (0x0010)    /* FLL unlock interrupt enable */
+#define FLLULPUC_H          (0x0010)    /* FLL unlock PUC enable */
 #define FLLWARNEN_H         (0x0020)    /* Warning enable */
 
 #define FLLUNLOCK_0         (0x0000)    /* FLL unlock condition: 0 */
@@ -2291,6 +2937,24 @@ extern "C" {
 #define LCDBLKMOD_2         (0x0002)  /* LCD_E Blinking mode: All */
 #define LCDBLKMOD_3         (0x0003)  /* LCD_E Blinking mode: Switching */
 
+#define LCDBLKPRE_0         (0x0000)  /* LCD_E Clock pre-scaler for blinking frequency: 0 */
+#define LCDBLKPRE_1         (0x0004)  /* LCD_E Clock pre-scaler for blinking frequency: 1 */
+#define LCDBLKPRE_2         (0x0008)  /* LCD_E Clock pre-scaler for blinking frequency: 2 */
+#define LCDBLKPRE_3         (0x000C)  /* LCD_E Clock pre-scaler for blinking frequency: 3 */
+#define LCDBLKPRE_4         (0x0010)  /* LCD_E Clock pre-scaler for blinking frequency: 4 */
+#define LCDBLKPRE_5         (0x0014)  /* LCD_E Clock pre-scaler for blinking frequency: 5 */
+#define LCDBLKPRE_6         (0x0018)  /* LCD_E Clock pre-scaler for blinking frequency: 6 */
+#define LCDBLKPRE_7         (0x001C)  /* LCD_E Clock pre-scaler for blinking frequency: 7 */
+
+#define LCDBLKPRE__4        (0x0000)  /* LCD_E Clock pre-scaler for blinking frequency: 4   */
+#define LCDBLKPRE__8        (0x0004)  /* LCD_E Clock pre-scaler for blinking frequency: 8   */
+#define LCDBLKPRE__16       (0x0008)  /* LCD_E Clock pre-scaler for blinking frequency: 16  */
+#define LCDBLKPRE__32       (0x000C)  /* LCD_E Clock pre-scaler for blinking frequency: 32  */
+#define LCDBLKPRE__64       (0x0010)  /* LCD_E Clock pre-scaler for blinking frequency: 64  */
+#define LCDBLKPRE__128      (0x0014)  /* LCD_E Clock pre-scaler for blinking frequency: 128 */
+#define LCDBLKPRE__256      (0x0018)  /* LCD_E Clock pre-scaler for blinking frequency: 256 */
+#define LCDBLKPRE__512      (0x001C)  /* LCD_E Clock pre-scaler for blinking frequency: 512 */
+
 // LCDMEMCTL
 #define LCDDISP             (0x0001)  /* LCD_E LCD memory registers for display */
 #define LCDCLRM             (0x0002)  /* LCD_E Clear LCD memory */
@@ -2333,22 +2997,22 @@ extern "C" {
 #define LCDCPFSEL3_H        (0x0080)  /* Charge pump frequency selection Bit: 3 */
 
 /* Charge pump voltage selections */
-#define VLCD_0                 (0x0000)       /* VLCD = 2.60V */
-#define VLCD_1                 (0x0100)       /* VLCD = 2.66V */
-#define VLCD_2                 (0x0200)       /* VLCD = 2.72V */
-#define VLCD_3                 (0x0300)       /* VLCD = 2.78V */
-#define VLCD_4                 (0x0400)       /* VLCD = 2.84V */
-#define VLCD_5                 (0x0500)       /* VLCD = 2.90V */
-#define VLCD_6                 (0x0600)       /* VLCD = 2.96V */
-#define VLCD_7                 (0x0700)       /* VLCD = 3.02V */
-#define VLCD_8                 (0x0800)       /* VLCD = 3.08V */
-#define VLCD_9                 (0x0900)       /* VLCD = 3.14V */
-#define VLCD_10                (0x0A00)       /* VLCD = 3.20V */
-#define VLCD_11                (0x0B00)       /* VLCD = 3.26V */
-#define VLCD_12                (0x0C00)       /* VLCD = 3.32V */
-#define VLCD_13                (0x0D00)       /* VLCD = 3.38V */
-#define VLCD_14                (0x0E00)       /* VLCD = 3.44V */
-#define VLCD_15                (0x0F00)       /* VLCD = 3.50V */
+#define VLCD_0              (0x0000)  /* VLCD = 2.60V */
+#define VLCD_1              (0x0100)  /* VLCD = 2.66V */
+#define VLCD_2              (0x0200)  /* VLCD = 2.72V */
+#define VLCD_3              (0x0300)  /* VLCD = 2.78V */
+#define VLCD_4              (0x0400)  /* VLCD = 2.84V */
+#define VLCD_5              (0x0500)  /* VLCD = 2.90V */
+#define VLCD_6              (0x0600)  /* VLCD = 2.96V */
+#define VLCD_7              (0x0700)  /* VLCD = 3.02V */
+#define VLCD_8              (0x0800)  /* VLCD = 3.08V */
+#define VLCD_9              (0x0900)  /* VLCD = 3.14V */
+#define VLCD_10             (0x0A00)  /* VLCD = 3.20V */
+#define VLCD_11             (0x0B00)  /* VLCD = 3.26V */
+#define VLCD_12             (0x0C00)  /* VLCD = 3.32V */
+#define VLCD_13             (0x0D00)  /* VLCD = 3.38V */
+#define VLCD_14             (0x0E00)  /* VLCD = 3.44V */
+#define VLCD_15             (0x0F00)  /* VLCD = 3.50V */
 
 
 // LCDPCTL0
@@ -2579,73 +3243,200 @@ extern "C" {
 #define LCDCSS46_H          (0x0040)  /* Selects pin L46 as either common or segment line */
 #define LCDCSS47_H          (0x0080)  /* Selects pin L47 as either common or segment line */
 
-#define OFS_LCDM0             (0x0020)  /* LCD Memory 0 */
+#define OFS_LCDM0W            (0x0020)  /* LCD Memory 0/1 */
+#define OFS_LCDM0W_L           OFS_LCDM0W
+#define OFS_LCDM0W_H           OFS_LCDM0W+1
+#define LCDM0               LCDM0W_L  /* LCD Memory 0 */
+#define LCDM1               LCDM0W_H  /* LCD Memory 1 */
 #define LCDMEM_             LCDM0     /* LCD Memory */
 #ifndef __STDC__
 #define LCDMEM              LCDM0     /* LCD Memory (for assembler) */
 #else
 #define LCDMEM              ((volatile char*) &LCDM0) /* LCD Memory (for C) */
 #endif
-#define OFS_LCDM1             (0x0021)  /* LCD Memory 1 */
-#define OFS_LCDM2             (0x0022)  /* LCD Memory 2 */
-#define OFS_LCDM3             (0x0023)  /* LCD Memory 3 */
-#define OFS_LCDM4             (0x0024)  /* LCD Memory 4 */
-#define OFS_LCDM5             (0x0025)  /* LCD Memory 5 */
-#define OFS_LCDM6             (0x0026)  /* LCD Memory 6 */
-#define OFS_LCDM7             (0x0027)  /* LCD Memory 7 */
-#define OFS_LCDM8             (0x0028)  /* LCD Memory 8 */
-#define OFS_LCDM9             (0x0029)  /* LCD Memory 9  */
-#define OFS_LCDM10            (0x002A)  /* LCD Memory 10 */
-#define OFS_LCDM11            (0x002B)  /* LCD Memory 11 */
-#define OFS_LCDM12            (0x002C)  /* LCD Memory 12 */
-#define OFS_LCDM13            (0x002D)  /* LCD Memory 13 */
-#define OFS_LCDM14            (0x002E)  /* LCD Memory 14 */
-#define OFS_LCDM15            (0x002F)  /* LCD Memory 15 */
-#define OFS_LCDM16            (0x0030)  /* LCD Memory 16 */
-#define OFS_LCDM17            (0x0031)  /* LCD Memory 17 */
-#define OFS_LCDM18            (0x0032)  /* LCD Memory 18 */
-#define OFS_LCDM19            (0x0033)  /* LCD Memory 19 */
-#define OFS_LCDM20            (0x0034)  /* LCD Memory 20 */
-#define OFS_LCDM21            (0x0035)  /* LCD Memory 21 */
-#define OFS_LCDM22            (0x0036)  /* LCD Memory 22 */
-#define OFS_LCDM23            (0x0037)  /* LCD Memory 23 */
-#define OFS_LCDM24            (0x0038)  /* LCD Memory 24 */
-#define OFS_LCDM25            (0x0039)  /* LCD Memory 25 */
-#define OFS_LCDM26            (0x003A)  /* LCD Memory 26 */
-#define OFS_LCDM27            (0x003B)  /* LCD Memory 27 */
-#define OFS_LCDM28            (0x003C)  /* LCD Memory 28 */
-#define OFS_LCDM29            (0x003D)  /* LCD Memory 29 */
-#define OFS_LCDM30            (0x003E)  /* LCD Memory 30 */
-#define OFS_LCDM31            (0x003F)  /* LCD Memory 31 */
-#define OFS_LCDM32            (0x0040)  /* LCD Memory 32 */
-#define OFS_LCDM33            (0x0041)  /* LCD Memory 33 */
-#define OFS_LCDM34            (0x0042)  /* LCD Memory 34 */
-#define OFS_LCDM35            (0x0043)  /* LCD Memory 35 */
-#define OFS_LCDM36            (0x0044)  /* LCD Memory 36 */
-#define OFS_LCDM37            (0x0045)  /* LCD Memory 37 */
-#define OFS_LCDM38            (0x0046)  /* LCD Memory 38 */
-#define OFS_LCDM39            (0x0047)  /* LCD Memory 39 */
+#define OFS_LCDM2W            (0x0022)  /* LCD Memory 2/3 */
+#define OFS_LCDM2W_L           OFS_LCDM2W
+#define OFS_LCDM2W_H           OFS_LCDM2W+1
+#define LCDM2               LCDM2W_L  /* LCD Memory 2 */
+#define LCDM3               LCDM2W_H  /* LCD Memory 3 */
+#define OFS_LCDM4W            (0x0024)  /* LCD Memory 4/5 */
+#define OFS_LCDM4W_L           OFS_LCDM4W
+#define OFS_LCDM4W_H           OFS_LCDM4W+1
+#define LCDM4               LCDM4W_L  /* LCD Memory 4 */
+#define LCDM5               LCDM4W_H  /* LCD Memory 5 */
+#define OFS_LCDM6W            (0x0026)  /* LCD Memory 6/7 */
+#define OFS_LCDM6W_L           OFS_LCDM6W
+#define OFS_LCDM6W_H           OFS_LCDM6W+1
+#define LCDM6               LCDM6W_L  /* LCD Memory 6 */
+#define LCDM7               LCDM6W_H  /* LCD Memory 7 */
+#define OFS_LCDM8W            (0x0028)  /* LCD Memory 8/9 */
+#define OFS_LCDM8W_L           OFS_LCDM8W
+#define OFS_LCDM8W_H           OFS_LCDM8W+1
+#define LCDM8               LCDM8W_L  /* LCD Memory 8 */
+#define LCDM9               LCDM8W_H  /* LCD Memory 9 */
+#define OFS_LCDM10W           (0x002A)  /* LCD Memory 10/11 */
+#define OFS_LCDM10W_L          OFS_LCDM10W
+#define OFS_LCDM10W_H          OFS_LCDM10W+1
+#define LCDM10              LCDM10W_L /* LCD Memory 10 */
+#define LCDM11              LCDM10W_H /* LCD Memory 11 */
+#define OFS_LCDM12W           (0x002C)  /* LCD Memory 12/13 */
+#define OFS_LCDM12W_L          OFS_LCDM12W
+#define OFS_LCDM12W_H          OFS_LCDM12W+1
+#define LCDM12              LCDM12W_L /* LCD Memory 12 */
+#define LCDM13              LCDM12W_H /* LCD Memory 13 */
+#define OFS_LCDM14W           (0x002E)  /* LCD Memory 14/15 */
+#define OFS_LCDM14W_L          OFS_LCDM14W
+#define OFS_LCDM14W_H          OFS_LCDM14W+1
+#define LCDM14              LCDM14W_L /* LCD Memory 14 */
+#define LCDM15              LCDM14W_H /* LCD Memory 15 */
+#define OFS_LCDM16W           (0x0030)  /* LCD Memory 16/17 */
+#define OFS_LCDM16W_L          OFS_LCDM16W
+#define OFS_LCDM16W_H          OFS_LCDM16W+1
+#define LCDM16              LCDM16W_L /* LCD Memory 16 */
+#define LCDM17              LCDM16W_H /* LCD Memory 17 */
+#define OFS_LCDM18W           (0x0032)  /* LCD Memory 18/19 */
+#define OFS_LCDM18W_L          OFS_LCDM18W
+#define OFS_LCDM18W_H          OFS_LCDM18W+1
+#define LCDM18              LCDM18W_L /* LCD Memory 18 */
+#define LCDM19              LCDM18W_H /* LCD Memory 19 */
+#define OFS_LCDM20W           (0x0034)  /* LCD Memory 20/21 */
+#define OFS_LCDM20W_L          OFS_LCDM20W
+#define OFS_LCDM20W_H          OFS_LCDM20W+1
+#define LCDM20              LCDM20W_L /* LCD Memory 20 */
+#define LCDM21              LCDM20W_H /* LCD Memory 21 */
+#define OFS_LCDM22W           (0x0036)  /* LCD Memory 22/23 */
+#define OFS_LCDM22W_L          OFS_LCDM22W
+#define OFS_LCDM22W_H          OFS_LCDM22W+1
+#define LCDM22              LCDM22W_L /* LCD Memory 22 */
+#define LCDM23              LCDM22W_H /* LCD Memory 23 */
+#define OFS_LCDM24W           (0x0038)  /* LCD Memory 24/25 */
+#define OFS_LCDM24W_L          OFS_LCDM24W
+#define OFS_LCDM24W_H          OFS_LCDM24W+1
+#define LCDM24              LCDM24W_L /* LCD Memory 24 */
+#define LCDM25              LCDM24W_H /* LCD Memory 25 */
+#define OFS_LCDM26W           (0x003A)  /* LCD Memory 26/27 */
+#define OFS_LCDM26W_L          OFS_LCDM26W
+#define OFS_LCDM26W_H          OFS_LCDM26W+1
+#define LCDM26              LCDM26W_L /* LCD Memory 26 */
+#define LCDM27              LCDM26W_H /* LCD Memory 27 */
+#define OFS_LCDM28W           (0x003C)  /* LCD Memory 28/29 */
+#define OFS_LCDM28W_L          OFS_LCDM28W
+#define OFS_LCDM28W_H          OFS_LCDM28W+1
+#define LCDM28              LCDM28W_L /* LCD Memory 28 */
+#define LCDM29              LCDM28W_H /* LCD Memory 29 */
+#define OFS_LCDM30W           (0x003E)  /* LCD Memory 30/31 */
+#define OFS_LCDM30W_L          OFS_LCDM30W
+#define OFS_LCDM30W_H          OFS_LCDM30W+1
+#define LCDM30              LCDM30W_L /* LCD Memory 30 */
+#define LCDM31              LCDM30W_H /* LCD Memory 31 */
+#define OFS_LCDM32W           (0x0040)  /* LCD Memory 32/33 */
+#define OFS_LCDM32W_L          OFS_LCDM32W
+#define OFS_LCDM32W_H          OFS_LCDM32W+1
+#define LCDM32              LCDM32W_L /* LCD Memory 32 */
+#define LCDM33              LCDM32W_H /* LCD Memory 33 */
+#define OFS_LCDM34W           (0x0042)  /* LCD Memory 34/35 */
+#define OFS_LCDM34W_L          OFS_LCDM34W
+#define OFS_LCDM34W_H          OFS_LCDM34W+1
+#define LCDM34              LCDM34W_L /* LCD Memory 34 */
+#define LCDM35              LCDM34W_H /* LCD Memory 35 */
+#define OFS_LCDM36W           (0x0044)  /* LCD Memory 36/37 */
+#define OFS_LCDM36W_L          OFS_LCDM36W
+#define OFS_LCDM36W_H          OFS_LCDM36W+1
+#define LCDM36              LCDM36W_L /* LCD Memory 36 */
+#define LCDM37              LCDM36W_H /* LCD Memory 37 */
+#define OFS_LCDM38W           (0x0046)  /* LCD Memory 38/39 */
+#define OFS_LCDM38W_L          OFS_LCDM38W
+#define OFS_LCDM38W_H          OFS_LCDM38W+1
+#define LCDM38              LCDM38W_L /* LCD Memory 38 */
+#define LCDM39              LCDM38W_H /* LCD Memory 39 */
 
-#define OFS_LCDBM0            (0x0040)  /* LCD Blinking Memory 0 */
-#define OFS_LCDBM1            (0x0041)  /* LCD Blinking Memory 1 */
-#define OFS_LCDBM2            (0x0042)  /* LCD Blinking Memory 2 */
-#define OFS_LCDBM3            (0x0043)  /* LCD Blinking Memory 3 */
-#define OFS_LCDBM4            (0x0044)  /* LCD Blinking Memory 4 */
-#define OFS_LCDBM5            (0x0045)  /* LCD Blinking Memory 5 */
-#define OFS_LCDBM6            (0x0046)  /* LCD Blinking Memory 6 */
-#define OFS_LCDBM7            (0x0047)  /* LCD Blinking Memory 7 */
-#define OFS_LCDBM8            (0x0048)  /* LCD Blinking Memory 8 */
-#define OFS_LCDBM9            (0x0049)  /* LCD Blinking Memory 9  */
-#define OFS_LCDBM10           (0x004A)  /* LCD Blinking Memory 10 */
-#define OFS_LCDBM11           (0x004B)  /* LCD Blinking Memory 11 */
-#define OFS_LCDBM12           (0x004C)  /* LCD Blinking Memory 12 */
-#define OFS_LCDBM13           (0x004D)  /* LCD Blinking Memory 13 */
-#define OFS_LCDBM14           (0x004E)  /* LCD Blinking Memory 14 */
-#define OFS_LCDBM15           (0x004F)  /* LCD Blinking Memory 15 */
-#define OFS_LCDBM16           (0x0050)  /* LCD Blinking Memory 16 */
-#define OFS_LCDBM17           (0x0051)  /* LCD Blinking Memory 17 */
-#define OFS_LCDBM18           (0x0052)  /* LCD Blinking Memory 18 */
-#define OFS_LCDBM19           (0x0053)  /* LCD Blinking Memory 19 */
+#define OFS_LCDBM0W           (0x0040)  /* LCD Blinking Memory 0/1 */
+#define OFS_LCDBM0W_L          OFS_LCDBM0W
+#define OFS_LCDBM0W_H          OFS_LCDBM0W+1
+#define LCDBM0              LCDBM0W_L /* LCD Blinking Memory 0 */
+#define LCDBM1              LCDBM0W_H /* LCD Blinking Memory 1 */
+#define LCDBMEM_            LCDBM0    /* LCD Blinking Memory */
+#ifndef __STDC__
+#define LCDBMEM             LCDBM0    /* LCD Blinking Memory (for assembler) */
+#else
+#define LCDBMEM             ((volatile char*) &LCDBM0) /* LCD Blinking Memory (for C) */
+#endif
+#define OFS_LCDBM2W           (0x0042)  /* LCD Blinking Memory 2/3 */
+#define OFS_LCDBM2W_L          OFS_LCDBM2W
+#define OFS_LCDBM2W_H          OFS_LCDBM2W+1
+#define LCDBM2              LCDBM2W_L  /* LCD Blinking Memory 2 */
+#define LCDBM3              LCDBM2W_H  /* LCD Blinking Memory 3 */
+#define OFS_LCDBM4W           (0x0044)  /* LCD Blinking Memory 4/5 */
+#define OFS_LCDBM4W_L          OFS_LCDBM4W
+#define OFS_LCDBM4W_H          OFS_LCDBM4W+1
+#define LCDBM4              LCDBM4W_L  /* LCD Blinking Memory 4 */
+#define LCDBM5              LCDBM4W_H  /* LCD Blinking Memory 5 */
+#define OFS_LCDBM6W           (0x0046)  /* LCD Blinking Memory 6/7 */
+#define OFS_LCDBM6W_L          OFS_LCDBM6W
+#define OFS_LCDBM6W_H          OFS_LCDBM6W+1
+#define LCDBM6              LCDBM6W_L  /* LCD Blinking Memory 6 */
+#define LCDBM7              LCDBM6W_H  /* LCD Blinking Memory 7 */
+#define OFS_LCDBM8W           (0x0048)  /* LCD Blinking Memory 8/9 */
+#define OFS_LCDBM8W_L          OFS_LCDBM8W
+#define OFS_LCDBM8W_H          OFS_LCDBM8W+1
+#define LCDBM8              LCDBM8W_L  /* LCD Blinking Memory 8 */
+#define LCDBM9              LCDBM8W_H  /* LCD Blinking Memory 9 */
+#define OFS_LCDBM10W          (0x004A)  /* LCD Blinking Memory 10/11 */
+#define OFS_LCDBM10W_L         OFS_LCDBM10W
+#define OFS_LCDBM10W_H         OFS_LCDBM10W+1
+#define LCDBM10             LCDBM10W_L /* LCD Blinking Memory 10 */
+#define LCDBM11             LCDBM10W_H /* LCD Blinking Memory 11 */
+#define OFS_LCDBM12W          (0x004C)  /* LCD Blinking Memory 12/13 */
+#define OFS_LCDBM12W_L         OFS_LCDBM12W
+#define OFS_LCDBM12W_H         OFS_LCDBM12W+1
+#define LCDBM12             LCDBM12W_L /* LCD Blinking Memory 12 */
+#define LCDBM13             LCDBM12W_H /* LCD Blinking Memory 13 */
+#define OFS_LCDBM14W          (0x004E)  /* LCD Blinking Memory 14/15 */
+#define OFS_LCDBM14W_L         OFS_LCDBM14W
+#define OFS_LCDBM14W_H         OFS_LCDBM14W+1
+#define LCDBM14             LCDBM14W_L /* LCD Blinking Memory 14 */
+#define LCDBM15             LCDBM14W_H /* LCD Blinking Memory 15 */
+#define OFS_LCDBM16W          (0x0050)  /* LCD Blinking Memory 16/17 */
+#define OFS_LCDBM16W_L         OFS_LCDBM16W
+#define OFS_LCDBM16W_H         OFS_LCDBM16W+1
+#define LCDBM16             LCDBM16W_L /* LCD Blinking Memory 16 */
+#define LCDBM17             LCDBM16W_H /* LCD Blinking Memory 17 */
+#define OFS_LCDBM18W          (0x0052)  /* LCD Blinking Memory 18/19 */
+#define OFS_LCDBM18W_L         OFS_LCDBM18W
+#define OFS_LCDBM18W_H         OFS_LCDBM18W+1
+#define LCDBM18             LCDBM18W_L /* LCD Blinking Memory 18 */
+#define LCDBM19             LCDBM18W_H /* LCD Blinking Memory 19 */
+#define OFS_LCDBM20W          (0x0054)   /* LCD Blinking Memory 20/21 */
+#define OFS_LCDBM20W_L         OFS_LCDBM20W
+#define OFS_LCDBM20W_H         OFS_LCDBM20W+1
+#define LCDBM20             LCDBM20W_L /* LCD Blinking Memory 20 */
+#define LCDBM21             LCDBM20W_H /* LCD Blinking Memory 21 */
+#define OFS_LCDBM22W          (0x0056)   /* LCD Blinking Memory 22/23 */
+#define OFS_LCDBM22W_L         OFS_LCDBM22W
+#define OFS_LCDBM22W_H         OFS_LCDBM22W+1
+#define LCDBM22             LCDBM22W_L /* LCD Blinking Memory 22 */
+#define LCDBM23             LCDBM22W_H /* LCD Blinking Memory 23 */
+#define OFS_LCDBM24W          (0x0058)   /* LCD Blinking Memory 24/25 */
+#define OFS_LCDBM24W_L         OFS_LCDBM24W
+#define OFS_LCDBM24W_H         OFS_LCDBM24W+1
+#define LCDBM24             LCDBM24W_L /* LCD Blinking Memory 24 */
+#define LCDBM25             LCDBM24W_H /* LCD Blinking Memory 25 */
+#define OFS_LCDBM26W          (0x005A)   /* LCD Blinking Memory 26/27 */
+#define OFS_LCDBM26W_L         OFS_LCDBM26W
+#define OFS_LCDBM26W_H         OFS_LCDBM26W+1
+#define LCDBM26             LCDBM26W_L /* LCD Blinking Memory 26 */
+#define LCDBM27             LCDBM26W_H /* LCD Blinking Memory 27 */
+#define OFS_LCDBM28W          (0x005C)   /* LCD Blinking Memory 28/29 */
+#define OFS_LCDBM28W_L         OFS_LCDBM28W
+#define OFS_LCDBM28W_H         OFS_LCDBM28W+1
+#define LCDBM28             LCDBM28W_L /* LCD Blinking Memory 28 */
+#define LCDBM29             LCDBM28W_H /* LCD Blinking Memory 29 */
+#define OFS_LCDBM30W          (0x005E)   /* LCD Blinking Memory 30/31 */
+#define OFS_LCDBM30W_L         OFS_LCDBM30W
+#define OFS_LCDBM30W_H         OFS_LCDBM30W+1
+#define LCDBM30             LCDBM30W_L /* LCD Blinking Memory 30 */
+#define LCDBM31             LCDBM30W_H /* LCD Blinking Memory 31 */
+
 
 /* LCDIV Definitions */
 #define LCDIV_NONE         (0x0000)    /* No Interrupt pending */
@@ -2926,7 +3717,7 @@ extern "C" {
 /************************************************************
 * PMM - Power Management System for G6xx
 ************************************************************/
-#ifdef  __MSP430_HAS_PMM__            /* Definition to show that Module is available */
+#ifdef  __MSP430_HAS_PMM_FRAM__       /* Definition to show that Module is available */
 
 #define OFS_PMMCTL0           (0x0000)  /* PMM Control 0 */
 #define OFS_PMMCTL0_L          OFS_PMMCTL0

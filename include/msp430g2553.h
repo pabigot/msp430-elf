@@ -38,17 +38,18 @@
 * This file supports assembler and C development for
 * MSP430G2553 devices.
 *
-* Texas Instruments, Version 1.1
+* Texas Instruments, Version 1.2
 *
 * Rev. 1.0, Setup
 * Rev. 1.1, added additional Cal Data Labels
+* Rev. 1.2, added dummy TRAPINT_VECTOR interrupt vector as bugfix for USCI29
 *
 ********************************************************************/
 
 #ifndef __MSP430G2553
 #define __MSP430G2553
 
-#define __MSP430_HEADER_VERSION__ 1131
+#define __MSP430_HEADER_VERSION__ 1146      /* Beta-Build-Tag: #0006 */
 
 #define __MSP430_TI_HEADERS__
 
@@ -1014,6 +1015,7 @@ const_sfrb(TLV_ADC10_1_LEN, TLV_ADC10_1_LEN_);
 * Interrupt Vectors (offset from 0xFFE0)
 ************************************************************/
 
+#define TRAPINT_VECTOR          ( 1)                     /* 0xFFE0 TRAPINT */
 #define PORT1_VECTOR            ( 3)                     /* 0xFFE4 Port 1 */
 #define PORT2_VECTOR            ( 4)                     /* 0xFFE6 Port 2 */
 #define ADC10_VECTOR            ( 6)                     /* 0xFFEA ADC10 */

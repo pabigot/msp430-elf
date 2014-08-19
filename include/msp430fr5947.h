@@ -53,7 +53,7 @@
 #ifndef __MSP430FR5947
 #define __MSP430FR5947
 
-#define __MSP430_HEADER_VERSION__ 1131
+#define __MSP430_HEADER_VERSION__ 1146      /* Beta-Build-Tag: #0006 */
 
 #define __MSP430_TI_HEADERS__
 
@@ -3703,6 +3703,7 @@ sfrw(SYSRSTIV, SYSRSTIV_);
 #define SYSRSTIV_MPUSEG1IFG (0x002A)   /* SYSRSTIV : MPUSEG1IFG violation */
 #define SYSRSTIV_MPUSEG2IFG (0x002C)   /* SYSRSTIV : MPUSEG2IFG violation */
 #define SYSRSTIV_MPUSEG3IFG (0x002E)   /* SYSRSTIV : MPUSEG3IFG violation */
+#define SYSRSTIV_ACCTEIFG  (0x0030)    /* SYSRSTIV : ACCTEIFG access time error */
 
 /************************************************************
 * Timer0_A3

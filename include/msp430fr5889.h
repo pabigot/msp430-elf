@@ -38,9 +38,10 @@
 * This file supports assembler and C development for
 * MSP430FR5889 devices.
 *
-* Texas Instruments, Version 1.0
+* Texas Instruments, Version 1.1
 *
 * Rev. 1.0, Setup
+* Rev. 1.1, ESI: Renamed bit ESIVCC2 to ESIVMIDEN, renamed bit ESIVSS to ESISHTSM
 *
 *
 ********************************************************************/
@@ -48,7 +49,7 @@
 #ifndef __MSP430FR5889
 #define __MSP430FR5889
 
-#define __MSP430_HEADER_VERSION__ 1131
+#define __MSP430_HEADER_VERSION__ 1146      /* Beta-Build-Tag: #0006 */
 
 #define __MSP430_TI_HEADERS__
 
@@ -2672,8 +2673,8 @@ sfrw(ESITSM31, ESITSM31_);
 #define ESICA1X             (0x0040)      /* AFE1's comparator input select */
 #define ESICISEL            (0x0020)      /* Comparator input select for AFE1 only */
 #define ESICACI3            (0x0010)      /* Comparator input select for AFE1 only */
-#define ESIVSS              (0x0008)      /* Sample-and-hold ESIVSS select */
-#define ESIVCC2             (0x0004)      /* Mid-voltage generator */
+#define ESISHTSM            (0x0008)      /* Sample-and-hold ESIVSS select */
+#define ESIVMIDEN           (0x0004)      /* Mid-voltage generator */
 #define ESISH               (0x0002)      /* Sample-and-hold enable */
 #define ESITEN              (0x0001)      /* Excitation enable */
 
@@ -2682,8 +2683,8 @@ sfrw(ESITSM31, ESITSM31_);
 #define ESICA1X_L           (0x0040)      /* AFE1's comparator input select */
 #define ESICISEL_L          (0x0020)      /* Comparator input select for AFE1 only */
 #define ESICACI3_L          (0x0010)      /* Comparator input select for AFE1 only */
-#define ESIVSS_L            (0x0008)      /* Sample-and-hold ESIVSS select */
-#define ESIVCC2_L           (0x0004)      /* Mid-voltage generator */
+#define ESISHTSM_L          (0x0008)      /* Sample-and-hold ESIVSS select */
+#define ESIVMIDEN_L         (0x0004)      /* Mid-voltage generator */
 #define ESISH_L             (0x0002)      /* Sample-and-hold enable */
 #define ESITEN_L            (0x0001)      /* Excitation enable */
 
@@ -2692,6 +2693,9 @@ sfrw(ESITSM31, ESITSM31_);
 #define ESICA2EN_H          (0x0004)      /* Enable ESICA(tsm) control for comparator in AFE2 */
 #define ESICA2INV_H         (0x0002)      /* Invert AFE2's comparator output */
 #define ESICA1INV_H         (0x0001)      /* Invert AFE1's comparator output */
+
+#define ESIVSS              (0x0008)      /* legacy define: Sample-and-hold ESIVSS select */
+#define ESIVCC2             (0x0004)      /* legacy define: Mid-voltage generator */
 
 /* ESIPPU Control Bits */
 #define ESITCHOUT1          (0x0200)      /* Latched AFE1 comparator output for test channel 1 */
@@ -5028,6 +5032,7 @@ sfrw(SYSRSTIV, SYSRSTIV_);
 #define SYSRSTIV_MPUSEG1IFG (0x002A)   /* SYSRSTIV : MPUSEG1IFG violation */
 #define SYSRSTIV_MPUSEG2IFG (0x002C)   /* SYSRSTIV : MPUSEG2IFG violation */
 #define SYSRSTIV_MPUSEG3IFG (0x002E)   /* SYSRSTIV : MPUSEG3IFG violation */
+#define SYSRSTIV_ACCTEIFG  (0x0030)    /* SYSRSTIV : ACCTEIFG access time error */
 
 /************************************************************
 * Timer0_A3
