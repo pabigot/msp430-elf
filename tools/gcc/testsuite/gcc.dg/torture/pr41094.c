@@ -1,6 +1,6 @@
 /* { dg-do run } */
-/* { dg-options "-ffast-math" } */
 /* { dg-require-effective-target large_double } */
+/* { dg-options "-ffast-math" } */
 
 #include <math.h>
 

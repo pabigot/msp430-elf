@@ -20,7 +20,7 @@ int main ()
 		nop ();
 
 	if (a == 0)
-		printf("PASS\n");
+	  ; // printf("PASS\n");
 	else
 		{ printf("FAIL\n"); return 1; }
 }

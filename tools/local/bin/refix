@@ -1,0 +1,87 @@
+#!/bin/sh
+#
+# refix - the proprietary sys-root integrator tool
+# 
+# v1.0 - Brendan Conoboy  <blc@redhat.com>
+#
+# This script fulfills two purposes:
+# 1) Copies a proprietary sys-root into the toolchain's tree
+# 2) Reruns fixincludes using the mixture of GNU and Proprietary headers.
+#
+# Note: This script figures out where most paths are by using relative paths
+# to the $RELEASE/H-$HOST/bin directory.  If this file is located elsewhere
+# on the system, HHOST needs to be set manually.
+
+# These variables are static:
+TARGET=THETARGET
+GCCVN=THEGCCVN
+
+# Everything else is automagically defined
+cd -P "`dirname $0`"
+DIRNAME="`pwd`"
+HHOST="`dirname $DIRNAME`"
+INSTDIR="`dirname $HHOST`"
+RELEASE=`basename $INSTDIR`
+
+SYSROOTTARGET="$HHOST/$TARGET/sys-root"
+
+cat << EOF
+Welcome to the TPF sys-root handler.  This program is provided to combine
+the Open Source header files included in the $RELEASE release with the
+proprietary headers and libraries provided by IBM.  To use this program,
+you will need a copy of the TPF sys-root.  The sys-root contains
+essential headers and libraries for use with the compiler and linker.
+
+Please enter the path to the sys-root you would like to integrate.
+The sys-root path should have have the directories usr/lib and usr/include
+directly underneath it.  For instance, if you have /tmp/sysroot/usr/lib,
+you would enter /tmp/sysroot for the pathname.  If you just press enter,
+the copying will be skipped and fixincludes will simply be run.  The files
+in the path you specify will only be copied and are not be modified in
+any way.
+
+EOF
+
+echo -n "Path: "
+read SYSROOTTMP
+
+echo ""
+
+if [ X = "X$SYSROOTTMP" ]; then
+  echo "Skipping the sys-root copy."
+else
+  if [ -x "$SYSROOTTMP" ]; then
+    echo "Copying sys-root"
+    echo "Source: $SYSROOTTMP"
+    echo "Target: $SYSROOTTARGET"
+    ( cd "$SYSROOTTMP" && tar cf - usr ) | ( cd $SYSROOTTARGET && tar xf - )
+  else
+    echo "Error: $SYSROOTTMP not available.  Exiting."
+    exit 1
+  fi
+fi
+
+# This is the fixincludes setup
+CPP="/usr/bin/gcc -E"
+srcdir=""
+INSTALL_ASSERT_H=""
+TARGET_MACHINE="$TARGET"
+SHELL="/bin/sh.exe"
+MACRO_LIST="/dev/null"
+export CPP srcdir INSTALL_ASSERT_H TARGET_MACHINE SHELL MACRO_LIST
+
+ifixdir="$HHOST/libexec/gcc/$TARGET/$GCCVN/install-tools"
+cd "$ifixdir"
+
+# This is how to we run fixincludes
+echo "Running fixincludes..."
+/bin/sh "$ifixdir/fixinc.sh" \
+ "$HHOST/lib/gcc/$TARGET/$GCCVN/include" \
+ "$HHOST/$TARGET/sys-root/usr/include"
+
+if [ "X$?" = X0 ]; then
+  echo "Success!  Tools are ready for use."
+else
+  echo "Fixincludes did not run successfully.  Please fix and re-run $0."
+fi
+

@@ -1,4 +1,4 @@
-/* Copyright (C) 1997-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -31,5 +31,5 @@ const char bug_report_url[] = BUGURL;
    BASEVER, DATESTAMP, DEVPHASE, and REVISION are defined by the
    Makefile.  */
 
-const char version_string[] = BASEVER DATESTAMP DEVPHASE " (Red Hat/devo)" REVISION;
+const char version_string[] = BASEVER DATESTAMP DEVPHASE " (GNUPro 14r1) (Based on: GCC 4.8 GDB 7.7 Binutils 2.24 Newlib 2.1)" REVISION;
 const char pkgversion_string[] = PKGVERSION;

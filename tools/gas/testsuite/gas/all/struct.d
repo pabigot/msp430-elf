@@ -1,6 +1,5 @@
 #nm: --extern-only
 #name: struct
-#skip: rx-*-* msp430*-*-*
 
 # Test the .struct pseudo-op.
 

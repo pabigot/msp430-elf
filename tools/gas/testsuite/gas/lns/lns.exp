@@ -20,10 +20,6 @@ if ![is_elf_format] then {
 }
 
 run_list_test "lns-diag-1" ""
-# HPPA64 has an unsupported reloc type (41: R_PARISC_SECREL32) in the .debug_info section	
-if { [istarget hppa64*-*-*]} {
-    return
-}
 run_dump_test "lns-duplicate"
 
 # ??? Won't work on targets that don't have a bare "nop" insn.
@@ -38,11 +34,12 @@ if {
      && ![istarget s390*-*-*]
 } {
     # Use alternate file for targets using DW_LNS_fixed_advance_pc opcodes.
-    if { [istarget xtensa*-*-*]
-	 || [istarget msp430-*-*]
+    if {    [istarget xtensa*-*-*]
 	 || [istarget am3*-*-*]
 	 || [istarget cr16-*-*]
 	 || [istarget crx-*-*]
+	 || [istarget msp430-*-*]
+	 || [istarget nds32*-*-*]
 	 || [istarget mn10*-*-*] } {
       run_dump_test "lns-common-1-alt"
       run_dump_test "lns-big-delta"

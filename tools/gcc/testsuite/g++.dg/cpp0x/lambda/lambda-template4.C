@@ -1,5 +1,6 @@
 // PR c++/51459
 // { dg-do run { target c++11 } }
+// { dg-require-effective-target size32plus }
 
 struct func {
     virtual ~func() { }

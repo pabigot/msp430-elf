@@ -45,3 +45,4 @@ int main ()
   if (test(c) != &c)
     return 1;
 }
+// { dg-require-effective-target size32plus }

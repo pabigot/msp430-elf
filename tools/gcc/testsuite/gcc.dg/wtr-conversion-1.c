@@ -3,6 +3,7 @@
    By Kaveh R. Ghazi <ghazi@caip.rutgers.edu> 4/09/2001.  */
 /* { dg-do compile } */
 /* { dg-options "-Wtraditional" } */
+/* { dg-options "-m64bit-doubles -Wtraditional" { target rx-*-* } } */
 
 extern void foo_i (int);
 extern void foo_f (float);

@@ -1,7 +1,6 @@
 /* Top level stuff for GDB, the GNU debugger.
 
-   Copyright (C) 1986-1994, 1996-2000, 2005-2012 Free Software
-   Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,10 +28,10 @@ extern int in_user_command;
 extern int confirm;
 extern char gdb_dirbuf[1024];
 extern int inhibit_gdbinit;
-extern int epoch_interface;
-extern char gdbinit[];
+extern const char gdbinit[];
 
 extern void print_gdb_version (struct ui_file *);
+extern void print_gdb_configuration (struct ui_file *);
 
 extern void read_command_file (FILE *);
 extern void init_history (void);

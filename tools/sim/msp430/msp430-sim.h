@@ -1,6 +1,6 @@
 /* Simulator for TI MSP430 and MSP430x processors.
 
-   Copyright (C) 2012 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of simulators.
@@ -21,9 +21,6 @@
 #ifndef _MSP430_SIM_H_
 #define _MSP430_SIM_H_
 
-#include <stdbool.h>
-#include <stdint.h>
-
 struct msp430_cpu_state
 {
   int regs[16];
@@ -32,4 +29,3 @@ struct msp430_cpu_state
 };
 
 #endif
-

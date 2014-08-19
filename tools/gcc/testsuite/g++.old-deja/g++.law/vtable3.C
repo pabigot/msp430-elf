@@ -21,5 +21,5 @@ struct B : virtual A {
 int main()
 {
     B blist[10];
-    printf ("PASS\n");
+    // printf ("PASS\n");
 }

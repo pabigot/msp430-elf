@@ -1,16 +1,17 @@
-/13450.cc/1.6/Sun Feb 24 19:24:53 2013//Tmsp430-130322-branch
-/50880.cc/1.2/Sun Feb 24 19:24:53 2013//Tmsp430-130322-branch
-/51083.cc/1.2/Sun Feb 24 19:24:53 2013//Tmsp430-130322-branch
-/56111.cc/1.1/Sun Feb 24 19:24:53 2013//Tmsp430-130322-branch
-/abi_tag.cc/1.1/Sun Nov 18 22:01:14 2012//Tmsp430-130322-branch
-/buggy_complex.cc/1.4/Sun Feb 24 19:24:53 2013//Tmsp430-130322-branch
-/c99.cc/1.2/Sun Feb 24 19:24:54 2013//Tmsp430-130322-branch
-/dr387_2.cc/1.3/Sun Feb 24 19:24:54 2013//Tmsp430-130322-branch
-/dr781_dr1137.cc/1.2/Sun Feb 24 19:24:54 2013//Tmsp430-130322-branch
-/dr844.cc/1.3/Sun Feb 24 19:24:54 2013//Tmsp430-130322-branch
-/pow.cc/1.4/Sun Sep 27 21:21:13 2009//Tmsp430-130322-branch
+/13450.cc/1.7/Thu Feb 20 13:47:26 2014//Tmsp430-14r1-branch
+/50880.cc/1.3/Thu Feb 20 13:47:26 2014//Tmsp430-14r1-branch
+/51083.cc/1.3/Thu Feb 20 13:47:26 2014//Tmsp430-14r1-branch
+/56111.cc/1.2/Thu Feb 20 13:47:26 2014//Tmsp430-14r1-branch
+/abi_tag.cc/1.1/Thu May  2 22:17:54 2013//Tmsp430-14r1-branch
+/buggy_complex.cc/1.5/Thu Feb 20 13:47:26 2014//Tmsp430-14r1-branch
+/c99.cc/1.2/Thu Feb 20 13:47:26 2014//Tmsp430-14r1-branch
+/dr387_2.cc/1.4/Thu Feb 20 13:47:26 2014//Tmsp430-14r1-branch
+/dr781_dr1137.cc/1.3/Thu Feb 20 13:47:26 2014//Tmsp430-14r1-branch
+/dr844.cc/1.4/Thu Feb 20 13:47:26 2014//Tmsp430-14r1-branch
+/pow.cc/1.4/Fri Feb 12 11:25:25 2010//Tmsp430-14r1-branch
 D/comparison_operators////
 D/cons////
 D/inserters_extractors////
+D/literals////
 D/requirements////
 D/value_operations////

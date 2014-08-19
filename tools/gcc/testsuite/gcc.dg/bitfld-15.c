@@ -2,7 +2,6 @@
 /* Remove pedantic.  Allow the GCC extension to use char for bitfields.  */
 /* { dg-options "" } */
 /* { dg-options "-mno-ms-bitfields -Wno-packed-bitfield-compat" { target { i?86-*-mingw* x86_64-*-mingw* } } } */
-/* { dg-skip-if "sizeof (struct t) == 4!" { "msp430-*-*" } { "*" } { "" } } */
 
 struct t
 {

@@ -17,10 +17,12 @@ public:
 
 int main() {
   C c;
+#if 0
   printf("&c.x = %x\n", &c.x);
   printf("&c.B1::x = %x\n", &c.B1::x);
   printf("&c.B2::x = %x\n", &c.B2::x);
   printf("&c.A::x = %x\n", &c.A::x);
+#endif
   if (&c.x != &c.B1::x
       || &c.x != &c.B2::x
       || &c.x != &c.A::x)

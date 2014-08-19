@@ -4,7 +4,7 @@ extern "C" int printf (const char*, ...);
 struct A
 {
   virtual void f () {
-    printf ("%x\n", this);
+    ; // printf ("%x\n", this);
   }
 };
 

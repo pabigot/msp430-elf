@@ -224,3 +224,4 @@ int main (void)
   if (a.bar ()() != 0)
     abort ();
 }
+// { dg-require-effective-target size32plus }

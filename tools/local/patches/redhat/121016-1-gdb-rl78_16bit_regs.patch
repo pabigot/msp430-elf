@@ -1,0 +1,36 @@
+This patch is for Renesas issue #3336843.  (It's the second patch posted
+to the issue.)  It changes the types of all registers, except for SP,
+that used to be data pointers to 16-bit integer types.
+
+I wrote an earlier patch for them that they didn't like.  That patch
+only changed the types of some of the registers.
+
+This patch needs to go upstream.
+
+
+
+2012-11-07  Kevin Buettner  <kevinb@redhat.com>
+
+	* rl78-tdep.c (rl78_register_type): Use a data pointer type for
+	SP and a 16-bit integer type for (other) register pairs.
+
+
+Index: gdb/rl78-tdep.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/rl78-tdep.c,v
+retrieving revision 1.2
+diff -u -p -r1.2 rl78-tdep.c
+--- gdb/rl78-tdep.c	31 Aug 2012 23:01:39 -0000	1.2
++++ gdb/rl78-tdep.c	9 Nov 2012 04:55:15 -0000
+@@ -248,8 +248,10 @@ rl78_register_type (struct gdbarch *gdba
+ 	   || (RL78_BANK0_R0_REGNUM <= reg_nr
+ 	       && reg_nr <= RL78_BANK3_R7_REGNUM))
+     return tdep->rl78_int8;
+-  else
++  else if (reg_nr == RL78_SP_REGNUM)
+     return tdep->rl78_data_pointer;
++  else
++    return tdep->rl78_int16;
+ }
+ 
+ /* Implement the "register_name" gdbarch method.  */

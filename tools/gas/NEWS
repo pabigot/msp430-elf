@@ -1,10 +1,21 @@
 -*- text -*-
 
+* Add support for the Andes NDS32.
+
+Changes in 2.24:
+
+* Add support for the Texas Instruments MSP430X processor.
+
+* Add -gdwarf-sections command line option to enable per-code-section
+  generation of DWARF .debug_line sections.
+
 * Add support for Altera Nios II.
 
 * Add support for the Imagination Technologies Meta processor.
 
 * Add support for the v850e3v5.
+
+* Remove assembler support for MIPS ECOFF targets.
 
 Changes in 2.23:
 
@@ -169,9 +180,6 @@ Changes in 2.16:
 
 * Add a -g command line option to generate debug information in the target's
   preferred debug format.
-
-* Add -msuppress-mapping-symbols switch to ARM GAS to disable the generation of
-  ARM ELF mapping symbols.
 
 * Support for the crx-elf target added.
 

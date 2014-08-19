@@ -37,7 +37,7 @@ main(int argc, char **argv)
 	if (offsetof (struct foo, c) > sizeof (unsigned int))
 		{ printf ("FAIL\n"); return 1; }
 	else
-		printf ("PASS\n");
+	  ; // printf ("PASS\n");
 	return 0;
 }
 

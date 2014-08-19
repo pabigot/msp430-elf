@@ -3,6 +3,7 @@
 // was not propagated back to the anon union itself, causing addressof
 // not to be replaced with stack slot.
 // { dg-do compile }
+// { dg-require-effective-target int32plus }
 // { dg-options "-O2" }
 
 struct A {

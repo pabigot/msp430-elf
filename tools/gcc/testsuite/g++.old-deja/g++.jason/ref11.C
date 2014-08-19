@@ -16,3 +16,4 @@ int main(int argc, char ** argv) {
 
   return 0;
 }
+// { dg-require-effective-target size32plus }

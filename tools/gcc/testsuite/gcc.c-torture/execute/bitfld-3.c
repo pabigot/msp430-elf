@@ -11,7 +11,7 @@ struct s {
   unsigned long long u41: 41;
 };
 
-struct s a = { 0x100000, 0x100000, 0x100000 };
+struct s a = { 0x100000LL, 0x100000LL, 0x100000LL };
 struct s b = { 0x100000000ULL, 0x100000000ULL, 0x100000000ULL };
 struct s c = { 0x1FFFFFFFFULL, 0, 0 };
 

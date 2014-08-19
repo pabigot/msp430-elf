@@ -9,7 +9,7 @@ public:
   ~bahamian ();  
 };
 
-class miami : public bahamian	// { dg-warning "" } // WARNING -
+class miami : public bahamian
 {
 public:
    miami ();

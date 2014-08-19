@@ -30,3 +30,4 @@ int main()
     d->Set();
     printf ("PASS\n");
 }
+// { dg-require-effective-target size32plus }

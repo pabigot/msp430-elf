@@ -1,7 +1,7 @@
 # parray:
 # Print the contents of a global array on stdout.
 #
-# RCS: @(#) $Id: parray.tcl,v 1.3 1998/09/14 18:40:03 stanton Exp $
+# RCS: @(#) $Id: parray.tcl,v 1.3 2012/04/18 00:36:27 kevinb Exp $
 #
 # Copyright (c) 1991-1993 The Regents of the University of California.
 # Copyright (c) 1994 Sun Microsystems, Inc.

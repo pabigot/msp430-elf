@@ -1,6 +1,6 @@
 /* Target-dependent code for the ALPHA architecture, for GDB, the GNU Debugger.
 
-   Copyright (C) 1993-2003, 2005-2012 Free Software Foundation, Inc.
+   Copyright (C) 1993-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -31,7 +31,7 @@
 #include "dis-asm.h"
 #include "symfile.h"
 #include "objfiles.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "linespec.h"
 #include "regcache.h"
 #include "reggroups.h"
@@ -475,14 +475,13 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  int length = TYPE_LENGTH (valtype);
   gdb_byte raw_buffer[ALPHA_REGISTER_SIZE];
   ULONGEST l;
 
   switch (TYPE_CODE (valtype))
     {
     case TYPE_CODE_FLT:
-      switch (length)
+      switch (TYPE_LENGTH (valtype))
 	{
 	case 4:
 	  regcache_cooked_read (regcache, ALPHA_FP0_REGNUM, raw_buffer);
@@ -505,7 +504,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
       break;
 
     case TYPE_CODE_COMPLEX:
-      switch (length)
+      switch (TYPE_LENGTH (valtype))
 	{
 	case 8:
 	  /* ??? This isn't correct wrt the ABI, but it's what GCC does.  */
@@ -518,7 +517,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
 	  break;
 
 	case 32:
-	  regcache_cooked_read_signed (regcache, ALPHA_V0_REGNUM, &l);
+	  regcache_cooked_read_unsigned (regcache, ALPHA_V0_REGNUM, &l);
 	  read_memory (l, valbuf, 32);
 	  break;
 
@@ -531,7 +530,7 @@ alpha_extract_return_value (struct type *valtype, struct regcache *regcache,
     default:
       /* Assume everything else degenerates to an integer.  */
       regcache_cooked_read_unsigned (regcache, ALPHA_V0_REGNUM, &l);
-      store_unsigned_integer (valbuf, length, byte_order, l);
+      store_unsigned_integer (valbuf, TYPE_LENGTH (valtype), byte_order, l);
       break;
     }
 }
@@ -544,14 +543,13 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
 			  const gdb_byte *valbuf)
 {
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  int length = TYPE_LENGTH (valtype);
   gdb_byte raw_buffer[ALPHA_REGISTER_SIZE];
   ULONGEST l;
 
   switch (TYPE_CODE (valtype))
     {
     case TYPE_CODE_FLT:
-      switch (length)
+      switch (TYPE_LENGTH (valtype))
 	{
 	case 4:
 	  alpha_lds (gdbarch, raw_buffer, valbuf);
@@ -575,7 +573,7 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
       break;
 
     case TYPE_CODE_COMPLEX:
-      switch (length)
+      switch (TYPE_LENGTH (valtype))
 	{
 	case 8:
 	  /* ??? This isn't correct wrt the ABI, but it's what GCC does.  */
@@ -603,7 +601,7 @@ alpha_store_return_value (struct type *valtype, struct regcache *regcache,
       /* Assume everything else degenerates to an integer.  */
       /* 32-bit values must be sign-extended to 64 bits
 	 even if the base data type is unsigned.  */
-      if (length == 4)
+      if (TYPE_LENGTH (valtype) == 4)
 	valtype = builtin_type (gdbarch)->builtin_int32;
       l = unpack_long (valtype, valbuf);
       regcache_cooked_write_unsigned (regcache, ALPHA_V0_REGNUM, l);
@@ -1034,7 +1032,7 @@ static const struct frame_unwind alpha_sigtramp_frame_unwind = {
 /* Heuristic_proc_start may hunt through the text section for a long
    time across a 2400 baud serial line.  Allows the user to limit this
    search.  */
-static unsigned int heuristic_fence_post = 0;
+static int heuristic_fence_post = 0;
 
 /* Attempt to locate the start of the function containing PC.  We assume that
    the previous function ends with an about_to_return insn.  Not foolproof by
@@ -1061,7 +1059,7 @@ alpha_heuristic_proc_start (struct gdbarch *gdbarch, CORE_ADDR pc)
   if (func)
     return func;
 
-  if (heuristic_fence_post == UINT_MAX
+  if (heuristic_fence_post == -1
       || fence < tdep->vm_min_address)
     fence = tdep->vm_min_address;
 

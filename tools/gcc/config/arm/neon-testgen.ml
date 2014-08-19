@@ -1,5 +1,5 @@
 (* Auto-generate ARM Neon intrinsics tests.
-   Copyright (C) 2006-2013 Free Software Foundation, Inc.
+   Copyright (C) 2006-2014 Free Software Foundation, Inc.
    Contributed by CodeSourcery.
 
    This file is part of GCC.
@@ -163,10 +163,13 @@ let effective_target features =
     match List.find (fun feature ->
                        match feature with Requires_feature _ -> true
                                         | Requires_arch _ -> true
+                                        | Requires_FP_bit 1 -> true
                                         | _ -> false)
                      features with
       Requires_feature "FMA" -> "arm_neonv2"
+    | Requires_feature "CRYPTO" -> "arm_crypto"
     | Requires_arch 8 -> "arm_v8_neon"
+    | Requires_FP_bit 1 -> "arm_neon_fp16"
     | _ -> assert false
   with Not_found -> "arm_neon"
 
@@ -298,5 +301,5 @@ let test_intrinsic_group dir (opcode, features, shape, name, munge, types) =
 (* Program entry point.  *)
 let _ =
   let directory = if Array.length Sys.argv <> 1 then Sys.argv.(1) else "." in
-    List.iter (test_intrinsic_group directory) (reinterp @ ops)
+    List.iter (test_intrinsic_group directory) (reinterp @ reinterpq @ ops)
 

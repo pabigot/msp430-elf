@@ -1,6 +1,5 @@
 /* { dg-skip-if "" { pdp11-*-* } { "*" } { "" } } */
 /* PR target/35318 */
-/* { dg-skip-if "Too many registers needed on 16-bit targets" { "xstormy16-*-*" } { "*" } { "" } } */
 
 void
 foo ()

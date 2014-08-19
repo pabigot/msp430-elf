@@ -11,7 +11,7 @@ class complex
  public:
   complex (double r, double i=0) { re = r; im = i; }
   friend int operator > (const complex& x, const complex &y);
-  void print () { printf ("re = %g; im = %g;\n", re, im); }
+  void print () { /* printf ("re = %g; im = %g;\n", re, im) */ ; }
 };
 int operator >(const complex& x, const complex &y)
 {

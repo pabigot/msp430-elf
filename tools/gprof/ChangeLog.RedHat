@@ -1,18 +1,24 @@
-2002-02-19  Nick Clifton  <nickc@cambridge.redhat.com>
+2007-07-16  Nick Clifton  <nickc@redhat.com>
 
-	* Makefile.in: Regenerate.
+	* corefile.c (core_sym_class): Add second parameter to call to
+	bfd_get_symbol_leading_char.
 
-2001-11-06  Nick Clifton  <nickc@cambridge.redhat.com>
+2004-10-13  Nick Clifton  <nickc@redhat.com>
 
-	* Add po/fr.po file, missed from previous merge.
+	* Import this patch from the mainline:
 
-2001-10-05  Ben Elliston  <bje@redhat.com>
+	2004-06-15  Alan Modra  <amodra@bigpond.net.au>
+	* corefile.c (core_init): Use bfd_get_section_size
+	instead of bfd_get_section_size_before_reloc or _raw_size.
+	* symtab.c (symtab_finalize): Likewise.
 
-	* Makefile.in: Rebuild.
+2003-08-05  Nick Clifton  <nickc@redhat.com>
 
-1999-08-06  Stan Cox  <scox@cygnus.com>
+	* Import new files from 2.14 branch:
+	
+	po/da.po
+	po/pt_BR.po
 
-	* gprof.c (main): Add optarg to -d; remove optarg from -D.
 
 Local Variables:
 mode: change-log

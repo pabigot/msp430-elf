@@ -8,6 +8,7 @@
 /* { dg-do link } */
 /* { dg-options "-fno-finite-math-only" { target sh*-*-* } } */
 /* { dg-options "-funsafe-math-optimizations -fsigned-zeros -fno-associative-math" { target powerpc-*-darwin* powerpc*-*-linux* } } */
+/* { dg-skip-if "Denormals not supported" { rx-*-* } "*" "" } */
 
 extern void link_error(int);
 

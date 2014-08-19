@@ -38,5 +38,5 @@ main(void)
 	if (f (2).val != 5)
 		{ printf ("FAIL\n"); return 1; }
 	else
-		printf ("PASS\n");
+	  ; // printf ("PASS\n");
 }

@@ -1,0 +1,129 @@
+For vr4300-sim/-march=vr4130/-EL/-mabi=o64/-mlong32/-mips16/-mgp64, and
+all of the rest of the mips multilibs that we're testing, we're getting
+60+ FAILs from gdb.base/store.exp.  Here is the relevant portion of
+the start of the failures from the log file:
+
+tbreak add_float
+Temporary breakpoint 15 at 0xa010030a: file /ironwood2/gnupro-cross/mips64vrel-elf/bld64/../../gnupro/gdb/testsuite/gdb.base/store.c, line 47.
+(gdb) PASS: gdb.base/store.exp: tbreak add_float
+continue
+Continuing.
+
+Temporary breakpoint 15, add_float (u=-1, v=-2) at /ironwood2/gnupro-cross/mips64vrel-elf/bld64/../../gnupro/gdb/testsuite/gdb.base/store.c:47
+47	  return u + v;
+(gdb) PASS: gdb.base/store.exp: continue to add_float
+up
+#1  0xa01004e6 in wack_float (u=-1, v=-2) at /ironwood2/gnupro-cross/mips64vrel-elf/bld64/../../gnupro/gdb/testsuite/gdb.base/store.c:110
+110	  l = add_float (l, r);
+(gdb) PASS: gdb.base/store.exp: upvar float l; up
+print l
+$48 = -1.21988965e-19
+(gdb) FAIL: gdb.base/store.exp: upvar float l; print old l, expecting -1
+print r
+$49 = -2
+(gdb) PASS: gdb.base/store.exp: upvar float l; print old r, expecting -2
+set variable l = 4
+(gdb) PASS: gdb.base/store.exp: upvar float l; set l to 4
+print l
+No symbol "l" in current context.
+(gdb) FAIL: gdb.base/store.exp: upvar float l; print new l, expecting 4
+tbreak add_double
+Temporary breakpoint 16 at 0xa010032e: file /ironwood2/gnupro-cross/mips64vrel-elf/bld64/../../gnupro/gdb/testsuite/gdb.base/store.c, line 53.
+(gdb) PASS: gdb.base/store.exp: tbreak add_double
+continue
+Continuing.
+mips-core: 4 byte read to unmapped address 0x40800000 at 0x40800000
+
+Program received signal SIGBUS, Bus error.
+0x40800000 in ?? ()
+(gdb) FAIL: gdb.base/store.exp: continue to add_double
+
+These failures occur due to `l' in wack_float() being assigned to the
+`ra' (return address) register.
+
+Note that wack_float() is defined as follows:
+
+float
+wack_float (register float u, register float v)
+{
+  register float l = u, r = v;
+  l = add_float (l, r);
+  return l + r;
+}
+
+The gdb test case places a breakpoint in add_float, runs to that
+breakpoint, and then goes up a frame to examine and modify certain
+variables.
+
+The lifetime of `l' with value obtained from `u' ends with invocation
+of add_float().  The result of the add_float() call is placed in `l'
+when the call is finished.
+
+Thus it's perfectly acceptable (though a bit perverse) to put l's value
+in the ra register.
+
+In any case, due to the fact that the scope of l-with-the-value-of-u
+finishes once the call to add_float() is set up, the compiler is then
+free to use ra for other purposes which, of course, during a call is
+to place the return address in that register.
+
+This is why the test fails to print the old value of 'l' - the register
+to which it was assigned is now being used for another purpose.
+
+And, moreover, it explains the BUS error after it is assigned to: add_float()
+is a leaf function and, therefore, does not need to save ra on the stack.
+So, it simply uses it as is not expecting it to be changed upon return.
+
+That BUS error is reponsible for many cascade failures later on.
+
+My fix, below, is to assign to `r' instead of `l' since the scope
+of the value set at the beginning of the function extends beyond the
+call to call_float().
+
+It won't fix the failure with `l' apparently having the wrong value.
+Perhaps that test ought to be removed entirely.  It does, however,
+prevent the BUS error and the resulting cascade failures.  (Stopping
+the cascade failures is important because it lets us find out if there
+are any real failures amongst the cascade...)
+
+This patch was submitted upstream.  I ended up withdrawing it.
+Ulrich Weigand observed that the problem is actually in GCC.  The
+variable `l' should be marked as optimized out so that GDB doesn't
+try to use it whilst in the call to add_float().
+
+Therefore, this patch should NOT go upstream.  However, since it
+does prevent a BUS error (and a multitude of cascade failures),
+I think we should continue to use it for our local testing
+until GCC is fixed in our sources.
+
+
+gdb/testsuite/ChangeLog.RedHat:
+
+	* gdb.base/store.exp (proc up_set): Set, and check, the variable
+	`r' rather than `l' due to the fact that the lifetime for the
+	pre-call value for `l' does not extend beyond the call of
+	add_<type>.
+	
+
+Index: gdb/testsuite/gdb.base/store.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.base/store.exp,v
+retrieving revision 1.8
+diff -u -p -r1.8 store.exp
+--- gdb/testsuite/gdb.base/store.exp	29 Apr 2010 22:01:43 -0000	1.8
++++ gdb/testsuite/gdb.base/store.exp	22 Nov 2010 21:03:50 -0000
+@@ -97,10 +97,10 @@ proc up_set { t l r new } {
+ 	"${prefix}; print old l, expecting ${l}"
+     gdb_test "print r" " = ${r}" \
+ 	"${prefix}; print old r, expecting ${r}"
+-    gdb_test "set variable l = 4" "" \
+-	"${prefix}; set l to 4"
+-    gdb_test "print l" " = ${new}" \
+-	"${prefix}; print new l, expecting ${new}"
++    gdb_test "set variable r = 4" "" \
++	"${prefix}; set r to 4"
++    gdb_test "print r" " = ${new}" \
++	"${prefix}; print new r, expecting ${new}"
+ }
+ 
+ up_set "charest" "-1 .*" "-2 .*" "4 ..004."

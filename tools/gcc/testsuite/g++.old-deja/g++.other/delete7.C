@@ -16,3 +16,4 @@ int main ()
   delete [] p;
   return r;
 }
+// { dg-require-effective-target size32plus }

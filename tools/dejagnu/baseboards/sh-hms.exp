@@ -1,3 +1,22 @@
+# Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+# Foundation, Inc.
+#
+# This file is part of DejaGnu.
+#
+# DejaGnu is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# DejaGnu is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with DejaGnu; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+
 # This is a list of toolchains that are supported on this board.
 set_board_info target_install  {sh-hms}
 
@@ -18,7 +37,7 @@ set_board_info cflags "[newlib_include_flags]"
 set_board_info ldflags "[newlib_link_flags] [libgloss_link_flags]"
 
 # Linker script for the SH2 board.
-set_board_info ldscript "-Wl,-Tsh2lcevb.ld"
+set_board_info ldscript "-Tsh2lcevb.ld"
 
 # Can't pass arguments to this target.
 set_board_info noargs  1
@@ -30,7 +49,7 @@ set_board_info gdb_protocol "remote"
 # Jumping to start is how we get the program started in GDB.
 set_board_info gdb_run_command  "jump start"
 # The remote target uses a GDB stub.
-set_board_info use_gdb_stub 1 
+set_board_info use_gdb_stub 1
 # We can't do I/O.
 set_board_info gdb,noinferiorio  1
 # Or signals.
@@ -44,4 +63,4 @@ set_board_info gcc,stack_size  16384
 set_board_info exit_statuses_bad 1
 
 # Need to pass -mieee in order to for the compiler to be IEEE-fp compliant.
-set_board_info ieee_multilib_flags "-mieee";
+set_board_info ieee_multilib_flags "-mieee"

@@ -42,7 +42,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  *
- * from: $Header: /cvs/cvsfiles/devo/newlib/libc/machine/sparc/setjmp.S,v 1.1 1997/06/25 07:19:16 marka Exp $
+ * from: $Header: /cvs/cvsfiles/gnupro/newlib/libc/machine/sparc/setjmp.S,v 1.10 2014/02/20 13:50:13 nickc Exp $
  */
 
 #if defined(LIBC_SCCS) && !defined(lint)

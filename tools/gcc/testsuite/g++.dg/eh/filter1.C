@@ -41,3 +41,5 @@ main ()
 
 a::a() { }
 a::~a() { exit (0); }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

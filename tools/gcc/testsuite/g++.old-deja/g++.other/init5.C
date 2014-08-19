@@ -1,4 +1,5 @@
 // { dg-do run { xfail { ! cxa_atexit } } }
+// { dg-require-effective-target size32plus }
 // Objects must be destructed in decreasing cnt order
 // Original test attributed to James Kanze <jkanze@otelo.ibmmail.com>
 

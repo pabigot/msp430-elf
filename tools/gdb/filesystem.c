@@ -1,6 +1,6 @@
 /* Handle different target file systems for GDB, the GNU Debugger.
 
-   Copyright (C) 2010-2012 Free Software Foundation, Inc.
+   Copyright (C) 2010-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -39,7 +39,7 @@ effective_target_file_system_kind (void)
 {
   if (target_file_system_kind == file_system_kind_auto)
     {
-      if (gdbarch_has_dos_based_file_system (target_gdbarch))
+      if (gdbarch_has_dos_based_file_system (target_gdbarch ()))
 	return file_system_kind_dos_based;
       else
 	return file_system_kind_unix;

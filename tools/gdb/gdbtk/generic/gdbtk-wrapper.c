@@ -38,11 +38,6 @@ gdb_result GDB_evaluate_expression (struct expression *, value_ptr *);
 
 gdb_result GDB_type_print (value_ptr, char *, struct ui_file *, int);
 
-gdb_result GDB_val_print (struct type *type, char *valaddr,
-			  CORE_ADDR address, struct ui_file *stream,
-			  int format, int deref_ref, int recurse,
-			  enum val_prettyprint pretty);
-
 gdb_result GDB_value_equal (value_ptr, value_ptr, int *);
 
 /*
@@ -183,8 +178,7 @@ GDB_val_print (struct type *type,
 	       struct ui_file *stream,
 	       int format,
 	       int deref_ref,
-	       int recurse,
-	       enum val_prettyprint pretty)
+	       int recurse)
 {
   struct gdb_wrapper_arguments args;
 
@@ -195,7 +189,6 @@ GDB_val_print (struct type *type,
   args.args[4].integer = format;
   args.args[5].integer = deref_ref;
   args.args[6].integer = recurse;
-  args.args[7].integer = pretty;
 
   return call_wrapped_function ((catch_errors_ftype *) wrap_val_print, &args);
 }
@@ -220,7 +213,6 @@ wrap_val_print (char *a)
   get_formatted_print_options (&opts, format);
   opts.deref_ref = (*args)->args[5].integer;
   recurse = (*args)->args[6].integer;
-  opts.pretty = (enum val_prettyprint) (*args)->args[7].integer;
 
   val_print (type, valaddr, 0, address, stream, recurse, NULL, &opts,
              current_language);

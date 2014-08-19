@@ -21,3 +21,4 @@ int main(){
         ai = test();
 }
 
+// { dg-require-effective-target size32plus }

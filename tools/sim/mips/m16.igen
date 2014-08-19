@@ -612,6 +612,7 @@
 }
 
 
+
 11101,3.RX,3.RY,01010:RR:16::CMP
 "cmp r<TRX>, r<TRY>"
 *mips16:

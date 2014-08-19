@@ -1,8 +1,9 @@
 /* Test complex arithmetic with signed zeros.  Mixed real/complex
    addition.  */
 /* { dg-do run } */
+/* { dg-skip-if "test too big" { rl78-*-* } "*" "" } */
+/* { dg-skip-if "test too big for small mode" { msp430*-*-* } "*" "" } */
 /* { dg-options "-std=gnu99" { target c } } */
-/* { dg-skip-if "test too big" { msp430*-*-* } "*" "" } */
 
 #include "complex-sign.h"
 

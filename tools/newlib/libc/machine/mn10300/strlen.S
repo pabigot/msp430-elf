@@ -1,7 +1,6 @@
 	.file "strlen.S"
 
 	.section .text
-#if 0
 	.global _strlen
 	.type	 _strlen,@function
 _strlen:
@@ -42,66 +41,6 @@ _strlen:
 	mov a0,d0
 .Lepilogue:
 	ret [d2,d3,a2,a3],16
-#else
-	.global  _strlen
-	.type	 _strlen,@function
-_strlen:
-	movm	[d2,d3,a3],(sp)
-.Lend_of_prologue:
-	mov	d0, a0
-	mov 	a0, a3
-
-/*	Newlib for the MN10300 is compiled with -Os enabled all the time,
-	so normally the code below will not be triggered.  The test for
-	__LIW__ however enables us to build a speed optimized version when
-	building -mliw enabled multilibs.  -mliw allows long instruction
-	word generation which is faster but occupies more space.  LIW
-	instructions are not acutally used in the code below, but enabling
-	their generation implies that the user is more interested in code
-	performance than code size.  */
-#if ! defined __OPTIMIZE_SIZE__ || defined __LIW__
-	btst	3, d0
-	bne	.L21
-	mov	(a0), d0
-	mov	-16843009, a1
-	mov	a1, d1
-	add	d0, d1
-	not	d0
-	and	d0, d1
-	mov 	-2139062144, d2
-	btst	-2139062144, d1
-	bne	.L21
-#ifdef __NO_SETLB__
-.Loop1:
-#else
-	setlb
-#endif
-	inc4	a0
-	mov	(a0), d0
-	mov	a1, d1
-	add	d0, d1
-	not	d0
-	and	d0, d1
-	and	d2, d1
-#ifdef __NO_SETLB__
-	beq	.Loop1
-#else
-	leq
-#endif
-#endif /* Optimize for speed.  */
-	
-	jmp	.L21
-.L19:
-	inc	a0
-.L21:
-	movbu	(a0), d3
-	cmp	0, d3
-	bne	.L19
-
-	sub	a3, a0
-	mov	a0, d0
-	ret	[d2,d3,a3], 12
-#endif
 .Lend_of_strlen:
 	.size	 _strlen, .Lend_of_strlen - _strlen
 

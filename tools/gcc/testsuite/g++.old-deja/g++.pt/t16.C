@@ -26,6 +26,6 @@ int main ()
   int j = max (1, 37);
   complex m1 = max (c1, c2);
   m1.print ();
-  printf ("j=%d\n", j);
+  // printf ("j=%d\n", j);
   return 0;
 }

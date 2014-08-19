@@ -1,7 +1,6 @@
 /* Reading symbol files from memory.
 
-   Copyright (C) 1986-1987, 1989, 1991, 1994-1996, 1998, 2000-2005,
-   2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -102,14 +101,11 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr, char *name,
     error (_("Failed to read a valid object file image from memory."));
 
   gdb_bfd_ref (nbfd);
+  xfree (bfd_get_filename (nbfd));
   if (name == NULL)
-    nbfd->filename = "shared object read from target memory";
+    nbfd->filename = xstrdup ("shared object read from target memory");
   else
-    {
-      nbfd->filename = name;
-      gdb_bfd_stash_filename (nbfd);
-      xfree (name);
-    }
+    nbfd->filename = name;
 
   cleanup = make_cleanup_bfd_unref (nbfd);
 
@@ -128,8 +124,10 @@ symbol_file_add_from_memory (struct bfd *templ, CORE_ADDR addr, char *name,
 	sai->other[i].sectindex = sec->index;
 	++i;
       }
+  sai->num_sections = i;
 
-  objf = symbol_file_add_from_bfd (nbfd, from_tty ? SYMFILE_VERBOSE : 0,
+  objf = symbol_file_add_from_bfd (nbfd, bfd_get_filename (nbfd),
+				   from_tty ? SYMFILE_VERBOSE : 0,
                                    sai, OBJF_SHARED, NULL);
 
   /* This might change our ideas about frames already looked at.  */
@@ -220,7 +218,7 @@ add_vsyscall_page (struct target_ops *target, int from_tty)
       args.bfd = bfd;
       args.sysinfo_ehdr = sysinfo_ehdr;
       args.name = xstrprintf ("system-supplied DSO at %s",
-			      paddress (target_gdbarch, sysinfo_ehdr));
+			      paddress (target_gdbarch (), sysinfo_ehdr));
       /* Pass zero for FROM_TTY, because the action of loading the
 	 vsyscall DSO was not triggered by the user, even if the user
 	 typed "run" at the TTY.  */

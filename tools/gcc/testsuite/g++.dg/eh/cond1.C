@@ -62,3 +62,5 @@ int main(int argc, char *argv[])
     (argc+1 ? has_destructor() : throw i++);
     if (i != 4) abort();
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

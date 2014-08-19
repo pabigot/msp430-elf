@@ -3,7 +3,7 @@
 # This demonstration script creates a window with a bunch of menus
 # and cascaded menus using menubuttons.
 #
-# # RCS: @(#) $Id$
+# # RCS: @(#) $Id: menubu.tcl,v 1.3 2012/04/18 00:36:58 kevinb Exp $
 
 if {![info exists widgetDemo]} {
     error "This script should be run from the \"widget\" demo."

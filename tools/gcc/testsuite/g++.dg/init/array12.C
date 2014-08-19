@@ -4,21 +4,21 @@
 
 // { dg-do run }
 
-extern "C" int printf (const char *, ...);
+// extern "C" int printf (const char *, ...);
 
 int c;
 int r;
 
 struct A
 {
-  A() { printf ("A()\n"); if (c++) r = 1; }
-  A(const A&) { printf ("A(const A&)\n"); ++c; }
-  ~A() { printf ("~A()\n"); --c; }
+  A() { /*printf ("A()\n");*/ if (c++) r = 1; }
+  A(const A&) { /*printf ("A(const A&)\n");*/ ++c; }
+  ~A() { /*printf ("~A()\n");*/ --c; }
 };
  
 struct B
 {
-  B(int, const A& = A()) { printf ("B()\n"); }
+  B(int, const A& = A()) { /*printf ("B()\n");*/ }
 };
  
 int main()
@@ -26,3 +26,5 @@ int main()
   B b[] = { 0, 0 };
   return r;
 }
+
+// { dg-require-effective-target size32plus }

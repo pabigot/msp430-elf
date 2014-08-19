@@ -1,0 +1,147 @@
+2010-10-06  Nick Clifton  <nickc@redhat.com>
+
+	* Import from the mainline:
+
+	2010-10-06  Nick Clifton  <nickc@redhat.com>
+
+	* script-sections.cc(class Memory_region): Remove
+	current_lma_offset_ field.  Rename current_vma_offset_ to
+	current_offset_.  Add last_section_ field.
+	(Memory_region::get_current_vma_address): Rename to
+	get_current_address.
+	(Memory_region::get_current_lma_address): Delete.
+	(Memory_region::increment_vma_offset): Rename to
+	increment_offset.
+	(Memory_region::increment_lma_offset): Delete.
+	(Memory_region::attributes_compatible): New method.  Returns
+	true if the provided section is compatible with the region.
+	(Memory_region::get_last_section): New method.  Returns the last
+	section to use the region.
+	(Memory_region::set_last_section): New method.  Stores the last
+	section to use the region.
+	(Script_sections::block_in_region): New method.  Returns true if
+	a block of memory is contained within a region.
+	(Script_sections::find_memory_region): New method.  Locates a
+	memory region to be used to set a VMA or LMA address.
+	(Output_section_definition::set_section_addresses): Add code to
+	check for addresses set by memory regions.
+	(Output_segment::set_section_addresses): Remove memory region
+	walking code.
+	(Script_sections::create_segment): Add a warning if a header
+	segment is created outside of any region.
+	* script-sections.h (class Script_sections): Add prototypes for
+	find_memory_region and block_in_region methods.
+	* testsuite/memory_test.s: Use .long instead of .word.
+	* testsuite/memory_test.t: Add some more output sections.
+	* testsuite/memory_test.sh: Update expected output.
+
+2010-09-30  Nick Clifton  <nickc@redhat.com>
+
+	* script-sections.cc (class Memory_Region): Add has_room_for
+	method.
+	(Output_section_definition::set_section_addresses): If an address
+	has not been set for the section scan the memory regions looking
+	one that can be used to contain it.
+	(Output_segment::set_section_address): Remove memory region
+	walking code.
+	(Script_sections::find_memory_region): New method: Find a region
+	suitable for containing a section.
+	(Script_sections::create_segments): Check target
+	create_loadable_phdr_Segment before creating a loadable segment to
+	contain the program headers.
+	* script-sections.h (class Script_sections): Add find_memory_region.
+	* target.h (class Target): Add create_loadable_phdr_segment
+	method.
+	(Target_info struct): Add create_loadable_phdr_segment field.
+	* arm.cc (Target_info): Initialise create_loadable_phdr_segment field.
+	* i386.cc (Target_info): Likewise.
+	* power.cc (Target_info): Likewise.
+	* sparc.cc (Target_info): Likewise.
+	* x86_64.cc (Target_info): Likewise.
+	* rx.cc (Target_info): Likewise.
+	(has_got_section, got_size): Remove unused methods.
+
+2010-09-18  Brendan Conoboy  <blc@redhat.com>
+
+	* configure.ac: Disable AM_BINUTILS_WARNINGS, pull gettext
+	from libintl if needed for Cygwin.
+	* Makefile.am: Don't use INCINTL since it is not provided.
+	* testsuite/Makefile.am: Likewise
+	* configure.ac: Regenerate
+	* Makefile.in: Regenerate
+	* testsuite/Makefile.in: Regenerate
+
+2010-09-18  DJ Delorie  <dj@redhat.com>
+
+	* plugin.cc (gold): Pre-cast dlsym to avoid warnings with g++ 3.4.
+
+2010-09-16  Nick Clifton  <nickc@redhat.com>
+
+	* rx.cc: New file: Adds support for the Renesas RX.
+	* Makefile.am (TARGETSOURCES): Add rx.cc
+	(ALL_TARGETOBJS): Add rx.o
+	* Makefile.in: Regenerate.
+	* configure.in: Add rx as a target.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+	* configure.tgt: Add rx-*-* as a target.
+
+2010-08-20  Nick Clifton  <nickc@redhat.com>
+
+	* expression.cc (script_exp_function_origin): Move to script.cc.
+	(script_exp_function_length): Likewise.
+	* script-c.h (script_add_memory, script_parse_memory_attr,
+	script_set_section_region, script_include_directive): Prototype.
+	(script_exp_function_origin, script_exp_function_length): Update
+	prototypes.
+	* script-sections.h (classs Script_sections): Add
+	add_memory_region(), find_memory_region(),
+	find_memory_region_origin(), find_memory_region_length(),
+	set_memory_region() and memory_region_ members.
+	(enum): Declare values used for MEMORY attributes.
+	* script-sections.cc (class Memory_region): New class.
+	(class Output_section_definition): Add set_memory_region().
+	(Script_sections constructor): Initialise the memory_regions_
+	field.
+	(class Script_sections): Define add_memory_region(),
+	find_memory_region(), find_memory_region_origin(),
+	find_memory_region_length() and set_memory_region().
+	Update print() to print any PHDRS declarations even if the script
+	does not contain a SECTIONS statement.  Also print out the MEMORY
+	declarations, if any.
+	* script.cc (script_set_section_region, script_add_memory)
+	(script_parse_memory_attr, script_include_directive): New
+	functions.
+	(script_exp_function_origin, script_exp_function_length): Moved
+	here from sxpression.cc.
+	* yyscript.y (LEN, ORG): New tokens.
+	(memory_attr): New integer type.
+	(file_cmd): Add MEMORY token.
+	(opt_memspec): Replace error message with call to
+	script_set_section_region.
+	(opt_memspec_at): Likewise.
+	(memory_defs, memory_def, memory_attr, memorig_origin)
+	(memory_length): New rules.
+	(exp): Pass closure parameter to invocations of
+	script_exp_function_origin and script_exp_function_length.
+
+2010-03-17  Nick Clifton  <nickc@redhat.com>
+
+	* configure.ac (install_as_default): Define and set to false
+	unless --enable-gold or --enable-gold=both/gold has been
+	specified.
+	* configure: Regenerate.
+
+2010-03-03  Nick Clifton  <nickc@redhat.com>
+
+	* options.cc (parse_version): Do not exit after displaying the
+	version number.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

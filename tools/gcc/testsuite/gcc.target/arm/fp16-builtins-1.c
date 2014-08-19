@@ -2,7 +2,7 @@
    Except as otherwise noted, they should behave exactly
    the same as those with float arguments.  */
 
-/* { dg-do run } */
+/* { dg-do compile } */
 /* { dg-options "-mfp16-format=ieee -std=gnu99" } */
 
 #include <stdlib.h>

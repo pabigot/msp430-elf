@@ -1,33 +1,14 @@
-/*
+/* Copyright (c) 2005,2008,2009,2011,2013 Red Hat, Inc. All rights reserved.
 
-Copyright (c) 2005,2008,2009,2011 Red Hat Incorporated.
-All rights reserved.
-
-Redistribution and use in source and binary forms, with or without 
-modification, are permitted provided that the following conditions are met: 
-
-    Redistributions of source code must retain the above copyright 
-    notice, this list of conditions and the following disclaimer.
-
-    Redistributions in binary form must reproduce the above copyright
-    notice, this list of conditions and the following disclaimer in the
-    documentation and/or other materials provided with the distribution.
-
-    The name of Red Hat Incorporated may not be used to endorse 
-    or promote products derived from this software without specific 
-    prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" 
-AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE 
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-DISCLAIMED.  IN NO EVENT SHALL RED HAT INCORPORATED BE LIABLE FOR ANY
-DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-(INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND 
-ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
-
+   This copyrighted material is made available to anyone wishing to use, modify,
+   copy, or redistribute it subject to the terms and conditions of the BSD
+   License.   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY expressed or implied, including the implied warranties
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  A copy of this license
+   is available at http://www.opensource.org/licenses. Any Red Hat trademarks that
+   are incorporated in the source code or documentation are not subject to the BSD
+   License and may only be used or replicated with the express permission of
+   Red Hat, Inc.
 */
 
 /* Default linker script, for normal executables */
@@ -38,14 +19,19 @@ ENTRY(_start)
    __DYNAMIC = 0;    */
 
 INCLUDE intr_vectors.ld
-   
-MEMORY
-{
-  RAM (w)      : ORIGIN = 0x00200, LENGTH = 0x0ee00
+
+MEMORY {
+	RAM (w)      : ORIGIN = 0x00200, LENGTH = 0x0ee00
+	RESETVEC (w) : ORIGIN = 0x0fffe, LENGTH = 0x00002
 }
 
 SECTIONS
 {
+  .resetvec :
+  {
+    *(.resetvec)
+  } > RESETVEC
+
   .rodata : {
     . = ALIGN(2);
     *(.plt)
@@ -145,22 +131,22 @@ SECTIONS
     *(.dynbss)
     *(.sbss .sbss.*)
     *(.bss .bss.* .gnu.linkonce.b.*)
-    . = ALIGN(2);
     PROVIDE (__bssend = .);
-    _end = .;
   } > RAM
   PROVIDE (__bsssize = SIZEOF(.bss));
 
   /* This section contains data that is not initialised at startup.  */
-  .noinit : {
+  .noinit (NOLOAD) : {
     . = ALIGN(2);
     PROVIDE (__noinit_start = .);
     *(.noinit)
     . = ALIGN(2);
     *(COMMON)
     PROVIDE (__noinit_end = .);
-    end = .;
   } > RAM
+
+  _end = .;
+  PROVIDE (end = .);
 
   .stack (ORIGIN (RAM) + LENGTH(RAM)) :
   {
@@ -200,7 +186,7 @@ SECTIONS
   /* DWARF 2 */
   .debug_info     0 : { *(.debug_info .gnu.linkonce.wi.*) }
   .debug_abbrev   0 : { *(.debug_abbrev) }
-  .debug_line     0 : { *(.debug_line) }
+  .debug_line     0 : { *(.debug_line .debug_line.* .debug_line_end ) }
   .debug_frame    0 : { *(.debug_frame) }
   .debug_str      0 : { *(.debug_str) }
   .debug_loc      0 : { *(.debug_loc) }

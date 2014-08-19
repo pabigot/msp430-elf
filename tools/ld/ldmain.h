@@ -1,6 +1,5 @@
 /* ldmain.h -
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1999, 2002, 2003, 2004,
-   2005, 2007, 2008, 2009, 2012 Free Software Foundation, Inc.
+   Copyright 1991-2013 Free Software Foundation, Inc.
 
    This file is part of the GNU Binutils.
 
@@ -43,9 +42,6 @@ extern int overflow_cutoff_limit;
   (link_info.disable_target_specific_optimizations < 0)
 #define RELAXATION_DISABLED_BY_USER	\
   (link_info.disable_target_specific_optimizations > 1)
-#define RELAXATION_ENABLED		\
-  (link_info.disable_target_specific_optimizations == 0)
-#undef  RELAXATION_ENABLED
 #define RELAXATION_ENABLED		\
   (link_info.disable_target_specific_optimizations == 0 \
    || link_info.disable_target_specific_optimizations == 1)

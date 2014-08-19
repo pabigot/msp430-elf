@@ -1,5 +1,4 @@
-/* { dg-skip-if "Too big for a 16-bit target" { "msp430-*-*" } { "*" } { "" } } */
-
+/* { dg-require-effective-target int32plus } */
 /* Inspired by the test case for PR middle-end/52640.  */
 
 typedef struct

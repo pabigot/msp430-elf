@@ -1,4 +1,5 @@
 /* { dg-do run } */
+/* { dg-skip-if "non standard pointer size in large memory model" { "msp430-*-*" } { "-mlarge" } { "" } } */
 
 #if (__SIZEOF_LONG_LONG__ == __SIZEOF_POINTER__)
 typedef unsigned long long uintptr_t;

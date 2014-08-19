@@ -1,6 +1,6 @@
 /* Header file for GDB command decoding library.
 
-   Copyright (c) 2000, 2003, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -51,6 +51,7 @@ cmd_types;
 #define CMD_DEPRECATED            0x1
 #define DEPRECATED_WARN_USER      0x2
 #define MALLOCED_REPLACEMENT      0x4
+#define DOC_ALLOCATED             0x8
 
 struct cmd_list_element
   {
@@ -58,7 +59,7 @@ struct cmd_list_element
     struct cmd_list_element *next;
 
     /* Name of this command.  */
-    char *name;
+    const char *name;
 
     /* Command class; class values are chosen by application program.  */
     enum command_class class;
@@ -112,7 +113,9 @@ struct cmd_list_element
        memory for replacement is malloc'ed.  When a command is
        undeprecated or re-deprecated at runtime we don't want to risk
        calling free on statically allocated memory, so we check this
-       flag.  */
+       flag.
+
+       bit 3: DOC_ALLOCATED, set if the doc field should be xfree'd.  */
 
     int flags;
 

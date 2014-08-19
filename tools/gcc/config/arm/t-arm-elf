@@ -1,4 +1,4 @@
-# Copyright (C) 1998-2013 Free Software Foundation, Inc.
+# Copyright (C) 1998-2014 Free Software Foundation, Inc.
 #
 # This file is part of GCC.
 #
@@ -47,7 +47,7 @@ MULTILIB_EXCEPTIONS    += *mthumb/*mfloat-abi=hard*
 # MULTILIB_OPTIONS    += mcpu=ep9312
 # MULTILIB_DIRNAMES   += ep9312
 # MULTILIB_EXCEPTIONS += *mthumb/*mcpu=ep9312*
-#
+# 	
 # MULTILIB_OPTIONS     += mlittle-endian/mbig-endian
 # MULTILIB_DIRNAMES    += le be
 # MULTILIB_MATCHES     += mbig-endian=mbe mlittle-endian=mle
@@ -88,7 +88,3 @@ MULTILIB_EXCEPTIONS    += *mthumb/*mfloat-abi=hard*
 # MULTILIB_MATCHES    += mcpu?arm7=mcpu?arm600
 # MULTILIB_MATCHES    += mcpu?arm7=mcpu?arm610
 # MULTILIB_MATCHES    += mcpu?arm7=mcpu?arm620
-
-# Local Variables:
-# mode: Makefile
-# End:

@@ -1,6 +1,6 @@
 /* { dg-do compile } */
-/* { dg-options "-O2 -fdump-tree-optimized" } */
 /* { dg-require-effective-target int32plus } */
+/* { dg-options "-O2 -fdump-tree-optimized" } */
 
 int *a_p;
 int a[1000];

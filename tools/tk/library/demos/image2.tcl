@@ -3,7 +3,7 @@
 # This demonstration script creates a simple collection of widgets
 # that allow you to select and view images in a Tk label.
 #
-# RCS: @(#) $Id: image2.tcl,v 1.10 2003/03/19 23:02:05 cagney Exp $
+# RCS: @(#) $Id: image2.tcl,v 1.3 2012/04/18 00:36:58 kevinb Exp $
 
 if {![info exists widgetDemo]} {
     error "This script should be run from the \"widget\" demo."

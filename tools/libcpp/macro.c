@@ -1,5 +1,5 @@
 /* Part of CPP library.  (Macro and #define handling.)
-   Copyright (C) 1986-2013 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
    Written by Per Bothner, 1994.
    Based on CCCP program by Paul Rubin, June 1986
    Adapted to ANSI C, Richard Stallman, Jan 1987
@@ -232,6 +232,10 @@ _cpp_builtin_macro_text (cpp_reader *pfile, cpp_hashnode *node)
 
     case BT_TIMESTAMP:
       {
+	if (CPP_OPTION (pfile, warn_date_time))
+	  cpp_warning (pfile, CPP_W_DATE_TIME, "macro \"%s\" might prevent "
+		       "reproducible builds", NODE_NAME (node));
+
 	cpp_buffer *pbuffer = cpp_get_buffer (pfile);
 	if (pbuffer->timestamp == NULL)
 	  {
@@ -325,6 +329,9 @@ _cpp_builtin_macro_text (cpp_reader *pfile, cpp_hashnode *node)
 
     case BT_DATE:
     case BT_TIME:
+      if (CPP_OPTION (pfile, warn_date_time))
+	cpp_warning (pfile, CPP_W_DATE_TIME, "macro \"%s\" might prevent "
+		     "reproducible builds", NODE_NAME (node));
       if (pfile->date == NULL)
 	{
 	  /* Allocate __DATE__ and __TIME__ strings from permanent
@@ -1108,21 +1115,22 @@ enter_macro_context (cpp_reader *pfile, cpp_hashnode *node,
 
       if (macro->paramc == 0)
 	{
+	  unsigned tokens_count = macro_real_token_count (macro);
 	  if (CPP_OPTION (pfile, track_macro_expansion))
 	    {
-	      unsigned int i, count = macro->count;
+	      unsigned int i;
 	      const cpp_token *src = macro->exp.tokens;
 	      const struct line_map *map;
 	      source_location *virt_locs = NULL;
-	      _cpp_buff *macro_tokens =
-		tokens_buff_new (pfile, count, &virt_locs);
+	      _cpp_buff *macro_tokens
+		= tokens_buff_new (pfile, tokens_count, &virt_locs);
 
 	      /* Create a macro map to record the locations of the
 		 tokens that are involved in the expansion. LOCATION
 		 is the location of the macro expansion point.  */
-	      map  = linemap_enter_macro (pfile->line_table,
-					  node, location, count);
-	      for (i = 0; i < count; ++i)
+	      map = linemap_enter_macro (pfile->line_table,
+					 node, location, tokens_count);
+	      for (i = 0; i < tokens_count; ++i)
 		{
 		  tokens_buff_add_token (macro_tokens, virt_locs,
 					 src, src->src_loc,
@@ -1134,16 +1142,12 @@ enter_macro_context (cpp_reader *pfile, cpp_hashnode *node,
 					    virt_locs,
 					    (const cpp_token **)
 					    macro_tokens->base,
-					    count);
-	      num_macro_tokens_counter += count;
+					    tokens_count);
 	    }
 	  else
-	    {
-	      unsigned tokens_count = macro_real_token_count (macro);
-	      _cpp_push_token_context (pfile, node, macro->exp.tokens,
-				       tokens_count);
-	      num_macro_tokens_counter += tokens_count;
-	    }
+	    _cpp_push_token_context (pfile, node, macro->exp.tokens,
+				     tokens_count);
+	  num_macro_tokens_counter += tokens_count;
 	}
 
       if (pragma_buff)

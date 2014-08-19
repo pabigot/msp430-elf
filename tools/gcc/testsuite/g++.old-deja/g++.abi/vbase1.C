@@ -113,3 +113,4 @@ int main ()
 }
 
 #endif /* !(defined (__GXX_ABI_VERSION) && __GXX_ABI_VERSION >= 100) */
+// { dg-require-effective-target size32plus }

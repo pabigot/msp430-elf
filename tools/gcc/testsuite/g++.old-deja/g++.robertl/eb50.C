@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 struct foo { };
 int f(int a, int b)
 {

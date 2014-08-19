@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // Copyright (C) 2000 Free Software Foundation, Inc.
 // Contributed by Nathan Sidwell 19 Jan 2001 <nathan@codesourcery.com>
 

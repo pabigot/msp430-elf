@@ -201,8 +201,9 @@ distclean maintainer-clean realclean: clean
 
 .PHONY: install info install-info clean-info
 install:
+	mkdir -p $(DESTDIR)$(tooldir)/lib${MULTISUBDIR}
 	@for file in $(CRT0) $(PCRT0) $(BSP); do \
-	  $(INSTALL_DATA) $${file} $(DESTDIR)$(tooldir)/lib${MULTISUBDIR}; \
+	  $(INSTALL_DATA) $${file} $(DESTDIR)$(tooldir)/lib${MULTISUBDIR}/$${file}; \
 	done
 	@for script in ${SCRIPTS}; do\
 	  $(INSTALL_DATA) ${srcdir}/$${script}.ld $(DESTDIR)$(tooldir)/lib${MULTISUBDIR}/$${script}.ld; \
@@ -241,7 +242,11 @@ cfe_mem.o: ${srcdir}/cfe_mem.c ${srcdir}/cfe_api.h
 # it will have to be built, then this rule can be scrapped, allowing
 # the implicit rule to run.
 cma101.o: ${srcdir}/cma101.c
-	$(CC) -c $(CFLAGS_FOR_TARGET) $(CFLAGS) -mno-mips16 ${srcdir}/cma101.c
+	$(CC) -c $(CFLAGS_FOR_TARGET) -O2 $(INCLUDES) $(CFLAGS) -mno-mips16 ${srcdir}/cma101.c
+
+# cygmon can not be compiled as mips16 since it uses the syscall instruction
+cygmon.o: ${srcdir}/cygmon.c
+	$(CC) -c $(CFLAGS_FOR_TARGET) -O2 $(INCLUDES) $(CFLAGS) -mno-mips16 ${srcdir}/cygmon.c
 
 syscalls.o: ${srcdir}/syscalls.c
 

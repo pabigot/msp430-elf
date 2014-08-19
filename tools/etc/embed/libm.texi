@@ -1,6 +1,0 @@
-@c This file documents using Libm on an embedded target, 
-@c as @included in newlib.texi.
-
-@node Libm
-@subsubsection Libm, the library of math functions
-

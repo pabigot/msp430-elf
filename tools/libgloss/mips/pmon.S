@@ -172,5 +172,6 @@ __sizemem:
 	.end	__sizemem
 #else
 
+
 #endif
 /* EOF pmon.S */

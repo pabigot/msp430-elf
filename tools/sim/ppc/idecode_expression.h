@@ -414,5 +414,3 @@ do { \
 do { \
   FPSCR = (FPSCR & ~fpscr_fprf) | (VAL); \
 } while (0)
-#include "altivec_expression.h"
-#include "e500_expression.h"

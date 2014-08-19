@@ -1,7 +1,7 @@
 /* Get info from stack frames; convert between frames, blocks,
    functions and pc values.
 
-   Copyright (C) 1986-2004, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -35,7 +35,6 @@
 #include "gdbcmd.h"
 #include "block.h"
 #include "inline-frame.h"
-#include "psymtab.h"
 
 /* Return the innermost lexical block in execution in a specified
    stack frame.  The frame address is assumed valid.
@@ -88,7 +87,7 @@ CORE_ADDR
 get_pc_function_start (CORE_ADDR pc)
 {
   struct block *bl;
-  struct minimal_symbol *msymbol;
+  struct bound_minimal_symbol msymbol;
 
   bl = block_for_pc (pc);
   if (bl)
@@ -103,9 +102,9 @@ get_pc_function_start (CORE_ADDR pc)
     }
 
   msymbol = lookup_minimal_symbol_by_pc (pc);
-  if (msymbol)
+  if (msymbol.minsym)
     {
-      CORE_ADDR fstart = SYMBOL_VALUE_ADDRESS (msymbol);
+      CORE_ADDR fstart = SYMBOL_VALUE_ADDRESS (msymbol.minsym);
 
       if (find_pc_section (fstart))
 	return fstart;
@@ -218,7 +217,7 @@ find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
       && section == cache_pc_function_section)
     goto return_cached_value;
 
-  msymbol = lookup_minimal_symbol_by_pc_section (mapped_pc, section);
+  msymbol = lookup_minimal_symbol_by_pc_section (mapped_pc, section).minsym;
   ALL_OBJFILES (objfile)
   {
     if (objfile->sf)
@@ -292,8 +291,8 @@ find_pc_partial_function_gnu_ifunc (CORE_ADDR pc, const char **name,
 	{
 	  if (SYMBOL_VALUE_ADDRESS (msymbol + i)
 	      != SYMBOL_VALUE_ADDRESS (msymbol)
-	      && SYMBOL_OBJ_SECTION (msymbol + i)
-	      == SYMBOL_OBJ_SECTION (msymbol))
+	      && SYMBOL_SECTION (msymbol + i)
+	      == SYMBOL_SECTION (msymbol))
 	    break;
 	}
 
@@ -360,14 +359,9 @@ struct frame_info *
 block_innermost_frame (const struct block *block)
 {
   struct frame_info *frame;
-  CORE_ADDR start;
-  CORE_ADDR end;
 
   if (block == NULL)
     return NULL;
-
-  start = BLOCK_START (block);
-  end = BLOCK_END (block);
 
   frame = get_selected_frame_if_set ();
   if (frame == NULL)

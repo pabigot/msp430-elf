@@ -1,0 +1,4 @@
+Sun Mar 23 17:53:16 GMT 2003  Brendan Conoboy  <blc@redhat.com>
+
+        Makefile: Activate install: target, add install-info: target.
+

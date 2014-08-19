@@ -28,7 +28,7 @@ sub(foo f) {
 int main() {
    sub(foo());
    if (things == 0)
-     printf ("PASS\n");
+     ; // printf ("PASS\n");
    else
      { printf ("FAIL\n"); return 1; }
 }

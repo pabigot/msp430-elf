@@ -30,3 +30,4 @@ int main() {
   foo(p);
   return bar(p);
 }
+// { dg-require-effective-target size32plus }

@@ -1,0 +1,13 @@
+2010-09-16  Nick Clifton  <nickc@redhat.com>
+
+	* rx.h: New file.  Define constants used by RX port of GOLD.
+	* elfcpp.h (enum EM): Add EM_RX.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

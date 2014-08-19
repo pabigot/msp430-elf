@@ -1,6 +1,6 @@
 /* Parse a printf-style format string.
 
-   Copyright (C) 1986-2012 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -51,7 +51,7 @@ struct format_piece
 /* Return an array of printf fragments found at the given string, and
    rewrite ARG with a pointer to the end of the format string.  */
 
-extern struct format_piece *parse_format_string (char **arg);
+extern struct format_piece *parse_format_string (const char **arg);
 
 /* Given a pointer to an array of format pieces, free any memory that
    would have been allocated by parse_format_string.  */

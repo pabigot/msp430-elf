@@ -1,6 +1,6 @@
-/dna_str_limit.hpp/1.4/Sun Feb 24 19:28:46 2013//Tmsp430-130322-branch
-/limit_string_hash_fn.hpp/1.4/Sun Feb 24 19:28:46 2013//Tmsp430-130322-branch
-/string_hash_fn.hpp/1.4/Sun Feb 24 19:28:46 2013//Tmsp430-130322-branch
-/string_ranged_hash_fn.hpp/1.4/Sun Feb 24 19:28:47 2013//Tmsp430-130322-branch
-/string_ranged_probe_fn.hpp/1.4/Sun Feb 24 19:28:47 2013//Tmsp430-130322-branch
+/dna_str_limit.hpp/1.5/Thu Feb 20 13:47:53 2014//Tmsp430-14r1-branch
+/limit_string_hash_fn.hpp/1.5/Thu Feb 20 13:47:53 2014//Tmsp430-14r1-branch
+/string_hash_fn.hpp/1.5/Thu Feb 20 13:47:53 2014//Tmsp430-14r1-branch
+/string_ranged_hash_fn.hpp/1.5/Thu Feb 20 13:47:53 2014//Tmsp430-14r1-branch
+/string_ranged_probe_fn.hpp/1.5/Thu Feb 20 13:47:53 2014//Tmsp430-14r1-branch
 D

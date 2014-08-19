@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkTableEdit.c,v 1.1 2001/10/24 20:09:50 keiths Exp $
+ * RCS: @(#) $Id: tkTableEdit.c,v 1.3 2012/04/18 00:37:22 kevinb Exp $
  */
 
 #include "tkTable.h"

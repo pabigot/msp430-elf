@@ -1,9 +1,22 @@
+2010-09-30  Kevin Buettner  <kevinb@redhat.com>
+
+	* interp.c (sim_write): Add `const' to buffer arg.
+
+2009-01-07  Nick Clifton  <nickc@redhat.com>
+
+	* configure: Regenerate.
+
 2007-09-05  Nick Clifton  <nickc@redhat.com>
 
 	* fpp.c (MAKE_FPSR): Also set NaN flag bit.
 	(fpp_opp): Make FCMP case correctly set flag bits.
 	* md-fpp.h (to_single): Hack to fix rounding errors.
 	(from_single, to_double, from_double): Likewise.
+
+2007-09-04  Nick Clifton  <nickc@redhat.com>
+
+	* machdep/m68k.h (SET_ZFLG, SET_CFLG, SET_VFLG, SET_NFLG): Rewrite
+	to work around host compiler bug.
 
 2007-03-09  Nick Clifton  <nickc@redhat.com>
 

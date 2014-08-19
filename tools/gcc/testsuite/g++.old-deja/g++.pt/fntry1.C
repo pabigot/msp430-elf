@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // Bug: g++ silently ignores function-try-blocks in templates.
 // Submitted by Jason Merrill <jason@cygnus.com>
 

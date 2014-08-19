@@ -1,5 +1,5 @@
 ; CPU implementation description.
-; Copyright (C) 2000, 2003, 2009 Red Hat, Inc.
+; Copyright (C) 2000, 2003 Red Hat, Inc.
 ; This file is part of CGEN.
 ; See file COPYING.CGEN for details.
 
@@ -61,7 +61,7 @@
 ; FIXME: No longer used.
 
 (define (unit:make-insn-timing u issue done)
-  (let ((result (object-copy u)))
+  (let ((result (object-copy-top u)))
     (elm-xset! result 'issue issue)
     (elm-xset! result 'done done)
     result)
@@ -108,13 +108,13 @@
 
 ; Parse a `prefetch' spec.
 
-(define (/prefetch-parse context expr)
+(define (-prefetch-parse errtxt expr)
   nil
 )
 
 ; Parse a `retire' spec.
 
-(define (/retire-parse context expr)
+(define (-retire-parse errtxt expr)
   nil
 )
 
@@ -122,9 +122,9 @@
 ; ??? Perhaps we should also use name/value pairs here, but that's an
 ; unnecessary complication at this point in time.
 
-(define (/pipeline-parse context model-name spec) ; name comments attrs elements)
+(define (-pipeline-parse errtxt model-name spec) ; name comments attrs elements)
   (if (not (= (length spec) 4))
-      (parse-error context "pipeline spec not `name comment attrs elements'" spec))
+      (parse-error errtxt "pipeline spec not `name comment attrs elements'" spec))
   (apply make (cons <pipeline> spec))
 )
 
@@ -132,9 +132,9 @@
 ; ??? Perhaps we should also use name/value pairs here, but that's an
 ; unnecessary complication at this point in time.
 
-(define (/unit-parse context model-name spec) ; name comments attrs elements)
+(define (-unit-parse errtxt model-name spec) ; name comments attrs elements)
   (if (not (= (length spec) 9))
-      (parse-error context "unit spec not `name comment attrs issue done state inputs outputs profile'" spec))
+      (parse-error errtxt "unit spec not `name comment attrs issue done state inputs outputs profile'" spec))
   (apply make (append (cons <unit> spec) (list model-name)))
 )
 
@@ -143,31 +143,27 @@
 ; description in the .cpu file.
 ; All arguments are in raw (non-evaluated) form.
 
-(define (/model-parse context name comment attrs mach-name prefetch retire pipelines state units)
+(define (-model-parse errtxt name comment attrs mach-name prefetch retire pipelines state units)
   (logit 2 "Processing model " name " ...\n")
-
-  ;; Pick out name first to augment the error context.
-  (let* ((name (parse-name context name))
-	 (context (context-append-name context name))
-	 (mach (current-mach-lookup mach-name)))
-
+  (let ((name (parse-name name errtxt))
+	; FIXME: switch to `context' like in cver.
+	(errtxt (stringsym-append errtxt " " name))
+	(mach (current-mach-lookup mach-name)))
     (if (null? units)
-	(parse-error context "there must be at least one function unit" name))
-
+	(parse-error errtxt "there must be at least one function unit" name))
     (if mach ; is `mach' being "kept"?
 	(let ((model-obj
 	       (make <model>
 		     name
-		     (parse-comment context comment)
-		     (atlist-parse context attrs "cpu")
+		     (parse-comment comment errtxt)
+		     (atlist-parse attrs "cpu" errtxt)
 		     mach
-		     (/prefetch-parse context prefetch)
-		     (/retire-parse context retire)
-		     (map (lambda (p) (/pipeline-parse context name p)) pipelines)
+		     (-prefetch-parse errtxt prefetch)
+		     (-retire-parse errtxt retire)
+		     (map (lambda (p) (-pipeline-parse errtxt name p)) pipelines)
 		     state
-		     (map (lambda (u) (/unit-parse context name u)) units))))
+		     (map (lambda (u) (-unit-parse errtxt name u)) units))))
 	  model-obj)
-
 	(begin
 	  ; MACH wasn't found, ignore this model.
 	  (logit 2 "Nonexistant mach " mach-name ", ignoring " name ".\n")
@@ -176,12 +172,12 @@
 
 ; Read a model description.
 ; This is the main routine for analyzing models in the .cpu file.
-; CONTEXT is a <context> object for error messages.
+; ERRTXT is prepended to error messages to provide context.
 ; ARG-LIST is an associative list of field name and field value.
-; /model-parse is invoked to create the `model' object.
+; -model-parse is invoked to create the `model' object.
 
-(define (/model-read context . arg-list)
-  (let (
+(define (-model-read errtxt . arg-list)
+  (let (; Current mach elements:
 	(name nil)      ; name of model
 	(comment nil)   ; description of model
 	(attrs nil)     ; attributes
@@ -192,7 +188,6 @@
 	(state nil)     ; list of (name mode) pairs to record state
 	(units nil)     ; list of function units
 	)
-
     (let loop ((arg-list arg-list))
       (if (null? arg-list)
 	  nil
@@ -208,19 +203,18 @@
 	      ((pipeline) (set! pipelines (cons (cdr arg) pipelines)))
 	      ((state) (set! state (cdr arg)))
 	      ((unit) (set! units (cons (cdr arg) units)))
-	      (else (parse-error context "invalid model arg" arg)))
+	      (else (parse-error errtxt "invalid model arg" arg)))
 	    (loop (cdr arg-list)))))
-
     ; Now that we've identified the elements, build the object.
-    (/model-parse context name comment attrs mach prefetch retire pipelines state units))
+    (-model-parse errtxt name comment attrs mach prefetch retire pipelines state units)
+    )
 )
 
 ; Define a cpu model object, name/value pair list version.
 
 (define define-model
   (lambda arg-list
-    (let ((m (apply /model-read (cons (make-current-context "define-model")
-				      arg-list))))
+    (let ((m (apply -model-read (cons "define-model" arg-list))))
       (if m
 	  (current-model-add! m))
       m))
@@ -253,7 +247,7 @@
 ; Subroutine of parse-insn-timing to parse the timing spec for MODEL.
 ; The result is a <timing> object.
 
-(define (/insn-timing-parse-model context model spec)
+(define (-insn-timing-parse-model context model spec)
   (make <timing> model
 	(map (lambda (unit-timing-desc)
 	       (let ((type (car unit-timing-desc))
@@ -278,14 +272,13 @@
 ; are returned as (model1), i.e. an empty unit list.
 
 (define (parse-insn-timing context insn-timing-desc)
-  (logit 3 "  parse-insn-timing: context= " (context-prefix context)
-	 ", desc= " insn-timing-desc "\n")
+  (logit 2 "parse-insn-timing: context==" context ", desc==" insn-timing-desc "\n")
   (map (lambda (model-timing-desc)
 	 (let* ((model-name (car model-timing-desc))
 		(model (current-model-lookup model-name)))
 	   (cons model-name
 		 (if model
-		     (/insn-timing-parse-model context model
+		     (-insn-timing-parse-model context model
 					       (cdr model-timing-desc))
 		     '()))))
        insn-timing-desc)

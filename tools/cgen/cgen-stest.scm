@@ -1,5 +1,5 @@
 ; CPU description file generator for the simulator testsuite.
-; Copyright (C) 2000, 2009 Red Hat, Inc.
+; Copyright (C) 2000 Red Hat, Inc.
 ; This file is part of CGEN.
 
 ; This is invoked to build several .s files and a script to run to
@@ -76,5 +76,3 @@
 )
 
 (cgen-stest (program-arguments))
-
-;; FIXME: cgen-all will generate the opcodes files, not what we want

@@ -2,6 +2,7 @@
 /* { dg-options "-O2 -Wmissing-noreturn" } */
 /* { dg-options "-O2 -mno-mmx" { target { { i?86-*-* x86_64-*-* } && ia32 } } } */
 /* { dg-do run } */
+/* { dg-skip-if "non standard stack" { "rx-*-*" } { "*" } { "" } } */
 
 extern void abort (void);
 

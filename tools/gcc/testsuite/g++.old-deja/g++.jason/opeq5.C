@@ -5,7 +5,7 @@
 // whether the vbase is assigned at all.
 
 int count = 0;
-extern "C" int printf (const char *, ...);
+// extern "C" int printf (const char *, ...);
 
 class A {
  public:
@@ -20,7 +20,7 @@ int main()
 {
   D a, b;
   a = b;
-  printf ("%d\n",count);
+  // printf ("%d\n",count);
   if (count == 0)
     return 1;
   return 0;

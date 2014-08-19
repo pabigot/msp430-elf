@@ -9,8 +9,7 @@
 @end direntry
 
 @copying
-Copyright @copyright{} 1990-1994, 1996, 1998-2006, 2008-2012 Free
-Software Foundation, Inc.
+Copyright @copyright{} 1990-2013 Free Software Foundation, Inc.
 Contributed by Cygnus Solutions.  Written by John Gilmore.
 Second Edition by Stan Shebs.
 
@@ -41,7 +40,7 @@ This file documents the internals of the GNU debugger @value{GDBN}.
 @page
 @tex
 \def\$#1${{#1}}  % Kluge: collect RCS revision info without $...$
-\xdef\manvers{\$Revision: 1.254 $}  % For use in headers, footers too
+\xdef\manvers{\$Revision: 1.21 $}  % For use in headers, footers too
 {\parskip=0pt
 \hfill Cygnus Solutions\par
 \hfill \manvers\par
@@ -2761,11 +2760,6 @@ Substitute for isatty, if not available.
 @item FOPEN_RB
 Define this if binary files are opened the same way as text files.
 
-@item CC_HAS_LONG_LONG
-@cindex @code{long long} data type
-Define this if the host C compiler supports @code{long long}.  This is set
-by the @code{configure} script.
-
 @item PRINTF_HAS_LONG_LONG
 Define this if the host can handle printing of long long integers via
 the printf format conversion specifier @code{ll}.  This is set by the
@@ -4532,8 +4526,11 @@ contents and size of a breakpoint instruction.  It returns a pointer to
 a static string of bytes that encode a breakpoint instruction, stores the
 length of the string to @code{*@var{lenptr}}, and adjusts the program
 counter (if necessary) to point to the actual memory location where the
-breakpoint should be inserted.  May return @code{NULL} to indicate that
-software breakpoints are not supported.
+breakpoint should be inserted.  On input, the program counter
+(@code{*@var{pcptr}} is the encoded inferior's PC register.  If software
+breakpoints are supported, the function sets this argument to the PC's
+plain address.  If software breakpoints are not supported, the function
+returns NULL instead of the encoded breakpoint instruction.
 
 Although it is common to use a trap instruction for a breakpoint, it's
 not required; for instance, the bit pattern could be an invalid
@@ -4813,7 +4810,7 @@ instead of value.
 @anchor{gdbarch_push_dummy_call} Define this to push the dummy frame's call to
 the inferior function onto the stack.  In addition to pushing @var{nargs}, the
 code should push @var{struct_addr} (when @var{struct_return} is non-zero), and
-the return address (@var{bp_addr}).
+the return address (@var{bp_addr}, in inferior's PC register encoding).
 
 @var{function} is a pointer to a @code{struct value}; on architectures that use
 function descriptors, this contains the function descriptor value.
@@ -4827,12 +4824,14 @@ instruction sequence (including space for a breakpoint) to which the
 called function should return.
 
 Set @var{bp_addr} to the address at which the breakpoint instruction
-should be inserted, @var{real_pc} to the resume address when starting
-the call sequence, and return the updated inner-most stack address.
+should be inserted (in inferior's PC register encoding), @var{real_pc} to the
+resume address when starting the call sequence, and return the updated
+inner-most stack address.
 
 By default, the stack is grown sufficient to hold a frame-aligned
 (@pxref{frame_align}) breakpoint, @var{bp_addr} is set to the address
-reserved for that breakpoint, and @var{real_pc} set to @var{funaddr}.
+reserved for that breakpoint (in inferior's PC register encoding), and
+@var{real_pc} set to @var{funaddr}.
 
 This method replaces @w{@code{gdbarch_call_dummy_location (@var{gdbarch})}}.
 
@@ -5907,6 +5906,25 @@ protected with parentheses.)
 Declarations like @samp{struct foo *} should be used in preference to
 declarations like @samp{typedef struct foo @{ @dots{} @} *foo_ptr}.
 
+Zero constant (@code{0}) is not interchangeable with a null pointer
+constant (@code{NULL}) anywhere.  @sc{gcc} does not give a warning for
+such interchange.  Specifically:
+
+@multitable @columnfractions .2 .5
+@item incorrect
+@tab @code{if (pointervar) @{@}}
+@item incorrect
+@tab @code{if (!pointervar) @{@}}
+@item incorrect
+@tab @code{if (pointervar != 0) @{@}}
+@item incorrect
+@tab @code{if (pointervar == 0) @{@}}
+@item correct
+@tab @code{if (pointervar != NULL) @{@}}
+@item correct
+@tab @code{if (pointervar == NULL) @{@}}
+@end multitable
+
 @subsection Function Prototypes
 @cindex function prototypes
 
@@ -5916,7 +5934,8 @@ argument type and name, with the name matching that used in the actual
 function definition.
 
 All external functions should have a declaration in a header file that
-callers include, except for @code{_initialize_*} functions, which must
+callers include, that declaration should use the @code{extern} modifier.
+The only exception concerns @code{_initialize_*} functions, which must
 be external so that @file{init.c} construction works, but shouldn't be
 visible to random source files.
 

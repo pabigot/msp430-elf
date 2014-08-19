@@ -1,171 +1,280 @@
-## Process this file with automake to generate Makefile.in
+# Process this file with automake to generate Makefile.in
 
 AUTOMAKE_OPTIONS = dejagnu
 
-# Install all the associated data files
-SUBDIRS = doc # testsuite example
+EXTRA_DIST = ChangeLog.0 MAINTAINERS runtest site.tmpl \
+	$(pkgdata_DATA) $(pkgdata_SCRIPTS) \
+	$(config_DATA) $(config_SCRIPTS) \
+	$(baseboard_DATA) $(baseboard_SCRIPTS) \
+	$(TESTSUITE_FILES) $(XML) $(CONTRIB)
 
-# Install the bourne shell script driver in the bindir
 bin_SCRIPTS = runtest
+include_HEADERS = dejagnu.h
 
-# Install the main DejaGnu expect file in the datadir
-pkgdata_SCRIPTS = runtest.exp
+pkgdata_DATA = stub-loader.c testglue.c \
+  runtest.exp \
+  lib/debugger.exp lib/dejagnu.exp lib/dg.exp lib/framework.exp \
+  lib/ftp.exp lib/kermit.exp lib/libgloss.exp lib/remote.exp \
+  lib/rlogin.exp lib/rsh.exp lib/standard.exp lib/target.exp \
+  lib/targetdb.exp lib/telnet.exp lib/tip.exp lib/utils.exp
 
-# Install config.guess too, so we can use it to figure out
-# what type of machine we're running on.
-libexecdir = $(pkgdatadir)/libexec
-libexec_SCRIPTS = config.guess
+configdir = $(pkgdatadir)/config
+config_DATA = config/README \
+	config/arc.exp \
+	config/arm-ice.exp \
+	config/base-config.exp \
+	config/base68k.exp \
+	config/bug.exp \
+	config/cfdbug.exp \
+	config/cygmon.exp \
+	config/d10v.exp \
+	config/ddb-ether.exp \
+	config/ddb.exp \
+	config/default.exp \
+	config/dos.exp \
+	config/dve.exp \
+	config/gdb-comm.exp \
+	config/gdb_stub.exp \
+	config/h8300.exp \
+	config/i386-bozo.exp \
+	config/i960.exp \
+	config/m32r-stub.exp \
+	config/m32r.exp \
+	config/m68hc11.exp \
+	config/m68k-emc.exp \
+	config/mips-idt.exp \
+	config/mn10200-eval.exp \
+	config/mn10300-eval.exp \
+	config/netware.exp \
+	config/powerpc-bug.exp \
+	config/proelf.exp \
+	config/rockhopper.exp \
+	config/rom68k.exp \
+	config/sh.exp \
+	config/sid.exp \
+	config/sim.exp \
+	config/slite.exp \
+	config/sparclet.exp \
+	config/tic80.exp \
+	config/unix.exp \
+	config/vr4100.exp \
+	config/vr4300.exp \
+	config/vr5000.exp \
+	config/vxworks.exp
 
-TLCSH = @TCLSH@
+baseboarddir = $(pkgdatadir)/baseboards
+baseboard_DATA = baseboards/README \
+	baseboards/am33_2.0-libremote.exp \
+	baseboards/arc-sim.exp \
+	baseboards/arm-ice.exp \
+	baseboards/arm-sid.exp \
+	baseboards/arm-sim.exp \
+	baseboards/basic-sid.exp \
+	baseboards/basic-sim.exp \
+	baseboards/cf.exp \
+	baseboards/cygmon.exp \
+	baseboards/cygwin.exp \
+	baseboards/d10v-sim.exp \
+	baseboards/d10v.exp \
+	baseboards/d30v-sim.exp \
+	baseboards/danlite-elf.exp \
+	baseboards/dos.exp \
+	baseboards/fr30-cygmon.exp \
+	baseboards/fr30-elf.exp \
+	baseboards/fr30-sim.exp \
+	baseboards/frv-elf.exp \
+	baseboards/frv-sim.exp \
+	baseboards/frv-tiger.exp \
+	baseboards/frv-tomcat.exp \
+	baseboards/gdbserver-sample.exp \
+	baseboards/h8300-sim.exp \
+	baseboards/h8300.exp \
+	baseboards/i386-bozo.exp \
+	baseboards/i386-sid.exp \
+	baseboards/i960-cyclone.exp \
+	baseboards/i960-sim.exp \
+	baseboards/iq2000-sim.exp \
+	baseboards/jmr3904-sim.exp \
+	baseboards/linux-gdbserver.exp \
+	baseboards/linux-libremote.exp \
+	baseboards/m32c-sim.exp \
+	baseboards/m32r-elf.exp \
+	baseboards/m32r-sid.exp \
+	baseboards/m32r-sim.exp \
+	baseboards/m68hc11-sim.exp \
+	baseboards/m68k-emc.exp \
+	baseboards/m68k-sid.exp \
+	baseboards/m68k-sim.exp \
+	baseboards/mcore-elf.exp \
+	baseboards/mcore-moto-sim.exp \
+	baseboards/mcore-pe.exp \
+	baseboards/mcore-sim.exp \
+	baseboards/mep-sid.exp \
+	baseboards/mips-idt.exp \
+	baseboards/mips-lnews-sim.exp \
+	baseboards/mips-lsi-sim.exp \
+	baseboards/mips-sim-idt32.exp \
+	baseboards/mips-sim-idt64.exp \
+	baseboards/mips-sim.exp \
+	baseboards/mips64-sim.exp \
+	baseboards/mips64vr4100-sim.exp \
+	baseboards/mmixware-sim.exp \
+	baseboards/mn10200-cygmon.exp \
+	baseboards/mn10200-sim.exp \
+	baseboards/mn10300-cygmon.exp \
+	baseboards/mn10300-sim.exp \
+	baseboards/msp430-sim.exp \
+	baseboards/msparc-cygmon.exp \
+	baseboards/mt-sid.exp \
+	baseboards/op50n.exp \
+	baseboards/powerpc-bug.exp \
+	baseboards/powerpc-bug1.exp \
+	baseboards/powerpc-sim.exp \
+	baseboards/powerpcle-sim.exp \
+	baseboards/rl78-sim.exp \
+	baseboards/rockhopper.exp \
+	baseboards/rom68k-idp.exp \
+	baseboards/rx-sim.exp \
+	baseboards/sh-hms.exp \
+	baseboards/sh-sid.exp \
+	baseboards/sh-sim.exp \
+	baseboards/sparc-sim.exp \
+	baseboards/sparc64-sim.exp \
+	baseboards/sparclet-aout.exp \
+	baseboards/sparclite-coff.exp \
+	baseboards/sparclite-cygmon.exp \
+	baseboards/sparclite-sim-le.exp \
+	baseboards/sparclite-sim.exp \
+	baseboards/strongarm-cygmon.exp \
+	baseboards/tic80-sim.exp \
+	baseboards/tx39-dve.exp \
+	baseboards/tx39-sim.exp \
+	baseboards/unix.exp \
+	baseboards/usparc-cygmon.exp \
+	baseboards/v850-sim.exp \
+	baseboards/vr4100-ddb.exp \
+	baseboards/vr4100-sim.exp \
+	baseboards/vr4111-sim.exp \
+	baseboards/vr4300-ddb.exp \
+	baseboards/vr4300-no-script-sim.exp \
+	baseboards/vr4300-sim.exp \
+	baseboards/vr4300.exp \
+	baseboards/vr5000-ddb.exp \
+	baseboards/vx4300.exp \
+	baseboards/vx68k.exp \
+	baseboards/vx960.exp \
+	baseboards/vxsparc.exp \
+	baseboards/x86-cygmon.exp \
+	baseboards/xscale-cygmon.exp \
+	baseboards/xstormy16-sid.exp \
+	baseboards/xtensa-sim.exp
 
-RUNTESTDEFAULTFLAGS = --srcdir $(srcdir)/testsuite RUNTEST=$(RUNTEST)
-RUNTEST = ` \
-  if [ -f ${srcdir}/runtest$(EXEEXT) ] ; then \
-    echo ${srcdir}/runtest$(EXEEXT); \
-  else echo "ERROR: runtest not found" ; exit 1; fi`
+djlibexecdir = $(pkgdatadir)/libexec
+djlibexec_SCRIPTS = config.guess
 
-CLEANFILES = x.log x.sum site.bak setval.tmp
-check-DEJAGNU:
-	cd testsuite ; $(MAKE) check
-	cd example ; $(MAKE) check
-#	@echo "Do nothing here, cause we don't want to run the tests twice"
+# Contributed scripts, etc.
 
-# Since we don't use SUBDIRS, we have to manually clean the sub directories.
-# We don't use SUBDIRS, so the excample or test cases don't get built
-# by default for a "make all".
-clean-local:
-	cd doc       ; $(MAKE) clean
-	cd testsuite ; $(MAKE) clean
-	cd example   ; $(MAKE) clean
+CONTRIB = contrib/compare_tests
 
-# Set ourselves up to build a RedHat package
-tarball: overview.html overview.ps overview.pdf
-	-rm -fr dejagnu-${VERSION}
-	cp -fpr $(srcdir) dejagnu-${VERSION}
-	@echo "clean up stuff we don't want in the source file"
-	src=$(srcdir); \
-	dir=`(cd $${src}; pwd)`; \
-	(cd dejagnu-${VERSION} ; $${dir}/Clean.tcl); \
-	-mkdir -p doc/overview; \
-	-cp -fr doc/overview dejagnu-${VERSION}/doc/; \
-	-cp -fr doc/overview.ps dejagnu-${VERSION}/doc/; \
-	-cp -fr doc/overview.pdf dejagnu-${VERSION}/doc/; \
-	tar cvf ../dejagnu-${VERSION}.tar dejagnu-${VERSION}; \
-	gzip -9fv ../dejagnu-${VERSION}.tar; \
-	cp -f ../dejagnu-${VERSION}.tar.gz /usr/src/redhat/SOURCES/; \
-	cp -f $${dir}/redhat/dejagnu.spec /usr/src/redhat/SPECS/
+# Testsuite.
 
-DATE = `date "+%Y%m%d`
-snapshot:
-	-rm -fr dejagnu-${DATE}
-	cp -fpr $(srcdir) dejagnu-${DATE}
-	@echo "clean up stuff we don't want in the source file"
-	src=$(srcdir); \
-	dir=`(cd $${src}; pwd)`; \
-	(cd dejagnu-${DATE} ; $${dir}/Clean.tcl);
-	-mkdir -p doc/overview
-	-cp -fr doc/overview dejagnu-${DATE}/doc/
-	-cp -fr doc/overview.ps dejagnu-${DATE}/doc/
-	-cp -fr doc/overview.pdf dejagnu-${DATE}/doc/
-	tar cf ../dejagnu-${DATE}.tar dejagnu-${DATE}
-	gzip -9fv ../dejagnu-${DATE}.tar
+TESTSUITE_FILES = \
+	testsuite/runtest.all/topdir/subdir1/subsubdir1/subsubfile1 \
+	testsuite/runtest.all/topdir/subdir1/subfile1 \
+	testsuite/runtest.all/topdir/subdir1/subfile2 \
+	testsuite/runtest.all/topdir/subdir2/subfile2 \
+	testsuite/runtest.all/libs.exp \
+	testsuite/runtest.all/options.exp \
+	testsuite/runtest.all/remote.test \
+	testsuite/runtest.all/stats-sub.exp \
+	testsuite/runtest.all/stats.exp \
+	testsuite/runtest.all/target.test \
+	testsuite/runtest.all/utils.test \
+	testsuite/runtest.all/clone_output.test \
+	testsuite/runtest.all/config.test \
+	testsuite/runtest.all/default_procs.tcl \
+	testsuite/config/default.exp \
+	testsuite/lib/libsup.exp \
+	testsuite/lib/util-defs.exp \
+	testsuite/libdejagnu/tunit.exp
 
-rpmspec: $(srcdir)/redhat/dejagnu.spec
-	cp -f $(srcdir)/redhat/dejagnu.spec /usr/src/redhat/SPECS/
+RUNTEST = ${top_srcdir}/runtest
+RUNTESTDEFAULTFLAGS = --srcdir $(srcdir)/testsuite
 
-rpm: tarball rpmspec
-	cp -f ../$(distdir).tar.gz /usr/src/redhat/SOURCES/
+AM_CXXFLAGS = -I$(top_srcdir) -g
+check_PROGRAMS = unit
+unit_SOURCES = testsuite/libdejagnu/unit.cc
+
+# Documentation.
+
+dist_man_MANS = doc/runtest.1
+info_TEXINFOS = doc/dejagnu.texi
+
+DOCBOOK2PDF = @DOCBOOK2PDF@
+DOCBOOK2RTF = @DOCBOOK2RTF@
+DOCBOOK2PS = @DOCBOOK2PS@
+DOCBOOK2HTML = @DOCBOOK2HTML@
+DOCBOOK2TEXI = @DOCBOOK2TEXI@
+
+XML = doc/dejagnu.xml doc/legal.xml doc/ref.xml doc/user.xml
+
+dejagnu.pdf: $(XML)
+	$(DOCBOOK2PDF) $(srcdir)/doc/dejagnu.xml
+
+dejagnu.ps: $(XML)
+	$(DOCBOOK2PS) $(srcdir)/doc/dejagnu.xml
+
+dejagnu.rtf: $(XML)
+	$(DOCBOOK2RTF) $(srcdir)/doc/dejagnu.xml
+
+html:
+	$(DOCBOOK2HTML) -o html $(srcdir)/doc/dejagnu.xml
+
+doc/dejagnu.texi: $(XML)
+	$(DOCBOOK2TEXI) --string-param directory-description="The GNU testing framework." --string-param directory-category="Programming" $(srcdir)/doc/dejagnu.xml
+	mv dejagnu.texi $(srcdir)/doc
+
+# Packaging.
+
+# RPM
+rpm: dist $(srcdir)/packaging/rpm/dejagnu.spec
+	cp -f $(srcdir)/packaging/rpm/dejagnu.spec /usr/src/redhat/SPECS/
+	cp -f dejagnu-${VERSION}.tar.gz /usr/src/redhat/SOURCES/
 	rpm -ba /usr/src/redhat/SPECS/dejagnu.spec
 
-deb: overview.html overview.ps overview.pdf
-	-rm -fr dejagnu-${VERSION}
-	cp -fpr $(srcdir) dejagnu-${VERSION}
-	@echo "clean up stuff we don't want in the source file"
-	src=$(srcdir); \
-	dir=`(cd $${src}; pwd)`; \
-	(cd dejagnu-${VERSION} ; $${dir}/Clean.tcl);
-	-mkdir -p doc/overview;
-	-cp -fr $(srcdir)/debian dejagnu-${VERSION}/;
-	-cp -fr doc/overview dejagnu-${VERSION}/doc/;
-	-cp -fr doc/overview.ps dejagnu-${VERSION}/doc/;
-	-cp -fr doc/overview.pdf dejagnu-${VERSION}/doc/;
+# Debian GNU/Linux package
+deb: dist
+	rm -rf dejagnu-${VERSION}
+	tar xfz dejagnu-${VERSION}.tar.gz
+	cp -fr $(srcdir)/packaging/deb dejagnu-${VERSION}/
 	(cd dejagnu-${VERSION}; dpkg-buildpackage)
 
-overview.html overview.ps overview.pdf install-doc:
-	cd doc && $(MAKE) $(FLAGS_TO_PASS) $@
+# Most proprietary Unices use /opt for optional packages.
+PKGDIR = /opt
 
-# Automake sucks when it comes to building a distribution, so
-# we just copy the source tree onto of what Automake did, and
-# then we Clean it. Automake only includes the source files.
-# We want all the testsuites, data files, and html versions of the doc.
-dist-hook: rpmspec overview.html overview.ps overview.pdf
-	-rm -fr $(distdir)
-	cp -fpr $(srcdir) $(distdir)
-	(cd $(distdir) ; $(TCLSH) $(srcdir)/Clean.tcl)
-	-cp -fr doc/overview $(distdir)/doc/
-	-cp -fr doc/overview.ps $(distdir)/doc/
-	-cp -fr doc/overview.pdf $(distdir)/doc/
+$(PKGDIR)/dejagnu:
+	rm -rf dejagnu-${VERSION}
+	mkdir dejagnu-${VERSION}
+	cd dejagnu-${VERSION}
+	$(srcdir)/configure -v --prefix $@
+	make install
 
+# Solaris package
+solpkg: $(PKGDIR)/dejagnu
+	cp $(srcdir)/packaging/pkg/prototype /tmp
+	cp $(srcdir)/packaging/pkg/pkginfo /tmp
+	here=`pwd`; \
+	  cd /tmp; \
+	  pkgmk -o -r / -d /tmp; \
+	  tar cf $$here/dejagnu-${VERSION}.SPARC.2.8.pkg.tar DejaGnu; \
+	  gzip -9fv  $$here/dejagnu-${VERSION}.SPARC.2.8.pkg.tar
+	rm -rf /tmp/prototype /tmp/pkginfo /tmp/DejaGnu
 
-# Below, host-independent data files that need to get installed.
-# We do it this way so we can use globbing.
-
-lib_dest = $(DESTDIR)$(pkgdatadir)
-lib_files = $(srcdir)/*.c $(srcdir)/lib/*.exp
-
-baseboards_dest = $(DESTDIR)$(pkgdatadir)/baseboards
-baseboards_files = $(srcdir)/baseboards/README $(srcdir)/baseboards/*.exp
-
-config_dest = $(DESTDIR)$(pkgdatadir)/config
-config_files = $(srcdir)/config/README $(srcdir)/config/*.exp
-
-install-info:
-
-uninstall-info:
-
-install-data-local:
-	$(mkinstalldirs) $(lib_dest) $(includedir)
-	for f in $(lib_files); do \
-	  test ! -f "$$f" || $(INSTALL_DATA) $$f $(lib_dest); \
-	done
-	#
-	$(mkinstalldirs) $(baseboards_dest)
-	for f in $(baseboards_files); do \
-	  test ! -f "$$f" || $(INSTALL_DATA) $$f $(baseboards_dest); \
-	done
-	#
-	$(INSTALL_DATA) $(srcdir)/dejagnu.h $(includedir); \
-	#
-	$(mkinstalldirs) $(config_dest)
-	for f in $(config_files); do \
-	  test ! -f "$$f" || $(INSTALL_DATA) $$f $(config_dest); \
-	done
-
-uninstall-local:
-	for f in $(lib_files); do \
-	  test ! -f "$$f" || rm -f $(lib_dest)/`basename "$$f"`; \
-	done
-	for f in $(config_files); do \
-	  test ! -f "$$f" || rm -f $(config_dest)/`basename "$$f"`; \
-	done
-	for f in $(baseboards_files); do \
-	  test ! -f "$$f" || rm -f $(baseboards_dest)/`basename "$$f"`; \
-	done
-
-	for f in $(baseboards_files); do \
-	  test ! -f "$$f" || rm -f $(baseboards_dest)/`basename "$$f"`; \
-	done
-	rm -f $(includedir)/dejagnu.h;
-
-site.exp: Makefile
-	@echo 'Making a new site.exp file...'
-	@test ! -f site.bak || rm -f site.bak
-	@echo '## these variables are automatically generated by make ##' > $@-t
-	@echo '# Do not edit here.  If you wish to override these values' >> $-t
-	@echo '# edit the last section' >> $@-t
-	@echo 'set srcdir $(srcdir)' >> $@-t
-	@echo 'set objdir' `pwd` >> $@-t
-	@echo '## All variables above are generated by configure. Do Not Edit ##' >> $@-t
-	@test ! -f site.exp || sed '1,/^## All variables above are.*##/ d' site.exp >> $@-t
-	@test ! -f site.exp || mv site.exp site.bak
-	@mv $@-t site.exp
+# HP depot package
+hpdepot: $(PKGDIR)/dejagnu
+	swpackage -s $(srcdir)/packaging/depot/dejagnu.psf -x target_type=directory -d /tmp
+	here=`pwd`; \
+	  cd /tmp; \
+	  tar cf $$here/dejagnu-${VERSION}.hpux11.depot dejagnu; \
+	  gzip -9fv  $$here/dejagnu-${VERSION}.hpux11.depot; \
+	  rm -rf /tmp/dejagnu

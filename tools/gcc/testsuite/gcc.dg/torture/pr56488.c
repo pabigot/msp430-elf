@@ -1,4 +1,5 @@
-/* { dg-do run } */
+/* { dg-do run { target { size32plus } } } */
+/* { dg-require-effective-target int32plus } */
 
 int a, c, d = 1;
 struct S { int s; } b, f;
@@ -8,7 +9,7 @@ static void
 foo (int x)
 {
   int g[] = { };
-  for (e = 0; e != 15; e = e + 5)
+  for (e = 0; e != 1; e = e + 5)
     {
       int *h[1] = { &g[0] };
       if (!x)

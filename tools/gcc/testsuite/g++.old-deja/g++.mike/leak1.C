@@ -37,3 +37,4 @@ int main() {
   bar();
   return count != 2;
 }
+// { dg-require-effective-target size32plus }

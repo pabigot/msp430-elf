@@ -1,8 +1,6 @@
 /* { dg-do run } */
 /* { dg-options "-fdump-tree-alias" } */
 /* { dg-skip-if "" { *-*-* } { "-O0" "-fno-fat-lto-objects" } { "" } } */
-/* Warnings about pointer/int not same size */
-/* { dg-skip-if "" { m32c-*-* h8300-*-* xstormy16-*-* } { "*" } { "" } } */
 
 typedef __INTPTR_TYPE__ intptr_t;
 

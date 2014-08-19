@@ -1,4 +1,4 @@
-/* { dg-do run } */
+/* { dg-do compile } */
 /* { dg-require-effective-target arm_neon_ok } */
 /* { dg-require-effective-target arm_little_endian } */
 /* { dg-options "-O2" } */

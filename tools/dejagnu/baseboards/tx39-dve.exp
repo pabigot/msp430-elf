@@ -1,12 +1,31 @@
+# Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+# Foundation, Inc.
+#
+# This file is part of DejaGnu.
+#
+# DejaGnu is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# DejaGnu is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with DejaGnu; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+
 # This is a list of toolchains that are supported on this board.
 set_board_info target_install {mips-tx39-elf mips-elf}
 
 # Load the generic configuration for this board. This will define a basic
 # set of routines needed by the tool to communicate with the board.
 if { [board_info $board cygmon] == "yes" } {
-    load_generic_config "cygmon";
+    load_generic_config "cygmon"
 } else {
-    load_generic_config "dve";
+    load_generic_config "dve"
 }
 
 # It's a big-endian board.
@@ -18,11 +37,11 @@ set_board_info compiler "[find_gcc]"
 set_board_info cflags "[libgloss_include_flags] [newlib_include_flags]"
 set_board_info ldflags "[libgloss_link_flags] [newlib_link_flags]"
 # DDB linker script.
-set_board_info ldscript "-Wl,-Tdve.ld";
+set_board_info ldscript "-Tdve.ld"
 
 # GDB doesn't return exit statuses and we need to indicate this;
 # the standard GCC wrapper will work with this target.
-set_board_info needs_status_wrapper 1;
+set_board_info needs_status_wrapper 1
 
 # The GDB protocol used with this board.
 if { [board_info $board cygmon] == "yes" } {

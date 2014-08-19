@@ -1,4 +1,5 @@
 /* { dg-do compile } */
+/* { dg-skip-if "test does not match RX behaviour" { "rx-*-*" } { "*" } { "" } } */
 /* { dg-options "-fsignaling-nans -fwrapv -fdump-tree-gimple" } */
 int f(int i)
 {

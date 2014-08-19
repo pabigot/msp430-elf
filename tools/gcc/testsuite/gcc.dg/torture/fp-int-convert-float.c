@@ -1,6 +1,6 @@
 /* Test floating-point conversions.  Standard types and float.  */
 /* Origin: Joseph Myers <joseph@codesourcery.com> */
-/* { dg-do run } */
+/* { dg-do run { xfail rx-*-* } } */
 /* { dg-skip-if "test too big for msp430" { msp430*-*-* } "*" "" } */
 /* { dg-options "" } */
 

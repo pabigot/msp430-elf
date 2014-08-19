@@ -1,6 +1,6 @@
 /* Definitions of target machine for GNU compiler.
    Matsushita MN10300 series
-   Copyright (C) 1996-2013 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
    Contributed by Jeff Law (law@cygnus.com).
 
    This file is part of GCC.
@@ -18,9 +18,6 @@
    You should have received a copy of the GNU General Public License
    along with GCC; see the file COPYING3.  If not see
    <http://www.gnu.org/licenses/>.  */
-
-#ifndef __MN10300_H_INCLUDED__
-#define __MN10300_H_INCLUDED__
 
 #undef ASM_SPEC
 #undef LIB_SPEC
@@ -56,7 +53,7 @@
       builtin_define (TARGET_ALLOW_LIW ?	\
 		      "__LIW__" : "__NO_LIW__");\
 						\
-      builtin_define (TARGET_ALLOW_SETLB ?	\
+      builtin_define (TARGET_ALLOW_SETLB  ?	\
 		      "__SETLB__" : "__NO_SETLB__");\
     }						\
   while (0)
@@ -71,15 +68,10 @@ extern enum processor_type mn10300_tune_cpu;
 #define TARGET_AM33_2	(mn10300_processor >= PROCESSOR_AM33_2)
 #define TARGET_AM34	(mn10300_processor >= PROCESSOR_AM34)
 
-
 #ifndef PROCESSOR_DEFAULT
 #define PROCESSOR_DEFAULT PROCESSOR_MN10300
 #endif
 
-/* Define the name of an environment variable that will be checked
-   to see if it contains default GCC/G++ command line switches when
-   this compiler is running as a cross-compiler.  */
-#define TARGET_CROSS_GCC_DEFAULT_OPTIONS "AM3_GCC_DEFAULT_OPTIONS"
 
 /* Target machine storage layout */
 
@@ -115,7 +107,7 @@ extern enum processor_type mn10300_tune_cpu;
 #define BIGGEST_ALIGNMENT	32
 
 /* Alignment of field after `int : 0' in a structure.  */
-#define EMPTY_FIELD_BOUNDARY	32
+#define EMPTY_FIELD_BOUNDARY    32
 
 /* Define this if move instructions will actually fail to work
    when given unaligned data.  */
@@ -123,19 +115,6 @@ extern enum processor_type mn10300_tune_cpu;
 
 /* Define this as 1 if `char' should by default be signed; else as 0.  */
 #define DEFAULT_SIGNED_CHAR 0
-
-#define CONSTANT_ALIGNMENT(EXP, ALIGN) \
- ((TREE_CODE (EXP) == STRING_CST  || TREE_CODE (EXP) == CONSTRUCTOR) \
-  && (ALIGN) < BIGGEST_ALIGNMENT ? BIGGEST_ALIGNMENT : (ALIGN))
-
-#define DATA_ALIGNMENT(TYPE, ALIGN) \
- ((((ALIGN) < BIGGEST_ALIGNMENT) \
-   && (  (TREE_CODE (TYPE) == ARRAY_TYPE && ! TYPE_PACKED (TREE_TYPE (TYPE))) \
-       || TREE_CODE (TYPE) == UNION_TYPE \
-       || TREE_CODE (TYPE) == RECORD_TYPE)) ? BIGGEST_ALIGNMENT : (ALIGN))
-
-#define LOCAL_ALIGNMENT(TYPE, ALIGN) \
- DATA_ALIGNMENT (TYPE, ALIGN)
 
 #undef  SIZE_TYPE
 #define SIZE_TYPE "unsigned int"
@@ -256,7 +235,6 @@ extern enum processor_type mn10300_tune_cpu;
 
 /* Value is 1 if hard register REGNO can hold a value of machine-mode
    MODE.  */
-
 #define HARD_REGNO_MODE_OK(REGNO, MODE) \
   mn10300_hard_regno_mode_ok ((REGNO), (MODE))
 
@@ -302,7 +280,7 @@ enum reg_class
 
 /* Give names of register classes as strings for dump file.  */
 
-#define REG_CLASS_NAMES							\
+#define REG_CLASS_NAMES					   		\
 { "NO_REGS", "DATA_REGS", "ADDRESS_REGS", "SP_REGS", "SP_OR_ADDRESS_REGS", \
   "EXTENDED_REGS", "FP_REGS", "FP_ACC_REGS", "CC_REGS", "MDR_REGS",	\
   "GENERAL_REGS", "SP_OR_GENERAL_REGS", "ALL_REGS", "LIM_REGS"		\
@@ -312,9 +290,9 @@ enum reg_class
    This is an initializer for a vector of HARD_REG_SET
    of length N_REG_CLASSES.  */
 
-#define REG_CLASS_CONTENTS  			\
-{ { 0,	        0 },	  /* No regs      */	\
-  { 0x0000000f, 0 },	  /* DATA_REGS */	\
+#define REG_CLASS_CONTENTS					\
+{ { 0,	        0 },	  /* No regs */				\
+  { 0x0000000f, 0 },	  /* DATA_REGS */			\
   { 0x000001f0, 0 },	  /* ADDRESS_REGS */			\
   { 0x00000200, 0 },	  /* SP_REGS */				\
   { 0x000003f0, 0 },	  /* SP_OR_ADDRESS_REGS */		\
@@ -333,14 +311,14 @@ enum reg_class
    reg number REGNO.  This could be a conditional expression
    or could index an array.  */
 
-#define REGNO_REG_CLASS(REGNO) \
-  ((REGNO) <= LAST_DATA_REGNUM ? DATA_REGS : \
-   (REGNO) <= LAST_ADDRESS_REGNUM ? ADDRESS_REGS : \
-   (REGNO) == STACK_POINTER_REGNUM ? SP_REGS : \
+#define REGNO_REG_CLASS(REGNO)			     \
+  ((REGNO) <= LAST_DATA_REGNUM ? DATA_REGS :	     \
+   (REGNO) <= LAST_ADDRESS_REGNUM ? ADDRESS_REGS :   \
+   (REGNO) == STACK_POINTER_REGNUM ? SP_REGS :	     \
    (REGNO) <= LAST_EXTENDED_REGNUM ? EXTENDED_REGS : \
-   (REGNO) <= LAST_FP_REGNUM ? FP_REGS : \
+   (REGNO) <= LAST_FP_REGNUM ? FP_REGS :	     \
    (REGNO) == MDR_REG ? MDR_REGS :		     \
-   (REGNO) == CC_REG ? CC_REGS : \
+   (REGNO) == CC_REG ? CC_REGS :		     \
    NO_REGS)
 
 /* The class value for index registers, and the one for base regs.  */
@@ -518,7 +496,7 @@ struct cum_arg
 
 /* Length in units of the trampoline for entering a nested function.  */
 
-#define TRAMPOLINE_SIZE 	16
+#define TRAMPOLINE_SIZE		16
 #define TRAMPOLINE_ALIGNMENT	32
 
 /* A C expression whose value is RTL representing the value of the return
@@ -548,7 +526,6 @@ struct cum_arg
 /* We have post-increments.  */
 #define HAVE_POST_INCREMENT	TARGET_AM33
 #define HAVE_POST_MODIFY_DISP	TARGET_AM33
-
 
 /* ... But we don't want to use them for block moves.  Small offsets are
    just as effective, at least for inline block move sizes, and appears
@@ -594,10 +571,10 @@ do {									     \
 
 /* Non-global SYMBOL_REFs have SYMBOL_REF_FLAG enabled.  */
 #define MN10300_GLOBAL_P(X) (! SYMBOL_REF_FLAG (X))
-
+
 #define SELECT_CC_MODE(OP, X, Y)  mn10300_select_cc_mode (OP, X, Y)
 #define REVERSIBLE_CC_MODE(MODE)  0
-
+
 /* Nonzero if access to memory by bytes or half words is no faster
    than accessing full words.  */
 #define SLOW_BYTE_ACCESS 1
@@ -607,31 +584,10 @@ do {									     \
 /* According expr.c, a value of around 6 should minimize code size, and
    for the MN10300 series, that's our primary concern.  */
 #define MOVE_RATIO(speed) 6
-#define TARGET_BLOCK_MOVE_MAY_USE_LIBCALL(X,Y,SIZE,METHOD,RETURN_ANSWER) \
-  do									 \
-    {									 \
-      extern int flag_hosted;						 \
-									 \
-      if ((METHOD) == BLOCK_OP_BUILTIN || (METHOD) == BLOCK_OP_TAILCALL) \
-	* (RETURN_ANSWER) = true;					 \
-      else if (! TARGET_MEM_FUNCS || ! flag_hosted)			 \
-	* (RETURN_ANSWER) = false;					 \
-    }									 \
-  while (0)
-
-/* When TARGET_NO_MEM_FUNCS is in operation we want to disable gcc's
-   generation of calls to memcpy/memset.  The definition of TARGET_BLOCK_
-   MOVE_MAY_USE_LIBCALL above has handled this for memcpy()s but GCC has no
-   equivalent code for handling memset()s, so we use CLEAR_RATIO instead.
-   Unfortunately gcc handles clearing blocks via generating individual
-   instructions for each byte to be cleared, rather than generating a loop
-   so we cannot set too high a value.  */
-#define CLEAR_RATIO(speed)  ((unsigned HOST_WIDE_INT) \
-			     ((! TARGET_MEM_FUNCS) ? 256 : (speed ? 15 : 3)))
 
 #define TEXT_SECTION_ASM_OP "\t.section .text"
 #define DATA_SECTION_ASM_OP "\t.section .data"
-#define BSS_SECTION_ASM_OP "\t.section .bss"
+#define BSS_SECTION_ASM_OP  "\t.section .bss"
 
 #define ASM_COMMENT_START "#"
 
@@ -661,7 +617,7 @@ do {									     \
 /* This is how to output a reference to a user-level label named NAME.
    `assemble_name' uses this.  */
 
-#undef ASM_OUTPUT_LABELREF
+#undef  ASM_OUTPUT_LABELREF
 #define ASM_OUTPUT_LABELREF(FILE, NAME) \
   asm_fprintf (FILE, "%U%s", (*targetm.strip_name_encoding) (NAME))
 
@@ -680,33 +636,34 @@ do {									     \
 /* How to refer to registers in assembler output.
    This sequence is indexed by compiler's hard-register-number (see above).  */
 
-#define REGISTER_NAMES \
-{ "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3", "ap", "sp", \
-  "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7" \
-, "fs0", "fs1", "fs2", "fs3", "fs4", "fs5", "fs6", "fs7" \
-, "fs8", "fs9", "fs10", "fs11", "fs12", "fs13", "fs14", "fs15" \
-, "fs16", "fs17", "fs18", "fs19", "fs20", "fs21", "fs22", "fs23" \
-, "fs24", "fs25", "fs26", "fs27", "fs28", "fs29", "fs30", "fs31" \
+#define REGISTER_NAMES							\
+{ "d0", "d1", "d2", "d3", "a0", "a1", "a2", "a3", "ap", "sp",		\
+  "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7"			\
+, "fs0", "fs1", "fs2", "fs3", "fs4", "fs5", "fs6", "fs7"		\
+, "fs8", "fs9", "fs10", "fs11", "fs12", "fs13", "fs14", "fs15"		\
+, "fs16", "fs17", "fs18", "fs19", "fs20", "fs21", "fs22", "fs23"	\
+, "fs24", "fs25", "fs26", "fs27", "fs28", "fs29", "fs30", "fs31"	\
 , "mdr", "EPSW"								\
 }
 
-#define ADDITIONAL_REGISTER_NAMES \
-{ {"r8",  4}, {"r9",  5}, {"r10", 6}, {"r11", 7}, \
-  {"r12", 0}, {"r13", 1}, {"r14", 2}, {"r15", 3}, \
-  {"e0", 10}, {"e1", 11}, {"e2", 12}, {"e3", 13}, \
-  {"e4", 14}, {"e5", 15}, {"e6", 16}, {"e7", 17} \
-, {"fd0", 18}, {"fd2", 20}, {"fd4", 22}, {"fd6", 24} \
-, {"fd8", 26}, {"fd10", 28}, {"fd12", 30}, {"fd14", 32} \
-, {"fd16", 34}, {"fd18", 36}, {"fd20", 38}, {"fd22", 40} \
-, {"fd24", 42}, {"fd26", 44}, {"fd28", 46}, {"fd30", 48} \
-, {"cc", CC_REG} \
+#define ADDITIONAL_REGISTER_NAMES				\
+{ {"r8",  4}, {"r9",  5}, {"r10", 6}, {"r11", 7},		\
+  {"r12", 0}, {"r13", 1}, {"r14", 2}, {"r15", 3},		\
+  {"e0", 10}, {"e1", 11}, {"e2", 12}, {"e3", 13},		\
+  {"e4", 14}, {"e5", 15}, {"e6", 16}, {"e7", 17}		\
+, {"fd0", 18}, {"fd2", 20}, {"fd4", 22}, {"fd6", 24}		\
+, {"fd8", 26}, {"fd10", 28}, {"fd12", 30}, {"fd14", 32}		\
+, {"fd16", 34}, {"fd18", 36}, {"fd20", 38}, {"fd22", 40}	\
+, {"fd24", 42}, {"fd26", 44}, {"fd28", 46}, {"fd30", 48}	\
+, {"cc", CC_REG}						\
 }
 
 /* Print an instruction operand X on file FILE.
    look in mn10300.c for details */
 
-#define PRINT_OPERAND(FILE, X, CODE)  \
+#define PRINT_OPERAND(FILE, X, CODE) \
   mn10300_print_operand (FILE, X, CODE)
+
 /* Print a memory operand whose address is X, on file FILE.
    This uses a function in output-vax.c.  */
 
@@ -731,10 +688,9 @@ do {									     \
 #define DEFAULT_GDB_EXTENSIONS 1
 
 /* Use dwarf2 debugging info by default.  */
-#undef PREFERRED_DEBUGGING_TYPE
+#undef  PREFERRED_DEBUGGING_TYPE
 #define PREFERRED_DEBUGGING_TYPE DWARF2_DEBUG
 #define DWARF2_DEBUGGING_INFO 1
-
 #define DWARF2_ASM_LINE_DEBUG_INFO 1
 
 /* Specify the machine mode that this machine uses

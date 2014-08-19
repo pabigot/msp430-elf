@@ -1,11 +1,11 @@
-/autoconf.h/1.1/Tue Sep  4 15:53:40 2007//Tmsp430-130322-branch
-/debug.h/1.1/Tue Sep  4 15:53:40 2007//Tmsp430-130322-branch
-/ersatz.h/1.1/Tue Sep  4 15:53:40 2007//Tmsp430-130322-branch
-/memory.h/1.1/Tue Sep  4 15:53:40 2007//Tmsp430-130322-branch
-/options.h/1.1/Tue Sep  4 15:53:40 2007//Tmsp430-130322-branch
-/readcpu.h/1.1/Tue Sep  4 15:53:40 2007//Tmsp430-130322-branch
-/sysdeps.h/1.1/Tue Sep  4 15:53:40 2007//Tmsp430-130322-branch
-/uae.h/1.1/Tue Sep  4 15:53:40 2007//Tmsp430-130322-branch
-/uaeexe.h/1.1/Tue Sep  4 15:53:40 2007//Tmsp430-130322-branch
-/zfile.h/1.1/Tue Sep  4 15:53:40 2007//Tmsp430-130322-branch
+/autoconf.h/1.1/Fri May  6 23:46:42 2005//Tmsp430-14r1-branch
+/debug.h/1.1/Fri May  6 23:46:42 2005//Tmsp430-14r1-branch
+/ersatz.h/1.1/Fri May  6 23:46:42 2005//Tmsp430-14r1-branch
+/memory.h/1.1/Fri May  6 23:46:42 2005//Tmsp430-14r1-branch
+/options.h/1.1/Fri May  6 23:46:42 2005//Tmsp430-14r1-branch
+/readcpu.h/1.1/Fri May  6 23:46:42 2005//Tmsp430-14r1-branch
+/sysdeps.h/1.1/Fri May  6 23:46:42 2005//Tmsp430-14r1-branch
+/uae.h/1.1/Fri May  6 23:46:42 2005//Tmsp430-14r1-branch
+/uaeexe.h/1.1/Fri May  6 23:46:42 2005//Tmsp430-14r1-branch
+/zfile.h/1.1/Fri May  6 23:46:42 2005//Tmsp430-14r1-branch
 D

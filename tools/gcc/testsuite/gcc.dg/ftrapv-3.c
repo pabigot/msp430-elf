@@ -1,6 +1,6 @@
 /* { dg-do run } */
-/* { dg-options "-ftrapv" } */
 /* { dg-skip-if "trapping arithmetic not supported" { msp430-*-* rl78-*-* } "*" "" } */
+/* { dg-options "-ftrapv" } */
 
 extern void abort (void);
 unsigned long

@@ -1,6 +1,6 @@
 #
 # Expect driver script for GCC Regression Tests
-#   Copyright (C) 1993-2013 Free Software Foundation, Inc.
+#   Copyright (C) 1993-2014 Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -29,6 +29,9 @@ load_lib c-torture.exp
 
 # Disable tests on machines with no hardware support for IEEE arithmetic.
 if { [istarget "vax-*-*"] || [ istarget "powerpc-*-*spe"] || [istarget "pdp11-*-*"] } { return }
+
+# IEEE Denormal numbers not supported.
+if { [istarget "rx-*-*"] } { return }
 
 if $tracelevel then {
     strace $tracelevel

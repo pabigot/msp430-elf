@@ -1,6 +1,4 @@
-// { dg-do run }
-// { dg-options "-std=gnu++0x" }
-
+// { dg-do run { target c++11 } }
 struct A {};
 struct B {};
 struct C {};
@@ -32,3 +30,5 @@ int main()
   }
   return 0;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

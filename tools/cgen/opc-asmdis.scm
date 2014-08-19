@@ -1,10 +1,10 @@
 ; Assembler/disassembler support generator.
-; Copyright (C) 2000, 2001, 2005, 2009 Red Hat, Inc.
+; Copyright (C) 2000, 2001, 2005 Red Hat, Inc.
 ; This file is part of CGEN.
 
 ; Assembler support.
 
-(define (/gen-parse-switch)
+(define (-gen-parse-switch)
   (logit 2 "Generating parse switch ...\n")
   (string-list
    "\
@@ -52,15 +52,15 @@ const char *
 ; Assembler initialization C code
 ; Code is appended during processing.
 
-(define /asm-init-code "")
+(define -asm-init-code "")
 (define (add-asm-init code)
-  (set! /asm-init-code (string-append /asm-init-code code))
+  (set! -asm-init-code (string-append -asm-init-code code))
 )
 
 ; Return C code to define the assembler init function.
 ; This is called after opcode_open.
 
-(define (/gen-init-asm-fn)
+(define (-gen-init-asm-fn)
   (string-append
    "\
 void
@@ -70,11 +70,8 @@ void
   @arch@_cgen_init_ibld_table (cd);
   cd->parse_handlers = & @arch@_cgen_parse_handlers[0];
   cd->parse_operand = @arch@_cgen_parse_operand;
-#ifdef CGEN_ASM_INIT_HOOK
-CGEN_ASM_INIT_HOOK
-#endif
 "
-   /asm-init-code
+   -asm-init-code
 "}\n\n"
    )
 )
@@ -88,15 +85,15 @@ CGEN_ASM_INIT_HOOK
    "\n"
    (lambda () (gen-extra-asm.c (opc-file-path) (current-arch-name)))
    "\n"
-   /gen-parse-switch
+   -gen-parse-switch
    (lambda () (gen-handler-table "parse" opc-parse-handlers))
-   /gen-init-asm-fn
+   -gen-init-asm-fn
    )
 )
 
 ; Disassembler support.
 
-(define (/gen-print-switch)
+(define (-gen-print-switch)
   (logit 2 "Generating print switch ...\n")
   (string-list
    "\
@@ -146,14 +143,14 @@ void
 ; Disassembler initialization C code.
 ; Code is appended during processing.
 
-(define /dis-init-code "")
+(define -dis-init-code "")
 (define (add-dis-init code)
-  (set! /dis-init-code (string-append /dis-init-code code))
+  (set! -dis-init-code (string-append -dis-init-code code))
 )
 
 ; Return C code to define the disassembler init function.
 
-(define (/gen-init-dis-fn)
+(define (-gen-init-dis-fn)
   (string-append
    "
 void
@@ -164,7 +161,7 @@ void
   cd->print_handlers = & @arch@_cgen_print_handlers[0];
   cd->print_operand = @arch@_cgen_print_operand;
 "
-   /dis-init-code
+   -dis-init-code
 "}\n\n"
    )
 )
@@ -178,8 +175,8 @@ void
    "\n"
    (lambda () (gen-extra-dis.c (opc-file-path) (current-arch-name)))
    "\n"
-   /gen-print-switch
+   -gen-print-switch
    (lambda () (gen-handler-table "print" opc-print-handlers))
-   /gen-init-dis-fn
+   -gen-init-dis-fn
    )
 )

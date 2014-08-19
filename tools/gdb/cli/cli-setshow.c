@@ -1,6 +1,6 @@
 /* Handle set and show GDB commands.
 
-   Copyright (c) 2000-2003, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 #include "readline/tilde.h"
 #include "value.h"
 #include <ctype.h>
-#include "gdb_string.h"
+#include <string.h>
 #include "arch-utils.h"
 #include "observer.h"
 
@@ -28,10 +28,7 @@
 #include "cli/cli-decode.h"
 #include "cli/cli-cmds.h"
 #include "cli/cli-setshow.h"
-
-/* Prototypes for local functions.  */
-
-static int parse_binary_operation (char *);
+#include "cli/cli-utils.h"
 
 /* Return true if the change of command parameter should be notified.  */
 
@@ -76,8 +73,10 @@ parse_auto_binary_operation (const char *arg)
   return AUTO_BOOLEAN_AUTO; /* Pacify GCC.  */
 }
 
-static int
-parse_binary_operation (char *arg)
+/* See cli-setshow.h.  */
+
+int
+parse_cli_boolean_value (char *arg)
 {
   int length;
 
@@ -100,10 +99,7 @@ parse_binary_operation (char *arg)
 	   || strncmp (arg, "disable", length) == 0)
     return 0;
   else
-    {
-      error (_("\"on\" or \"off\" expected."));
-      return 0;
-    }
+    return -1;
 }
 
 void
@@ -132,6 +128,20 @@ deprecated_show_value_hack (struct ui_file *ignore_file,
     }
 }
 
+/* Returns true if ARG is "unlimited".  */
+
+static int
+is_unlimited_literal (const char *arg)
+{
+  size_t len = sizeof ("unlimited") - 1;
+
+  arg = skip_spaces_const (arg);
+
+  return (strncmp (arg, "unlimited", len) == 0
+	  && (isspace (arg[len]) || arg[len] == '\0'));
+}
+
+
 /* Do a "set" command.  ARG is NULL if no argument, or the
    text of the argument, and FROM_TTY is nonzero if this command is
    being entered directly by the user (i.e. these are just like any
@@ -150,7 +160,7 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
     case var_string:
       {
 	char *new;
-	char *p;
+	const char *p;
 	char *q;
 	int ch;
 
@@ -248,8 +258,10 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
       break;
     case var_boolean:
       {
-	int val = parse_binary_operation (arg);
+	int val = parse_cli_boolean_value (arg);
 
+	if (val < 0)
+	  error (_("\"on\" or \"off\" expected."));
 	if (val != *(int *) c->var)
 	  {
 	    *(int *) c->var = val;
@@ -272,13 +284,31 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
       break;
     case var_uinteger:
     case var_zuinteger:
-      if (arg == NULL)
-	error_no_arg (_("integer to set it to."));
       {
-	unsigned int val = parse_and_eval_long (arg);
+	LONGEST val;
+
+	if (arg == NULL)
+	  {
+	    if (c->var_type == var_uinteger)
+	      error_no_arg (_("integer to set it to, or \"unlimited\"."));
+	    else
+	      error_no_arg (_("integer to set it to."));
+	  }
+
+	if (c->var_type == var_uinteger && is_unlimited_literal (arg))
+	  val = 0;
+	else
+	  val = parse_and_eval_long (arg);
 
 	if (c->var_type == var_uinteger && val == 0)
 	  val = UINT_MAX;
+	else if (val < 0
+		 /* For var_uinteger, don't let the user set the value
+		    to UINT_MAX directly, as that exposes an
+		    implementation detail to the user interface.  */
+		 || (c->var_type == var_uinteger && val >= UINT_MAX)
+		 || (c->var_type == var_zuinteger && val > UINT_MAX))
+	  error (_("integer %s out of range"), plongest (val));
 
 	if (*(unsigned int *) c->var != val)
 	  {
@@ -291,15 +321,30 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
     case var_integer:
     case var_zinteger:
       {
-	unsigned int val;
+	LONGEST val;
 
 	if (arg == NULL)
-	  error_no_arg (_("integer to set it to."));
-	val = parse_and_eval_long (arg);
+	  {
+	    if (c->var_type == var_integer)
+	      error_no_arg (_("integer to set it to, or \"unlimited\"."));
+	    else
+	      error_no_arg (_("integer to set it to."));
+	  }
+
+	if (c->var_type == var_integer && is_unlimited_literal (arg))
+	  val = 0;
+	else
+	  val = parse_and_eval_long (arg);
+
 	if (val == 0 && c->var_type == var_integer)
 	  val = INT_MAX;
-	else if (val >= INT_MAX)
-	  error (_("integer %u out of range"), val);
+	else if (val < INT_MIN
+		 /* For var_integer, don't let the user set the value
+		    to INT_MAX directly, as that exposes an
+		    implementation detail to the user interface.  */
+		 || (c->var_type == var_integer && val >= INT_MAX)
+		 || (c->var_type == var_zinteger && val > INT_MAX))
+	  error (_("integer %s out of range"), plongest (val));
 
 	if (*(int *) c->var != val)
 	  {
@@ -375,6 +420,30 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
 	  {
 	    *(const char **) c->var = match;
 
+	    option_changed = 1;
+	  }
+      }
+      break;
+    case var_zuinteger_unlimited:
+      {
+	LONGEST val;
+
+	if (arg == NULL)
+	  error_no_arg (_("integer to set it to, or \"unlimited\"."));
+
+	if (is_unlimited_literal (arg))
+	  val = -1;
+	else
+	  val = parse_and_eval_long (arg);
+
+	if (val > INT_MAX)
+	  error (_("integer %s out of range"), plongest (val));
+	else if (val < -1)
+	  error (_("only -1 is allowed to set as unlimited"));
+
+	if (*(int *) c->var != val)
+	  {
+	    *(int *) c->var = val;
 	    option_changed = 1;
 	  }
       }
@@ -478,6 +547,7 @@ do_set_command (char *arg, int from_tty, struct cmd_list_element *c)
 	  break;
 	case var_integer:
 	case var_zinteger:
+	case var_zuinteger_unlimited:
 	  {
 	    char s[64];
 
@@ -562,7 +632,14 @@ do_show_command (char *arg, int from_tty, struct cmd_list_element *c)
       else
 	fprintf_filtered (stb, "%d", *(int *) c->var);
       break;
-
+    case var_zuinteger_unlimited:
+      {
+	if (*(int *) c->var == -1)
+	  fputs_filtered ("unlimited", stb);
+	else
+	  fprintf_filtered (stb, "%d", *(int *) c->var);
+      }
+      break;
     default:
       error (_("gdb internal error: bad var_type in do_show_command"));
     }

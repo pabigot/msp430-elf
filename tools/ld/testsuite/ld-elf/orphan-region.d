@@ -6,7 +6,6 @@
 #xfail: spu-*-* hppa*64*-*-* *-*-nacl*
 # if not using elf32.em, you don't get fancy orphan handling
 # spu twiddles LOAD range, hppa64 adds PHDR, nacl splits to two segments
-#xfail: cy16-*-*
 
 #...
   \[[ 0-9]+\] \.text[ \t]+PROGBITS[ \t]+0*40000000[ \t]+.*

@@ -1,7 +1,6 @@
 /* Cache and manage the values of registers for GDB, the GNU debugger.
 
-   Copyright (C) 1986-1987, 1989, 1991, 1994-1996, 1998, 2000-2002,
-   2004, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,11 +25,11 @@
 #include "regcache.h"
 #include "reggroups.h"
 #include "gdb_assert.h"
-#include "gdb_string.h"
-#include "gdbcmd.h"		/* For maintenanceprintlist.  */
+#include <string.h>
 #include "observer.h"
 #include "exceptions.h"
 #include "remote.h"
+#include "valprint.h"
 
 /*
  * DATA STRUCTURE
@@ -226,14 +225,14 @@ regcache_xmalloc_1 (struct gdbarch *gdbarch, struct address_space *aspace,
       regcache->registers
 	= XCALLOC (descr->sizeof_cooked_registers, gdb_byte);
       regcache->register_status
-	= XCALLOC (descr->sizeof_cooked_register_status, gdb_byte);
+	= XCALLOC (descr->sizeof_cooked_register_status, signed char);
     }
   else
     {
       regcache->registers
 	= XCALLOC (descr->sizeof_raw_registers, gdb_byte);
       regcache->register_status
-	= XCALLOC (descr->sizeof_raw_register_status, gdb_byte);
+	= XCALLOC (descr->sizeof_raw_register_status, signed char);
     }
   regcache->aspace = aspace;
   regcache->ptid = minus_one_ptid;
@@ -411,7 +410,7 @@ regcache_dup (struct regcache *src)
   return newbuf;
 }
 
-int
+enum register_status
 regcache_register_status (const struct regcache *regcache, int regnum)
 {
   gdb_assert (regcache != NULL);
@@ -707,8 +706,6 @@ regcache_cooked_read (struct regcache *regcache, int regnum, gdb_byte *buf)
     {
       /* Read-only register cache, perhaps the cooked value was
 	 cached?  */
-      struct gdbarch *gdbarch = regcache->descr->gdbarch;
-
       if (regcache->register_status[regnum] == REG_VALID)
 	memcpy (buf, register_buffer (regcache, regnum),
 		regcache->descr->sizeof_register[regnum]);
@@ -1093,27 +1090,6 @@ reg_flush_command (char *command, int from_tty)
     printf_filtered (_("Register cache flushed.\n"));
 }
 
-static void
-dump_endian_bytes (struct ui_file *file, enum bfd_endian endian,
-		   const unsigned char *buf, long len)
-{
-  int i;
-
-  switch (endian)
-    {
-    case BFD_ENDIAN_BIG:
-      for (i = 0; i < len; i++)
-	fprintf_unfiltered (file, "%02x", buf[i]);
-      break;
-    case BFD_ENDIAN_LITTLE:
-      for (i = len - 1; i >= 0; i--)
-	fprintf_unfiltered (file, "%02x", buf[i]);
-      break;
-    default:
-      internal_error (__FILE__, __LINE__, _("Bad switch"));
-    }
-}
-
 enum regcache_dump_what
 {
   regcache_dump_none, regcache_dump_raw,
@@ -1133,7 +1109,7 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
   int footnote_register_offset = 0;
   int footnote_register_type_name_null = 0;
   long register_offset = 0;
-  unsigned char buf[MAX_REGISTER_SIZE];
+  gdb_byte buf[MAX_REGISTER_SIZE];
 
 #if 0
   fprintf_unfiltered (file, "nr_raw_registers %d\n",
@@ -1261,10 +1237,9 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	  else
 	    {
 	      regcache_raw_read (regcache, regnum, buf);
-	      fprintf_unfiltered (file, "0x");
-	      dump_endian_bytes (file,
-				 gdbarch_byte_order (gdbarch), buf,
-				 regcache->descr->sizeof_register[regnum]);
+	      print_hex_chars (file, buf,
+			       regcache->descr->sizeof_register[regnum],
+			       gdbarch_byte_order (gdbarch));
 	    }
 	}
 
@@ -1283,12 +1258,9 @@ regcache_dump (struct regcache *regcache, struct ui_file *file,
 	      else if (status == REG_UNAVAILABLE)
 		fprintf_unfiltered (file, "<unavailable>");
 	      else
-		{
-		  fprintf_unfiltered (file, "0x");
-		  dump_endian_bytes (file,
-				     gdbarch_byte_order (gdbarch), buf,
-				     regcache->descr->sizeof_register[regnum]);
-		}
+		print_hex_chars (file, buf,
+				 regcache->descr->sizeof_register[regnum],
+				 gdbarch_byte_order (gdbarch));
 	    }
 	}
 

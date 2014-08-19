@@ -13,3 +13,4 @@ struct C : B { int f(const B*); int x; };
 int C::f(const B*) { return 0; }
 
 int main() { C c; return fail; }
+// { dg-require-effective-target size32plus }

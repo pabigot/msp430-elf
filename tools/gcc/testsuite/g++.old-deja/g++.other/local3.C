@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // Bug: g++ lies about DECL_CONTEXT, so the backend thinks B::f is not
 // function-local.
 // Contributed by Jason Merrill <jason@cygnus.com>

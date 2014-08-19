@@ -46,5 +46,5 @@ int main() {
     if (strncmp ("ABCABDABE", stuff, 9))
 	{ printf ("FAIL\n"); return 1; }
     else
-	printf ("PASS\n");
+      ; // printf ("PASS\n");
 }

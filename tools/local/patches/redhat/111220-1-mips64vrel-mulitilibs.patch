@@ -1,0 +1,392 @@
+This patch changes the multilibs for the mips64vrel-elf target to those
+explicitly requested.
+
+bfd/ChangeLog
+2011-12-20  Nick Clifton  <nickc@redhat.com>
+
+	* config.bfd (mips64vrel): Add nlittemips and nbigmips targets.
+	* elfxx-mips.c (mips_elf_merge_obj_attributes): Do not warn about
+	hard float output with soft float input.
+	(_bfd_mips_elf_merge_private_bfd_data): Improve	error message for
+	mismatched formats.
+
+gcc/ChangeLog
+2011-12-20  Nick Clifton  <nickc@redhat.com>
+
+	* config/mips/t-vr (MULTILIB_OPTIONS): Change to revised multilib
+	selection.
+	(MULTILIB_DIRNAMES, MULTILIB_MATCHES): Likewise.
+	* config/mips/vr.h: Tidy.
+	(SUBTARGET_LINK_SPEC): New define.
+	(TPBIT): Define.
+	(tp-bit.c): Provide a build rule.
+	* config/mips/mips.h (SUBTARGET_LINK_SPEC): Provide default
+	definition.
+	(LINK_SPEC): Include SUBTARGET_LINK_SPEC.
+	(EXTRA_SPECS): Add SUBTARGET_LINK_SPEC.
+
+ld/ChangeLog
+2011-12-23  Nick Clifton  <nickc@redhat.com>
+
+	* configure.tgt (mips*el-*-elf*): Add elf32bmipn32 emulation.
+
+Index: bfd/config.bfd
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/bfd/config.bfd,v
+retrieving revision 1.30
+diff -u -3 -p -r1.30 config.bfd
+--- bfd/config.bfd	27 Apr 2011 13:57:29 -0000	1.30
++++ bfd/config.bfd	20 Dec 2011 17:04:13 -0000
+@@ -973,7 +973,7 @@ case "${targ}" in
+     ;;
+   mips*el-*-elf* | mips*el-*-vxworks* | mips*-*-chorus*)
+     targ_defvec=bfd_elf32_littlemips_vec
+-    targ_selvecs="bfd_elf32_bigmips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec"
++    targ_selvecs="bfd_elf32_bigmips_vec bfd_elf64_bigmips_vec bfd_elf64_littlemips_vec bfd_elf32_nlittlemips_vec bfd_elf32_nbigmips_vec"
+     ;;
+   mips*-*-elf* | mips*-*-rtems* | mips*-*-vxworks | mips*-*-windiss)
+     targ_defvec=bfd_elf32_bigmips_vec
+Index: gcc/config/mips/t-vr
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/config/mips/t-vr,v
+retrieving revision 1.17
+diff -u -3 -p -r1.17 t-vr
+--- gcc/config/mips/t-vr	29 Mar 2011 16:59:25 -0000	1.17
++++ gcc/config/mips/t-vr	20 Dec 2011 17:04:15 -0000
+@@ -43,88 +43,32 @@ $(T)crtn.o: $(srcdir)/config/mips/crtn.a
+ # Main multilibs
+ # --------------
+ #
+-# Endianness: EB or EL
++# Endianness: EL (default)
++#             EB
+ #
+-# ABIs: mabi=32
+-#	mabi=o64
+-#	mabi=eabi
+-#	mabi=eabi/mlong32
+-#	mabi=eabi/mgp32
+-#	mabi=eabi/mgp32/mlong64
++# ABIs: mabi=eabi (default)
++#       mabi=32
++#       mabi=n32
++#	mabi=64
++#       mgp32
+ #
+-# Architecture: march=vr4120 with -mfix-vr4120
+-#		march=vr4130 with -mfix-vr4130 (default)
+-#		march=vr5000
+-#		march=vr5400
++# Architecture: march=vr4300 (default)
++#               march=vr4130 [with -mfix-vr4130 enabled]
+ #		march=vr5500
+ #
+-# Total: 2 * 6 * 5 = 60 multilibs.
+-#
+-#
+-# Extra vr4300 multilibs
+-# ----------------------
+-#
+-# Endianness: EB or EL
+-#
+-# ABI: o64
+-#
+-# Architecture: vr4300.
+-#
+-# Total: 2 * 1 * 2 = 2 multilibs.
+-#
+-#
+-# Extra MIPS16 multilibs
+-# ----------------------
+-#
+-# Endianness: EB or EL
+-#
+-# ABIs: mabi=o64
+-#	mabi=eabi/mlong32
+-#	mabi=eabi/mgp32
+-#
+-# Architecture: march=vr4120 with -mfix-vr4120
+-#		march=vr4130 with -mfix-vr4130 (default)
+-#
+-# Total: 2 * 3 * 2 = 12 multilibs.
++# Total: 2 * 5 * 3 = 30 multilibs.
++
+ MULTILIB_OPTIONS =			\
+ 	EL/EB				\
+-	mabi=32/mabi=o64/mabi=eabi	\
+-	mgp32				\
+-	mlong64				\
+-	mips16				\
+-	mfix-vr4120/mfix-vr4130/march=vr4300/march=vr5000/march=vr5400/march=vr5500
++	mabi=eabi/mabi=32/mabi=n32/mabi=64/mgp32	\
++	march=vr4300/march=vr4130/march=vr5500
+ 
+ MULTILIB_DIRNAMES =	\
+ 	el eb		\
+-	o32 o64 eabi	\
+-	gp32		\
+-	long64		\
+-	mips16		\
+-	vr4120 vr4130 vr4300 vr5000 vr5400 vr5500
+-
+-MULTILIB_MATCHES = EL=mel EB=meb mfix-vr4120=march?vr4120 \
+-		   mfix-vr4130=march?vr4130 mfix-vr4120=mvr4120
+-
+-# Assume a 41xx-series is the default: we'd need a *mips16 entry if
+-# the default processor didn't support mips16.  Also assume the
+-# default ABI is EABI64 -mlong32.
+-MULTILIB_EXCEPTIONS =				\
+-	*mabi=32/mlong64*			\
+-	*mabi=32/mgp32*				\
+-	*mabi=o64/mgp32*			\
+-	*mabi=o64/mlong64*			\
+-	*mips16/march=vr5*			\
+-	*mips16/march=vr4300			\
+-	$(MIPS16_EXCEPTIONS)			\
+-	$(VR4300_EXCEPTIONS)
+-
+-MIPS16_EXCEPTIONS =				\
+-	*mabi=32*mips16*			\
+-	*mlong64*mips16*
++	eabi o32 n32 n64 gp32	\
++	vr4300 vr4130 vr5500
+ 
+-VR4300_EXCEPTIONS =				\
+-	*mabi=32*march=vr4300			\
+-	*mgp32*march=vr4300			\
+-	*mlong64*march=vr4300			\
+-	march=vr4300				\
+-	E[LB]/march=vr4300
++MULTILIB_MATCHES = EL=mel EB=meb \
++		   mabi?o32=mabi?32 \
++		   mabi?n64=mabi?64 \
++		   mfix-vr4130=march?vr4130 
+Index: gcc/config/mips/vr.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/config/mips/vr.h,v
+retrieving revision 1.20
+diff -u -3 -p -r1.20 vr.h
+--- gcc/config/mips/vr.h	29 Mar 2011 16:59:25 -0000	1.20
++++ gcc/config/mips/vr.h	20 Dec 2011 17:04:15 -0000
+@@ -19,7 +19,7 @@ You should have received a copy of the G
+ along with GCC; see the file COPYING3.  If not see
+ <http://www.gnu.org/licenses/>.  */
+ 
+-#define DEFAULT_VR_ARCH "mfix-vr4130"
++#define DEFAULT_VR_ARCH "march=4300"
+ 
+ #undef  MIPS_ABI_DEFAULT
+ #define MIPS_ABI_DEFAULT      ABI_EABI
+@@ -33,18 +33,13 @@ along with GCC; see the file COPYING3.  
+ 	  MULTILIB_ABI_DEFAULT,			\
+ 	  DEFAULT_VR_ARCH }
+ 
+-#undef DRIVER_SELF_SPECS
++#undef  DRIVER_SELF_SPECS
+ #define DRIVER_SELF_SPECS \
+ 	/* Enforce the default architecture.  This is mostly for	\
+ 	   the assembler's benefit.  */					\
+ 	"%{!march=*:%{!mfix-vr4120:%{!mfix-vr4130:"			\
+ 	"-" DEFAULT_VR_ARCH "}}}",					\
+ 									\
+-	/* Make -mfix-vr4120 imply -march=vr4120.  This cuts down	\
+-	   on command-line tautology and makes it easier for t-vr to	\
+-	   provide a -mfix-vr4120 multilib.  */				\
+-	"%{mfix-vr4120:%{!march=*:-march=vr4120}}",			\
+-									\
+ 	/* Same idea for -mfix-vr4130.  */				\
+ 	"%{mfix-vr4130:%{!march=*:-march=vr4130}}",			\
+ 									\
+@@ -52,11 +47,7 @@ along with GCC; see the file COPYING3.  
+ 	MIPS_ARCH_FLOAT_SPEC,						\
+ 									\
+ 	/* Make -mabi=eabi -mlong32 the default.  */			\
+-	"%{!mabi=*:-mabi=eabi %{!mlong*:-mlong32}}",			\
+-									\
+-	/* Make sure -mlong64 multilibs are chosen when	64-bit longs	\
+-	   are needed.  */						\
+-	"%{mabi=eabi:%{!mlong*:%{!mgp32:-mlong64}}}",			\
++	"%{!mabi=*:-mabi=eabi}",					\
+ 									\
+ 	/* Remove -mgp32 if it is redundant.  */			\
+ 	"%{mabi=32:%<mgp32}",						\
+Index: bfd/elfxx-mips.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/bfd/elfxx-mips.c,v
+retrieving revision 1.20
+diff -u -3 -p -r1.20 elfxx-mips.c
+--- bfd/elfxx-mips.c	28 Jun 2011 16:21:16 -0000	1.20
++++ bfd/elfxx-mips.c	23 Dec 2011 17:37:30 -0000
+@@ -12410,9 +12410,11 @@ mips_elf_merge_obj_attributes (bfd *ibfd
+ 		break;
+ 
+ 	      case 3:
++#if 0 /* It is OK if output uses hard float, but input uses soft float.  */
+ 		_bfd_error_handler
+ 		  (_("Warning: %B uses hard float, %B uses soft float"),
+ 		   obfd, ibfd);
++#endif
+ 		break;
+ 
+ 	      case 4:
+@@ -12436,9 +12438,11 @@ mips_elf_merge_obj_attributes (bfd *ibfd
+ 		break;
+ 
+ 	      case 3:
++#if 0 /* It is OK if output uses hard float, but input uses soft float.  */
+ 		_bfd_error_handler
+ 		  (_("Warning: %B uses hard float, %B uses soft float"),
+ 		   obfd, ibfd);
++#endif
+ 		break;
+ 
+ 	      case 4:
+@@ -12484,9 +12488,11 @@ mips_elf_merge_obj_attributes (bfd *ibfd
+ 		break;
+ 
+ 	      case 3:
++#if 0 /* It is OK if output uses hard float, but input uses soft float.  */
+ 		_bfd_error_handler
+ 		  (_("Warning: %B uses hard float, %B uses soft float"),
+ 		   obfd, ibfd);
++#endif
+ 		break;
+ 
+ 	      default:
+@@ -12532,8 +12538,8 @@ _bfd_mips_elf_merge_private_bfd_data (bf
+   if (strcmp (bfd_get_target (ibfd), bfd_get_target (obfd)) != 0)
+     {
+       (*_bfd_error_handler)
+-	(_("%B: ABI is incompatible with that of the selected emulation"),
+-	 ibfd);
++	(_("%B: input format (%s) is different from output format (%s)"),
++	 ibfd, bfd_get_target (ibfd), bfd_get_target (obfd));
+       return FALSE;
+     }
+ 
+Index: gcc/config/mips/mips.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/config/mips/mips.h,v
+retrieving revision 1.43
+diff -u -3 -p -r1.43 mips.h
+--- gcc/config/mips/mips.h	25 Mar 2011 11:20:41 -0000	1.43
++++ gcc/config/mips/mips.h	23 Dec 2011 17:37:30 -0000
+@@ -1146,11 +1146,16 @@ enum mips_code_readable_setting {
+ 
+ /* Extra switches sometimes passed to the linker.  */
+ 
++#ifndef SUBTARGET_LINK_SPEC
++#define SUBTARGET_LINK_SPEC ""
++#endif
++
+ #ifndef LINK_SPEC
+ #define LINK_SPEC "\
+ %(endian_spec) \
+ %{G*} %{mips1} %{mips2} %{mips3} %{mips4} %{mips32*} %{mips64*} \
+-%{shared}"
++%{shared} \
++%(subtarget_link_spec)"
+ #endif  /* LINK_SPEC defined */
+ 
+ 
+@@ -1195,6 +1200,7 @@ enum mips_code_readable_setting {
+   { "subtarget_asm_optimizing_spec", SUBTARGET_ASM_OPTIMIZING_SPEC },	\
+   { "subtarget_asm_debugging_spec", SUBTARGET_ASM_DEBUGGING_SPEC },	\
+   { "subtarget_asm_spec", SUBTARGET_ASM_SPEC },				\
++  { "subtarget_link_spec", SUBTARGET_LINK_SPEC },			\
+   { "asm_abi_default_spec", "-" MULTILIB_ABI_DEFAULT },			\
+   { "endian_spec", ENDIAN_SPEC },					\
+   SUBTARGET_EXTRA_SPECS
+Index: gcc/config/mips/t-vr
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/config/mips/t-vr,v
+retrieving revision 1.18
+diff -u -3 -p -r1.18 t-vr
+--- gcc/config/mips/t-vr	20 Dec 2011 17:23:11 -0000	1.18
++++ gcc/config/mips/t-vr	23 Dec 2011 17:37:30 -0000
+@@ -69,6 +69,6 @@ MULTILIB_DIRNAMES =	\
+ 	vr4300 vr4130 vr5500
+ 
+ MULTILIB_MATCHES = EL=mel EB=meb \
+-		   mabi?o32=mabi?32 \
+-		   mabi?n64=mabi?64 \
++		   mabi?32=mabi?o32 \
++		   mabi?64=mabi?n64 \
+ 		   mfix-vr4130=march?vr4130 
+Index: gcc/config/mips/vr.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/config/mips/vr.h,v
+retrieving revision 1.21
+diff -u -3 -p -r1.21 vr.h
+--- gcc/config/mips/vr.h	20 Dec 2011 17:23:11 -0000	1.21
++++ gcc/config/mips/vr.h	23 Dec 2011 17:37:30 -0000
+@@ -33,6 +33,11 @@ along with GCC; see the file COPYING3.  
+ 	  MULTILIB_ABI_DEFAULT,			\
+ 	  DEFAULT_VR_ARCH }
+ 
++#undef  SUBTARGET_LINK_SPEC
++#define SUBTARGET_LINK_SPEC \
++  "%{mabi=n32:%{EB:--oformat=elf32-nbigmips} %{!EB:--oformat=elf32-nlittlemips}}\
++   %{mabi=64:%{EB:--oformat=elf64-bigmips} %{!EB:--oformat=elf64-littlemips}}"
++
+ #undef  DRIVER_SELF_SPECS
+ #define DRIVER_SELF_SPECS \
+ 	/* Enforce the default architecture.  This is mostly for	\
+Index: ld/configure.tgt
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/ld/configure.tgt,v
+retrieving revision 1.27
+diff -u -3 -p -r1.27 configure.tgt
+--- ld/configure.tgt	27 Apr 2011 13:57:35 -0000	1.27
++++ ld/configure.tgt	23 Dec 2011 17:41:18 -0000
+@@ -396,7 +396,9 @@ mips*el-sde-elf*)	targ_emul=elf32ltsmip
+ 			targ_extra_emuls="elf32btsmip elf32ltsmipn32 elf64ltsmip elf32btsmipn32 elf64btsmip" ;;
+ mips*-sde-elf*)		targ_emul=elf32btsmip
+ 			targ_extra_emuls="elf32ltsmip elf32btsmipn32 elf64btsmip elf32ltsmipn32 elf64ltsmip" ;;
+-mips*el-*-elf*)		targ_emul=elf32elmip ;;
++mips*el-*-elf*)		targ_emul=elf32elmip
++	                targ_extra_emuls="elf32bmipn32"
++			;;
+ mips*-*-elf*)		targ_emul=elf32ebmip ;;
+ mips*-*-rtems*)		targ_emul=elf32ebmip ;;
+ mips*el-*-vxworks*)	targ_emul=elf32elmipvxworks
+Index: gcc/config/mips/t-vr
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/config/mips/t-vr,v
+retrieving revision 1.19
+diff -u -3 -p -r1.19 t-vr
+--- gcc/config/mips/t-vr	23 Dec 2011 17:44:37 -0000	1.19
++++ gcc/config/mips/t-vr	26 Dec 2011 10:37:13 -0000
+@@ -70,5 +70,4 @@ MULTILIB_DIRNAMES =	\
+ 
+ MULTILIB_MATCHES = EL=mel EB=meb \
+ 		   mabi?32=mabi?o32 \
+-		   mabi?64=mabi?n64 \
+-		   mfix-vr4130=march?vr4130 
++		   mabi?64=mabi?n64
+Index: gcc/config/mips/t-vr
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/config/mips/t-vr,v
+retrieving revision 1.20
+diff -u -3 -p -r1.20 t-vr
+--- gcc/config/mips/t-vr	26 Dec 2011 10:37:59 -0000	1.20
++++ gcc/config/mips/t-vr	29 Dec 2011 18:36:57 -0000
+@@ -40,6 +40,18 @@ $(T)crtn.o: $(srcdir)/config/mips/crtn.a
+ 
+ # END boiler-plate
+ 
++TPBIT = tp-bit.c
++
++tp-bit.c: $(srcdir)/config/fp-bit.c
++	echo '#ifdef __MIPSEL__' > tp-bit.c
++	echo '# define FLOAT_BIT_ORDER_MISMATCH' >> tp-bit.c
++	echo '#endif' >> tp-bit.c
++	echo '#if __LDBL_MANT_DIG__ == 113' >> tp-bit.c
++	echo '#define QUIET_NAN_NEGATED' >> tp-bit.c
++	echo '# define TFLOAT' >> tp-bit.c
++	cat $(srcdir)/config/fp-bit.c >> tp-bit.c
++	echo '#endif' >> tp-bit.c
++
+ # Main multilibs
+ # --------------
+ #

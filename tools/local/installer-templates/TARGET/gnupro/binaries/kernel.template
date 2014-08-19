@@ -1,0 +1,2 @@
+file     ${release}/kernel/kernel-${boardname}.*
+file     ${release}/kernel/bootsetup-${boardname}

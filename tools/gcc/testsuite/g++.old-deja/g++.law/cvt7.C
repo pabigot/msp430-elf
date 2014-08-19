@@ -58,7 +58,7 @@ int main()
     switch (ar2)
     {
     case 1:
-	std::printf ("PASS\n");
+      // std::printf ("PASS\n");
         break;
     default:
 	{ std::printf ("FAIL\n"); return 1; }

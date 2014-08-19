@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // Test that const-correctness is observed when using new.
 
 struct A {

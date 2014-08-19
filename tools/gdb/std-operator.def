@@ -1,7 +1,6 @@
 /* Standard language operator definitions for GDB, the GNU debugger.
 
-   Copyright (C) 1986, 1989, 1992, 1994, 2000, 2003, 2005, 2007-2012
-   Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -286,19 +285,6 @@ OP (OP_OBJC_SELECTOR)
    a string, which, of course, is variable length.  */
 OP (OP_SCOPE)
 
-/* Used to represent named structure field values in brace
-   initializers (or tuples as they are called in (the deleted)
-   Chill).
-
-   The gcc C syntax is NAME:VALUE or .NAME=VALUE, the (the
-   deleted) Chill syntax is .NAME:VALUE.  Multiple labels (as in
-   the (the deleted) Chill syntax .NAME1,.NAME2:VALUE) is
-   represented as if it were .NAME1:(.NAME2:VALUE) (though that is
-   not valid (the deleted) Chill syntax).
-
-   The NAME is represented as for STRUCTOP_STRUCT;  VALUE follows.  */
-OP (OP_LABELED)
-
 /* OP_TYPE is for parsing types, and used with the "ptype" command
    so we can look up types that are qualified by scope, either with
    the GDB "::" operator, or the Modula-2 '.' operator.  */
@@ -330,3 +316,6 @@ OP (OP_TYPEOF)
    evaluated solely for its type.  This is similar to typeof, but has
    slight different semantics.  */
 OP (OP_DECLTYPE)
+
+/* The typeid operator.  This has one expression argument.  */
+OP (OP_TYPEID)

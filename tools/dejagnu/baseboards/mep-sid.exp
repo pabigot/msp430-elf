@@ -1,0 +1,55 @@
+# This is a list of toolchains that are supported on this board.
+set_board_info target_install {mep-elf}
+
+# Load a baseboard description for SID simulators.
+load_base_board_description "basic-sid"
+set_board_info sim [find_rawsid]
+set_board_info sim,protocol "rawsid";
+verbose "Using simulator [board_info $board sim]\n"
+
+# Multilib options.
+process_multilib_options ""
+set flags [board_info $board multilib_flags]
+if {![regexp -- {-mconfig=([^ ]*)} $flags dummy config]} {
+    set config default
+    set flags "-mconfig=$config $flags"
+    unset_board_info multilib_flags
+    set_board_info multilib_flags $flags
+}
+set additional_sim_flags "--board=$config"
+if {[regexp -- "-mmult" $flags]} {
+    append additional_sim_flags " -e \"set ${config}-0/cpu mul-option? true\""
+}
+if {[regexp -- "-mdiv" $flags]} {
+    append additional_sim_flags " -e \"set ${config}-0/cpu div-option? true\""
+}
+set_board_info sim,options $additional_sim_flags
+
+# Increase the default to avoid timeouts on 20001226-1.c.
+set_board_info gcc,timeout 600
+set_board_info gdb,timeout 600
+
+# Increase the simulation timeout for certain long-running gcc
+# execution tests.
+set_board_info sim_time_limit 1800
+
+# Do this before loading sid.exp, so we can override it (ewww).
+set_board_info ldflags   "-msim [libgloss_link_flags] [newlib_link_flags]"
+
+# We support complex relocations
+set_board_info bfd,relc 1
+
+# Load the generic configuration for this board. This will define a basic set
+# of routines needed by the tool to communicate with the board.
+load_generic_config "sid"
+
+# default endian: little
+set_board_info sim,defaultendian "-EL"
+
+unset additional_sim_flags
+
+set_board_info gdb,start_symbol "_start"
+set_board_info gdb,noinferiorio 1
+set_board_info gdb,nofileio 1
+set_board_info gdb,nosignals 1
+set_board_info gdb,skip_huge_test 1

@@ -1,6 +1,6 @@
 # The IGEN simulator generator for GDB, the GNU Debugger.
 #
-# Copyright 2002 Free Software Foundation, Inc.
+# Copyright 2002-2014 Free Software Foundation, Inc.
 #
 # Contributed by Andrew Cagney.
 #
@@ -8,17 +8,16 @@
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 default: all
 
@@ -36,6 +35,7 @@ bindir = @bindir@
 libdir = @libdir@
 tooldir = $(libdir)/$(target_alias)
 
+datarootdir = @datarootdir@
 datadir = @datadir@
 mandir = @mandir@
 man1dir = $(mandir)/man1
@@ -117,7 +117,7 @@ IGEN_OBJS=\
 	gen.o
 
 igen: igen.o $(IGEN_OBJS)
-	$(CC_FOR_BUILD) $(BUILD_LDFLAGS) -o igen igen.o $(IGEN_OBJS) $(LIBIBERTY_LIB)
+	$(CC_FOR_BUILD) $(BUILD_CFLAGS) $(BUILD_LDFLAGS) -o igen igen.o $(IGEN_OBJS) $(LIBIBERTY_LIB)
 
 igen.o: igen.c misc.h filter_host.h lf.h table.h ld-decode.h ld-cache.h ld-insn.h filter.h gen-model.h gen-itable.h gen-icache.h gen-idecode.h gen-engine.h gen-semantics.h gen-support.h gen.h igen.h 
 	$(CC_FOR_BUILD) $(BUILD_CFLAGS) -c $(srcdir)/igen.c

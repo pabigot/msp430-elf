@@ -40,3 +40,4 @@ int main()
    My_string str1 = strings[0];
    return strcmp ("first string", str1.char_p ()) != 0;
 }
+// { dg-require-effective-target size32plus }

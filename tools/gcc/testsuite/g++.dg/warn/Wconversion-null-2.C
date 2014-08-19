@@ -1,5 +1,6 @@
 // { dg-do link  }
 // { dg-options "" }
+// { dg-skip-if "non-power-of-two pointer size" { msp430-*-* } { "-mlarge" } { "" } }
 
 #include <cstddef>
 

@@ -1,7 +1,6 @@
 /* Support for printing Fortran types for GDB, the GNU debugger.
 
-   Copyright (C) 1986, 1988-1989, 1991, 1993-1996, 1998, 2000-2003,
-   2006-2012 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    Contributed by Motorola.  Adapted from the C version by Farooq Butt
    (fmbutt@engage.sps.mot.com).
@@ -32,7 +31,7 @@
 #include "target.h"
 #include "f-lang.h"
 
-#include "gdb_string.h"
+#include <string.h>
 #include <errno.h>
 
 #if 0				/* Currently unused.  */
@@ -52,7 +51,7 @@ void f_type_print_base (struct type *, struct ui_file *, int, int);
 
 void
 f_print_type (struct type *type, const char *varstring, struct ui_file *stream,
-	      int show, int level)
+	      int show, int level, const struct type_print_options *flags)
 {
   enum type_code code;
   int demangled_args;

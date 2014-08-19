@@ -95,3 +95,4 @@ foo (char *s, size_t m, const struct tm *tp)
   strftime (s, m, "%OZ", tp); /* { dg-warning "flag|modifier" "bad %OZ" } */
   strftime (s, m, "%O%", tp); /* { dg-warning "flag|modifier" "bad %O%" } */
 }
+/* { dg-prune-output ".*__int20.*" } */

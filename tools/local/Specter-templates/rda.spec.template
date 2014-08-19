@@ -1,0 +1,47 @@
+Summary: An embedded Linux stub for use with GDB
+Name: rda
+Version: RELEASE
+Release: GNUPROREV
+Copyright: GPL
+Group: Development/Tools
+URL: http://sources.redhat.com/rda/
+Source: rda-%{version}-%{release}.tar.bz2
+
+Buildroot: /var/tmp/rda-root
+
+%description
+RDA is an embedded linux executable that works with gdb to allow
+debugging applications built in a cross-compiled environment.
+
+%prep
+%setup -c rda-RELEASE
+
+%build
+mkdir build-%{_target_platform}
+cd build-%{_target_platform}
+CARGS=CONFIGEXTRA
+CFLAGS="${CFLAGS:-%optflags}" ../configure \
+  %{_target_platform} --prefix=%{_prefix} --exec-prefix=%{_exec_prefix} \
+  --bindir=%{_bindir} --sbindir=%{_sbindir} --sysconfdir=%{_sysconfdir} \
+  --datadir=%{_datadir} --includedir=%{_includedir} --libdir=%{_libdir} \
+  --libexecdir=%{_libexecdir} --localstatedir=%{_localstatedir} \
+  --sharedstatedir=%{_sharedstatedir} --mandir=%{_mandir} \
+  --infodir=%{_infodir} --disable-shared $CARGS
+MARGS=MAKEEXTRA
+make $MARGS tooldir=%{_prefix} all
+cd ..
+
+%install
+rm -rf %{buildroot}
+mkdir -p %{buildroot}%{_prefix}
+cd build-%{_target_platform}
+mkdir -p $RPM_BUILD_ROOT/%{_prefix}/bin
+cp */rda/unix/rda $RPM_BUILD_ROOT%{_prefix}/bin/rda
+
+%clean
+rm -rf %{buildroot}
+
+%files
+%defattr(-,root,root)
+%{_prefix}/bin/rda
+

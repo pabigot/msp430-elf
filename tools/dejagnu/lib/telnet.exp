@@ -1,27 +1,26 @@
-# Copyright (C) 1997 - 2001 Free Software Foundation, Inc.
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
+# Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+# 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
+#
+# This file is part of DejaGnu.
+#
+# DejaGnu is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  
-
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-dejagnu@gnu.org
-
 #
-# Connect using telnet. This takes two arguments. The first one is the
-# hostname, and the second is the optional port number. This sets
-# the fileid field in the config array, and returns -1 for error, or the
-# spawn id.
+# DejaGnu is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with DejaGnu; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+
+
+# Connect to HOSTNAME using Telnet.  ARGS is a list of options.
+# Currently the only supported option is "raw".  Sets the fileid field
+# in the config array and returns -1 for error or the spawn id.
 #
 proc telnet_open { hostname args } {
     global verbose
@@ -30,38 +29,38 @@ proc telnet_open { hostname args } {
     global timeout
     global board_info
 
-    set raw 0;
-
-    if { [llength $args] > 0 } {
-	if { [lindex $args 0] == "raw" } {
-	    set raw 1;
+    set raw 0
+    foreach arg $args {
+	switch $arg {
+	    "raw" { set raw 1 }
 	}
     }
 
     set port 23
-    if [board_info $hostname exists name] {
+    if {[board_info $hostname exists name]} {
 	set connhost [board_info $hostname name]
     } else {
 	set connhost $hostname
     }
 
-    if [board_info $connhost exists hostname] {
-	set hostname [board_info $connhost hostname];
+    if {[board_info $connhost exists hostname]} {
+	set hostname [board_info $connhost hostname]
     }
 
-    if [file exists /usr/kerberos/bin/telnet] {
-	set telnet /usr/kerberos/bin/telnet;
+    if {[file exists /usr/kerberos/bin/telnet]} {
+	set telnet /usr/kerberos/bin/telnet
     } else {
-	set telnet telnet;
+	set telnet telnet
     }
 
     # Instead of unsetting it, let's return it. One connection at a
     # time, please.
-    if [board_info $connhost exists fileid] {
-	return [board_info $connhost fileid];
+    if {[board_info $connhost exists fileid]} {
+	return [board_info $connhost fileid]
     }
-    # get the hostname and port number from the config array
-    if [board_info $connhost exists netport] {
+
+    # Get the hostname and port number from the config array.
+    if {[board_info $connhost exists netport]} {
 	set type $hostname
 	set hosttmp [split [board_info $connhost netport] ":"]
 	set hostname [lindex $hosttmp 0]
@@ -72,61 +71,63 @@ proc telnet_open { hostname args } {
     } else {
 	set type target
     }
-    if [board_info $connhost exists shell_prompt] {
+
+    if {[board_info $connhost exists shell_prompt]} {
         set shell_prompt [board_info $connhost shell_prompt]
     }
-    if ![info exists shell_prompt] {	# if no prompt, then set it to something generic
+    if {![info exists shell_prompt]} {
+	# If no prompt, then set it to something generic.
 	set shell_prompt ".*> "
     }
- 
+
     set tries 0
     set result -1
-    set need_respawn 1;
+    set need_respawn 1
     verbose "Starting a telnet connection to $hostname:$port $shell_prompt" 2
     while { $result < 0 && $tries <= 3 } {
 	if { $need_respawn } {
-	    set need_respawn 0;
-	    spawn $telnet $hostname $port;
+	    set need_respawn 0
+	    spawn $telnet $hostname $port
 	}
 	expect {
 	    "Trying " {
-		exp_continue;
+		exp_continue
 	    }
 	    -re "$shell_prompt.*$" {
 		verbose "Got prompt\n"
 		set result 0
 	    }
 	    -re "nt Name:|ogin:" {
-		if [board_info $connhost exists telnet_username] {
-		    exp_send "[board_info $connhost telnet_username]\n";
-		    exp_continue;
+		if {[board_info $connhost exists telnet_username]} {
+		    exp_send "[board_info $connhost telnet_username]\n"
+		    exp_continue
 		}
-		if [board_info $connhost exists username] {
-		    exp_send "[board_info $connhost username]\n";
-		    exp_continue;
+		if {[board_info $connhost exists username]} {
+		    exp_send "[board_info $connhost username]\n"
+		    exp_continue
 		}
 		perror "telnet: need to login"
 		break
 	    }
 	    "assword:" {
-		if [board_info $connhost exists telnet_password] {
-		    exp_send "[board_info $connhost telnet_password]\n";
-		    exp_continue;
+		if {[board_info $connhost exists telnet_password]} {
+		    exp_send "[board_info $connhost telnet_password]\n"
+		    exp_continue
 		}
-		if [board_info $connhost exists password] {
-		    exp_send "[board_info $connhost password]\n";
-		    exp_continue;
+		if {[board_info $connhost exists password]} {
+		    exp_send "[board_info $connhost password]\n"
+		    exp_continue
 		}
 		perror "telnet: need a password"
 		break
 	    }
 	    -re "advance.*y/n.*\\?" {
-		exp_send "n\n";
-		exp_continue;
+		exp_send "n\n"
+		exp_continue
 	    }
 	    -re {([Aa]dvanced|[Ss]imple) or ([Ss]imple|[Aa]dvanced)} {
-		exp_send "simple\n";
-		exp_continue;
+		exp_send "simple\n"
+		exp_continue
 	    }
 	    "Connected to" {
 		exp_continue
@@ -137,15 +138,15 @@ proc telnet_open { hostname args } {
 		break
 	    }
 	    "VxWorks Boot" {
-		exp_send "@\n";
-		sleep 20;
-		exp_continue;
+		exp_send "@\n"
+		sleep 20
+		exp_continue
 	    }
 	    -re "Escape character is.*\\.\[\r\n\]" {
 		if { $raw || [board_info $connhost exists dont_wait_for_prompt] } {
-		    set result 0;
+		    set result 0
 		} else {
-		    if [board_info $connhost exists send_initial_cr] {
+		    if {[board_info $connhost exists send_initial_cr]} {
 			exp_send "\n"
 		    }
 		    exp_continue
@@ -159,8 +160,8 @@ proc telnet_open { hostname args } {
 		break
 	    }
 	    -re "Connection refused.*$" {
-		catch "exp_send \"\003\"" foo;
-		sleep 5;
+		catch "exp_send \"\003\"" foo
+		sleep 5
 		warning "telnet: connection refused."
 	    }
 	    -re "Sorry, this system is engaged.*" {
@@ -174,23 +175,25 @@ proc telnet_open { hostname args } {
 	    -re "\[\r\n\]+" {
 		exp_continue
 	    }
-	    timeout { 
+	    timeout {
 		exp_send "\n"
 	    }
 	    eof {
 		warning "telnet: got unexpected EOF from telnet."
-		catch close;
-		catch wait;
-		set need_respawn 1;
-		sleep 5;
+		catch close
+		catch wait
+		set need_respawn 1
+		sleep 5
 	    }
 	}
 	incr tries
     }
-    # we look for this here again cause it means something went wrong, and
-    # it doesn't always show up in the expect in buffer till the server times out.
-    if [info exists expect_out(buffer)] {
-	if [regexp "assword:|ogin:" $expect_out(buffer)] {
+
+    # We look for this here again cause it means something went wrong,
+    # and it doesn't always show up in the expect in buffer till the
+    # server times out.
+    if {[info exists expect_out(buffer)]} {
+	if {[regexp "assword:|ogin:" $expect_out(buffer)]} {
 	    perror "telnet: need to supply a login and password."
 	}
     }
@@ -203,15 +206,15 @@ proc telnet_open { hostname args } {
 	verbose "setting board_info($connhost,fileid) to $spawn_id" 3
 	set board_info($connhost,fileid) $spawn_id
     }
+
     return $spawn_id
 }
 
-#
-# Put the telnet connection into binary mode.
+# Put the Telnet connection to HOSTNAME into binary mode.
 #
 proc telnet_binary { hostname } {
-    if [board_info $hostname exists fileid] {
-	remote_send $hostname "";
+    if {[board_info $hostname exists fileid]} {
+	remote_send $hostname ""
 	remote_expect $hostname 5 {
 	    -re "telnet> *$" {}
 	    default {}
@@ -219,16 +222,16 @@ proc telnet_binary { hostname } {
 	remote_send $hostname "set binary\n"
 	remote_expect $hostname 5 {
 	    -re "Format is .*telnet> *$" {
-		remote_send $hostname "toggle binary\n";
-		exp_continue;
+		remote_send $hostname "toggle binary\n"
+		exp_continue
 	    }
 	    -re "Negotiating network ascii.*telnet> *$" {
-		remote_send $hostname "toggle binary\n";
-		exp_continue;
+		remote_send $hostname "toggle binary\n"
+		exp_continue
 	    }
 	    -re "Negotiating binary.*\[\r\n\].*$" { }
 	    -re "binary.*unknown argument.*telnet> *$" {
-		remote_send $hostname "mode character\n";
+		remote_send $hostname "mode character\n"
 	    }
 	    -re "Already operating in binary.*\[\r\n\].*$" { }
 	    timeout {
@@ -236,8 +239,4 @@ proc telnet_binary { hostname } {
 	    }
 	}
     }
-}
-
-proc telnet_transmit { dest file args } {
-    return [standard_transmit $dest $file];
 }

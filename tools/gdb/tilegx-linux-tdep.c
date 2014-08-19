@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux on Tilera TILE-Gx processors.
 
-   Copyright 2012 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -85,9 +85,11 @@ tilegx_linux_supply_regset (const struct regset *regset,
   int i;
 
   /* This logic must match that of struct pt_regs in "ptrace.h".  */
-  for (i = 0; i < TILEGX_NUM_EASY_REGS + 1; i++, ptr += tilegx_reg_size)
+  for (i = 0; i < TILEGX_NUM_EASY_REGS + 2; i++, ptr += tilegx_reg_size)
     {
-      int gri = (i < TILEGX_NUM_EASY_REGS) ? i : TILEGX_PC_REGNUM;
+      int gri = (i < TILEGX_NUM_EASY_REGS)
+                 ? i : (i == TILEGX_NUM_EASY_REGS)
+                        ? TILEGX_PC_REGNUM : TILEGX_FAULTNUM_REGNUM;
 
       if (regnum == gri || regnum == -1)
 	regcache_raw_supply (regcache, gri, ptr);

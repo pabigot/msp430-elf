@@ -1,6 +1,6 @@
 /* Native-dependent code for SPARC.
 
-   Copyright (C) 2003-2005, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,7 +24,7 @@
 
 #include "gdb_assert.h"
 #include <signal.h>
-#include "gdb_string.h"
+#include <string.h>
 #include <sys/ptrace.h>
 #include "gdb_wait.h"
 #ifdef HAVE_MACHINE_REG_H
@@ -82,12 +82,15 @@ typedef struct fp_status fpregset_t;
 
 /* Register set description.  */
 const struct sparc_gregset *sparc_gregset;
+const struct sparc_fpregset *sparc_fpregset;
 void (*sparc_supply_gregset) (const struct sparc_gregset *,
 			      struct regcache *, int , const void *);
 void (*sparc_collect_gregset) (const struct sparc_gregset *,
 			       const struct regcache *, int, void *);
-void (*sparc_supply_fpregset) (struct regcache *, int , const void *);
-void (*sparc_collect_fpregset) (const struct regcache *, int , void *);
+void (*sparc_supply_fpregset) (const struct sparc_fpregset *,
+			       struct regcache *, int , const void *);
+void (*sparc_collect_fpregset) (const struct sparc_fpregset *,
+				const struct regcache *, int , void *);
 int (*sparc_gregset_supplies_p) (struct gdbarch *, int);
 int (*sparc_fpregset_supplies_p) (struct gdbarch *, int);
 
@@ -152,9 +155,9 @@ sparc_fetch_inferior_registers (struct target_ops *ops,
      These functions should instead be paramaterized with an explicit
      object (struct regcache, struct thread_info?) into which the LWPs
      registers can be written.  */
-  pid = TIDGET (inferior_ptid);
+  pid = ptid_get_lwp (inferior_ptid);
   if (pid == 0)
-    pid = PIDGET (inferior_ptid);
+    pid = ptid_get_pid (inferior_ptid);
 
   if (regnum == SPARC_G0_REGNUM)
     {
@@ -183,7 +186,7 @@ sparc_fetch_inferior_registers (struct target_ops *ops,
       if (ptrace (PTRACE_GETFPREGS, pid, (PTRACE_TYPE_ARG3) &fpregs, 0) == -1)
 	perror_with_name (_("Couldn't get floating point status"));
 
-      sparc_supply_fpregset (regcache, -1, &fpregs);
+      sparc_supply_fpregset (sparc_fpregset, regcache, -1, &fpregs);
     }
 }
 
@@ -196,9 +199,9 @@ sparc_store_inferior_registers (struct target_ops *ops,
 
   /* NOTE: cagney/2002-12-02: See comment in fetch_inferior_registers
      about threaded assumptions.  */
-  pid = TIDGET (inferior_ptid);
+  pid = ptid_get_lwp (inferior_ptid);
   if (pid == 0)
-    pid = PIDGET (inferior_ptid);
+    pid = ptid_get_pid (inferior_ptid);
 
   if (regnum == -1 || sparc_gregset_supplies_p (gdbarch, regnum))
     {
@@ -234,7 +237,7 @@ sparc_store_inferior_registers (struct target_ops *ops,
 	perror_with_name (_("Couldn't get floating-point registers"));
 
       memcpy (&saved_fpregs, &fpregs, sizeof (fpregs));
-      sparc_collect_fpregset (regcache, regnum, &fpregs);
+      sparc_collect_fpregset (sparc_fpregset, regcache, regnum, &fpregs);
 
       /* Writing the floating-point registers will fail on NetBSD with
 	 EINVAL if the inferior process doesn't have an FPU state
@@ -279,9 +282,9 @@ sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
   {
     int pid;
 
-    pid = TIDGET (inferior_ptid);
+    pid = ptid_get_lwp (inferior_ptid);
     if (pid == 0)
-      pid = PIDGET (inferior_ptid);
+      pid = ptid_get_pid (inferior_ptid);
 
     /* Sanity check.  The proper type for a cookie is register_t, but
        we can't assume that this type exists on all systems supported
@@ -310,9 +313,7 @@ sparc_xfer_wcookie (struct target_ops *ops, enum target_object object,
   return len;
 }
 
-LONGEST (*inf_ptrace_xfer_partial) (struct target_ops *, enum target_object,
-				    const char *, gdb_byte *, const gdb_byte *,
-				    ULONGEST, LONGEST);
+target_xfer_partial_ftype *inf_ptrace_xfer_partial;
 
 static LONGEST
 sparc_xfer_partial (struct target_ops *ops, enum target_object object,
@@ -353,6 +354,8 @@ _initialize_sparc_nat (void)
   /* Deafult to using SunOS 4 register sets.  */
   if (sparc_gregset == NULL)
     sparc_gregset = &sparc32_sunos4_gregset;
+  if (sparc_fpregset == NULL)
+    sparc_fpregset = &sparc32_sunos4_fpregset;
   if (sparc_supply_gregset == NULL)
     sparc_supply_gregset = sparc32_supply_gregset;
   if (sparc_collect_gregset == NULL)

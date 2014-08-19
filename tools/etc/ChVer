@@ -5,9 +5,9 @@
 #
 # Originally authored by Angela Marie Thomas
 # angela@redhat.com
-# $Date: 2013/08/12 20:47:01 $
+# $Date: 2003/11/12 00:11:31 $
 # 
-# $Id: ChVer,v 1.6.14.2 2013/08/12 20:47:01 release Exp $
+# $Id: ChVer,v 1.4 2003/11/12 00:11:31 release Exp $
 #
 # Designed to be run from the top-level of a source tree
 #
@@ -44,7 +44,7 @@ if [ -f /bin/sh5 ] ; then
 fi
 
 ProgName=`basename $0`
-Version='$Revision: 1.6.14.2 $'
+Version='$Revision: 1.4 $'
 
 # reasonable umask
 umask 0002
@@ -228,8 +228,8 @@ if [ ! -f Makefile.in ] ; then
     echo "${ProgName}: You need to run ${ProgName} in a source tree"
     exit 1
 fi
-if [ ! -f configure.ac ] ; then
-    echo "${ProgName}: configure.ac missing from current directory."
+if [ ! -f configure.in ] ; then
+    echo "${ProgName}: configure.in missing from current directory."
     echo "${ProgName}: You need to run ${ProgName} in a source tree"
     exit 1
 fi
@@ -558,19 +558,13 @@ else
     commit_list="$commit_list $file"
 fi
 
-for file in file=gdb/version.in gcc/DEV-PHASE; do
-  Vecho $file
-  if [ ! -f $file ] ; then
+file=gdb/version.in; Vecho $file
+if [ ! -f $file ] ; then
     Vecho "${ProgName}: no entry for $file"
-  else
-    $Echo sed \
-      -e "s/ .*//" \
-      -e "s/$/ ($Release)/" \
-      $file > $TmpFile
-    $Echo cp $TmpFile $file
+else
+    $Echo echo "$Release" > $file
     commit_list="$commit_list $file"
-  fi
-done
+fi
 
 # cleanup
 rm -f $TmpFile

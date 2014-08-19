@@ -20,3 +20,5 @@ int main () {
   if (typeid (*f()) == typeid (*g()))
     return 1;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

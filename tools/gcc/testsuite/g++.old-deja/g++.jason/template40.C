@@ -18,3 +18,4 @@ int main(int argc, char *argv[])
 {
   Array<long> ia;	// looping occurs on this line
 }
+// { dg-require-effective-target size32plus }

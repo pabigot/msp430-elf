@@ -1,0 +1,27 @@
+Additional 4.9-specific tweaks
+
+2014-06-25  DJ Delorie  <dj@redhat.com>
+
+	* simplify-rtx.c (simplify_const_unary_operation): Use precision, not bitsize.
+
+
+Index: gcc/simplify-rtx.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/simplify-rtx.c,v
+retrieving revision 1.43
+diff -p -U 5 -r1.43  gcc/simplify-rtx.c
+--- gcc/simplify-rtx.c	20 Jun 2014 08:00:12 -0000	1.43
++++ gcc/simplify-rtx.c	25 Jun 2014 20:16:09 -0000
+@@ -1736,11 +1736,11 @@ simplify_const_unary_operation (enum rtx
+ 		 we would have to distinguish between zero-extension
+ 		 and sign-extension.  */
+ 	      gcc_assert (width == op_width);
+ 	      val = arg0;
+ 	    }
+-	  else if (GET_MODE_BITSIZE (op_mode) < HOST_BITS_PER_WIDE_INT)
++	  else if (GET_MODE_PRECISION (op_mode) < HOST_BITS_PER_WIDE_INT)
+ 	    val = arg0 & GET_MODE_MASK (op_mode);
+ 	  else
+ 	    return 0;
+ 	  break;
+ 

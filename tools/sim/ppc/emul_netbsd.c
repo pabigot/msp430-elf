@@ -438,10 +438,16 @@ do_close(os_emul_data *emul,
   if (WITH_TRACE && ppc_trace[trace_os_emul])
     printf_filtered ("%d", d);
 
-  SYS(close);
+  if (d == 2)
+    status = 0; /* Do not close stderr - there may be debugging output still to come.  */
+  else
+    {
+      SYS(close);
 
-  /* Can't combine these statements, cuz close sets errno. */
-  status = close(d);
+      /* Can't combine these statements, cuz close sets errno. */
+      status = close(d);
+    }
+
   emul_write_status(processor, status, errno);
 }
 

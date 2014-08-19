@@ -50,3 +50,4 @@ int main() {
     return s1->vDisplay();
 }
 
+// { dg-require-effective-target size32plus }

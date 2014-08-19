@@ -4,7 +4,7 @@
 #	Unix platform. This implementation is used only if the
 #	"::tk_strictMotif" flag is set.
 #
-# RCS: @(#) $Id: xmfbox.tcl,v 1.9 2003/03/19 23:02:05 cagney Exp $
+# RCS: @(#) $Id: xmfbox.tcl,v 1.3 2012/04/18 00:36:57 kevinb Exp $
 #
 # Copyright (c) 1996 Sun Microsystems, Inc.
 # Copyright (c) 1998-2000 Scriptics Corporation

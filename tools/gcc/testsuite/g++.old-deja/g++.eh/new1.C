@@ -52,3 +52,4 @@ void operator delete (void *p) throw ()
 
 
 
+// { dg-require-effective-target size32plus }

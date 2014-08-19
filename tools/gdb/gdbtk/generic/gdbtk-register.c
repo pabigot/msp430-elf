@@ -340,7 +340,6 @@ get_register (int regnum, map_arg arg)
 
       get_formatted_print_options (&opts, format);
       opts.deref_ref = 1;
-      opts.pretty = Val_pretty_default;
       val_print (reg_vtype, value_contents_for_printing (val),
 		 value_embedded_offset (val), 0,
 		 stb, 0, val, &opts, current_language);
@@ -445,7 +444,8 @@ register_changed_p (int regnum, map_arg arg)
   char raw_buffer[MAX_REGISTER_SIZE];
 
   if (!target_has_registers
-      || !frame_register_read (get_selected_frame (NULL), regnum, raw_buffer))
+      || !deprecated_frame_register_read (get_selected_frame (NULL), regnum,
+					  raw_buffer))
     return;
 
   if (memcmp (&old_regs[regnum * MAX_REGISTER_SIZE], raw_buffer,

@@ -1,0 +1,31 @@
+/adddf3.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/addsf3.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/arc-ieee-754.h/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/divdf3.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/divsf3-stdmul.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/divsf3.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/divtab-arc-df.c/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/divtab-arc-sf.c/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/eqdf2.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/eqsf2.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/extendsfdf2.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/fixdfsi.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/fixsfsi.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/fixunsdfsi.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/floatsidf.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/floatsisf.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/floatunsidf.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/gedf2.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/gesf2.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/gtdf2.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/gtsf2.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/muldf3.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/mulsf3.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/orddf2.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/ordsf2.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/truncdfsf2.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/uneqdf2.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+/uneqsf2.S/1.1/Tue Mar  4 14:20:47 2014//Tmsp430-14r1-branch
+D/arc600////
+D/arc600-dsp////
+D/arc600-mul64////

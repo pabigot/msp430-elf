@@ -3,4 +3,4 @@ loading capabilities.  If shared libraries are supported then
 the build system in the parent directory will create
 the shared libs and load them into the tcltest executable.
 
-RCS: @(#) $Id: README,v 1.8 2003/03/19 23:01:32 cagney Exp $
+RCS: @(#) $Id: README,v 1.3 2012/04/18 00:36:38 kevinb Exp $

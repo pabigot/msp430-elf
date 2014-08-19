@@ -1,0 +1,19 @@
+Installation
+------------
+
+To install the tools from Windows Explorer, open the CDROM folder and
+double-click on the "install.gui.bat" or "install~1.bat". Follow the
+directions in the installer.
+
+To install the tools from the Command prompt, change to the CDROM drive
+and run "install-gui.bat" or "instal~1.bat"
+
+Post Installation
+-----------------
+If installer is intructed to update the system search path, the tools will
+be immediately available for use upon the next reboot or system login.  
+One might, for instance, select "Run..." from the Start Menu and type
+"bash" for the program to run.  This will bring up a command window using
+the familiar Unix shell.  Commands such as gcc, gdb, and so forth will
+be immediately available.
+

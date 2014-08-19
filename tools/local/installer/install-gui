@@ -1,0 +1,81 @@
+#!/bin/sh
+
+#
+# install-gui -- Wrapper for Cygnus GUI installer
+#
+# Angela Marie Thomas
+# angela@cygnus.com
+# $Date: 2009/01/07 23:49:03 $
+#
+# Copyright (C) 1999 Cygnus Solutions
+# 
+# $Id: install-gui,v 1.3 2009/01/07 23:49:03 release Exp $
+#
+
+# use /bin/sh5 on Ultrix systems to get shell functions
+if [ -f /bin/sh5 ] ; then 
+   if [ ! -n "${RUNNING_UNDER_BIN_SH5}" ] ; then
+       RUNNING_UNDER_BIN_SH5=yes
+       export RUNNING_UNDER_BIN_SH5
+       exec /bin/sh5 $0 $*
+   fi
+fi
+
+ProgName=`basename $0`
+Version='$Revision: 1.3 $'
+
+TRUE=1
+FALSE=0
+
+#
+# dirname($dir)
+# Print parent directory of $dir
+#
+dirname() {
+    pdir="`echo $1 | sed -e 's;^\(.*\)/\([^/]*\)$;\1;'`"
+    if [ "$pdir" = "" -o "$pdir" = "$1" ]; then
+        pdir="."
+    fi
+    echo "$pdir"
+}
+
+ProgName=`basename $0`
+RootDir=`dirname $0`
+RootDir=`(cd $RootDir ; pwd)`
+
+host=`(cd /tmp; sh $RootDir/utils/bin/config.guess)`
+case $host in
+    i[3456789]86*linux-gnu|i[3456789]89*linux-gnulibc2*|x86_64*linux-gnu)
+        binhost=i686-pc-linux-gnu
+        ;;
+    sparc*-sun-solaris2.[1567890]*)
+        binhost=sparc-sun-solaris2.5
+        ;;
+    mips*-sgi-irix6.*)
+        binhost=mips-sgi-irix6.5
+        ;;
+    hppa*-hp-hpux1[01].*)
+        binhost=hppa1.1-hp-hpux10.20
+        ;;
+    powerpc*-ibm-aix*)
+	binhost=powerpc-ibm-aix
+	;;
+    powerpc*-*-linux-gnu*)
+	binhost=powerpc-unknown-linux-gnu
+	;;
+    *)
+        echo "${ProgName}: \"$host\" is not a supported install host.  Exiting."
+        exit 1
+        ;;
+esac
+
+TCL_LIBRARY=$RootDir/utils/H-${binhost}/lib/tcl8.3
+TK_LIBRARY=$RootDir/utils/H-${binhost}/lib/tk8.3
+export TCL_LIBRARY TK_LIBRARY
+
+# Case insensitive for hosts that don't support RR CDs
+PATH=${RootDir}:${RootDir}/utils/bin:${RootDir}/utils/H-${binhost}/bin:${RootDir}/utils/h-${binhost}/bin:$PATH
+export PATH
+
+cd $RootDir
+wish8.3 install.tcl < /dev/null

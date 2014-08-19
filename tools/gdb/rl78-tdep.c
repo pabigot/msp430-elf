@@ -1,6 +1,6 @@
 /* Target-dependent code for the Renesas RL78 for GDB, the GNU debugger.
 
-   Copyright (C) 2011-2012 Free Software Foundation, Inc.
+   Copyright (C) 2011-2014 Free Software Foundation, Inc.
 
    Contributed by Red Hat, Inc.
 
@@ -94,7 +94,7 @@ enum
   RL78_PSW_REGNUM,	/* 8 bits */
   RL78_ES_REGNUM,	/* 8 bits */
   RL78_CS_REGNUM,	/* 8 bits */
-  RL78_PC_REGNUM,	/* 20 bits; we'll use 32 bits for it.  */
+  RL78_RAW_PC_REGNUM,	/* 20 bits; we'll use 32 bits for it.  */
 
   /* Fixed address SFRs (some of those above are SFRs too.) */
   RL78_SPL_REGNUM,	/* 8 bits; lower half of SP */
@@ -105,7 +105,8 @@ enum
   RL78_NUM_REGS,
 
   /* Pseudo registers.  */
-  RL78_SP_REGNUM = RL78_NUM_REGS,
+  RL78_PC_REGNUM = RL78_NUM_REGS,
+  RL78_SP_REGNUM,
 
   RL78_X_REGNUM,
   RL78_A_REGNUM,
@@ -196,7 +197,8 @@ struct gdbarch_tdep
 	      *rl78_uint32,
 	      *rl78_int32,
 	      *rl78_data_pointer,
-	      *rl78_code_pointer;
+	      *rl78_code_pointer,
+	      *rl78_psw_type;
 };
 
 /* This structure holds the results of a prologue analysis.  */
@@ -243,6 +245,10 @@ rl78_register_type (struct gdbarch *gdbarch, int reg_nr)
 
   if (reg_nr == RL78_PC_REGNUM)
     return tdep->rl78_code_pointer;
+  else if (reg_nr == RL78_RAW_PC_REGNUM)
+    return tdep->rl78_uint32;
+  else if (reg_nr == RL78_PSW_REGNUM)
+    return (tdep->rl78_psw_type);
   else if (reg_nr <= RL78_MEM_REGNUM
            || (RL78_X_REGNUM <= reg_nr && reg_nr <= RL78_H_REGNUM)
 	   || (RL78_BANK0_R0_REGNUM <= reg_nr
@@ -298,13 +304,14 @@ rl78_register_name (struct gdbarch *gdbarch, int regnr)
     "psw",
     "es",
     "cs",
-    "pc",
+    "",
 
     "",		/* spl */
     "",		/* sph */
     "pmc",
     "mem",
 
+    "pc",
     "sp",
 
     "x",
@@ -381,6 +388,133 @@ rl78_register_name (struct gdbarch *gdbarch, int regnr)
   return reg_names[regnr];
 }
 
+static const char *
+rl78_g10_register_name (struct gdbarch *gdbarch, int regnr)
+{
+  static const char *const reg_names[] =
+  {
+    "",		/* bank0_r0 */
+    "",		/* bank0_r1 */
+    "",		/* bank0_r2 */
+    "",		/* bank0_r3 */
+    "",		/* bank0_r4 */
+    "",		/* bank0_r5 */
+    "",		/* bank0_r6 */
+    "",		/* bank0_r7 */
+
+    "",		/* bank1_r0 */
+    "",		/* bank1_r1 */
+    "",		/* bank1_r2 */
+    "",		/* bank1_r3 */
+    "",		/* bank1_r4 */
+    "",		/* bank1_r5 */
+    "",		/* bank1_r6 */
+    "",		/* bank1_r7 */
+
+    "",		/* bank2_r0 */
+    "",		/* bank2_r1 */
+    "",		/* bank2_r2 */
+    "",		/* bank2_r3 */
+    "",		/* bank2_r4 */
+    "",		/* bank2_r5 */
+    "",		/* bank2_r6 */
+    "",		/* bank2_r7 */
+
+    "",		/* bank3_r0 */
+    "",		/* bank3_r1 */
+    "",		/* bank3_r2 */
+    "",		/* bank3_r3 */
+    "",		/* bank3_r4 */
+    "",		/* bank3_r5 */
+    "",		/* bank3_r6 */
+    "",		/* bank3_r7 */
+
+    "psw",
+    "es",
+    "cs",
+    "",
+
+    "",		/* spl */
+    "",		/* sph */
+    "pmc",
+    "mem",
+
+    "pc",
+    "sp",
+
+    "x",
+    "a",
+    "c",
+    "b",
+    "e",
+    "d",
+    "l",
+    "h",
+
+    "ax",
+    "bc",
+    "de",
+    "hl",
+
+    "bank0_r0",
+    "bank0_r1",
+    "bank0_r2",
+    "bank0_r3",
+    "bank0_r4",
+    "bank0_r5",
+    "bank0_r6",
+    "bank0_r7",
+
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+    "",
+
+    "bank0_rp0",
+    "bank0_rp1",
+    "bank0_rp2",
+    "bank0_rp3",
+
+    "",
+    "",
+    "",
+    "",
+
+    "",
+    "",
+    "",
+    "",
+
+    "",
+    "",
+    "",
+    ""
+  };
+
+  return reg_names[regnr];
+}
 
 /* Implement the "register_reggroup_p" gdbarch method.  */
 
@@ -394,7 +528,12 @@ rl78_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
   /* All other registers are saved and restored.  */
   if (group == save_reggroup || group == restore_reggroup)
     {
-      if (regnum < RL78_NUM_REGS)
+      if ((regnum < RL78_NUM_REGS
+           && regnum != RL78_SPL_REGNUM
+	   && regnum != RL78_SPH_REGNUM
+	   && regnum != RL78_RAW_PC_REGNUM)
+	  || regnum == RL78_SP_REGNUM
+	  || regnum == RL78_PC_REGNUM)
 	return 1;
       else
 	return 0;
@@ -407,6 +546,7 @@ rl78_register_reggroup_p (struct gdbarch *gdbarch, int regnum,
       || regnum == RL78_SPH_REGNUM
       || regnum == RL78_PMC_REGNUM
       || regnum == RL78_MEM_REGNUM
+      || regnum == RL78_RAW_PC_REGNUM
       || (RL78_BANK0_RP0_REGNUM <= regnum && regnum <= RL78_BANK3_RP3_REGNUM))
     return group == system_reggroup;
 
@@ -461,6 +601,12 @@ rl78_pseudo_register_read (struct gdbarch *gdbarch,
       status = regcache_raw_read (regcache, RL78_SPL_REGNUM, buffer);
       if (status == REG_VALID)
 	status = regcache_raw_read (regcache, RL78_SPH_REGNUM, buffer + 1);
+    }
+  else if (reg == RL78_PC_REGNUM)
+    {
+      gdb_byte rawbuf[4];
+      status = regcache_raw_read (regcache, RL78_RAW_PC_REGNUM, rawbuf);
+      memcpy (buffer, rawbuf, 3);
     }
   else if (RL78_X_REGNUM <= reg && reg <= RL78_H_REGNUM)
     {
@@ -524,6 +670,13 @@ rl78_pseudo_register_write (struct gdbarch *gdbarch,
     {
       regcache_raw_write (regcache, RL78_SPL_REGNUM, buffer);
       regcache_raw_write (regcache, RL78_SPH_REGNUM, buffer + 1);
+    }
+  else if (reg == RL78_PC_REGNUM)
+    {
+      gdb_byte rawbuf[4];
+      memcpy (rawbuf, buffer, 3);
+      rawbuf[3] = 0;
+      regcache_raw_write (regcache, RL78_RAW_PC_REGNUM, rawbuf);
     }
   else if (RL78_X_REGNUM <= reg && reg <= RL78_H_REGNUM)
     {
@@ -617,7 +770,7 @@ check_for_saved (void *result_untyped, pv_t addr, CORE_ADDR size,
   if (value.kind == pvk_register
       && value.k == 0
       && pv_is_register (addr, RL78_SP_REGNUM)
-      && size == register_size (target_gdbarch, value.reg))
+      && size == register_size (target_gdbarch (), value.reg))
     result->reg_offset[value.reg] = addr.k;
 }
 
@@ -644,7 +797,7 @@ rl78_analyze_prologue (CORE_ADDR start_pc,
       result->reg_offset[rn] = 1;
     }
 
-  stack = make_pv_area (RL78_SP_REGNUM, gdbarch_addr_bit (target_gdbarch));
+  stack = make_pv_area (RL78_SP_REGNUM, gdbarch_addr_bit (target_gdbarch ()));
   back_to = make_cleanup_free_pv_area (stack);
 
   /* The call instruction has saved the return address on the stack.  */
@@ -740,14 +893,29 @@ rl78_pointer_to_address (struct gdbarch *gdbarch,
                          struct type *type, const gdb_byte *buf)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  int vtable = 0;
   CORE_ADDR addr
     = extract_unsigned_integer (buf, TYPE_LENGTH (type), byte_order);
+
+#if 1
+  /* See if it's a vtable.  */
+  if (TYPE_CODE (type) == TYPE_CODE_PTR)
+    {
+      struct type *targ_type = TYPE_TARGET_TYPE (type);
+       
+      if (TYPE_CODE (targ_type) == TYPE_CODE_STRUCT
+          && TYPE_TAG_NAME (targ_type) != NULL
+	  && strcmp (TYPE_TAG_NAME (targ_type), "gdb_gnu_v3_abi_vtable") == 0)
+	vtable = 1;
+    }
+#endif
 
   /* Is it a code address?  */
   if (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_FUNC
       || TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_METHOD
       || TYPE_CODE_SPACE (TYPE_TARGET_TYPE (type))
-      || TYPE_LENGTH (type) == 4)
+      || TYPE_LENGTH (type) == 4
+      || vtable)
     return rl78_make_instruction_address (addr);
   else
     return rl78_make_data_address (addr);
@@ -911,6 +1079,14 @@ rl78_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
   else if (reg == 32)
     return RL78_SP_REGNUM;
   else if (reg == 33)
+    return -1;			/* ap */
+  else if (reg == 34)
+    return RL78_PSW_REGNUM;
+  else if (reg == 35)
+    return RL78_ES_REGNUM;
+  else if (reg == 36)
+    return RL78_CS_REGNUM;
+  else if (reg == 37)
     return RL78_PC_REGNUM;
   else
     internal_error (__FILE__, __LINE__,
@@ -942,6 +1118,7 @@ rl78_return_value (struct gdbarch *gdbarch,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   ULONGEST valtype_len = TYPE_LENGTH (valtype);
+  int is_g10 = gdbarch_tdep (gdbarch)->elf_flags & E_FLAG_RL78_G10;
 
   if (valtype_len > 8)
     return RETURN_VALUE_STRUCT_CONVENTION;
@@ -955,11 +1132,16 @@ rl78_return_value (struct gdbarch *gdbarch,
 
       while (valtype_len > 0)
 	{
-	  regcache_cooked_read_unsigned (regcache, argreg, &u);
+	  if (is_g10)
+	    u = read_memory_integer (g10_raddr, 1,
+	                             gdbarch_byte_order (gdbarch));
+	  else
+	    regcache_cooked_read_unsigned (regcache, argreg, &u);
 	  store_unsigned_integer (readbuf + offset, 1, byte_order, u);
 	  valtype_len -= 1;
 	  offset += 1;
 	  argreg++;
+	  g10_raddr++;
 	}
     }
 
@@ -967,15 +1149,22 @@ rl78_return_value (struct gdbarch *gdbarch,
     {
       ULONGEST u;
       int argreg = RL78_RAW_BANK1_R0_REGNUM;
+      CORE_ADDR g10_raddr = 0xffec8;
       int offset = 0;
 
       while (valtype_len > 0)
 	{
 	  u = extract_unsigned_integer (writebuf + offset, 1, byte_order);
-	  regcache_cooked_write_unsigned (regcache, argreg, u);
+	  if (is_g10) {
+	    gdb_byte b = u & 0xff;
+	    write_memory (g10_raddr, &b, 1);
+	  }
+	  else
+	    regcache_cooked_write_unsigned (regcache, argreg, u);
 	  valtype_len -= 1;
 	  offset += 1;
 	  argreg++;
+	  g10_raddr++;
 	}
     }
 
@@ -1106,10 +1295,23 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   TYPE_TARGET_TYPE (tdep->rl78_code_pointer) = tdep->rl78_void;
   TYPE_UNSIGNED (tdep->rl78_code_pointer) = 1;
 
+  tdep->rl78_psw_type = arch_flags_type (gdbarch, "rl78_psw_type", 1);
+  append_flags_type_flag (tdep->rl78_psw_type, 0, "CY");
+  append_flags_type_flag (tdep->rl78_psw_type, 1, "ISP0");
+  append_flags_type_flag (tdep->rl78_psw_type, 2, "ISP1");
+  append_flags_type_flag (tdep->rl78_psw_type, 3, "RBS0");
+  append_flags_type_flag (tdep->rl78_psw_type, 4, "AC");
+  append_flags_type_flag (tdep->rl78_psw_type, 5, "RBS1");
+  append_flags_type_flag (tdep->rl78_psw_type, 6, "Z");
+  append_flags_type_flag (tdep->rl78_psw_type, 7, "IE");
+
   /* Registers.  */
   set_gdbarch_num_regs (gdbarch, RL78_NUM_REGS);
   set_gdbarch_num_pseudo_regs (gdbarch, RL78_NUM_PSEUDO_REGS);
-  set_gdbarch_register_name (gdbarch, rl78_register_name);
+  if (tdep->elf_flags & E_FLAG_RL78_G10)
+    set_gdbarch_register_name (gdbarch, rl78_g10_register_name);
+  else
+    set_gdbarch_register_name (gdbarch, rl78_register_name);
   set_gdbarch_register_type (gdbarch, rl78_register_type);
   set_gdbarch_pc_regnum (gdbarch, RL78_PC_REGNUM);
   set_gdbarch_sp_regnum (gdbarch, RL78_SP_REGNUM);
@@ -1127,6 +1329,7 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_long_long_bit (gdbarch, 64);
   set_gdbarch_ptr_bit (gdbarch, 16);
   set_gdbarch_addr_bit (gdbarch, 32);
+  set_gdbarch_dwarf2_addr_size (gdbarch, 4);
   set_gdbarch_float_bit (gdbarch, 32);
   set_gdbarch_float_format (gdbarch, floatformats_ieee_single);
   set_gdbarch_double_bit (gdbarch, 32);
@@ -1150,6 +1353,8 @@ rl78_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_unwind_pc (gdbarch, rl78_unwind_pc);
   set_gdbarch_unwind_sp (gdbarch, rl78_unwind_sp);
   set_gdbarch_frame_align (gdbarch, rl78_frame_align);
+
+  dwarf2_append_unwinders (gdbarch);
   frame_unwind_append_unwinder (gdbarch, &rl78_unwind);
 
   /* Dummy frames, return values.  */

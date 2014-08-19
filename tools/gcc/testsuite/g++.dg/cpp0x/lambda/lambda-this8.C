@@ -1,5 +1,6 @@
 // PR c++/56135
 // { dg-do run { target c++11 } }
+// { dg-require-effective-target size32plus }
 
 #include <functional>
 

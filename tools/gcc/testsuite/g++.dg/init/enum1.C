@@ -1,4 +1,5 @@
 /* { dg-options "-Wno-overflow" } */
+/* { dg-skip-if "__int20 changes break this test" { *-*-* } { "*" } { "" } } */
 
 #ifndef __SIZEOF_INT128__
 #define UNACCEPT 0xffffffffffffffffLL

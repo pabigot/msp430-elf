@@ -1,5 +1,5 @@
 /* Functions for manipulating expressions designed to be executed on the agent
-   Copyright (C) 1998-2000, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 1998-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,7 +25,7 @@
 #include "ax.h"
 
 #include "value.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "user-regs.h"
 
@@ -57,6 +57,9 @@ new_agent_expr (struct gdbarch *gdbarch, CORE_ADDR scope)
   x->reg_mask_len = 1;
   x->reg_mask = xmalloc (x->reg_mask_len * sizeof (x->reg_mask[0]));
   memset (x->reg_mask, 0, x->reg_mask_len * sizeof (x->reg_mask[0]));
+
+  x->tracing = 0;
+  x->trace_string = 0;
 
   return x;
 }
@@ -337,7 +340,7 @@ ax_tsv (struct agent_expr *x, enum agent_op op, int num)
    is counted in the length.)  */
 
 void
-ax_string (struct agent_expr *x, char *str, int slen)
+ax_string (struct agent_expr *x, const char *str, int slen)
 {
   int i;
 
@@ -375,7 +378,6 @@ void
 ax_print (struct ui_file *f, struct agent_expr *x)
 {
   int i;
-  int is_float = 0;
 
   fprintf_filtered (f, _("Scope: %s\n"), paddress (x->gdbarch, x->scope));
   fprintf_filtered (f, _("Reg mask:"));
@@ -430,8 +432,6 @@ ax_print (struct ui_file *f, struct agent_expr *x)
 	}
       fprintf_filtered (f, "\n");
       i += 1 + aop_map[op].op_size;
-
-      is_float = (op == aop_float);
     }
 }
 

@@ -70,3 +70,5 @@ int main(void)
   N2::C<void> c2;
   return 0;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

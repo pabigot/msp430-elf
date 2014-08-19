@@ -1,6 +1,5 @@
 #objdump: -drw
 #name: i386 .bundle_align_mode
-#target: *-*-*linux*
 
 .*: +file format .*i386.*
 

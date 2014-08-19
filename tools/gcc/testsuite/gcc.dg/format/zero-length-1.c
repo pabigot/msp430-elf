@@ -13,3 +13,4 @@ foo (void)
   /* Zero-length format strings are allowed.  */
   printf ("");
 }
+/* { dg-prune-output ".*__int20.*" } */

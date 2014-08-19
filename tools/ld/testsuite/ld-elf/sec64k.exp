@@ -28,20 +28,13 @@ if ![is_elf_format] {
     return
 }
 
-# This test is too big for some targets.
-if {   [istarget cr16-*-*] \
-    || [istarget crx-*-*] \
-    } {
-    return
-}
-
 # Targets using the generic linker backend don't sort section symbols
 # before local symbols, so don't bother testing them.
 if { [istarget "arc-*-*"]
-     || [istarget "msp430*-*-*"]
      || [istarget "d30v-*-*"]
      || [istarget "dlx-*-*"]
      || [istarget "i960-*-*"]
+     || [istarget "msp430*-*-*"]
      || [istarget "or32-*-*"]
      || [istarget "pj*-*-*"]
      || [istarget "m32r-*-*"] } {
@@ -131,11 +124,11 @@ if [catch { set ofd [open "tmpdir/$test1.d" w] } x] {
 # The m32r target generates both REL and RELA relocs (for historical
 # reasons) so the expected number of sections will be much more than
 # 68000, which throws this particular test right off.
-if {![istarget "m32r-*-*"]} then {
+if { ![istarget "m32r-*-*"] } then {
     foreach sfile [lrange $sfiles 0 [expr [llength $sfiles] / 2]] {
 	puts $ofd "#source: $sfile"
     }
-    puts $ofd "#ld: -r -X"
+    puts $ofd "#ld: -r"
     puts $ofd "#readelf: -W -Ss"
     puts $ofd "There are 680.. section headers.*:"
     puts $ofd "#..."
@@ -182,7 +175,7 @@ if { ![istarget "d10v-*-*"]
     } elseif { [istarget spu*-*-*] } {
 	puts $ofd "#ld: --local-store 0:0"
     } else {
-	puts $ofd "#ld: -X"
+	puts $ofd "#ld:"
     }
     puts $ofd "#readelf: -W -Ss"
     puts $ofd "There are 660.. section headers.*:"

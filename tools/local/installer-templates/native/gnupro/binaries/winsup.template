@@ -1,0 +1,27 @@
+# from winsup
+# NOTE: .exe is being used instead of ${EXEEXT} so it will be
+# picked up for host-x-cygwin
+file	${release}/H-${host}/bin/cygwin1.*.dll cygwin
+file	${release}/H-${host}/bin/mingwm1.*.dll cygwin
+file	${release}/H-${host}/bin/cygcheck.exe cygwin
+file	${release}/H-${host}/bin/cygserver.exe cygwin
+file	${release}/H-${host}/bin/cygserver-config cygwin
+file	${release}/H-${host}/bin/cygpath.exe cygwin
+file	${release}/H-${host}/bin/dumper.exe cygwin
+file	${release}/H-${host}/bin/getfacl.exe cygwin
+file	${release}/H-${host}/bin/ipcrm.exe cygwin
+file	${release}/H-${host}/bin/ipcs.exe cygwin
+file	${release}/H-${host}/bin/kill.exe cygwin
+file	${release}/H-${host}/bin/mkgroup.exe cygwin
+file	${release}/H-${host}/bin/mkpasswd.exe cygwin
+file	${release}/H-${host}/bin/mount.exe cygwin
+file	${release}/H-${host}/bin/passwd.exe cygwin
+file	${release}/H-${host}/bin/ps.exe cygwin
+file	${release}/H-${host}/bin/regtool.exe cygwin
+file	${release}/H-${host}/bin/setfacl.exe cygwin
+file	${release}/H-${host}/bin/ssp.exe cygwin
+file	${release}/H-${host}/bin/strace.exe cygwin
+file	${release}/H-${host}/bin/umount.exe cygwin
+dir	${release}/H-${host}/${target}/man cygwin
+dir	${release}/H-${host}/lib/mingw cygwin
+dir	${release}/H-${host}/lib/w32api cygwin

@@ -24,3 +24,4 @@ int main() {
   printf("%d.\n", b->a());
   return 0;
 }
+// { dg-require-effective-target size32plus }

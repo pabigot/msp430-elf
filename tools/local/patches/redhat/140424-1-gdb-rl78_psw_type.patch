@@ -1,0 +1,55 @@
+This is a patch for Renesas issue #3156823.
+
+It adds a new type for the PSW register, causing symbolic flags to be
+printed when using GDB's "info registers" command.
+
+2014-04-24  Kevin Buettner  <kevinb@redhat.com>
+
+	* rl78-tdep.c (struct gdbarch_tdep): Add new field, rl78_psw_type.
+	(rl78_register_type): Add case for RL78_PSW_REGNUM.
+	(rl78_gdbarch_init): Initialize rl78_psw_type.
+
+
+Index: gdb/rl78-tdep.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/rl78-tdep.c,v
+retrieving revision 1.8
+diff -u -p -r1.8 rl78-tdep.c
+--- gdb/rl78-tdep.c	13 Dec 2013 00:28:59 -0000	1.8
++++ gdb/rl78-tdep.c	24 Apr 2014 14:12:03 -0000
+@@ -197,7 +197,8 @@ struct gdbarch_tdep
+ 	      *rl78_uint32,
+ 	      *rl78_int32,
+ 	      *rl78_data_pointer,
+-	      *rl78_code_pointer;
++	      *rl78_code_pointer,
++	      *rl78_psw_type;
+ };
+ 
+ /* This structure holds the results of a prologue analysis.  */
+@@ -246,6 +247,8 @@ rl78_register_type (struct gdbarch *gdba
+     return tdep->rl78_code_pointer;
+   else if (reg_nr == RL78_RAW_PC_REGNUM)
+     return tdep->rl78_uint32;
++  else if (reg_nr == RL78_PSW_REGNUM)
++    return (tdep->rl78_psw_type);
+   else if (reg_nr <= RL78_MEM_REGNUM
+            || (RL78_X_REGNUM <= reg_nr && reg_nr <= RL78_H_REGNUM)
+ 	   || (RL78_BANK0_R0_REGNUM <= reg_nr
+@@ -1292,6 +1295,16 @@ rl78_gdbarch_init (struct gdbarch_info i
+   TYPE_TARGET_TYPE (tdep->rl78_code_pointer) = tdep->rl78_void;
+   TYPE_UNSIGNED (tdep->rl78_code_pointer) = 1;
+ 
++  tdep->rl78_psw_type = arch_flags_type (gdbarch, "rl78_psw_type", 1);
++  append_flags_type_flag (tdep->rl78_psw_type, 0, "CY");
++  append_flags_type_flag (tdep->rl78_psw_type, 1, "ISP0");
++  append_flags_type_flag (tdep->rl78_psw_type, 2, "ISP1");
++  append_flags_type_flag (tdep->rl78_psw_type, 3, "RBS0");
++  append_flags_type_flag (tdep->rl78_psw_type, 4, "AC");
++  append_flags_type_flag (tdep->rl78_psw_type, 5, "RBS1");
++  append_flags_type_flag (tdep->rl78_psw_type, 6, "Z");
++  append_flags_type_flag (tdep->rl78_psw_type, 7, "IE");
++
+   /* Registers.  */
+   set_gdbarch_num_regs (gdbarch, RL78_NUM_REGS);
+   set_gdbarch_num_pseudo_regs (gdbarch, RL78_NUM_PSEUDO_REGS);

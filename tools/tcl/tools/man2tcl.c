@@ -16,7 +16,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: man2tcl.c,v 1.3 2003/03/19 23:01:31 cagney Exp $
+ * RCS: @(#) $Id: man2tcl.c,v 1.3 2012/04/18 00:36:36 kevinb Exp $
  */
 
 static char sccsid[] = "@(#) man2tcl.c 1.3 95/08/12 17:34:08";

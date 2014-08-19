@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // { dg-options "-O2" }
 // Test for bad loop optimization of goto fixups.
 

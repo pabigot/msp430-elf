@@ -12,7 +12,7 @@ main ()
   // The size of any class or class object is larger than zero.
   int i = sizeof (foo);
   if (i > 0)
-    printf ("PASS\n");
+    ; // printf ("PASS\n");
   else
     { printf ("FAIL\n"); return 1; }
 }

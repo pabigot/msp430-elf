@@ -1,14 +1,19 @@
-/.cvsignore/1.1/Wed Mar 19 23:00:53 2003//Tmsp430-130322-branch
-/CHANGES/1.1/Wed Mar 19 23:00:53 2003//Tmsp430-130322-branch
-/ChangeLog/1.2/Tue Feb  3 19:07:29 2009//Tmsp430-130322-branch
-/Makefile.in/1.4.20.2/Thu Mar 28 01:08:42 2013//Tmsp430-130322-branch
-/README/1.1/Wed Mar 19 23:00:53 2003//Tmsp430-130322-branch
-/aclocal.m4/1.2/Tue Feb  3 19:07:29 2009//Tmsp430-130322-branch
-/configure/1.2/Tue Feb  3 19:07:29 2009//Tmsp430-130322-branch
-/configure.ac/1.1/Tue Feb  3 19:07:29 2009//Tmsp430-130322-branch
-/iwidgets.tcl.in/1.1/Wed Mar 19 23:00:53 2003//Tmsp430-130322-branch
-/license.terms/1.1/Wed Mar 19 23:00:53 2003//Tmsp430-130322-branch
-/pkgIndex.tcl.in/1.1/Wed Mar 19 23:00:53 2003//Tmsp430-130322-branch
+/.cvsignore/1.1.1.1/Sun Feb 16 05:42:00 2003/-ko/Tmsp430-14r1-branch
+/CHANGES/1.1.1.1/Sun Feb 16 05:42:00 2003/-ko/Tmsp430-14r1-branch
+/ChangeLog/1.2/Wed Apr 18 00:37:20 2012/-ko/Tmsp430-14r1-branch
+/ChangeLog.SOURCES/1.1/Mon Feb  2 15:04:11 2004//Tmsp430-14r1-branch
+/Makefile.in/1.5/Thu Oct 18 00:51:08 2012/-ko/Tmsp430-14r1-branch
+/README/1.1.1.1/Sun Feb 16 05:42:00 2003/-ko/Tmsp430-14r1-branch
+/aclocal.m4/1.2/Wed Apr 18 00:37:20 2012/-ko/Tmsp430-14r1-branch
+/configure/1.2/Wed Apr 18 00:37:20 2012/-ko/Tmsp430-14r1-branch
+/configure.ac/1.1/Wed Apr 18 00:44:00 2012//Tmsp430-14r1-branch
+/configure.in/1.1.1.1/Sun Feb 16 05:42:00 2003/-ko/Tmsp430-14r1-branch
+/iwidgets.tcl/1.1/Mon Feb 17 06:40:49 2003//Tmsp430-14r1-branch
+/iwidgets.tcl.in/1.2/Wed Apr 18 00:37:20 2012/-ko/Tmsp430-14r1-branch
+/license.terms/1.1.1.1/Sun Feb 16 05:42:00 2003/-ko/Tmsp430-14r1-branch
+/pkgIndex.tcl/1.1/Mon Feb 17 06:40:49 2003//Tmsp430-14r1-branch
+/pkgIndex.tcl.in/1.1.1.1/Sun Feb 16 05:42:00 2003/-ko/Tmsp430-14r1-branch
+/tcl.m4/1.1.1.1/Sun Feb 16 05:42:00 2003/-ko/Tmsp430-14r1-branch
 D/demos////
 D/doc////
 D/generic////

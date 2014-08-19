@@ -1,0 +1,42 @@
+When GDB runs a newlib-linked program to completion using the PPC
+simulator, it will close GDB's file descriptors for stdin, stdout, and
+stderr.  This patch prevents the simulator from closing these
+descriptors.
+
+In particular, when running the GDB testsuite, this patch fixes the problem
+in which the following message shows up at various points in the log file:
+
+    ERROR: Process no longer exists
+
+As a consequence, a number of failures and unresolved testcases are fixed.
+
+Note: 2013-11-20: Updated patch to apply cleanly against current sources.
+This should go upstream at some point.  Upstream sources now have an
+exception for file descriptor 2, but does not yet handle 0 or 1.
+
+sim/ppc/ChangeLog.RedHat:
+
+	* emul_netbsd.c (do_close): Don't close file descriptors 0, 1, or 2.
+
+
+Index: sim/ppc/emul_netbsd.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/ppc/emul_netbsd.c,v
+retrieving revision 1.16
+diff -u -p -r1.16 emul_netbsd.c
+--- sim/ppc/emul_netbsd.c	4 Oct 2013 09:10:55 -0000	1.16
++++ sim/ppc/emul_netbsd.c	20 Nov 2013 22:09:31 -0000
+@@ -438,8 +438,11 @@ do_close(os_emul_data *emul,
+   if (WITH_TRACE && ppc_trace[trace_os_emul])
+     printf_filtered ("%d", d);
+ 
+-  if (d == 2)
+-    status = 0;
++  if (d == 0 || d == 1 || d == 2)
++    {
++      errno = 0;
++      status = 0;
++    }
+   else
+     {
+       SYS(close);

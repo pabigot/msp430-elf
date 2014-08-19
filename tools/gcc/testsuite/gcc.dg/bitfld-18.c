@@ -1,7 +1,7 @@
 /* { dg-do compile } */
+/* { dg-skip-if "non standard bitfields" { "rx-*-*" } { "*" } { "" } } */
 /* { dg-options "-Wno-packed-bitfield-compat" } */
 /* { dg-options "-Wno-packed-bitfield-compat -mno-ms-bitfields" { target { i?86-*-mingw* x86_64-*-mingw* } } } */
-/* { dg-skip-if "sizeof (struct t) == 4!" { "msp430-*-*" } { "*" } { "" } } */
 
 struct t
 {

@@ -30,3 +30,4 @@ foo (int i, long long ll, size_t z, wint_t lc, wchar_t *ls)
   /* The flag character I is a GNU extension.  */
   printf ("%Id", i); /* { dg-warning "C" "printf I flag" } */
 }
+/* { dg-prune-output ".*__int20.*" } */

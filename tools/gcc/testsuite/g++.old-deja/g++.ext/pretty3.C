@@ -4,7 +4,7 @@
 
 // make sure __FUNCTION__ and __PRETTY_FUNCTION__ work in templates
 
-#include <stdio.h>
+// #include <stdio.h>
 #include <string.h>
 
 static bool bad = false;
@@ -13,10 +13,11 @@ template<class T> void f1 (T)
 {
   char const *function = __FUNCTION__;
   char const *pretty = __PRETTY_FUNCTION__;
-  
+#if 0  
   printf ("generic\n");
   printf ("__FUNCTION__ %s\n", function);
   printf ("__PRETTY_FUNCTION__ %s\n", pretty);
+#endif
   
   if (strcmp (function, "f1"))
     bad = true;
@@ -28,11 +29,11 @@ template<> void f1<int> (int)
 {
   char const *function = __FUNCTION__;
   char const *pretty = __PRETTY_FUNCTION__;
-  
+#if 0  
   printf ("specialized\n");
   printf ("__FUNCTION__ %s\n", function);
   printf ("__PRETTY_FUNCTION__ %s\n", pretty);
-  
+#endif
   if (strcmp (function, "f1<int>"))
     bad = true;
   if (strcmp (pretty, "void f1(T) [with T = int]"))

@@ -1,5 +1,5 @@
 /* OpenCL language support for GDB, the GNU debugger.
-   Copyright (C) 2010-2012 Free Software Foundation, Inc.
+   Copyright (C) 2010-2014 Free Software Foundation, Inc.
 
    Contributed by Ken Werner <ken.werner@de.ibm.com>.
 
@@ -19,13 +19,13 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdbtypes.h"
 #include "symtab.h"
 #include "expression.h"
 #include "parser-defs.h"
-#include "symtab.h"
 #include "language.h"
+#include "varobj.h"
 #include "c-lang.h"
 #include "gdb_assert.h"
 
@@ -683,6 +683,58 @@ vector_relop (struct expression *exp, struct value *val1, struct value *val2,
   return ret;
 }
 
+/* Perform a cast of ARG into TYPE.  There's sadly a lot of duplication in
+   here from valops.c:value_cast, opencl is different only in the
+   behaviour of scalar to vector casting.  As far as possibly we're going
+   to try and delegate back to the standard value_cast function. */
+
+static struct value *
+opencl_value_cast (struct type *type, struct value *arg)
+{
+  if (type != value_type (arg))
+    {
+      /* Casting scalar to vector is a special case for OpenCL, scalar
+	 is cast to element type of vector then replicated into each
+	 element of the vector.  First though, we need to work out if
+	 this is a scalar to vector cast; code lifted from
+	 valops.c:value_cast.  */
+      enum type_code code1, code2;
+      struct type *to_type;
+      int scalar;
+
+      to_type = check_typedef (type);
+
+      code1 = TYPE_CODE (to_type);
+      code2 = TYPE_CODE (check_typedef (value_type (arg)));
+
+      if (code2 == TYPE_CODE_REF)
+	code2 = TYPE_CODE (check_typedef (value_type (coerce_ref (arg))));
+
+      scalar = (code2 == TYPE_CODE_INT || code2 == TYPE_CODE_BOOL
+		|| code2 == TYPE_CODE_CHAR || code2 == TYPE_CODE_FLT
+		|| code2 == TYPE_CODE_DECFLOAT || code2 == TYPE_CODE_ENUM
+		|| code2 == TYPE_CODE_RANGE);
+
+      if (code1 == TYPE_CODE_ARRAY && TYPE_VECTOR (to_type) && scalar)
+	{
+	  struct type *eltype;
+
+	  /* Cast to the element type of the vector here as
+	     value_vector_widen will error if the scalar value is
+	     truncated by the cast.  To avoid the error, cast (and
+	     possibly truncate) here.  */
+	  eltype = check_typedef (TYPE_TARGET_TYPE (to_type));
+	  arg = value_cast (eltype, arg);
+
+	  return value_vector_widen (arg, type);
+	}
+      else
+	/* Standard cast handler.  */
+	arg = value_cast (type, arg);
+    }
+  return arg;
+}
+
 /* Perform a relational operation on two operands.  */
 
 static struct value *
@@ -718,7 +770,7 @@ opencl_relop (struct expression *exp, struct value *arg1, struct value *arg2,
       if (TYPE_CODE (t) != TYPE_CODE_FLT && !is_integral_type (t))
 	error (_("Argument to operation not a number or boolean."));
 
-      *v = value_cast (t1_is_vec ? type1 : type2, *v);
+      *v = opencl_value_cast (t1_is_vec ? type1 : type2, *v);
       val = vector_relop (exp, arg1, arg2, op);
     }
 
@@ -740,6 +792,46 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
 
   switch (op)
     {
+    /* Handle assignment and cast operators to support OpenCL-style
+       scalar-to-vector widening.  */
+    case BINOP_ASSIGN:
+      (*pos)++;
+      arg1 = evaluate_subexp (NULL_TYPE, exp, pos, noside);
+      type1 = value_type (arg1);
+      arg2 = evaluate_subexp (type1, exp, pos, noside);
+
+      if (noside == EVAL_SKIP || noside == EVAL_AVOID_SIDE_EFFECTS)
+	return arg1;
+
+      if (deprecated_value_modifiable (arg1)
+	  && VALUE_LVAL (arg1) != lval_internalvar)
+	arg2 = opencl_value_cast (type1, arg2);
+
+      return value_assign (arg1, arg2);
+
+    case UNOP_CAST:
+      type1 = exp->elts[*pos + 1].type;
+      (*pos) += 2;
+      arg1 = evaluate_subexp (type1, exp, pos, noside);
+
+      if (noside == EVAL_SKIP)
+	return value_from_longest (builtin_type (exp->gdbarch)->
+				   builtin_int, 1);
+
+      return opencl_value_cast (type1, arg1);
+
+    case UNOP_CAST_TYPE:
+      (*pos)++;
+      arg1 = evaluate_subexp (NULL, exp, pos, EVAL_AVOID_SIDE_EFFECTS);
+      type1 = value_type (arg1);
+      arg1 = evaluate_subexp (type1, exp, pos, noside);
+
+      if (noside == EVAL_SKIP)
+	return value_from_longest (builtin_type (exp->gdbarch)->
+				   builtin_int, 1);
+
+      return opencl_value_cast (type1, arg1);
+
     /* Handle binary relational and equality operators that are either not
        or differently defined for GNU vectors.  */
     case BINOP_EQUAL:
@@ -852,12 +944,12 @@ evaluate_subexp_opencl (struct type *expect_type, struct expression *exp,
 	  /* Widen the scalar operand to a vector if necessary.  */
 	  if (t2_is_vec || !t3_is_vec)
 	    {
-	      arg3 = value_cast (type2, arg3);
+	      arg3 = opencl_value_cast (type2, arg3);
 	      type3 = value_type (arg3);
 	    }
 	  else if (!t2_is_vec || t3_is_vec)
 	    {
-	      arg2 = value_cast (type3, arg2);
+	      arg2 = opencl_value_cast (type3, arg2);
 	      type2 = value_type (arg2);
 	    }
 	  else if (!t2_is_vec || !t3_is_vec)
@@ -943,15 +1035,13 @@ Cannot perform conditional operation on vectors with different sizes"));
 	  }
 	else
 	  {
+	    struct value *v = value_struct_elt (&arg1, NULL,
+						&exp->elts[pc + 2].string, NULL,
+						"structure");
+
 	    if (noside == EVAL_AVOID_SIDE_EFFECTS)
-	      return
-		  value_zero (lookup_struct_elt_type
-			      (value_type (arg1),&exp->elts[pc + 2].string, 0),
-			      lval_memory);
-	    else
-	      return value_struct_elt (&arg1, NULL,
-				       &exp->elts[pc + 2].string, NULL,
-				       "structure");
+	      v = value_zero (value_type (v), not_lval);
+	    return v;
 	  }
       }
     default:
@@ -959,6 +1049,27 @@ Cannot perform conditional operation on vectors with different sizes"));
     }
 
   return evaluate_subexp_c (expect_type, exp, pos, noside);
+}
+
+/* Print OpenCL types.  */
+
+static void
+opencl_print_type (struct type *type, const char *varstring,
+		   struct ui_file *stream, int show, int level,
+		   const struct type_print_options *flags)
+{
+  /* We nearly always defer to C type printing, except that vector
+     types are considered primitive in OpenCL, and should always
+     be printed using their TYPE_NAME.  */
+  if (show > 0)
+    {
+      CHECK_TYPEDEF (type);
+      if (TYPE_CODE (type) == TYPE_CODE_ARRAY && TYPE_VECTOR (type)
+	  && TYPE_NAME (type) != NULL)
+	show = 0;
+    }
+
+  c_print_type (type, varstring, stream, show, level, flags); 
 }
 
 static void
@@ -991,6 +1102,7 @@ const struct exp_descriptor exp_descriptor_opencl =
 const struct language_defn opencl_language_defn =
 {
   "opencl",			/* Language name */
+  "OpenCL C",
   language_opencl,
   range_check_off,
   case_sensitive_on,
@@ -1003,7 +1115,7 @@ const struct language_defn opencl_language_defn =
   c_printchar,			/* Print a character constant */
   c_printstr,			/* Function to print string constant */
   c_emit_char,			/* Print a single char */
-  c_print_type,			/* Print a type using appropriate syntax */
+  opencl_print_type,		/* Print a type using appropriate syntax */
   c_print_typedef,		/* Print a typedef using appropriate syntax */
   c_val_print,			/* Print a value using appropriate syntax */
   c_value_print,		/* Print a top-level value */
@@ -1026,6 +1138,7 @@ const struct language_defn opencl_language_defn =
   c_get_string,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
+  &default_varobj_ops,
   LANG_MAGIC
 };
 

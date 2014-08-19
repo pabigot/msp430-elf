@@ -1,7 +1,7 @@
 /* { dg-do link } */
+// { dg-require-effective-target int32plus }
 /* { dg-timeout-factor 2.0 } */
 /* { dg-skip-if "Program too big" { "avr-*-*" } { "*" } { "" } } */
-// { dg-require-effective-target int32plus }
 
 namespace Loki
 {

@@ -1,12 +1,13 @@
-/Makefile.am/1.1/Wed Sep 30 11:12:44 2009//Tmsp430-130322-branch
-/Makefile.in/1.9/Sun Mar 17 22:14:50 2013//Tmsp430-130322-branch
-/abort.c/1.1/Wed Sep 30 11:12:44 2009//Tmsp430-130322-branch
-/aclocal.m4/1.18/Sun Mar 17 22:14:50 2013//Tmsp430-130322-branch
-/configure/1.18/Sun Mar 17 22:14:51 2013//Tmsp430-130322-branch
-/configure.in/1.1/Wed Sep 30 11:12:44 2009//Tmsp430-130322-branch
-/longjmp.S/1.1/Wed Sep 30 11:12:44 2009//Tmsp430-130322-branch
-/setjmp.S/1.1/Wed Sep 30 11:12:44 2009//Tmsp430-130322-branch
-/strcmp.c/1.1/Wed Sep 30 11:12:44 2009//Tmsp430-130322-branch
-/strcpy.c/1.1/Wed Sep 30 11:12:44 2009//Tmsp430-130322-branch
-/strlen.c/1.1/Wed Sep 30 11:12:44 2009//Tmsp430-130322-branch
+/Makefile.am/1.1/Thu Jan 21 20:54:12 2010//Tmsp430-14r1-branch
+/Makefile.in/1.6/Thu Feb 20 13:50:13 2014//Tmsp430-14r1-branch
+/abort.c/1.1/Thu Jan 21 20:54:12 2010//Tmsp430-14r1-branch
+/aclocal.m4/1.9/Thu Feb 20 13:50:13 2014//Tmsp430-14r1-branch
+/configure/1.8/Thu Feb 20 13:50:13 2014//Tmsp430-14r1-branch
+/configure.in/1.1/Thu Jan 21 20:54:12 2010//Tmsp430-14r1-branch
+/longjmp.S/1.1/Thu Jan 21 20:54:12 2010//Tmsp430-14r1-branch
+/mb_endian.h/1.1/Thu Feb 20 16:43:45 2014//Tmsp430-14r1-branch
+/setjmp.S/1.1/Thu Jan 21 20:54:12 2010//Tmsp430-14r1-branch
+/strcmp.c/1.2/Thu Feb 20 13:50:13 2014//Tmsp430-14r1-branch
+/strcpy.c/1.2/Thu Feb 20 13:50:13 2014//Tmsp430-14r1-branch
+/strlen.c/1.2/Thu Feb 20 13:50:13 2014//Tmsp430-14r1-branch
 D

@@ -13,6 +13,9 @@ D/promise////
 D/recursive_mutex////
 D/recursive_timed_mutex////
 D/shared_future////
+D/shared_lock////
+D/shared_mutex////
+D/shared_timed_mutex////
 D/this_thread////
 D/thread////
 D/timed_mutex////

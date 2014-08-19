@@ -1,0 +1,23 @@
+/Makefile.am/1.1/Fri May 18 10:42:00 2012//Tmsp430-14r1-branch
+/Makefile.in/1.1/Fri May 18 10:42:00 2012//Tmsp430-14r1-branch
+/Prolog_interface.dox/1.1/Fri May 18 10:42:00 2012//Tmsp430-14r1-branch
+/ppl_interface_generator_prolog_cc_code.m4/1.1/Fri May 18 10:42:00 2012//Tmsp430-14r1-branch
+/ppl_interface_generator_prolog_cc_files.m4/1.1/Fri May 18 10:42:01 2012//Tmsp430-14r1-branch
+/ppl_interface_generator_prolog_dox.m4/1.1/Fri May 18 10:42:01 2012//Tmsp430-14r1-branch
+/ppl_interface_generator_prolog_dox_code.m4/1.1/Fri May 18 10:42:01 2012//Tmsp430-14r1-branch
+/ppl_interface_generator_prolog_hh_code.m4/1.1/Fri May 18 10:42:01 2012//Tmsp430-14r1-branch
+/ppl_interface_generator_prolog_hh_files.m4/1.1/Fri May 18 10:42:02 2012//Tmsp430-14r1-branch
+/ppl_interface_generator_prolog_procedure_generators.m4/1.1/Fri May 18 10:42:02 2012//Tmsp430-14r1-branch
+/ppl_interface_generator_prolog_systems.m4/1.1/Fri May 18 10:42:02 2012//Tmsp430-14r1-branch
+/ppl_prolog_common.cc/1.1/Fri May 18 10:42:02 2012//Tmsp430-14r1-branch
+/ppl_prolog_common.defs.hh/1.1/Fri May 18 10:42:03 2012//Tmsp430-14r1-branch
+/ppl_prolog_common.inlines.hh/1.1/Fri May 18 10:42:03 2012//Tmsp430-14r1-branch
+/ppl_prolog_sysdep_dox/1.1/Fri May 18 10:42:03 2012//Tmsp430-14r1-branch
+/ppl_prolog_sysindep_dox/1.1/Fri May 18 10:42:03 2012//Tmsp430-14r1-branch
+D/Ciao////
+D/GNU////
+D/SICStus////
+D/SWI////
+D/XSB////
+D/YAP////
+D/tests////

@@ -7,7 +7,7 @@ short int
 g (void)
 {
   short int wc = ((short int)1 << 31) - 1; /* { dg-bogus "overflow .* overflow" } */
-  /* { dg-warning "overflow" "" { target *-*-* } 11 } */
+  /* { dg-warning "overflow" "" { target *-*-* } 9 } */
   return wc;
 }
 

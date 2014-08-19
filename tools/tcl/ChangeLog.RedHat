@@ -1,13 +1,16 @@
-2009-02-06  Kevin Buettner  <kevinb@redhat.com>
+2010-04-30  Corinna Vinschen  <vinschen@redhat.com>
 
-	Merge / backport upstream changes:
-	*tclWinDde.c (Tcl_DdObjCmd): Change declaration and remove
-	cast of `objv' to avoid GCC error.
+	* win/configure.in: Define __USE_W32_SOCKETS on Cygwin to avoid
+	conflicting definitions between POSIX and WinSock.
+	* win/configure: Regenerate.
+	* win/tclWinChan.c (ESP): Make sure the comiler knows it's used.
+	(EBP): Ditto.
 
-2009-02-05  Kevin Buettner  <kevinb@redhat.com>
+2007-03-27  DJ Delorie  <dj@redhat.com>
 
-	Merge / backport upstream changes:
-	* tclWinChan.c (Tcl_MakeFileChannel): Put inline assembler into
-	one big block.
-	(struct EXCEPTION_REGISTRATION): Define.
-	(_except_makefilechannel_handler): Delete.
+	* compat/strstr.c: Don't use NULL since it's undefined here.
+
+2006-12-14  DJ Delorie  <dj@redhat.com>
+
+	* unix/tcl.m4: Remove stray quotes.
+	* unix/configure: Likewise.

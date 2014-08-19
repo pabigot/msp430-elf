@@ -1,66 +1,83 @@
-2008-07-30  Nick Clifton  <nickc@redhat.com>
+2014-06-18  DJ Delorie  <dj@redhat.com>
 
-	* src/atomic.cc (__atomic_flag_for): Add support for targets with
-	16-bit ints.
+	* include/bits/cpp_type_traits.h: Add support for __intN types.
+	* include/c_global/cstdlib: Likewise.
+	* include/c_std/cstdlib: Likewise.
+	* include/std/limits: Likewise.
+	* include/std/type_traits: Likewise.
+	* src/c++11/limits.cc: Likewise.
 
-2008-06-05  Nick Clifton  <nickc@redhat.com>
+2013-05-24  Nick Clifton  <nickc@redhat.com>
 
-	* include/backward/iostream.h: Temporarily restore until G++
-	testsuite is updated to use the correct versions of these headers.
-	* include/backward/fstream.h: Likewise.
-	* include/backward/ostream.h: Likewise.
-	* include/backward/stream.h: Likewise.
+	* configure.ac: Add test for s390*-*-tpf target and if we are
+	building for this target set GLIBCXX_USE_LIBM to false.
+	* configure: Regenerate.
+	* src/Makefile.am (libstdc___la_LDFLAGS): Only add "-lm" to the
+	linker command line if GLIBCXX_USE_LIBM is true.
+	* src/Makefile.in: Regenerate.
 
-2008-04-07  DJ Delorie  <dj@redhat.com>
+2012-07-20  Nick Clifton  <nickc@redhat.com>
 
+	* config/cpu/mips/atomicity.h: ... and add throw()s.
+
+2012-07-13  Nick Clifton  <nickc@redhat.com>
+
+	* config/cpu/mips/atomicity.h: Update use of NAMESPACE macros...
+
+2012-05-11  Nick Clifton  <nickc@redhat.com>
+
+	* include/tr1/gamma.tcc (__psi_series): Use unsigned longs for
+	large loop.
+	* include/tr1/hypergemoetric.tcc (__conf_hyperg_series):
+	Likewise.
+
+2011-10-20  DJ Delorie  <dj@redhat.com>
+
+	* include/bits/random.tcc (seed_seq::generate): Cast max()
+	operands to size_t to ensure a template match.
+	* include/std/bitset (_M_copy_from_ptr): Cast min() operands to
+	size_t to ensure a template match.
+
+2009-04-16  Nick Clifton  <nickc@redhat.com>
+
+	* config/cpu/mips/atomicity.h: Select mips32 ISA.
+
+2009-04-14  Nick Clifton  <nickc@redhat.com>
+
+	* config/os/generic/error_constants.h (enum class errc): Add
+	conditional inclusion of error numbers not supported by TPF.
+
+2008-08-28  Nick Clifton  <nickc@redhat.com>
+
+	* configure.ac: Add test for s390*-*-tpf target and if we are
+	building for this target set GLIBCXX_USE_LIBM to false.
+	* configure: Regenerate.
+	* src/Makefile.am (libstdc___la_LDFLAGS): Only add "-lm" to the
+	linker command line if GLIBCXX_USE_LIBM is true.
+	* src/Makefile.in: Regenerate.
+
+2008-08-07  DJ Delorie  <dj@redhat.com>
+
+	* configure: Fix typo, fix from libtool.m4.
+
+2008-03-31  Nick Clifton  <nickc@redhat.com>
+
+	* configure.ac (GCC_NO_EXECUTABLES): Do not define. Assume that
+	FLAGS_FOR_TARGET has been set up by the top level configure to
+	allow cross toolchains to compile and link executables.
+
+2006-02-06  Nick Clifton  <nickc@redhat.com>
+
+	* acinclude.m4 (GLIBCXX_ENABLE_SYMVERS): Check to see if
+	linking is allowed before defaulting enable_symvers to yes.
 	* configure: Regenerate.
 
-2004-07-23  Nick Clifton  <nickc@redhat.com>
+2004-06-21  Alexandre Oliva  <aoliva@redhat.com>
 
-	* configure: Regenerate after recent merge.
-
-2004-06-17  Alexandre Oliva  <aoliva@redhat.com>
-
-	* include/bits/istream.tcc (getline): Make sure arguments passed
-	to min/max have the same type.
-	* include/bits/locale_facets.tcc (__verify_grouping): Likewise.
+	2004-06-17  Alexandre Oliva  <aoliva@redhat.com>
+	* include/bits/locale_facets.tcc (__verify_grouping): Make sure
+	arguments passed to min/max have the same type.
 	* include/bits/stl_deque.h (_Deque_base::_Deque_base): Likewise.
-
-2003-12-29  Nick Clifton  <nickc@redhat.com>
-
-	* libmath/mathconf.h: Add parameter to nan() prototype.
-
-2003-10-01  Eric Christopher  <echristo@redhat.com>
-
-        * config/cpu/sh/atomicity.h (__exchange_and_add): Remove 'm'
-        constraint.
-
-2003-07-09  Alexandre Oliva  <aoliva@redhat.com>
-
-	* config/cpu/sh/atomicity.h: New.  Use movli and movco on SH4a.
-
-2002-03-18  Nick Clifton  <nickc@cambridge.redhat.com>
-
-	* configure: Regenerate.
-
-2001-10-23  Nick Clifton  <nickc@cambridge.redhat.com>
-
-	* configure: Regenerate.
-
-2001-07-06  Frank Ch. Eigler  <fche@redhat.com>
-
-	* src/Makefile.am: Added dummy install-info target.
-	* src/Makefile.in: Regenerated.
-
-2001-06-29  J"orn Rennecke <amylaar@redhat.com>
-
-	* libsupc++/eh_personality.cc (parse_lsda_header):
-	Don't add two pointers.
-	(check_exception_spec): Don't pass pointer as second argument
-	to get_ttype_entry.
-	(PERSONALITY_FUNCTION): Don't add two pointers.
-	Use casts when assining a pointer to an integer.
-	Don't pass pointer as third argument to _Unwind_SetGR.
 
 Local Variables:
 mode: change-log

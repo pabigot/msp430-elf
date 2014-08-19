@@ -1,0 +1,138 @@
+2011-03-28  Nick Clifton  <nickc@redhat.com>
+
+	* fat-gcc: Add support for multiple source files on the command
+	line.
+	Add support for C++ and assembler source files.
+	Add support for building shared libraries.
+
+2011-03-03  Nick Clifton  <nickc@redhat.com>
+
+	* fat-gcc: Improved executable generation.
+
+2011-03-03  Nick Clifton  <nickc@redhat.com>
+
+	* fat-gcc: New script.  Used to build "fat" ARM binaries
+	containing both soft-float API code and hard-float API code.
+
+2008-02-12  Nick Clifton  <nickc@redhat.com>
+
+	* eBuild-Linux: Specifically set the SHELL environment variable in
+	case a different value is set in the user's environment.
+
+2007-07-19  Brendan Conoboy  <blc@redhat.com>
+
+	* eBuild-Linux: Re-add the --rpmi flag for building with
+	rpm.
+
+2007-05-09  Nick Clifton  <nickc@redhat.com>
+
+	* eBuild-Linux: Add --nativepath switch to set NATIVEPATH
+	directly.
+	Add checks to see if MAKE and NATIVEPATH are set correctly.
+	Change default value for NATIVE to /opt/redhat/gnupro-06r1-1.
+
+2007-04-03  Nick Clifton  <nickc@redhat.com>
+
+	* GNUProImporter.sh: Add file regeneration pass and a new switch
+	(--regenerate-files) to run this pass on its own.
+	Enable the building of the test toolchains as part of the merge
+	process.
+
+2006-10-24  Nick Clifton  <nickc@redhat.com>
+
+	* eBuild-Linux (--glibc-config-options-stage2=): New switch to
+	allow configure options specific to the second build of glibc to
+	be specified.
+	Add code to display the configure options for the tools and glibc
+	stages at the start of the script's run, for visual confirmation
+	by the user.
+
+2006-10-17  Nick Clifton  <nickc@redhat.com>
+
+	* local/bin/eBuild-Linux (tools_stage2conf): Add --without-newlib.
+	[Necessary for FRV build with 06r1, but possibly broken for other
+	targets ???]
+
+2006-08-25  Nick Clifton  <nickc@redhat.com>
+
+	* eBuild-Linux (NATIVE): Switch to using 06r1.
+
+2006-01-11  Nick Clifton  <nickc@redhat.com>
+
+	* local/bin/eBuild-Linux: Report variable settings (for visual
+	confirmation by the user) before starting the real work.
+
+2006-01-10  Nick Clifton  <nickc@redhat.com>
+
+	* GNUProImporter.sh (look_for_bogus_CVS_directories): New
+	function.
+	(--verify-tree): New switch.  Invokes new function.
+
+2005-11-01  Nick Clifton  <nickc@redhat.com>
+
+	* GNUProImporter.sh (restore_tree): Report missing CVS
+	directories.
+
+2005-08-31  Nick Clifton  <nickc@redhat.com>
+
+	* eBuild-Linux: Add new switch --install-target-libbfd.
+	Add new switch --help.
+
+2005-08-11  Nick Clifton  <nickc@redhat.com>
+
+	* eBuild-Linux (tools_stage2inst): Add install-bfd.
+	(tools_stage2_conf): Add --enable-install-bfd
+
+2005-06-17  Nick Clifton  <nickc@redhat.com>
+
+	* GNUProImporter.sh: Add --restore-tree switch to restore
+	the GNUPro CVS meta-files after an aborted update.
+
+1999-11-30  UTC 2005  Brendan Conoboy  <blc@redhat.com>
+
+	* eBuild-Linux: Remove temporary sysroot after glibc stage 2.
+
+1999-11-30  UTC 2005  Brendan Conoboy  <blc@redhat.com>
+
+	* eBuild-Linux: Use gnupro-05r1-1 as native by default.
+
+1999-11-30  UTC 2005  Brendan Conoboy  <blc@redhat.com>
+
+	* VaultGui: Remove src-native from cross linux tool vaults.
+
+1999-11-30  UTC 2005  Brendan Conoboy  <blc@redhat.com>
+
+        * VaultGui: Remove src-cross.zip from Solaris/Cygwin natives.
+
+1999-11-30  UTC 2005  Brendan Conoboy  <blc@redhat.com>
+
+	* VaultGui: Default eLinux board names to noboard.
+
+1999-11-30  MST 2004  Brendan Conoboy  <blc@redhat.com>
+
+	* eBuild-uCLinux: Bring up to date with devo.
+
+1999-11-30  MST 2004  Brendan Conoboy  <blc@redhat.com>
+
+	* eBuild-Linux: Make command line switches less invasive.
+
+2004-01-30  Nick Clifton  <nickc@redhat.com>
+
+	* eBuild-Linux: Add two new switch: --tools-config-options and
+          --glibc-config-options.
+
+1999-11-30  UTC 2004  Brendan Conoboy  <blc@redhat.com>
+
+	* Specter: Sourceware->RPM spec file generator.
+	* MakePrune: Removes unwanted files from source RPM.
+	* Specter-templates: Spec file template repository.
+	* Spector-configs: Working configs for use with Specter.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

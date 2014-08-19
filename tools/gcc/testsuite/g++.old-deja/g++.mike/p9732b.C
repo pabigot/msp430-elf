@@ -45,3 +45,4 @@ base base_returning_function () {
   base local_base_object;
   return local_base_object;
 }
+// { dg-require-effective-target size32plus }

@@ -1,0 +1,128 @@
+This patch fixes 444 failures for mips-sim-idt64/-EB/-mips32.  (It should
+be noted though that many of these failures are cascade failures.)
+
+From the log file, one example of a failure fixed by this patch is:
+
+    p t_short_values(10,-23)
+    UNPREDICTABLE: PC = 0x800209d4
+    Quit
+    (gdb) FAIL: gdb.base/callfuncs.exp: p t_short_values(10,-23)
+
+In creating the inferior function call, gdb is placing a negative
+value, -23, sign extended only to 32-bits, into one of the 64-bit
+argument registers.  When the simulator executes a move instruction
+in the course of executing t_short_values(), it first checks to make
+sure that the register value is correctly sign extended.  If it's not,
+it outputs the "UNPREDICTABLE" message.
+
+
+The following tests are all affected by this bug.  (There are many
+other failures too, but many of these were due to GDB attempting the
+requested operation while it still thinks the target is running.)
+
+FAIL: gdb.base/call-ar-st.exp: print sum_array_print(10, *list1, *list2, *list3, *list4)
+FAIL: gdb.base/call-rt-st.exp: print print_struct_rep(*struct1)
+FAIL: gdb.base/callfuncs.exp: p t_short_values(10,-23)
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 5 structs-tc
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 3 structs-ts
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-ti
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-tl
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-tll
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-tf
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-td
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-tld
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 4 structs-ts-tc
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-ti-tc
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-tl-tc
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-tll-tc
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-tf-tc
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-td-tc
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-tld-tc
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 3 structs-tc-ts
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-tc-ti
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-tc-tl
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-tc-tll
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-tc-tf
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-tc-td
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-tc-tld
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-td-tf
+PASS: gdb.base/structs.exp: call Fun<n>(foo<n>); call 2 structs-tf-td
+    (These are PASSes, but further structs.exp tests fail - until reset - due
+    to the "UNPREDICTABLE" abort.)
+FAIL: gdb.cp/classes.exp: call class_param.Aval_a (g_A)
+FAIL: gdb.cp/virtfunc.exp: print pDe->vg()
+
+This patch needs to be submitted upstream.  It may be similar to one
+of Michael Snyder's earlier patches.  If so, credit should be given
+to Michael.
+
+After some revision, this patch went in (upstream) on 2010-12-14.
+
+gdb/ChangeLog.RedHat:
+
+2010-10-21  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_eabi_push_dummy_call): Place signed, rather
+	than unsigned values in registers.
+
+
+Index: gdb/mips-tdep.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/mips-tdep.c,v
+retrieving revision 1.42
+diff -u -p -r1.42 mips-tdep.c
+--- gdb/mips-tdep.c	29 Apr 2010 22:01:14 -0000	1.42
++++ gdb/mips-tdep.c	21 Oct 2010 21:51:08 -0000
+@@ -2755,7 +2755,7 @@ mips_eabi_push_dummy_call (struct gdbarc
+ 	fprintf_unfiltered (gdb_stdlog,
+ 			    "mips_eabi_push_dummy_call: struct_return reg=%d %s\n",
+ 			    argreg, paddress (gdbarch, struct_addr));
+-      regcache_cooked_write_unsigned (regcache, argreg++, struct_addr);
++      regcache_cooked_write_signed (regcache, argreg++, struct_addr);
+     }
+ 
+   /* Now load as many as possible of the first arguments into
+@@ -2834,7 +2834,7 @@ mips_eabi_push_dummy_call (struct gdbarc
+ 	      if (mips_debug)
+ 		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
+ 				    float_argreg, phex (regval, 4));
+-	      regcache_cooked_write_unsigned (regcache, float_argreg++, regval);
++	      regcache_cooked_write_signed (regcache, float_argreg++, regval);
+ 
+ 	      /* Write the high word of the double to the odd register(s).  */
+ 	      regval = extract_unsigned_integer (val + 4 - low_offset,
+@@ -2842,7 +2842,7 @@ mips_eabi_push_dummy_call (struct gdbarc
+ 	      if (mips_debug)
+ 		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
+ 				    float_argreg, phex (regval, 4));
+-	      regcache_cooked_write_unsigned (regcache, float_argreg++, regval);
++	      regcache_cooked_write_signed (regcache, float_argreg++, regval);
+ 	    }
+ 	  else
+ 	    {
+@@ -2854,7 +2854,7 @@ mips_eabi_push_dummy_call (struct gdbarc
+ 	      if (mips_debug)
+ 		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
+ 				    float_argreg, phex (regval, len));
+-	      regcache_cooked_write_unsigned (regcache, float_argreg++, regval);
++	      regcache_cooked_write_signed (regcache, float_argreg++, regval);
+ 	    }
+ 	}
+       else
+@@ -2937,13 +2937,13 @@ mips_eabi_push_dummy_call (struct gdbarc
+ 		  && !fp_register_arg_p (gdbarch, typecode, arg_type))
+ 		{
+ 		  LONGEST regval =
+-		    extract_unsigned_integer (val, partial_len, byte_order);
++		    extract_signed_integer (val, partial_len, byte_order);
+ 
+ 		  if (mips_debug)
+ 		    fprintf_filtered (gdb_stdlog, " - reg=%d val=%s",
+ 				      argreg,
+ 				      phex (regval, regsize));
+-		  regcache_cooked_write_unsigned (regcache, argreg, regval);
++		  regcache_cooked_write_signed (regcache, argreg, regval);
+ 		  argreg++;
+ 		}
+ 
+

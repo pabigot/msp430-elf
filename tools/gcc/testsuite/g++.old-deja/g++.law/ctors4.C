@@ -23,6 +23,6 @@ main ()
 {
   B b;
   A a = b;  //unjustified error: unexpected argument to constructor `A'
-  printf ("PASS\n");
+  // printf ("PASS\n");
 }
 

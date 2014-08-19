@@ -1,6 +1,6 @@
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998-2012 Free Software Foundation, Inc.
+   Copyright (C) 1998-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,11 +23,10 @@
 #include "buildsym.h"
 #include "gdbcmd.h"
 #include "inferior.h"		/* enum CALL_DUMMY_LOCATION et al.  */
-#include "gdb_string.h"
+#include <string.h>
 #include "regcache.h"
 #include "gdb_assert.h"
 #include "sim-regno.h"
-#include "dwarf2expr.h"
 #include "gdbcore.h"
 #include "osabi.h"
 #include "target-descriptions.h"
@@ -478,7 +477,7 @@ set_architecture (char *ignore_args, int from_tty, struct cmd_list_element *c)
 }
 
 /* Try to select a global architecture that matches "info".  Return
-   non-zero if the attempt succeds.  */
+   non-zero if the attempt succeeds.  */
 int
 gdbarch_update_p (struct gdbarch_info info)
 {
@@ -507,7 +506,7 @@ gdbarch_update_p (struct gdbarch_info info)
 
   /* If it is the same old architecture, accept the request (but don't
      swap anything).  */
-  if (new_gdbarch == target_gdbarch)
+  if (new_gdbarch == target_gdbarch ())
     {
       if (gdbarch_debug)
 	fprintf_unfiltered (gdb_stdlog, "gdbarch_update_p: "
@@ -523,7 +522,7 @@ gdbarch_update_p (struct gdbarch_info info)
 			"New architecture %s (%s) selected\n",
 			host_address_to_string (new_gdbarch),
 			gdbarch_bfd_arch_info (new_gdbarch)->printable_name);
-  deprecated_target_gdbarch_select_hack (new_gdbarch);
+  set_target_gdbarch (new_gdbarch);
 
   return 1;
 }
@@ -557,7 +556,7 @@ set_gdbarch_from_file (bfd *abfd)
 
   if (gdbarch == NULL)
     error (_("Architecture of file not recognized."));
-  deprecated_target_gdbarch_select_hack (gdbarch);
+  set_target_gdbarch (gdbarch);
 }
 
 /* Initialize the current architecture.  Update the ``set
@@ -758,7 +757,7 @@ get_current_arch (void)
   if (has_stack_frames ())
     return get_frame_arch (get_selected_frame (NULL));
   else
-    return target_gdbarch;
+    return target_gdbarch ();
 }
 
 int

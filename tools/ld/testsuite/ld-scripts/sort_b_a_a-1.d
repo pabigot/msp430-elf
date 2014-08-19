@@ -1,7 +1,6 @@
 #source: sort_n_a-a.s
 #source: sort_n_a-b.s
 #ld: -T sort_b_a_a.t
-#ld_after_inputfiles: -X
 #name: SORT_BY_ALIGNMENT(SORT_BY_ALIGNMENT())
 #nm: -n
 

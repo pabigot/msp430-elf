@@ -1,3 +1,4 @@
+/* { dg-options "-m64bit-doubles" { target rx-*-* } } */
 /* { dg-prune-output ".*-Wno-abi.*" } */
 
 #include "struct-layout-1.h"

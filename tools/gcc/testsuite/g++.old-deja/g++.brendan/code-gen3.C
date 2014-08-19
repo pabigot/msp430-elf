@@ -3,7 +3,7 @@
 // Check that passing things which are not a multiple of
 // 4 bytes in size doesn't mess up other subsequent parameters.
 
-extern "C" int printf (const char *, ...); 
+// extern "C" int printf (const char *, ...); 
 
 struct base {
 	int f1 : 8;
@@ -27,9 +27,9 @@ int test2 (struct base formal_base, int v1)
 	formal_base.f1 = formal_base.f2;	// prevent warnings
 
 	if (v1 != 0x5e5e)
-	  { printf ("FAIL\n"); return 1; }
+	  { /* printf ("FAIL\n"); */ return 1; }
 	else
-	  printf ("PASS\n");
+	  ; /* printf ("PASS\n"); */
 
 	return 0;
 }

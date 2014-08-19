@@ -1,0 +1,41 @@
+This is a hack that fixes a lot of failures in the GDB testsuite for MIPS toolchains
+when testing mips16 multilibs.  The correct fix would be to adjust the line number
+information that is stored by gas when an instruction is moved into a delay slot, but
+this is a quick hack/workaround for now.
+
+2008-06-04  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-mips.c (s_mips_loc): Hack to improve the generation of
+	line number vs address information for GDB.
+
+
+Index: gas/config/tc-mips.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gas/config/tc-mips.c,v
+retrieving revision 1.41
+diff -c -3 -p -r1.41 tc-mips.c
+*** gas/config/tc-mips.c	10 Mar 2008 10:43:03 -0000	1.41
+--- gas/config/tc-mips.c	4 Jun 2008 08:50:08 -0000
+*************** s_mips_file (int x ATTRIBUTE_UNUSED)
+*** 14476,14481 ****
+--- 14476,14495 ----
+  static void
+  s_mips_loc (int x ATTRIBUTE_UNUSED)
+  {
++   /* FIXME: This is a hack to allow GDB to get proper line number/address
++      information.  GCC (in mips16 mode) will generate code like this:
++      
++             sw      $4,24($17)
++        .loc 1 371 0
++             jal     call6j
++        .loc 1 372 0
++ 
++      which (without this hack) would be reordered so that the SW insn
++      fills the delay slot of the JAL insn.  Unfortunately this rearrangement
++      happens after the .loc directives have been processed, so GDB ends up
++      thinking that line 371 starts half way through the JAL instruction.  */
++   if (mips_opts.mips16)
++     history[0].fixed_p = 1;
+    if (!ECOFF_DEBUGGING)
+      dwarf2_directive_loc (0);
+  }

@@ -1,0 +1,524 @@
+This patch adds rl78 and redhat sanitized changes from devo to
+gnupro.  Most of it's g13 stuff, but I think there are a few
+other changes here too.
+
+I copied the ChangeLog entries verbatim from devo's ChangeLog.RedHat.
+
+
+sim/rl78/ChangeLog.RedHat:
+
+2013-12-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb-if.c (sim_open): Add "target sim" options, "g13" and "-Mg13",
+	for turning on G13 multiplier.
+
+2013-10-16  DJ Delorie  <dj@redhat.com>
+
+	* cpu.c (g13_multiply): New.
+	* cpu.h (g13_multiply): Declare.
+	* load.c (rl78_load): If a .modelinfo section is found, load
+	rom/ram/mirror sizes from it.
+	* main.c (main): Add "-M g13" option to select G13-style
+	multiplier.
+	* mem.c (mem_set_mirror): New.
+	(address_mapping): Use dynamic mirror information.
+	(mem_put_byte): Only use G13 multiplier when in G13 mode.
+	* mem.h (mem_set_mirror): Declare.
+	* rl78.c (process_clock_tick): Don't update SFRs if the mirror
+	area overlaps them.  Be more robust about detecting uninitialized
+	interrupt vectors.
+
+2012-11-26  DJ Delorie  <dj@redhat.com>
+
+	* rl78.c (decode_opcode): Handle G10-specific return registers.
+	* syscalls.c (RET): Likewise.
+
+2012-10-27  DJ Delorie  <dj@redhat.com>
+
+	* cpu.h: Add rl78_g10_mode.
+	* cpu.c: Add rl78_g10_mode.
+	* load.c: Set it based on the ELF flags.
+	* mem.c: If G10, trap any accessess to missing register banks.
+	* rl78.c: If G10, trap any use of the SEL opcode.
+
+2012-03-20  Kevin Buettner  <kevinb@redhat.com>
+
+	* syscalls.c (rl78_syscall): Don't close file descriptors 0,
+	1, or 2.
+
+2012-01-12  DJ Delorie  <dj@redhat.com>
+
+	* syscalls.c, syscalls.h: New.
+	* Makefile.in: Add them.
+	* rl78.c (get_carry, set_carry): Make public.
+	* cpu.h (get_c, put_c): Fix prototypes to match.
+	* mem.c (mem_put_byte): Handle syscalls.
+
+
+Index: sim/rl78/Makefile.in
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/rl78/Makefile.in,v
+retrieving revision 1.3
+diff -u -p -r1.3 Makefile.in
+--- sim/rl78/Makefile.in	25 May 2013 03:54:35 -0000	1.3
++++ sim/rl78/Makefile.in	14 Dec 2013 00:50:27 -0000
+@@ -30,6 +30,7 @@ SIM_OBJS = \
+ 	mem.o \
+ 	cpu.o \
+ 	rl78.o \
++	syscalls.o \
+ 	gdb-if.o \
+ 	trace.o
+ 
+Index: sim/rl78/cpu.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/rl78/cpu.c,v
+retrieving revision 1.2
+diff -u -p -r1.2 cpu.c
+--- sim/rl78/cpu.c	25 May 2013 03:54:36 -0000	1.2
++++ sim/rl78/cpu.c	14 Dec 2013 00:50:27 -0000
+@@ -32,6 +32,8 @@ int verbose = 0;
+ int trace = 0;
+ int rl78_in_gdb = 1;
+ int timer_enabled = 2;
++int rl78_g10_mode = 0;
++int g13_multiply = 0;
+ 
+ #define REGISTER_ADDRESS 0xffee0
+ 
+Index: sim/rl78/cpu.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/rl78/cpu.h,v
+retrieving revision 1.2
+diff -u -p -r1.2 cpu.h
+--- sim/rl78/cpu.h	25 May 2013 03:54:36 -0000	1.2
++++ sim/rl78/cpu.h	14 Dec 2013 00:50:27 -0000
+@@ -46,8 +46,8 @@ extern const char * const reg_names[];
+ 
+ void init_cpu (void);
+ void set_flags (int mask, int newbits);
+-void set_c (int c);
+-int  get_c (void);
++void set_carry (int c);
++int  get_carry (void);
+ 
+ const char *bits (int v, int b);
+ 
+@@ -97,4 +97,11 @@ extern int timer_enabled;
+ extern void dump_counts_per_insn (const char * filename);
+ extern unsigned int counts_per_insn[0x100000];
+ 
++extern void rl78_syscall (void);
++
++extern int rl78_g10_mode;
++
++/* Set from the -M option. */
++extern int g13_multiply;
++
+ #endif
+Index: sim/rl78/gdb-if.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/rl78/gdb-if.c,v
+retrieving revision 1.4
+diff -u -p -r1.4 gdb-if.c
+--- sim/rl78/gdb-if.c	5 Nov 2013 07:52:41 -0000	1.4
++++ sim/rl78/gdb-if.c	14 Dec 2013 00:50:27 -0000
+@@ -86,6 +86,19 @@ sim_open (SIM_OPEN_KIND kind,
+ 
+   sim_disasm_init (abfd);
+   open = 1;
++
++  g13_multiply = 0;
++  while (argv != NULL && *argv != NULL)
++    {
++      if (strcmp (*argv, "g13") == 0 || strcmp (*argv, "-Mg13") == 0)
++	{
++	  fprintf (stderr, "rl78 g13 support enabled.\n");
++	  g13_multiply = 1;
++	  break;
++	}
++      argv++;
++    }
++
+   return &the_minisim;
+ }
+ 
+Index: sim/rl78/load.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/rl78/load.c,v
+retrieving revision 1.2
+diff -u -p -r1.2 load.c
+--- sim/rl78/load.c	25 May 2013 03:54:36 -0000	1.2
++++ sim/rl78/load.c	14 Dec 2013 00:50:27 -0000
+@@ -27,6 +27,8 @@
+ 
+ #include "libiberty.h"
+ #include "bfd.h"
++#include "elf-bfd.h"
++#include "elf/rl78.h"
+ #include "libbfd.h"
+ #include "cpu.h"
+ #include "mem.h"
+@@ -89,6 +91,44 @@ rl78_load (bfd *prog, host_callback *cal
+       fprintf (stderr, "%s: Failed to read program headers\n", simname);
+       return;
+     }
++  {
++    asection *sec;
++    for (sec = prog->sections; sec; sec = sec->next)
++      if (strcmp (sec->name, ".modelinfo") == 0)
++	{
++	  unsigned char info[24];
++	  /* The fields are these, and in this order.  */
++	  long family;
++	  long rom_size;
++	  long ram_start;
++	  long mirror_rom_start;
++	  long mirror_ram_start;
++	  long mirror_size;
++
++#define GETWORD(x) (info[x+0] | (info[x+1] << 8) | (info[x+2] << 16) | (info[x+3] << 24))
++	  if (bfd_get_section_contents (prog, sec, info, 0, 24))
++	    {
++	      family = GETWORD (0);
++	      rom_size = GETWORD (4);
++	      ram_start = GETWORD (8);
++	      mirror_rom_start = GETWORD (12);
++	      mirror_ram_start = GETWORD (16);
++	      mirror_size = GETWORD (20);
++
++	      mem_ram_size (0x100000 - ram_start);
++	      mem_rom_size (rom_size);
++	      mem_set_mirror (mirror_rom_start, mirror_ram_start, mirror_size);
++	      printf("rom: %lx ram: %lx mirror: %lx %lx %lx\n",
++		     rom_size, ram_start,
++		     mirror_rom_start, mirror_ram_start, mirror_size);
++	    }
++	}
++  }
++
++  if (elf_elfheader (prog)->e_flags & E_FLAG_RL78_G10)
++    rl78_g10_mode = 1;
++  else
++    rl78_g10_mode = 0;
+   
+   for (i = 0; i < num_headers; i++)
+     {
+Index: sim/rl78/main.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/rl78/main.c,v
+retrieving revision 1.2
+diff -u -p -r1.2 main.c
+--- sim/rl78/main.c	25 May 2013 03:54:37 -0000	1.2
++++ sim/rl78/main.c	14 Dec 2013 00:50:27 -0000
+@@ -68,7 +68,7 @@ main (int argc, char **argv)
+ 
+   xmalloc_set_program_name (argv[0]);
+ 
+-  while ((o = getopt (argc, argv, "tvdr:D:")) != -1)
++  while ((o = getopt (argc, argv, "tvdr:D:M:")) != -1)
+     {
+       switch (o)
+ 	{
+@@ -87,6 +87,10 @@ main (int argc, char **argv)
+ 	case 'D':
+ 	  dump_counts_filename = optarg;
+ 	  break;
++	case 'M':
++	  if (strcmp (optarg, "g13") == 0)
++	    g13_multiply = 1;
++	  break;
+ 	case '?':
+ 	  {
+ 	    fprintf (stderr,
+@@ -96,6 +100,7 @@ main (int argc, char **argv)
+ 		     "\t-t\t\t- trace.\n"
+ 		     "\t-d\t\t- disassemble.\n"
+ 		     "\t-r <bytes>\t- ram size.\n"
++		     "\t-M <mcu>\t- mcu type, default none, allowed: g13\n"
+ 		     "\t-D <filename>\t- dump cycle count histogram\n");
+ 	    exit (1);
+ 	  }
+Index: sim/rl78/mem.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/rl78/mem.c,v
+retrieving revision 1.2
+diff -u -p -r1.2 mem.c
+--- sim/rl78/mem.c	25 May 2013 03:54:37 -0000	1.2
++++ sim/rl78/mem.c	14 Dec 2013 00:50:27 -0000
+@@ -30,6 +30,9 @@
+ 
+ #define ILLEGAL_OPCODE 0xff
+ 
++extern jmp_buf decode_jmp_buf;
++#define DO_RETURN(x) longjmp (decode_jmp_buf, x)
++
+ int rom_limit = 0x100000;
+ int ram_base = 0xf8000;
+ unsigned char memory[MEM_SIZE];
+@@ -63,6 +66,18 @@ mem_rom_size (int rom_bytes)
+   rom_limit = rom_bytes;
+ }
+ 
++int mirror_rom_base = 0x01000;
++int mirror_ram_base = 0xf1000;
++int mirror_length = 0x7000;
++
++void
++mem_set_mirror (int rom_base, int ram_base, int length)
++{
++  mirror_rom_base = rom_base;
++  mirror_ram_base = ram_base;
++  mirror_length = length;
++}
++
+ /* ---------------------------------------------------------------------- */
+ /* Note: the RL78 memory map has a few surprises.  For starters, part
+    of the first 64k is mapped to the last 64k, depending on an SFR bit
+@@ -92,9 +107,9 @@ static int
+ address_mapping (int address)
+ {
+   address &= MASK;
+-  if (address >= 0xf1000 && address < ram_base)
++  if (address >= mirror_ram_base && address < mirror_ram_base + mirror_length)
+     {
+-      address &= 0xffff;
++      address = address - mirror_ram_base + mirror_rom_base;
+       tprintf ("&");
+       if (memory[RL78_SFR_PMC] & 1)
+ 	{
+@@ -115,6 +130,19 @@ mem_put_byte (int address, unsigned char
+   address = address_mapping (address);
+   memory [address] = value;
+   initted [address] = 1;
++
++  if (address == RL78_SFR_PMC && value == 0x42)
++    {
++      rl78_syscall ();
++      return;
++    }
++
++  if (rl78_g10_mode && 0xffee0 <= address && address <= 0xffef7)
++    {
++      fflush (stdout);
++      fprintf (stderr, "Error: banks 1-3 accessed at PC %#x\n", pc);
++      DO_RETURN (RL78_MAKE_HIT_BREAK ());
++    }
+   if (address == SDR00)
+     {
+       putchar (value);
+@@ -140,63 +168,66 @@ mem_put_byte (int address, unsigned char
+       printf ("Warning: SP value 0x%04x truncated at pc=0x%05x\n", value, pc);
+       value &= ~1;
+     }
+-  if (address == MDUC)
++  if (g13_multiply)
+     {
+-      if ((value & 0x81) == 0x81)
++      if (address == MDUC)
+ 	{
+-	  /* division */
+-	  mduc_clock = total_clocks;
++	  if ((value & 0x81) == 0x81)
++	    {
++	      /* division */
++	      mduc_clock = total_clocks;
++	    }
+ 	}
+-    }
+-  if ((address & ~3) == MDAL)
+-    {
+-      mda_set |= (1 << (address & 3));
+-      if (mda_set == MDA_SET)
++      if ((address & ~3) == MDAL)
+ 	{
+-	  long als, ahs;
+-	  unsigned long alu, ahu;
+-	  long rvs;
+-	  long mdc;
+-	  unsigned long rvu;
+-	  mda_set = 0;
+-	  switch (memory [MDUC] & 0xc8)
++	  mda_set |= (1 << (address & 3));
++	  if (mda_set == MDA_SET)
+ 	    {
+-	    case 0x00:
+-	      alu = mem_get_hi (MDAL);
+-	      ahu = mem_get_hi (MDAH);
+-	      rvu = alu * ahu;
+-	      tprintf  ("MDUC: %lu * %lu = %lu\n", alu, ahu, rvu);
+-	      mem_put_si (MDBL, rvu);
+-	      break;
+-	    case 0x08:
+-	      als = sign_ext (mem_get_hi (MDAL), 16);
+-	      ahs = sign_ext (mem_get_hi (MDAH), 16);
+-	      rvs = als * ahs;
+-	      tprintf  ("MDUC: %ld * %ld = %ld\n", als, ahs, rvs);
+-	      mem_put_si (MDBL, rvs);
+-	      break;
+-	    case 0x40:
+-	      alu = mem_get_hi (MDAL);
+-	      ahu = mem_get_hi (MDAH);
+-	      rvu = alu * ahu;
+-	      mem_put_si (MDBL, rvu);
+-	      mdc = mem_get_si (MDCL);
+-	      tprintf  ("MDUC: %lu * %lu + %lu = ", alu, ahu, mdc);
+-	      mdc += (long) rvu;
+-	      tprintf ("%lu\n", mdc);
+-	      mem_put_si (MDCL, mdc);
+-	      break;
+-	    case 0x48:
+-	      als = sign_ext (mem_get_hi (MDAL), 16);
+-	      ahs = sign_ext (mem_get_hi (MDAH), 16);
+-	      rvs = als * ahs;
+-	      mem_put_si (MDBL, rvs);
+-	      mdc = mem_get_si (MDCL);
+-	      tprintf  ("MDUC: %ld * %ld + %ld = ", als, ahs, mdc);
+-	      tprintf ("%ld\n", mdc);
+-	      mdc += rvs;
+-	      mem_put_si (MDCL, mdc);
+-	      break;
++	      long als, ahs;
++	      unsigned long alu, ahu;
++	      long rvs;
++	      long mdc;
++	      unsigned long rvu;
++	      mda_set = 0;
++	      switch (memory [MDUC] & 0xc8)
++		{
++		case 0x00:
++		  alu = mem_get_hi (MDAL);
++		  ahu = mem_get_hi (MDAH);
++		  rvu = alu * ahu;
++		  tprintf  ("MDUC: %lu * %lu = %lu\n", alu, ahu, rvu);
++		  mem_put_si (MDBL, rvu);
++		  break;
++		case 0x08:
++		  als = sign_ext (mem_get_hi (MDAL), 16);
++		  ahs = sign_ext (mem_get_hi (MDAH), 16);
++		  rvs = als * ahs;
++		  tprintf  ("MDUC: %ld * %ld = %ld\n", als, ahs, rvs);
++		  mem_put_si (MDBL, rvs);
++		  break;
++		case 0x40:
++		  alu = mem_get_hi (MDAL);
++		  ahu = mem_get_hi (MDAH);
++		  rvu = alu * ahu;
++		  mem_put_si (MDBL, rvu);
++		  mdc = mem_get_si (MDCL);
++		  tprintf  ("MDUC: %lu * %lu + %lu = ", alu, ahu, mdc);
++		  mdc += (long) rvu;
++		  tprintf ("%lu\n", mdc);
++		  mem_put_si (MDCL, mdc);
++		  break;
++		case 0x48:
++		  als = sign_ext (mem_get_hi (MDAL), 16);
++		  ahs = sign_ext (mem_get_hi (MDAH), 16);
++		  rvs = als * ahs;
++		  mem_put_si (MDBL, rvs);
++		  mdc = mem_get_si (MDCL);
++		  tprintf  ("MDUC: %ld * %ld + %ld = ", als, ahs, mdc);
++		  tprintf ("%ld\n", mdc);
++		  mdc += rvs;
++		  mem_put_si (MDCL, mdc);
++		  break;
++		}
+ 	    }
+ 	}
+     }
+@@ -276,8 +307,6 @@ mem_get_byte (int address)
+   return memory [address];
+ }
+ 
+-extern jmp_buf decode_jmp_buf;
+-#define DO_RETURN(x) longjmp (decode_jmp_buf, x)
+ 
+ #define CHECK_ALIGNMENT(a,v,m) \
+   if (a & m) { printf ("Misalignment addr 0x%05x val 0x%04x pc %05x\n", (int)a, (int)v, (int)pc); \
+Index: sim/rl78/mem.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/rl78/mem.h,v
+retrieving revision 1.2
+diff -u -p -r1.2 mem.h
+--- sim/rl78/mem.h	25 May 2013 03:54:37 -0000	1.2
++++ sim/rl78/mem.h	14 Dec 2013 00:50:27 -0000
+@@ -50,5 +50,6 @@ unsigned long mem_get_si (int address);
+ void mem_get_blk (int address, void *bufptr, int nbytes);
+ 
+ int sign_ext (int v, int bits);
++void mem_set_mirror(int, int, int);
+ 
+ #endif
+Index: sim/rl78/rl78.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/rl78/rl78.c,v
+retrieving revision 1.2
+diff -u -p -r1.2 rl78.c
+--- sim/rl78/rl78.c	25 May 2013 03:54:37 -0000	1.2
++++ sim/rl78/rl78.c	14 Dec 2013 00:50:28 -0000
+@@ -307,13 +307,13 @@ gpc (RL78_Opcode_Decoded *opcode, int id
+   return a;
+ }
+ 
+-static int
++int
+ get_carry (void)
+ {
+   return (get_reg (RL78_Reg_PSW) & RL78_PSW_CY) ? 1 : 0;
+ }
+ 
+-static void
++void
+ set_carry (int c)
+ {
+   int p = get_reg (RL78_Reg_PSW);
+@@ -352,6 +352,8 @@ process_clock_tick (void)
+   counts_per_insn[opcode_pc] += pending_clocks;
+   total_clocks += pending_clocks;
+ 
++  extern int mirror_ram_base;
++  if (mirror_ram_base != 0xf0000)
+   while (pending_clocks)
+     {
+       pending_clocks --;
+@@ -367,7 +369,7 @@ process_clock_tick (void)
+       mask = mem_get_hi (MK1);
+ 
+       if ((psw & RL78_PSW_IE)
+-	  && (ivect != 0)
++	  && (ivect >= 0xd8 && ivect != 0xffff)
+ 	  && !(mask & 0x0010))
+ 	{
+ 	  unsigned short sp = get_reg (RL78_Reg_SP);
+@@ -704,7 +706,8 @@ decode_opcode (void)
+ 	  int i;
+ 	  skip_init ++;
+ 	  for (i = 0; i < 8; i ++)
+-	    printf (" %02x", mem_get_qi (0xffef0 + i) & 0xff);
++#define RVREG (rl78_g10_mode ? 0xffec8 : 0xffef0)
++	    printf (" %02x", mem_get_qi (RVREG + i) & 0xff);
+ 	  skip_init --;
+ 	}
+ #endif
+@@ -800,6 +803,11 @@ decode_opcode (void)
+       break;
+ 
+     case RLO_sel:
++      if (rl78_g10_mode)
++	{
++	  fprintf (stderr, "Error: SEL called at CP %#x.\n", pc);
++	  DO_RETURN (RL78_MAKE_HIT_BREAK ());
++	}
+       tprintf ("SEL:");
+       a = GS ();
+       b = get_reg (RL78_Reg_PSW);
+@@ -853,6 +861,9 @@ decode_opcode (void)
+       opcode_size = rl78_decode_opcode (pc, &opcode,
+ 					rl78_get_byte, &rl78_data);
+       pc += opcode_size;
++      /* Manual says 1 clock always, but the chip takes two clocks if
++        it skips the instruction (i.e. takes the branch).  */
++      CLOCKS (2);
+       tprintf (" skipped: %s\n", opcode.syntax);
+       break;
+ 

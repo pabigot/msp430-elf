@@ -1,5 +1,5 @@
 /* Helper routines for C++ support in GDB.
-   Copyright (C) 2002-2005, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
 
    Contributed by MontaVista Software.
 
@@ -20,7 +20,7 @@
 
 #include "defs.h"
 #include "cp-support.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "demangle.h"
 #include "gdb_assert.h"
 #include "gdbcmd.h"
@@ -37,8 +37,6 @@
 #include "cp-abi.h"
 
 #include "safe-ctype.h"
-
-#include "psymtab.h"
 
 #define d_left(dc) (dc)->u.s_binary.left
 #define d_right(dc) (dc)->u.s_binary.right
@@ -81,7 +79,9 @@ static const char * const ignore_typedefs[] =
 
 static void
   replace_typedefs (struct demangle_parse_info *info,
-		    struct demangle_component *ret_comp);
+		    struct demangle_component *ret_comp,
+		    canonicalization_ftype *finder,
+		    void *data);
 
 /* A convenience function to copy STRING into OBSTACK, returning a pointer
    to the newly allocated string and saving the number of bytes saved in LEN.
@@ -152,7 +152,9 @@ cp_already_canonical (const char *string)
 
 static int
 inspect_type (struct demangle_parse_info *info,
-	      struct demangle_component *ret_comp)
+	      struct demangle_component *ret_comp,
+	      canonicalization_ftype *finder,
+	      void *data)
 {
   int i;
   char *name;
@@ -182,8 +184,23 @@ inspect_type (struct demangle_parse_info *info,
     {
       struct type *otype = SYMBOL_TYPE (sym);
 
-      /* If the type is a typedef, replace it.  */
-      if (TYPE_CODE (otype) == TYPE_CODE_TYPEDEF)
+      if (finder != NULL)
+	{
+	  const char *new_name = (*finder) (otype, data);
+
+	  if (new_name != NULL)
+	    {
+	      ret_comp->u.s_name.s = new_name;
+	      ret_comp->u.s_name.len = strlen (new_name);
+	      return 1;
+	    }
+
+	  return 0;
+	}
+
+      /* If the type is a typedef or namespace alias, replace it.  */
+      if (TYPE_CODE (otype) == TYPE_CODE_TYPEDEF
+	  || TYPE_CODE (otype) == TYPE_CODE_NAMESPACE)
 	{
 	  long len;
 	  int is_anon;
@@ -193,6 +210,13 @@ inspect_type (struct demangle_parse_info *info,
 
 	  /* Get the real type of the typedef.  */
 	  type = check_typedef (otype);
+
+	  /* If the symbol is a namespace and its type name is no different
+	     than the name we looked up, this symbol is not a namespace
+	     alias and does not need to be substituted.  */
+	  if (TYPE_CODE (otype) == TYPE_CODE_NAMESPACE
+	      && strcmp (TYPE_NAME (type), name) == 0)
+	    return 0;
 
 	  is_anon = (TYPE_TAG_NAME (type) == NULL
 		     && (TYPE_CODE (type) == TYPE_CODE_ENUM
@@ -249,7 +273,7 @@ inspect_type (struct demangle_parse_info *info,
 		 if the type is anonymous (that would lead to infinite
 		 looping).  */
 	      if (!is_anon)
-		replace_typedefs (info, ret_comp);
+		replace_typedefs (info, ret_comp, finder, data);
 	    }
 	  else
 	    {
@@ -286,7 +310,9 @@ inspect_type (struct demangle_parse_info *info,
 
 static void
 replace_typedefs_qualified_name (struct demangle_parse_info *info,
-				 struct demangle_component *ret_comp)
+				 struct demangle_component *ret_comp,
+				 canonicalization_ftype *finder,
+				 void *data)
 {
   long len;
   char *name;
@@ -310,7 +336,7 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
 	  new.type = DEMANGLE_COMPONENT_NAME;
 	  new.u.s_name.s = name;
 	  new.u.s_name.len = len;
-	  if (inspect_type (info, &new))
+	  if (inspect_type (info, &new, finder, data))
 	    {
 	      char *n, *s;
 	      long slen;
@@ -344,7 +370,7 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
 	  /* The current node is not a name, so simply replace any
 	     typedefs in it.  Then print it to the stream to continue
 	     checking for more typedefs in the tree.  */
-	  replace_typedefs (info, d_left (comp));
+	  replace_typedefs (info, d_left (comp), finder, data);
 	  name = cp_comp_to_string (d_left (comp), 100);
 	  if (name == NULL)
 	    {
@@ -355,6 +381,7 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
 	  fputs_unfiltered (name, buf);
 	  xfree (name);
 	}
+
       ui_file_write (buf, "::", 2);
       comp = d_right (comp);
     }
@@ -374,10 +401,10 @@ replace_typedefs_qualified_name (struct demangle_parse_info *info,
       ret_comp->type = DEMANGLE_COMPONENT_NAME;
       ret_comp->u.s_name.s = name;
       ret_comp->u.s_name.len = len;
-      inspect_type (info, ret_comp);
+      inspect_type (info, ret_comp, finder, data);
     }
   else
-    replace_typedefs (info, comp);
+    replace_typedefs (info, comp, finder, data);
 
   ui_file_delete (buf);
 }
@@ -405,10 +432,48 @@ check_cv_qualifiers (struct demangle_component *ret_comp)
 
 static void
 replace_typedefs (struct demangle_parse_info *info,
-		  struct demangle_component *ret_comp)
+		  struct demangle_component *ret_comp,
+		  canonicalization_ftype *finder,
+		  void *data)
 {
   if (ret_comp)
     {
+      if (finder != NULL
+	  && (ret_comp->type == DEMANGLE_COMPONENT_NAME
+	      || ret_comp->type == DEMANGLE_COMPONENT_QUAL_NAME
+	      || ret_comp->type == DEMANGLE_COMPONENT_TEMPLATE
+	      || ret_comp->type == DEMANGLE_COMPONENT_BUILTIN_TYPE))
+	{
+	  char *local_name = cp_comp_to_string (ret_comp, 10);
+
+	  if (local_name != NULL)
+	    {
+	      struct symbol *sym;
+	      volatile struct gdb_exception except;
+
+	      sym = NULL;
+	      TRY_CATCH (except, RETURN_MASK_ALL)
+		{
+		  sym = lookup_symbol (local_name, 0, VAR_DOMAIN, 0);
+		}
+	      xfree (local_name);
+
+	      if (except.reason >= 0 && sym != NULL)
+		{
+		  struct type *otype = SYMBOL_TYPE (sym);
+		  const char *new_name = (*finder) (otype, data);
+
+		  if (new_name != NULL)
+		    {
+		      ret_comp->type = DEMANGLE_COMPONENT_NAME;
+		      ret_comp->u.s_name.s = new_name;
+		      ret_comp->u.s_name.len = strlen (new_name);
+		      return;
+		    }
+		}
+	    }
+	}
+
       switch (ret_comp->type)
 	{
 	case DEMANGLE_COMPONENT_ARGLIST:
@@ -419,23 +484,23 @@ replace_typedefs (struct demangle_parse_info *info,
 	case DEMANGLE_COMPONENT_TEMPLATE:
 	case DEMANGLE_COMPONENT_TEMPLATE_ARGLIST:
 	case DEMANGLE_COMPONENT_TYPED_NAME:
-	  replace_typedefs (info, d_left (ret_comp));
-	  replace_typedefs (info, d_right (ret_comp));
+	  replace_typedefs (info, d_left (ret_comp), finder, data);
+	  replace_typedefs (info, d_right (ret_comp), finder, data);
 	  break;
 
 	case DEMANGLE_COMPONENT_NAME:
-	  inspect_type (info, ret_comp);
+	  inspect_type (info, ret_comp, finder, data);
 	  break;
 
 	case DEMANGLE_COMPONENT_QUAL_NAME:
-	  replace_typedefs_qualified_name (info, ret_comp);
+	  replace_typedefs_qualified_name (info, ret_comp, finder, data);
 	  break;
 
 	case DEMANGLE_COMPONENT_LOCAL_NAME:
 	case DEMANGLE_COMPONENT_CTOR:
 	case DEMANGLE_COMPONENT_ARRAY_TYPE:
 	case DEMANGLE_COMPONENT_PTRMEM_TYPE:
-	  replace_typedefs (info, d_right (ret_comp));
+	  replace_typedefs (info, d_right (ret_comp), finder, data);
 	  break;
 
 	case DEMANGLE_COMPONENT_CONST:
@@ -446,7 +511,7 @@ replace_typedefs (struct demangle_parse_info *info,
 	case DEMANGLE_COMPONENT_RESTRICT_THIS:
 	case DEMANGLE_COMPONENT_POINTER:
 	case DEMANGLE_COMPONENT_REFERENCE:
-	  replace_typedefs (info, d_left (ret_comp));
+	  replace_typedefs (info, d_left (ret_comp), finder, data);
 	  break;
 
 	default:
@@ -458,10 +523,13 @@ replace_typedefs (struct demangle_parse_info *info,
 /* Parse STRING and convert it to canonical form, resolving any typedefs.
    If parsing fails, or if STRING is already canonical, return NULL.
    Otherwise return the canonical form.  The return value is allocated via
-   xmalloc.  */
+   xmalloc.  If FINDER is not NULL, then type components are passed to
+   FINDER to be looked up.  DATA is passed verbatim to FINDER.  */
 
 char *
-cp_canonicalize_string_no_typedefs (const char *string)
+cp_canonicalize_string_full (const char *string,
+			     canonicalization_ftype *finder,
+			     void *data)
 {
   char *ret;
   unsigned int estimated_len;
@@ -473,7 +541,7 @@ cp_canonicalize_string_no_typedefs (const char *string)
   if (info != NULL)
     {
       /* Replace all the typedefs in the tree.  */
-      replace_typedefs (info, info->tree);
+      replace_typedefs (info, info->tree, finder, data);
 
       /* Convert the tree back into a string.  */
       ret = cp_comp_to_string (info->tree, estimated_len);
@@ -492,6 +560,15 @@ cp_canonicalize_string_no_typedefs (const char *string)
     }
 
   return ret;
+}
+
+/* Like cp_canonicalize_string_full, but always passes NULL for
+   FINDER.  */
+
+char *
+cp_canonicalize_string_no_typedefs (const char *string)
+{
+  return cp_canonicalize_string_full (string, NULL, NULL);
 }
 
 /* Parse STRING and convert it to canonical form.  If parsing fails,
@@ -564,7 +641,7 @@ mangled_name_to_comp (const char *mangled_name, int options,
 
   /* If it doesn't, or if that failed, then try to demangle the
      name.  */
-  demangled_name = cplus_demangle (mangled_name, options);
+  demangled_name = gdb_demangle (mangled_name, options);
   if (demangled_name == NULL)
    return NULL;
   
@@ -1403,6 +1480,14 @@ cp_lookup_rtti_type (const char *name, struct block *block)
     }
 
   return rtti_type;
+}
+
+/* A wrapper for bfd_demangle.  */
+
+char *
+gdb_demangle (const char *name, int options)
+{
+  return bfd_demangle (NULL, name, options);
 }
 
 /* Don't allow just "maintenance cplus".  */

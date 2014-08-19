@@ -40,3 +40,5 @@ int main() {
 
   return r;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

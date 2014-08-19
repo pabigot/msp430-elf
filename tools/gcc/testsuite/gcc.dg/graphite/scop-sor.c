@@ -1,4 +1,5 @@
 /* { dg-require-effective-target ilp32 } */
+
 #define SIZE 10000
 
 static double P[SIZE][SIZE];

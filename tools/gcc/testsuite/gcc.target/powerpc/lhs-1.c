@@ -1,7 +1,6 @@
 /* { dg-do compile { target { powerpc*-*-* } } } */
 /* { dg-skip-if "" { powerpc*-*-darwin* } { "*" } { "" } } */
 /* { dg-options "-O2 -mcpu=power5" } */
-/* { dg-final { scan-assembler-times "nop" 3 } } */
 
 /* Test generation of nops in load hit store situation.  */
 

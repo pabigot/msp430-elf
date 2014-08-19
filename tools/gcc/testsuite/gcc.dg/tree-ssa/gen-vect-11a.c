@@ -1,6 +1,6 @@
 /* { dg-do run { target vect_cmdline_needed } } */
-/* { dg-options "-O2 -ftree-vectorize -fdump-tree-vect-details" } */
-/* { dg-options "-O2 -ftree-vectorize -fdump-tree-vect-details -mno-sse" { target { i?86-*-* x86_64-*-* } } } */
+/* { dg-options "-O2 -ftree-vectorize -fdump-tree-vect-details -fvect-cost-model=dynamic" } */
+/* { dg-options "-O2 -ftree-vectorize -fdump-tree-vect-details -fvect-cost-model=dynamic -mno-sse" { target { i?86-*-* x86_64-*-* } } } */
 
 #include <stdlib.h>
 
@@ -37,6 +37,4 @@ int main ()
   return 0;
 }
 
-
-/* { dg-final { scan-tree-dump-times "vectorized 1 loops" 1 "vect" { target { ! avr-*-* } } } } */
 /* { dg-final { cleanup-tree-dump "vect" } } */

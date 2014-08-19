@@ -17,3 +17,4 @@ int main() {
   p = new toto[5];
   delete [] p;
 }
+// { dg-require-effective-target size32plus }

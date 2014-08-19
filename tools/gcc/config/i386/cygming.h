@@ -1,6 +1,6 @@
 /* Operating system specific defines to be used when targeting GCC for
    hosting on Windows32, using a Unix style C library and tools.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -31,12 +31,12 @@ along with GCC; see the file COPYING3.  If not see
 #define PREFERRED_DEBUGGING_TYPE DBX_DEBUG
 #endif
 
-#undef  TARGET_SEH
+#undef TARGET_SEH
 #define TARGET_SEH  (TARGET_64BIT_MS_ABI && flag_unwind_tables)
 
 /* Win64 with SEH cannot represent DRAP stack frames.  Disable its use.
    Force the use of different mechanisms to allocate aligned local data.  */
-#undef  MAX_STACK_ALIGNMENT
+#undef MAX_STACK_ALIGNMENT
 #define MAX_STACK_ALIGNMENT  (TARGET_SEH ? 128 : MAX_OFILE_ALIGNMENT)
 
 /* Support hooks for SEH.  */
@@ -52,23 +52,25 @@ along with GCC; see the file COPYING3.  If not see
 #define TARGET_ASM_INIT_SECTIONS  i386_pe_seh_init_sections
 #define SUBTARGET_ASM_UNWIND_INIT  i386_pe_seh_init
 
-
-#undef  DEFAULT_ABI
+#undef DEFAULT_ABI
 #define DEFAULT_ABI (TARGET_64BIT ? MS_ABI : SYSV_ABI)
 
+#undef TARGET_PECOFF
+#define TARGET_PECOFF 1
+
 #if ! defined (USE_MINGW64_LEADING_UNDERSCORES)
-#undef  USER_LABEL_PREFIX
+#undef USER_LABEL_PREFIX
 #define USER_LABEL_PREFIX (TARGET_64BIT ? "" : "_")
 
-#undef  LOCAL_LABEL_PREFIX
+#undef LOCAL_LABEL_PREFIX
 #define LOCAL_LABEL_PREFIX (TARGET_64BIT ? "." : "")
 
-#undef  ASM_GENERATE_INTERNAL_LABEL
+#undef ASM_GENERATE_INTERNAL_LABEL
 #define ASM_GENERATE_INTERNAL_LABEL(BUF,PREFIX,NUMBER)  \
   sprintf ((BUF), "*%s%s%ld", LOCAL_LABEL_PREFIX, \
 	   (PREFIX), (long)(NUMBER))
 
-#undef  LPREFIX
+#undef LPREFIX
 #define LPREFIX (TARGET_64BIT ? ".L" : "L")
 
 #endif
@@ -169,6 +171,9 @@ along with GCC; see the file COPYING3.  If not see
 #undef MATH_LIBRARY
 #define MATH_LIBRARY ""
 
+#undef TARGET_LIBC_HAS_FUNCTION
+#define TARGET_LIBC_HAS_FUNCTION no_c99_libc_has_function
+
 #define SIZE_TYPE (TARGET_64BIT ? "long long unsigned int" : "unsigned int")
 #define PTRDIFF_TYPE (TARGET_64BIT ? "long long int" : "int")
 
@@ -207,11 +212,6 @@ do {									\
 	       (flag_pic > 1) ? "PIC" : "pic");				\
       flag_pic = 0;							\
     }									\
-  /* PR 37216: Do not use commons when supporting SSE insns - commons	\
-     in the PE/COFF file format do not have alignment attributes and	\
-     variables used with SSE instructions must be properly aligned.  */ \
-  if (TARGET_SSE)							\
-    flag_no_common = 1;							\
 } while (0)
 
 /* Define this macro if references to a symbol must be treated
@@ -235,7 +235,7 @@ do {									\
 
 /* Local and global relocs can be placed always into readonly memory
    for PE-COFF targets.  */
-#undef  TARGET_ASM_RELOC_RW_MASK
+#undef TARGET_ASM_RELOC_RW_MASK
 #define TARGET_ASM_RELOC_RW_MASK i386_pe_reloc_rw_mask
 
 /* Output a common block.  */
@@ -313,7 +313,7 @@ do {						\
    properly.  If we are generating SDB debugging information, this
    will happen automatically, so we only need to handle other cases.  */
 #undef ASM_DECLARE_FUNCTION_NAME
-#define ASM_DECLARE_FUNCTION_NAME(FILE, NAME, DECL)			\
+#define ASM_DECLARE_FUNCTION_NAME(FILE, NAME, DECL) \
   i386_pe_start_function (FILE, NAME, DECL)
 
 #undef ASM_DECLARE_FUNCTION_SIZE
@@ -479,6 +479,9 @@ do {						\
 
 #undef TARGET_ASM_ASSEMBLE_VISIBILITY
 #define TARGET_ASM_ASSEMBLE_VISIBILITY i386_pe_assemble_visibility
+
+#undef SUB_TARGET_RECORD_STUB
+#define SUB_TARGET_RECORD_STUB i386_pe_record_stub
 
 /* Static stack checking is supported by means of probes.  */
 #define STACK_CHECK_STATIC_BUILTIN 1

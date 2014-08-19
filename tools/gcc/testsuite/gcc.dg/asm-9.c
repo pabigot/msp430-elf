@@ -1,7 +1,7 @@
 /* PR inline-asm/15740 */
 /* { dg-do compile } */
-/* { dg-options "-O" } */
 /* { dg-skip-if "asm construct does not work with RL78" { rl78-*-* } { "*" } { "" } } */
+/* { dg-options "-O" } */
 
 void foo(void)
 {

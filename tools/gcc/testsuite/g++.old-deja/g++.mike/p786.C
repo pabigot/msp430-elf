@@ -12,13 +12,13 @@ public:
 
 void func(const C& a, C& b)
 {
-   printf ("in const func\n");
+  printf ("in const func\n");
    exit(1);
 }
 
 void func(C& a, C& b)
 {
-   printf ("in non-const func\n");
+  // printf ("in non-const func\n");
 }
 
 void testit(const C& a, C& b)

@@ -1,8 +1,8 @@
 2008-08-05  Joe English	 <jenglish@users.sourceforge.net>
 
 	* generic/tk.h, generic/tkEvent.c: Fix for [Bug 2010422] "no event
-	type or button # or keysym while executing "bind Listbox
-	<MouseWheel> [...]".
+	type or button # or keysym while executing " bind Listbox
+	<MouseWheel> [...].
 
 2006-11-30  Christopher Faylor  <cgf@timesys.com>
 

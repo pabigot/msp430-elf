@@ -1,5 +1,5 @@
 /* Insn note definitions.
-   Copyright (C) 2004-2013 Free Software Foundation, Inc.
+   Copyright (C) 2004-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -87,6 +87,4 @@ INSN_NOTE (CFI)
    label that should be emitted.  */
 INSN_NOTE (CFI_LABEL)
 
-INSN_NOTE (SOFTWARE_PIPELINED_LOOP_BEGIN)
-INSN_NOTE (SOFTWARE_PIPELINED_LOOP_END)
 #undef INSN_NOTE

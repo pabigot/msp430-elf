@@ -29,5 +29,5 @@ int main ()
 	if (v2 != 0x00007777)
 	  abort ();
 	else
-	  printf ("PASS\n");
+	  ; //printf ("PASS\n");
 }

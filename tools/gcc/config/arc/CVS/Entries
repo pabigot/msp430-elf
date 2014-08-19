@@ -1,0 +1,17 @@
+/arc-modes.def/1.5/Thu Feb 20 16:40:29 2014//Tmsp430-14r1-branch
+/arc-opts.h/1.1/Thu Feb 20 16:40:29 2014//Tmsp430-14r1-branch
+/arc-protos.h/1.8/Thu Feb 20 16:40:29 2014//Tmsp430-14r1-branch
+/arc-simd.h/1.1/Thu Feb 20 16:40:29 2014//Tmsp430-14r1-branch
+/arc.c/1.13/Mon Mar 17 09:19:48 2014//Tmsp430-14r1-branch
+/arc.h/1.12/Thu Feb 20 16:40:29 2014//Tmsp430-14r1-branch
+/arc.md/1.11/Mon Mar 17 09:19:48 2014//Tmsp430-14r1-branch
+/arc.opt/1.5/Mon Mar 10 09:18:18 2014//Tmsp430-14r1-branch
+/arc600.md/1.1/Thu Feb 20 16:40:29 2014//Tmsp430-14r1-branch
+/arc700.md/1.1/Thu Feb 20 16:40:29 2014//Tmsp430-14r1-branch
+/constraints.md/1.1/Thu Feb 20 16:40:29 2014//Tmsp430-14r1-branch
+/fpx.md/1.1/Thu Feb 20 16:40:29 2014//Tmsp430-14r1-branch
+/predicates.md/1.2/Mon Mar 17 09:19:48 2014//Tmsp430-14r1-branch
+/simdext.md/1.1/Thu Feb 20 16:40:29 2014//Tmsp430-14r1-branch
+/t-arc-newlib/1.1/Thu Feb 20 16:40:29 2014//Tmsp430-14r1-branch
+/t-arc-uClibc/1.1/Thu Feb 20 16:40:29 2014//Tmsp430-14r1-branch
+D

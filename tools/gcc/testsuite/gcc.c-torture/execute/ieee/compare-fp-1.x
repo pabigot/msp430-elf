@@ -3,4 +3,8 @@ if [istarget "spu-*-*"] {
     # support Nan & Inf. 
     return 1
 }
+if [istarget "rx-*-*"] {
+  # Similarly for RX
+  return 1
+}
 return 0

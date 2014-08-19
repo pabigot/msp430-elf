@@ -1,0 +1,9 @@
+2010-04-30  Corinna Vinschen  <vinschen@redhat.com>
+
+	* win/tkWinPort.h (struct timezone): Don't define on Cygwin since it's
+	already available in the newlib headers.
+
+2006-12-14  DJ Delorie  <dj@redhat.com>
+
+	* unix/tcl.m4: Remove stray quotes.
+	* unix/configure: Likewise.

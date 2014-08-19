@@ -195,8 +195,9 @@ if {   ![ld_compile "$CC $CFLAGS -fcommon" $srcdir/$subdir/common1a.c tmpdir/com
 
 global ld
 global link_output
+global gcc_gas_flag
 
-set options "-r tmpdir/common1a.o tmpdir/common1b.o"
+set options "-nostdlib -r tmpdir/common1a.o tmpdir/common1b.o"
 
 # SH64 targets needs an extra ld option for this test.
 if [istarget sh64*-*-*] {
@@ -207,7 +208,7 @@ if [istarget sh64*-*-*] {
     }
 }
 
-if { [ld_simple_link $ld tmpdir/common1.o $options] } {
+if { [ld_simple_link $CC tmpdir/common1.o $options] } {
     unresolved $test1w1
     return
 }
@@ -233,7 +234,7 @@ if { [dump_common1 $test1c1] } {
     pass $test1c1
 }
 
-set options "-r tmpdir/common1b.o tmpdir/common1a.o"
+set options "-nostdlib -r tmpdir/common1b.o tmpdir/common1a.o"
 
 # SH64 targets needs an extra ld option for this test.
 if [istarget sh64*-*-*] {
@@ -244,7 +245,7 @@ if [istarget sh64*-*-*] {
     }
 }
 
-if { [ld_simple_link $ld tmpdir/common1.o $options] } {
+if { [ld_simple_link $CC tmpdir/common1.o $options] } {
     unresolved $test1w2
     return
 }

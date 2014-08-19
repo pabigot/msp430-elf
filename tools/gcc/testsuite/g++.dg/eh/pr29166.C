@@ -195,3 +195,5 @@ int main(int argc, char** argv)
 
   return sum_before != sum_after;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

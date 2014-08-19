@@ -18,6 +18,6 @@ func (int const& i)
 int main ()
 { 
   Foo<int const> foo;
-  printf ("PASS\n");
+  // printf ("PASS\n");
   return 0;
 }

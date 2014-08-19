@@ -43,27 +43,3 @@ sbrk (nbytes)
 
   return base;
 }
-
-int
-gettimeofday (void * a, void * b)
-{
-  return -1;
-}
-
-int
-link (void * a, void * b)
-{
-  return -1;
-}
-
-int
-unlink (void *a)
-{
-  return -1;
-}
-
-int
-sigprocmask (int a, void * b, void * c)
-{
-  return -1;
-}

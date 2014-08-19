@@ -1,7 +1,6 @@
 /* Output generating routines for GDB.
 
-   Copyright (C) 1999-2003, 2005, 2007-2012 Free Software Foundation,
-   Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
 
    Contributed by Cygnus Solutions.
    Written by Fernando Nasser for Cygnus.
@@ -198,6 +197,7 @@ typedef void (wrap_hint_ftype) (struct ui_out * uiout, char *identstring);
 typedef void (flush_ftype) (struct ui_out * uiout);
 typedef int (redirect_ftype) (struct ui_out * uiout,
 			      struct ui_file * outstream);
+typedef void (data_destroy_ftype) (struct ui_out *uiout);
 
 /* ui-out-impl */
 
@@ -222,6 +222,7 @@ struct ui_out_impl
     wrap_hint_ftype *wrap_hint;
     flush_ftype *flush;
     redirect_ftype *redirect;
+    data_destroy_ftype *data_destroy;
     int is_mi_like_p;
   };
 
@@ -236,6 +237,10 @@ extern void uo_field_string (struct ui_out *uiout, int fldno, int width,
 extern struct ui_out *ui_out_new (struct ui_out_impl *impl,
 				  void *data,
 				  int flags);
+
+/* Destroy a ui_out object.  */
+
+extern void ui_out_destroy (struct ui_out *uiout);
 
 /* Redirect the ouptut of a ui_out object temporarily.  */
 

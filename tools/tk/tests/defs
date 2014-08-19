@@ -8,7 +8,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# RCS: @(#) $Id: defs,v 1.14 2000/10/11 21:52:00 spolk Exp $
+# RCS: @(#) $Id: defs,v 1.3 2012/04/18 00:37:04 kevinb Exp $
 
 if ![info exists srcdir] {
     set srcdir .

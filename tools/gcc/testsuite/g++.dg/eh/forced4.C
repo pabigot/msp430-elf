@@ -50,3 +50,5 @@ int main()
   } catch (...) {
   }
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

@@ -143,3 +143,4 @@ foo (int *ip, unsigned int *uip, short int *hp, unsigned short int *uhp,
   scanf ("%hhd", uhhp); /* { dg-warning "format" "%hhd sign" } */
   scanf ("%hhu", hhp); /* { dg-warning "format" "%hhu sign" } */
 }
+/* { dg-prune-output ".*__int20.*" } */

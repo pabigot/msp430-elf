@@ -29,3 +29,4 @@ int main() {
     Test3 t3;
     return 0;
 }
+// { dg-require-effective-target size32plus }

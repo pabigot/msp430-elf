@@ -1,3 +1,4 @@
+/* Public domain.  */
 extern double __floatsidf (long);
 
 double

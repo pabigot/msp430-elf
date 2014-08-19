@@ -18,8 +18,6 @@
    along with GCC; see the file COPYING3.  If not see
    <http://www.gnu.org/licenses/>.  */
 
-#ifndef GCC_MSP430_H
-#define GCC_MSP430_H
 
 /* Run-time Target Specification */
 
@@ -57,8 +55,8 @@ extern bool msp430x;
   "%{mcpu=*:-mcpu=%*}%{!mcpu=*:%{mmcu=*:-mmcu=%*}} " /* Pass the CPU type on to the assembler.  */ \
   "%{mrelax=-mQ} " /* Pass the relax option on to the assembler.  */ \
   "%{mlarge:-ml} " /* Tell the assembler if we are building for the LARGE pointer model.  */ \
-  "%{!msim:-md} %{msim:%{mlarge:-md}}" /* Copy data from ROM to RAM if necessary.  */ \
-  "%{ffunction-sections:-gdwarf-sections}" /* If function sections are being created then create DWARF line number sections as well.  */
+  "%{!msim:-md} %{msim:%{mlarge:-md}} " /* Copy data from ROM to RAM if necessary.  */ \
+  "%{ffunction-sections:-gdwarf-sections} " /* If function sections are being created then create DWARF line number sections as well.  */
 
 /* Enable linker section garbage collection by default, unless we
    are creating a relocatable binary (gc does not work) or debugging
@@ -133,10 +131,9 @@ extern bool msp430x;
 #define MAX_REGS_PER_ADDRESS 		1
 
 #define Pmode 				(TARGET_LARGE ? PSImode : HImode)
-/* Note: 32 is a lie.  Large pointers are actually 20-bits wide.  But gcc
-   thinks that any non-power-of-2 pointer size equates to BLKmode, which
-   causes all kinds of problems...  */
-#define POINTER_SIZE			(TARGET_LARGE ? 32 : 16)
+#define POINTER_SIZE			(TARGET_LARGE ? 20 : 16)
+/* This is just for .eh_frame, to match bfd.  */
+#define PTR_SIZE			(TARGET_LARGE ? 4 : 2)
 #define	POINTERS_EXTEND_UNSIGNED	1
 
 #define ADDR_SPACE_NEAR	1
@@ -160,9 +157,9 @@ extern bool msp430x;
 /* Layout of Source Language Data Types */
 
 #undef  SIZE_TYPE
-#define SIZE_TYPE			(TARGET_LARGE ? "long unsigned int" : "unsigned int")
+#define SIZE_TYPE			(TARGET_LARGE ? "__int20 unsigned" : "unsigned int")
 #undef  PTRDIFF_TYPE
-#define PTRDIFF_TYPE			(TARGET_LARGE ? "long int" : "int")
+#define PTRDIFF_TYPE			(TARGET_LARGE ? "__int20" : "int")
 #undef  WCHAR_TYPE
 #define WCHAR_TYPE			"long int"
 #undef  WCHAR_TYPE_SIZE
@@ -173,9 +170,9 @@ extern bool msp430x;
 #define HAS_LONG_UNCOND_BRANCH		0
 
 #define LOAD_EXTEND_OP(M)		ZERO_EXTEND
-#define WORD_REGISTER_OPERATIONS	1
+/*#define WORD_REGISTER_OPERATIONS	1*/
 
-#define MOVE_MAX 			4
+#define MOVE_MAX 			8
 #define STARTING_FRAME_OFFSET		0
 
 #define INCOMING_RETURN_ADDR_RTX \
@@ -319,10 +316,7 @@ typedef struct
   msp430_hard_regno_mode_ok (REGNO, MODE)
 
 #define MODES_TIEABLE_P(MODE1, MODE2)				\
-  (   (   GET_MODE_CLASS (MODE1) == MODE_FLOAT			\
-       || GET_MODE_CLASS (MODE1) == MODE_COMPLEX_FLOAT)		\
-   == (   GET_MODE_CLASS (MODE2) == MODE_FLOAT			\
-       || GET_MODE_CLASS (MODE2) == MODE_COMPLEX_FLOAT))
+  msp430_modes_tieable_p (MODE1, MODE2)
 
 /* Exception Handling */
 
@@ -385,9 +379,9 @@ typedef struct
 #define JUMP_TABLES_IN_TEXT_SECTION	1
 
 #undef	DWARF2_ADDR_SIZE
-#define	DWARF2_ADDR_SIZE			4
+#define	DWARF2_ADDR_SIZE			(msp430x ? 4 : 2)
 
-#define INCOMING_FRAME_SP_OFFSET		(POINTER_SIZE / BITS_PER_UNIT)
+#define INCOMING_FRAME_SP_OFFSET		(TARGET_LARGE ? 4 : 2)
 
 #undef  PREFERRED_DEBUGGING_TYPE
 #define PREFERRED_DEBUGGING_TYPE DWARF2_DEBUG
@@ -415,4 +409,5 @@ typedef struct
 
 #define TARGET_HAS_NO_HW_DIVIDE (! TARGET_HWMULT)
 
-#endif /* GCC_MSP430_H */
+#undef  USE_SELECT_SECTION_FOR_FUNCTIONS
+#define USE_SELECT_SECTION_FOR_FUNCTIONS 1

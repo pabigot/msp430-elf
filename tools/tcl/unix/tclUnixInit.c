@@ -7,7 +7,7 @@
  * Copyright (c) 1999 by Scriptics Corporation.
  * All rights reserved.
  *
- * RCS: @(#) $Id: tclUnixInit.c,v 1.15 2003/03/19 23:01:32 cagney Exp $
+ * RCS: @(#) $Id: tclUnixInit.c,v 1.3 2012/04/18 00:36:38 kevinb Exp $
  */
 
 #if defined(HAVE_CFBUNDLE)

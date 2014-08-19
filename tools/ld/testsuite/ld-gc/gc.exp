@@ -47,7 +47,8 @@ proc test_gc { testname filename linker ldflags} {
     global subdir
     global nm_output
     global objfile
-
+    global CC
+    
     if ![file readable $objfile ] {
 	untested $testname
 	return
@@ -55,7 +56,7 @@ proc test_gc { testname filename linker ldflags} {
 
     set outfile "tmpdir/$filename"
     set options "-L$srcdir/$subdir"
-    append options " " $ldflags " " [ld_simple_link_defsyms] " " $objfile
+    append options " " $ldflags " " [ld_simple_link_defsyms "-Wl,--defsym,"] " " $objfile
 
     # SH64 targets needs an extra ld option for this test.
     if [istarget sh64*-*-*] {
@@ -94,10 +95,10 @@ proc test_gc { testname filename linker ldflags} {
     pass $testname
 }
 
-test_gc "Check --gc-section" "gcexe" $ld "--gc-sections -e main"
-test_gc "Check --gc-section/-q" "gcrexe" $ld "--gc-sections -q -e main"
-test_gc "Check --gc-section/-r/-e" "gcrel" $ld "-r --gc-sections -e main"
-test_gc "Check --gc-section/-r/-u" "gcrel" $ld "-r --gc-sections -u used_func"
+test_gc "Check --gc-section" "gcexe" $CC "-Wl,--gc-sections -Wl,-e,main"
+test_gc "Check --gc-section/-q" "gcrexe" $CC "-Wl,--gc-sections -Wl,-q -Wl,-e,main"
+test_gc "Check --gc-section/-r/-e" "gcrel" $CC "-nostdlib -Wl,-r -Wl,--gc-sections -Wl,-e,main"
+test_gc "Check --gc-section/-r/-u" "gcrel" $CC "-nostdlib -Wl,-r -Wl,--gc-sections -Wl,-u,used_func"
 
 run_dump_test "noent"
 run_dump_test "abi-note"
@@ -121,7 +122,7 @@ if { [is_remote host] || [which $CC] != 0 } {
 	 || [istarget "*-*-nacl*"]
 	 || [istarget "*-*-gnu*"] } {
 	ld_compile "$CC -fPIC $CFLAGS $cflags" $srcdir/$subdir/pr11218-1.c tmpdir/pr11218-1.o
-	ld_simple_link $ld tmpdir/pr11218-1.so "-shared tmpdir/pr11218-1.o"
+	ld_simple_link $CC tmpdir/pr11218-1.so "-shared tmpdir/pr11218-1.o"
  	ld_compile "$CC -c $CFLAGS $cflags" $srcdir/$subdir/pr11218-2.c tmpdir/pr11218-2.o
 	run_dump_test "pr11218"
     }

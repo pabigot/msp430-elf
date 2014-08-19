@@ -3,7 +3,7 @@
 # This demonstration script creates a canvas widget showing a 2-D
 # plot with data points that can be dragged with the mouse.
 #
-# RCS: @(#) $Id: plot.tcl,v 1.9 2003/03/19 23:02:05 cagney Exp $
+# RCS: @(#) $Id: plot.tcl,v 1.3 2012/04/18 00:36:59 kevinb Exp $
 
 if {![info exists widgetDemo]} {
     error "This script should be run from the \"widget\" demo."

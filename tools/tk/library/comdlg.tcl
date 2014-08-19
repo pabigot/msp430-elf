@@ -3,7 +3,7 @@
 #	Some functions needed for the common dialog boxes. Probably need to go
 #	in a different file.
 #
-# RCS: @(#) $Id: comdlg.tcl,v 1.8 2003/03/19 23:02:04 cagney Exp $
+# RCS: @(#) $Id: comdlg.tcl,v 1.3 2012/04/18 00:36:56 kevinb Exp $
 #
 # Copyright (c) 1996 Sun Microsystems, Inc.
 #

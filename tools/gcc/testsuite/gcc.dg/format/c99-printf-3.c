@@ -37,3 +37,4 @@ foo (int i, char *s, size_t n, va_list v0, va_list v1, va_list v2, va_list v3,
   printf (dcgettext ("", "%d", 0), i);
   printf (dcgettext ("", "%ld", 0), i);
 }
+/* { dg-prune-output ".*__int20.*" } */

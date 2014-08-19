@@ -6,7 +6,6 @@
 
 // { dg-final { scan-assembler-not "_ZSt9terminatev" } }
 // { dg-final { scan-assembler-not "EHB" } }
-// { dg-final { scan-assembler "LSDA" } }
 
 // { dg-options "-fnothrow-opt" }
 

@@ -1,6 +1,6 @@
 // Special functions -*- C++ -*-
 
-// Copyright (C) 2006-2013 Free Software Foundation, Inc.
+// Copyright (C) 2006-2014 Free Software Foundation, Inc.
 //
 // This file is part of the GNU ISO C++ Library.  This library is free
 // software; you can redistribute it and/or modify it under the
@@ -351,8 +351,8 @@ namespace tr1
     __psi_series(_Tp __x)
     {
       _Tp __sum = -__numeric_constants<_Tp>::__gamma_e() - _Tp(1) / __x;
-      const unsigned long int __max_iter = 100000;
-      for (unsigned long int __k = 1; __k < __max_iter; ++__k)
+      const unsigned int __max_iter = 100000;
+      for (unsigned int __k = 1; __k < __max_iter; ++__k)
         {
           const _Tp __term = __x / (__k * (__k + __x));
           __sum += __term;
@@ -466,3 +466,4 @@ namespace tr1
 }
 
 #endif // _GLIBCXX_TR1_GAMMA_TCC
+

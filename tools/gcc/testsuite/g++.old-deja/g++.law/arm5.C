@@ -18,7 +18,7 @@ int main( void) {
         int & c = max( a, b);
 
         if (&c == &b)
-                printf( "PASS\n");
+	  ; /* printf( "PASS\n"); */
         else
                 { printf( "FAIL\n"); return 1; }
         return 0;

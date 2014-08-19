@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 extern "C" int printf (const char *, ...);
 
 int c, d;

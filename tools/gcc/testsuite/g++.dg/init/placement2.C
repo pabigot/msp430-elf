@@ -20,3 +20,5 @@ int main()
   catch (...) {}
   return c != 1;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

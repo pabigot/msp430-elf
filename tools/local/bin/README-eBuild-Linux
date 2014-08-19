@@ -1,0 +1,97 @@
+  Instructions for building an XScale Linux targeted cross compiler
+  on a non-XScale host (eg x86 Linux or Cygwin) using the eBuild-Linux
+  script:
+  
+  1. Install the compiler, glibc and kernel sources somewhere
+     accessible on the host.  eg:
+
+       cd /home
+       mkdir sources
+       cd sources
+       tar xfz tools-src.tar.gz
+       tar xfz glibc-src.tar.gz
+       tar xfz kernel-src.tar.gz
+
+  2. Create a directory that will hold the intermediary files as the
+     toolchain is built.  eg:
+
+       cd /home
+       mkdir builds
+
+     In this directory create a sub-directory called sources and in
+     this put symbolic links called 'kernel-src' 'tools-src' and
+     'glibc-src' pointing to the relevant directories:
+
+       cd /home/builds
+       mkdir sources
+       cd sources
+       ln -s /home/sources/kernel-src kernel-src
+       ln -s /home/sources/tools-src tools-src
+       ln -s /home/sources/glibc-src glibc-src
+     
+  3. Create a directory that will hold the toolchain once it is
+     built.  eg:
+
+       cd /home
+       mkdir -p release/xscale-crosscompiler
+
+  4. Run the eBuild-Linux script (attached below) with the following
+     parameters:
+
+       eBuild-Linux \
+         --target=xscale-linux-gnu \
+         --srctop=/home/builds/sources \
+         --prefix=/home/release \
+         --release=xscale-crosscompiler \
+         --host=i686-pc-cygwin \
+         --build=i686-pc-cygwin \
+         --karch=arm \
+         --kproc=armv \
+         --ktype=pxa \
+         --lang="c,c++"
+
+     Note - several of these parameters are optional, since they match
+     the defaults built in to the script, but they are included here
+     for clarity.
+
+     The process can take a long time, depending upon the speed of the
+     host computer.  If everything worked correctly the last message
+     issued by the script will be:
+
+       Ending eBuild-Linux run at <time>
+
+     Note - if the script fails you can look in the sub-directory
+     'build-xscale-crosscompiler/' of the build directory where there
+     will be logs of each stage's actions.
+
+     One likely problem is if the tools-src archive is a complete
+     source archive including lots of non-compiler related components
+     (eg 'bzip2' or 'lynx').  In this case the problem is that the
+     configure script in the top level of the sources is not that
+     smart and it will try to build *every* component in the source
+     directories even when the compiler is not ready for them.
+
+     The simplest solution to this problem is to make an alternative
+     source tree which contains a limited set of symbolic links to the
+     real sources.  Here is the minimal set of links that are needed:
+
+       bfd            binutils      bison           boehm-gc
+       config         config.guess  config.if       config-ml.in
+       config.sub     configure     configure.in    contrib
+       dejagnu        etc           fastjar         flex
+       gas            gcc           gettext         gettext.m4
+       glibc          gnupro        include         install-sh
+       intl           ld            libiberty       libstdc++-v3
+       libtool.m4     ltcf-c.sh     ltcf-cxx.sh     ltcf-gcj.sh
+       ltconfig       ltmain.sh     Makefile.def    Makefile.in
+       Makefile.tpl   makefile.vms  missing         mkdep
+       mkinstalldirs  mmalloc       move-if-change  newlib
+       opcodes        readline      sim             src-release
+       symlink-tree   texinfo       ylwrap          zlib
+     
+    Then change the tools-src symbolic link in the build/sources
+    directory to point to this symbolic link tree.
+
+    If the script completes successfully the final, built toolchain
+    will have been installed into the directory created in step 3.
+    

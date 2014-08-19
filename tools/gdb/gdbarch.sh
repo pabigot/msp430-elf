@@ -2,7 +2,7 @@
 
 # Architecture commands for GDB, the GNU debugger.
 #
-# Copyright (C) 1998-2012 Free Software Foundation, Inc.
+# Copyright (C) 1998-2014 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -47,7 +47,10 @@ do_read ()
 {
     comment=""
     class=""
-    while read line
+    # On some SH's, 'read' trims leading and trailing whitespace by
+    # default (e.g., bash), while on others (e.g., dash), it doesn't.
+    # Set IFS to empty to disable the trimming everywhere.
+    while IFS='' read line
     do
 	if test "${line}" = ""
 	then
@@ -337,8 +340,8 @@ function_list ()
   cat <<EOF
 i:const struct bfd_arch_info *:bfd_arch_info:::&bfd_default_arch_struct::::gdbarch_bfd_arch_info (gdbarch)->printable_name
 #
-i:int:byte_order:::BFD_ENDIAN_BIG
-i:int:byte_order_for_code:::BFD_ENDIAN_BIG
+i:enum bfd_endian:byte_order:::BFD_ENDIAN_BIG
+i:enum bfd_endian:byte_order_for_code:::BFD_ENDIAN_BIG
 #
 i:enum gdb_osabi:osabi:::GDB_OSABI_UNKNOWN
 #
@@ -466,13 +469,11 @@ m:const char *:register_name:int regnr:regnr::0
 # use "register_type".
 M:struct type *:register_type:int reg_nr:reg_nr
 
-# See gdbint.texinfo, and PUSH_DUMMY_CALL.
 M:struct frame_id:dummy_id:struct frame_info *this_frame:this_frame
 # Implement DUMMY_ID and PUSH_DUMMY_CALL, then delete
 # deprecated_fp_regnum.
 v:int:deprecated_fp_regnum:::-1:-1::0
 
-# See gdbint.texinfo.  See infcall.c.
 M:CORE_ADDR:push_dummy_call:struct value *function, struct regcache *regcache, CORE_ADDR bp_addr, int nargs, struct value **args, CORE_ADDR sp, int struct_return, CORE_ADDR struct_addr:function, regcache, bp_addr, nargs, args, sp, struct_return, struct_addr
 v:int:call_dummy_location::::AT_ENTRY_POINT::0
 M:CORE_ADDR:push_dummy_code:CORE_ADDR sp, CORE_ADDR funaddr, struct value **args, int nargs, struct type *value_type, CORE_ADDR *real_pc, CORE_ADDR *bp_addr, struct regcache *regcache:sp, funaddr, args, nargs, value_type, real_pc, bp_addr, regcache
@@ -485,8 +486,13 @@ M:void:print_vector_info:struct ui_file *file, struct frame_info *frame, const c
 m:int:register_sim_regno:int reg_nr:reg_nr::legacy_register_sim_regno::0
 m:int:cannot_fetch_register:int regnum:regnum::cannot_register_not::0
 m:int:cannot_store_register:int regnum:regnum::cannot_register_not::0
-# setjmp/longjmp support.
+
+# Determine the address where a longjmp will land and save this address
+# in PC.  Return nonzero on success.
+#
+# FRAME corresponds to the longjmp frame.
 F:int:get_longjmp_target:struct frame_info *frame, CORE_ADDR *pc:frame, pc
+
 #
 v:int:believe_pcc_promotion:::::::
 #
@@ -574,9 +580,6 @@ m:CORE_ADDR:convert_from_func_ptr_addr:CORE_ADDR addr, struct target_ops *targ:a
 # sort of generic thing to handle alignment or segmentation (it's
 # possible it should be in TARGET_READ_PC instead).
 m:CORE_ADDR:addr_bits_remove:CORE_ADDR addr:addr::core_addr_identity::0
-# It is not at all clear why gdbarch_smash_text_address is not folded into
-# gdbarch_addr_bits_remove.
-m:CORE_ADDR:smash_text_address:CORE_ADDR addr:addr::core_addr_identity::0
 
 # FIXME/cagney/2001-01-18: This should be split in two.  A target method that
 # indicates if the target needs software single step.  An ISA method to
@@ -589,7 +592,7 @@ m:CORE_ADDR:smash_text_address:CORE_ADDR addr:addr::core_addr_identity::0
 # FIXME/cagney/2001-01-18: The logic is backwards.  It should be asking if the
 # target can single step.  If not, then implement single step using breakpoints.
 #
-# A return value of 1 means that the software_single_step breakpoints 
+# A return value of 1 means that the software_single_step breakpoints
 # were inserted; 0 means they were not.
 F:int:software_single_step:struct frame_info *frame:frame
 
@@ -641,12 +644,23 @@ v:struct core_regset_section *:core_regset_sections:const char *name, int len:::
 # Create core file notes
 M:char *:make_corefile_notes:bfd *obfd, int *note_size:obfd, note_size
 
+# The elfcore writer hook to use to write Linux prpsinfo notes to core
+# files.  Most Linux architectures use the same prpsinfo32 or
+# prpsinfo64 layouts, and so won't need to provide this hook, as we
+# call the Linux generic routines in bfd to write prpsinfo notes by
+# default.
+F:char *:elfcore_write_linux_prpsinfo:bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prpsinfo *info:obfd, note_data, note_size, info
+
 # Find core file memory regions
 M:int:find_memory_regions:find_memory_region_ftype func, void *data:func, data
 
 # Read offset OFFSET of TARGET_OBJECT_LIBRARIES formatted shared libraries list from
 # core file into buffer READBUF with length LEN.
 M:LONGEST:core_xfer_shared_libraries:gdb_byte *readbuf, ULONGEST offset, LONGEST len:readbuf, offset, len
+
+# Read offset OFFSET of TARGET_OBJECT_LIBRARIES_AIX formatted shared
+# libraries list from core file into buffer READBUF with length LEN.
+M:LONGEST:core_xfer_shared_libraries_aix:gdb_byte *readbuf, ULONGEST offset, LONGEST len:readbuf, offset, len
 
 # How the core target converts a PTID from a core file to a string.
 M:char *:core_pid_to_str:ptid_t ptid:ptid
@@ -788,6 +802,15 @@ M:int:process_record_signal:struct regcache *regcache, enum gdb_signal signal:re
 # (target_wait, target_resume, etc.).
 M:enum gdb_signal:gdb_signal_from_target:int signo:signo
 
+# Signal translation: translate the GDB's internal signal number into
+# the inferior's signal (target's) representation.  The implementation
+# of this method must be host independent.  IOW, don't rely on symbols
+# of the NAT_FILE header (the nm-*.h files), the host <signal.h>
+# header, or similar headers.
+# Return the target signal number if found, or -1 if the GDB internal
+# signal number is invalid.
+M:int:gdb_signal_to_target:enum gdb_signal signal:signal
+
 # Extra signal info inspection.
 #
 # Return a type suitable to inspect extra signal information.
@@ -803,29 +826,34 @@ M:LONGEST:get_syscall_number:ptid_t ptid:ptid
 
 # SystemTap related fields and functions.
 
-# Prefix used to mark an integer constant on the architecture's assembly
+# A NULL-terminated array of prefixes used to mark an integer constant
+# on the architecture's assembly.
 # For example, on x86 integer constants are written as:
 #
 #  \$10 ;; integer constant 10
 #
 # in this case, this prefix would be the character \`\$\'.
-v:const char *:stap_integer_prefix:::0:0::0:gdbarch->stap_integer_prefix
+v:const char *const *:stap_integer_prefixes:::0:0::0:pstring_list (gdbarch->stap_integer_prefixes)
 
-# Suffix used to mark an integer constant on the architecture's assembly.
-v:const char *:stap_integer_suffix:::0:0::0:gdbarch->stap_integer_suffix
+# A NULL-terminated array of suffixes used to mark an integer constant
+# on the architecture's assembly.
+v:const char *const *:stap_integer_suffixes:::0:0::0:pstring_list (gdbarch->stap_integer_suffixes)
 
-# Prefix used to mark a register name on the architecture's assembly.
+# A NULL-terminated array of prefixes used to mark a register name on
+# the architecture's assembly.
 # For example, on x86 the register name is written as:
 #
 #  \%eax ;; register eax
 #
 # in this case, this prefix would be the character \`\%\'.
-v:const char *:stap_register_prefix:::0:0::0:gdbarch->stap_register_prefix
+v:const char *const *:stap_register_prefixes:::0:0::0:pstring_list (gdbarch->stap_register_prefixes)
 
-# Suffix used to mark a register name on the architecture's assembly
-v:const char *:stap_register_suffix:::0:0::0:gdbarch->stap_register_suffix
+# A NULL-terminated array of suffixes used to mark a register name on
+# the architecture's assembly.
+v:const char *const *:stap_register_suffixes:::0:0::0:pstring_list (gdbarch->stap_register_suffixes)
 
-# Prefix used to mark a register indirection on the architecture's assembly.
+# A NULL-terminated array of prefixes used to mark a register
+# indirection on the architecture's assembly.
 # For example, on x86 the register indirection is written as:
 #
 #  \(\%eax\) ;; indirecting eax
@@ -834,9 +862,10 @@ v:const char *:stap_register_suffix:::0:0::0:gdbarch->stap_register_suffix
 #
 # Please note that we use the indirection prefix also for register
 # displacement, e.g., \`4\(\%eax\)\' on x86.
-v:const char *:stap_register_indirection_prefix:::0:0::0:gdbarch->stap_register_indirection_prefix
+v:const char *const *:stap_register_indirection_prefixes:::0:0::0:pstring_list (gdbarch->stap_register_indirection_prefixes)
 
-# Suffix used to mark a register indirection on the architecture's assembly.
+# A NULL-terminated array of suffixes used to mark a register
+# indirection on the architecture's assembly.
 # For example, on x86 the register indirection is written as:
 #
 #  \(\%eax\) ;; indirecting eax
@@ -845,18 +874,18 @@ v:const char *:stap_register_indirection_prefix:::0:0::0:gdbarch->stap_register_
 #
 # Please note that we use the indirection suffix also for register
 # displacement, e.g., \`4\(\%eax\)\' on x86.
-v:const char *:stap_register_indirection_suffix:::0:0::0:gdbarch->stap_register_indirection_suffix
+v:const char *const *:stap_register_indirection_suffixes:::0:0::0:pstring_list (gdbarch->stap_register_indirection_suffixes)
 
-# Prefix used to name a register using GDB's nomenclature.
+# Prefix(es) used to name a register using GDB's nomenclature.
 #
 # For example, on PPC a register is represented by a number in the assembly
 # language (e.g., \`10\' is the 10th general-purpose register).  However,
 # inside GDB this same register has an \`r\' appended to its name, so the 10th
 # register would be represented as \`r10\' internally.
-v:const char *:stap_gdb_register_prefix:::0:0::0:gdbarch->stap_gdb_register_prefix
+v:const char *:stap_gdb_register_prefix:::0:0::0:pstring (gdbarch->stap_gdb_register_prefix)
 
 # Suffix used to name a register using GDB's nomenclature.
-v:const char *:stap_gdb_register_suffix:::0:0::0:gdbarch->stap_gdb_register_suffix
+v:const char *:stap_gdb_register_suffix:::0:0::0:pstring (gdbarch->stap_gdb_register_suffix)
 
 # Check if S is a single operand.
 #
@@ -943,6 +972,11 @@ m:void:gen_return_address:struct agent_expr *ax, struct axs_value *value, CORE_A
 # Implement the "info proc" command.
 M:void:info_proc:char *args, enum info_proc_what what:args, what
 
+# Implement the "info proc" command for core files.  Noe that there
+# are two "info_proc"-like methods on gdbarch -- one for core files,
+# one for live targets.
+M:void:core_info_proc:char *args, enum info_proc_what what:args, what
+
 # Iterate over all objfiles in the order that makes the most sense
 # for the architecture to make global symbol searches.
 #
@@ -958,6 +992,8 @@ M:void:info_proc:char *args, enum info_proc_what what:args, what
 # inspected when the symbol search was requested.
 m:void:iterate_over_objfiles_in_search_order:iterate_over_objfiles_in_search_order_cb_ftype *cb, void *cb_data, struct objfile *current_objfile:cb, cb_data, current_objfile:0:default_iterate_over_objfiles_in_search_order::0
 
+# Ravenscar arch-dependent ops.
+v:struct ravenscar_arch_ops *:ravenscar_ops:::NULL:NULL::0:host_address_to_string (gdbarch->ravenscar_ops)
 EOF
 }
 
@@ -1011,8 +1047,7 @@ cat <<EOF
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
-   2007, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (C) 1998-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -1068,7 +1103,6 @@ struct disassemble_info;
 struct target_ops;
 struct obstack;
 struct bp_target_info;
-struct dwarf_expr_piece;
 struct target_desc;
 struct displaced_step_closure;
 struct core_regset_section;
@@ -1076,18 +1110,28 @@ struct syscall;
 struct agent_expr;
 struct axs_value;
 struct stap_parse_info;
+struct ravenscar_arch_ops;
+struct elf_internal_linux_prpsinfo;
 
-/* The architecture associated with the connection to the target.
- 
-   The architecture vector provides some information that is really
-   a property of the target: The layout of certain packets, for instance;
-   or the solib_ops vector.  Etc.  To differentiate architecture accesses
-   to per-target properties from per-thread/per-frame/per-objfile properties,
-   accesses to per-target properties should be made through target_gdbarch.
+/* The architecture associated with the inferior through the
+   connection to the target.
 
-   Eventually, when support for multiple targets is implemented in
-   GDB, this global should be made target-specific.  */
-extern struct gdbarch *target_gdbarch;
+   The architecture vector provides some information that is really a
+   property of the inferior, accessed through a particular target:
+   ptrace operations; the layout of certain RSP packets; the solib_ops
+   vector; etc.  To differentiate architecture accesses to
+   per-inferior/target properties from
+   per-thread/per-frame/per-objfile properties, accesses to
+   per-inferior/target properties should be made through this
+   gdbarch.  */
+
+/* This is a convenience wrapper for 'current_inferior ()->gdbarch'.  */
+extern struct gdbarch *target_gdbarch (void);
+
+/* The initial, default architecture.  It uses host values (for want of a better
+   choice).  */
+extern struct gdbarch startup_gdbarch;
+
 
 /* Callback type for the 'iterate_over_objfiles_in_search_order'
    gdbarch  method.  */
@@ -1235,9 +1279,9 @@ struct gdbarch_info
   const struct bfd_arch_info *bfd_arch_info;
 
   /* Use default: BFD_ENDIAN_UNKNOWN (NB: is not ZERO).  */
-  int byte_order;
+  enum bfd_endian byte_order;
 
-  int byte_order_for_code;
+  enum bfd_endian byte_order_for_code;
 
   /* Use default: NULL (ZERO).  */
   bfd *abfd;
@@ -1324,15 +1368,9 @@ extern int gdbarch_update_p (struct gdbarch_info info);
 extern struct gdbarch *gdbarch_find_by_info (struct gdbarch_info info);
 
 
-/* Helper function.  Set the global "target_gdbarch" to "gdbarch".
+/* Helper function.  Set the target gdbarch to "gdbarch".  */
 
-   FIXME: kettenis/20031124: Of the functions that follow, only
-   gdbarch_from_bfd is supposed to survive.  The others will
-   dissappear since in the future GDB will (hopefully) be truly
-   multi-arch.  However, for now we're still stuck with the concept of
-   a single active architecture.  */
-
-extern void deprecated_target_gdbarch_select_hack (struct gdbarch *gdbarch);
+extern void set_target_gdbarch (struct gdbarch *gdbarch);
 
 
 /* Register per-architecture data-pointer.
@@ -1406,7 +1444,7 @@ cat <<EOF
 #include "floatformat.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "reggroups.h"
 #include "osabi.h"
 #include "gdb_obstack.h"
@@ -1449,6 +1487,35 @@ pstring (const char *string)
   return string;
 }
 
+/* Helper function to print a list of strings, represented as "const
+   char *const *".  The list is printed comma-separated.  */
+
+static char *
+pstring_list (const char *const *list)
+{
+  static char ret[100];
+  const char *const *p;
+  size_t offset = 0;
+
+  if (list == NULL)
+    return "(null)";
+
+  ret[0] = '\0';
+  for (p = list; *p != NULL && offset < sizeof (ret); ++p)
+    {
+      size_t s = xsnprintf (ret + offset, sizeof (ret) - offset, "%s, ", *p);
+      offset += 2 + s;
+    }
+
+  if (offset > 0)
+    {
+      gdb_assert (offset - 2 < sizeof (ret));
+      ret[offset - 2] = '\0';
+    }
+
+  return ret;
+}
+
 EOF
 
 # gdbarch open the gdbarch object
@@ -1479,9 +1546,6 @@ printf "\n"
 printf "  /* per-architecture data-pointers.  */\n"
 printf "  unsigned nr_data;\n"
 printf "  void **data;\n"
-printf "\n"
-printf "  /* per-architecture swap-regions.  */\n"
-printf "  struct gdbarch_swap *swap;\n"
 printf "\n"
 cat <<EOF
   /* Multi-arch values.
@@ -1548,8 +1612,8 @@ done
 cat <<EOF
   /* target specific vector and its dump routine.  */
   NULL, NULL,
-  /*per-architecture data-pointers and swap regions.  */
-  0, NULL, NULL,
+  /*per-architecture data-pointers.  */
+  0, NULL,
   /* Multi-arch values */
 EOF
 function_list | while do_read
@@ -1563,7 +1627,6 @@ cat <<EOF
   /* startup_gdbarch() */
 };
 
-struct gdbarch *target_gdbarch = &startup_gdbarch;
 EOF
 
 # Create a new gdbarch struct
@@ -2278,13 +2341,21 @@ gdbarch_find_by_info (struct gdbarch_info info)
 /* Make the specified architecture current.  */
 
 void
-deprecated_target_gdbarch_select_hack (struct gdbarch *new_gdbarch)
+set_target_gdbarch (struct gdbarch *new_gdbarch)
 {
   gdb_assert (new_gdbarch != NULL);
   gdb_assert (new_gdbarch->initialized_p);
-  target_gdbarch = new_gdbarch;
+  current_inferior ()->gdbarch = new_gdbarch;
   observer_notify_architecture_changed (new_gdbarch);
   registers_changed ();
+}
+
+/* Return the current inferior's arch.  */
+
+struct gdbarch *
+target_gdbarch (void)
+{
+  return current_inferior ()->gdbarch;
 }
 
 extern void _initialize_gdbarch (void);

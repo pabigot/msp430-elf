@@ -1,5 +1,5 @@
 /* Subroutines for the gcc driver.
-   Copyright (C) 2007-2013 Free Software Foundation, Inc.
+   Copyright (C) 2007-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -190,7 +190,7 @@ elf_platform (void)
   return NULL;
 }
 
-/* Returns AT_PLATFORM if present, otherwise generic 32.  */
+/* Returns AT_DCACHEBSIZE if present, otherwise generic 32.  */
 
 static int
 elf_dcachebsize (void)

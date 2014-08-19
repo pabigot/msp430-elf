@@ -74,3 +74,4 @@ main ()
   printf ("c == %d, d == %d\n", c, d);
   return c != d || wrong;
 }
+// { dg-require-effective-target size32plus }

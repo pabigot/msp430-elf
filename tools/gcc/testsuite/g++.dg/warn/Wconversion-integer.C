@@ -2,8 +2,8 @@
    C++ equivalent of gcc/testsuite/gcc.dg/Wconversion-integer.c  */
 
 // { dg-do compile } 
-// { dg-options "-fsigned-char -Wconversion" } 
 // { dg-require-effective-target int32plus }
+// { dg-options "-fsigned-char -Wconversion" } 
 
 #include <limits.h>
 

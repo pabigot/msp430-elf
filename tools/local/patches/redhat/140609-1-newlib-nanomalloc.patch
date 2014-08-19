@@ -1,0 +1,259 @@
+Make nano-malloc the default for MSP430
+
+2014-06-09  DJ Delorie  <dj@redhat.com>
+
+	* configure.host (default_newlib_nano_malloc): New.
+	(msp430): Set it.
+	* configure.in (newlib_nano_malloc): Leave unset if not set by
+	the user.
+	* configure: Regenerate.
+	* libc/configure.in (NEWLIB_NANO_MALLOC): Set after running
+	configure.host.
+	(newlib_nano_malloc): Leave unset if not set by	the user.
+	* libc/configure: Regenerate.
+
+Index: newlib/configure
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/newlib/configure,v
+retrieving revision 1.25
+diff -p -U 5 -r1.25 configure
+--- newlib/configure	20 Feb 2014 13:50:11 -0000	1.25
++++ newlib/configure	10 Jun 2014 03:18:08 -0000
+@@ -2425,11 +2425,11 @@ if test "${enable_newlib_nano_malloc+set
+     no)  newlib_nano_malloc=no  ;;
+     *)   as_fn_error $? "bad value ${enableval} for newlib-nano-malloc option" "$LINENO" 5 ;;
+   esac
+  fi
+ else
+-  newlib_nano_malloc=no
++  newlib_nano_malloc=
+ fi
+ 
+ # Check whether --enable-newlib-unbuf-stream-opt was given.
+ if test "${enable_newlib_unbuf_stream_opt+set}" = set; then :
+   enableval=$enable_newlib_unbuf_stream_opt; if test "${newlib_unbuf_stream_opt+set}" != set; then
+Index: newlib/configure.host
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/newlib/configure.host,v
+retrieving revision 1.47
+diff -p -U 5 -r1.47 configure.host
+--- newlib/configure.host	20 Feb 2014 13:50:11 -0000	1.47
++++ newlib/configure.host	10 Jun 2014 03:18:08 -0000
+@@ -69,10 +69,11 @@ have_sys_mach_dir=no
+ default_newlib_io_c99_formats=no
+ default_newlib_io_long_long=no
+ default_newlib_io_long_double=no
+ default_newlib_io_pos_args=no
+ default_newlib_atexit_dynamic_alloc=yes
++default_newlib_nano_malloc=no
+ aext=a
+ oext=o
+ lpfx="lib_a-"
+ 
+ case "${target_optspace}:${host}" in
+@@ -227,10 +228,11 @@ case "${host_cpu}" in
+   msp430*)
+ 	newlib_cflags="${newlib_cflags} -DPREFER_SIZE_OVER_SPEED -DSMALL_MEMORY"
+ 	newlib_cflags="${newlib_cflags} -ffunction-sections -fdata-sections "
+ 	newlib_cflags="${newlib_cflags} -mOs "
+ 	machine_dir=msp430
++	default_newlib_nano_malloc="yes"
+ 	;;
+   mt*)
+ 	machine_dir=mt
+ 	;;
+   nds32*)
+@@ -833,10 +835,17 @@ if [ "x${newlib_atexit_dynamic_alloc}" =
+ 	if [ ${default_newlib_atexit_dynamic_alloc} = "yes" ]; then
+ 		newlib_atexit_dynamic_alloc="yes"; 
+ 	fi
+ fi
+ 
++# Enable nano-malloc if requested.
++if [ "x${newlib_nano_malloc}" = "x" ]; then
++	if [ ${default_newlib_nano_malloc} = "yes" ]; then
++		newlib_nano_malloc="yes";
++	fi
++fi
++
+ # Remove rpc headers if xdr_dir not specified
+ if [ "x${xdr_dir}" = "x" ]; then
+ 	noinclude="${noinclude} rpc/types.h rpc/xdr.h"
+ fi
+ 
+Index: newlib/configure.in
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/newlib/configure.in,v
+retrieving revision 1.13
+diff -p -U 5 -r1.13 configure.in
+--- newlib/configure.in	20 Feb 2014 13:50:11 -0000	1.13
++++ newlib/configure.in	10 Jun 2014 03:18:08 -0000
+@@ -179,11 +179,11 @@ AC_ARG_ENABLE(newlib-nano-malloc,
+   case "${enableval}" in
+     yes) newlib_nano_malloc=yes ;;
+     no)  newlib_nano_malloc=no  ;;
+     *)   AC_MSG_ERROR(bad value ${enableval} for newlib-nano-malloc option) ;;
+   esac
+- fi], [newlib_nano_malloc=no])dnl
++ fi], [newlib_nano_malloc=])dnl
+ 
+ dnl Support --disable-newlib-unbuf-stream-opt
+ AC_ARG_ENABLE(newlib-unbuf-stream-opt,
+ [  --disable-newlib-unbuf-stream-opt    disable unbuffered stream optimization in streamio],
+ [if test "${newlib_unbuf_stream_opt+set}" != set; then
+Index: newlib/libc/configure
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/newlib/libc/configure,v
+retrieving revision 1.23
+diff -p -U 5 -r1.23 configure
+--- newlib/libc/configure	20 Feb 2014 13:50:11 -0000	1.23
++++ newlib/libc/configure	10 Jun 2014 03:18:11 -0000
+@@ -671,10 +671,12 @@ CPPFLAGS
+ CFLAGS
+ LIBTOOL
+ OBJDUMP
+ DLLTOOL
+ SED
++NEWLIB_NANO_MALLOC_FALSE
++NEWLIB_NANO_MALLOC_TRUE
+ sys_dir
+ machine_dir
+ libm_machine_dir
+ lpfx
+ aext
+@@ -747,12 +749,10 @@ build_vendor
+ build_cpu
+ build
+ newlib_basedir
+ MAY_SUPPLY_SYSCALLS_FALSE
+ MAY_SUPPLY_SYSCALLS_TRUE
+-NEWLIB_NANO_MALLOC_FALSE
+-NEWLIB_NANO_MALLOC_TRUE
+ target_alias
+ host_alias
+ build_alias
+ LIBS
+ ECHO_T
+@@ -2222,19 +2222,11 @@ if test "${enable_newlib_nano_malloc+set
+    yes) newlib_nano_malloc=yes ;;
+    no)  newlib_nano_malloc=no ;;
+    *) as_fn_error $? "bad value ${enableval} for newlib-nano-malloc" "$LINENO" 5 ;;
+  esac
+ else
+-  newlib_nano_malloc=no
+-fi
+-
+- if test x$newlib_nano_malloc = xyes; then
+-  NEWLIB_NANO_MALLOC_TRUE=
+-  NEWLIB_NANO_MALLOC_FALSE='#'
+-else
+-  NEWLIB_NANO_MALLOC_TRUE='#'
+-  NEWLIB_NANO_MALLOC_FALSE=
++  newlib_nano_malloc=
+ fi
+ 
+ 
+ 
+ # Make sure we can run config.sub.
+@@ -3809,10 +3801,19 @@ OBJEXT=${oext}
+ 
+ 
+ 
+ 
+ 
++ if test x$newlib_nano_malloc = xyes; then
++  NEWLIB_NANO_MALLOC_TRUE=
++  NEWLIB_NANO_MALLOC_FALSE='#'
++else
++  NEWLIB_NANO_MALLOC_TRUE='#'
++  NEWLIB_NANO_MALLOC_FALSE=
++fi
++
++
+ { $as_echo "$as_me:${as_lineno-$LINENO}: checking for a sed that does not truncate output" >&5
+ $as_echo_n "checking for a sed that does not truncate output... " >&6; }
+ if ${ac_cv_path_SED+:} false; then :
+   $as_echo_n "(cached) " >&6
+ else
+@@ -11498,11 +11499,11 @@ else
+   lt_cv_dlopen_self=cross
+ else
+   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
+   lt_status=$lt_dlunknown
+   cat > conftest.$ac_ext <<_LT_EOF
+-#line 11503 "configure"
++#line 11504 "configure"
+ #include "confdefs.h"
+ 
+ #if HAVE_DLFCN_H
+ #include <dlfcn.h>
+ #endif
+@@ -11604,11 +11605,11 @@ else
+   lt_cv_dlopen_self_static=cross
+ else
+   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
+   lt_status=$lt_dlunknown
+   cat > conftest.$ac_ext <<_LT_EOF
+-#line 11609 "configure"
++#line 11610 "configure"
+ #include "confdefs.h"
+ 
+ #if HAVE_DLFCN_H
+ #include <dlfcn.h>
+ #endif
+@@ -12217,14 +12218,10 @@ done
+ LIBOBJS=$ac_libobjs
+ 
+ LTLIBOBJS=$ac_ltlibobjs
+ 
+ 
+-if test -z "${NEWLIB_NANO_MALLOC_TRUE}" && test -z "${NEWLIB_NANO_MALLOC_FALSE}"; then
+-  as_fn_error $? "conditional \"NEWLIB_NANO_MALLOC\" was never defined.
+-Usually this means the macro was only invoked conditionally." "$LINENO" 5
+-fi
+ if test -z "${MAY_SUPPLY_SYSCALLS_TRUE}" && test -z "${MAY_SUPPLY_SYSCALLS_FALSE}"; then
+   as_fn_error $? "conditional \"MAY_SUPPLY_SYSCALLS\" was never defined.
+ Usually this means the macro was only invoked conditionally." "$LINENO" 5
+ fi
+  if test -n "$EXEEXT"; then
+@@ -12269,10 +12266,14 @@ Usually this means the macro was only in
+ fi
+ if test -z "${USE_LIBTOOL_TRUE}" && test -z "${USE_LIBTOOL_FALSE}"; then
+   as_fn_error $? "conditional \"USE_LIBTOOL\" was never defined.
+ Usually this means the macro was only invoked conditionally." "$LINENO" 5
+ fi
++if test -z "${NEWLIB_NANO_MALLOC_TRUE}" && test -z "${NEWLIB_NANO_MALLOC_FALSE}"; then
++  as_fn_error $? "conditional \"NEWLIB_NANO_MALLOC\" was never defined.
++Usually this means the macro was only invoked conditionally." "$LINENO" 5
++fi
+ if test -z "${am__fastdepCC_TRUE}" && test -z "${am__fastdepCC_FALSE}"; then
+   as_fn_error $? "conditional \"am__fastdepCC\" was never defined.
+ Usually this means the macro was only invoked conditionally." "$LINENO" 5
+ fi
+ if test -z "${HAVE_SIGNAL_DIR_TRUE}" && test -z "${HAVE_SIGNAL_DIR_FALSE}"; then
+Index: newlib/libc/configure.in
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/newlib/libc/configure.in,v
+retrieving revision 1.11
+diff -p -U 5 -r1.11 configure.in
+--- newlib/libc/configure.in	20 Feb 2014 13:50:11 -0000	1.11
++++ newlib/libc/configure.in	10 Jun 2014 03:18:11 -0000
+@@ -22,15 +22,16 @@ AC_ARG_ENABLE(newlib_nano_malloc,
+ [  --enable-newlib-nano-malloc    Use small-footprint nano-malloc implementation],
+ [case "${enableval}" in
+    yes) newlib_nano_malloc=yes ;;
+    no)  newlib_nano_malloc=no ;;
+    *) AC_MSG_ERROR(bad value ${enableval} for newlib-nano-malloc) ;;
+- esac],[newlib_nano_malloc=no])
+-AM_CONDITIONAL(NEWLIB_NANO_MALLOC, test x$newlib_nano_malloc = xyes)
++ esac],[newlib_nano_malloc=])
+ 
+ NEWLIB_CONFIGURE(..)
+ 
++AM_CONDITIONAL(NEWLIB_NANO_MALLOC, test x$newlib_nano_malloc = xyes)
++
+ dnl We have to enable libtool after NEWLIB_CONFIGURE because if we try and
+ dnl add it into NEWLIB_CONFIGURE, executable tests are made before the first
+ dnl line of the macro which fail because appropriate LDFLAGS are not set.
+ _LT_DECL_SED
+ _LT_PROG_ECHO_BACKSLASH

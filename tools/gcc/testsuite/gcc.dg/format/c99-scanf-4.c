@@ -17,3 +17,4 @@ foo (char **sp, wchar_t **lsp)
   scanf ("%m[bcd]", sp); /* { dg-warning "C" "%m[]" } */
   scanf ("%ml[bcd]", lsp); /* { dg-warning "C" "%ml[]" } */
 }
+/* { dg-prune-output ".*__int20.*" } */

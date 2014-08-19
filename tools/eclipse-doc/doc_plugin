@@ -1,0 +1,157 @@
+#!/bin/sh
+# This script takes the inputs in this order, 
+# 	SRCDIR 	   - path of the source directory
+# 	BUILDDIR   - path of the build directory 
+#	GNUPRO_VER - version of GNUPro tools (eg 03r2 for gnupro-03r2 release).
+# 	GNUPRO_DOC_PATH - specify the path where GNUPro docs are checked out. 
+#			  This is required to build gnupro.html.
+#
+# Usage eclipse_plugin SRCDIR BUILDDIR GNUPRO_VER GNUPRO_DOC_PATH
+#
+# This script generates html files from .texi/.texinfo files for all GNUPro 
+# tools (GCC,GAS,LD,GDB,BINUTILS) and GNUPro user's manual.
+# These documents are required to plugin GNUPro docs into Eclipse IDE.
+# This script will create toc.xml which is required for Eclipse plugin.
+# Later the script will create a directory under BUILDDIR which contains 
+# all the files which is required to plugin GNUPro docs into Eclipse IDE.
+# Later the script add CSS coding implementations to the html files which 
+# is used by Eclipse IDE
+#
+
+SRCDIR=$1
+BUILDDIR=$2
+XMLFILE=$SRCDIR/eclipse-doc/toc.xml
+DSTDIR=$SRCDIR/eclipse-doc
+mkdir -p $DSTDIR
+
+# Add Eclipse stylesheet to all the GNUPro docs. 
+TMPFILE=$DSTDIR/eclipse_stylesheet
+echo "<style type=\"text/css\"> " > $TMPFILE
+echo "@import url(../notnetscape4.css);" >> $TMPFILE
+echo "</style>" >> $TMPFILE
+echo "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=iso-8859-1\">" >> $TMPFILE
+echo "<link rel=\"stylesheet\" href=\"book.css\" charset=\"ISO-8859-1\" type=\"text/css\">" >> $TMPFILE
+
+# Initialize toc.xml file
+echo "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" > $XMLFILE
+echo "<?NLS TYPE=\"org.eclipse.help.toc\"?>" >> $XMLFILE
+echo "<!-- ============================================ -->" >> $XMLFILE
+echo "<!-- Define the GNUPro 03r2 Tools online help     -->" >> $XMLFILE
+echo "<!-- ============================================ --> " >> $XMLFILE
+echo "" >> $XMLFILE    
+echo "<toc label=\"GNUPro 03r2 User Guide\">" >> $XMLFILE
+echo "" >> $XMLFILE
+
+# Add GNUPro user manual.
+if test "${4+set}" = set; then
+   cd $4 
+   make clean
+   make gnupro.html
+   cp -r gnupro $DSTDIR
+   sed '/<head>/ r $TMPFILE' gnupro/gnupro_toc.html >& /tmp/temp 
+   cp /tmp/temp gnupro/gnupro_toc.html
+   echo "<topic label=\"Using the GNUPro Toolkit\" href=\"gnupro/gnupro_toc.html\" />" >> $XMLFILE
+   echo "" >> $XMLFILE
+else 
+   echo "No GNUPro user's manual"
+fi
+ 
+# clean old directories.
+cd $DSTDIR
+rm -rf gcc cpp as ld binutils gdb doc.zip
+
+# start making .html files for GNUPro tools.
+
+if test -d $BUILDDIR/gcc; then
+   cd $BUILDDIR/gcc
+   rm -rf doc/gcc.info doc/cpp.info
+   make MAKEINFO="makeinfo --html" MAKEINFOFLAGS="" info
+   cp -r doc/gcc.info $DSTDIR/gcc
+   cp -r doc/cpp.info $DSTDIR/cpp
+   sed '/<head>/ r $TMPFILE' $DSTDIR/cpp/index.html >& /tmp/temp
+   mv /tmp/temp $DSTDIR/cpp/index.html
+   sed '/<head>/ r $TMPFILE' $DSTDIR/gcc/index.html >& /tmp/temp 
+   mv /tmp/temp $DSTDIR/gcc/index.html
+   echo "<topic label=\"Compiler\">" >> $XMLFILE
+   echo "  <topic label=\"The GNU C Preprocessor\" href=\"cpp/index.html\" />" >> $XMLFILE
+   echo "  <topic label=\"Using the GNU Compiler\" href=\"gcc/index.html\" />" >> $XMLFILE
+   echo "</topic>" >> $XMLFILE
+   echo "" >> $XMLFILE
+fi
+
+if test -d $BUILDDIR/gas || test -s $BUILDDIR/ld || test $BUILDDIR/binutils; then
+  echo "<topic label=\"Binutils\">" >> $XMLFILE
+fi
+
+if test -d $BUILDDIR/gas ;  then
+   cd $BUILDDIR/gas
+   rm -rf doc/as.info*
+   make MAKEINFO="makeinfo --html" info
+   cp -r doc/as.info $DSTDIR/as
+   sed '/<head>/ r $TMPFILE' $DSTDIR/as/index.html >& /tmp/temp
+   mv /tmp/temp $DSTDIR/as/index.html
+   echo "  <topic label=\"Using the GNU Assembler\" href=\"as/index.html\" />" >> $XMLFILE
+fi
+
+if test -d $BUILDDIR/ld; then
+   cd $BUILDDIR/ld
+   rm -rf ld.info*
+   make MAKEINFO="makeinfo --html" info
+   mkdir $DSTDIR/ld
+   mv *.html $DSTDIR/ld
+   sed '/<head>/ r $TMPFILE' $DSTDIR/ld/index.html >& /tmp/temp
+   mv /tmp/temp $DSTDIR/ld/index.html
+   echo "  <topic label=\"Using the GNU Linker\" href=\"ld/index.html\" />" >> $XMLFILE
+fi
+
+if test -d $BUILDDIR/binutils ; then
+   cd $BUILDDIR/binutils
+   rm -rf doc/binutils*
+   make MAKEINFO="makeinfo --html" info
+   cp -r doc/binutils $DSTDIR
+   sed '/<head>/ r $TMPFILE' $DSTDIR/binutils/index.html >& /tmp/temp
+   mv /tmp/temp $DSTDIR/binutils/index.html
+   echo "  <topic label=\"Using the GNU Binary Utilities\" href=\"binutils/index.html\" />" >> $XMLFILE
+fi
+
+if test -d $BUILDDIR/gas || test -s $BUILDDIR/ld || test $BUILDDIR/binutils ; then
+  echo "</topic>" >> $XMLFILE
+  echo "" >> $XMLFILE
+fi
+
+if test -d $BUILDDIR/gdb ; then
+   cd $BUILDDIR/gdb
+   rm -rf doc/gdb.info*
+   make MAKEINFO="makeinfo --html" info
+   cp -r doc/gdb.info $DSTDIR/gdb
+   sed '/<head>/ r $TMPFILE' $DSTDIR/gdb/index.html >& /tmp/temp
+   mv /tmp/temp $DSTDIR/gdb/index.html
+   echo "<topic label=\"Debugger\">" >> $XMLFILE
+   echo "  <topic label=\"Using the GNU Debugger\" href=\"gdb/index.html\" />" >> $XMLFILE
+   echo "</topic>" >> $XMLFILE
+fi
+
+echo "" >> $XMLFILE
+echo "</toc>" $XMLFILE
+
+# create a doc.zip file of all the .html files.
+cd $DSTDIR
+zip doc.zip gnupro/* gcc/* cpp/* as/* ld/* binutils/* gdb/* *.css 
+
+rm -rf gcc cpp as ld binutils gdb $TMPFILE /tmp/temp
+
+# create a plugin directory and copy all the necessary files into it.
+
+ECLIPSE_DIR=/$BUILDDIR/eclipse/com.redhat.eclipse.gnupro.$3.doc_1.0.0
+mkdir -p $ECLIPSE_DIR
+
+if test -d $ECLIPSE_DIR; then
+  cp $DSTDIR/doc.zip $ECLIPSE_DIR
+  cp $DSTDIR/toc.xml $ECLIPSE_DIR
+  cp $SRCDIR/doc/eclipse/plugin.{properties,xml} $ECLIPSE_DIR
+fi
+
+# clean up everything in eclipse dir 
+cd $DSTDIR
+rm -rf doc.zip toc.xml 
+

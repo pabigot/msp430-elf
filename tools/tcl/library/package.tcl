@@ -3,7 +3,7 @@
 # utility procs formerly in init.tcl which can be loaded on demand
 # for package management.
 #
-# RCS: @(#) $Id: package.tcl,v 1.3 2003/03/19 23:01:19 cagney Exp $
+# RCS: @(#) $Id: package.tcl,v 1.3 2012/04/18 00:36:27 kevinb Exp $
 #
 # Copyright (c) 1991-1993 The Regents of the University of California.
 # Copyright (c) 1994-1998 Sun Microsystems, Inc.

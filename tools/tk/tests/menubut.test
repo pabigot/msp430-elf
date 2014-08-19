@@ -6,7 +6,7 @@
 # Copyright (c) 1998-1999 by Scriptics Corporation.
 # All rights reserved.
 #
-# RCS: @(#) $Id: menubut.test,v 1.12 2003/03/19 23:02:08 cagney Exp $
+# RCS: @(#) $Id: menubut.test,v 1.3 2012/04/18 00:37:05 kevinb Exp $
 
 # XXX This test file is woefully incomplete right now.  If any part
 # XXX of a procedure has tests then the whole procedure has tests,

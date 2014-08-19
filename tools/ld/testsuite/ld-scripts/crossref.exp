@@ -31,9 +31,11 @@ if { ![is_remote host] && [which $CC] == 0 } {
     return
 }
 
+global CFLAGS
+set old_CFLAGS "$CFLAGS"
+
 # Xtensa targets currently default to putting literal values in a separate
 # section and that requires linker script support, so put literals in text.
-global CFLAGS
 if [istarget xtensa*-*-*] {
     set CFLAGS "$CFLAGS -mtext-section-literals"
 }
@@ -41,7 +43,7 @@ if [istarget xtensa*-*-*] {
 # If we have a compiler that doesn't use/reference dot-symbols, then
 # calls to functions reference the .opd section function descriptor.
 # This makes NOCROSSREFS rather useless on powerpc64.
-if [istarget powerpc64*-*-*] {
+if [istarget powerpc64-*-*] {
     set CFLAGS "$CFLAGS -mcall-aixdesc"
 }
 
@@ -61,6 +63,7 @@ if { ![ld_compile $CC "$srcdir/$subdir/cross1.c" tmpdir/cross1.o] \
      || ![ld_compile $CC "$srcdir/$subdir/cross2.c" tmpdir/cross2.o] } {
     unresolved $test1
     unresolved $test2
+    set CFLAGS "$old_CFLAGS"
     return
 }
 
@@ -73,19 +76,10 @@ if [istarget sh64*-*-elf] {
 
 # IA64 has both ordered and unordered sections in an input file.
 setup_xfail ia64-*-*
+# MSP430 has its own orphan placing code.
+setup_xfail msp430-*-*
 
-# V850 targets may need some special support symbols defined.
-if [istarget v850*-*-elf] {
-    set flags "--defsym __save_r31=0 --defsym __return_r31=0 --defsym __ctbp=0"
-}
-
-set exec_output [run_host_cmd "$ld" "$flags -o tmpdir/cross1 -T $srcdir/$subdir/cross1.t tmpdir/cross1.o tmpdir/cross2.o"]
-
-set exec_output [prune_warnings $exec_output]
-
-regsub -all "(^|\n)($ld: warning: cannot find entry symbol\[^\n\]*\n?)" $exec_output "\\1" exec_output
-
-if [string match "" $exec_output] then {
+if [ld_simple_link $CC tmpdir/cross1 "$flags -T $srcdir/$subdir/cross1.t tmpdir/cross1.o tmpdir/cross2.o"] {
     fail $test1
 } else {
     verbose -log "$exec_output"
@@ -100,6 +94,7 @@ if [string match "" $exec_output] then {
 
 if { ![ld_compile $CC "$srcdir/$subdir/cross3.c" tmpdir/cross3.o] } {
     unresolved $test2
+    set CFLAGS "$old_CFLAGS"
     return
 }
 
@@ -123,11 +118,13 @@ if [string match "" $exec_output] then {
 
 if { ![ld_compile $CC "$srcdir/$subdir/cross4.c" tmpdir/cross4.o] } {
     unresolved $test3
+    set CFLAGS "$old_CFLAGS"
     return
 }
 
 if ![ld_relocate $ld tmpdir/cross3-partial.o "tmpdir/cross1.o tmpdir/cross4.o"] {
     unresolved $test3
+    set CFLAGS "$old_CFLAGS"
     return
 }
 
@@ -143,3 +140,5 @@ if [string match "" $exec_output] then {
     verbose -log "$exec_output"
     fail $test3
 }
+
+set CFLAGS "$old_CFLAGS"

@@ -1,5 +1,7 @@
 /* { dg-do run } */
-/* { dg-skip-if "test too big for the msp430" { msp430*-*-* } "*" "" } */
+/* This test is too big for small targets.  */
+/* { dg-require-effective-target size32plus } */
+/* { dg-require-effective-target int32plus } */
 
 #include <stdlib.h>
 

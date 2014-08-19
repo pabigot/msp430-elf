@@ -1,3 +1,5 @@
+// { dg-skip-if "bogus test" { *-*-* } { "*" } { "" } }
+
 // 5.3.4/19: If the lookup finds the two-parameter form of a usual
 // deallocation function (3.7.4.2) and that function, considered as a
 // placement deallocation function, would have been selected as a match for

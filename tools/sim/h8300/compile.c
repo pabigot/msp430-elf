@@ -5113,10 +5113,3 @@ sim_set_callbacks (struct host_callback_struct *ptr)
 {
   sim_callback = ptr;
 }
-
-SIM_RC
-sim_hardware_watchpoint (SIM_DESC sd, SIM_WATCH_ACTION action,
-                         SIM_WATCH_TYPE type, SIM_ADDR addr, long length)
-{
-  return SIM_RC_FAIL;
-}

@@ -1,74 +1,90 @@
-2013-03-04  Nick Clifton  <nickc@redhat.com>
+2014-06-18  Kevin Buettner  <kevinb@redhat.com>
 
-	* msp430/msp430-sim.c (put_op): Disable serial port hacks - they
-	interfere with gcc test runs.
+	* msp430/msp43-sim.c (sim_open): Allow accesses to low memory.
 
-2013-02-25  Nick Clifton  <nickc@redhat.com>
+2014-06-18  Nick Clifton  <nickc@redhat.com>
 
-	* msp430/trace.c (remove_useless_symbols): Treat assembler local
-	labels as useless.
+	* msp430/msp430-sim.c (sim_open): Explicitly set memory regions.
+	(get_op): Issue an error message on illegal reads.
+	(put_op): Likewise for illegal writes.
 
-2013-02-20  Nick Clifton  <nickc@redhat.com>
+2014-06-13  Nick Clifton  <nickc@redhat.com>
 
-	* msp430/msp430-sim.c (sim_open): Increase simulated memory to 16M.
+	* msp430/msp430-sim.c (get_op): Correct indirect addressing bias.
+	(out_op): Likewise.
 
-2013-02-11  DJ Delorie  <dj@redhat.com>
+2014-06-06  Nick Clifton  <nickc@redhat.com>
 
-	* msp430/msp430-sim.c (sim_open): Check for _CIOBUF_ also.
-	(msp430_cio): Change CIO to int16 length.
+	* msp430/msp430-sim.c (get_op): Fix decoding of extended indexed
+	addressing.
 
-2013-01-16  Nick Clifton  <nickc@redhat.com>
+2014-04-23  Nick Clifton  <nickc@redhat.com>
 
-	* rx.rx.c (decode_opcode): Handle SATR.
+	* msp430/msp430-sim.c (put_op): Fix detection of writes to
+	hardware registers.
 
-2013-01-11  DJ Delorie  <dj@redhat.com>
+2014-04-07  Nick Clifton  <nickc@redhat.com>
 
-	* msp430/msp430-sim.c (put_op): Keep SP word-aligned.
-	(msp430_step_once): Likewise.
+	* msp430/msp430-sim.c (sim_open): Add hardware multiply memory region.
+	(get_op): Add support for reading hardware multiply registers.
+	(put_op): Add support for writing to hardware multiply registers.
+	(msp430_step_once): Fix size of stack accesses.  Add support for
+	CPUX interrupt returns.
 
-2013-01-10  DJ Delorie  <dj@redhat.com>
+2011-09-27  Kevin Buettner  <kevinb@redhat.com>
 
-	* msp430/msp430-sim.c (sim_open): Map memory above 64k.
-	(msp430_step_once): Allow PC values above 64k.
+	* sh/interp.c (MA): Adjust cast to avoid warning on 64-bit hosts.
+	(sim_store_register, sim_fetch_register): Return length, not -1.
 
-2013-01-03  Nick Clifton  <nickc@redhat.com>
+2010-09-29  Brendan Conoboy  <blc@redhat.com>
 
-	* msp430/Makefile.in: Add copyright notice.
+	* common/sim-hrw.c: Add const to buf in sim_write prototype.
+	* h8300/compile.c: likewise
+	* m32c/gdb-if.c: likewise
+	* sh/interp.c: likewise
 
-2012-12-18  Nick Clifton  <nickc@redhat.com>
+2010-08-31  Nick Clifton  <nickc@redhat.com>
 
-	* msp430/trace.c (remove_useless_symbols): Include local symbols.
+	* v850/v850.igen: Trap when executing a NOP at address 0x0.
 
-2012-11-06  DJ Delorie  <dj@redhat.com>
+2010-06-17  Nick Clifton  <nickc@redhat.com>
 
-	* msp430/msp430-sim.h (msp430_cpu_state): Store CIO addresses as
-	well.
-	* msp430/msp430-sim.c (bfd.h): Include.
-	(lookup_symbol): New.
-	(sim_open): Look up the CIO symbols.
-	(msp430_cio): New.  Only write() is supported for now.
-	(msp430_step_once): If the CIO address is executed, run CIO
-	commands.
-	(msp430_step_once): Discriminate between BRK and NOP.
-	(sim_create_inferior): Save reset vector to $R0 as well.
+	* v850/simops.c (OP_10007E0): Treat a signal of 6 as SIM_SIGABRT.
 
-2012-09-06  DJ Delorie  <dj@redhat.com>
+2009-01-02  Nick Clifton  <nickc@redhat.com>
 
-	* msp430: New Directory.
-	* configure.txt: Add it.
-	* configure: Regenerate.
+	* Import this patch from the mainline:
+	2008-07-11  Hans-Peter Nilsson  <hp@axis.com>
 
-2011-06-07  Kevin Buettner  <kevinb@redhat.com>
-	    Nick Clifton  <nickc@redhat.com>
+	* common/common.m4: Add test for libz and zlib.h.
 
-	* rx/gdb-if.c (sim_read): Retry a read that fails the first time.
-	* rx/err.c (rx_overrides): Default to allowing access to address 0.
+	And then:
 
-2010-07-30  Nick Clifton  <nickc@redhat.com>
+	* arm/configure: Regenerate.
+	* cris/configure: Regenerate.
+	* d10v/configure: Regenerate.
+	* erc32/configure: Regenerate.
+	* frv/configure: Regenerate.
+	* h8300/configure: Regenerate.
+	* iq2000/configure: Regenerate.
+	* m32c/configure: Regenerate.
+	* m32r/configure: Regenerate.
+	* m68hc11/configure: Regenerate.
+	* mcore/configure: Regenerate.
+	* mips/configure: Regenerate.
+	* mn10300/configure: Regenerate.
+	* ppc/configure: Regenerate.
+	* sh/configure: Regenerate.
+	* sh64/configure: Regenerate.
+	* v850/configure: Regenerate.
 
-	* load.c (rx_load): Do not load segments that are not readable.
-	* mem.c (mem_put_byte): In verbose mode, issue a message when
-	generating an access exception.
+	* Finally import this patch as well:
+	2008-07-11  Hans-Peter Nilsson  <hp@axis.com>
+
+	* ppc/configure.ac: Add test for libz and zlib.h.
+	* ppc/Makefile.in (LIBS): Set from @LIBS@.
+	* ppc/configure: Regenerate.
+	* ppc/config.in: Ditto.
 
 2008-07-23  Nick Clifton  <nickc@redhat.com>
 
@@ -86,84 +102,106 @@
 
 	* frv/mloop.in: Add missing start of line comment marker.
 
-2007-09-04  Nick Clifton  <nickc@redhat.com>
+	* mn10300/interp.c: Remove inclusion of sysdep.h from the bfd
+	build directory - it has incompatible definitions of malloc and
+	realloc.
+	* sh/interp.c: Likewise.
+	* mips/interp.c: Likewise.
 
-	* m68k: New simulator.
+2008-07-17  Kevin Buettner  <kevinb@redhat.com>
 
-2007-03-28  Kevin Buettner  <kevinb@redhat.com>
-
-	* common/aclocal.m4: Include gettext-sister.m4 instead of
-	gettext.m4.  Use ZW_GNU_GETTEXT_SISTER_DIR instead of
-	CY_GNU_GETTEXT.
-	* arm/configure, frv/configure, h8300/configure, m32c/configure,
-	m32r/configure, m68hc11/configure, mips/configure, sh/configure,
-	sh64/configure, v850/configure: Regenerate.
-
-2005-02-17  Jim Blandy  <jimb@redhat.com>
-
-	* configure.ac: Fix configury for sh64.
-	* configure: Regenerated.
-
-2004-06-16  Alexandre Oliva  <aoliva@redhat.com>
-
-	* configure.in: Drop h8sx, revert to h8300.
-	* configure: Likewise.
-
-2003-02-18  Michael Snyder  <msnyder@redhat.com>
-
-	* configure.in: Add testsuite to subdirs for h8sx.
+	* configure.ac: Add support for m68k target.
 	* configure: Regenerate.
 
-2003-01-09  Andrew Cagney  <cagney@redhat.com>
+2007-03-09  Nick Clifton  <nickc@redhat.com>
 
-	* configure.in: When h800*-*-* configure h8sx directory.
+	* configure.ac: Add support for m68k target.
 	* configure: Regenerate.
 
-2002-05-07  matthew green <mrg@redhat.com>
+2007-02-15  Nick Clifton  <nickc@redhat.com>
 
-	* configure, configure.in: Decend into "testsuite" for PowerPC.
+	* Import this patch from the mainline:
+	2007-02-15  Nick Clifton  <nickc@redhat.com>
 
-2002-01-10  Nick Clifton  <nickc@cambridge.redhat.com>
+	* armemu.c (handle_v6_insn): Fix typo in sign extension test of
+	the sext and sxtah instructions.
 
-	* MAINTAINERS: Import text from sourceware.
+2005-10-26  Corinna Vinschen  <vinschen@redhat.com>
 
-2000-10-31  Ben Elliston  <bje@redhat.com>
+	Same change as on FSF trunk, 2005-04-15.  Just use configure.in
+	instead of configure.ac to circumvent configure problems in gnupro.
 
-	* configure.in: Match sh64, not sh5.
+	* configure.in: Add explicit sh64 case.
 	* configure: Regenerate.
 
-2000-10-09  Ben Elliston  <bje@redhat.com>
+2005-05-24  Nick Clifton  <nickc@redhat.com>
 
-	* configure.in: Add support for sh5.
+	* arm/thumbemu.c (handle_v6_thumb_insn): New function.
+	(ARMul_ThumbDecode): Call handle_v6_thumb_insn() when an undefined
+	instruction binary is encountered.
+
+2005-05-24  Corinna Vinschen  <vinschen@redhat.com>
+
+	* configure.in: Add entry for iq2000.
 	* configure: Regenerate.
 
-Thu Jul 27 20:47:00 2000  Andrew Cagney  <cagney@b1.cygnus.com>
+	* arm/configure: Regenerate.
+	* d10v/configure: Regenerate.
+	* erc32/configure: Regenerate.
+	* frv/configure: Regenerate.
+	* h8300/configure: Regenerate.
+	* igen/configure: Regenerate.
+	* iq2000/configure: Regenerate.
+	* m32r/configure: Regenerate.
+	* m68hc11/configure: Regenerate.
+	* mcore/configure: Regenerate.
+	* mips/configure: Regenerate.
+	* mn10300/configure: Regenerate.
+	* ppc/configure: Regenerate.
+	* sh/configure: Regenerate.
+	* v850/configure: Regenerate.
 
-	* Makefile.in: Put autoconf messages into ChangeLog.Cygnus.
+2005-05-06  Kevin Buettner  <kevinb@redhat.com>
 
-2000-04-20  Nick Clifton  <nickc@cygnus.com>
-
-	* configure.in (extra_subdirs): Add testsuite to strongarm
-	directories.
+	From Will Cohen  <wcohen@redhat.com>:
+	* configure.in: Added entry for m68k.
 	* configure: Regenerate.
 
-Thu Apr 29 17:10:20 1999  Dave Brolley  <brolley@cygnus.com>
+2005-04-20  Nick Clifton  <nickc@redhat.com>
 
-	* configure.in: Add support for frv.
-	* configure: Regenerate.
+	* arm/armemu.c (handle_v6_insn): New function - emulate a few
+	of the v6 instructions - the ones now generated by GCC.
+	(ARMulEmulate32): Call handle_v6_insn when a possible v6 insn
+	is found.
+	* arm/armdefs.h (struct ARMul_State): Add new field: is_v6.
+	(ARM_v6_Prop): Define.
+	* arm/arminit.c (ARMul_NewState): Initialise the v6 flag.
+	(ARMul_SelectProcessor): Determine if the v6 flag should be
+	set.
+	* arm/wrapper.c (sim_create_inferior): For unknown
+	architectures, default to allowing the v6 instructions.
 
-1999-02-10  Doug Evans  <devans@casey.cygnus.com>
+2004-09-30  Corinna Vinschen  <vinschen@redhat.com>
 
-	* configure.in (sparc*): Configure sparc subdir if --with-cgen or
-	--with-cgen-sim.
+	* Import gdb_6_2-branch.
+
+2004-06-27  Alexandre Oliva  <aoliva@redhat.com>
+
+	2003-07-23  Richard Sandiford  <rsandifo@redhat.com>
+	* h8300/compile.c (sim_resume): Make sure that dst.reg refers to
+	the right register byte in mova/sz.l @(dd,RnL),ERn.
+	2003-07-21  Richard Sandiford  <rsandifo@redhat.com>
+	* h8300/compile.c (sim_resume): Zero-extend immediate to muls,
+	mulsu, mulxs, divs and divxs.
+
+	* h8300/compile.c (sim_load): Update sd->memory_size.
+
+2004-05-24  Alexandre Oliva  <aoliva@redhat.com>
+
+	2001-08-07  Michael Keezer <mkeezer@redhat.com>
+	* configure.in (target): Add am33_2.0 to mn10300 case
 	* configure: Rebuild.
-
-1999-02-02  Doug Evans  <devans@casey.cygnus.com>
-
-	* configure.in (sparc*): Configure sparc subdir if --with-cgen.
-	* configure: Rebuild.
-
-
+
 Local Variables:
 mode: change-log
 left-margin: 8

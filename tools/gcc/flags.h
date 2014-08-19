@@ -1,5 +1,5 @@
 /* Compilation switch flag definitions for GCC.
-   Copyright (C) 1987-2013 Free Software Foundation, Inc.
+   Copyright (C) 1987-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -24,12 +24,6 @@ along with GCC; see the file COPYING3.  If not see
 #include "options.h"
 
 #if !defined(IN_LIBGCC2) && !defined(IN_TARGET_LIBS) && !defined(IN_RTS)
-
-/* Nonzero means a filename was provided, to gcc,
-   and hence a pathname was provided to cc1.  It must be read in
-   as an extension to the printf format string checker.  */
-
-extern const char * printf_formats_pathname;
 
 /* Names of debug_info_type, for error messages.  */
 extern const char *const debug_type_names[];

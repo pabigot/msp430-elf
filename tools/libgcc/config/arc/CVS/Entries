@@ -1,0 +1,16 @@
+/asm.h/1.1/Tue Mar  4 14:20:46 2014//Tmsp430-14r1-branch
+/crtg.S/1.1/Tue Mar  4 14:20:46 2014//Tmsp430-14r1-branch
+/crtgend.S/1.1/Tue Mar  4 14:20:46 2014//Tmsp430-14r1-branch
+/crti.S/1.1/Tue Mar  4 14:20:46 2014//Tmsp430-14r1-branch
+/crtn.S/1.1/Tue Mar  4 14:20:46 2014//Tmsp430-14r1-branch
+/divtab-arc700.c/1.1/Tue Mar  4 14:20:46 2014//Tmsp430-14r1-branch
+/dp-hack.h/1.1/Tue Mar  4 14:20:46 2014//Tmsp430-14r1-branch
+/fp-hack.h/1.1/Tue Mar  4 14:20:46 2014//Tmsp430-14r1-branch
+/initfini.c/1.1/Tue Mar  4 14:20:46 2014//Tmsp430-14r1-branch
+/lib1funcs.S/1.1/Tue Mar  4 14:20:46 2014//Tmsp430-14r1-branch
+/libgcc-excl.ver/1.1/Tue Mar  4 14:20:46 2014//Tmsp430-14r1-branch
+/t-arc/1.1/Tue Mar  4 14:20:46 2014//Tmsp430-14r1-branch
+/t-arc-newlib/1.1/Tue Mar  4 14:20:46 2014//Tmsp430-14r1-branch
+/t-arc700-uClibc/1.1/Tue Mar  4 14:20:46 2014//Tmsp430-14r1-branch
+D/gmon////
+D/ieee-754////

@@ -26,3 +26,4 @@ int main()
 
      t=(Test)i;
   }
+// { dg-require-effective-target size32plus }

@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 template <class T> T* create ();
 
 template <class T> T* create2()

@@ -1,7 +1,6 @@
 /* PR tree-optimization/52267 */
-/* { dg-do run } */
+/* { dg-do run { target { ! int16 } } } */
 /* { dg-options "-O2" } */
-/* { dg-require-effective-target int32plus } */
 
 extern void abort (void);
 

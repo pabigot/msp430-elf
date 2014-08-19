@@ -1,6 +1,6 @@
 // { dg-do run  }
-// { dg-options "-O" }
 // { dg-require-effective-target int32plus }
+// { dg-options "-O" }
 
 #include <iostream>
 #include <typeinfo>

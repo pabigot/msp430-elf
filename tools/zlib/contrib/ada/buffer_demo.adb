@@ -6,7 +6,7 @@
 --  Open source license information is in the zlib.ads file.  --
 ----------------------------------------------------------------
 --
---  $Id: buffer_demo.adb,v 1.91 2013/09/22 18:21:41 nickc Exp $
+--  $Id: buffer_demo.adb,v 1.13 2014/02/20 13:52:54 nickc Exp $
 
 --  This demo program provided by Dr Steve Sangwine <sjs@essex.ac.uk>
 --

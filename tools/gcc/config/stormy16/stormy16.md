@@ -1,5 +1,5 @@
 ;; XSTORMY16 Machine description template
-;; Copyright (C) 1997-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1997-2014 Free Software Foundation, Inc.
 ;; Contributed by Red Hat, Inc.
 
 ;; This file is part of GCC.
@@ -114,7 +114,7 @@
 ;; insns like this one are never generated.
 
 (define_insn "pushqi1"
-  [(set (mem:QI (post_inc (reg:HI 15)))
+  [(set (mem:QI (post_inc:HI (reg:HI 15)))
 	(match_operand:QI 0 "register_operand" "r"))]
   ""
   "push %0"
@@ -123,7 +123,7 @@
 
 (define_insn "popqi1"
   [(set (match_operand:QI 0 "register_operand" "=r")
-	(mem:QI (pre_dec (reg:HI 15))))]
+	(mem:QI (pre_dec:HI (reg:HI 15))))]
   ""
   "pop %0"
   [(set_attr "psw_operand" "nop")
@@ -168,7 +168,7 @@
    (set_attr "psw_operand" "0,0,0,0,nop,0,nop,0,0")])
 
 (define_insn "pushhi1"
-  [(set (mem:HI (post_inc (reg:HI 15)))
+  [(set (mem:HI (post_inc:HI (reg:HI 15)))
 	(match_operand:HI 0 "register_operand" "r"))]
   ""
   "push %0"
@@ -177,7 +177,7 @@
 
 (define_insn "pophi1"
   [(set (match_operand:HI 0 "register_operand" "=r")
-	(mem:HI (pre_dec (reg:HI 15))))]
+	(mem:HI (pre_dec:HI (reg:HI 15))))]
   ""
   "pop %0"
   [(set_attr "psw_operand" "nop")
@@ -268,32 +268,17 @@
   ""
   "cbw %0")
 
-;;--;; (define_insn "zero_extendqihi2"
-;;--;;   [(set (match_operand:HI                 0 "register_operand" 	   "=e,r")
-;;--;; 	(zero_extend:HI (match_operand:QI 1 "nonimmediate_operand" "m,0")))]
-;;--;;   ""
-;;--;;   "@
-;;--;;    mov.b %0, %1
-;;--;;    shl %0,#8\n\tshr %0,#8"
-;;--;;   [(set_attr "psw_operand" "nop,0")
-;;--;;    (set_attr_alternative "length"
-;;--;; 	     [(const_int 4)
-;;--;; 	      (const_int 8)])])
-
-;; This peephole is here to catch cases where GCC loads a value
-;; using alternative 0 of the zero_extendhiqi pattern and then
-;; zero-extends it again using alternative 1.  This can happen
-;; when volatile unsigned char * pointers are used in the source code.
-(define_peephole2
-  [(set (match_operand:HI                 0 "register_operand")
-	(zero_extend:HI (match_operand:QI 1 "memory_operand")))
-   (set (match_dup 0)
-	(zero_extend:HI (match_operand:QI 2 "register_operand")))]
-  "REGNO (operands[0]) == REGNO (operands[2])"
-  [(set (match_dup 0)
-	(zero_extend:HI (match_dup 1)))]
+(define_insn "zero_extendqihi2"
+  [(set (match_operand:HI                 0 "register_operand" 	   "=e,r")
+	(zero_extend:HI (match_operand:QI 1 "nonimmediate_operand" "m,0")))]
   ""
-)
+  "@
+   mov.b %0, %1
+   shl %0,#8\n\tshr %0,#8"
+  [(set_attr "psw_operand" "nop,0")
+   (set_attr_alternative "length"
+	     [(const_int 4)
+	      (const_int 8)])])
 
 ;; ::::::::::::::::::::
 ;; ::
@@ -561,7 +546,7 @@
 
 ;; Logical AND, 16-bit integers
 (define_insn "andhi3"
-  [(set (match_operand:HI 0 "xstormy16_below100_or_register" "=T,r,r,r,W")
+  [(set (match_operand:HI 0 "xstormy16_splittable_below100_or_register" "=T,r,r,r,W")
 	(and:HI (match_operand:HI 1 "xstormy16_below100_or_register" "%0,0,0,0,0")
 		(match_operand:HI 2 "nonmemory_operand" "L,r,K,i,K")))]
   ""
@@ -582,15 +567,7 @@
 	(and:QI (match_dup 4)
 		(match_dup 5)))]
   { int s = ((INTVAL (operands[2]) & 0xff) == 0xff) ? 1 : 0;
-    if (GET_CODE (operands[0]) == MEM
-	&& CONST_INT_P (XEXP (operands[0], 0)))
-      operands[3] = gen_rtx_MEM (QImode, GEN_INT (INTVAL (XEXP (operands[0], 0)) + s));
-    else  
     operands[3] = simplify_gen_subreg (QImode, operands[0], HImode, s);
-    if (GET_CODE (operands[1]) == MEM
-	&& CONST_INT_P (XEXP (operands[1], 0)))
-      operands[4] = gen_rtx_MEM (QImode, GEN_INT (INTVAL (XEXP (operands[1], 0)) + s));
-    else  
     operands[4] = simplify_gen_subreg (QImode, operands[1], HImode, s);
     operands[5] = simplify_gen_subreg (QImode, operands[2], HImode, s);
     operands[5] = GEN_INT (INTVAL (operands[5]) | ~ (HOST_WIDE_INT) 0xff);
@@ -598,7 +575,7 @@
 
 ;; Inclusive OR, 16-bit integers
 (define_insn "iorhi3"
-  [(set (match_operand:HI 0 "xstormy16_below100_or_register" "=T,r,r,r,W")
+  [(set (match_operand:HI 0 "xstormy16_splittable_below100_or_register" "=T,r,r,r,W")
 	(ior:HI (match_operand:HI 1 "xstormy16_below100_or_register" "%0,0,0,0,0")
 		(match_operand:HI 2 "nonmemory_operand" "L,r,J,i,J")))]
   ""
@@ -619,15 +596,7 @@
 	(ior:QI (match_dup 4)
 		(match_dup 5)))]
   { int s = ((INTVAL (operands[2]) & 0xff) == 0x00) ? 1 : 0;
-    if (GET_CODE (operands[0]) == MEM
-	&& CONST_INT_P (XEXP (operands[0], 0)))
-      operands[3] = gen_rtx_MEM (QImode, GEN_INT (INTVAL (XEXP (operands[0], 0)) + s));
-    else  
     operands[3] = simplify_gen_subreg (QImode, operands[0], HImode, s);
-    if (GET_CODE (operands[1]) == MEM
-	&& CONST_INT_P (XEXP (operands[1], 0)))
-      operands[4] = gen_rtx_MEM (QImode, GEN_INT (INTVAL (XEXP (operands[1], 0)) + s));
-    else  
     operands[4] = simplify_gen_subreg (QImode, operands[1], HImode, s);
     operands[5] = simplify_gen_subreg (QImode, operands[2], HImode, s);
     operands[5] = GEN_INT (INTVAL (operands[5]) & 0xff);
@@ -793,8 +762,10 @@
 (define_insn "cbranchhi"
   [(set (pc)
 	(if_then_else (match_operator:HI 1 "comparison_operator"
-				      [(match_operand:HI 2 "nonmemory_operand" "r,e,L")
-				       (match_operand:HI 3 "nonmemory_operand" "r,L,e")])
+				      [(match_operand:HI 2 "nonmemory_operand"
+					"r,e,L")
+				       (match_operand:HI 3 "nonmemory_operand"
+						      "r,L,e")])
 		      (label_ref (match_operand 0 "" ""))
 		      (pc)))
    (clobber (reg:BI CARRY_REG))]
@@ -824,42 +795,42 @@
   [(set_attr "branch_class" "bcc12")
    (set_attr "psw_operand" "0,0,1")])
 
-;;--;; (define_insn "*eqbranchsi"
-;;--;;   [(set (pc)
-;;--;; 	(if_then_else (match_operator:SI 1 "equality_operator"
-;;--;; 				      [(match_operand:SI 2 "register_operand"
-;;--;; 							 "r")
-;;--;; 				       (const_int 0)])
-;;--;; 		      (label_ref (match_operand 0 "" ""))
-;;--;; 		      (pc)))
-;;--;;    (clobber (match_operand:SI 3 "register_operand" "=2"))]
-;;--;;   ""
-;;--;;   "*
-;;--;; {
-;;--;;   return xstormy16_output_cbranch_si (operands[1], \"%l0\", 0, insn);
-;;--;; }"
-;;--;;   [(set_attr "branch_class" "bcc8p2")
-;;--;;    (set_attr "psw_operand" "clobber")])
-;;--;; 
-;;--;; (define_insn "*ineqbranch_1"
-;;--;;   [(set (pc)
-;;--;; 	(if_then_else (match_operator:HI 4 "xstormy16_ineqsi_operator"
-;;--;; 		       [(minus:HI (match_operand:HI 1 "register_operand" "T,r,r")
-;;--;; 			   (zero_extend:HI (reg:BI CARRY_REG)))
-;;--;; 			(match_operand:HI 3 "nonmemory_operand" "L,r,i")])
-;;--;; 		      (label_ref (match_operand 0 "" ""))
-;;--;; 		      (pc)))
-;;--;;    (set (match_operand:HI 2 "register_operand" "=1,1,1")
-;;--;; 	(minus:HI (minus:HI (match_dup 1) (zero_extend:HI (reg:BI CARRY_REG)))
-;;--;; 		  (match_dup 3)))
-;;--;;    (clobber (reg:BI CARRY_REG))]
-;;--;;   ""
-;;--;;   "*
-;;--;; {
-;;--;;   return xstormy16_output_cbranch_si (operands[4], \"%l0\", 0, insn);
-;;--;; }"
-;;--;;   [(set_attr "branch_class" "bcc8p2,bcc8p2,bcc8p4")
-;;--;;    (set_attr "psw_operand" "2,2,2")])
+(define_insn "*eqbranchsi"
+  [(set (pc)
+	(if_then_else (match_operator:SI 1 "equality_operator"
+				      [(match_operand:SI 2 "register_operand"
+							 "r")
+				       (const_int 0)])
+		      (label_ref (match_operand 0 "" ""))
+		      (pc)))
+   (clobber (match_operand:SI 3 "register_operand" "=2"))]
+  ""
+  "*
+{
+  return xstormy16_output_cbranch_si (operands[1], \"%l0\", 0, insn);
+}"
+  [(set_attr "branch_class" "bcc8p2")
+   (set_attr "psw_operand" "clobber")])
+
+(define_insn "*ineqbranch_1"
+  [(set (pc)
+	(if_then_else (match_operator:HI 4 "xstormy16_ineqsi_operator"
+		       [(minus:HI (match_operand:HI 1 "register_operand" "T,r,r")
+			   (zero_extend:HI (reg:BI CARRY_REG)))
+			(match_operand:HI 3 "nonmemory_operand" "L,r,i")])
+		      (label_ref (match_operand 0 "" ""))
+		      (pc)))
+   (set (match_operand:HI 2 "register_operand" "=1,1,1")
+	(minus:HI (minus:HI (match_dup 1) (zero_extend:HI (reg:BI CARRY_REG)))
+		  (match_dup 3)))
+   (clobber (reg:BI CARRY_REG))]
+  ""
+  "*
+{
+  return xstormy16_output_cbranch_si (operands[4], \"%l0\", 0, insn);
+}"
+  [(set_attr "branch_class" "bcc8p2,bcc8p2,bcc8p4")
+   (set_attr "psw_operand" "2,2,2")])
 
 ;; ::::::::::::::::::::
 ;; ::
@@ -958,8 +929,7 @@
    (parallel [(set (pc) (match_operand:HI 0 "register_operand" ""))
 	      (use (match_dup 1))])]
   ""
-  "operands[1] = gen_reg_rtx (HImode);
-  ")
+  "operands[1] = gen_reg_rtx (HImode);")
 
 (define_insn ""
   [(set (pc) (match_operand:HI 0 "register_operand" "r"))
@@ -1157,23 +1127,9 @@
 		      (pc)))
    (clobber (reg:BI CARRY_REG))]
   ""
-  "*
-  switch (get_attr_length (insn))
-  {
-  case 4: return \"bn %1,%B2,%l0\";
-  case 8: return \"bp %1,%B2,. + 8 | jmpf %l0\";
-  default: abort ();
-  }
-  "
-  [(set_attr "psw_operand" "nop")
-   (set (attr "length")
-	(if_then_else
-	   (and (ge (minus (match_dup 0) (pc)) (const_int -2048))
-		(le (minus (match_dup 0) (pc)) (const_int 2047)))
-	   (const_int 4)
-	   (const_int 8)))
-  ]
-)
+  "bn %1,%B2,%l0"
+  [(set_attr "length" "4")
+   (set_attr "psw_operand" "nop")])
 
 (define_insn "*bclrx2"
   [(set (pc)
@@ -1187,23 +1143,9 @@
 		      (pc)))
    (clobber (reg:BI CARRY_REG))]
   ""
-  "*
-  switch (get_attr_length (insn))
-  {
-  case 4: return \"bn %1,%B2,%l0\";
-  case 8: return \"bp %1,%B2,. + 8 | jmpf %l0\";
-  default: abort ();
-  }
-  "
-  [(set_attr "psw_operand" "nop")
-   (set (attr "length")
-	(if_then_else
-	   (and (ge (minus (match_dup 0) (pc)) (const_int -2048))
-		(le (minus (match_dup 0) (pc)) (const_int 2047)))
-	   (const_int 4)
-	   (const_int 8)))
-  ]
-)
+  "bn %1,%B2,%l0"
+  [(set_attr "length" "4")
+   (set_attr "psw_operand" "nop")])
 
 (define_insn "*bclrx3"
   [(set (pc)
@@ -1214,23 +1156,9 @@
 		      (pc)))
    (clobber (reg:BI CARRY_REG))]
   ""
-  "*
-  switch (get_attr_length (insn))
-  {
-  case 4: return \"bn %1,%B2,%l0\";
-  case 8: return \"bp %1,%B2,. + 8 | jmpf %l0\";
-  default: abort ();
-  }
-  "
-  [(set_attr "psw_operand" "nop")
-   (set (attr "length")
-	(if_then_else
-	   (and (ge (minus (match_dup 0) (pc)) (const_int -2048))
-		(le (minus (match_dup 0) (pc)) (const_int 2047)))
-	   (const_int 4)
-	   (const_int 8)))
-  ]
-)
+  "bn %1,%B2,%l0"
+  [(set_attr "length" "4")
+   (set_attr "psw_operand" "nop")])
 
 (define_insn "*bclr7"
   [(set (pc)
@@ -1242,23 +1170,9 @@
 		      (pc)))
    (clobber (reg:BI CARRY_REG))]
   ""
-  "*
-  switch (get_attr_length (insn))
-  {
-  case 4: return \"bn %1,#7,%l0\";
-  case 8: return \"bp %1,#7,. + 8 | jmpf %l0\";
-  default: abort ();
-  }
-  "
-  [(set_attr "psw_operand" "nop")
-   (set (attr "length")
-	(if_then_else
-	   (and (ge (minus (match_dup 0) (pc)) (const_int -2048))
-		(le (minus (match_dup 0) (pc)) (const_int 2047)))
-	   (const_int 4)
-	   (const_int 8)))
-  ]
-)
+  "bn %1,#7,%l0"
+  [(set_attr "length" "4")
+   (set_attr "psw_operand" "nop")])
 
 (define_insn "*bclr15"
   [(set (pc)
@@ -1268,23 +1182,9 @@
 		      (pc)))
    (clobber (reg:BI CARRY_REG))]
   ""
-  "*
-  switch (get_attr_length (insn))
-  {
-  case 4: return \"bn %1,#7,%l0\";
-  case 8: return \"bp %1,#7,. + 8 | jmpf %l0\";
-  default: abort ();
-  }
-  "
-  [(set_attr "psw_operand" "nop")
-   (set (attr "length")
-	(if_then_else
-	   (and (ge (minus (match_dup 0) (pc)) (const_int -2048))
-		(le (minus (match_dup 0) (pc)) (const_int 2047)))
-	   (const_int 4)
-	   (const_int 8)))
-  ]
-)
+  "bn %1,#7,%l0"
+  [(set_attr "length" "4")
+   (set_attr "psw_operand" "nop")])
 
 (define_insn "*bsetx"
   [(set (pc)
@@ -1295,23 +1195,9 @@
 		      (pc)))
    (clobber (reg:BI CARRY_REG))]
   ""
-  "*
-  switch (get_attr_length (insn))
-  {
-  case 4: return \"bp %1,%B2,%l0\";
-  case 8: return \"bn %1,%B2,. + 8 | jmpf %l0\";
-  default: abort ();
-  }
-  "
-  [(set_attr "psw_operand" "nop")
-   (set (attr "length")
-	(if_then_else
-	   (and (ge (minus (match_dup 0) (pc)) (const_int -2048))
-		(le (minus (match_dup 0) (pc)) (const_int 2047)))
-	   (const_int 4)
-	   (const_int 8)))
-  ]
-)
+  "bp %1,%B2,%l0"
+  [(set_attr "length" "4")
+   (set_attr "psw_operand" "nop")])
 
 (define_insn "*bsetx2"
   [(set (pc)
@@ -1322,23 +1208,9 @@
 		      (pc)))
    (clobber (reg:BI CARRY_REG))]
   ""
-  "*
-  switch (get_attr_length (insn))
-  {
-  case 4: return \"bp %1,%b2,%l0\";
-  case 8: return \"bn %1,%b2,. + 8 | jmpf %l0\";
-  default: abort ();
-  }
-  "
-  [(set_attr "psw_operand" "nop")
-   (set (attr "length")
-	(if_then_else
-	   (and (ge (minus (match_dup 0) (pc)) (const_int -2048))
-		(le (minus (match_dup 0) (pc)) (const_int 2047)))
-	   (const_int 4)
-	   (const_int 8)))
-  ]
-)
+  "bp %1,%b2,%l0"
+  [(set_attr "length" "4")
+   (set_attr "psw_operand" "nop")])
 
 (define_insn "*bsetx3"
   [(set (pc)
@@ -1349,23 +1221,9 @@
 		      (pc)))
    (clobber (reg:BI CARRY_REG))]
   ""
-  "*
-  switch (get_attr_length (insn))
-  {
-  case 4: return \"bp %1,%B2,%l0\";
-  case 8: return \"bn %1,%B2,. + 8 | jmpf %l0\";
-  default: abort ();
-  }
-  "
-  [(set_attr "psw_operand" "nop")
-   (set (attr "length")
-	(if_then_else
-	   (and (ge (minus (match_dup 0) (pc)) (const_int -2048))
-		(le (minus (match_dup 0) (pc)) (const_int 2047)))
-	   (const_int 4)
-	   (const_int 8)))
-  ]
-)
+  "bp %1,%B2,%l0"
+  [(set_attr "length" "4")
+   (set_attr "psw_operand" "nop")])
 
 (define_insn "*bset7"
   [(set (pc)
@@ -1375,23 +1233,9 @@
 		      (pc)))
    (clobber (reg:BI CARRY_REG))]
   ""
-  "*
-  switch (get_attr_length (insn))
-  {
-  case 4: return \"bp %1,#7,%l0\";
-  case 8: return \"bn %1,#7,. + 8 | jmpf %l0\";
-  default: abort ();
-  }
-  "
-  [(set_attr "psw_operand" "nop")
-   (set (attr "length")
-	(if_then_else
-	   (and (ge (minus (match_dup 0) (pc)) (const_int -2048))
-		(le (minus (match_dup 0) (pc)) (const_int 2047)))
-	   (const_int 4)
-	   (const_int 8)))
-  ]
-)
+  "bp %1,#7,%l0"
+  [(set_attr "length" "4")
+   (set_attr "psw_operand" "nop")])
 
 (define_insn "*bset15"
   [(set (pc)
@@ -1401,150 +1245,6 @@
 		      (pc)))
    (clobber (reg:BI CARRY_REG))]
   ""
-  "*
-  switch (get_attr_length (insn))
-  {
-  case 4: return \"bp %1,#7,%l0\";
-  case 8: return \"bn %1,#7,. + 8 | jmpf %l0\";
-  default: abort ();
-  }
-  "
-  [(set_attr "psw_operand" "nop")
-   (set (attr "length")
-	(if_then_else
-	   (and (ge (minus (match_dup 0) (pc)) (const_int -2048))
-		(le (minus (match_dup 0) (pc)) (const_int 2047)))
-	   (const_int 4)
-	   (const_int 8)))
-  ]
-)
-;;--;; (define_insn "*bclrx"
-;;--;;   [(set (pc)
-;;--;; 	(if_then_else (eq:HI (and:QI (match_operand:QI 1 "xstormy16_below100_operand" "W")
-;;--;; 				     (match_operand:HI 2 "immediate_operand" "i"))
-;;--;; 			     (const_int 0))
-;;--;; 		      (label_ref (match_operand 0 "" ""))
-;;--;; 		      (pc)))
-;;--;;    (clobber (reg:BI CARRY_REG))]
-;;--;;   ""
-;;--;;   "bn %1,%B2,%l0"
-;;--;;   [(set_attr "length" "4")
-;;--;;    (set_attr "psw_operand" "nop")])
-;;--;; 
-;;--;; (define_insn "*bclrx2"
-;;--;;   [(set (pc)
-;;--;; 	(if_then_else (zero_extract:HI
-;;--;; 		       (xor:HI (subreg:HI
-;;--;; 				(match_operand:QI 1 "xstormy16_below100_operand" "W") 0)
-;;--;; 			       (match_operand:HI 2 "xstormy16_onebit_set_operand" "J"))
-;;--;; 		       (const_int 1)
-;;--;; 		       (match_operand:HI 3 "immediate_operand" "i"))
-;;--;; 		      (label_ref (match_operand 0 "" ""))
-;;--;; 		      (pc)))
-;;--;;    (clobber (reg:BI CARRY_REG))]
-;;--;;   ""
-;;--;;   "bn %1,%B2,%l0"
-;;--;;   [(set_attr "length" "4")
-;;--;;    (set_attr "psw_operand" "nop")])
-;;--;; 
-;;--;; (define_insn "*bclrx3"
-;;--;;   [(set (pc)
-;;--;; 	(if_then_else (eq:HI (and:HI (zero_extend:HI (match_operand:QI 1 "xstormy16_below100_operand" "W"))
-;;--;; 				     (match_operand:HI 2 "immediate_operand" "i"))
-;;--;; 			     (const_int 0))
-;;--;; 		      (label_ref (match_operand 0 "" ""))
-;;--;; 		      (pc)))
-;;--;;    (clobber (reg:BI CARRY_REG))]
-;;--;;   ""
-;;--;;   "bn %1,%B2,%l0"
-;;--;;   [(set_attr "length" "4")
-;;--;;    (set_attr "psw_operand" "nop")])
-;;--;; 
-;;--;; (define_insn "*bclr7"
-;;--;;   [(set (pc)
-;;--;; 	(if_then_else (xor:HI (lshiftrt:HI (subreg:HI
-;;--;; 					    (match_operand:QI 1 "xstormy16_below100_operand" "W") 0)
-;;--;; 					   (const_int 7))
-;;--;; 			      (const_int 1))
-;;--;; 		      (label_ref (match_operand 0 "" ""))
-;;--;; 		      (pc)))
-;;--;;    (clobber (reg:BI CARRY_REG))]
-;;--;;   ""
-;;--;;   "bn %1,#7,%l0"
-;;--;;   [(set_attr "length" "4")
-;;--;;    (set_attr "psw_operand" "nop")])
-;;--;; 
-;;--;; (define_insn "*bclr15"
-;;--;;   [(set (pc)
-;;--;; 	(if_then_else (ge:HI (sign_extend:HI (match_operand:QI 1 "xstormy16_below100_operand" "W"))
-;;--;; 			     (const_int 0))
-;;--;; 		      (label_ref (match_operand 0 "" ""))
-;;--;; 		      (pc)))
-;;--;;    (clobber (reg:BI CARRY_REG))]
-;;--;;   ""
-;;--;;   "bn %1,#7,%l0"
-;;--;;   [(set_attr "length" "4")
-;;--;;    (set_attr "psw_operand" "nop")])
-;;--;; 
-;;--;; (define_insn "*bsetx"
-;;--;;   [(set (pc)
-;;--;; 	(if_then_else (ne:HI (and:QI (match_operand:QI 1 "xstormy16_below100_operand" "W")
-;;--;; 				     (match_operand:HI 2 "immediate_operand" "i"))
-;;--;; 			     (const_int 0))
-;;--;; 		      (label_ref (match_operand 0 "" ""))
-;;--;; 		      (pc)))
-;;--;;    (clobber (reg:BI CARRY_REG))]
-;;--;;   ""
-;;--;;   "bp %1,%B2,%l0"
-;;--;;   [(set_attr "length" "4")
-;;--;;    (set_attr "psw_operand" "nop")])
-;;--;; 
-;;--;; (define_insn "*bsetx2"
-;;--;;   [(set (pc)
-;;--;; 	(if_then_else (zero_extract:HI (match_operand:QI 1 "xstormy16_below100_operand" "W")
-;;--;; 				       (const_int 1)
-;;--;; 				       (match_operand:HI 2 "immediate_operand" "i"))
-;;--;; 		      (label_ref (match_operand 0 "" ""))
-;;--;; 		      (pc)))
-;;--;;    (clobber (reg:BI CARRY_REG))]
-;;--;;   ""
-;;--;;   "bp %1,%b2,%l0"
-;;--;;   [(set_attr "length" "4")
-;;--;;    (set_attr "psw_operand" "nop")])
-;;--;; 
-;;--;; (define_insn "*bsetx3"
-;;--;;   [(set (pc)
-;;--;; 	(if_then_else (ne:HI (and:HI (zero_extend:HI (match_operand:QI 1 "xstormy16_below100_operand" "W"))
-;;--;; 				     (match_operand:HI 2 "immediate_operand" "i"))
-;;--;; 			     (const_int 0))
-;;--;; 		      (label_ref (match_operand 0 "" ""))
-;;--;; 		      (pc)))
-;;--;;    (clobber (reg:BI CARRY_REG))]
-;;--;;   ""
-;;--;;   "bp %1,%B2,%l0"
-;;--;;   [(set_attr "length" "4")
-;;--;;    (set_attr "psw_operand" "nop")])
-;;--;; 
-;;--;; (define_insn "*bset7"
-;;--;;   [(set (pc)
-;;--;; 	(if_then_else (lshiftrt:HI (subreg:HI (match_operand:QI 1 "xstormy16_below100_operand" "W") 0)
-;;--;; 				   (const_int 7))
-;;--;; 		      (label_ref (match_operand 0 "" ""))
-;;--;; 		      (pc)))
-;;--;;    (clobber (reg:BI CARRY_REG))]
-;;--;;   ""
-;;--;;   "bp %1,#7,%l0"
-;;--;;   [(set_attr "length" "4")
-;;--;;    (set_attr "psw_operand" "nop")])
-;;--;; 
-;;--;; (define_insn "*bset15"
-;;--;;   [(set (pc)
-;;--;; 	(if_then_else (lt:HI (sign_extend:HI (match_operand:QI 1 "xstormy16_below100_operand" "W"))
-;;--;; 			     (const_int 0))
-;;--;; 		      (label_ref (match_operand 0 "" ""))
-;;--;; 		      (pc)))
-;;--;;    (clobber (reg:BI CARRY_REG))]
-;;--;;   ""
-;;--;;   "bp %1,#7,%l0"
-;;--;;   [(set_attr "length" "4")
-;;--;;    (set_attr "psw_operand" "nop")])
+  "bp %1,#7,%l0"
+  [(set_attr "length" "4")
+   (set_attr "psw_operand" "nop")])

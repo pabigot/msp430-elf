@@ -25,3 +25,4 @@ int main()
   if (i != 1)
     return 1;
 }
+// { dg-require-effective-target size32plus }

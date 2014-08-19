@@ -404,20 +404,4 @@ do { \
 # include "sim-endian.c"
 #endif
 
-/* AltiVec endian helpers, wrong endian hosts vs targets need to be
-   sure to get the right bytes/halfs/words when the order matters.
-   Note that many AltiVec instructions do not depend on byte order
-   and work on N independant bits of data.  This is only for the
-   instructions that actually move data around.  */
-#if (WITH_HOST_BYTE_ORDER == BIG_ENDIAN)
-#define AV_BINDEX(x)	((x) & 15)
-#define AV_HINDEX(x)	((x) & 7)
-#else
-static char endian_b2l_bindex[16] = { 3,  2, 1, 0,  7,  6,  5,  4,
-			             11, 10, 9, 8, 15, 14, 13, 12 };
-static char endian_b2l_hindex[16] = { 1, 0, 3, 2, 5, 4, 7, 6 };
-#define AV_BINDEX(x)	endian_b2l_bindex[(x) & 15]
-#define AV_HINDEX(x)	endian_b2l_hindex[(x) & 7]
-#endif
-
 #endif /* _SIM_ENDIAN_H_ */

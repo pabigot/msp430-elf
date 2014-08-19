@@ -1,5 +1,4 @@
-This is /work/sources/devo/current/mpc/doc/mpc.info, produced by
-makeinfo version 4.8 from /work/sources/devo/current/mpc/doc/mpc.texi.
+This is /work/sources/gnupro/current/mpc/doc/mpc.info, produced by makeinfo version 4.13 from /work/sources/gnupro/current/mpc/doc/mpc.texi.
 
 START-INFO-DIR-ENTRY
 * mpc: (mpc.info).               Multiple Precision Complex Library.
@@ -80,8 +79,8 @@ builds upon the GNU MP and the GNU MPFR libraries.
 1.1 How to use this Manual
 ==========================
 
-Everyone should read *Note MPC Basics::.  If you need to install the
-library yourself, you need to read *Note Installing MPC::, too.
+Everyone should read *note MPC Basics::.  If you need to install the
+library yourself, you need to read *note Installing MPC::, too.
 
    The remainder of the manual can be used for later reference,
 although it is probably a good idea to skim through it.
@@ -1294,30 +1293,30 @@ Function and Type Index
 
 
 Tag Table:
-Node: Top1015
-Node: Copying1676
-Node: Introduction to MPC2334
-Node: Installing MPC3042
-Node: Reporting Bugs7701
-Node: MPC Basics9030
-Ref: return-value12680
-Node: Complex Functions14122
-Node: Initializing Complex Numbers15271
-Node: Assigning Complex Numbers17685
-Node: Converting Complex Numbers22093
-Node: String and Stream Input and Output22727
-Ref: string-io22874
-Node: Complex Comparison29306
-Node: Projection & Decomposing30385
-Node: Basic Arithmetic31760
-Node: Power Functions and Logarithm36400
-Node: Trigonometric Functions38055
-Node: Miscellaneous Complex Functions40280
-Node: Advanced Functions42425
-Node: Internals43498
-Node: Contributors43945
-Node: References44291
-Node: Concept Index45205
-Node: Function Index47519
+Node: Top1020
+Node: Copying1681
+Node: Introduction to MPC2339
+Node: Installing MPC3047
+Node: Reporting Bugs7706
+Node: MPC Basics9035
+Ref: return-value12685
+Node: Complex Functions14127
+Node: Initializing Complex Numbers15276
+Node: Assigning Complex Numbers17690
+Node: Converting Complex Numbers22098
+Node: String and Stream Input and Output22732
+Ref: string-io22879
+Node: Complex Comparison29311
+Node: Projection & Decomposing30390
+Node: Basic Arithmetic31765
+Node: Power Functions and Logarithm36405
+Node: Trigonometric Functions38060
+Node: Miscellaneous Complex Functions40285
+Node: Advanced Functions42430
+Node: Internals43503
+Node: Contributors43950
+Node: References44296
+Node: Concept Index45210
+Node: Function Index47524
 
 End Tag Table

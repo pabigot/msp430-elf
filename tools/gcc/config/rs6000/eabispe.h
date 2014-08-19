@@ -1,6 +1,6 @@
 /* Core target definitions for GNU compiler
    for PowerPC embedded targeted systems with SPE support.
-   Copyright (C) 2002-2013 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
    Contributed by Aldy Hernandez (aldyh@redhat.com).
 
    This file is part of GCC.
@@ -24,6 +24,3 @@
 
 #undef  ASM_DEFAULT_SPEC
 #define	ASM_DEFAULT_SPEC "-mppc -mspe -me500"
-
-#undef  CPP_LONGDOUBLE_DEFAULT_SPEC
-#define CPP_LONGDOUBLE_DEFAULT_SPEC "-D__LONG_DOUBLE_128__=1"

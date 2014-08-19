@@ -3,7 +3,7 @@
 # This file defines several procedures for managing the input
 # focus.
 #
-# RCS: @(#) $Id: focus.tcl,v 1.9 2003/03/19 23:02:04 cagney Exp $
+# RCS: @(#) $Id: focus.tcl,v 1.3 2012/04/18 00:36:56 kevinb Exp $
 #
 # Copyright (c) 1994-1995 Sun Microsystems, Inc.
 #

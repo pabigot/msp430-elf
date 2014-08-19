@@ -1,7 +1,7 @@
 /* { dg-do compile } */
+/* { dg-require-effective-target scheduling } */
 /* { dg-options "-O1 -fschedule-insns2 -fsched2-use-superblocks" } */
-/* { dg-skip-if "No scheduling" { mmix-*-* cris-*-* crisv32-*-* fido-*-* m68k-*-* m32c-*-* avr-*-* moxie-*-* } { "*" } { "" } } */
-/* { dg-skip-if "No scheduling" { msp430-*-* rl78-*-* rx-*-* xstormy16-*-* } { "*" } { "" } } */
+/* { dg-require-effective-target scheduling } */
 
 extern double f (double x);
 

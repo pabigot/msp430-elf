@@ -84,3 +84,4 @@ int main(int argc, char *argv[]) {
   fooA1(d);
   return num!=0;
 }
+// { dg-require-effective-target size32plus }

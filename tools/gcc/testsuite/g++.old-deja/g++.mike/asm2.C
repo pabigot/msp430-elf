@@ -21,5 +21,5 @@ main(void)
 void
 sub (void)
 {
-  printf ("hello world\n");
+  ; // printf ("hello world\n");
 }

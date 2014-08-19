@@ -204,13 +204,6 @@ do_syscall (void)
 	}
       State.exited = 1;
     }
-  else if (FUNC == 289)
-    {
-      /* This is the cache flush syscall used by the trampoline code,
-	 Since we are not emulating a cache we can simply ignore it.  */
-      RETERR = 0;
-      RETVAL = 0;
-    }
   else
     {
       CB_SYSCALL syscall;

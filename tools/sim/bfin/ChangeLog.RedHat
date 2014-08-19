@@ -1,4 +1,0 @@
-2011-05-16  Kevin Buettner  <kevinb@redhat.com
-
-	* interp.c (sim_hardware_watchpoint): New function.
-

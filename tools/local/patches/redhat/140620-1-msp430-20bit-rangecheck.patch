@@ -1,0 +1,53 @@
+Fix range check logic for 20-bit mode.
+
+2014-06-20  DJ Delorie  <dj@redhat.com>
+
+	* config/tc-msp430.c (msp430_srcoperand): Fix range check logic.
+
+
+Index: gas/config/tc-msp430.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gas/config/tc-msp430.c,v
+retrieving revision 1.15
+diff -p -U 5 -r1.15 tc-msp430.c
+--- gas/config/tc-msp430.c	23 May 2014 13:31:41 -0000	1.15
++++ gas/config/tc-msp430.c	20 Jun 2014 07:24:52 -0000
+@@ -1130,11 +1130,11 @@ msp430_srcoperand (struct msp430_operand
+ 	      op->vshift = 0;
+ 	    }
+ 
+ 	  if (allow_20bit_values)
+ 	    {
+-	      if (op->exp.X_add_number > 0xfffff || op->exp.X_add_number < - (0x7ffff))
++	      if (op->exp.X_add_number > 0xfffff || op->exp.X_add_number < - (0x80000))
+ 		{
+ 		  as_bad (_("value 0x%x out of extended range."), x);
+ 		  return 1;
+ 		}
+ 	    }
+@@ -1309,11 +1309,11 @@ msp430_srcoperand (struct msp430_operand
+ 	{
+ 	  int x = op->exp.X_add_number;
+ 
+ 	  if (allow_20bit_values)
+ 	    {
+-	      if (x > 0xfffff || x < -(0x7ffff))
++	      if (x > 0xfffff || x < -(0x80000))
+ 		{
+ 		  as_bad (_("value 0x%x out of extended range."), x);
+ 		  return 1;
+ 		}
+ 	    }
+@@ -1418,11 +1418,11 @@ msp430_srcoperand (struct msp430_operand
+ 	{
+ 	  int x = op->exp.X_add_number;
+ 
+ 	  if (allow_20bit_values)
+ 	    {
+-	      if (x > 0xfffff || x < - (0x7ffff))
++	      if (x > 0xfffff || x < - (0x80000))
+ 		{
+ 		  as_bad (_("value 0x%x out of extended range."), x);
+ 		  return 1;
+ 		}
+ 	    }

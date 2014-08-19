@@ -18,3 +18,4 @@ foo (int i)
   printf ("%d\n" - 1, i);	/* { dg-warning "not a string" "minus constant" } */
   printf ("%d\n" + -1, i);	/* { dg-warning "not a string" "negative addend" } */
 }
+/* { dg-prune-output ".*__int20.*" } */

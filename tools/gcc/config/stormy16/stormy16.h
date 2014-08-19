@@ -1,5 +1,5 @@
 /* Xstormy16 cpu description.
-   Copyright (C) 1997-2013 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of GCC.
@@ -65,13 +65,6 @@
 
 #define UNITS_PER_WORD 2
 
-#if 0
-/* Defing PROMOTE_MODE is bogus.  It cause QImode loads
-   to be considered impossible, thus requiring GCC to use
-   an HImode load and then a *_extend function to set the
-   correct top 8-bits.  The XStormy16 is perfectly capable
-   of perfoming QImode loads and stores and it always
-   zero-extends, so often code can be saved by doing this.  */
 #define PROMOTE_MODE(MODE,UNSIGNEDP,TYPE)	\
   do						\
     {						\
@@ -80,7 +73,6 @@
 	(MODE) = HImode;			\
     }						\
   while (0)
-#endif
 
 #define PARM_BOUNDARY 16
 
@@ -268,6 +260,7 @@ enum reg_class
 #define CARRY_REGNUM		16
 #define FRAME_POINTER_REGNUM	17
 #define ARG_POINTER_REGNUM	18
+
 
 /* Eliminating the Frame Pointer and the Arg Pointer.  */
 
@@ -308,17 +301,20 @@ enum reg_class
 #define FUNCTION_ARG_REGNO_P(REGNO)					\
   ((REGNO) >= FIRST_ARGUMENT_REGISTER 					\
    && (REGNO) < FIRST_ARGUMENT_REGISTER + NUM_ARGUMENT_REGISTERS)
+
 
 /* How Scalar Function Values are Returned.  */
 
 /* The number of the hard register that is used to return a scalar value from a
    function call.  */
 #define RETURN_VALUE_REGNUM	FIRST_ARGUMENT_REGISTER
+
 
 /* Function Entry and Exit.  */
 
 #define EPILOGUE_USES(REGNO) \
   xstormy16_epilogue_uses (REGNO)
+
 
 /* Generating Code for Profiling.  */
 
@@ -326,12 +322,14 @@ enum reg_class
    not implemented.  */
      
 #define FUNCTION_PROFILER(FILE, LABELNO) xstormy16_function_profiler ()
+
 
 /* Trampolines for Nested Functions.  */
 
 #define TRAMPOLINE_SIZE 8
 #define TRAMPOLINE_ALIGNMENT 16
 
+
 /* Addressing Modes.  */
 
 #define HAVE_POST_INCREMENT 1
@@ -339,6 +337,7 @@ enum reg_class
 #define HAVE_PRE_DECREMENT 1
 
 #define MAX_REGS_PER_ADDRESS 1
+
 
 /* Describing Relative Costs of Operations.  */
 
@@ -347,6 +346,7 @@ enum reg_class
 #define SLOW_BYTE_ACCESS 0
 
 #define NO_FUNCTION_CSE
+
 
 /* Dividing the output into sections.  */
 
@@ -437,6 +437,7 @@ enum reg_class
 
 #define ASM_OUTPUT_REG_POP(STREAM, REGNO) \
   fprintf (STREAM, "\tpop %d\n", REGNO)
+
 
 /* Output of dispatch tables.  */
 
@@ -449,6 +450,7 @@ enum reg_class
 
 /* Alignment for ADDR_VECs is the same as for code.  */
 #define ADDR_VEC_ALIGN(ADDR_VEC) 1
+
 
 /* Assembler Commands for Exception Regions.  */
 

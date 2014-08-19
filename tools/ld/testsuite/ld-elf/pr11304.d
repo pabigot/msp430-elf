@@ -2,7 +2,6 @@
 #source: pr11304b.s
 #ld: -e 0 --section-start .zzz=0x800000
 #readelf: -S --wide
-#xfail: hppa*-*-*hpux*
 
 #failif
 #...

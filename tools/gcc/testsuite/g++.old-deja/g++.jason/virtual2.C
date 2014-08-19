@@ -12,3 +12,4 @@ int main ()
   A* ap = new B;
   return (ap->f () != 0);
 }
+// { dg-require-effective-target size32plus }

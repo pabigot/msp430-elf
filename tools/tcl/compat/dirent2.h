@@ -10,7 +10,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: dirent2.h,v 1.2 1998/09/14 18:39:44 stanton Exp $
+ * RCS: @(#) $Id: dirent2.h,v 1.3 2012/04/18 00:36:12 kevinb Exp $
  */
 
 #ifndef _DIRENT

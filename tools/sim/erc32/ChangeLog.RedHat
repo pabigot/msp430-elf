@@ -1,11 +1,0 @@
-2011-05-16  Kevin Buettner  <kevinb@redhat.com
-
-	* interf.c (sim_hardware_watchpoint): New function.
-
-
-Local Variables:
-mode: change-log
-left-margin: 8
-fill-column: 74
-version-control: never
-End:

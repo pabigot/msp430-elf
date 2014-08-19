@@ -1,4 +1,5 @@
 /* { dg-do compile } */
+/* { dg-skip-if "non standard pointer size in large memory model" { "msp430-*-*" } { "-mlarge" } { "" } } */
 /* { dg-options "-O2" } */
 /* { dg-options "-O2 -msse2" { target { i?86-*-* x86_64-*-* } } } */
 /* { dg-options "-O2 -maltivec" { target { powerpc*-*-linux* && powerpc_altivec_ok } } } */

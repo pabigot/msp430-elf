@@ -1,6 +1,6 @@
 // { dg-do run  }
 // GROUPS passed miscellaneous
-extern "C" int printf (const char *, ...);
+// extern "C" int printf (const char *, ...);
 
 int main()
 {
@@ -10,7 +10,7 @@ int main()
   *pi = 4;
 
   if (i != 4)
-    { printf ("FAIL\n"); return 1; }
+    { /* printf ("FAIL\n"); */ return 1; }
   else
-    printf ("PASS\n");
+    ; // printf ("PASS\n");
 }

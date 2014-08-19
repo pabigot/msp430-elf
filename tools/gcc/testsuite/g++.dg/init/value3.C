@@ -29,3 +29,5 @@ int main()
   if (p2[0][0].i != 0 || p2[0][1].i != 0)
     abort();
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

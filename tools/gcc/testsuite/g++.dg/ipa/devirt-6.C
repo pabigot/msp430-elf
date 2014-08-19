@@ -36,3 +36,5 @@ int main()
  reinterpret_cast<A *>(p)->~A();
  return 0;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

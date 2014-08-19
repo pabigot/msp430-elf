@@ -10,7 +10,7 @@
  *
  * Changes 2002 Copyright (c) 2002 ActiveState Corporation.
  *
- * RCS: @(#) $Id$
+ * RCS: @(#) $Id: strftime.c,v 1.3 2012/04/18 00:36:12 kevinb Exp $
  */
 
 /*
@@ -47,7 +47,7 @@
  */
 
 #if defined(LIBC_SCCS)
-static char *rcsid = "$Id$";
+static char *rcsid = "$Id: strftime.c,v 1.3 2012/04/18 00:36:12 kevinb Exp $";
 #endif /* LIBC_SCCS */
 
 #include <time.h>

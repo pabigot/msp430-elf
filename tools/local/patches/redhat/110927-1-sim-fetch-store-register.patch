@@ -1,0 +1,70 @@
+This patch adjusts sim_fetch_register() and sim_store_register() to
+return the length of the value being fetched instead of -1.  Apparently
+remote-sim.c in GDB has changed enough so that this return value now
+actually matters.
+
+This patch should go upstream.
+
+sim/mn10300/ChangeLog.RedHat:
+
+2011-09-27  Kevin Buettner  <kevinb@redhat.com>
+
+	* interp.c (sim_fetch_register): Return length, not -1.
+
+sim/ChangeLog.RedHat:
+
+2011-09-27  Kevin Buettner  <kevinb@redhat.com>
+
+	* sh/interp.c (MA): Adjust cast to avoid warning on 64-bit hosts.
+	(sim_store_register, sim_fetch_register): Return length, not -1.
+
+Index: sim/mn10300/interp.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/mn10300/interp.c,v
+retrieving revision 1.11
+diff -u -p -r1.11 interp.c
+--- sim/mn10300/interp.c	5 Jul 2011 23:20:25 -0000	1.11
++++ sim/mn10300/interp.c	27 Sep 2011 16:18:43 -0000
+@@ -400,7 +400,7 @@ sim_fetch_register (SIM_DESC sd,
+ 		    int length)
+ {
+   put_word (memory, State.regs[rn]);
+-  return -1;
++  return length;
+ }
+  
+ int
+Index: sim/sh/interp.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/sh/interp.c,v
+retrieving revision 1.12
+diff -u -p -r1.12 interp.c
+--- sim/sh/interp.c	5 Jul 2011 23:20:28 -0000	1.12
++++ sim/sh/interp.c	27 Sep 2011 16:18:43 -0000
+@@ -862,7 +862,7 @@ do { \
+ #else
+ 
+ #define MA(n) \
+-  do { memstalls += ((((int) PC & 3) != 0) ? (n) : ((n) - 1)); } while (0)
++  do { memstalls += ((((long) PC & 3) != 0) ? (n) : ((n) - 1)); } while (0)
+ 
+ #define L(x)   thislock = x;
+ #define TL(x)  if ((x) == prevlock) stalls++;
+@@ -2356,7 +2356,7 @@ sim_store_register (sd, rn, memory, leng
+     default:
+       return 0;
+     }
+-  return -1;
++  return length;
+ }
+ 
+ int
+@@ -2531,7 +2531,7 @@ sim_fetch_register (sd, rn, memory, leng
+       return 0;
+     }
+   * (int *) memory = swap (val);
+-  return -1;
++  return length;
+ }
+ 
+ int

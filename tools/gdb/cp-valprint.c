@@ -1,7 +1,6 @@
 /* Support for printing C++ values for GDB, the GNU debugger.
 
-   Copyright (C) 1986, 1988-1989, 1991-1997, 2000-2003, 2005-2012 Free
-   Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,7 +27,7 @@
 #include "gdbcmd.h"
 #include "demangle.h"
 #include "annotate.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "c-lang.h"
 #include "target.h"
 #include "cp-abi.h"
@@ -37,6 +36,7 @@
 #include "language.h"
 #include "python/python.h"
 #include "exceptions.h"
+#include "typeprint.h"
 
 /* Controls printing of vtbl's.  */
 static void
@@ -210,7 +210,9 @@ cp_print_value_fields (struct type *type, struct type *real_type,
     {
       int statmem_obstack_initial_size = 0;
       int stat_array_obstack_initial_size = 0;
-      
+      struct type *vptr_basetype = NULL;
+      int vptr_fieldno;
+
       if (dont_print_statmem == 0)
 	{
 	  statmem_obstack_initial_size =
@@ -225,6 +227,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	    }
 	}
 
+      vptr_fieldno = get_vptr_fieldno (type, &vptr_basetype);
       for (i = n_baseclasses; i < len; i++)
 	{
 	  /* If requested, skip printing of static fields.  */
@@ -236,7 +239,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	    fprintf_filtered (stream, ", ");
 	  else if (n_baseclasses > 0)
 	    {
-	      if (options->pretty)
+	      if (options->prettyformat)
 		{
 		  fprintf_filtered (stream, "\n");
 		  print_spaces_filtered (2 + 2 * recurse, stream);
@@ -247,7 +250,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	    }
 	  fields_seen = 1;
 
-	  if (options->pretty)
+	  if (options->prettyformat)
 	    {
 	      fprintf_filtered (stream, "\n");
 	      print_spaces_filtered (2 + 2 * recurse, stream);
@@ -256,42 +259,21 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	    {
 	      wrap_here (n_spaces (2 + 2 * recurse));
 	    }
-	  if (options->inspect_it)
-	    {
-	      if (TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_PTR)
-		fputs_filtered ("\"( ptr \"", stream);
-	      else
-		fputs_filtered ("\"( nodef \"", stream);
-	      if (field_is_static (&TYPE_FIELD (type, i)))
-		fputs_filtered ("static ", stream);
-	      fprintf_symbol_filtered (stream,
-				       TYPE_FIELD_NAME (type, i),
-				       current_language->la_language,
-				       DMGL_PARAMS | DMGL_ANSI);
-	      fputs_filtered ("\" \"", stream);
-	      fprintf_symbol_filtered (stream,
-				       TYPE_FIELD_NAME (type, i),
-				       current_language->la_language,
-				       DMGL_PARAMS | DMGL_ANSI);
-	      fputs_filtered ("\") \"", stream);
-	    }
-	  else
-	    {
-	      annotate_field_begin (TYPE_FIELD_TYPE (type, i));
 
-	      if (field_is_static (&TYPE_FIELD (type, i)))
-		fputs_filtered ("static ", stream);
-	      fprintf_symbol_filtered (stream,
-				       TYPE_FIELD_NAME (type, i),
-				       current_language->la_language,
-				       DMGL_PARAMS | DMGL_ANSI);
-	      annotate_field_name_end ();
-	      /* Do not print leading '=' in case of anonymous
-		 unions.  */
-	      if (strcmp (TYPE_FIELD_NAME (type, i), ""))
-		fputs_filtered (" = ", stream);
-	      annotate_field_value ();
-	    }
+	  annotate_field_begin (TYPE_FIELD_TYPE (type, i));
+
+	  if (field_is_static (&TYPE_FIELD (type, i)))
+	    fputs_filtered ("static ", stream);
+	  fprintf_symbol_filtered (stream,
+				   TYPE_FIELD_NAME (type, i),
+				   current_language->la_language,
+				   DMGL_PARAMS | DMGL_ANSI);
+	  annotate_field_name_end ();
+	  /* Do not print leading '=' in case of anonymous
+	     unions.  */
+	  if (strcmp (TYPE_FIELD_NAME (type, i), ""))
+	    fputs_filtered (" = ", stream);
+	  annotate_field_value ();
 
 	  if (!field_is_static (&TYPE_FIELD (type, i))
 	      && TYPE_FIELD_PACKED (type, i))
@@ -316,7 +298,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 					  TYPE_FIELD_BITPOS (type, i),
 					  TYPE_FIELD_BITSIZE (type, i)))
 		{
-		  val_print_optimized_out (stream);
+		  val_print_optimized_out (val, stream);
 		}
 	      else
 		{
@@ -351,14 +333,11 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 		    fprintf_filtered (stream,
 				      _("<error reading variable: %s>"),
 				      ex.message);
-		  else if (v == NULL)
-		    val_print_optimized_out (stream);
-		  else
-		    cp_print_static_field (TYPE_FIELD_TYPE (type, i),
-					   v, stream, recurse + 1,
-					   options);
+		  cp_print_static_field (TYPE_FIELD_TYPE (type, i),
+					 v, stream, recurse + 1,
+					 options);
 		}
-	      else if (i == TYPE_VPTR_FIELDNO (type))
+	      else if (i == vptr_fieldno && type == vptr_basetype)
 		{
 		  int i_offset = offset + TYPE_FIELD_BITPOS (type, i) / 8;
 		  struct type *i_type = TYPE_FIELD_TYPE (type, i);
@@ -425,7 +404,7 @@ cp_print_value_fields (struct type *type, struct type *real_type,
 	    }
 	}
 
-      if (options->pretty)
+      if (options->prettyformat)
 	{
 	  fprintf_filtered (stream, "\n");
 	  print_spaces_filtered (2 * recurse, stream);
@@ -586,7 +565,7 @@ cp_print_value (struct type *type, struct type *real_type,
 	}
 
       /* Now do the printing.  */
-      if (options->pretty)
+      if (options->prettyformat)
 	{
 	  fprintf_filtered (stream, "\n");
 	  print_spaces_filtered (2 * recurse, stream);
@@ -658,7 +637,13 @@ cp_print_static_field (struct type *type,
 		       const struct value_print_options *options)
 {
   struct value_print_options opts;
-  
+
+  if (value_entirely_optimized_out (val))
+    {
+      val_print_optimized_out (val, stream);
+      return;
+    }
+
   if (TYPE_CODE (type) == TYPE_CODE_STRUCT)
     {
       CORE_ADDR *first_dont_print;
@@ -786,7 +771,7 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
      print it.  */
   struct type *domain = TYPE_DOMAIN_TYPE (type);
   LONGEST val;
-  unsigned int fieldno;
+  int fieldno;
 
   val = extract_signed_integer (valaddr,
 				TYPE_LENGTH (type),
@@ -819,7 +804,7 @@ cp_print_class_member (const gdb_byte *valaddr, struct type *type,
       if (name)
 	fputs_filtered (name, stream);
       else
-	c_type_print_base (domain, stream, 0, 0);
+	c_type_print_base (domain, stream, 0, 0, &type_print_raw_options);
       fprintf_filtered (stream, "::");
       fputs_filtered (TYPE_FIELD_NAME (domain, fieldno), stream);
     }

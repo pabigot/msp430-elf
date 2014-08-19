@@ -8,7 +8,7 @@
 # The file is placed into the TEXT resource named "tclshrc" which is
 # automatically executed on startup.
 #
-# RCS: @(#) $Id$
+# RCS: @(#) $Id: tclets.tcl,v 1.3 2012/04/18 00:37:00 kevinb Exp $
 #
 # Copyright (c) 1997 Sun Microsystems, Inc.
 #

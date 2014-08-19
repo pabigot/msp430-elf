@@ -30,13 +30,13 @@ class C {
 public:
   C() { }
   C(C& o) { }		// with it, things are wrong, without it, they're ok
-  virtual void beefy(void) const { printf("A::beefy\n"); exit(1); }
+  virtual void beefy(void) const { /*printf("A::beefy\n")*/; exit(1); }
 };
 
 class B : private A, public C {
 public:
   B(const A& x, int){}
-  void beefy(void) const { printf("B::beefy\n"); }
+  void beefy(void) const { /*printf("B::beefy\n")*/; }
 };
 
 B A::compute(void) const

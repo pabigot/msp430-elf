@@ -1,3 +1,4 @@
+// { dg-require-effective-target size32plus }
 #include "20081211-1.h"
 
 foo *

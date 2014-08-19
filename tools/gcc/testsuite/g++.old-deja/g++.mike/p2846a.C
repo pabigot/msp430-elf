@@ -13,12 +13,12 @@ extern "C" void exit(int);
 
 class B {
 public:
-  virtual void print(void) const { printf("B::print\n"); }
+  virtual void print(void) const { /*printf("B::print\n")*/; }
 };
 
 class D : public B {
 public:
-  void print(void) const { printf("D::print\n"); exit(1); }
+  void print(void) const { /*printf("D::print\n")*/; exit(1); }
   B compute(void) const;
 };
 

@@ -1,0 +1,12 @@
+/ChangeLog/1.6/Mon Apr 28 09:14:08 2014//Tmsp430-14r1-branch
+/Makefile.am/1.4/Mon Mar 31 10:42:15 2014//Tmsp430-14r1-branch
+/Makefile.in/1.4/Mon Mar 31 10:42:15 2014//Tmsp430-14r1-branch
+/README/1.1/Thu Feb 20 21:52:11 2014//Tmsp430-14r1-branch
+/aclocal.m4/1.4/Mon Mar 31 10:42:15 2014//Tmsp430-14r1-branch
+/configure/1.2/Mon Mar 31 10:42:15 2014//Tmsp430-14r1-branch
+/configure.ac/1.2/Mon Mar 31 10:42:15 2014//Tmsp430-14r1-branch
+/configure.tgt/1.1/Thu Feb 20 21:52:11 2014//Tmsp430-14r1-branch
+/libcilkrts.spec.in/1.1/Mon Mar 31 10:42:15 2014//Tmsp430-14r1-branch
+D/include////
+D/mk////
+D/runtime////

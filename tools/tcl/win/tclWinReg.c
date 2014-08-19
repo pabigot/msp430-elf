@@ -11,7 +11,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclWinReg.c,v 1.3 2005/03/22 21:13:31 release Exp $
+ * RCS: @(#) $Id: tclWinReg.c,v 1.4 2012/04/18 00:36:41 kevinb Exp $
  */
 
 #include <tclPort.h>
@@ -747,9 +747,7 @@ GetValue(
 		    Tcl_NewStringObj(Tcl_DStringValue(&buf),
 			    Tcl_DStringLength(&buf)));
 	    if (regWinProcs->useWide) {
-	        Tcl_UniChar *pu = (Tcl_UniChar *) p;
-		while (*pu++ != 0) {}
-		p = (char *) pu;
+		while (*((Tcl_UniChar *)p)++ != 0) {}
 	    } else {
 		while (*p++ != '\0') {}
 	    }

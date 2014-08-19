@@ -24,7 +24,7 @@ int main()
         oA.c = 'q';
 
         if ( (oA .* pmA))
-                        printf( "PASS\n");
+	  ; // printf( "PASS\n");
         else
                         printf(" FAIL\n");
 }

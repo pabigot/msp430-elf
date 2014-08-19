@@ -1,6 +1,6 @@
 /* Auxiliary vector support for GDB, the GNU debugger.
 
-   Copyright (C) 2004-2012 Free Software Foundation, Inc.
+   Copyright (C) 2004-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,6 +26,7 @@
 #include "gdb_assert.h"
 #include "gdbcore.h"
 #include "observer.h"
+#include "filestuff.h"
 
 #include "auxv.h"
 #include "elf/common.h"
@@ -47,8 +48,8 @@ procfs_xfer_auxv (gdb_byte *readbuf,
   int fd;
   LONGEST n;
 
-  pathname = xstrprintf ("/proc/%d/auxv", PIDGET (inferior_ptid));
-  fd = open (pathname, writebuf != NULL ? O_WRONLY : O_RDONLY);
+  pathname = xstrprintf ("/proc/%d/auxv", ptid_get_pid (inferior_ptid));
+  fd = gdb_open_cloexec (pathname, writebuf != NULL ? O_WRONLY : O_RDONLY, 0);
   xfree (pathname);
   if (fd < 0)
     return -1;
@@ -76,7 +77,7 @@ ld_so_xfer_auxv (gdb_byte *readbuf,
 {
   struct minimal_symbol *msym;
   CORE_ADDR data_address, pointer_address;
-  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   size_t ptr_size = TYPE_LENGTH (ptr_type);
   size_t auxv_pair_size = 2 * ptr_size;
   gdb_byte *ptr_buf = alloca (ptr_size);
@@ -240,9 +241,9 @@ static int
 default_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
 		   gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
-  const int sizeof_auxv_field = gdbarch_ptr_bit (target_gdbarch)
+  const int sizeof_auxv_field = gdbarch_ptr_bit (target_gdbarch ())
 				/ TARGET_CHAR_BIT;
-  const enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  const enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   gdb_byte *ptr = *readptr;
 
   if (endptr == ptr)
@@ -479,7 +480,7 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 	  fprintf_filtered (file, "%s\n", plongest (val));
 	  break;
 	case hex:
-	  fprintf_filtered (file, "%s\n", paddress (target_gdbarch, val));
+	  fprintf_filtered (file, "%s\n", paddress (target_gdbarch (), val));
 	  break;
 	case str:
 	  {
@@ -487,8 +488,8 @@ fprint_target_auxv (struct ui_file *file, struct target_ops *ops)
 
 	    get_user_print_options (&opts);
 	    if (opts.addressprint)
-	      fprintf_filtered (file, "%s ", paddress (target_gdbarch, val));
-	    val_print_string (builtin_type (target_gdbarch)->builtin_char,
+	      fprintf_filtered (file, "%s ", paddress (target_gdbarch (), val));
+	    val_print_string (builtin_type (target_gdbarch ())->builtin_char,
 			      NULL, val, -1, file, &opts);
 	    fprintf_filtered (file, "\n");
 	  }

@@ -1,5 +1,21 @@
-/Makefile.am/1.20/Sun Jan 27 12:15:45 2013//Tmsp430-130322-branch
-/Makefile.in/1.48/Sun Jan 27 12:15:45 2013//Tmsp430-130322-branch
-/binutils.texi/1.98/Sun Feb 24 18:18:23 2013//Tmsp430-130322-branch
-/fdl.texi/1.5/Tue Dec 30 08:38:16 2008//Tmsp430-130322-branch
+/Makefile.am/1.8/Thu Feb 20 13:27:08 2014//Tmsp430-14r1-branch
+/Makefile.in/1.25/Thu Feb 20 13:27:08 2014//Tmsp430-14r1-branch
+/addr2line.1/1.10/Thu May  2 21:22:40 2013//Tmsp430-14r1-branch
+/ar.1/1.10/Thu May  2 21:22:41 2013//Tmsp430-14r1-branch
+/binutils.texi/1.22/Thu Mar  6 15:02:28 2014//Tmsp430-14r1-branch
+/cxxfilt.man/1.9/Thu May  2 21:22:41 2013//Tmsp430-14r1-branch
+/dlltool.1/1.10/Thu May  2 21:22:41 2013//Tmsp430-14r1-branch
+/elfedit.1/1.1/Fri May  3 13:26:45 2013//Tmsp430-14r1-branch
+/fdl.texi/1.5/Thu Jan 21 20:53:06 2010//Tmsp430-14r1-branch
+/nlmconv.1/1.10/Thu May  2 21:22:41 2013//Tmsp430-14r1-branch
+/nm.1/1.10/Thu May  2 21:22:41 2013//Tmsp430-14r1-branch
+/objcopy.1/1.10/Thu May  2 21:22:41 2013//Tmsp430-14r1-branch
+/objdump.1/1.10/Thu May  2 21:22:41 2013//Tmsp430-14r1-branch
+/ranlib.1/1.10/Thu May  2 21:22:41 2013//Tmsp430-14r1-branch
+/readelf.1/1.10/Thu May  2 21:22:41 2013//Tmsp430-14r1-branch
+/size.1/1.10/Thu May  2 21:22:41 2013//Tmsp430-14r1-branch
+/strings.1/1.10/Thu May  2 21:22:41 2013//Tmsp430-14r1-branch
+/strip.1/1.10/Thu May  2 21:22:41 2013//Tmsp430-14r1-branch
+/windmc.1/1.4/Thu May  2 21:22:41 2013//Tmsp430-14r1-branch
+/windres.1/1.10/Thu May  2 21:22:41 2013//Tmsp430-14r1-branch
 D

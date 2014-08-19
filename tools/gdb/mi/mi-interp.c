@@ -1,6 +1,6 @@
 /* MI Interpreter Definitions and Commands for GDB, the GNU debugger.
 
-   Copyright (C) 2002-2005, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "interps.h"
 #include "event-top.h"
 #include "event-loop.h"
@@ -35,13 +35,15 @@
 #include "gdbthread.h"
 #include "solist.h"
 #include "gdb.h"
+#include "objfiles.h"
+#include "tracepoint.h"
 
 /* These are the interpreter setup, etc. functions for the MI
    interpreter.  */
 
-static void mi_execute_command_wrapper (char *cmd);
+static void mi_execute_command_wrapper (const char *cmd);
 static void mi_execute_command_input_handler (char *cmd);
-static void mi_command_loop (int mi_version);
+static void mi_command_loop (void *data);
 
 /* These are hooks that we put in place while doing interpreter_exec
    so we can report interesting things that happened "behind the MI's
@@ -50,16 +52,13 @@ static void mi_command_loop (int mi_version);
 static int mi_interp_query_hook (const char *ctlstr, va_list ap)
   ATTRIBUTE_PRINTF (1, 0);
 
-static void mi3_command_loop (void);
-static void mi2_command_loop (void);
-static void mi1_command_loop (void);
-
 static void mi_insert_notify_hooks (void);
 static void mi_remove_notify_hooks (void);
 static void mi_on_normal_stop (struct bpstats *bs, int print_frame);
 
 static void mi_new_thread (struct thread_info *t);
 static void mi_thread_exit (struct thread_info *t, int silent);
+static void mi_record_changed (struct inferior*, int);
 static void mi_inferior_added (struct inferior *inf);
 static void mi_inferior_appeared (struct inferior *inf);
 static void mi_inferior_exit (struct inferior *inf);
@@ -68,10 +67,16 @@ static void mi_on_resume (ptid_t ptid);
 static void mi_solib_loaded (struct so_list *solib);
 static void mi_solib_unloaded (struct so_list *solib);
 static void mi_about_to_proceed (void);
+static void mi_traceframe_changed (int tfnum, int tpnum);
+static void mi_tsv_created (const struct trace_state_variable *tsv);
+static void mi_tsv_deleted (const struct trace_state_variable *tsv);
+static void mi_tsv_modified (const struct trace_state_variable *tsv);
 static void mi_breakpoint_created (struct breakpoint *b);
 static void mi_breakpoint_deleted (struct breakpoint *b);
 static void mi_breakpoint_modified (struct breakpoint *b);
 static void mi_command_param_changed (const char *param, const char *value);
+static void mi_memory_changed (struct inferior *inf, CORE_ADDR memaddr,
+			       ssize_t len, const bfd_byte *myaddr);
 
 static int report_initial_inferior (struct inferior *inf, void *closure);
 
@@ -121,15 +126,21 @@ mi_interpreter_init (struct interp *interp, int top_level)
       observer_attach_inferior_appeared (mi_inferior_appeared);
       observer_attach_inferior_exit (mi_inferior_exit);
       observer_attach_inferior_removed (mi_inferior_removed);
+      observer_attach_record_changed (mi_record_changed);
       observer_attach_normal_stop (mi_on_normal_stop);
       observer_attach_target_resumed (mi_on_resume);
       observer_attach_solib_loaded (mi_solib_loaded);
       observer_attach_solib_unloaded (mi_solib_unloaded);
       observer_attach_about_to_proceed (mi_about_to_proceed);
+      observer_attach_traceframe_changed (mi_traceframe_changed);
+      observer_attach_tsv_created (mi_tsv_created);
+      observer_attach_tsv_deleted (mi_tsv_deleted);
+      observer_attach_tsv_modified (mi_tsv_modified);
       observer_attach_breakpoint_created (mi_breakpoint_created);
       observer_attach_breakpoint_deleted (mi_breakpoint_deleted);
       observer_attach_breakpoint_modified (mi_breakpoint_modified);
       observer_attach_command_param_changed (mi_command_param_changed);
+      observer_attach_memory_changed (mi_memory_changed);
 
       /* The initial inferior is created before this function is
 	 called, so we need to report it explicitly.  Use iteration in
@@ -154,7 +165,6 @@ mi_interpreter_resume (void *data)
      _intialize_event_loop.  */
   call_readline = gdb_readline2;
   input_handler = mi_execute_command_input_handler;
-  add_file_handler (input_fd, stdin_event_handler, 0);
   async_command_editing_p = 0;
   /* FIXME: This is a total hack for now.  PB's use of the MI
      implicitly relies on a bug in the async support which allows
@@ -179,16 +189,6 @@ mi_interpreter_resume (void *data)
 
   deprecated_show_load_progress = mi_load_progress;
 
-  /* If we're _the_ interpreter, take control.  */
-  if (current_interp_named_p (INTERP_MI1))
-    deprecated_command_loop_hook = mi1_command_loop;
-  else if (current_interp_named_p (INTERP_MI2))
-    deprecated_command_loop_hook = mi2_command_loop;
-  else if (current_interp_named_p (INTERP_MI3))
-    deprecated_command_loop_hook = mi3_command_loop;
-  else
-    deprecated_command_loop_hook = mi2_command_loop;
-
   return 1;
 }
 
@@ -202,10 +202,7 @@ mi_interpreter_suspend (void *data)
 static struct gdb_exception
 mi_interpreter_exec (void *data, const char *command)
 {
-  char *tmp = alloca (strlen (command) + 1);
-
-  strcpy (tmp, command);
-  mi_execute_command_wrapper (tmp);
+  mi_execute_command_wrapper (command);
   return exception_none;
 }
 
@@ -233,11 +230,6 @@ mi_cmd_interpreter_exec (char *command, char **argv, int argc)
   if (interp_to_use == NULL)
     error (_("-interpreter-exec: could not find interpreter \"%s\""),
 	   argv[0]);
-
-  if (!interp_exec_p (interp_to_use))
-    error (_("-interpreter-exec: interpreter \"%s\" "
-	     "does not support command execution"),
-	      argv[0]);
 
   /* Insert the MI out hooks, making sure to also call the
      interpreter's hooks if it has any.  */
@@ -294,7 +286,7 @@ mi_interp_query_hook (const char *ctlstr, va_list ap)
 }
 
 static void
-mi_execute_command_wrapper (char *cmd)
+mi_execute_command_wrapper (const char *cmd)
 {
   mi_execute_command (cmd, stdin == instream);
 }
@@ -311,25 +303,7 @@ mi_execute_command_input_handler (char *cmd)
 }
 
 static void
-mi1_command_loop (void)
-{
-  mi_command_loop (1);
-}
-
-static void
-mi2_command_loop (void)
-{
-  mi_command_loop (2);
-}
-
-static void
-mi3_command_loop (void)
-{
-  mi_command_loop (3);
-}
-
-static void
-mi_command_loop (int mi_version)
+mi_command_loop (void *data)
 {
   /* Turn off 8 bit strings in quoted output.  Any character with the
      high bit set is printed using C's octal format.  */
@@ -372,6 +346,19 @@ mi_thread_exit (struct thread_info *t, int silent)
   fprintf_unfiltered (mi->event_channel, 
 		      "thread-exited,id=\"%d\",group-id=\"i%d\"",
 		      t->num, inf->num);
+  gdb_flush (mi->event_channel);
+}
+
+/* Emit notification on changing the state of record.  */
+
+static void
+mi_record_changed (struct inferior *inferior, int started)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+
+  fprintf_unfiltered (mi->event_channel,  "record-%s,thread-group=\"i%d\"",
+		      started ? "started" : "stopped", inferior->num);
+
   gdb_flush (mi->event_channel);
 }
 
@@ -456,7 +443,7 @@ mi_on_normal_stop (struct bpstats *bs, int print_frame)
 	  get_last_target_status (&last_ptid, &last);
 	  bpstat_print (bs, last.kind);
 
-	  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC);
+	  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC, 1);
 	  current_uiout = saved_uiout;
 	}
 
@@ -510,7 +497,90 @@ struct mi_suppress_notification mi_suppress_notification =
   {
     0,
     0,
+    0,
   };
+
+/* Emit notification on changing a traceframe.  */
+
+static void
+mi_traceframe_changed (int tfnum, int tpnum)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+
+  if (mi_suppress_notification.traceframe)
+    return;
+
+  target_terminal_ours ();
+
+  if (tfnum >= 0)
+    fprintf_unfiltered (mi->event_channel, "traceframe-changed,"
+			"num=\"%d\",tracepoint=\"%d\"\n",
+			tfnum, tpnum);
+  else
+    fprintf_unfiltered (mi->event_channel, "traceframe-changed,end");
+
+  gdb_flush (mi->event_channel);
+}
+
+/* Emit notification on creating a trace state variable.  */
+
+static void
+mi_tsv_created (const struct trace_state_variable *tsv)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+
+  target_terminal_ours ();
+
+  fprintf_unfiltered (mi->event_channel, "tsv-created,"
+		      "name=\"%s\",initial=\"%s\"\n",
+		      tsv->name, plongest (tsv->initial_value));
+
+  gdb_flush (mi->event_channel);
+}
+
+/* Emit notification on deleting a trace state variable.  */
+
+static void
+mi_tsv_deleted (const struct trace_state_variable *tsv)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+
+  target_terminal_ours ();
+
+  if (tsv != NULL)
+    fprintf_unfiltered (mi->event_channel, "tsv-deleted,"
+			"name=\"%s\"\n", tsv->name);
+  else
+    fprintf_unfiltered (mi->event_channel, "tsv-deleted\n");
+
+  gdb_flush (mi->event_channel);
+}
+
+/* Emit notification on modifying a trace state variable.  */
+
+static void
+mi_tsv_modified (const struct trace_state_variable *tsv)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+  struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
+
+  target_terminal_ours ();
+
+  fprintf_unfiltered (mi->event_channel,
+		      "tsv-modified");
+
+  ui_out_redirect (mi_uiout, mi->event_channel);
+
+  ui_out_field_string (mi_uiout, "name", tsv->name);
+  ui_out_field_string (mi_uiout, "initial",
+		       plongest (tsv->initial_value));
+  if (tsv->value_known)
+    ui_out_field_string (mi_uiout, "current", plongest (tsv->value));
+
+  ui_out_redirect (mi_uiout, NULL);
+
+  gdb_flush (mi->event_channel);
+}
 
 /* Emit notification about a created breakpoint.  */
 
@@ -652,7 +722,7 @@ mi_on_resume (ptid_t ptid)
 			  current_token ? current_token : "");
     }
 
-  if (PIDGET (ptid) == -1)
+  if (ptid_get_pid (ptid) == -1)
     fprintf_unfiltered (raw_stdout, "*running,thread-id=\"all\"\n");
   else if (ptid_is_pid (ptid))
     {
@@ -696,7 +766,7 @@ mi_solib_loaded (struct so_list *solib)
   struct mi_interp *mi = top_level_interpreter_data ();
 
   target_terminal_ours ();
-  if (gdbarch_has_global_solist (target_gdbarch))
+  if (gdbarch_has_global_solist (target_gdbarch ()))
     fprintf_unfiltered (mi->event_channel,
 			"library-loaded,id=\"%s\",target-name=\"%s\","
 			"host-name=\"%s\",symbols-loaded=\"%d\"",
@@ -720,7 +790,7 @@ mi_solib_unloaded (struct so_list *solib)
   struct mi_interp *mi = top_level_interpreter_data ();
 
   target_terminal_ours ();
-  if (gdbarch_has_global_solist (target_gdbarch))
+  if (gdbarch_has_global_solist (target_gdbarch ()))
     fprintf_unfiltered (mi->event_channel,
 			"library-unloaded,id=\"%s\",target-name=\"%s\","
 			"host-name=\"%s\"",
@@ -756,6 +826,47 @@ mi_command_param_changed (const char *param, const char *value)
 
   ui_out_field_string (mi_uiout, "param", param);
   ui_out_field_string (mi_uiout, "value", value);
+
+  ui_out_redirect (mi_uiout, NULL);
+
+  gdb_flush (mi->event_channel);
+}
+
+/* Emit notification about the target memory change.  */
+
+static void
+mi_memory_changed (struct inferior *inferior, CORE_ADDR memaddr,
+		   ssize_t len, const bfd_byte *myaddr)
+{
+  struct mi_interp *mi = top_level_interpreter_data ();
+  struct ui_out *mi_uiout = interp_ui_out (top_level_interpreter ());
+  struct obj_section *sec;
+
+  if (mi_suppress_notification.memory)
+    return;
+
+  target_terminal_ours ();
+
+  fprintf_unfiltered (mi->event_channel,
+		      "memory-changed");
+
+  ui_out_redirect (mi_uiout, mi->event_channel);
+
+  ui_out_field_fmt (mi_uiout, "thread-group", "i%d", inferior->num);
+  ui_out_field_core_addr (mi_uiout, "addr", target_gdbarch (), memaddr);
+  ui_out_field_fmt (mi_uiout, "len", "0x%zx", len);
+
+  /* Append 'type=code' into notification if MEMADDR falls in the range of
+     sections contain code.  */
+  sec = find_pc_section (memaddr);
+  if (sec != NULL && sec->objfile != NULL)
+    {
+      flagword flags = bfd_get_section_flags (sec->objfile->obfd,
+					      sec->the_bfd_section);
+
+      if (flags & SEC_CODE)
+	ui_out_field_string (mi_uiout, "type", "code");
+    }
 
   ui_out_redirect (mi_uiout, NULL);
 
@@ -848,7 +959,8 @@ _initialize_mi_interp (void)
       mi_interpreter_exec,	/* exec_proc */
       mi_interpreter_prompt_p,	/* prompt_proc_p */
       mi_ui_out, 		/* ui_out_proc */
-      mi_set_logging		/* set_logging_proc */
+      mi_set_logging,		/* set_logging_proc */
+      mi_command_loop		/* command_loop_proc */
     };
 
   /* The various interpreter levels.  */

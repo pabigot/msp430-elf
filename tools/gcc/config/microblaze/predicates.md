@@ -1,5 +1,5 @@
 ;; Predicate definitions for Xilinx MicroBlaze
-;; Copyright (C) 2009-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2009-2014 Free Software Foundation, Inc.
 ;;
 ;; Contributed by Michael Eager <eager@eagercon.com>.
 ;;
@@ -85,6 +85,10 @@
   (ior (match_operand 0 "const_0_operand")
        (match_operand 0 "register_operand")))
 
+(define_predicate "reg_or_mem_operand"
+  (ior (match_operand 0 "memory_operand")
+       (match_operand 0 "register_operand")))
+
 ;;  Return if the operand is either the PC or a label_ref.  
 (define_special_predicate "pc_or_label_operand"
   (ior (match_code "pc,label_ref")
@@ -119,3 +123,7 @@
 ;; Test for valid PIC call operand
 (define_predicate "call_insn_plt_operand"
   (match_test "PLT_ADDR_P (op)"))
+
+;; Return if the code of this rtx pattern is a comparison.
+(define_predicate "cmp_op"
+  (match_code "gt,ge,gtu,geu,lt,le,ltu,leu"))

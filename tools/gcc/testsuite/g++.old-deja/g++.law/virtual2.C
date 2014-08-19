@@ -28,5 +28,5 @@ int main()
 {
 	vderived v;
 
-	printf ("PASS\n");
+	// printf ("PASS\n");
 }

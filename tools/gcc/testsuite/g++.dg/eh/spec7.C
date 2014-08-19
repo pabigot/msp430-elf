@@ -33,3 +33,5 @@ int main() {
     if (!destructor_called) 
       abort (); 
 } 
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

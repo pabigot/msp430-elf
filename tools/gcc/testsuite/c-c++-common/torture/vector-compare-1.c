@@ -1,5 +1,6 @@
 /* { dg-do run } */
-/* { dg-skip-if "test too big for small mode" { msp430*-*-* } "*" "-mlarge" } */
+/* { dg-skip-if "test too big" { rl78-*-* } "*" "" } */
+/* { dg-skip-if "test too big for small mode" { msp430*-*-* } "*" "" } */
 
 #define vector(elcount, type)					\
 __attribute__((vector_size((elcount)*sizeof(type)))) type

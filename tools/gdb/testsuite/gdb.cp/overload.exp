@@ -1,4 +1,4 @@
-# Copyright 1998-2004, 2007-2012 Free Software Foundation, Inc.
+# Copyright 1998-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,12 @@ if { [skip_cplus_tests] } { continue }
 
 standard_testfile .cc
 
-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
+set opts [list debug c++]
+if [istarget "rl78-*"] then {
+    lappend opts "additional_flags=-Wl,--no-gc-sections"
+}
+
+if {[prepare_for_testing $testfile.exp $testfile $srcfile $opts]} {
     return -1
 }
 
@@ -138,6 +143,9 @@ gdb_test "print foo_instance3" "\\$\[0-9\]+ = \{ifoo = 222, ccpfoo = $hex \"A\"\
 
 gdb_test "print foo_instance1.overloadargs(1)" "\\$\[0-9\]+ = 1" \
     "print call overloaded func 1 arg"
+
+# Regression test for overloading with function pointer type.
+gdb_test "print foo_instance1.overloadfnarg(23, intintfunc)" " = 23"
 
 # If GDB fails to restore the selected frame properly after the
 # inferior function call above (see GDB PR 1155 for an explanation of

@@ -1,8 +1,8 @@
 /* { dg-do run } */
+/* { dg-require-effective-target double64plus } */
 /* { dg-options "-O2" } */
 /* { dg-options "-O2 -msse2 -mtune=core2 -mfpmath=387" { target { i?86-*-* x86_64-*-* } } } */
 /* { dg-require-effective-target sse2_runtime { target { i?86-*-* x86_64-*-* } } } */
-/* { dg-skip-if "Need 64-bit doubles" { "msp430-*-*" } { "*" } { "" } } */
 
 extern void abort (void);
 

@@ -1,4 +1,5 @@
 // { dg-lto-do link }
+// { dg-require-effective-target size32plus }
 
 typedef int size_t;
 template < size_t _Nw > struct _Base_bitset

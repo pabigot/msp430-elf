@@ -1,4 +1,4 @@
-# Copyright 2012 Free Software Foundation, Inc.
+# Copyright 2012-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -96,7 +96,7 @@ gdb_test_multiple "explore ss_ptr" "" {
     -re "[pointer_description {ss_ptr} $SS].*" {
         pass "explore ss_ptr"
         gdb_test_multiple "y" "explore_as_single_value_pointer" {
-            -re "$SS_fields" {
+            -re "$SS_fields.*$gdb_prompt" {
                 pass "explore ss_ptr as single value pointer"
             }
         }
@@ -119,7 +119,7 @@ gdb_test_multiple "explore darray_ref" "" {
                                     -re ".*Returning to parent value.*Enter the index of the element you want to explore in 'darray_ref':.*" {
                                         pass "end explore_as_array_index_2"
                                         gdb_test_multiple "\0" "end explore_as_array" {
-                                            -re "\[\n\r\]+" {
+                                            -re "\[\n\r\]+$gdb_prompt" {
                                                 pass "end explore_as_array"
                                             }
                                         }
@@ -164,13 +164,23 @@ gdb_test_multiple "explore cs" "" {
                 gdb_test_multiple " " "end cs.s exploration" {
                     -re ".*$enter_field_number_prompt" {
                         pass "end cs.s exploration"
-                        gdb_test_multiple "\0" "end cs exploration" {
-                            -re "$gdb_prompt" {
-                                pass "end cs exploration"
-                            }
-                        }
                     }
                 }
+            }
+        }
+        gdb_test_multiple "1" "explore cs.u" {
+            -re "[compound_description {cs.u} {union} {union SimpleUnion}].*.*[field_choices {i} {c} {f} {d}].*$enter_field_number_prompt" {
+                pass "explore cs.u"
+                gdb_test_multiple " " "end cs.u exploration" {
+                    -re ".*$enter_field_number_prompt" {
+                        pass "end cs.u exploration"
+                    }
+                }
+            }
+        }
+        gdb_test_multiple "\0" "explore cs.u" {
+            -re "$gdb_prompt" {
+                pass "end cs exploration"
             }
         }
     }

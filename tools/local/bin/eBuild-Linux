@@ -1,0 +1,823 @@
+#!/bin/bash
+
+# eBuild-Linux script
+#
+# Boostraps the building of a cross-compiler for an embedded Linux
+# system using a set of Linux kernel sources, glibc sources and
+# compiler sources.
+#
+# Here is an example of using this script to build an AM33 toolchain:
+#
+#  source ./eBuild-Linux \
+#    --prefix=`pwd`/install \
+#    --target=am33_2.0-linux-gnu \
+#    --karch=mn10300 \
+#    --ktype=am33v2 \
+#    --kproc=mn103e010 \
+#    --lang="c,c++" \
+#    --buildtop="`pwd`/build" \
+#    --srctop="`pwd`/sources" \
+#    --tools-config-options="--with-x=no" \
+#    --glibc-config-options="--with-tls" \
+#    --glibc-config-options-stage2="--enable-add-ons=nptl --with-__thread"
+#
+# The "sources" directory would contain three symbolic links: tools, kernel
+# and glibc to the toolchain sources, kernel sources and glibc sources
+# respectively.
+
+# Exit on any error.
+set -e
+
+# Default overridable variables
+
+RELEASE=release-yymmdd		# Name of release, usually /opt/redhat/$RELEASE
+REVISION=x			# release revision
+HOST=i686-pc-linux-gnulibc2.3	# Platform tools will run on
+BUILD=$HOST			# Platform we're building on
+TARGET=unknown-linux-gnu	# Platform tools will generate executables for
+PREFIX="/opt/redhat/${RELEASE}-${REVISION}"	# Installation prefix
+SRCTOP="$PREFIX/sources"	# Location of the "sources" directory
+BUILDTOP="/es/build/$RELEASE/$REVISION/$HOST/X-$TARGET"
+NATIVE="/opt/redhat/gnupro-06r1-1"
+NATIVEPATH="$NATIVE/H-$BUILD/bin" # Native compiler bin path
+MAKE="$NATIVEPATH/make"		# In case we need a special version
+SYSROOT="$NATIVE/H-$BUILD/$BUILD/sys-root" # sys-root used by native compiler
+KARCH=""			# Kernel architecture type (eg arm, mips, x86)
+				# The dir kernel_src/include/asm-$KARCH should exist
+KPROC=""			# Kernel processor architecture (eg armv, mips32, pentiumv)
+				# The dir kernel_src/include/asm-$KARCH/proc-$KPROC should exist 
+KTYPE=""			# Kernel processor type (eg XScale, Athlon)
+				# The dir kernel_src/include/asm-$KARCH/arch-$KTYPE should exist
+LANGUAGES="c,c++"		# Languages to enable
+TOOLS_CONFIG_OPTIONS=""		# Extra options to pass to configure when creating toolchain
+GLIBC_CONFIG_OPTIONS=""		# Extra options to pass to configure when creating glibc (all stages)
+GLIBC_CONFIG_OPTIONS_STAGE2=""	# Extra options to pass to configure when creating glibc for stage2
+GLIBC_MULTILIBS=none		# sets CPPFLAGS prior to building glibc
+CC_for_host=gcc			# Compiler for the HOST platform.
+xCC_prefix=			# Prefix to apply to compiler command
+RPMI=""                         # Prefix for stage2 installation when using RPM
+DELETE=""			# Delete stages if they already exist
+INSTALL_TARGET_LIBBFD=""	# Install a libbfd for the target
+
+help ()
+{
+  # The following exec goop is so we don't have to manually
+  # redirect every message to stderr in this function.
+
+  exec 4>&1    # save stdout fd to fd #4
+  exec 1>&2    # redirect stdout to stderr
+
+  cat <<__EOM__
+Usage: `basename $0` [options]
+
+  --debug
+             Enable debugging
+  --delete
+             Delete any pre-existing build before starting
+  --lang <languages>
+             Specify the compilers to build.  Default: $LANGUAGES
+  --native <dir>
+             Fast way of setting --nativepath, --sysroot and --make.
+             Equivalent to:
+	       --nativepath=<dir>/H-<build>/bin
+	       --make=<dir>/H-<build>/bin/make
+	       --sysroot=<dir>/H-<build>/<build>/sys-root
+	     Default: $NATIVE
+  --nativepath <dir>
+            Specify the directory containing the native executables
+	     Default: $NATIVEPATH
+  --make <path>
+            Specify the absolute path to the make program
+             Default: <native>/H-<build>/bin/make
+  --sysroot <dir>
+            Specify the sysroot to be used by the HOST compiler.
+	     Default: <native>/H-<build>/<build>/sys-root
+  --prefix <dir>
+            Specify the prefix to use.
+	     Default: /opt/redhat/<release>-<revision>
+  --buildtop <dir>
+            Specify where to build the toolchains.
+	     Default: /es/build/<release>/<revision>/<host>/X-<target>
+  --host <triplet>
+            Specify the host machine.  Default: $HOST
+  --target <triplet>
+            Specify the target machine.  Default: $TARGET
+  --build <triplet>
+            Specify the build machine.  Also sets --native.
+	    Default: $BUILD
+  --karch <machine>
+            Specify the kernel architecture type.
+             <kernel-src>/include/asm-<machine> should exist
+  --kproc <cpu>
+            Specify the kernel machine type.
+             <kernel-src>/include/asm-<machine>/proc-<cpu>  should exist
+  --ktype <type>
+            Specify the kernel architecture sub-type, if necessary.
+             <kernel-src>/include/asm-<machine>/arch-<type>  should exist  
+  --rev <string>
+            Specify the revision of the toolchain being built.  No default.
+  --rel <string>
+            Specify the release of the toolchain being built.  No default.
+  --srctop <dir>
+            Specify the location of the sources.  Default: <prefix>/sources
+  --CC <command>
+            Specify the name of the host C compiler.  Default: $CC_for_host
+  --xCC_prefix <string>
+            Prefix for constructed cross compiler, eg: distcc.  Default: none
+  --tools-config-options <string>
+            Additional options to pass to configure when creating the toolchain.  No default.
+  --glibc-config-options <string>
+            Additional options to pass to configure when creating Glibc (all stages).  No default.
+  --glibc-config-options-stage2 <string>
+            Additional options to pass to configure when creating Glibc for stage2.  Default:
+  --gml <multilibs>
+            Specify which multilibs to support when building Glibc.  Default: none.
+  --install-target-libbfd
+            Create a libbfd for the target and install it into:
+              <prefix>/H-<host>/<target>/lib
+__EOM__
+  exec 1>&4   # Copy stdout fd back from temporary save fd, #4
+}
+
+while [ $# -ne 0 ]; do
+    option=$1
+    shift
+
+    optarg=""
+    case $option in
+    --*=*)
+        optarg=`echo $option | sed -e 's/^--[a-zA-Z0-9_-]*\=//'`
+        ;;
+    esac
+
+    case $option in
+    -h | --help)
+	help
+	exit 0
+	;;
+    --x|-x|--debug|-D)
+        set -x
+        ;;
+    --delete)
+        DELETE=1
+        ;;
+    --lang*)
+        LANGUAGES=$optarg
+        ;;
+    --make*)
+        MAKE=$optarg
+        ;;
+    --nativepath*)
+	NATIVEPATH="$optarg"
+        ;;
+    --native*)
+        NATIVE=$optarg
+	NATIVEPATH="$NATIVE/H-$BUILD/bin"
+	MAKE="$NATIVEPATH/make"
+	SYSROOT="$NATIVE/H-$BUILD/$BUILD/sys-root"
+        ;;
+    --sysroot*)
+        SYSROOT=$optarg
+	;;
+    --prefix*)
+        PREFIX=$optarg
+	SRCTOP="$PREFIX/sources"
+        ;;
+    --buildtop*)
+        BUILDTOP="$optarg"
+        ;;
+    --host*)
+        HOST=$optarg
+	BUILDTOP="/es/build/$RELEASE/$REVISION/$HOST/X-$TARGET"
+        ;;
+    --target*)
+        TARGET=$optarg
+	BUILDTOP="/es/build/$RELEASE/$REVISION/$HOST/X-$TARGET"
+        ;;
+    --build*)
+        BUILD=$optarg
+	NATIVEPATH="$NATIVE/H-$BUILD/bin"
+	MAKE="$NATIVEPATH/make"	
+	SYSROOT="$NATIVE/H-$BUILD/$BUILD/sys-root"
+        ;;
+    --karch*)
+        KARCH=$optarg
+        ;;
+    --kproc*)
+        KPROC=$optarg
+        ;;
+    --ktype*)
+        KTYPE=$optarg
+        ;;
+    --rev*)
+        REVISION=$optarg
+	PREFIX="/opt/redhat/${RELEASE}-${REVISION}"
+	BUILDTOP="/es/build/$RELEASE/$REVISION/$HOST/X-$TARGET"
+	SRCTOP="$PREFIX/sources"
+        ;;
+    --rel*)
+        RELEASE=$optarg
+	PREFIX="/opt/redhat/${RELEASE}-${REVISION}"
+	BUILDTOP="/es/build/$RELEASE/$REVISION/$HOST/X-$TARGET"
+	SRCTOP="$PREFIX/sources"
+        ;;
+    --srctop*)
+	SRCTOP="$optarg"
+        ;;
+    --xCC_prefix*)
+        xCC_prefix="$optarg"
+	;;
+    --CC*)
+    	CC_for_host="$optarg"
+	;;
+    --tools-config-options*)
+	TOOLS_CONFIG_OPTIONS=$optarg
+	;;
+    --glibc-config-options-stage2*)
+	GLIBC_CONFIG_OPTIONS_STAGE2=$optarg
+	;;
+    --glibc-config-options*)
+	GLIBC_CONFIG_OPTIONS=$optarg
+	;;
+    --gml*)
+	GLIBC_MULTILIBS="$optarg"
+	;;
+    --install-target-libbfd*)
+        INSTALL_TARGET_LIBBFD=1
+	;;
+    --rpmi*)
+        RPMI="${optarg}"
+        ;;
+    esac
+done
+
+export MAKE
+
+if [ X$SYSROOT = X ]; then
+  if [ X$HOSTEXPLICIT = X1 ]; then
+    testcc="$HOST-gcc"
+  else
+    testcc="gcc"
+  fi
+  sr="`$testcc -E -v - < /dev/null 2>&1 >/dev/null | sed -n 's,/usr/include$,/,p' | sed 's/^ *//'`"
+  if [ sr != '/' ]; then
+    SYSROOT="$sr`$testcc --print-multi-os-directory`"
+  fi
+fi
+
+if [ X$PREFIX = X ]; then
+  PREFIX="/opt/redhat/$RELEASE-$REVISION"
+fi
+
+mkdir -p "$BUILDTOP"
+if [ X$DELETE = X1 ]; then
+  rm -f "$BUILDTOP"/*STMP
+fi
+cd "$BUILDTOP"
+
+# Create a fake config.cache file for glibc that avoids it having to run
+# compilation tests that involve linking an executable.  This cannot be done
+# just yet as we only have a basic compiler ready, not an entire toolchain.
+
+echo "libc_cv_forced_unwind=yes" > glibc.config.cache
+echo "libc_cv_gcc_exceptions=yes" >> glibc.config.cache
+echo "libc_cv_c_cleanup=yes" >> glibc.config.cache
+GLIBC_CACHE=$PWD/glibc.config.cache
+export GLIBC_CACHE
+
+case $xCC_prefix in
+  "" | *" ")
+    ;;
+  *)
+    xCC_prefix=$xCC_prefix\ 
+    ;;
+esac
+  
+# Locate source trees:
+kernel_src=$SRCTOP/header/$TARGET/usr
+if ! test -d $kernel_src; then
+  kernel_src=$SRCTOP/kernel/$TARGET
+  if ! test -d $kernel_src; then
+    kernel_src=$SRCTOP/kernel
+    if ! test -d $kernel_src; then
+      echo " Missing kernel source directory: $kernel_src"
+      exit 1
+    fi
+  fi
+fi
+
+glibc_src=$SRCTOP/glibc/$TARGET
+if ! test -d $glibc_src; then
+  glibc_src=$SRCTOP/glibc
+  if ! test -d $glibc_src; then
+    echo " Missing glibc source directory: $glibc_src"
+    exit 1
+  fi
+fi
+
+tools_src=$SRCTOP/tools/cross
+if ! test -d $tools_src; then
+  tools_src=$SRCTOP/tools-cross
+  if ! test -d $tools_src; then
+    echo " Missing toolchain source directory: $tools_src"
+    exit 1
+  fi
+fi
+
+# Check that executables are present.
+if [ ! -x $MAKE ] ; then
+  echo "ERROR:"
+  echo "  Missing make program, please use --make, --native or --build"
+  echo "  Current value: $MAKE"
+  exit 1
+fi
+
+if [ ! -d $NATIVEPATH ] ; then
+  echo "WARNING:"
+  echo "  Path to native executables directory does not exist, you might want to use --nativepath"
+  echo "  Current value: $NATIVEPATH"
+fi
+
+# Sysroot variables
+
+sysroot_stage1=$BUILDTOP/sysroot-stage1
+sysroot_stage2=$BUILDTOP/sysroot-stage2
+sysroot_stage3=$BUILDTOP/sysroot-stage3
+
+# Tools variables
+
+tools_prefix_stage1=$BUILDTOP/tools-install-stage1/$RELEASE-$REVISION
+tools_exec_prefix_stage1=$tools_prefix_stage1/H-$HOST
+tools_sys_root_prefix_stage1=$tools_exec_prefix_stage1/$TARGET
+# --with-newlib is added in order to define inhibit_libc when building
+# libgcc for the first time.  This prevents libgcc from trying to use
+# headers and functions from glibc, which has not been built yet.
+tools_stage1conf="$tools_src/configure -v \
+  --host=$HOST \
+  --target=$TARGET \
+  --build=$BUILD \
+  --enable-languages=c \
+  --prefix=$tools_prefix_stage1 \
+  --exec-prefix=$tools_exec_prefix_stage1 \
+  --with-sysroot \
+  --disable-shared \
+  --disable-threads \
+  --with-newlib \
+  $TOOLS_CONFIG_OPTIONS"
+tools_stage1bld="all-build-texinfo all-binutils all-ld all-gas all-gcc all-target-libgcc"
+tools_stage1inst="install-binutils install-ld install-gas install-gcc install-target-libgcc"
+
+tools_prefix_stage2="${RPMI}$PREFIX"
+tools_exec_prefix_stage2=$tools_prefix_stage2/H-$HOST
+tools_sys_root_prefix_stage2=$tools_exec_prefix_stage2/$TARGET
+tools_stage2conf="$tools_src/configure -v \
+  --host=$HOST \
+  --target=$TARGET \
+  --build=$BUILD \
+  --enable-languages=$LANGUAGES \
+  --prefix=$tools_prefix_stage2 \
+  --exec_prefix=$tools_exec_prefix_stage2 \
+  --with-sysroot \
+  --without-newlib \
+  --enable-threads \
+  --x-libraries=$SYSROOT/usr/X11R6/lib/ \
+  --x-includes=$SYSROOT/usr/X11R6/include/ \
+  --enable-install-libbfd \
+  $TOOLS_CONFIG_OPTIONS"
+tools_stage2bld="all info"
+tools_stage2inst="install install-info install-bfd"
+
+libbfdconf="$tools_src/bfd/configure -v \
+  --enable-install-libbfd \
+  --host=$TARGET \
+  --target=$TARGET \
+  --build=$BUILD \
+  --prefix=$tools_exec_prefix_stage2 \
+  --exec_prefix=$tools_sys_root_prefix_stage2 \
+  "
+
+# Glibc variables
+
+glibc_host=$TARGET
+glibc_target=$TARGET
+glibc_build=$BUILD
+
+glibc_config_prefix=/usr
+
+glibc_stage1conf="$glibc_src/configure -v \
+  --with-headers=$sysroot_stage2/usr/include \
+  --prefix=$glibc_config_prefix  \
+  --host=$glibc_host \
+  --build=$glibc_build \
+  --target=$glibc_target \
+  --disable-profile \
+  --without-cvs \
+  $GLIBC_CONFIG_OPTIONS"
+
+glibc_stage2conf="$glibc_src/configure -v \
+  --with-headers=$sysroot_stage3/usr/include \
+  --prefix=$glibc_config_prefix  \
+  --host=$glibc_host \
+  --build=$glibc_build \
+  --target=$glibc_target \
+  --disable-profile \
+  --without-cvs \
+  $GLIBC_CONFIG_OPTIONS \
+  $GLIBC_CONFIG_OPTIONS_STAGE2"
+
+# Other variables
+
+mkinstalldirs=$tools_src/mkinstalldirs
+
+dummy_header_files="\
+    usr/include/sys/types.h \
+    usr/include/sys/ucontext.h \
+    usr/include/errno.h\
+    usr/include/string.h\
+    usr/include/stdlib.h\
+    usr/include/signal.h\
+    usr/include/stdio.h\
+    usr/include/unistd.h\
+    usr/include/time.h"
+dummy_header_dirs="usr/include usr/include/sys"
+
+# We defintely don't want this picked up from the environment by accident.
+#unset CFLAGS
+if [ X$CFLAGS != X ]; then
+  echo "  Warning: CFLAGS set (to $CFLAGS), is this intentional ?"
+fi
+
+OLDCPPFLAGS="$CPPFLAGS"
+
+# Give the user a summary of the variable settings.
+
+echo "Variable settings:"
+echo "  Release:     " $RELEASE
+echo "  Revision:    " $REVISION
+echo "  Host:        " $HOST
+echo "  Build:       " $BUILD
+echo "  Target:      " $TARGET
+echo "  Prefix:      " $PREFIX
+echo "  Build Top:   " $BUILDTOP
+echo "  Source Top:  " $SRCTOP
+echo "  Native Path: " $NATIVEPATH
+echo "  Make:        " $MAKE
+echo "  Sysroot:     " $SYSROOT
+echo "Sources:"
+echo "  Gcc:         " `find $tools_src -printf "%l"`
+echo "  Glibc:       " `find $glibc_src -printf "%l"`
+echo "  Kernel:      " `find $kernel_src -printf "%l"`
+echo "Config options:"
+echo "  Tools (stage1): --enable-languages=c --with-sysroot --disable-shared --disable-threads --with-newlib $TOOLS_CONFIG_OPTIONS"
+echo "  Tools (stage2): --enable-languages=$LANGUAGES --with-sysroot --enable-threads --without-newlib $TOOLS_CONFIG_OPTIONS"
+echo "  Glibc (stage1): --disable-profile --without-cvs $GLIBC_CONFIG_OPTIONS"
+echo "  Glibc (stage2): --disable-profile --without-cvs $GLIBC_CONFIG_OPTIONS $GLIBC_CONFIG_OPTIONS_STAGE2"
+
+# Save a bit of text in the strings below.
+
+AT=" at `/bin/date +%H:%M`."
+
+# Do the actual work.
+
+echo "Starting $0" $AT
+
+# Stage 1
+#     * copy kernel headers
+#     * make tweaks for glibc
+#     * build gcc/binutils/ld/gas with above headers
+
+# Stage1 environment variables
+
+PATH="$tools_exec_prefix_stage1/bin:$NATIVEPATH:/usr/sbin:/sbin:/usr/bin:/bin"
+export PATH
+
+if [ ! -f KERN-STAGE1-STMP ]; then
+    # Copy kernel headers to sysroot dir
+    AT=" at `/bin/date +%H:%M`."
+    echo "Copying/Generating kernel files for stage1" $AT
+    rm -rf "$sysroot_stage1/usr/include"
+    $mkinstalldirs $sysroot_stage1/usr/include > /dev/null 2>&1
+    (cd $kernel_src/include ; tar cf - linux asm*) | \
+        (cd $sysroot_stage1/usr/include ; tar xpf -)
+
+    test -d $sysroot_stage1/usr/include/asm || \
+        ln -s asm-$KARCH $sysroot_stage1/usr/include/asm
+
+    echo "Doing include hacks for stage1."
+    $mkinstalldirs $sysroot_stage1/usr/include/gnu > /dev/null 2>&1
+    touch $sysroot_stage1/usr/include/link.h
+    touch $sysroot_stage1/usr/include/gnu/stubs.h
+    touch $sysroot_stage1/usr/include/linux/autoconf.h
+    if [ -f $glibc_src/features.h ]; then
+        # We must be glibc 2.0.x
+        cp $glibc_src/features.h $sysroot_stage1/usr/include/features.h
+    elif [ -f $glibc_src/include/features.h ]; then
+        # We must be glibc 2.1 or greater
+        cp $glibc_src/include/features.h $sysroot_stage1/usr/include/features.h
+    else
+        # We have yet another different glibc
+        echo "Can't find features.h in glibc-src.  Exiting."
+        exit 1
+    fi
+    if [ -f $glibc_src/linuxthreads/sysdeps/pthread/pthread.h ]; then
+        cp $glibc_src/linuxthreads/sysdeps/pthread/pthread.h $sysroot_stage1/usr/include/pthread.h
+    fi
+
+    if test -f $kernel_src/Makefile; then
+	# Make version.h and symlinks
+	echo "Making version.h and symlinks for stage1."
+	cp $kernel_src/Makefile $sysroot_stage1/usr
+	(cd $sysroot_stage1/usr ; \
+	 $MAKE -w -I $kernel_src ARCH=$KARCH PROCESSOR=$KPROC INCDIR=$KTYPE CONFIGURATION= TOPDIR=`pwd` symlinks include/linux/version.h) > /dev/null
+	rm $sysroot_stage1/usr/Makefile
+    fi
+
+    # Touch dummy headers libgcc depends upon from glibc
+    for dir in $dummy_header_dirs; do
+        (cd $sysroot_stage1; $mkinstalldirs $dir) > /dev/null
+    done
+    for file in $dummy_header_files; do
+        (cd $sysroot_stage1; 
+         echo '/* This space intentionally left blank */' > $file)
+    done
+
+    echo 'typedef struct _IO_FILE FILE;' > $sysroot_stage1/usr/include/stdio.h
+    echo 'extern FILE *stderr;' >> $sysroot_stage1/usr/include/stdio.h
+    echo '#define SEEK_CUR 1' >> $sysroot_stage1/usr/include/stdio.h
+    echo '#define SEEK_SET 0' >> $sysroot_stage1/usr/include/stdio.h
+
+    mkdir -p $tools_sys_root_prefix_stage1
+    rm -rf $tools_sys_root_prefix_stage1/sys-root
+    ln -s $sysroot_stage1 $tools_sys_root_prefix_stage1/sys-root
+
+    echo "Done include hacks for stage1."
+    touch KERN-STAGE1-STMP
+else
+    echo "Skipping include hacks for stage1."
+fi
+
+if [ ! -f TOOLS-STAGE1-STMP ]; then
+    # Build stage1 tools
+    CC=$CC_for_host; export CC
+    SHELL=/bin/bash; export SHELL
+
+    AT=" at `/bin/date +%H:%M`."
+    echo "Doing tools stage1" $AT
+    rm -rf tools-stage1; mkdir -p tools-stage1
+    
+    AT=" at `/bin/date +%H:%M`."
+    (cd tools-stage1; $tools_stage1conf) > tools-stage1.log 2>&1 \
+      || { echo "*** tools stage1 configure failed" $AT; exit 3; }
+    AT=" at `/bin/date +%H:%M`."
+    (cd tools-stage1; $MAKE -w $tools_stage1bld) >> tools-stage1.log 2>&1 \
+      || { echo "*** tools stage1 build failed" $AT; exit 4; }
+    AT=" at `/bin/date +%H:%M`."
+    (cd tools-stage1; $MAKE -w $tools_stage1inst) >> tools-stage1.log 2>&1 \
+      || { echo "*** tools stage1 install failed" $AT; exit 5; }
+
+    # If we're building a static LIBGCC only (for bootstraping purposes),
+    # and a dynamic GLIBC, then the glibc build will try to link with
+    # "libgcc_eh.a", which in a dynamic-library setting, is supposed to
+    # contain some object files split out of libgcc.a.  Creating a soft link
+    # is enough to get things to work.  Alternatively we could create an
+    # empty linker script file, but this approach feels safer.  Ideally,
+    # glibc shouldn't just assume libgcc_eh.a.  It doesn't if you
+    # disable-shared, but then we'd need yet another bootstrapping stage.
+    case " $tools_stage1conf " in
+    *" --disable-shared "*)
+      case " $glibc_stage1conf " in
+      *" --disable-shared "*) ;;
+      *)
+        find $tools_prefix_stage1 -name libgcc.a | sed 's,libgcc\.a$,,' |
+        while read d; do ln -s libgcc.a $d/libgcc_eh.a; done
+	;;
+      esac
+      ;;
+    esac
+
+    unset CC
+    touch TOOLS-STAGE1-STMP
+    echo "Finished tools stage1"
+else
+    echo "Skipping tools stage1"
+fi
+
+# Stage 2
+#     * copy kernel headers
+#     * make tweaks
+#     * build and install glibc with stage1 compiler
+#     * build and install toolchain with stage1 compiler and stage2 glibc
+
+PATH="$tools_exec_prefix_stage1/bin:$NATIVEPATH:/usr/sbin:/sbin:/usr/bin:/bin"
+export PATH
+
+if [ ! -f KERN-STAGE2-STMP ]; then
+    # Copy kernel headers to install dir
+    AT=" at `/bin/date +%H:%M`."
+    echo "Copying kernel files for stage2" $AT
+    $mkinstalldirs $sysroot_stage2/usr/include > /dev/null
+    (cd $kernel_src/include ; tar cf - linux asm*) | \
+        (cd $sysroot_stage2/usr/include ; tar xpf -)
+
+    test -d $sysroot_stage2/usr/include/asm || \
+        ln -s asm-$KARCH $sysroot_stage2/usr/include/asm
+
+    # Some hacks I don't fully grok
+    echo "Doing include hacks for stage2."
+    $mkinstalldirs $sysroot_stage2/usr/include/gnu > /dev/null
+    touch $sysroot_stage2/usr/include/gnu/stubs.h
+    touch $sysroot_stage2/usr/include/linux/autoconf.h
+    if [ -f $glibc_src/features.h ]; then
+        # We must be glibc 2.0.x
+        cp $glibc_src/features.h $sysroot_stage1/usr/include/features.h
+    elif [ -f $glibc_src/include/features.h ]; then
+        # We must be glibc 2.1 or greater
+        cp $glibc_src/include/features.h $sysroot_stage1/usr/include/features.h
+    else
+        # We have yet another different glibc
+        echo "Can't find features.h in glibc-src.  Exiting."
+        exit 1
+    fi
+    if [ -f $glibc_src/linuxthreads/sysdeps/pthread/pthread.h ]; then
+        cp $glibc_src/linuxthreads/sysdeps/pthread/pthread.h $sysroot_stage2/usr/include/pthread.h
+    fi
+
+    if test -f $kernel_src/Makefile; then
+	# Make version.h and symlinks
+	echo "Making version.h and symlinks for stage2."
+	cp $kernel_src/Makefile $sysroot_stage2/usr
+	(cd $sysroot_stage2/usr ; \
+	 $MAKE -I $kernel_src ARCH=$KARCH PROCESSOR=$KPROC INCDIR=$KTYPE CONFIGURATION= TOPDIR=`pwd` symlinks include/linux/version.h)
+	rm $sysroot_stage2/usr/Makefile
+    fi
+
+    mkdir -p $tools_sys_root_prefix_stage2
+    rm -rf $tools_sys_root_prefix_stage2/sys-root
+    ln -s $sysroot_stage2 $tools_sys_root_prefix_stage2/sys-root
+
+    touch KERN-STAGE2-STMP
+    echo "Finished copying kernel files for stage2"
+else
+    echo "Skipping copying kernel files for stage2"
+fi
+
+if [ ! -f GLIBC-STAGE1-STMP ]; then
+    # Should be enough to build glibc now
+    for gml in $GLIBC_MULTILIBS; do
+        if [ X$gml = Xnone ]; then
+	    POSTFIX=""
+	    CC=$glibc_target-gcc; export CC
+        else
+	    POSTFIX="_`echo $gml | sed  's/[^][a-zA-Z0-9-]/_/g'`"
+            CC="$glibc_target-gcc $gml"; export CC
+        fi
+        AT=" at `/bin/date +%H:%M`."
+        echo "Doing glibc stage1$POSTFIX" $AT
+        rm -rf glibc-stage1$POSTFIX; mkdir glibc-stage1$POSTFIX
+
+	if [ -f "$GLIBC_CACHE" ]; then
+	  cat "$GLIBC_CACHE" > glibc-stage1$POSTFIX/config.cache
+	fi
+        
+        AT=" at `/bin/date +%H:%M`."
+        (cd glibc-stage1$POSTFIX; $glibc_stage1conf) > glibc-stage1$POSTFIX.log 2>&1 \
+          || { echo "*** glibc stage1$POSTFIX configure failed" $AT; exit 6; }
+	
+	mkdir -p glibc-stage1$POSTFIX/bits
+	touch glibc-stage1$POSTFIX/bits/stdio_lim.st
+	touch glibc-stage1$POSTFIX/bits/stdio_lim.h
+	
+        AT=" at `/bin/date +%H:%M`."
+        (cd glibc-stage1$POSTFIX; $MAKE -w) >> glibc-stage1$POSTFIX.log 2>&1 \
+          || { echo "*** glibc stage1$POSTFIX build failed" $AT; exit 7; }
+        AT=" at `/bin/date +%H:%M`."
+        (cd glibc-stage1$POSTFIX; $MAKE -w install_root=${sysroot_stage2} install) >> glibc-stage1$POSTFIX.log 2>&1 \
+          || { echo "*** glibc stage1$POSTFIX install failed" $AT; exit 8; }
+    
+        unset CC
+        echo "Done glibc stage1$POSTFIX"
+    done
+    touch GLIBC-STAGE1-STMP
+else
+    echo "Skipping glibc stage1"
+fi
+
+if [ ! -f TOOLS-STAGE2-STMP ]; then
+    # And now we do a full tool build
+    CC=$CC_for_host; export CC
+    SHELL=/bin/bash; export SHELL
+    
+    AT=" at `/bin/date +%H:%M`."
+    echo "Doing tools stage2" $AT
+    rm -rf tools-stage2; mkdir tools-stage2
+    
+    AT=" at `/bin/date +%H:%M`."
+    (cd tools-stage2; $tools_stage2conf) > tools-stage2.log 2>&1 \
+      || { echo "*** tools stage2 configure failed" $AT; exit 9; }
+    AT=" at `/bin/date +%H:%M`."
+    (cd tools-stage2; $MAKE -w $tools_stage2bld) >> tools-stage2.log 2>&1 \
+      || { echo "*** tools stage2 build failed" $AT; exit 10; }
+    AT=" at `/bin/date +%H:%M`."
+    (cd tools-stage2; $MAKE -w $tools_stage2inst) >> tools-stage2.log 2>&1 \
+      || { echo "*** tools stage2 install failed" $AT; exit 11; }
+
+    unset CC
+    
+    touch TOOLS-STAGE2-STMP
+    echo "Done tools stage2"
+else
+    echo "Skipping tools stage2"
+fi
+
+# Stage 3
+#     * copy kernel headers
+#     * make tweaks
+#     * build and install glibc with stage2 compiler
+#     * if requested build and install libbfd with stage2 compiler
+
+PATH="$tools_exec_prefix_stage2/bin:$NATIVEPATH:/usr/sbin:/sbin:/usr/bin:/bin"
+export PATH
+
+if [ ! -f KERN-STAGE3-STMP ]; then
+    # Copy kernel headers to install dir
+    AT=" at `/bin/date +%H:%M`."
+    echo "Copying stage2 sysroot to stage3" $AT
+
+    if [ -d "$sysroot_stage3" ]; then
+      rm -rf "$sysroot_stage3"
+    fi
+    cp -a $sysroot_stage2 $sysroot_stage3
+
+    touch KERN-STAGE3-STMP
+    echo "Done copying stage2 sysroot to stage3"
+else
+    echo "Skipping copying stage2 sysroot to stage3"
+fi
+
+if [ ! -f GLIBC-STAGE2-STMP ]; then
+    # Should be enough to build glibc w/threads now
+    CC=$xCC_prefix$glibc_target-gcc; export CC
+    for gml in $GLIBC_MULTILIBS; do
+        if [ X$gml = Xnone ]; then
+	    POSTFIX=""
+	    CC=$glibc_target-gcc; export CC
+        else
+	    POSTFIX="_`echo $gml | sed  's/[^][a-zA-Z0-9-]/_/g'`"
+            CC="$glibc_target-gcc $gml"; export CC
+        fi
+        AT=" at `/bin/date +%H:%M`."
+        echo "Doing glibc stage2$POSTFIX" $AT
+        rm -rf glibc-stage2$POSTFIX; mkdir glibc-stage2$POSTFIX
+    
+        AT=" at `/bin/date +%H:%M`."
+        (cd glibc-stage2$POSTFIX; $glibc_stage2conf) > glibc-stage2$POSTFIX.log 2>&1 \
+          || { echo "*** glibc stage2$POSTFIX configure failed" $AT; exit 12; }
+        AT=" at `/bin/date +%H:%M`."
+        (cd glibc-stage2$POSTFIX; $MAKE -w) >> glibc-stage2$POSTFIX.log 2>&1 \
+          || { echo "*** glibc stage2$POSTFIX build failed" $AT; exit 13; }
+        AT=" at `/bin/date +%H:%M`."
+        (cd glibc-stage2$POSTFIX; $MAKE -w install_root=$sysroot_stage3 install) >> glibc-stage2$POSTFIX.log 2>&1 \
+          || { echo "*** glibc stage2$POSTFIX install failed" $AT; exit 14; }
+
+        unset CC
+    done
+    rm -rf $tools_sys_root_prefix_stage2/sys-root
+    cp -a $sysroot_stage3 $tools_sys_root_prefix_stage2/sys-root
+    touch GLIBC-STAGE2-STMP
+    echo "Done glibc stage2"
+else
+    echo "Skipping doing glibc stage2"
+fi
+
+if [ X$INSTALL_TARGET_LIBBFD = X1 ]; then
+  if [ ! -f LIBBFD-STAGE2-STMP ]; then
+    AT=" at `/bin/date +%H:%M`."
+    echo "Installing libbfd" $AT
+    CC=$glibc_target-gcc; export CC
+    rm -rf libbfd ; mkdir libbfd
+
+        (cd libbfd; $libbfdconf) > libbfd.log 2>&1 \
+          || { echo "*** libbfd configure failed" $AT; exit 15; }
+        AT=" at `/bin/date +%H:%M`."
+        (cd libbfd; $MAKE -w) >> libbfd.log 2>&1 \
+          || { echo "*** libbfd build failed" $AT; exit 16; }
+        AT=" at `/bin/date +%H:%M`."
+        (cd libbfd; $MAKE -w install) >> libbfd.log 2>&1 \
+          || { echo "*** libbfd install failed" $AT; exit 14; }
+    
+    unset CC    
+    touch LIBBFD-STAGE2-STMP
+    echo "Installed libbfd"
+  else
+    echo "Skipping install of libbfd"
+  fi
+fi
+
+AT=" at `/bin/date +%H:%M`."
+echo "Ending $0 run" $AT
+
+exit 0
+
+# Local Variables:
+# change-log-default-name: "ChangeLog.RedHat"
+# End:

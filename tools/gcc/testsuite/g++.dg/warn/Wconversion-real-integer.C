@@ -5,6 +5,7 @@
 /* { dg-do compile }
 /* { dg-options "-Wconversion -ftrack-macro-expansion=0" } */
 /* { dg-require-effective-target int32plus } */
+/* { dg-skip-if "non-IEEE math" { "rx-*-*" } { "*" } { "-m64bit-doubles" } } */
 #include <limits.h>
 
 void fsi (signed int x);

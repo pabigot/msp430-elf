@@ -1,4 +1,5 @@
 /* { dg-do compile } */
+/* { dg-skip-if "non standard pointer size in large memory model" { "msp430-*-*" } { "-mlarge" } { "" } } */
 
 #if __SIZEOF_POINTER__ == __SIZEOF_LONG__
 _mark (long obj, int i, char *a)

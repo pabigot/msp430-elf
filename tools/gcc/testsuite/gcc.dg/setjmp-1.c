@@ -3,6 +3,7 @@
 
 /* { dg-do compile } */
 /* { dg-options "-O -Wclobbered -Wextra -Wall" } */
+/* { dg-skip-if "code reorg generates the warning" { rl78-*-* v850-*-* } { "*" } { "" } } */
 
 #include <setjmp.h>
 

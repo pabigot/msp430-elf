@@ -1,5 +1,5 @@
 /* Prototypes for exported functions defined in arm.c and pe.c
-   Copyright (C) 1999-2013 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (rearnsha@arm.com)
    Minor hacks by Nick Clifton (nickc@cygnus.com)
 
@@ -24,12 +24,13 @@
 
 extern enum unwind_info_type arm_except_unwind_info (struct gcc_options *);
 extern int use_return_insn (int, rtx);
+extern bool use_simple_return_p (void);
 extern enum reg_class arm_regno_class (int);
 extern void arm_load_pic_register (unsigned long);
 extern int arm_volatile_func (void);
 extern void arm_expand_prologue (void);
 extern void arm_expand_epilogue (bool);
-extern void thumb2_expand_return (void);
+extern void thumb2_expand_return (bool);
 extern const char *arm_strip_name_encoding (const char *);
 extern void arm_asm_output_labelref (FILE *, const char *);
 extern void thumb2_asm_output_opcode (FILE *);
@@ -78,6 +79,7 @@ extern char *neon_output_shift_immediate (const char *, char, rtx *,
 extern void neon_pairwise_reduce (rtx, rtx, enum machine_mode,
 				  rtx (*) (rtx, rtx, rtx));
 extern rtx neon_make_constant (rtx);
+extern tree arm_builtin_vectorized_function (tree, tree, tree);
 extern void neon_expand_vector_init (rtx, rtx);
 extern void neon_lane_bounds (rtx, HOST_WIDE_INT, HOST_WIDE_INT);
 extern void neon_const_bounds (rtx, HOST_WIDE_INT, HOST_WIDE_INT);
@@ -93,16 +95,8 @@ extern enum reg_class coproc_secondary_reload_class (enum machine_mode, rtx,
 extern bool arm_tls_referenced_p (rtx);
 
 extern int arm_coproc_mem_operand (rtx, bool);
-extern int neon_vector_mem_operand (rtx, int);
+extern int neon_vector_mem_operand (rtx, int, bool);
 extern int neon_struct_mem_operand (rtx);
-extern int arm_no_early_store_addr_dep (rtx, rtx);
-extern int arm_early_store_addr_dep (rtx, rtx);
-extern int arm_early_load_addr_dep (rtx, rtx);
-extern int arm_no_early_alu_shift_dep (rtx, rtx);
-extern int arm_no_early_alu_shift_value_dep (rtx, rtx);
-extern int arm_no_early_mul_dep (rtx, rtx);
-extern int arm_mac_accumulator_is_result (rtx, rtx);
-extern int arm_mac_accumulator_is_mul_result (rtx, rtx);
 
 extern int tls_mentioned_p (rtx);
 extern int symbol_mentioned_p (rtx);
@@ -117,7 +111,9 @@ extern rtx arm_gen_load_multiple (int *, int, rtx, int, rtx, HOST_WIDE_INT *);
 extern rtx arm_gen_store_multiple (int *, int, rtx, int, rtx, HOST_WIDE_INT *);
 extern bool offset_ok_for_ldrd_strd (HOST_WIDE_INT);
 extern bool operands_ok_ldrd_strd (rtx, rtx, rtx, HOST_WIDE_INT, bool, bool);
+extern bool gen_operands_ldrd_strd (rtx *, bool, bool, bool);
 extern int arm_gen_movmemqi (rtx *);
+extern bool gen_movmem_ldrd_strd (rtx *);
 extern enum machine_mode arm_select_cc_mode (RTX_CODE, rtx, rtx);
 extern enum machine_mode arm_select_dominance_cc_mode (rtx, rtx,
 						       HOST_WIDE_INT);
@@ -125,6 +121,7 @@ extern rtx arm_gen_compare_reg (RTX_CODE, rtx, rtx, rtx);
 extern rtx arm_gen_return_addr_mask (void);
 extern void arm_reload_in_hi (rtx *);
 extern void arm_reload_out_hi (rtx *);
+extern int arm_max_const_double_inline_cost (void);
 extern int arm_const_double_inline_cost (rtx);
 extern bool arm_const_double_by_parts (rtx);
 extern bool arm_const_double_by_immediates (rtx);
@@ -132,7 +129,7 @@ extern const char *fp_immediate_constant (rtx);
 extern void arm_emit_call_insn (rtx, rtx);
 extern const char *output_call (rtx *);
 extern const char *output_call_mem (rtx *);
-extern void arm_emit_movpair (rtx, rtx);
+void arm_emit_movpair (rtx, rtx);
 extern const char *output_mov_long_double_arm_from_arm (rtx *);
 extern const char *output_move_double (rtx *, bool, int *count);
 extern const char *output_move_quad (rtx *);
@@ -160,13 +157,11 @@ extern const char *arm_output_shift(rtx *, int);
 extern const char *arm_output_iwmmxt_shift_immediate (const char *, rtx *, bool);
 extern const char *arm_output_iwmmxt_tinsr (rtx *);
 extern unsigned int arm_sync_loop_insns (rtx , rtx *);
-extern int arm_attr_length_push_multi (rtx, rtx);
+extern int arm_attr_length_push_multi(rtx, rtx);
 extern void arm_expand_compare_and_swap (rtx op[]);
 extern void arm_split_compare_and_swap (rtx op[]);
 extern void arm_split_atomic_op (enum rtx_code, rtx, rtx, rtx, rtx, rtx, rtx);
 extern rtx arm_load_tp (rtx);
-extern const char * output_sa1110_fix  (rtx *, int);
-extern section *    arm_elf_select_rtx_section (enum machine_mode, rtx, unsigned HOST_WIDE_INT);
 
 #if defined TREE_CODE
 extern void arm_init_cumulative_args (CUMULATIVE_ARGS *, tree, rtx, tree);
@@ -226,6 +221,8 @@ extern const char *arm_mangle_type (const_tree);
 
 extern void arm_order_regs_for_local_alloc (void);
 
+extern int arm_max_conditional_execute ();
+
 /* Vectorizer cost model implementation.  */
 struct cpu_vec_costs {
   const int scalar_stmt_cost;   /* Cost of any scalar operation, excluding
@@ -250,13 +247,15 @@ struct cpu_vec_costs {
 #ifdef RTX_CODE
 /* This needs to be here because we need RTX_CODE and similar.  */
 
+struct cpu_cost_table;
+
 struct tune_params
 {
   bool (*rtx_costs) (rtx, RTX_CODE, RTX_CODE, int *, bool);
+  const struct cpu_cost_table *insn_extra_cost;
   bool (*sched_adjust_cost) (rtx, rtx, rtx, int *);
   int constant_limit;
-  /* Maximum number of instructions to conditionalise in
-     arm_final_prescan_insn.  */
+  /* Maximum number of instructions to conditionalise.  */
   int max_insns_skipped;
   int num_prefetch_slots;
   int l1_cache_size;
@@ -271,10 +270,14 @@ struct tune_params
   bool logical_op_non_short_circuit[2];
   /* Vectorizer costs.  */
   const struct cpu_vec_costs* vec_costs;
+  /* Prefer Neon for 64-bit bitops.  */
+  bool prefer_neon_for_64bits;
 };
 
 extern const struct tune_params *current_tune;
 extern int vfp3_const_double_for_fract_bits (rtx);
+/* return power of two from operand, otherwise 0.  */
+extern int vfp3_const_double_for_bits (rtx);
 
 extern void arm_emit_coreregs_64bit_shift (enum rtx_code, rtx, rtx, rtx, rtx,
 					   rtx);
@@ -287,5 +290,8 @@ extern bool arm_expand_vec_perm_const (rtx target, rtx op0, rtx op1, rtx sel);
 extern bool arm_autoinc_modes_ok_p (enum machine_mode, enum arm_auto_incmodes);
 
 extern void arm_emit_eabi_attribute (const char *, int, int);
+
+/* Defined in gcc/common/config/arm-common.c.  */
+extern const char *arm_rewrite_selected_cpu (const char *name);
 
 #endif /* ! GCC_ARM_PROTOS_H */

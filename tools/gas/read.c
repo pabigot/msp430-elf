@@ -1,7 +1,5 @@
 /* read.c - read a source file -
-   Copyright 1986, 1987, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997,
-   1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009,
-   2010, 2011, 2012  Free Software Foundation, Inc.
+   Copyright 1986-2013 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -1306,10 +1304,10 @@ read_a_source_file (char *name)
 }
 
 /* Convert O_constant expression EXP into the equivalent O_big representation.
-   Take the sign of the number from X_unsigned rather than X_add_number.  */
+   Take the sign of the number from SIGN rather than X_add_number.  */
 
 static void
-convert_to_bignum (expressionS *exp)
+convert_to_bignum (expressionS *exp, int sign)
 {
   valueT value;
   unsigned int i;
@@ -1322,8 +1320,8 @@ convert_to_bignum (expressionS *exp)
     }
   /* Add a sequence of sign bits if the top bit of X_add_number is not
      the sign of the original value.  */
-  if ((exp->X_add_number < 0) != !exp->X_unsigned)
-    generic_bignum[i++] = exp->X_unsigned ? 0 : LITTLENUM_MASK;
+  if ((exp->X_add_number < 0) == !sign)
+    generic_bignum[i++] = sign ? LITTLENUM_MASK : 0;
   exp->X_op = O_big;
   exp->X_add_number = i;
 }
@@ -1630,7 +1628,7 @@ read_symbol_name (void)
 	      name_end = start + len;
 	      name = start + sofar;
 	    }
-	  
+
 	  *name++ = (char) C;
 	}
       *name = 0;
@@ -1672,7 +1670,7 @@ read_symbol_name (void)
       ignore_rest_of_line ();
       return NULL;
     }
-    
+
   SKIP_WHITESPACE ();
 
   return start;
@@ -4250,7 +4248,7 @@ emit_expr (expressionS *exp, unsigned int nbytes)
   if (op == O_constant && nbytes > sizeof (valueT))
     {
       extra_digit = exp->X_unsigned ? 0 : -1;
-      convert_to_bignum (exp);
+      convert_to_bignum (exp, !exp->X_unsigned);
       op = O_big;
     }
 
@@ -4544,6 +4542,7 @@ parse_bitfield_cons (exp, nbytes)
       exp->X_add_number = value;
       exp->X_op = O_constant;
       exp->X_unsigned = 1;
+      exp->X_extrabit = 0;
     }
 }
 
@@ -5103,12 +5102,12 @@ emit_leb128_expr (expressionS *exp, int sign)
     }
   else if (op == O_constant
 	   && sign
-	   && (exp->X_add_number < 0) != !exp->X_unsigned)
+	   && (exp->X_add_number < 0) == !exp->X_extrabit)
     {
       /* We're outputting a signed leb128 and the sign of X_add_number
 	 doesn't reflect the sign of the original value.  Convert EXP
 	 to a correctly-extended bignum instead.  */
-      convert_to_bignum (exp);
+      convert_to_bignum (exp, exp->X_extrabit);
       op = O_big;
     }
 
@@ -5756,7 +5755,7 @@ s_include (int arg ATTRIBUTE_UNUSED)
 
   demand_empty_rest_of_line ();
   path = (char *) xmalloc ((unsigned long) i
-                           + include_dir_maxlen + 5 /* slop */ );
+			   + include_dir_maxlen + 5 /* slop */ );
 
   for (i = 0; i < include_dir_count; i++)
     {
@@ -5793,8 +5792,8 @@ add_include_dir (char *path)
     {
       include_dir_count++;
       include_dirs =
-	(char **) realloc (include_dirs,
-			   include_dir_count * sizeof (*include_dirs));
+	(char **) xrealloc (include_dirs,
+			    include_dir_count * sizeof (*include_dirs));
     }
 
   include_dirs[include_dir_count - 1] = path;	/* New one.  */
@@ -6032,7 +6031,6 @@ input_scrub_insert_line (const char *line)
 {
   sb newline;
   size_t len = strlen (line);
-
   sb_build (&newline, len);
   sb_add_buffer (&newline, line, len);
   input_scrub_include_sb (&newline, input_line_pointer, 0);

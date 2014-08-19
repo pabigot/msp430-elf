@@ -1,6 +1,6 @@
 // Special functions -*- C++ -*-
 
-// Copyright (C) 2006-2013 Free Software Foundation, Inc.
+// Copyright (C) 2006-2014 Free Software Foundation, Inc.
 //
 // This file is part of the GNU ISO C++ Library.  This library is free
 // software; you can redistribute it and/or modify it under the
@@ -81,8 +81,8 @@ namespace tr1
 
       _Tp __term = _Tp(1);
       _Tp __Fac = _Tp(1);
-      const unsigned long int __max_iter = 100000;
-      unsigned long int __i;
+      const unsigned int __max_iter = 100000;
+      unsigned int __i;
       for (__i = 0; __i < __max_iter; ++__i)
         {
           __term *= (__a + _Tp(__i)) * __x
@@ -269,8 +269,8 @@ namespace tr1
 
       _Tp __term = _Tp(1);
       _Tp __Fabc = _Tp(1);
-      const unsigned long int __max_iter = 100000;
-      unsigned long int __i;
+      const unsigned int __max_iter = 100000;
+      unsigned int __i;
       for (__i = 0; __i < __max_iter; ++__i)
         {
           __term *= (__a + _Tp(__i)) * (__b + _Tp(__i)) * __x

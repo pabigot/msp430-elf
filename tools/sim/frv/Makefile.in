@@ -1,10 +1,10 @@
 # Makefile template for Configure for the frv simulator
-# Copyright (C) 1998, 1999, 2000, 2001, 2003 Free Software Foundation, Inc.
+# Copyright (C) 1998-2014 Free Software Foundation, Inc.
 # Contributed by Red Hat.
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
 #
 # This program is distributed in the hope that it will be useful,
@@ -12,16 +12,12 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
-# You should have received a copy of the GNU General Public License along
-# with this program; if not, write to the Free Software Foundation, Inc.,
-# 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## COMMON_PRE_CONFIG_FRAG
 
 FRV_OBJS = frv.o cpu.o decode.o sem.o model.o mloop.o cgen-par.o
-
-CONFIG_DEVICES = dv-sockser.o
-CONFIG_DEVICES =
 
 SIM_OBJS = \
 	$(SIM_NEW_COMMON_OBJS) \
@@ -37,7 +33,7 @@ SIM_OBJS = \
 	traps.o interrupts.o memory.o cache.o pipeline.o \
 	profile.o profile-fr400.o profile-fr450.o profile-fr500.o profile-fr550.o options.o \
 	devices.o reset.o registers.o \
-	$(CONFIG_DEVICES)
+	$(frv_extra_objs)
 
 # Extra headers included by sim-main.h.
 SIM_EXTRA_DEPS = \

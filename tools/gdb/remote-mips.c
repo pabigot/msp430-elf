@@ -1,6 +1,6 @@
 /* Remote debugging interface for MIPS remote debugging protocol.
 
-   Copyright (C) 1993-2004, 2006-2012 Free Software Foundation, Inc.
+   Copyright (C) 1993-2014 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.  Written by Ian Lance Taylor
    <ian@cygnus.com>.
@@ -29,8 +29,8 @@
 #include "serial.h"
 #include "target.h"
 #include "exceptions.h"
-#include "gdb_string.h"
-#include "gdb_stat.h"
+#include <string.h>
+#include <sys/stat.h>
 #include "gdb_usleep.h"
 #include "regcache.h"
 #include <ctype.h>
@@ -63,7 +63,7 @@ static int mips_receive_trailer (unsigned char *trlr, int *pgarbage,
 				 int *pch, int timeout);
 
 static int mips_cksum (const unsigned char *hdr,
-		       const unsigned char *data, int len);
+		       const char *data, int len);
 
 static void mips_send_packet (const char *s, int get_ack);
 
@@ -84,9 +84,7 @@ static void ddb_open (char *name, int from_tty);
 
 static void lsi_open (char *name, int from_tty);
 
-static void mips_close (int quitting);
-
-static void mips_detach (struct target_ops *ops, char *args, int from_tty);
+static void mips_close (void);
 
 static int mips_map_regno (struct gdbarch *, int);
 
@@ -108,12 +106,12 @@ static void mips_files_info (struct target_ops *ignore);
 
 static void mips_mourn_inferior (struct target_ops *ops);
 
-static int pmon_makeb64 (unsigned long v, char *p, int n, int *chksum);
+static int pmon_makeb64 (unsigned long v, char *p, int n, unsigned int *chksum);
 
-static int pmon_zeroset (int recsize, char **buff, int *amount,
+static int pmon_zeroset (int recsize, char **buff, unsigned int *amount,
 			 unsigned int *chksum);
 
-static int pmon_checkset (int recsize, char **buff, int *value);
+static int pmon_checkset (int recsize, char **buff, unsigned int *value);
 
 static void pmon_make_fastrec (char **outbuf, unsigned char *inbuf,
 			       int *inptr, int inamount, int *recsize,
@@ -488,17 +486,11 @@ static void ATTRIBUTE_NORETURN
 mips_error (char *string,...)
 {
   va_list args;
-
-  va_start (args, string);
+  char *fmt;
 
   target_terminal_ours ();
   wrap_here ("");		/* Force out any buffered output.  */
   gdb_flush (gdb_stdout);
-  if (error_pre_print)
-    fputs_filtered (error_pre_print, gdb_stderr);
-  vfprintf_filtered (gdb_stderr, string, args);
-  fprintf_filtered (gdb_stderr, "\n");
-  va_end (args);
   gdb_flush (gdb_stderr);
 
   /* Clean up in such a way that mips_close won't try to talk to the
@@ -506,11 +498,16 @@ mips_error (char *string,...)
      it).  */
   close_ports ();
 
-  printf_unfiltered ("Ending remote MIPS debugging.\n");
   if (!ptid_equal (inferior_ptid, null_ptid))
     target_mourn_inferior ();
 
-  deprecated_throw_reason (RETURN_ERROR);
+  fmt = concat (_("Ending remote MIPS debugging: "),
+		string, (char *) NULL);
+  make_cleanup (xfree, fmt);
+
+  va_start (args, string);
+  throw_verror (TARGET_CLOSE_ERROR, fmt, args);
+  va_end (args);
 }
 
 /* putc_readable - print a character, displaying non-printable chars in
@@ -824,12 +821,13 @@ mips_receive_trailer (unsigned char *trlr, int *pgarbage,
 }
 
 /* Get the checksum of a packet.  HDR points to the packet header.
-   DATA points to the packet data.  LEN is the length of DATA.  */
+   DATASTR points to the packet data.  LEN is the length of DATASTR.  */
 
 static int
-mips_cksum (const unsigned char *hdr, const unsigned char *data, int len)
+mips_cksum (const unsigned char *hdr, const char *datastr, int len)
 {
   const unsigned char *p;
+  const unsigned char *data = (const unsigned char *) datastr;
   int c;
   int cksum;
 
@@ -872,7 +870,7 @@ mips_send_packet (const char *s, int get_ack)
 
   memcpy (packet + HDR_LENGTH, s, len);
 
-  cksum = mips_cksum (packet, packet + HDR_LENGTH, len);
+  cksum = mips_cksum (packet, (char *) packet + HDR_LENGTH, len);
   packet[HDR_LENGTH + len + TRLR_INDX_CSUM1] = TRLR_SET_CSUM1 (cksum);
   packet[HDR_LENGTH + len + TRLR_INDX_CSUM2] = TRLR_SET_CSUM2 (cksum);
   packet[HDR_LENGTH + len + TRLR_INDX_CSUM3] = TRLR_SET_CSUM3 (cksum);
@@ -976,8 +974,7 @@ mips_send_packet (const char *s, int get_ack)
 
 	  /* If the checksum does not match the trailer checksum, this
 	     is a bad packet; ignore it.  */
-	  if (mips_cksum (hdr, (unsigned char *) NULL, 0)
-	      != TRLR_GET_CKSUM (trlr))
+	  if (mips_cksum (hdr, NULL, 0) != TRLR_GET_CKSUM (trlr))
 	    continue;
 
 	  if (remote_debug > 0)
@@ -1142,7 +1139,7 @@ mips_receive_packet (char *buff, int throw_error, int timeout)
       ack[HDR_INDX_LEN1] = HDR_SET_LEN1 (0, 0, mips_receive_seq);
       ack[HDR_INDX_SEQ] = HDR_SET_SEQ (0, 0, mips_receive_seq);
 
-      cksum = mips_cksum (ack, (unsigned char *) NULL, 0);
+      cksum = mips_cksum (ack, NULL, 0);
 
       ack[HDR_LENGTH + TRLR_INDX_CSUM1] = TRLR_SET_CSUM1 (cksum);
       ack[HDR_LENGTH + TRLR_INDX_CSUM2] = TRLR_SET_CSUM2 (cksum);
@@ -1183,7 +1180,7 @@ mips_receive_packet (char *buff, int throw_error, int timeout)
   ack[HDR_INDX_LEN1] = HDR_SET_LEN1 (0, 0, mips_receive_seq);
   ack[HDR_INDX_SEQ] = HDR_SET_SEQ (0, 0, mips_receive_seq);
 
-  cksum = mips_cksum (ack, (unsigned char *) NULL, 0);
+  cksum = mips_cksum (ack, NULL, 0);
 
   ack[HDR_LENGTH + TRLR_INDX_CSUM1] = TRLR_SET_CSUM1 (cksum);
   ack[HDR_LENGTH + TRLR_INDX_CSUM2] = TRLR_SET_CSUM2 (cksum);
@@ -1242,7 +1239,7 @@ mips_request (int cmd,
 	      int timeout,
 	      char *buff)
 {
-  int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
+  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
   char myBuff[DATA_MAXLEN + 1];
   char response_string[17];
   int len;
@@ -1386,13 +1383,19 @@ mips_exit_debug (void)
       mips_request ('x', 0, 0, NULL, mips_receive_wait, NULL);
       mips_need_reply = 0;
       if (!mips_expect (" break!"))
-	return -1;
+	{
+	  do_cleanups (old_cleanups);
+	  return -1;
+	}
     }
   else
     mips_request ('x', 0, 0, &err, mips_receive_wait, NULL);
 
   if (!mips_expect (mips_monitor_prompt))
-    return -1;
+    {
+      do_cleanups (old_cleanups);
+      return -1;
+    }
 
   do_cleanups (old_cleanups);
 
@@ -1406,7 +1409,7 @@ static void
 mips_initialize (void)
 {
   int err;
-  struct cleanup *old_cleanups = make_cleanup (mips_initialize_cleanups, NULL);
+  struct cleanup *old_cleanups;
   int j;
 
   /* What is this code doing here?  I don't see any way it can happen, and
@@ -1418,6 +1421,8 @@ mips_initialize (void)
       warning (_("internal error: mips_initialize called twice"));
       return;
     }
+
+  old_cleanups = make_cleanup (mips_initialize_cleanups, NULL);
 
   mips_wait_flag = 0;
   mips_initializing = 1;
@@ -1543,6 +1548,7 @@ common_open (struct target_ops *ops, char *name, int from_tty,
   char *remote_name = 0;
   char *local_name = 0;
   char **argv;
+  struct cleanup *cleanup;
 
   if (name == 0)
     error (_("\
@@ -1558,7 +1564,7 @@ seen from the board via TFTP, specify that name as the third parameter.\n"));
   /* Parse the serial port name, the optional TFTP name, and the
      optional local TFTP name.  */
   argv = gdb_buildargv (name);
-  make_cleanup_freeargv (argv);
+  cleanup = make_cleanup_freeargv (argv);
 
   serial_port_name = xstrdup (argv[0]);
   if (argv[1])			/* Remote TFTP name specified?  */
@@ -1653,8 +1659,10 @@ seen from the board via TFTP, specify that name as the third parameter.\n"));
   reinit_frame_cache ();
   registers_changed ();
   stop_pc = regcache_read_pc (get_current_regcache ());
-  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC);
+  print_stack_frame (get_selected_frame (NULL), 0, SRC_AND_LOC, 1);
   xfree (serial_port_name);
+
+  do_cleanups (cleanup);
 }
 
 /* Open a connection to an IDT board.  */
@@ -1663,17 +1671,16 @@ static void
 mips_open (char *name, int from_tty)
 {
   const char *monitor_prompt = NULL;
-  if (gdbarch_bfd_arch_info (target_gdbarch) != NULL
-      && gdbarch_bfd_arch_info (target_gdbarch)->arch == bfd_arch_mips)
+  if (gdbarch_bfd_arch_info (target_gdbarch ()) != NULL
+      && gdbarch_bfd_arch_info (target_gdbarch ())->arch == bfd_arch_mips)
     {
-    switch (gdbarch_bfd_arch_info (target_gdbarch)->mach)
+    switch (gdbarch_bfd_arch_info (target_gdbarch ())->mach)
       {
       case bfd_mach_mips4100:
       case bfd_mach_mips4300:
       case bfd_mach_mips4600:
       case bfd_mach_mips4650:
       case bfd_mach_mips5000:
-      case bfd_mach_mips5400:
 	monitor_prompt = "<RISQ> ";
 	break;
       }
@@ -1724,7 +1731,7 @@ lsi_open (char *name, int from_tty)
 /* Close a connection to the remote board.  */
 
 static void
-mips_close (int quitting)
+mips_close (void)
 {
   if (mips_is_open)
     {
@@ -1740,14 +1747,12 @@ mips_close (int quitting)
 /* Detach from the remote board.  */
 
 static void
-mips_detach (struct target_ops *ops, char *args, int from_tty)
+mips_detach (struct target_ops *ops, const char *args, int from_tty)
 {
   if (args)
     error (_("Argument given to \"detach\" when remotely debugging."));
 
-  pop_target ();
-
-  mips_close (1);
+  unpush_target (ops);
 
   if (from_tty)
     printf_unfiltered ("Ending remote MIPS debugging.\n");
@@ -1795,7 +1800,7 @@ mips_signal_from_protocol (int sig)
 static void
 mips_set_register (int regno, ULONGEST value)
 {
-  char buf[MAX_REGISTER_SIZE];
+  gdb_byte buf[MAX_REGISTER_SIZE];
   struct regcache *regcache = get_current_regcache ();
   struct gdbarch *gdbarch = get_regcache_arch (regcache);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
@@ -2148,11 +2153,11 @@ static int
 mips_xfer_memory (CORE_ADDR memaddr, gdb_byte *myaddr, int len, int write,
 		  struct mem_attrib *attrib, struct target_ops *target)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   int i;
   CORE_ADDR addr;
   int count;
-  char *buffer;
+  gdb_byte *buffer;
   int status;
 
   /* PMON targets do not cope well with 64 bit addresses.  Mask the
@@ -2283,8 +2288,7 @@ Give up (and stop debugging it)? ")))
 
 	  printf_unfiltered ("Ending remote MIPS debugging.\n");
 	  target_mourn_inferior ();
-
-	  deprecated_throw_reason (RETURN_QUIT);
+	  quit ();
 	}
 
       target_terminal_inferior ();
@@ -2480,7 +2484,7 @@ static int
 mips_check_lsi_error (CORE_ADDR addr, int rerrflg)
 {
   struct lsi_error *err;
-  const char *saddr = paddress (target_gdbarch, addr);
+  const char *saddr = paddress (target_gdbarch (), addr);
 
   if (rerrflg == 0)		/* no error */
     return 0;
@@ -2548,13 +2552,13 @@ mips_common_breakpoint (%s): Unknown error: 0x%x\n",
 static int
 mips_common_breakpoint (int set, CORE_ADDR addr, int len, enum break_type type)
 {
-  int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
+  int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
   char buf[DATA_MAXLEN + 1];
   char cmd, rcmd;
   int rpid, rerrflg, rresponse, rlen;
   int nfields;
 
-  addr = gdbarch_addr_bits_remove (target_gdbarch, addr);
+  addr = gdbarch_addr_bits_remove (target_gdbarch (), addr);
 
   if (mips_monitor == MON_LSI)
     {
@@ -2582,7 +2586,7 @@ mips_common_breakpoint (int set, CORE_ADDR addr, int len, enum break_type type)
 	    {
 	      warning (_("\
 mips_common_breakpoint: Attempt to clear bogus breakpoint at %s"),
-		       paddress (target_gdbarch, addr));
+		       paddress (target_gdbarch (), addr));
 	      return 1;
 	    }
 
@@ -2733,7 +2737,7 @@ mips_common_breakpoint: Attempt to clear bogus breakpoint at %s"),
 	  if (rresponse != 22)	/* invalid argument */
 	    fprintf_unfiltered (gdb_stderr, "\
 mips_common_breakpoint (%s):  Got error: 0x%x\n",
-				paddress (target_gdbarch, addr), rresponse);
+				paddress (target_gdbarch (), addr), rresponse);
 	  return 1;
 	}
     }
@@ -2766,7 +2770,7 @@ send_srec (char *srec, int len, CORE_ADDR addr)
 	case 0x15:		/* NACK */
 	  fprintf_unfiltered (gdb_stderr,
 			      "Download got a NACK at byte %s!  Retrying.\n",
-			      paddress (target_gdbarch, addr));
+			      paddress (target_gdbarch (), addr));
 	  continue;
 	default:
 	  error (_("Download got unexpected ack char: 0x%x, retrying."),
@@ -2782,7 +2786,8 @@ mips_load_srec (char *args)
 {
   bfd *abfd;
   asection *s;
-  char *buffer, srec[1024];
+  char srec[1024];
+  bfd_byte *buffer;
   unsigned int i;
   unsigned int srec_frame = 200;
   int reclen;
@@ -2975,7 +2980,7 @@ static char encoding[] =
    characters written into the buffer.  */
 
 static int
-pmon_makeb64 (unsigned long v, char *p, int n, int *chksum)
+pmon_makeb64 (unsigned long v, char *p, int n, unsigned int *chksum)
 {
   int count = (n / 6);
 
@@ -3023,7 +3028,8 @@ pmon_makeb64 (unsigned long v, char *p, int n, int *chksum)
    escape sequence into the data stream.  */
 
 static int
-pmon_zeroset (int recsize, char **buff, int *amount, unsigned int *chksum)
+pmon_zeroset (int recsize, char **buff,
+	      unsigned int *amount, unsigned int *chksum)
 {
   int count;
 
@@ -3049,7 +3055,7 @@ pmon_zeroset (int recsize, char **buff, int *amount, unsigned int *chksum)
    the record elements added by this call.  */
 
 static int
-pmon_checkset (int recsize, char **buff, int *value)
+pmon_checkset (int recsize, char **buff, unsigned int *value)
 {
   int count;
 

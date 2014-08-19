@@ -3,6 +3,8 @@
 
 #ifdef __hppa__
 #define REGISTER "1"
+#elif defined __RL78__
+#define REGISTER "r8"
 #else
 #ifdef __moxie__
 #define REGISTER "2"

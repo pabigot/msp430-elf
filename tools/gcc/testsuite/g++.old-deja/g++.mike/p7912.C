@@ -21,3 +21,4 @@ main()
   }
   return count;
 }
+// { dg-require-effective-target size32plus }

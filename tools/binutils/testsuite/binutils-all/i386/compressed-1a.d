@@ -35,28 +35,28 @@ Contents of the .[z]?debug_info section:
    Abbrev Offset: 0x0
    Pointer Size:  4
  <0><b>: Abbrev Number: 1 \(DW_TAG_compile_unit\)
-    <c>   DW_AT_producer    : \(indirect string, offset: 0x0\): GNU C 4.4.4	
+    <c>   DW_AT_producer    : \(indirect string, offset: 0x0\): GNU C 4.4.4
     <10>   DW_AT_language    : 1	\(ANSI C\)
-    <11>   DW_AT_name        : \(indirect string, offset: 0x18\): compressed-1.c	
-    <15>   DW_AT_comp_dir    : \(indirect string, offset: 0x16\): .	
-    <19>   DW_AT_low_pc      : 0x0	
-    <1d>   DW_AT_high_pc     : 0x1b	
-    <21>   DW_AT_stmt_list   : 0x0	
+    <11>   DW_AT_name        : \(indirect string, offset: 0x18\): compressed-1.c
+    <15>   DW_AT_comp_dir    : \(indirect string, offset: 0x16\): .
+    <19>   DW_AT_low_pc      : 0x0
+    <1d>   DW_AT_high_pc     : 0x1b
+    <21>   DW_AT_stmt_list   : 0x0
  <1><25>: Abbrev Number: 2 \(DW_TAG_subprogram\)
-    <26>   DW_AT_external    : 1	
-    <27>   DW_AT_name        : \(indirect string, offset: 0xc\): foo2	
-    <2b>   DW_AT_decl_file   : 1	
-    <2c>   DW_AT_decl_line   : 10	
-    <2d>   DW_AT_low_pc      : 0x0	
-    <31>   DW_AT_high_pc     : 0x2	
+    <26>   DW_AT_external    : 1
+    <27>   DW_AT_name        : \(indirect string, offset: 0xc\): foo2
+    <2b>   DW_AT_decl_file   : 1
+    <2c>   DW_AT_decl_line   : 10
+    <2d>   DW_AT_low_pc      : 0x0
+    <31>   DW_AT_high_pc     : 0x2
     <35>   DW_AT_frame_base  : 1 byte block: 9c 	\(DW_OP_call_frame_cfa\)
  <1><37>: Abbrev Number: 2 \(DW_TAG_subprogram\)
-    <38>   DW_AT_external    : 1	
-    <39>   DW_AT_name        : \(indirect string, offset: 0x11\): foo1	
-    <3d>   DW_AT_decl_file   : 1	
-    <3e>   DW_AT_decl_line   : 4	
-    <3f>   DW_AT_low_pc      : 0x10	
-    <43>   DW_AT_high_pc     : 0x1b	
+    <38>   DW_AT_external    : 1
+    <39>   DW_AT_name        : \(indirect string, offset: 0x11\): foo1
+    <3d>   DW_AT_decl_file   : 1
+    <3e>   DW_AT_decl_line   : 4
+    <3f>   DW_AT_low_pc      : 0x10
+    <43>   DW_AT_high_pc     : 0x1b
     <47>   DW_AT_frame_base  : 1 byte block: 9c 	\(DW_OP_call_frame_cfa\)
  <1><49>: Abbrev Number: 0
 
@@ -88,21 +88,21 @@ Raw dump of debug contents of section .[z]?debug_line:
 
  The Directory Table is empty.
 
- The File Name Table:
+ The File Name Table \(offset 0x.*\):
   Entry	Dir	Time	Size	Name
   1	0	0	0	compressed-1.c
 
  Line Number Statements:
-  Extended opcode 2: set Address to 0x0
-  Advance Line by 10 to 11
-  Copy
-  Special opcode 6: advance Address by 0 to 0x0 and Line by 1 to 12
-  Advance Line by -7 to 5
-  Special opcode 229: advance Address by 16 to 0x10 and Line by 0 to 5
-  Special opcode 49: advance Address by 3 to 0x13 and Line by 2 to 7
-  Special opcode 46: advance Address by 3 to 0x16 and Line by -1 to 6
-  Advance PC by 5 to 0x1b
-  Extended opcode 1: End of Sequence
+  \[0x.*\]  Extended opcode 2: set Address to 0x0
+  \[0x.*\]  Advance Line by 10 to 11
+  \[0x.*\]  Copy
+  \[0x.*\]  Special opcode 6: advance Address by 0 to 0x0 and Line by 1 to 12
+  \[0x.*\]  Advance Line by -7 to 5
+  \[0x.*\]  Special opcode 229: advance Address by 16 to 0x10 and Line by 0 to 5
+  \[0x.*\]  Special opcode 49: advance Address by 3 to 0x13 and Line by 2 to 7
+  \[0x.*\]  Special opcode 46: advance Address by 3 to 0x16 and Line by -1 to 6
+  \[0x.*\]  Advance PC by 5 to 0x1b
+  \[0x.*\]  Extended opcode 1: End of Sequence
 
 
 Contents of the .[z]?debug_pubnames section:

@@ -1,4 +1,3 @@
-/* { dg-options "-O2" } */
 /* { dg-options "-O2 -Wno-int-to-pointer" } */
 
 __extension__ typedef __INTPTR_TYPE__ intptr_t;

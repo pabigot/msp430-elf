@@ -55,3 +55,4 @@ public:
 int main () {
   void *vp = new interproc_jump_edge();
 }
+// { dg-require-effective-target size32plus }

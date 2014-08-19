@@ -1,0 +1,15 @@
+2014-05-06  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf.c (backtrace_dwarf_add): Add casts to avoid compile time
+	warnings.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:
+
+

@@ -22,3 +22,4 @@ public:
 int main() {
   return derived().IwantedThisMethod();
 }
+// { dg-require-effective-target size32plus }

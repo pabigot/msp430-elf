@@ -1,6 +1,6 @@
 /* Definitions of taret machine for GNU compiler.
    Matsushita AM33/2.0
-   Copyright (C) 2001-2013 Free Software Foundation, Inc.
+   Copyright (C) 2001-2014 Free Software Foundation, Inc.
    Contributed by Alexandre Oliva <aoliva@redhat.com>
 
    This file is part of GCC.
@@ -43,10 +43,6 @@
 
 #undef  PROCESSOR_DEFAULT
 #define PROCESSOR_DEFAULT PROCESSOR_AM33_2
-
-/* On LINUX targets enable MEM_FUNCS by default.  */
-#undef  TARGET_FLAGS
-#define TARGET_FLAGS MASK_MULT_BUG | MASK_PTR_A0D0 | MASK_MEM_FUNCS
 
 #define DBX_REGISTER_NUMBER(REGNO) (REGNO)
 

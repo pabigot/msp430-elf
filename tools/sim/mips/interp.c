@@ -65,12 +65,8 @@ code on the hardware.
 #include "gdb/callback.h"   /* GDB simulator callback interface */
 #include "gdb/remote-sim.h" /* GDB simulator interface */
 
-#ifndef PARAMS
-#define PARAMS(x) 
-#endif
-
-char* pr_addr PARAMS ((SIM_ADDR addr));
-char* pr_uword64 PARAMS ((uword64 addr));
+char* pr_addr (SIM_ADDR addr);
+char* pr_uword64 (uword64 addr);
 
 
 /* Within interp.c we refer to the sim_state and sim_cpu directly. */
@@ -98,7 +94,7 @@ char* pr_uword64 PARAMS ((uword64 addr));
 /*-- GDB simulator interface ------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
 
-static void ColdReset PARAMS((SIM_DESC sd));
+static void ColdReset (SIM_DESC sd);
 
 /*---------------------------------------------------------------------------*/
 
@@ -160,10 +156,11 @@ static SIM_RC sim_firmware_command (SIM_DESC sd, char* arg);
 
 #define MEM_SIZE (8 << 20)	/* 8 MBytes */
 
+
 #if defined(TRACE)
 static char *tracefile = "trace.din"; /* default filename for trace log */
 FILE *tracefh = NULL;
-static void open_trace PARAMS((SIM_DESC sd));
+static void open_trace (SIM_DESC sd);
 #endif /* TRACE */
 
 static const char * get_insn_name (sim_cpu *, int);
@@ -369,6 +366,7 @@ sim_open (kind, cb, abfd, argv)
   if (sim_pre_argv_init (sd, argv[0]) != SIM_RC_OK)
     return 0;
   sim_add_option_table (sd, NULL, mips_options);
+
 
   /* getopt will print the error message so we just have to exit if this fails.
      FIXME: Hmmm...  in the case of gdb we need getopt to call
@@ -683,6 +681,7 @@ sim_open (kind, cb, abfd, argv)
 	  cpu->register_widths[rn] = 0;
       }
 
+
   }
 
 #if defined(TRACE)
@@ -799,6 +798,8 @@ sim_open (kind, cb, abfd, argv)
     }
   }
 
+
+
   return sd;
 }
 
@@ -831,6 +832,7 @@ sim_close (sd, quitting)
 #ifdef DEBUG
   printf("DBG: sim_close: entered (quitting = %d)\n",quitting);
 #endif
+
 
   /* "quitting" is non-zero if we cannot hang on errors */
 
@@ -938,6 +940,8 @@ sim_store_register (sd,rn,memory,length)
       return 0;
     }
 
+
+
   if (rn >= FGR_BASE && rn < FGR_BASE + NR_FGR)
     {
       cpu->fpr_state[rn - FGR_BASE] = fmt_uninterpreted;
@@ -1022,6 +1026,8 @@ sim_fetch_register (sd,rn,memory,length)
       sim_io_eprintf (sd, "Invalid register width for %d (register fetch ignored)\n",rn);
       return 0;
     }
+
+
 
   /* Any floating point register */
   if (rn >= FGR_BASE && rn < FGR_BASE + NR_FGR)
@@ -1133,13 +1139,6 @@ sim_create_inferior (sd, abfd, argv,env)
   return SIM_RC_OK;
 }
 
-
-SIM_RC
-sim_hardware_watchpoint (SIM_DESC sd, SIM_WATCH_ACTION action,
-                         SIM_WATCH_TYPE type, SIM_ADDR addr, long length)
-{
-  return SIM_RC_FAIL;
-}
 /*---------------------------------------------------------------------------*/
 /*-- Private simulator support interface ------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -1810,6 +1809,9 @@ ColdReset (SIM_DESC sd)
     }
 }
 
+
+
+
 /* Description from page A-26 of the "MIPS IV Instruction Set" manual (revision 3.1) */
 /* Signal an exception condition. This will result in an exception
    that aborts the instruction. The instruction operation pseudocode
@@ -2033,6 +2035,8 @@ signal_exception (SIM_DESC sd,
   return;
 }
 
+
+
 /* This function implements what the MIPS32 and MIPS64 ISAs define as
    "UNPREDICTABLE" behaviour.
 
@@ -2130,6 +2134,9 @@ cop_ld (SIM_DESC sd,
   return;
 }
 
+
+
+
 unsigned int
 cop_sw (SIM_DESC sd,
 	sim_cpu *cpu,
@@ -2184,6 +2191,9 @@ cop_sd (SIM_DESC sd,
 
   return(value);
 }
+
+
+
 
 void
 decode_coproc (SIM_DESC sd,
@@ -2415,6 +2425,7 @@ decode_coproc (SIM_DESC sd,
     case 2: /* co-processor 2 */
       {
 	int handle = 0;
+
 
 	if(! handle)
 	  {

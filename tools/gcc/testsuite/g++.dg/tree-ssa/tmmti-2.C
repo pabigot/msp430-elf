@@ -18,5 +18,4 @@ double bar(long i)
 }
 
 /* { dg-final { scan-tree-dump "a\\\[.*i.*\\\]\\\[0\\\]" "optimized" { xfail *-*-* } } } */
-/* { dg-final { scan-tree-dump "b\\\[.*i.*\\\].x" "optimized" } } */
 /* { dg-final { cleanup-tree-dump "optimized" } } */

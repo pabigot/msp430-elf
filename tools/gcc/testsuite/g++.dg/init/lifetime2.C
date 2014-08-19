@@ -21,3 +21,5 @@ int main()
 {
   B b;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

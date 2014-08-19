@@ -1,6 +1,5 @@
 /* PR rtl-optimization/54455 */
 /* { dg-do compile } */
-/* { dg-skip-if "no instruction scheduling" { "msp430-*-*" } { "*" } { "" } } */
 /* { dg-options "-O1 -fschedule-insns -fselective-scheduling --param max-sched-extend-regions-iters=2" } */
 /* { dg-require-effective-target scheduling } */
 

@@ -40,3 +40,4 @@ __exit:
 	halt
 	SYSCALL(SYS_exit)
 	.size	__exit, . - __exit
+

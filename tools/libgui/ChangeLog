@@ -1,3 +1,16 @@
+2009-10-09  Keith Seitz  <keiths@redhat.com>
+
+	* aclocal.m4: Regenerate.
+	* configure: Regeneratre.
+	* Makefile.in: Regenerate.
+	* library/Makefile.am: Remove unused PACKAGES variable.
+	* library/Makefile.in: Regenerate.
+	* src/Makefile.in: Regenerate.
+
+2009-03-12  Keith Seitz  <keiths@redhat.com>
+
+	* library/pkgIndex.tcl: Update combobox version to 2.3.
+
 2008-08-02  Keith Seitz  <keiths@redhat.com>
 
 	* tcl.m4: Remove. I changed my mind.

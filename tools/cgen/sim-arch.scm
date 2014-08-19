@@ -1,12 +1,12 @@
 ; Simulator generator support routines.
-; Copyright (C) 2000, 2009 Red Hat, Inc.
+; Copyright (C) 2000 Red Hat, Inc.
 ; This file is part of CGEN.
 
 ; Utilities of cgen-arch.h.
 
 ; Return C macro definitions of the various supported cpus.
 
-(define (/gen-cpuall-defines)
+(define (-gen-cpuall-defines)
   "" ; nothing yet
 )
 
@@ -14,7 +14,7 @@
 ; ??? Modes are now defined in sim/common/cgen-types.h but we will need
 ; target specific modes.
 
-(define (/gen-support-decls)
+(define (-gen-support-decls)
   (string-append
 ;   (gen-enum-decl 'mode_type "mode types"
 ;		  "MODE_"
@@ -29,37 +29,38 @@
 
 ; Utilities of cgen-cpuall.h.
 
-; Subroutine of /gen-cpuall-includes.
+; Subroutine of -gen-cpuall-includes.
 
-(define (/gen-cpu-header cpu prefix)
+(define (-gen-cpu-header cpu prefix)
   (string-append "#include \"" prefix (cpu-file-transform cpu) ".h\"\n")
 )
 
 ; Return C code to include all the relevant headers for each cpu family,
 ; conditioned on ifdef WANT_CPU_@CPU@.
 
-(define (/gen-cpuall-includes)
+(define (-gen-cpuall-includes)
   (string-list
    "/* Include files for each cpu family.  */\n\n"
-   (string-list-map
-    (lambda (cpu)
-      (let* ((cpu-name (gen-sym cpu))
-	     (CPU-NAME (string-upcase cpu-name)))
-	(string-list "#ifdef WANT_CPU_" CPU-NAME "\n"
-		     (/gen-cpu-header cpu "eng")
-		     (/gen-cpu-header cpu "cpu")
-		     (/gen-cpu-header cpu "decode")
-		     "#endif\n\n")))
-    (current-cpu-list))
+   (string-list-map (lambda (cpu)
+		      (let* ((cpu-name (gen-sym cpu))
+			     (CPU-NAME (string-upcase cpu-name)))
+			(string-list "#ifdef WANT_CPU_" CPU-NAME "\n"
+				     (-gen-cpu-header cpu "eng")
+				     "#include \"cgen-engine.h\"\n"
+				     (-gen-cpu-header cpu "cpu")
+				     ; FIXME: Shorten "decode" to "dec".
+				     (-gen-cpu-header cpu "decode")
+				     "#endif\n\n")))
+		    (current-cpu-list))
    )
 )
 
-; Subroutine of /gen-cpuall-decls to generate cpu-specific structure entries.
+; Subroutine of -gen-cpuall-decls to generate cpu-specific structure entries.
 ; The result is "struct <cpu>_<type-name> <member-name>;".
 ; INDENT is the amount to indent by.
 ; CPU is the cpu object.
 
-(define (/gen-cpu-specific-decl indent cpu type-name member-name)
+(define (-gen-cpu-specific-decl indent cpu type-name member-name)
   (let* ((cpu-name (gen-sym cpu))
 	 (CPU-NAME (string-upcase cpu-name)))
     (string-append
@@ -75,7 +76,7 @@
 ; just the baseclass.  In cpu-specific files, the baseclass is augmented
 ; with the cpu-specific data.
 
-(define (/gen-cpuall-decls)
+(define (-gen-cpuall-decls)
   (string-list
    (gen-argbuf-type #f)
    (gen-scache-type #f)
@@ -90,7 +91,7 @@
 ; It is intended to be included before sim-basics.h and sim-base.h.
 
 (define (cgen-arch.h)
-  (logit 1 "Generating " (current-arch-name) "'s arch.h ...\n")
+  (logit 1 "Generating arch.h ...\n")
 
   (string-write
    (gen-c-copyright "Simulator header for @arch@."
@@ -104,9 +105,9 @@
    ;"#define WI SI\n"
    ;"#define UWI USI\n"
    ;"#define AI USI\n\n"
-   /gen-cpuall-defines
-   /gen-support-decls
-   /gen-arch-model-decls
+   -gen-cpuall-defines
+   -gen-support-decls
+   -gen-arch-model-decls
    "#endif /* @ARCH@_ARCH_H */\n"
    )
 )
@@ -115,7 +116,7 @@
 ; This file defines non cpu family specific data about the architecture.
 
 (define (cgen-arch.c)
-  (logit 1 "Generating " (current-arch-name) "'s arch.c ...\n")
+  (logit 1 "Generating arch.c ...\n")
 
   (string-write
    (gen-c-copyright "Simulator support for @arch@."
@@ -125,7 +126,7 @@
 #include \"bfd.h\"
 
 "
-   /gen-mach-data
+   -gen-mach-data
    )
 )
 
@@ -134,7 +135,7 @@
 ; It is intended to be included after sim-base.h/cgen-sim.h.
 
 (define (cgen-cpuall.h)
-  (logit 1 "Generating " (current-arch-name) "'s cpuall.h ...\n")
+  (logit 1 "Generating cpuall.h ...\n")
 
   (string-write
    (gen-c-copyright "Simulator CPU header for @arch@."
@@ -142,9 +143,9 @@
    "#ifndef @ARCH@_CPUALL_H\n"
    "#define @ARCH@_CPUALL_H\n"
    "\n"
-   /gen-cpuall-includes
-   /gen-mach-decls
-   /gen-cpuall-decls
+   -gen-cpuall-includes
+   -gen-mach-decls
+   -gen-cpuall-decls
    "#endif /* @ARCH@_CPUALL_H */\n"
    )
 )
@@ -153,7 +154,7 @@
 ; No longer used.
 
 (define (cgen-ops.c)
-  (logit 1 "Generating " (current-arch-name) "'s ops.c ...\n")
+  (logit 1 "Generating ops.c ...\n")
 
   (string-write
    (gen-c-copyright "Simulator operational support for @arch@."

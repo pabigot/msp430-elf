@@ -1,0 +1,414 @@
+The patch below updates v850_skip_prologue() to call the prologue
+analyzer proper, instead of relying only on line number information.
+It still uses line number information to try to obtain an answer,
+but will rely on it only if it seems "better" than the result provided
+by prologue analysis.
+
+The prologue analyzer has been updated so that it can provide a
+reasonable result for v850_skip_prologue.
+
+The v850 char type has been changed to be signed in order to match
+GCC.
+
+v850_use_struct_convention has been updated to provide better
+gdb.base/structs.exp results.
+
+This should be submitted externally as three patches.  (One for the
+signed char part, the prologue analyzer changes as the second, and
+the struct convention patch as the third.)
+
+A potential issue with getting this patch approved is the way that the
+v850_frame_cache struct is allocated and initialized in
+v850_skip_prologue().  This issue could be made moot if the trad-frame
+mechanism is abandoned and the prologue-value stuff is used instead. 
+(E.g, see rx-tdep.c.)
+
+The prologue analyzer changes fix the following failures:
+
+FAIL: gdb.opt/inline-bt.exp: continue to bar (1)
+FAIL: gdb.opt/inline-bt.exp: continue to bar (2)
+FAIL: gdb.opt/inline-bt.exp: continue to bar (3)
+FAIL: gdb.opt/inline-cmds.exp: continue to bar (1)
+FAIL: gdb.opt/inline-cmds.exp: continue to bar (2)
+FAIL: gdb.opt/inline-cmds.exp: continue to marker
+FAIL: gdb.opt/inline-cmds.exp: step into finish marker
+FAIL: gdb.opt/inline-cmds.exp: enter inlined_fn from noinline
+FAIL: gdb.opt/inline-cmds.exp: backtrace at inlined_fn from noinline
+FAIL: gdb.opt/inline-cmds.exp: inlined_fn from noinline inlined
+FAIL: gdb.opt/inline-cmds.exp: up to noinline
+FAIL: gdb.opt/inline-cmds.exp: noinline from outer_inline1 not inlined
+FAIL: gdb.opt/inline-cmds.exp: up to outer_inline1
+FAIL: gdb.opt/inline-cmds.exp: outer_inline1 inlined
+FAIL: gdb.opt/inline-cmds.exp: up to outer_inline2
+FAIL: gdb.opt/inline-cmds.exp: outer_inline2 inlined
+FAIL: gdb.opt/inline-cmds.exp: up from outer_inline2
+FAIL: gdb.opt/inline-cmds.exp: main not inlined
+FAIL: gdb.opt/inline-locals.exp: continue to bar (1)
+FAIL: gdb.opt/inline-locals.exp: continue to bar (2)
+FAIL: gdb.opt/inline-locals.exp: continue to bar (3)
+FAIL: gdb.opt/inline-locals.exp: print local (3)
+
+The addition of the "ld" instruction for terminating a scan
+prevents a regression in gdb.base/nodebug.exp.
+
+The change of char from unsigned to signed fixes the following
+failures:
+
+FAIL: gdb.base/charset.exp: check value of parsed character literal in EBCDIC-US
+FAIL: gdb.base/charset.exp: check value of parsed string literal in EBCDIC-US
+FAIL: gdb.base/charset.exp: check value of escape that doesn't exist in EBCDIC-US
+FAIL: gdb.base/charset.exp: check value of parsed character literal in IBM1047
+FAIL: gdb.base/charset.exp: check value of parsed string literal in IBM1047
+FAIL: gdb.base/charset.exp: check value of escape that doesn't exist in IBM1047
+
+These occur because the debug info describes char as signed, but
+the v850 tdep struct was definining it as unsigned.  Thus when comparing
+a character constant created in gdb to a variable described by the
+debug info, the match was not succeeding (in some instances) due to
+comparing a negative value to a positive value.
+
+The struct convention changes fix the following failures:
+
+FAIL: gdb.base/step-test.exp: large struct by value
+FAIL: gdb.base/structs.exp: p/c fun<n>(); call 1 structs-tc
+FAIL: gdb.base/structs.exp: p/c fun<n>(); call 1 structs-ts
+FAIL: gdb.base/structs.exp: p/c fun<n>(); call 1 structs-ti
+FAIL: gdb.base/structs.exp: p/c fun<n>(); call 1 structs-tl
+FAIL: gdb.base/structs.exp: p/c fun<n>(); call 1 structs-tll
+FAIL: gdb.base/structs.exp: p/c fun<n>(); call 1 structs-tf
+FAIL: gdb.base/structs.exp: p/c fun<n>(); call 1 structs-td
+FAIL: gdb.base/structs.exp: p/c fun<n>(); call 1 structs-tld
+FAIL: gdb.base/structs.exp: p/c fun<n>(); call 2 structs-ti-tc
+FAIL: gdb.base/structs.exp: p/c fun<n>(); call 2 structs-tl-tc
+FAIL: gdb.base/structs.exp: p/c fun<n>(); call 2 structs-tf-tc
+
+However, the following failures still remain:
+
+FAIL: gdb.base/structs.exp: p/c fun<n>(); call 2 structs-tc-ti
+FAIL: gdb.base/structs.exp: p/c fun<n>(); call 2 structs-tc-tl
+FAIL: gdb.base/structs.exp: p/c fun<n>(); call 2 structs-tc-tf
+
+I have tried to tweak the struct convention stuff to fix these
+latter three failures too, but have not been successful.
+
+
+gdb/ChangeLog.RedHat:
+2010-08-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* v850-tdep.c (v850_use_struct_convention): Return value in
+	register when singleton struct member or array element is
+	a scalar of any size, not just for sizes of 4 or larger.
+	Invoke check_typedef to fill in the correct type length for
+	typedefs.
+
+2010-08-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* v850-tdep.c (v850_analyze_prologue): Revise prologue analyzer
+	to observe new parameter `skip_only'.  Add new local,
+	`after_last_frame_related_insn', which is used to track the
+	address of the last frame related instruction; also, this
+	result is now used as the return value.  Break out of scan
+	loop when an `ld' instruction is seen.
+	(v850_skip_prologue): Invoke v850_analyze_prologue and
+	skip_prologue_using_sal.  Use the "best" answer as the return
+	value.
+	(v850_frame_cache): Adjust call to v850_analyze_prologue to
+	account for new parameter, `skip_only'.
+
+Index: gdb/v850-tdep.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/v850-tdep.c,v
+retrieving revision 1.19
+diff -u -p -r1.19 v850-tdep.c
+--- gdb/v850-tdep.c	8 Aug 2011 23:58:28 -0000	1.19
++++ gdb/v850-tdep.c	12 Aug 2011 23:29:21 -0000
+@@ -218,13 +218,13 @@ v850_use_struct_convention (struct type 
+        && TYPE_NFIELDS (type) == 1)
+     {
+       fld_type = TYPE_FIELD_TYPE (type, 0);
+-      if (v850_type_is_scalar (fld_type) && TYPE_LENGTH (fld_type) >= 4)
++      if (v850_type_is_scalar (fld_type))
+ 	return 0;
+ 
+       if (TYPE_CODE (fld_type) == TYPE_CODE_ARRAY)
+         {
+ 	  tgt_type = TYPE_TARGET_TYPE (fld_type);
+-	  if (v850_type_is_scalar (tgt_type) && TYPE_LENGTH (tgt_type) >= 4)
++	  if (v850_type_is_scalar (tgt_type))
+ 	    return 0;
+ 	}
+     }
+@@ -234,7 +234,7 @@ v850_use_struct_convention (struct type 
+      register.  */
+   if (TYPE_CODE (type) == TYPE_CODE_STRUCT
+       && v850_type_is_scalar (TYPE_FIELD_TYPE (type, 0))
+-      && TYPE_LENGTH (TYPE_FIELD_TYPE (type, 0)) == 4)
++      && TYPE_LENGTH (check_typedef (TYPE_FIELD_TYPE (type, 0))) == 4)
+     {
+       for (i = 1; i < TYPE_NFIELDS (type); ++i)
+         {
+@@ -456,7 +456,8 @@ v850_is_save_register (int reg)
+ static CORE_ADDR
+ v850_analyze_prologue (struct gdbarch *gdbarch,
+ 		       CORE_ADDR func_addr, CORE_ADDR pc,
+-		       struct v850_frame_cache *pi, ULONGEST ctbp)
++		       struct v850_frame_cache *pi, ULONGEST ctbp,
++		       int skip_only)
+ {
+   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+   CORE_ADDR prologue_end, current_pc;
+@@ -465,7 +466,7 @@ v850_analyze_prologue (struct gdbarch *g
+   int fp_used;
+   int ep_used;
+   int reg;
+-  CORE_ADDR save_pc, save_end;
++  CORE_ADDR save_pc, save_end, after_last_frame_related_insn;
+   int regsave_func_p;
+   int r12_tmp;
+ 
+@@ -473,6 +474,7 @@ v850_analyze_prologue (struct gdbarch *g
+   pifsr = &pifsrs[0];
+ 
+   prologue_end = pc;
++  after_last_frame_related_insn = func_addr;
+ 
+   /* Now, search the prologue looking for instructions that setup fp, save
+      rp, adjust sp and such.  We also record the frame offset of any saved
+@@ -501,76 +503,99 @@ v850_analyze_prologue (struct gdbarch *g
+ 
+       if ((insn & 0xffc0) == ((10 << 11) | 0x0780) && !regsave_func_p)
+ 	{			/* jarl <func>,10 */
+-	  long low_disp = insn2 & ~(long) 1;
+-	  long disp = (((((insn & 0x3f) << 16) + low_disp)
+-			& ~(long) 1) ^ 0x00200000) - 0x00200000;
+-
+-	  save_pc = current_pc;
+-	  save_end = prologue_end;
+-	  regsave_func_p = 1;
+-	  current_pc += disp - 4;
+-	  prologue_end = (current_pc
+-			  + (2 * 3)	/* moves to/from ep */
+-			  + 4		/* addi <const>,sp,sp */
+-			  + 2		/* jmp [r10] */
+-			  + (2 * 12)	/* sst.w to save r2, r20-r29, r31 */
+-			  + 20);	/* slop area */
++	  if (skip_only)
++	    after_last_frame_related_insn = current_pc;
++	  else
++	    {
++	      long low_disp = insn2 & ~(long) 1;
++	      long disp = (((((insn & 0x3f) << 16) + low_disp)
++			    & ~(long) 1) ^ 0x00200000) - 0x00200000;
++
++	      save_pc = current_pc;
++	      save_end = prologue_end;
++	      regsave_func_p = 1;
++	      current_pc += disp - 4;
++	      prologue_end = (current_pc
++			      + (2 * 3)	/* moves to/from ep */
++			      + 4		/* addi <const>,sp,sp */
++			      + 2		/* jmp [r10] */
++			      + (2 * 12)	/* sst.w to save r2, r20-r29, r31 */
++			      + 20);	/* slop area */
++	    }
+ 	}
+       else if ((insn & 0xffc0) == 0x0200 && !regsave_func_p)
+ 	{			/* callt <imm6> */
+-	  long adr = ctbp + ((insn & 0x3f) << 1);
++	  if (skip_only)
++	    after_last_frame_related_insn = current_pc;
++	  else
++	    {
++	      long adr = ctbp + ((insn & 0x3f) << 1);
+ 
+-	  save_pc = current_pc;
+-	  save_end = prologue_end;
+-	  regsave_func_p = 1;
+-	  current_pc = ctbp + (read_memory_unsigned_integer (adr, 2, byte_order)
+-			       & 0xffff);
+-	  prologue_end = (current_pc
+-			  + (2 * 3)	/* prepare list2,imm5,sp/imm */
+-			  + 4		/* ctret */
+-			  + 20);	/* slop area */
+-	  continue;
++	      save_pc = current_pc;
++	      save_end = prologue_end;
++	      regsave_func_p = 1;
++	      current_pc = ctbp + (read_memory_unsigned_integer (adr, 2, byte_order)
++				   & 0xffff);
++	      prologue_end = (current_pc
++			      + (2 * 3)	/* prepare list2,imm5,sp/imm */
++			      + 4		/* ctret */
++			      + 20);	/* slop area */
++	    }
+ 	}
+       else if ((insn & 0xffc0) == 0x0780)	/* prepare list2,imm5 */
+ 	{
+ 	  v850_handle_prepare (insn, insn2, &current_pc, pi, &pifsr);
+-	  continue;
++	  after_last_frame_related_insn = current_pc;
+ 	}
+       else if (insn == 0x07e0 && regsave_func_p && insn2 == 0x0144)
+ 	{			/* ctret after processing register save.  */
+ 	  current_pc = save_pc;
+ 	  prologue_end = save_end;
+ 	  regsave_func_p = 0;
+-	  continue;
++	  after_last_frame_related_insn = current_pc;
+ 	}
+       else if ((insn & 0xfff0) == 0x07e0 && (insn2 & 5) == 1)
+ 	{			/* pushml, pushmh */
+ 	  v850_handle_pushm (insn, insn2, pi, &pifsr);
+-	  continue;
++	  after_last_frame_related_insn = current_pc;
+ 	}
+       else if ((insn & 0xffe0) == 0x0060 && regsave_func_p)
+ 	{			/* jmp after processing register save.  */
+ 	  current_pc = save_pc;
+ 	  prologue_end = save_end;
+ 	  regsave_func_p = 0;
+-	  continue;
++	  after_last_frame_related_insn = current_pc;
+ 	}
+       else if ((insn & 0x07c0) == 0x0780	/* jarl or jr */
+ 	       || (insn & 0xffe0) == 0x0060	/* jmp */
+-	       || (insn & 0x0780) == 0x0580)	/* branch */
++	       || (insn & 0x0780) == 0x0580	/* branch */
++	       || (insn & 0x07c0) == 0x0700	/* ld - all three forms */ )
+ 	{
+-	  break;		/* Ran into end of prologue.  */
++	  /* Any sort of change in the control flow, other than the
++	     cases noted above signals an end of the prologue.  Also,
++	     the presence of a load usually indicates the end of the
++	     prologue too.  */
++	  break;
+ 	}
+ 
+       else if ((insn & 0xffe0) == ((E_SP_REGNUM << 11) | 0x0240))
+-        /* add <imm>,sp */
+-	pi->sp_offset += ((insn & 0x1f) ^ 0x10) - 0x10;
++	{
++	  /* add <imm>,sp */
++	  pi->sp_offset += ((insn & 0x1f) ^ 0x10) - 0x10;
++	  after_last_frame_related_insn = current_pc;
++	}
+       else if (insn == ((E_SP_REGNUM << 11) | 0x0600 | E_SP_REGNUM))
+-        /* addi <imm>,sp,sp */
+-	pi->sp_offset += insn2;
++	{
++	  /* addi <imm>,sp,sp */
++	  pi->sp_offset += insn2;
++	  after_last_frame_related_insn = current_pc;
++	}
+       else if (insn == ((E_FP_REGNUM << 11) | 0x0000 | E_SP_REGNUM))
+-        /* mov sp,fp */
+-	pi->uses_fp = 1;
++	{
++	  /* mov sp,fp */
++	  pi->uses_fp = 1;
++	  after_last_frame_related_insn = current_pc;
++	}
+       else if (insn == ((E_R12_REGNUM << 11) | 0x0640 | E_R0_REGNUM))
+         /* movhi hi(const),r0,r12 */
+ 	r12_tmp = insn2 << 16;
+@@ -578,8 +603,11 @@ v850_analyze_prologue (struct gdbarch *g
+         /* movea lo(const),r12,r12 */
+ 	r12_tmp += insn2;
+       else if (insn == ((E_SP_REGNUM << 11) | 0x01c0 | E_R12_REGNUM) && r12_tmp)
+-        /* add r12,sp */
+-	pi->sp_offset += r12_tmp;
++	{
++	  /* add r12,sp */
++	  pi->sp_offset += r12_tmp;
++	  after_last_frame_related_insn = current_pc;
++	}
+       else if (insn == ((E_EP_REGNUM << 11) | 0x0000 | E_SP_REGNUM))
+         /* mov sp,ep */
+ 	ep_used = 1;
+@@ -597,6 +625,7 @@ v850_analyze_prologue (struct gdbarch *g
+ 	  pifsr->offset = insn2 & ~1;
+ 	  pifsr->cur_frameoffset = pi->sp_offset;
+ 	  pifsr++;
++	  after_last_frame_related_insn = current_pc;
+ 	}
+       else if (ep_used
+ 	       && ((insn & 0x0781) == 0x0501)
+@@ -608,6 +637,7 @@ v850_analyze_prologue (struct gdbarch *g
+ 	  pifsr->offset = (insn & 0x007e) << 1;
+ 	  pifsr->cur_frameoffset = pi->sp_offset;
+ 	  pifsr++;
++	  after_last_frame_related_insn = current_pc;
+ 	}
+     }
+ 
+@@ -619,7 +649,7 @@ v850_analyze_prologue (struct gdbarch *g
+       pi->saved_regs[pifsr_tmp->reg].addr = pifsr_tmp->offset;
+     }
+ 
+-  return current_pc;
++  return after_last_frame_related_insn;
+ }
+ 
+ /* Return the address of the first code past the prologue of the function.  */
+@@ -627,27 +657,30 @@ v850_analyze_prologue (struct gdbarch *g
+ static CORE_ADDR
+ v850_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
+ {
+-  CORE_ADDR func_addr, func_end;
+-
+-  /* See what the symbol table says.  */
+-
+-  if (find_pc_partial_function (pc, NULL, &func_addr, &func_end))
+-    {
+-      struct symtab_and_line sal;
+-
+-      sal = find_pc_line (func_addr, 0);
+-      if (sal.line != 0 && sal.end < func_end)
+-	return sal.end;
+-
+-      /* Either there's no line info, or the line after the prologue is after
+-	 the end of the function.  In this case, there probably isn't a
+-	 prologue.  */
+-      return pc;
+-    }
+-
+-  /* We can't find the start of this function, so there's nothing we
+-     can do.  */
+-  return pc;
++  CORE_ADDR func_addr, func_end, sal_end;
++  CORE_ADDR prologue_end;
++  char *name;
++  struct v850_frame_cache p;
++  struct trad_frame_saved_reg regs[E_NUM_REGS];
++
++  /* Try to find the extent of the function that contains IP.  */
++  if (! find_pc_partial_function (pc, &name, &func_addr, &func_end))
++    return pc;
++
++  /* Find end by prologue analysis.  */
++  memset (&p, 0, sizeof p);
++  memset (&regs, 0, sizeof regs);
++  p.saved_regs = regs;
++  prologue_end = v850_analyze_prologue (gdbarch, func_addr, func_end, &p, 0, 1);
++
++  /* Find end by line info.  */
++  sal_end = skip_prologue_using_sal (gdbarch, pc);
++
++  /* Return whichever is lower.  */
++  if (sal_end != 0 && sal_end != pc && sal_end < prologue_end)
++    return sal_end;
++  else
++    return prologue_end;
+ }
+ 
+ static CORE_ADDR
+@@ -872,7 +905,7 @@ v850_frame_cache (struct frame_info *thi
+     {
+       ULONGEST ctbp;
+       ctbp = get_frame_register_unsigned (this_frame, E_CTBP_REGNUM);
+-      v850_analyze_prologue (gdbarch, cache->pc, current_pc, cache, ctbp);
++      v850_analyze_prologue (gdbarch, cache->pc, current_pc, cache, ctbp, 0);
+     }
+ 
+   if (!cache->uses_fp)
+

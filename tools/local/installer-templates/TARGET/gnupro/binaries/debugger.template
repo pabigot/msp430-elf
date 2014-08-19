@@ -1,0 +1,43 @@
+# from standalone simulator
+file	${release}/H-${host}/bin/${targetPrefix}run${EXEEXT}
+# from gdb
+file	${release}/H-${host}/bin/${targetPrefix}gdb${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}gdbtui${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}gdbserver${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}insight${EXEEXT}
+dir	${release}/share/gdbtcl
+dir	${release}/share/insight1.0
+# from libremote/cy16
+file	${release}/H-${host}/bin/${targetArch}-libremote.ini
+file	${release}/H-${host}/bin/${targetPrefix}${targetArch}${EXEEXT}
+#file	${release}/H-${host}/bin/${targetPrefix}libremote.ini
+#file	${release}/H-${host}/bin/${targetPrefix}libremote${EXEEXT}
+# from sid
+file	${release}/H-${host}/bin/configrun-sid
+file	${release}/H-${host}/bin/siddoc
+file	${release}/H-${host}/bin/${targetPrefix}sid
+file	${release}/H-${host}/bin/sid${EXEEXT}
+dir	${release}/H-${host}/lib/sidcomp
+dir	${release}/H-${host}/lib/sidsamples
+file	${release}/include/sidcomp.h
+file	${release}/include/sidso.h
+file	${release}/include/sidtypes.h
+dir	${release}/share/sid
+dir	${release}/share/sidcomp
+dir	${release}/share/sidsamples
+# gdbtk supporting programs
+dir	${release}/share/redhat/gui
+dir	${release}/share/itcl3.2
+dir	${release}/share/itk3.2
+dir	${release}/share/iwidgets4.0.1
+dir	${release}/share/tk8.4
+dir	${release}/H-${host}/lib/insight1.0
+dir	${release}/H-${host}/lib/itcl3.2
+dir	${release}/H-${host}/lib/itk3.2
+# do we still need this?
+file	${release}/H-${host}/lib/lib${target}-sim.a
+# some cygwin specific files
+file	${release}/H-${host}/bin/tclpip84.dll cygwin
+file	${release}/H-${host}/bin/cygtk80.dll cygwin
+file	${release}/H-${host}/bin/tcl84.dll cygwin
+file	${release}/H-${host}/bin/tk84.dll cygwin

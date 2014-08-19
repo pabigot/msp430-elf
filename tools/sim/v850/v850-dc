@@ -60,7 +60,7 @@
   switch,combine        :  10 :   10 :    :    :    :    1 :F_I,X       : v850e3v5
 
 # for jr32 jarl32
-  switch,combine        :   4 :    0 :    :    :    :    0 :VI          : v850e2
-  switch,combine        :   4 :    0 :    :    :    :    0 :VI          : v850e2v3
+  switch,combine        :  4 :   0 :    :    :    :    0 :VI            : v850e2
+  switch,combine        :  4 :   0 :    :    :    :    0 :VI            : v850e2v3
   switch,combine        :   4 :    0 :    :    :    :    0 :VI          : v850e3v5
   switch,combine        :  10 :    0 :    :    :    :    1 :F_I,XI      : v850e3v5

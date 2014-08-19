@@ -1,6 +1,6 @@
 /* { dg-do run } */
-/* { dg-options "-O2" } */
 // { dg-require-effective-target int32plus }
+/* { dg-options "-O2" } */
 
 /* The tail call optimization would inapproriately tail call the 
    destructors due to not recognizing a call clobbered variable */

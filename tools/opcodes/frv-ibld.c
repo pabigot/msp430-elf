@@ -193,12 +193,7 @@ insert_normal (CGEN_CPU_DESC cd,
 	{
 	  long minval = - (1L << (length - 1));
 	  long maxval =   (1L << (length - 1)) - 1;
-
-	  if ((sizeof (value) > 4) && (value & (1L << 31)))
-	    {
-	      value <<= sizeof (value) * 8 - 32;
-	      value >>= sizeof (value) * 8 - 32;
-	    }
+	  
 	  if (value < minval || value > maxval)
 	    {
 	      sprintf

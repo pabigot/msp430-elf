@@ -3,7 +3,7 @@
 // { dg-do run }
 
 extern "C" void * malloc (__SIZE_TYPE__);
-extern "C" int printf (const char *, ...);
+// extern "C" int printf (const char *, ...);
 extern "C" void abort(void);
 
 int nx,ny;
@@ -21,7 +21,7 @@ void f(double *x1d,int choice)
   {
     delta=&(*x2d)[1][0]-x1d;
   }
-  printf("Choice: %d, Delta: %ld\n",choice,delta);
+  //printf("Choice: %d, Delta: %ld\n",choice,delta);
   if (delta != ny)
     abort ();
 }
@@ -36,3 +36,4 @@ int main()
   f(data,1);
   return 0;
 }
+// { dg-require-effective-target size32plus }

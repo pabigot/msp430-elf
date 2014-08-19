@@ -2,9 +2,9 @@
 
 /* { dg-do run } */
 /* { dg-require-profiling "-pg" } */
+/* { dg-skip-if "no profiling support" { "msp430-*-*" } { "*" } { "" } } */
 /* { dg-options "-O2 -pg" } */
 /* { dg-options "-O2 -pg -static" { target hppa*-*-hpux* } } */
-/* { dg-skip-if "no profiling support" { "msp430-*-*" } { "*" } { "" } } */
 
 extern char *strdup (const char *);
 

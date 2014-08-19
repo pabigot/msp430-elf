@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenVMS IA-64.
 
-   Copyright (C) 2012 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -33,7 +33,7 @@ ia64_vms_find_proc_info_x (unw_addr_space_t as, unw_word_t ip,
                            unw_proc_info_t *pi,
                            int need_unwind_info, void *arg)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   unw_dyn_info_t di;
   int ret;
   gdb_byte buf[32];

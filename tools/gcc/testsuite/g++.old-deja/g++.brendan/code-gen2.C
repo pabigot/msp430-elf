@@ -3,7 +3,7 @@
 // Check that declarations with initializations are executed
 // correctly.
 
-extern "C" int printf (const char *, ...); 
+// extern "C" int printf (const char *, ...); 
 
 int main ()
 {
@@ -11,9 +11,9 @@ int main ()
 	char *tmp = &buff[0];	// also fails for char *tmp = buff;
 
 	if ((__SIZE_TYPE__) tmp != (__SIZE_TYPE__) &buff[0])
-	  { printf ("FAIL\n"); return 1; }
+	  { /* printf ("FAIL\n"); */ return 1; }
 	else
-	  printf ("PASS\n");
+	  ; /*printf ("PASS\n"); */
 
 	return 0;
 }

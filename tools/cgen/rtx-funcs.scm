@@ -1,5 +1,5 @@
 ; Standard RTL functions.
-; Copyright (C) 2000, 2009, 2010 Red Hat, Inc.
+; Copyright (C) 2000 Red Hat, Inc.
 ; This file is part of CGEN.
 ; See file COPYING.CGEN for details.
 
@@ -32,26 +32,21 @@
 
 ; Error reporting.
 ; MODE is present for use in situations like non-VOID mode cond's.
-; The code will expect the mode to be compatible even though `error'
-; "doesn't return".  A small concession for simpler code.
 
 (drn (error &options &mode message)
-     #f
-     (OPTIONS VOIDORNUMMODE STRING) (NA NA NA)
+     (OPTIONS ANYMODE STRING) (NA NA NA)
      MISC
-     (estate-error *estate* "error in rtl" message)
+     (context-error (estate-context *estate*) message)
 )
 
 ; Enums
 ; Default mode is INT.
 
 (drn (enum &options &mode enum-name)
-     #f
-     (OPTIONS ANYINTMODE SYMBOL) (NA NA NA) ;; ??? s/SYMBOL/ENUM-NAME/ ?
+     (OPTIONS NUMMODE SYMBOL) (NA NA NA)
      ARG
-     ;; When computing a value, return the enum's value.
-     ;; Canonicalization should have already caught bad values.
-     (car (enum-lookup-val enum-name))
+     ; When computing a value, return the enum's value.
+     (enum-lookup-val enum-name)
 )
 
 ; Instruction fields
@@ -61,12 +56,10 @@
 ; in this.
 
 (dron (ifield &options &mode ifld-name)
-      #f
-      (OPTIONS ANYNUMMODE SYMBOL) (NA NA NA) ;; ??? s/SYMBOL/IFIELD-NAME/ ?
+      (OPTIONS DFLTMODE SYMBOL) (NA NA NA)
       ARG
       (let ((f (current-ifld-lookup ifld-name)))
-	(make <operand> (obj-location f)
-	      ifld-name (string-append ifld-name " used as operand")
+	(make <operand> ifld-name (string-append ifld-name " used as operand")
 	      (atlist-cons (bool-attr-make 'SEM-ONLY #t)
 			   (obj-atlist f))
 	      (obj:name (ifld-hw-type f))
@@ -80,8 +73,7 @@
 ; in this.
 
 (dron (operand &options &mode op-name)
-      #f
-      (OPTIONS ANYNUMMODE SYMBOL) (NA NA NA) ;; ??? s/SYMBOL/OPERAND-NAME/ ?
+      (OPTIONS DFLTMODE SYMBOL) (NA NA NA)
       ARG
       (current-op-lookup op-name)
 )
@@ -111,10 +103,8 @@
 ; ??? Might also support numbering by allowing NEW-NAME to be a number.
 
 (drsn (name &options &mode new-name value)
-      #f
-      (OPTIONS ANYNUMMODE SYMBOL RTX) (NA NA NA ANY)
+      (OPTIONS DFLTMODE SYMBOL RTX) (NA NA NA ANY)
       ARG
-      ;; FIXME: s/DFLT/&mode/ ?
       (let ((result (object-copy (rtx-get 'DFLT value))))
 	(op:set-sem-name! result new-name)
 	result)
@@ -127,16 +117,15 @@
 ; Compiled operands are wrapped in this so that they still look like rtx.
 
 (dron (xop &options &mode object)
-      #f
-      (OPTIONS ANYNUMMODE OBJECT) (NA NA NA) ;; ??? s/OBJECT/OPERAND/ ?
+      (OPTIONS DFLTMODE OBJECT) (NA NA NA)
       ARG
       object
 )
 
 ;(dron (opspec: &options &mode op-name op-num hw-ref attrs)
-;      (OPTIONS ANYNUMMODE SYMBOL NUMBER RTX ATTRS) (NA NA NA NA ANY NA)
+;      (OPTIONS ANYMODE SYMBOL NUMBER RTX ATTRS) (NA NA NA NA ANY NA)
 ;      ARG
-;      (let ((opval (rtx-eval-with-estate hw-ref (mode:lookup &mode) *estate*)))
+;      (let ((opval (rtx-eval-with-estate hw-ref mode *estate*)))
 ;	(assert (operand? opval))
 ;	; Set the specified mode, ensuring it's ok.
 ;	; This also makes a copy as we don't want to modify predefined
@@ -153,8 +142,7 @@
 ; wrapped in this.
 
 (dron (local &options &mode local-name)
-      #f
-      (OPTIONS ANYNUMMODE SYMBOL) (NA NA NA) ;; ??? s/SYMBOL/LOCAL-NAME/ ?
+      (OPTIONS DFLTMODE SYMBOL) (NA NA NA)
       ARG
       (rtx-temp-lookup (tstate-env *tstate*) local-name)
 )
@@ -170,8 +158,7 @@
 ; ??? Since operands are given names and not numbers this isn't currently used.
 ;
 ;(drsn (dup &options &mode op-name)
-;     #f
-;     (OPTIONS ANYNUMMODE SYMBOL) (NA NA NA)
+;     (OPTIONS DFLTMODE SYMBOL) (NA NA NA)
 ;     ;(s-dup *estate* op-name)
 ;     (begin
 ;       (if (not (insn? (estate-owner *estate*)))
@@ -186,27 +173,22 @@
 ; ??? What about input/output operands.
 
 (drsn (ref &options &mode name)
-      BI
-      (OPTIONS BIMODE SYMBOL) (NA NA NA) ;; ??? s/SYMBOL/OPERAND-NAME/ ?
+      (OPTIONS DFLTMODE SYMBOL) (NA NA NA)
       ARG
       #f
 )
 
 ; Return the index of an operand.
 ; For registers this is the register number.
-; ??? Mode handling incomplete, this doesn't handle mem, which it could.
-; Until then we fix the mode of the result to INT.
+; ??? Mode handling incomplete.
 
 (dron (index-of &options &mode op-rtx)
-      INT
-      (OPTIONS INTMODE RTX) (NA NA ANY)
+      (OPTIONS DFLTMODE RTX) (NA NA ANY)
       ARG
-      ;; FIXME: s/DFLT/&mode/ ?
-      (let* ((operand (rtx-eval-with-estate op-rtx DFLT *estate*))
+      (let* ((operand (rtx-eval-with-estate op-rtx 'DFLT *estate*))
 	     (f (hw-index:value (op:index operand)))
 	     (f-name (obj:name f)))
-	(make <operand> (if (source-ident? f) (obj-location f) #f)
-	      f-name f-name
+	(make <operand> f-name f-name
 	      (atlist-cons (bool-attr-make 'SEM-ONLY #t)
 			   (obj-atlist f))
 	      (obj:name (ifld-hw-type f))
@@ -236,7 +218,7 @@
 ; unevaluated.
 ; ??? Not currently supported.  Not sure whether it should be.
 ;(drsn (hw &options &mode hw-elm . indx-sel)
-;      (OPTIONS ANYNUMMODE SYMBOL . RTX) (NA NA NA . INT)
+;      (OPTIONS ANYMODE SYMBOL . RTX) (NA NA NA . INT)
 ;      ARG
 ;      (let ((indx (if (pair? indx-sel) (car indx-sel) 0))
 ;            (selector (if (and (pair? indx-sel) (pair? (cdr indx-sel)))
@@ -248,8 +230,7 @@
 ; Register accesses.
 ; INDX-SEL is an optional index and possible selector.
 (dron (reg &options &mode hw-elm . indx-sel)
-      #f
-      (OPTIONS ANYNUMMODE SYMBOL . RTX) (NA NA NA . INT) ;; ??? s/SYMBOL/HW-NAME/ ?
+      (OPTIONS ANYMODE SYMBOL . RTX) (NA NA NA . INT)
       ARG
       (let ((indx (if (pair? indx-sel) (car indx-sel) 0))
 	    (selector (if (and (pair? indx-sel) (pair? (cdr indx-sel)))
@@ -262,8 +243,7 @@
 ; getter/setter definitions.
 
 (dron (raw-reg &options &mode hw-elm . indx-sel)
-      #f
-      (OPTIONS ANYNUMMODE SYMBOL . RTX) (NA NA NA . INT) ;; ??? s/SYMBOL/HW-NAME/ ?
+      (OPTIONS ANYMODE SYMBOL . RTX) (NA NA NA . INT)
       ARG
       (let ((indx (if (pair? indx-sel) (car indx-sel) 0))
 	    (selector (if (and (pair? indx-sel) (pair? (cdr indx-sel)))
@@ -276,7 +256,6 @@
 
 ; Memory accesses.
 (dron (mem &options &mode addr . sel)
-      #f
       (OPTIONS EXPLNUMMODE RTX . RTX) (NA NA AI . INT)
       ARG
       (s-hw *estate* mode 'h-memory addr
@@ -289,7 +268,7 @@
 ; The program counter.
 ; ??? Hmmm... needed?  The pc is usually specified as `pc' which is shorthand
 ; for (operand pc).
-;(dron (pc) () () ARG s-pc)
+(dron (pc) () () ARG s-pc)
 
 ; Fetch bytes from the instruction stream of size MODE.
 ; FIXME: Later need to augment this by passing an indicator to the mem-fetch
@@ -322,12 +301,10 @@
 
 ; Indicate there are N delay slots in the processing of RTX.
 ; N is a `const' node.
-; The mode of the result is the mode of RTX.
 ; ??? wip!
 
 (drn (delay &options &mode n rtx)
-     #f
-     (OPTIONS VOIDORNUMMODE RTX RTX) (NA NA INT MATCHEXPR)
+     (OPTIONS DFLTMODE RTX RTX) (NA NA INT ANY)
      MISC
      #f ; (s-sequence *estate* VOID '() rtx) ; wip!
 )
@@ -349,8 +326,7 @@
 ; ??? wip!
 
 (drn (skip &options &mode yes?)
-     VOID
-     (OPTIONS VOIDMODE RTX) (NA NA INT)
+     (OPTIONS DFLTMODE RTX) (NA NA INT)
      MISC
      #f
 )
@@ -363,7 +339,7 @@
 ; OWNER is the result of either (current-insn) or (current-mach)
 ; [note that canonicalization will turn them into
 ; (current-{insn,mach} () DFLT)].
-; The result is always of mode BI.
+; The result is always of mode INT.
 ; FIXME: wip
 ;
 ; This is a syntax node so the args are not pre-evaluated.
@@ -371,8 +347,7 @@
 ; FIXME: Hmmm... it currently isn't a syntax node.
 
 (drn (eq-attr &options &mode owner attr value)
-     BI
-      (OPTIONS BIMODE RTX SYMBOL SYMORNUM) (NA NA ANY NA NA)
+      (OPTIONS DFLTMODE RTX SYMBOL SYMORNUM) (NA NA ANY NA NA)
       MISC
       (let ((atval (if owner
 		       (obj-attr-value owner attr)
@@ -382,33 +357,23 @@
 	    (eq? atval value)))
 )
 
-; Get the value of attribute ATTR-NAME, expressable as an integer.
-; OBJ is the result of either (current-insn) or (current-mach).
-; Note that canonicalization will turn them into
-; (current-{insn,mach} () {INSN,MACH}MODE).
+; Get the value of attribute ATTR-NAME.
+; OBJ is the result of either (current-insn) or (current-mach)
+; [note that canonicalization will turn them into
+; (current-{insn,mach} () DFLT)].
 ; FIXME:wip
-; This uses INTMODE because we can't otherwise determine the
-; mode of the result (if elided).
 
-(drn (int-attr &options &mode obj attr-name)
-     #f
-     (OPTIONS INTMODE RTX SYMBOL) (NA NA ANY NA)
+(drn (attr &options &mode obj attr-name)
+     (OPTIONS DFLTMODE RTX SYMBOL) (NA NA NA NA)
      MISC
      #f
-)
-
-;; Deprecated alias for int-attr.
-
-(drmn (attr arg1 . rest)
-      (cons 'int-attr (cons arg1 rest))
 )
 
 ; Same as `quote', for use in attributes cus "quote" sounds too jargonish.
 ; [Ok, not a strong argument for using "symbol", but so what?]
 
 (drsn (symbol &options &mode name)
-      SYM
-      (OPTIONS SYMMODE SYMBOL) (NA NA NA)
+      (OPTIONS DFLTMODE SYMBOL) (NA NA NA)
       ARG
       name
 )
@@ -416,8 +381,7 @@
 ; Return the current instruction.
 
 (drn (current-insn &options &mode)
-     INSN
-     (OPTIONS INSNMODE) (NA NA)
+     (OPTIONS DFLTMODE) (NA NA)
      MISC
      (let ((obj (estate-owner *estate*)))
        (if (not (insn? obj))
@@ -429,8 +393,7 @@
 ; This can either be a compile-time or run-time value.
 
 (drn (current-mach &options &mode)
-     MACH
-     (OPTIONS MACHMODE) (NA NA)
+     (OPTIONS DFLTMODE) (NA NA)
      MISC
      -rtx-current-mach
 )
@@ -439,8 +402,7 @@
 
 ; FIXME: Need to consider 64 bit hosts.
 (drn (const &options &mode c)
-     #f
-     (OPTIONS ANYNUMMODE NUMBER) (NA NA NA)
+     (OPTIONS NUMMODE NUMBER) (NA NA NA)
      ARG
      ; When computing a value, just return the constant unchanged.
      c
@@ -450,11 +412,12 @@
 
 ; Combine smaller modes into a larger one.
 ; Arguments are specified most significant to least significant.
+; ??? May also want an endian dependent argument order.  That can be
+; implemented on top of or beside this.
 ; ??? Not all of the combinations are supported in the simulator.
 ; They'll get added as necessary.
 (drn (join &options &out-mode in-mode arg1 . arg-rest)
-     #f
-     (OPTIONS ANYNUMMODE ANYNUMMODE RTX . RTX) (NA NA NA ANY . ANY)
+     (OPTIONS NUMMODE NUMMODE RTX . RTX) (NA NA NA ANY . ANY)
      MISC
      ; FIXME: Ensure correct number of args for in/out modes.
      ; FIXME: Ensure compatible modes.
@@ -463,21 +426,19 @@
 
 ; GCC's subreg.
 ; Called subword 'cus it's not exactly subreg.
-; Word numbering is word-order dependent.
-; Word number 0 is the most significant word if big-endian-words.
-; Word number 0 is the least significant word if little-endian-words.
+; Word numbering is from most significant (word 0) to least (word N-1).
+; ??? May also want an endian dependent word ordering.  That can be
+; implemented on top of or beside this.
 ; ??? GCC plans to switch to SUBREG_BYTE.  Keep an eye out for the switch
 ; (which is extensive so probably won't happen anytime soon).
-; MODE is the mode of the result, not operand0.
 ;
-; The mode spec of operand0 use to be MATCHEXPR, but subword is not a normal rtx.
+; The mode spec of operand0 use to be OP0, but subword is not a normal rtx.
 ; The mode of operand0 is not necessarily the same as the mode of the result,
 ; and code which analyzes it would otherwise use the result mode (specified by
 ; `&mode') for the mode of operand0.
 
 (drn (subword &options &mode value word-num)
-     #f
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA ANY INT)
+     (OPTIONS NUMMODE RTX RTX) (NA NA ANY INT)
      ARG
      #f
 )
@@ -503,8 +464,7 @@
 ; independent name.
 
 (drn (c-code &options &mode text)
-     #f
-     (OPTIONS ANYCEXPRMODE STRING) (NA NA NA)
+     (OPTIONS ANYMODE STRING) (NA NA NA)
      UNSPEC
      #f
 )
@@ -515,13 +475,12 @@
 ;           (c-call mode name arg1 arg2 ...)
 ; which is converted into a C function call:
 ;           name (current_cpu, arg1, arg2, ...)
-; MODE is the mode of the result.
+; Mode is the mode of the result.
 ; If it is VOID this call is a statement and ';' is appended.
 ; Otherwise it is part of an expression.
 
 (drn (c-call &options &mode name . args)
-     #f
-     (OPTIONS ANYCEXPRMODE STRING . RTX) (NA NA NA . ANY)
+     (OPTIONS ANYMODE STRING . RTX) (NA NA NA . ANY)
      UNSPEC
      #f
 )
@@ -529,8 +488,7 @@
 ; Same as c-call but without implicit first arg of `current_cpu'.
 
 (drn (c-raw-call &options &mode name . args)
-     #f
-     (OPTIONS ANYCEXPRMODE STRING . RTX) (NA NA NA . ANY)
+     (OPTIONS ANYMODE STRING . RTX) (NA NA NA . ANY)
      UNSPEC
      #f
 )
@@ -538,7 +496,6 @@
 ; Set/get/miscellaneous
 
 (drn (nop &options &mode)
-     VOID
      (OPTIONS VOIDMODE) (NA NA)
      MISC
      #f
@@ -547,8 +504,7 @@
 ; Clobber - mark an object as modified without explaining why or how.
 
 (drn (clobber &options &mode object)
-     VOID
-     (OPTIONS VOIDORNUMMODE RTX) (NA NA MATCHEXPR)
+     (OPTIONS ANYMODE RTX) (NA NA OP0)
      MISC
      #f
 )
@@ -573,15 +529,13 @@
 ; Scheme too closely.
 
 (drn (set &options &mode dst src)
-     VOID
-     (OPTIONS ANYNUMMODE SETRTX RTX) (NA NA MATCHEXPR MATCH2)
+     (OPTIONS ANYMODE SETRTX RTX) (NA NA OP0 MATCH1)
      SET
      #f
 )
 
 (drn (set-quiet &options &mode dst src)
-     VOID
-     (OPTIONS ANYNUMMODE SETRTX RTX) (NA NA MATCHEXPR MATCH2)
+     (OPTIONS ANYMODE SETRTX RTX) (NA NA OP0 MATCH1)
      SET
      #f
 )
@@ -615,15 +569,13 @@
 ; - ???
 
 (drn (neg &options &mode s1)
-     #f
-     (OPTIONS ANYNUMMODE RTX) (NA NA MATCHEXPR)
+     (OPTIONS ANYMODE RTX) (NA NA OP0)
      UNARY
      #f
 )
 
 (drn (abs &options &mode s1)
-     #f
-     (OPTIONS ANYNUMMODE RTX) (NA NA MATCHEXPR)
+     (OPTIONS ANYMODE RTX) (NA NA OP0)
      UNARY
      #f
 )
@@ -632,8 +584,7 @@
 ; For floating point values this produces 1/x.
 ; ??? Might want different names.
 (drn (inv &options &mode s1)
-     #f
-     (OPTIONS ANYINTMODE RTX) (NA NA MATCHEXPR)
+     (OPTIONS ANYMODE RTX) (NA NA OP0)
      UNARY
      #f
 )
@@ -642,21 +593,18 @@
 ; MODE is the mode of S1.  The result always has mode BI.
 ; ??? Perhaps `mode' shouldn't be here.
 (drn (not &options &mode s1)
-     BI
-     (OPTIONS ANYINTMODE RTX) (NA NA MATCHEXPR)
+     (OPTIONS ANYMODE RTX) (NA NA OP0)
      UNARY
      #f
 )
 
 (drn (add &options &mode s1 s2)
-     #f
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
      BINARY
      #f
 )
 (drn (sub &options &mode s1 s2)
-     #f
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
      BINARY
      #f
 )
@@ -666,64 +614,32 @@
 ; For the *flag rtx's, MODE is the mode of S1,S2; the result always has
 ; mode BI.
 (drn (addc &options &mode s1 s2 s3)
-     #f
-     (OPTIONS ANYINTMODE RTX RTX RTX) (NA NA MATCHEXPR MATCH2 BI)
+     (OPTIONS ANYMODE RTX RTX RTX) (NA NA OP0 MATCH1 BI)
      TRINARY
      #f
 )
-(drn (addc-cflag &options &mode s1 s2 s3)
-     BI
-     (OPTIONS ANYINTMODE RTX RTX RTX) (NA NA MATCHEXPR MATCH2 BI)
+(drn (add-cflag &options &mode s1 s2 s3) ; FIXME: rename to addc-cflag
+     (OPTIONS ANYMODE RTX RTX RTX) (NA NA OP0 MATCH1 BI)
      TRINARY
      #f
 )
-(drn (addc-oflag &options &mode s1 s2 s3)
-     BI
-     (OPTIONS ANYINTMODE RTX RTX RTX) (NA NA MATCHEXPR MATCH2 BI)
+(drn (add-oflag &options &mode s1 s2 s3) ; FIXME: rename to addc-vflag
+     (OPTIONS ANYMODE RTX RTX RTX) (NA NA OP0 MATCH1 BI)
      TRINARY
      #f
 )
 (drn (subc &options &mode s1 s2 s3)
-     #f
-     (OPTIONS ANYINTMODE RTX RTX RTX) (NA NA MATCHEXPR MATCH2 BI)
+     (OPTIONS ANYMODE RTX RTX RTX) (NA NA OP0 MATCH1 BI)
      TRINARY
      #f
 )
-(drn (subc-cflag &options &mode s1 s2 s3)
-     BI
-     (OPTIONS ANYINTMODE RTX RTX RTX) (NA NA MATCHEXPR MATCH2 BI)
+(drn (sub-cflag &options &mode s1 s2 s3) ; FIXME: rename to subc-cflag
+     (OPTIONS ANYMODE RTX RTX RTX) (NA NA OP0 MATCH1 BI)
      TRINARY
      #f
 )
-(drn (subc-oflag &options &mode s1 s2 s3)
-     BI
-     (OPTIONS ANYINTMODE RTX RTX RTX) (NA NA MATCHEXPR MATCH2 BI)
-     TRINARY
-     #f
-)
-
-;; ??? These are deprecated.  Delete in time.
-(drn (add-cflag &options &mode s1 s2 s3)
-     BI
-     (OPTIONS ANYINTMODE RTX RTX RTX) (NA NA MATCHEXPR MATCH2 BI)
-     TRINARY
-     #f
-)
-(drn (add-oflag &options &mode s1 s2 s3)
-     BI
-     (OPTIONS ANYINTMODE RTX RTX RTX) (NA NA MATCHEXPR MATCH2 BI)
-     TRINARY
-     #f
-)
-(drn (sub-cflag &options &mode s1 s2 s3)
-     BI
-     (OPTIONS ANYINTMODE RTX RTX RTX) (NA NA MATCHEXPR MATCH2 BI)
-     TRINARY
-     #f
-)
-(drn (sub-oflag &options &mode s1 s2 s3)
-     BI
-     (OPTIONS ANYINTMODE RTX RTX RTX) (NA NA MATCHEXPR MATCH2 BI)
+(drn (sub-oflag &options &mode s1 s2 s3) ; FIXME: rename to subc-vflag
+     (OPTIONS ANYMODE RTX RTX RTX) (NA NA OP0 MATCH1 BI)
      TRINARY
      #f
 )
@@ -750,8 +666,7 @@
 ; Multiply/divide.
 
 (drn (mul &options &mode s1 s2)
-     #f
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
      BINARY
      #f
 )
@@ -760,26 +675,22 @@
 ; [both host and target], and one that specifies implementation defined
 ; situations [target].
 (drn (div &options &mode s1 s2)
-     #f
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
      BINARY
      #f
 )
 (drn (udiv &options &mode s1 s2)
-     #f
-     (OPTIONS ANYINTMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
      BINARY
      #f
 )
 (drn (mod &options &mode s1 s2)
-     #f
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
      BINARY
      #f
 )
 (drn (umod &options &mode s1 s2)
-     #f
-     (OPTIONS ANYINTMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
      BINARY
      #f
 )
@@ -789,41 +700,19 @@
 ; various floating point routines
 
 (drn (sqrt &options &mode s1)
-     #f
-     (OPTIONS ANYFLOATMODE RTX) (NA NA MATCHEXPR)
+     (OPTIONS FLOATMODE RTX) (NA NA OP0)
      UNARY
      #f
 )
 
 (drn (cos &options &mode s1)
-     #f
-     (OPTIONS ANYFLOATMODE RTX) (NA NA MATCHEXPR)
+     (OPTIONS FLOATMODE RTX) (NA NA OP0)
      UNARY
      #f
 )
 
 (drn (sin &options &mode s1)
-     #f
-     (OPTIONS ANYFLOATMODE RTX) (NA NA MATCHEXPR)
-     UNARY
-     #f
-)
-
-(drn (nan &options &mode s1)
-     BI
-     (OPTIONS ANYFLOATMODE RTX) (NA NA MATCHEXPR)
-     UNARY
-     #f
-)
-(drn (qnan &options &mode s1)
-     BI
-     (OPTIONS ANYFLOATMODE RTX) (NA NA MATCHEXPR)
-     UNARY
-     #f
-)
-(drn (snan &options &mode s1)
-     BI
-     (OPTIONS ANYFLOATMODE RTX) (NA NA MATCHEXPR)
+     (OPTIONS FLOATMODE RTX) (NA NA OP0)
      UNARY
      #f
 )
@@ -831,49 +720,42 @@
 ; min/max
 
 (drn (min &options &mode s1 s2)
-     #f
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
      BINARY
      #f
 )
 
 (drn (max &options &mode s1 s2)
-     #f
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
      BINARY
      #f
 )
 
 (drn (umin &options &mode s1 s2)
-     #f
-     (OPTIONS ANYINTMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
+     (OPTIONS INTMODE RTX RTX) (NA NA OP0 MATCH1)
      BINARY
      #f
 )
 
 (drn (umax &options &mode s1 s2)
-     #f
-     (OPTIONS ANYINTMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
+     (OPTIONS INTMODE RTX RTX) (NA NA OP0 MATCH1)
      BINARY
      #f
 )
 
 ; These are bitwise operations.
 (drn (and &options &mode s1 s2)
-     #f
-     (OPTIONS ANYINTMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
      BINARY
      #f
 )
 (drn (or &options &mode s1 s2)
-     #f
-     (OPTIONS ANYINTMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
      BINARY
      #f
 )
 (drn (xor &options &mode s1 s2)
-     #f
-     (OPTIONS ANYINTMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
      BINARY
      #f
 )
@@ -881,34 +763,29 @@
 ; Shift operations.
 
 (drn (sll &options &mode s1 s2)
-     #f
-     (OPTIONS ANYINTMODE RTX RTX) (NA NA MATCHEXPR INT)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 INT)
      BINARY
      #f
 )
 (drn (srl &options &mode s1 s2)
-     #f
-     (OPTIONS ANYINTMODE RTX RTX) (NA NA MATCHEXPR INT)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 INT)
      BINARY
      #f
 )
 ; ??? In non-sim case, ensure s1 is in right C type for right result.
 (drn (sra &options &mode s1 s2)
-     #f
-     (OPTIONS ANYINTMODE RTX RTX) (NA NA MATCHEXPR INT)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 INT)
      BINARY
      #f
 )
 ; Rotates don't really have a sign, so doesn't matter what we say.
 (drn (ror &options &mode s1 s2)
-     #f
-     (OPTIONS ANYINTMODE RTX RTX) (NA NA MATCHEXPR INT)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 INT)
      BINARY
      #f
 )
 (drn (rol &options &mode s1 s2)
-     #f
-     (OPTIONS ANYINTMODE RTX RTX) (NA NA MATCHEXPR INT)
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 INT)
      BINARY
      #f
 )
@@ -921,14 +798,12 @@
 ; On the other hand, handling an arbitrary number of args isn't supported by
 ; ISA's, which the main goal of what we're trying to represent.
 (drn (andif &options &mode s1 s2)
-     BI
-     (OPTIONS BIMODE RTX RTX) (NA NA ANYINT ANYINT)
+     (OPTIONS DFLTMODE RTX RTX) (NA NA ANY ANY)
      BINARY ; IF?
      #f
 )
 (drn (orif &options &mode s1 s2)
-     BI
-     (OPTIONS BIMODE RTX RTX) (NA NA ANYINT ANYINT)
+     (OPTIONS DFLTMODE RTX RTX) (NA NA ANY ANY)
      BINARY ; IF?
      #f
 )
@@ -941,62 +816,50 @@
 ;     ...
 ;)
 
-;; Integer conversions.
+; Conversions.
 
 (drn (ext &options &mode s1)
-     #f
-     (OPTIONS ANYINTMODE RTX) (NA NA ANY)
+     (OPTIONS INTMODE RTX) (NA NA ANY)
      UNARY
      #f
 )
 (drn (zext &options &mode s1)
-     #f
-     (OPTIONS ANYINTMODE RTX) (NA NA ANY)
+     (OPTIONS INTMODE RTX) (NA NA ANY)
      UNARY
      #f
 )
 (drn (trunc &options &mode s1)
-     #f
-     (OPTIONS ANYINTMODE RTX) (NA NA ANY)
+     (OPTIONS INTMODE RTX) (NA NA ANY)
      UNARY
      #f
 )
-
-;; Conversions involving floating point values.
-
-(drn (fext &options &mode how s1)
-     #f
-     (OPTIONS ANYFLOATMODE RTX RTX) (NA NA INT ANY)
+(drn (fext &options &mode s1)
+     (OPTIONS FLOATMODE RTX) (NA NA ANY)
      UNARY
      #f
 )
-(drn (ftrunc &options &mode how s1)
-     #f
-     (OPTIONS ANYFLOATMODE RTX RTX) (NA NA INT ANY)
+(drn (ftrunc &options &mode s1)
+     (OPTIONS FLOATMODE RTX) (NA NA ANY)
      UNARY
      #f
 )
-(drn (float &options &mode how s1)
-     #f
-     (OPTIONS ANYFLOATMODE RTX RTX) (NA NA INT ANY)
+(drn (float &options &mode s1)
+     (OPTIONS FLOATMODE RTX) (NA NA ANY)
      UNARY
      #f
 )
-(drn (ufloat &options &mode how s1)
-     #f
-     (OPTIONS ANYFLOATMODE RTX RTX) (NA NA INT ANY)
+(drn (ufloat &options &mode s1)
+     (OPTIONS FLOATMODE RTX) (NA NA ANY)
      UNARY
      #f
 )
-(drn (fix &options &mode how s1)
-     #f
-     (OPTIONS ANYINTMODE RTX RTX) (NA NA INT ANY)
+(drn (fix &options &mode s1)
+     (OPTIONS INTMODE RTX) (NA NA ANY)
      UNARY
      #f
 )
-(drn (ufix &options &mode how s1)
-     #f
-     (OPTIONS ANYINTMODE RTX RTX) (NA NA INT ANY)
+(drn (ufix &options &mode s1)
+     (OPTIONS INTMODE RTX) (NA NA ANY)
      UNARY
      #f
 )
@@ -1005,65 +868,55 @@
 ; MODE is the mode of S1,S2.  The result always has mode BI.
 
 (drn (eq &options &mode s1 s2)
-     BI
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
-     COMPARE
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
+     BINARY
      #f
 )
 (drn (ne &options &mode s1 s2)
-     BI
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
-     COMPARE
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
+     BINARY
      #f
 )
 ; ??? In non-sim case, ensure s1,s2 is in right C type for right result.
 (drn (lt &options &mode s1 s2)
-     BI
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
-     COMPARE
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
+     BINARY
      #f
 )
 (drn (le &options &mode s1 s2)
-     BI
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
-     COMPARE
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
+     BINARY
      #f
 )
 (drn (gt &options &mode s1 s2)
-     BI
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
-     COMPARE
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
+     BINARY
      #f
 )
 (drn (ge &options &mode s1 s2)
-     BI
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
-     COMPARE
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
+     BINARY
      #f
 )
 ; ??? In non-sim case, ensure s1,s2 is in right C type for right result.
 (drn (ltu &options &mode s1 s2)
-     BI
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
-     COMPARE
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
+     BINARY
      #f
 )
 (drn (leu &options &mode s1 s2)
-     BI
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
-     COMPARE
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
+     BINARY
      #f
 )
 (drn (gtu &options &mode s1 s2)
-     BI
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
-     COMPARE
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
+     BINARY
      #f
 )
 (drn (geu &options &mode s1 s2)
-     BI
-     (OPTIONS ANYNUMMODE RTX RTX) (NA NA MATCHEXPR MATCH2)
-     COMPARE
+     (OPTIONS ANYMODE RTX RTX) (NA NA OP0 MATCH1)
+     BINARY
      #f
 )
 
@@ -1074,26 +927,19 @@
 ; VALUE is any constant rtx.  SET is a `number-list' rtx.
 
 (drn (member &options &mode value set)
-     #f
-     (OPTIONS BIMODE RTX RTX) (NA NA INT INT)
+     (OPTIONS DFLTMODE RTX RTX) (NA NA INT INT)
      MISC
      (begin
        (if (not (rtx-constant? value))
-	   (estate-error *estate* "`member rtx'"
-			 "value is not a constant" value))
+	   (context-error (estate-context *estate*) "value is not a constant" value))
        (if (not (rtx-kind? 'number-list set))
-	   (estate-error *estate* "`member' rtx"
-			 "set is not a `number-list' rtx" set))
+	   (context-error (estate-context *estate*) "set is not a `number-list' rtx" set))
        (if (memq (rtx-constant-value value) (rtx-number-list-values set))
 	   (rtx-true)
 	   (rtx-false)))
 )
 
-;; FIXME: "number" in "number-list" implies floats are ok.
-;; Rename to integer-list, int-list, or some such.
-
 (drn (number-list &options &mode value-list)
-     #f
      (OPTIONS INTMODE NUMBER . NUMBER) (NA NA NA . NA)
      MISC
      #f
@@ -1103,44 +949,37 @@
 
 ; FIXME: make syntax node?
 (drn (if &options &mode cond then . else)
-     #f
-     ;; ??? It would be cleaner if TESTRTX had to have BI mode.
-     (OPTIONS ANYEXPRMODE TESTRTX RTX . RTX) (NA NA ANYINT MATCHEXPR . MATCH3)
+     (OPTIONS ANYMODE TESTRTX RTX . RTX) (NA NA ANY OP0 . MATCH2)
      IF
      (apply e-if (append! (list *estate* mode cond then) else))
 )
 
 ; ??? The syntax here isn't quite that of Scheme.  A condition must be
 ; followed by a result expression.
-; ??? The syntax here isn't quite right, there must be at least one cond rtx.
 ; ??? Intermediate expressions (the ones before the last one) needn't have
 ; the same mode as the result.
 (drsn (cond &options &mode . cond-code-list)
-     #f
-      (OPTIONS ANYEXPRMODE . CONDRTX) (NA NA . MATCHEXPR)
+      (OPTIONS ANYMODE . CONDRTX) (NA NA . OP0)
       COND
       #f
 )
 
-; ??? The syntax here isn't quite right, there must be at least one case.
 ; ??? Intermediate expressions (the ones before the last one) needn't have
 ; the same mode as the result.
 (drn (case &options &mode test . case-list)
-     #f
-     (OPTIONS ANYEXPRMODE RTX . CASERTX) (NA NA ANY . MATCHEXPR)
+     (OPTIONS ANYMODE RTX . CASERTX) (NA NA ANY . OP0)
      COND
      #f
 )
 
-; parallel, sequence, do-count, closure
+; Parallels and Sequences
 
 ; This has to be a syntax node as we don't want EXPRS to be pre-evaluated.
 ; All semantic ops must have a mode, though here it must be VOID.
 ; IGNORE is for consistency with sequence.  ??? Delete some day.
-; ??? There's no real need for mode either, but convention requires it.
+; ??? There's no real need for mode either.
 
 (drsn (parallel &options &mode ignore expr . exprs)
-     #f
       (OPTIONS VOIDMODE LOCALS RTX . RTX) (NA NA NA VOID . VOID)
       SEQUENCE
       #f
@@ -1148,32 +987,19 @@
 
 ; This has to be a syntax node to handle locals properly: they're not defined
 ; yet and thus pre-evaluating the expressions doesn't work.
+; ??? This should create a closure.
 
 (drsn (sequence &options &mode locals expr . exprs)
-     #f
-      (OPTIONS VOIDORNUMMODE LOCALS RTX . RTX) (NA NA NA MATCHSEQ . MATCHSEQ)
+      (OPTIONS ANYMODE LOCALS RTX . RTX) (NA NA NA OP0 . OP0)
       SEQUENCE
       #f
 )
-
-; This has to be a syntax node to handle iter-var properly: it's not defined
-; yet and thus pre-evaluating the expressions doesn't work.
-
-(drsn (do-count &options &mode iter-var nr-times expr . exprs)
-     #f
-      (OPTIONS VOIDMODE ITERATION RTX RTX . RTX) (NA NA NA INT VOID . VOID)
-      SEQUENCE
-      #f
-)
-
+
 ; Internal rtx to create a closure.
-; Internal, so it does not appear in rtl.texi (at least not yet).
-; ??? Maybe closures shouldn't be separate from sequences,
-; but I'm less convinced these days.
+; Internal, so it does not appear in rtl.texi.
 
-(drsn (closure &options &mode isa-name-list env-stack expr)
-     #f
-      (OPTIONS VOIDORNUMMODE SYMBOLLIST ENVSTACK RTX) (NA NA NA NA MATCHEXPR)
+(drsn (closure &options &mode expr env)
+      (OPTIONS DFLTMODE RTX ENV) (NA NA NA NA)
       MISC
       #f
 )

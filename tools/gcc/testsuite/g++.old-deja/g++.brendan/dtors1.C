@@ -6,12 +6,13 @@
 //
 // (also check that this execution doesn't seg-fault)
 
-extern "C" int printf (const char *, ...); 
+// extern "C" int printf (const char *, ...); 
 
 int derived_destructed;
 int base_destructed;
 
-struct base {
+struct base
+{
   int base_data_member;
 
   base()
@@ -24,7 +25,8 @@ struct base {
   }
 };
 
-struct derived : public base {
+struct derived : public base
+{
   int derived_data_member;
 
   derived()
@@ -44,9 +46,9 @@ int main ()
 {
 	test2 ();
 	if ((base_destructed != 0x781f) || (derived_destructed != 0xf178))
-	  { printf ("FAIL\n"); return 1; }
+	  { /* printf ("FAIL\n"); */ return 1; }
 	else
-	  printf ("PASS\n");
+	  ; // printf ("PASS\n");
 }
 
 void test2 ()

@@ -33,6 +33,7 @@ if {    ![istarget *-*-sysv4*] \
 }
 
 if { [istarget *-*-linux*aout*] \
+     || [istarget msp430-*-*] \
      || [istarget *-*-linux*oldld*] } {
     return
 }

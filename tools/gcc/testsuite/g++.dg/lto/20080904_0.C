@@ -1,4 +1,5 @@
 // { dg-lto-do run }
+// { dg-require-effective-target size32plus }
 
 /* This test will fail to link if the vtable for Derived is not emitted.  */
 

@@ -12,4 +12,14 @@
 #        }    
 #}
 
+set torture_eval_before_execute {
+
+    set compiler_conditional_xfail_data {
+        "RX fp rounding isn't pedantic" \
+        "rx-*-*" \
+        { "*" } \
+        { "-m64bit-doubles" }
+        }    
+}
+
 return 0

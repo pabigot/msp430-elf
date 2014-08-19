@@ -4,7 +4,6 @@
 #source: init3.s
 #source: initn.s
 #ld: --sort-section=alignment
-#ld_after_inputfiles: --discard-none
 #nm: -n
 
 #...

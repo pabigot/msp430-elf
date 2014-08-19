@@ -1,7 +1,4 @@
-extern int printf (const char *, ...);
-#if 0
 #include <stdio.h>
-#endif
 
 void
 foo2 (void)

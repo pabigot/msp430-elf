@@ -1,4 +1,5 @@
 /* { dg-do run } */
+/* { dg-require-effective-target trampolines } */
 /* { dg-options "-pg" } */
 /* { dg-options "-pg -static" { target hppa*-*-hpux* } } */
 /* { dg-require-profiling "-pg" } */

@@ -43,3 +43,5 @@ int main ()
   
   return count != 1;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

@@ -2,7 +2,7 @@
 # wanting multilib support.
 #
 # Copyright (C) 1995, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-# 2005, 2006, 2007, 2008, 2010, 2011 Free Software Foundation, Inc.
+# 2005, 2006, 2007, 2008, 2010, 2011  Free Software Foundation, Inc.
 #
 # This file is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -288,19 +288,6 @@ arm-*-*)
 	  for x in ${old_multidirs}; do
 	    case "$x" in
 	      *nofmult* ) : ;;
-	      *) multidirs="${multidirs} ${x}" ;;
-	    esac
-	  done
-	fi
-	;;
-m32r-*-*)
-	if [ x$enable_m32rx = xno ]
-	then
-	  old_multidirs=${multidirs}
-	  multidirs=""
-	  for x in ${old_multidirs}; do
-	    case "${x}" in
-	      *m32rx*) : ;;
 	      *) multidirs="${multidirs} ${x}" ;;
 	    esac
 	  done
@@ -871,10 +858,6 @@ if [ -n "${multidirs}" ] && [ -z "${ml_norecursion}" ]; then
 	fi
     fi
 
-    # Compress spaces inside CC_ so that configure scripts will not
-    # complain about mismatches in the CC command.  FIXME: Is this
-    # needed for other vars ?
-    CC_="`echo ${CC_} | tr -s ' '`"
     if eval ${ml_config_env} ${ml_config_shell} ${ml_recprog} \
 	--with-multisubdir=${ml_dir} --with-multisrctop=${multisrctop} \
 	${ac_configure_args} ${ml_config_env} ${ml_srcdiroption} ; then
@@ -892,6 +875,3 @@ fi
 
 fi # ${ml_toplevel_p} = yes
 fi # ${enable_multilib} = yes
-# Local Variables:
-# mode: autoconf
-# End:

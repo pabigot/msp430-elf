@@ -1,4 +1,5 @@
 /* { dg-do compile } */
+/* { dg-skip-if "non standard pointer size in large memory model" { "msp430-*-*" } { "-mlarge" } { "" } } */
 #include <limits.h>
 
 #if defined(__LP64__) || defined(_WIN64)

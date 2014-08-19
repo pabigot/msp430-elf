@@ -1,5 +1,6 @@
 // { dg-lto-do run }
 // { dg-lto-options { { -flto -g } { -flto -flto-partition=none -g } } }
+// { dg-require-effective-target size32plus }
 
 #include <typeinfo>
 

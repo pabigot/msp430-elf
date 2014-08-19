@@ -1,3 +1,4 @@
+// { dg-require-effective-target size32plus }
 extern "C" { void abort (void);}
 int foo (int);
 

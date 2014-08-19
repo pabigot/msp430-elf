@@ -1,10 +1,10 @@
-/minstd_rand.cc/1.3/Sun Feb 24 19:28:11 2013//Tmsp430-130322-branch
-/minstd_rand0.cc/1.3/Sun Feb 24 19:28:11 2013//Tmsp430-130322-branch
-/mt19937.cc/1.3/Sun Feb 24 19:28:11 2013//Tmsp430-130322-branch
-/ranlux3.cc/1.3/Sun Feb 24 19:28:11 2013//Tmsp430-130322-branch
-/ranlux3_01.cc/1.3/Sun Feb 24 19:28:11 2013//Tmsp430-130322-branch
-/ranlux4.cc/1.3/Sun Feb 24 19:28:12 2013//Tmsp430-130322-branch
-/ranlux4_01.cc/1.3/Sun Feb 24 19:28:12 2013//Tmsp430-130322-branch
+/minstd_rand.cc/1.4/Thu Feb 20 13:47:49 2014//Tmsp430-14r1-branch
+/minstd_rand0.cc/1.4/Thu Feb 20 13:47:49 2014//Tmsp430-14r1-branch
+/mt19937.cc/1.4/Thu Feb 20 13:47:49 2014//Tmsp430-14r1-branch
+/ranlux3.cc/1.4/Thu Feb 20 13:47:49 2014//Tmsp430-14r1-branch
+/ranlux3_01.cc/1.4/Thu Feb 20 13:47:49 2014//Tmsp430-14r1-branch
+/ranlux4.cc/1.4/Thu Feb 20 13:47:49 2014//Tmsp430-14r1-branch
+/ranlux4_01.cc/1.4/Thu Feb 20 13:47:49 2014//Tmsp430-14r1-branch
 D/bernoulli_distribution////
 D/binomial_distribution////
 D/discard_block////

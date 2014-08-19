@@ -86,6 +86,14 @@
 #define __IEEE_BIG_ENDIAN
 #endif
 
+#ifdef __nds32__
+#ifdef __big_endian__
+#define __IEEE_BIG_ENDIAN
+#else
+#define __IEEE_LITTLE_ENDIAN
+#endif
+#endif
+
 #ifdef __SPU__
 #define __IEEE_BIG_ENDIAN
 
@@ -137,6 +145,7 @@
 #define _FLOAT_ARG float
 #define _DOUBLE_IS_32BITS
 #endif
+
 
 #ifdef __sh__
 #ifdef __LITTLE_ENDIAN__
@@ -253,14 +262,6 @@
 #endif
 #endif
 #endif
-#if defined  _AIX && ! defined __PPC__
-#ifdef __BIG_ENDIAN__
-#define __IEEE_BIG_ENDIAN
-#endif
-#ifdef __LITTLE_ENDIAN__
-#define __IEEE_LITTLE_ENDIAN
-#endif
-#endif
 
 #ifdef __xstormy16__
 #define __IEEE_LITTLE_ENDIAN
@@ -363,7 +364,11 @@
 #endif
 
 #ifdef __MICROBLAZE__
+#ifndef __MICROBLAZEEL__
 #define __IEEE_BIG_ENDIAN
+#else
+#define __IEEE_LITTLE_ENDIAN
+#endif
 #endif
 
 #ifdef __MSP430__
@@ -400,15 +405,12 @@
 #define __SMALL_BITFIELDS	/* 16 Bit INT */
 #endif
 
-#ifdef __IP4K__
-#define __IEEE_BIG_ENDIAN
-#endif
-
-#ifdef __s390__
-#define __IEEE_BIG_ENDIAN
-#endif
-#ifdef __vax__
-#define __IEEE_LITTLE_ENDIAN
+#ifdef __NIOS2__
+# ifdef __nios2_big_endian__
+#  define __IEEE_BIG_ENDIAN
+# else
+#  define __IEEE_LITTLE_ENDIAN
+# endif
 #endif
 
 #ifndef __IEEE_BIG_ENDIAN
@@ -419,3 +421,4 @@
 
 #endif /* not __IEEE_LITTLE_ENDIAN */
 #endif /* not __IEEE_BIG_ENDIAN */
+

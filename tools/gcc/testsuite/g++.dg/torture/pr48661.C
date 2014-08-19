@@ -1,5 +1,6 @@
 // PR middle-end/48661
 // { dg-do run }
+// { dg-require-effective-target size32plus }
 
 extern "C" void abort ();
 

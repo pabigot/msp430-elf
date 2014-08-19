@@ -107,6 +107,11 @@ if {[istarget mips64*-*-linux*] &&
     append gcc_gas_flag " -mabi=n32"
 }
 
+if { [istarget rx-*-*] } {
+    global ASFLAGS
+    set ASFLAGS "-muse-conventional-section-names"
+}
+
 # load the utility procedures
 load_lib ld-lib.exp
 
@@ -139,11 +144,11 @@ proc get_target_emul {} {
 }
 
 if [isnative] {
-    foreach x {HOSTING_CRT0 HOSTING_SCRT0 HOSTING_LIBS} {
+    foreach x {HOSTING_CRT0 HOSTING_SCRT0 HOSTING_LIBS HOSTING_SLIBS} {
 	get_link_files $x
     }
 } else {
-    foreach x {HOSTING_CRT0 HOSTING_SCRT0 HOSTING_LIBS} { set $x "" }
+    foreach x {HOSTING_CRT0 HOSTING_SCRT0 HOSTING_LIBS HOSTING_SLIBS} { set $x "" }
 }
 if ![info exists HOSTING_EMU] { set HOSTING_EMU "-m [get_target_emul]" }
 

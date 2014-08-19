@@ -224,4 +224,3 @@ type r0, r1;  type *p0, *p1;
 regx0regx1_set (r0, r1, x0, x1, p0, p1)
 type r0, r1;  type *p0, *p1;
 {regx0 = regx1;  }
-

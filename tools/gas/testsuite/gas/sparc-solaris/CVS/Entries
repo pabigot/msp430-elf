@@ -1,6 +1,6 @@
-/addend.exp/1.5/Sun Jan 27 12:18:23 2013//Tmsp430-130322-branch
-/addend.s/1.1/Mon Oct 25 16:46:55 1993//Tmsp430-130322-branch
-/gas.exp/1.2/Sun Jan 27 12:18:23 2013//Tmsp430-130322-branch
-/sol-cc.s/1.1/Mon May 10 18:58:49 1993//Tmsp430-130322-branch
-/sol-gcc.s/1.1/Mon May 10 18:58:50 1993//Tmsp430-130322-branch
+/addend.exp/1.2/Thu Feb 20 13:29:32 2014//Tmsp430-14r1-branch
+/addend.s/1.1/Fri Aug 23 16:00:53 2002//Tmsp430-14r1-branch
+/gas.exp/1.2/Thu Feb 20 13:29:32 2014//Tmsp430-14r1-branch
+/sol-cc.s/1.1/Fri Aug 23 16:00:53 2002//Tmsp430-14r1-branch
+/sol-gcc.s/1.1/Fri Aug 23 16:00:53 2002//Tmsp430-14r1-branch
 D

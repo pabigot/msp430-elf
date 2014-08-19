@@ -1,6 +1,6 @@
 /* Target-dependent code for SPARC.
 
-   Copyright (C) 2003-2012 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -36,9 +36,10 @@
 #include "value.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "sparc-tdep.h"
+#include "sparc-ravenscar-thread.h"
 
 struct regset;
 
@@ -118,6 +119,37 @@ sparc_is_unimp_insn (CORE_ADDR pc)
   const unsigned long insn = sparc_fetch_instruction (pc);
   
   return ((insn & 0xc1c00000) == 0);
+}
+
+/* Return non-zero if the instruction corresponding to PC is an
+   "annulled" branch, i.e. the annul bit is set.  */
+
+int
+sparc_is_annulled_branch_insn (CORE_ADDR pc)
+{
+  /* The branch instructions featuring an annul bit can be identified
+     by the following bit patterns:
+
+     OP=0
+      OP2=1: Branch on Integer Condition Codes with Prediction (BPcc).
+      OP2=2: Branch on Integer Condition Codes (Bcc).
+      OP2=5: Branch on FP Condition Codes with Prediction (FBfcc).
+      OP2=6: Branch on FP Condition Codes (FBcc).
+      OP2=3 && Bit28=0:
+             Branch on Integer Register with Prediction (BPr).
+
+     This leaves out ILLTRAP (OP2=0), SETHI/NOP (OP2=4) and the V8
+     coprocessor branch instructions (Op2=7).  */
+
+  const unsigned long insn = sparc_fetch_instruction (pc);
+  const unsigned op2 = X_OP2 (insn);
+
+  if ((X_OP (insn) == 0)
+      && ((op2 == 1) || (op2 == 2) || (op2 == 5) || (op2 == 6)
+	  || ((op2 == 3) && ((insn & 0x10000000) == 0))))
+    return X_A (insn);
+  else
+    return 0;
 }
 
 /* OpenBSD/sparc includes StackGhost, which according to the author's
@@ -854,7 +886,7 @@ sparc_analyze_prologue (struct gdbarch *gdbarch, CORE_ADDR pc,
      dynamic linker patches up the first PLT with some code that
      starts with a SAVE instruction.  Patch up PC such that it points
      at the start of our PLT entry.  */
-  if (tdep->plt_entry_size > 0 && in_plt_section (current_pc, NULL))
+  if (tdep->plt_entry_size > 0 && in_plt_section (current_pc))
     pc = current_pc - ((current_pc - pc) % tdep->plt_entry_size);
 
   insn = sparc_fetch_instruction (pc);
@@ -1369,14 +1401,20 @@ sparc32_return_value (struct gdbarch *gdbarch, struct value *function,
   if (sparc_structure_or_union_p (type)
       || (sparc_floating_p (type) && TYPE_LENGTH (type) == 16))
     {
+      ULONGEST sp;
+      CORE_ADDR addr;
+
       if (readbuf)
 	{
-	  ULONGEST sp;
-	  CORE_ADDR addr;
-
 	  regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
 	  addr = read_memory_unsigned_integer (sp + 64, 4, byte_order);
 	  read_memory (addr, readbuf, TYPE_LENGTH (type));
+	}
+      if (writebuf)
+	{
+	  regcache_cooked_read_unsigned (regcache, SPARC_SP_REGNUM, &sp);
+	  addr = read_memory_unsigned_integer (sp + 64, 4, byte_order);
+	  write_memory (addr, writebuf, TYPE_LENGTH (type));
 	}
 
       return RETURN_VALUE_ABI_PRESERVES_ADDRESS;
@@ -1531,7 +1569,6 @@ sparc_analyze_control_transfer (struct frame_info *frame,
 	  if (X_A (insn))
 	    *npc = 0;
 
-	  gdb_assert (offset != 0);
 	  return pc + offset;
 	}
     }
@@ -1682,6 +1719,8 @@ sparc32_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   if (tdep->gregset)
     set_gdbarch_regset_from_core_section (gdbarch,
 					  sparc_regset_from_core_section);
+
+  register_sparc_ravenscar_ops (gdbarch);
 
   return gdbarch;
 }
@@ -1953,7 +1992,8 @@ sparc32_collect_gregset (const struct sparc_gregset *gregset,
 }
 
 void
-sparc32_supply_fpregset (struct regcache *regcache,
+sparc32_supply_fpregset (const struct sparc_fpregset *fpregset,
+			 struct regcache *regcache,
 			 int regnum, const void *fpregs)
 {
   const gdb_byte *regs = fpregs;
@@ -1962,15 +2002,18 @@ sparc32_supply_fpregset (struct regcache *regcache,
   for (i = 0; i < 32; i++)
     {
       if (regnum == (SPARC_F0_REGNUM + i) || regnum == -1)
-	regcache_raw_supply (regcache, SPARC_F0_REGNUM + i, regs + (i * 4));
+	regcache_raw_supply (regcache, SPARC_F0_REGNUM + i,
+			     regs + fpregset->r_f0_offset + (i * 4));
     }
 
   if (regnum == SPARC32_FSR_REGNUM || regnum == -1)
-    regcache_raw_supply (regcache, SPARC32_FSR_REGNUM, regs + (32 * 4) + 4);
+    regcache_raw_supply (regcache, SPARC32_FSR_REGNUM,
+			 regs + fpregset->r_fsr_offset);
 }
 
 void
-sparc32_collect_fpregset (const struct regcache *regcache,
+sparc32_collect_fpregset (const struct sparc_fpregset *fpregset,
+			  const struct regcache *regcache,
 			  int regnum, void *fpregs)
 {
   gdb_byte *regs = fpregs;
@@ -1979,11 +2022,13 @@ sparc32_collect_fpregset (const struct regcache *regcache,
   for (i = 0; i < 32; i++)
     {
       if (regnum == (SPARC_F0_REGNUM + i) || regnum == -1)
-	regcache_raw_collect (regcache, SPARC_F0_REGNUM + i, regs + (i * 4));
+	regcache_raw_collect (regcache, SPARC_F0_REGNUM + i,
+			      regs + fpregset->r_f0_offset + (i * 4));
     }
 
   if (regnum == SPARC32_FSR_REGNUM || regnum == -1)
-    regcache_raw_collect (regcache, SPARC32_FSR_REGNUM, regs + (32 * 4) + 4);
+    regcache_raw_collect (regcache, SPARC32_FSR_REGNUM,
+			  regs + fpregset->r_fsr_offset);
 }
 
 
@@ -2000,6 +2045,18 @@ const struct sparc_gregset sparc32_sunos4_gregset =
   -1,				/* %tbr */
   4 * 4,			/* %g1 */
   -1				/* %l0 */
+};
+
+const struct sparc_fpregset sparc32_sunos4_fpregset =
+{
+  0 * 4,			/* %f0 */
+  33 * 4,			/* %fsr */
+};
+
+const struct sparc_fpregset sparc32_bsd_fpregset =
+{
+  0 * 4,			/* %f0 */
+  32 * 4,			/* %fsr */
 };
 
 

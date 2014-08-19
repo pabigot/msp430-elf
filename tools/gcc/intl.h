@@ -1,5 +1,5 @@
 /* intl.h - internationalization
-   Copyright (C) 1998-2013 Free Software Foundation, Inc.
+   Copyright (C) 1998-2014 Free Software Foundation, Inc.
 
    GCC is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -26,16 +26,8 @@
 # define setlocale(category, locale) (locale)
 #endif
 
-/* If libintl.h is available, include it before testing for NLS. If we
-   are building with --disable-nls and another header file includes
-   libintl.h, the stubs defined down below will cause syntax errors
-   when parsing libintl.h. See http://gcc.gnu.org/bugzilla/show_bug.cgi?id=54281
-   for details.  */
-#if defined(HAVE_LIBINTL_H) || defined(ENABLE_NLS)
-# include <libintl.h>
-#endif
-
 #ifdef ENABLE_NLS
+#include <libintl.h>
 extern void gcc_init_libintl (void);
 extern size_t gcc_gettext_width (const char *);
 #else
@@ -46,12 +38,12 @@ extern size_t gcc_gettext_width (const char *);
 # define bindtextdomain(domain, directory) (domain)
 # undef gettext
 # define gettext(msgid) (msgid)
-# define ngettext(singular,plural,n) fake_ngettext(singular,plural,n)
+# define ngettext(singular,plural,n) fake_ngettext (singular, plural, n)
 # define gcc_init_libintl()	/* nothing */
-# define gcc_gettext_width(s) strlen(s)
+# define gcc_gettext_width(s) strlen (s)
 
-extern const char *fake_ngettext(const char *singular,const char *plural,
-                                 unsigned long int n);
+extern const char *fake_ngettext (const char *singular, const char *plural,
+				  unsigned long int n);
 
 #endif
 

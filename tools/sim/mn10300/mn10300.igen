@@ -3437,16 +3437,10 @@
 *am33_2
 
 {
-  enum sim_alignments saved_alignment;
-
-  /* SETLB instructions do not have alignment constraints.  */
-  saved_alignment = current_alignment;
-  current_alignment = NONSTRICT_ALIGNMENT;
   /* OP_DB (); */
   PC = cia;
   State.regs[REG_LIR] = load_word (State.regs[REG_PC] + 1);
   State.regs[REG_LAR] = State.regs[REG_PC] + 5;
-  current_alignment = saved_alignment;
 }
 
 

@@ -11,7 +11,7 @@
 #	files by clicking on the file icons or by entering a filename
 #	in the "Filename:" entry.
 #
-# RCS: @(#) $Id: tkfbox.tcl,v 1.27 2003/03/19 23:02:05 cagney Exp $
+# RCS: @(#) $Id: tkfbox.tcl,v 1.3 2012/04/18 00:36:57 kevinb Exp $
 #
 # Copyright (c) 1994-1998 Sun Microsystems, Inc.
 #

@@ -2,12 +2,12 @@
 // PRMS Id: 11420
 // Bug: Can't handle indirect virtual template base init.
 
-extern "C" int printf (const char *, ...);
+// extern "C" int printf (const char *, ...);
 
 template<class T>
 class Vbase {
  public:
-  Vbase(T i) { printf ("%d\n", i); }
+  Vbase(T i) { /* printf ("%d\n", i); */ ; }
 };
 
 template<class T>

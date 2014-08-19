@@ -1,6 +1,6 @@
 /* Definitions for targets which report shared library events.
 
-   Copyright (C) 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 2007-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,7 +26,7 @@
 #include "vec.h"
 #include "solib-target.h"
 
-#include "gdb_string.h"
+#include <string.h>
 
 /* Private data for each loaded library.  */
 struct lm_info
@@ -246,7 +246,8 @@ static struct so_list *
 solib_target_current_sos (void)
 {
   struct so_list *new_solib, *start = NULL, *last = NULL;
-  const char *library_document;
+  char *library_document;
+  struct cleanup *old_chain;
   VEC(lm_info_p) *library_list;
   struct lm_info *info;
   int ix;
@@ -258,8 +259,15 @@ solib_target_current_sos (void)
   if (library_document == NULL)
     return NULL;
 
+  /* solib_target_parse_libraries may throw, so we use a cleanup.  */
+  old_chain = make_cleanup (xfree, library_document);
+
   /* Parse the list.  */
   library_list = solib_target_parse_libraries (library_document);
+
+  /* library_document string is not needed behind this point.  */
+  do_cleanups (old_chain);
+
   if (library_list == NULL)
     return NULL;
 
@@ -325,14 +333,13 @@ static void
 solib_target_relocate_section_addresses (struct so_list *so,
 					 struct target_section *sec)
 {
-  int flags = bfd_get_section_flags (sec->bfd, sec->the_bfd_section);
   CORE_ADDR offset;
 
   /* Build the offset table only once per object file.  We can not do
      it any earlier, since we need to open the file first.  */
   if (so->lm_info->offsets == NULL)
     {
-      int num_sections = bfd_count_sections (so->abfd);
+      int num_sections = gdb_bfd_count_sections (so->abfd);
 
       so->lm_info->offsets = xzalloc (SIZEOF_N_SECTION_OFFSETS (num_sections));
 
@@ -449,7 +456,9 @@ Could not relocate shared library \"%s\": bad offsets"), so->so_name);
 	}
     }
 
-  offset = so->lm_info->offsets->offsets[sec->the_bfd_section->index];
+  offset = so->lm_info->offsets->offsets[gdb_bfd_section_index
+					 (sec->the_bfd_section->owner,
+					  sec->the_bfd_section)];
   sec->addr += offset;
   sec->endaddr += offset;
 }
@@ -468,7 +477,7 @@ solib_target_in_dynsym_resolve_code (CORE_ADDR pc)
   /* We don't have a range of addresses for the dynamic linker; there
      may not be one in the program's address space.  So only report
      PLT entries (which may be import stubs).  */
-  return in_plt_section (pc, NULL);
+  return in_plt_section (pc);
 }
 
 struct target_so_ops solib_target_so_ops;

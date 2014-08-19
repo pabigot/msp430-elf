@@ -1,0 +1,29 @@
+This patch updates the #pragma pack test to skip those
+targets that do not support it and which GNUPro cares about.
+It should be submitted upstream one day...
+
+2009-04-24  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.dg/cpp/_Pragma6.c: Skip for FRV, IQ2000,
+	MN10300 and v850.
+
+
+*** /work/sources/gcc/branches/4.4/gcc/testsuite/gcc.dg/cpp/_Pragma6.c	2009-04-03 17:56:12.000000000 +0100
+--- gcc/testsuite/gcc.dg/cpp/_Pragma6.c	2009-04-24 12:47:04.000000000 +0100
+***************
+*** 2,8 ****
+  /* This is supposed to succeed only if
+     the target defines HANDLE_PRAGMA_PACK_PUSH_POP
+     and doesn't define HANDLE_PRAGMA_PACK_WITH_EXPANSION.  */
+! /* { dg-do compile { target { ! { powerpc-ibm-aix* *-*-solaris2* fido-*-* m68k-*-* sh*-[us]*-elf m32c-*-* } } } } */
+  
+  #define push bar
+  #define foo _Pragma ("pack(push)")
+--- 2,8 ----
+  /* This is supposed to succeed only if
+     the target defines HANDLE_PRAGMA_PACK_PUSH_POP
+     and doesn't define HANDLE_PRAGMA_PACK_WITH_EXPANSION.  */
+! /* { dg-do compile { target { ! { powerpc-ibm-aix* *-*-solaris2* fido-*-* frv-*-* iq2000-*-* m68k-*-* mn10*-*-* am3*-*-* sh*-[us]*-elf m32c-*-* v850*-*-* } } } } */
+  
+  #define push bar
+  #define foo _Pragma ("pack(push)")

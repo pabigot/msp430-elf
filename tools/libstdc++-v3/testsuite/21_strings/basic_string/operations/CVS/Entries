@@ -1,2 +1,5 @@
-D/char////
-D/wchar_t////
+D/compare////
+D/data////
+D/find////
+D/rfind////
+D/substr////

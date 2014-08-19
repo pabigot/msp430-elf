@@ -1,6 +1,5 @@
 /* tc-rx.c -- Assembler for the Renesas RX
-   Copyright 2008, 2009, 2010, 2011
-   Free Software Foundation, Inc.
+   Copyright 2008-2013 Free Software Foundation, Inc.
 
    This file is part of GAS, the GNU Assembler.
 
@@ -56,6 +55,8 @@ static int rx_num_int_regs = 0;
 int rx_pid_register;
 int rx_gp_register;
 
+enum rx_cpu_types rx_cpu = RX600;
+
 static void rx_fetchalign (int ignore ATTRIBUTE_UNUSED);
 
 enum options
@@ -72,6 +73,7 @@ enum options
   OPTION_INT_REGS,
   OPTION_USES_GCC_ABI,
   OPTION_USES_RX_ABI,
+  OPTION_CPU,
 };
 
 #define RX_SHORTOPTS ""
@@ -98,6 +100,7 @@ struct option md_longopts[] =
   {"mint-register", required_argument, NULL, OPTION_INT_REGS},
   {"mgcc-abi", no_argument, NULL, OPTION_USES_GCC_ABI},
   {"mrx-abi", no_argument, NULL, OPTION_USES_RX_ABI},
+  {"mcpu",required_argument,NULL,OPTION_CPU},
   {NULL, no_argument, NULL, 0}
 };
 size_t md_longopts_size = sizeof (md_longopts);
@@ -155,6 +158,22 @@ md_parse_option (int c ATTRIBUTE_UNUSED, char * arg ATTRIBUTE_UNUSED)
     case OPTION_USES_RX_ABI:
       elf_flags |= E_FLAG_RX_ABI;
       return 1;
+
+    case OPTION_CPU:
+      if (strcasecmp (arg, "rx100") == 0)
+        rx_cpu = RX100;
+      else if (strcasecmp (arg, "rx200") == 0)
+	rx_cpu = RX200;
+      else if (strcasecmp (arg, "rx600") == 0)
+	rx_cpu = RX600;
+      else if (strcasecmp (arg, "rx610") == 0)
+	rx_cpu = RX610;
+      else
+	{
+	  as_warn (_("unrecognised RX CPU type %s"), arg);
+	  break;
+	}
+      return 1;
     }
   return 0;
 }
@@ -173,6 +192,7 @@ md_show_usage (FILE * stream)
   fprintf (stream, _("  --mrelax\n"));
   fprintf (stream, _("  --mpid\n"));
   fprintf (stream, _("  --mint-register=<value>\n"));
+  fprintf (stream, _("  --mcpu=<rx100|rx200|rx600|rx610>\n"));
 }
 
 static void
@@ -224,7 +244,7 @@ rx_include (int ignore)
   char * path;
   char * filename;
   char * current_filename;
-  char * eof;
+  char * last_char;
   char * p;
   char * d;
   char * f;
@@ -243,17 +263,17 @@ rx_include (int ignore)
 
   /* Get the filename.  Spaces are allowed, NUL characters are not.  */
   filename = input_line_pointer;
-  eof = find_end_of_line (filename, FALSE);
-  input_line_pointer = eof;
+  last_char = find_end_of_line (filename, FALSE);
+  input_line_pointer = last_char;
 
-  while (eof >= filename && (* eof == ' ' || * eof == '\n'))
-    -- eof;
-  end_char = *(++ eof);
-  * eof = 0;
-  if (eof == filename)
+  while (last_char >= filename && (* last_char == ' ' || * last_char == '\n'))
+    -- last_char;
+  end_char = *(++ last_char);
+  * last_char = 0;
+  if (last_char == filename)
     {
       as_bad (_("no filename following .INCLUDE pseudo-op"));
-      * eof = end_char;
+      * last_char = end_char;
       return;
     }
 
@@ -365,7 +385,7 @@ rx_include (int ignore)
       input_scrub_insert_file (path);
     }
 
-  * eof = end_char;
+  * last_char = end_char;
 }
 
 static void

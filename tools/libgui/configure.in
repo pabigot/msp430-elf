@@ -43,6 +43,7 @@ dnl here.
 AC_EGREP_CPP(strncasecmp, [#include <string.h>],
   AC_DEFINE(HAVE_STRNCASECMP_DECL))
 
+LIBGUI_CFLAGS=	
 
 AC_CACHE_CHECK([for cygwin32], ide_cv_os_cygwin32,
 [AC_EGREP_CPP(lose, [

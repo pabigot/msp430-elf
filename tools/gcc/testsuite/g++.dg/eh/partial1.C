@@ -35,3 +35,5 @@ int main()
   if (bs != 0)
     __builtin_abort ();
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

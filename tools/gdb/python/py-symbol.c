@@ -1,6 +1,6 @@
 /* Python interface to symbols.
 
-   Copyright (C) 2008-2012 Free Software Foundation, Inc.
+   Copyright (C) 2008-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -270,7 +270,7 @@ sympy_value (PyObject *self, PyObject *args)
 	  if (frame_info == NULL)
 	    error (_("invalid frame"));
 	}
-      
+
       if (symbol_read_needs_frame (symbol) && frame_info == NULL)
 	error (_("symbol requires a frame to compute its value"));
 
@@ -335,7 +335,7 @@ sympy_dealloc (PyObject *obj)
 
   if (sym_obj->prev)
     sym_obj->prev->next = sym_obj->next;
-  else if (SYMBOL_SYMTAB (sym_obj->symbol))
+  else if (sym_obj->symbol && SYMBOL_SYMTAB (sym_obj->symbol))
     {
       set_objfile_data (SYMBOL_SYMTAB (sym_obj->symbol)->objfile,
 			sympy_objfile_data_key, sym_obj->next);
@@ -354,7 +354,8 @@ sympy_dealloc (PyObject *obj)
 PyObject *
 gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
 {
-  int domain = VAR_DOMAIN, is_a_field_of_this = 0;
+  int domain = VAR_DOMAIN;
+  struct field_of_this_result is_a_field_of_this;
   const char *name;
   static char *keywords[] = { "name", "block", "domain", NULL };
   struct symbol *symbol = NULL;
@@ -407,7 +408,7 @@ gdbpy_lookup_symbol (PyObject *self, PyObject *args, PyObject *kw)
     }
   PyTuple_SET_ITEM (ret_tuple, 0, sym_obj);
 
-  bool_obj = is_a_field_of_this? Py_True : Py_False;
+  bool_obj = (is_a_field_of_this.type != NULL) ? Py_True : Py_False;
   Py_INCREF (bool_obj);
   PyTuple_SET_ITEM (ret_tuple, 1, bool_obj);
 
@@ -473,11 +474,11 @@ del_objfile_symbols (struct objfile *objfile, void *datum)
     }
 }
 
-void
+int
 gdbpy_initialize_symbols (void)
 {
   if (PyType_Ready (&symbol_object_type) < 0)
-    return;
+    return -1;
 
   /* Register an objfile "free" callback so we can properly
      invalidate symbol when an object file that is about to be
@@ -485,37 +486,53 @@ gdbpy_initialize_symbols (void)
   sympy_objfile_data_key
     = register_objfile_data_with_cleanup (NULL, del_objfile_symbols);
 
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_UNDEF", LOC_UNDEF);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_CONST", LOC_CONST);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_STATIC", LOC_STATIC);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_REGISTER", LOC_REGISTER);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_ARG", LOC_ARG);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_REF_ARG", LOC_REF_ARG);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_LOCAL", LOC_LOCAL);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_TYPEDEF", LOC_TYPEDEF);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_LABEL", LOC_LABEL);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_BLOCK", LOC_BLOCK);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_CONST_BYTES",
-			   LOC_CONST_BYTES);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_UNRESOLVED",
-			   LOC_UNRESOLVED);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_OPTIMIZED_OUT",
-			   LOC_OPTIMIZED_OUT);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_COMPUTED", LOC_COMPUTED);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_REGPARM_ADDR",
-			   LOC_REGPARM_ADDR);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_UNDEF_DOMAIN", UNDEF_DOMAIN);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_VAR_DOMAIN", VAR_DOMAIN);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_STRUCT_DOMAIN", STRUCT_DOMAIN);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_LABEL_DOMAIN", LABEL_DOMAIN);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_VARIABLES_DOMAIN",
-			   VARIABLES_DOMAIN);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_FUNCTIONS_DOMAIN",
-			   FUNCTIONS_DOMAIN);
-  PyModule_AddIntConstant (gdb_module, "SYMBOL_TYPES_DOMAIN", TYPES_DOMAIN);
+  if (PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_UNDEF", LOC_UNDEF) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_CONST",
+				  LOC_CONST) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_STATIC",
+				  LOC_STATIC) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_REGISTER",
+				  LOC_REGISTER) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_ARG",
+				  LOC_ARG) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_REF_ARG",
+				  LOC_REF_ARG) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_LOCAL",
+				  LOC_LOCAL) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_TYPEDEF",
+				  LOC_TYPEDEF) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_LABEL",
+				  LOC_LABEL) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_BLOCK",
+				  LOC_BLOCK) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_CONST_BYTES",
+				  LOC_CONST_BYTES) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_UNRESOLVED",
+				  LOC_UNRESOLVED) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_OPTIMIZED_OUT",
+				  LOC_OPTIMIZED_OUT) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_COMPUTED",
+				  LOC_COMPUTED) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LOC_REGPARM_ADDR",
+				  LOC_REGPARM_ADDR) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_UNDEF_DOMAIN",
+				  UNDEF_DOMAIN) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_VAR_DOMAIN",
+				  VAR_DOMAIN) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_STRUCT_DOMAIN",
+				  STRUCT_DOMAIN) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_LABEL_DOMAIN",
+				  LABEL_DOMAIN) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_VARIABLES_DOMAIN",
+				  VARIABLES_DOMAIN) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_FUNCTIONS_DOMAIN",
+				  FUNCTIONS_DOMAIN) < 0
+      || PyModule_AddIntConstant (gdb_module, "SYMBOL_TYPES_DOMAIN",
+				  TYPES_DOMAIN) < 0)
+    return -1;
 
-  Py_INCREF (&symbol_object_type);
-  PyModule_AddObject (gdb_module, "Symbol", (PyObject *) &symbol_object_type);
+  return gdb_pymodule_addobject (gdb_module, "Symbol",
+				 (PyObject *) &symbol_object_type);
 }
 
 
@@ -561,8 +578,7 @@ Return the value of the symbol." },
 };
 
 PyTypeObject symbol_object_type = {
-  PyObject_HEAD_INIT (NULL)
-  0,				  /*ob_size*/
+  PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.Symbol",			  /*tp_name*/
   sizeof (symbol_object),	  /*tp_basicsize*/
   0,				  /*tp_itemsize*/

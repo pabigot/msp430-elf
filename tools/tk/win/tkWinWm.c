@@ -12,7 +12,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkWinWm.c,v 1.16 2003/03/19 23:02:12 cagney Exp $
+ * RCS: @(#) $Id: tkWinWm.c,v 1.3 2012/04/18 00:37:12 kevinb Exp $
  */
 
 #include "tkWinInt.h"

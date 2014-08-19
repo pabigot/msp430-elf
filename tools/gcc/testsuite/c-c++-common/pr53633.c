@@ -1,6 +1,8 @@
 /* { dg-do compile } */
 /* { dg-require-effective-target naked_functions } */
 /* { dg-options "-O2 -Wall" } */
+/* { dg-skip-if "naked attribute does not prevent warnings" { msp430-*-* rl78-*-* } { "*" } { "" } } */
+
 /* Check that we do not get warnings about missing return statements
    or bogus looking noreturn functions.  */
 int __attribute__((naked))

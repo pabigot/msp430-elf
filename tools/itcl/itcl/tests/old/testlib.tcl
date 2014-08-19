@@ -6,7 +6,7 @@
 #            mmclennan@lucent.com
 #            http://www.tcltk.com/itcl
 #
-#      RCS:  $Id: testlib.tcl,v 1.4 2000/10/11 22:11:48 spolk Exp $
+#      RCS:  $Id: testlib.tcl,v 1.3 2012/04/18 00:37:17 kevinb Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1993-1998  Lucent Technologies, Inc.
 # ======================================================================

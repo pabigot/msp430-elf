@@ -1,6 +1,6 @@
 /* { dg-do compile } */
-/* { dg-options "-Wdouble-promotion" } */
 /* { dg-skip-if "sizeof float == sizeof double, so some of the warnings are not generated" { msp430*-*-* } "*" "" } */
+/* { dg-options "-Wdouble-promotion" } */
 
 #include <stddef.h>
 

@@ -24,3 +24,4 @@ foo (int *ip, long long int *llp, wchar_t *ls)
   scanf ("%'d", ip); /* { dg-warning "C" "scanf ' flag" } */
   scanf ("%Id", ip); /* { dg-warning "C" "scanf I flag" } */
 }
+/* { dg-prune-output ".*__int20.*" } */

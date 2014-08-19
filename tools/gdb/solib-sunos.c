@@ -1,7 +1,6 @@
 /* Handle SunOS shared libraries for GDB, the GNU Debugger.
 
-   Copyright (C) 1990-1996, 1998-2001, 2004, 2007-2012 Free Software
-   Foundation, Inc.
+   Copyright (C) 1990-2013 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -121,7 +120,7 @@ static char *main_name_list[] =
 
 #define SOLIB_EXTRACT_ADDRESS(MEMBER) \
 	extract_unsigned_integer (&(MEMBER), sizeof (MEMBER), \
-				  gdbarch_byte_order (target_gdbarch))
+				  gdbarch_byte_order (target_gdbarch ()))
 
 /* local data declarations */
 
@@ -141,7 +140,7 @@ static CORE_ADDR flag_addr;
 static CORE_ADDR
 lm_addr (struct so_list *so)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   int lm_addr_offset = offsetof (struct link_map, lm_addr);
   int lm_addr_size = fieldsize (struct link_map, lm_addr);
 
@@ -152,7 +151,7 @@ lm_addr (struct so_list *so)
 static CORE_ADDR
 lm_next (struct so_list *so)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   int lm_next_offset = offsetof (struct link_map, lm_next);
   int lm_next_size = fieldsize (struct link_map, lm_next);
 
@@ -164,7 +163,7 @@ lm_next (struct so_list *so)
 static CORE_ADDR
 lm_name (struct so_list *so)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   int lm_name_offset = offsetof (struct link_map, lm_name);
   int lm_name_size = fieldsize (struct link_map, lm_name);
 
@@ -690,9 +689,9 @@ sunos_solib_create_inferior_hook (int from_tty)
      the GDB software break point list.  Thus we have to adjust the
      PC here.  */
 
-  if (gdbarch_decr_pc_after_break (target_gdbarch))
+  if (gdbarch_decr_pc_after_break (target_gdbarch ()))
     {
-      stop_pc -= gdbarch_decr_pc_after_break (target_gdbarch);
+      stop_pc -= gdbarch_decr_pc_after_break (target_gdbarch ());
       regcache_write_pc (get_current_regcache (), stop_pc);
     }
 

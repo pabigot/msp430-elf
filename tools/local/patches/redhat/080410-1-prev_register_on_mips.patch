@@ -1,0 +1,51 @@
+This patch applies to the case where you have a mips64 target
+(eg. mipsisa64-elf), but you're compiling in 32 bit mode (gcc -mips32).
+
+In this case mips_regsize (gdbarch) is 64, but mips_saved_regsize (tdep) 
+is 32 (ie. only 32 bits are used to save a register on the stack).
+
+trad_frame_get_prev_register can't handle that case (AFAICT), because
+it relies on what the regcache says about the regsize.
+
+gdb/ChangeLog.RedHat:
+2004-06-04  Michael Snyder  <msnyder@redhat.com>
+
+        * mips-tdep.c (mips_insn32_frame_prev_register): Don't call
+	trad_frame_get_prev_register when stack-save-size is not equal
+	to register-size.
+
+Index: gdb/mips-tdep.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/mips-tdep.c,v
+retrieving revision 1.40
+diff -u -p -r1.40 mips-tdep.c
+--- gdb/mips-tdep.c	2 Feb 2010 22:14:41 -0000	1.40
++++ gdb/mips-tdep.c	3 Feb 2010 18:52:16 -0000
+@@ -2172,7 +2172,26 @@ mips_insn32_frame_prev_register (struct 
+ {
+   struct mips_frame_cache *info = mips_insn32_frame_cache (this_frame,
+ 							   this_cache);
+-  return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
++  struct gdbarch *gdbarch = get_frame_arch (this_frame);
++  int abi_regsize = mips_abi_regsize (gdbarch);
++
++  if (abi_regsize < mips_isa_regsize (gdbarch)
++      && trad_frame_addr_p (info->saved_regs, regnum))
++    {
++      char tmp[MAX_REGISTER_SIZE];
++
++      /* The register was saved in memory, but the size on the stack
++	 is not the same as the size in the regcache.  Trad_frame
++	 cannot handle this case.  */
++      get_frame_memory (this_frame, info->saved_regs[regnum].addr, tmp,
++                        abi_regsize);
++      return
++        frame_unwind_got_constant (this_frame, regnum,
++          extract_signed_integer (tmp, abi_regsize,
++	                          gdbarch_byte_order (gdbarch)));
++    }
++  else
++    return trad_frame_get_prev_register (this_frame, info->saved_regs, regnum);
+ }
+ 
+ static int

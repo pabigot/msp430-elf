@@ -1,0 +1,141 @@
+Summary: The GNU patch command, for modifying/upgrading files.
+Name: patch
+Version: 2.5.4
+Release: 16
+License: GPL
+URL: http://www.gnu.org/software/patch/patch.html
+Group: Development/Tools
+Source: ftp://ftp.gnu.org/gnu/patch/patch-%{version}.tar.gz
+Patch1: patch-2.5-stderr.patch
+Patch2: patch-2.5.4-suffix.patch
+Patch3: patch-2.5.4-sigsegv.patch
+Patch4: patch-2.5.4-ifdef.patch
+Patch5: patch-2.5.4-program_name.patch
+Buildroot: %{_tmppath}/%{name}-%{version}-root
+
+%description
+The patch program applies diff files to originals.  The diff command
+is used to compare an original to a changed file.  Diff lists the
+changes made to the file.  A person who has the original file can then
+use the patch command with the diff file to add the changes to their
+original file (patching the file).
+
+Patch should be installed because it is a common way of upgrading
+applications.
+
+%prep
+%setup -q
+%patch1 -p1 -b .stderr
+%patch2 -p1 -b .suffix
+%patch3 -p1 -b .sigsegv
+%patch4 -p1 -b .ifdef
+%patch5 -p1 -b .program_name
+
+%build
+CFLAGS="$RPM_OPT_FLAGS -D_GNU_SOURCE"
+%configure
+
+# XXX unset CPPFLAGS on (ultra?)sparc to avoid large file system support
+%ifarch sparc sparc64
+make CPPFLAGS=""
+%else
+make
+%endif
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%makeinstall
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+%doc NEWS README
+/usr/bin/*
+%{_mandir}/*/*
+
+%changelog
+* Wed Jan 22 2003 Tim Powers <timp@redhat.com>
+- rebuilt
+
+* Wed Nov 20 2002 Tim Powers <timp@redhat.com>
+- rebuilt in current collinst
+
+* Fri Jun 21 2002 Tim Powers <timp@redhat.com>
+- automated rebuild
+
+* Thu May 23 2002 Tim Powers <timp@redhat.com>
+- automated rebuild
+
+* Tue Apr  9 2002 Tim Waugh <twaugh@redhat.com> 2.5.4-12
+- Fix error reporting when given bad options (bug #62981).
+
+* Tue Mar  5 2002 Tim Waugh <twaugh@redhat.com> 2.5.4-11
+- s/Copyright:/License:/.
+- Fix -D behaviour (bug #60688).
+
+* Tue May 29 2001 Tim Waugh <twaugh@redhat.com> 2.5.4-10
+- Merge Mandrake patch:
+  - fix possible segfault
+
+* Fri Dec  1 2000 Tim Waugh <twaugh@redhat.com>
+- Rebuild because of fileutils bug.
+
+* Thu Nov  2 2000 Tim Waugh <twaugh@redhat.com>
+- use .orig as default suffix, as per man page and previous behaviour
+  (bug #20202).
+- use better patch for this, from maintainer.
+
+* Wed Oct  4 2000 Tim Waugh <twaugh@redhat.com>
+- actually use the RPM_OPT_FLAGS
+
+* Wed Jul 12 2000 Prospector <bugzilla@redhat.com>
+- automatic rebuild
+
+* Tue Jun 13 2000 Trond Eivind Glomsrød <teg@redhat.com>
+- Use %%makeinstall, %%{_tmppath} and %%{_mandir}
+
+* Fri May 12 2000 Trond Eivind Glomsrød <teg@redhat.com>
+- added URL
+
+* Wed Feb 16 2000 Bernhard Rosenkraenzer <bero@redhat.com>
+- 2.5.4
+- Fix up LFS support on Alpha (Bug #5732)
+
+* Mon Feb  7 2000 Bill Nottingham <notting@redhat.com>
+- handle compressed manpages
+
+* Sun Jun 06 1999 Alan Cox <alan@redhat.com>
+- Fix the case where stderr isnt flushed for ask(). Now the 'no such file'
+  appears before the skip patch question, not at the very end, Doh!
+
+* Mon Mar 22 1999 Jeff Johnson <jbj@redhat.com>
+- (ultra?) sparc was getting large file system support.
+
+* Sun Mar 21 1999 Cristian Gafton <gafton@redhat.com> 
+- auto rebuild in the new build environment (release 7)
+
+* Fri Dec 18 1998 Cristian Gafton <gafton@redhat.com>
+- build against glibc 2.1
+
+* Tue Sep  1 1998 Jeff Johnson <jbj@redhat.com>
+- bump release to preserve newer than back-ported 4.2.
+
+* Tue Jun 09 1998 Prospector System <bugs@redhat.com>
+- translations modified for de, fr
+
+* Tue Jun  9 1998 Jeff Johnson <jbj@redhat.com>
+- Fix for problem #682 segfault.
+
+* Fri Apr 24 1998 Prospector System <bugs@redhat.com>
+- translations modified for de, fr, tr
+
+* Tue Apr 07 1998 Cristian Gafton <gafton@redhat.com>
+- added buildroot
+
+* Wed Oct 21 1997 Cristian Gafton <gafton@redhat.com>
+- updated to 2.5
+
+* Mon Jun 02 1997 Erik Troan <ewt@redhat.com>
+- built against glibc

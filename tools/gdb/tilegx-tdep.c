@@ -1,6 +1,6 @@
 /* Target-dependent code for the Tilera TILE-Gx processor.
 
-   Copyright (C) 2012 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,7 +30,7 @@
 #include "value.h"
 #include "dis-asm.h"
 #include "inferior.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
 #include "arch-utils.h"
 #include "floatformat.h"
@@ -41,7 +41,6 @@
 #include "linux-tdep.h"
 #include "objfiles.h"
 #include "solib-svr4.h"
-#include "symtab.h"
 #include "tilegx-tdep.h"
 #include "opcode/tilegx.h"
 
@@ -155,7 +154,7 @@ tilegx_register_name (struct gdbarch *gdbarch, int regnum)
       "r40",  "r41",  "r42",  "r43",  "r44",  "r45",  "r46",  "r47",
       "r48",  "r49",  "r50",  "r51",  "r52",  "tp",   "sp",   "lr",
       "sn",   "idn0", "idn1", "udn0", "udn1", "udn2", "udn3", "zero",
-      "pc"
+      "pc",   "faultnum",
     };
 
   if (regnum < 0 || regnum >= TILEGX_NUM_REGS)
@@ -292,7 +291,7 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
   int argreg = TILEGX_R0_REGNUM;
   int i, j;
   int typelen, slacklen, alignlen;
-  static const gdb_byte two_zero_words[8] = { 0 };
+  static const gdb_byte four_zero_words[16] = { 0 };
 
   /* If struct_return is 1, then the struct return address will
      consume one argument-passing register.  */
@@ -326,18 +325,6 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
   /* Align SP.  */
   stack_dest = tilegx_frame_align (gdbarch, stack_dest);
 
-  /* Loop backwards through arguments to determine stack alignment.  */
-  alignlen = 0;
-
-  for (j = nargs - 1; j >= i; j--)
-    {
-      typelen = TYPE_LENGTH (value_enclosing_type (args[j]));
-      alignlen += (typelen + 3) & (~3);
-    }
-
-  if (alignlen & 0x4)
-    stack_dest -= 4;
-
   /* Loop backwards through remaining arguments and push them on
      the stack, word aligned.  */
   for (j = nargs - 1; j >= i; j--)
@@ -347,7 +334,7 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
       const gdb_byte *contents = value_contents (args[j]);
 
       typelen = TYPE_LENGTH (value_enclosing_type (args[j]));
-      slacklen = ((typelen + 3) & (~3)) - typelen;
+      slacklen = align_up (typelen, 8) - typelen;
       val = xmalloc (typelen + slacklen);
       back_to = make_cleanup (xfree, val);
       memcpy (val, contents, typelen);
@@ -359,9 +346,9 @@ tilegx_push_dummy_call (struct gdbarch *gdbarch,
       do_cleanups (back_to);
     }
 
-  /* Add 2 words for linkage space to the stack.  */
-  stack_dest = stack_dest - 8;
-  write_memory (stack_dest, two_zero_words, 8);
+  /* Add 16 bytes for linkage space to the stack.  */
+  stack_dest = stack_dest - 16;
+  write_memory (stack_dest, four_zero_words, 16);
 
   /* Update stack pointer.  */
   regcache_cooked_write_unsigned (regcache, TILEGX_SP_REGNUM, stack_dest);
@@ -405,7 +392,7 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
   struct tilegx_reverse_regs
     new_reverse_frame[TILEGX_MAX_INSTRUCTIONS_PER_BUNDLE];
   int dest_regs[TILEGX_MAX_INSTRUCTIONS_PER_BUNDLE];
-  int reverse_frame_valid, prolog_done, branch_seen;
+  int reverse_frame_valid, prolog_done, branch_seen, lr_saved_on_stack_p;
   LONGEST prev_sp_value;
   int i, j;
 
@@ -421,6 +408,7 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
   prolog_done = 0;
   branch_seen = 0;
   prev_sp_value = 0;
+  lr_saved_on_stack_p = 0;
 
   /* To cut down on round-trip overhead, we fetch multiple bundles
      at once.  These variables describe the range of memory we have
@@ -444,6 +432,8 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 
 	  if (instbuf_size > size_on_same_page)
 	    instbuf_size = size_on_same_page;
+
+	  instbuf_size = min (instbuf_size, (end_addr - next_addr));
 	  instbuf_start = next_addr;
 
 	  status = safe_frame_unwind_memory (next_frame, instbuf_start,
@@ -484,7 +474,11 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 		     See trad-frame.h.  */
 		  cache->saved_regs[saved_register].realreg = saved_register;
 		  cache->saved_regs[saved_register].addr = saved_address;
-		}
+		} 
+	      else if (cache
+		       && (operands[0] == TILEGX_SP_REGNUM) 
+		       && (operands[1] == TILEGX_LR_REGNUM))
+		lr_saved_on_stack_p = 1;
 	      break;
 	    case TILEGX_OPC_ADDI:
 	    case TILEGX_OPC_ADDLI:
@@ -737,30 +731,45 @@ tilegx_analyze_prologue (struct gdbarch* gdbarch,
 	}
     }
 
+  if (lr_saved_on_stack_p)
+    {
+      cache->saved_regs[TILEGX_LR_REGNUM].realreg = TILEGX_LR_REGNUM;
+      cache->saved_regs[TILEGX_LR_REGNUM].addr =
+	cache->saved_regs[TILEGX_SP_REGNUM].addr;
+    }
+
   return prolog_end;
 }
 
 /* This is the implementation of gdbarch method skip_prologue.  */
 
 static CORE_ADDR
-tilegx_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR pc)
+tilegx_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
-  struct symtab_and_line sal;
-  CORE_ADDR func_start, func_end;
+  CORE_ADDR func_start, end_pc;
+  struct obj_section *s;
 
   /* This is the preferred method, find the end of the prologue by
      using the debugging information.  */
-  if (find_pc_partial_function (pc, NULL, &func_start, &func_end))
+  if (find_pc_partial_function (start_pc, NULL, &func_start, NULL))
     {
-	sal = find_pc_line (func_start, 0);
+      CORE_ADDR post_prologue_pc
+        = skip_prologue_using_sal (gdbarch, func_start);
 
-	if (sal.end < func_end && pc <= sal.end)
-	  return sal.end;
+      if (post_prologue_pc != 0)
+        return max (start_pc, post_prologue_pc);
     }
+
+  /* Don't straddle a section boundary.  */
+  s = find_pc_section (start_pc);
+  end_pc = start_pc + 8 * TILEGX_BUNDLE_SIZE_IN_BYTES;
+  if (s != NULL)
+    end_pc = min (end_pc, obj_section_endaddr (s));
 
   /* Otherwise, try to skip prologue the hard way.  */
   return tilegx_analyze_prologue (gdbarch,
-				  pc, pc + 8 * TILEGX_BUNDLE_SIZE_IN_BYTES,
+				  start_pc,
+				  end_pc,
 				  NULL, NULL);
 }
 
@@ -782,6 +791,59 @@ tilegx_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR pc)
 	return 1;
     }
   return 0;
+}
+
+/* This is the implementation of gdbarch method get_longjmp_target.  */
+
+static int
+tilegx_get_longjmp_target (struct frame_info *frame, CORE_ADDR *pc)
+{
+  struct gdbarch *gdbarch = get_frame_arch (frame);
+  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+  CORE_ADDR jb_addr;
+  gdb_byte buf[8];
+
+  jb_addr = get_frame_register_unsigned (frame, TILEGX_R0_REGNUM);
+
+  /* TileGX jmp_buf contains 32 elements of type __uint_reg_t which
+     has a size of 8 bytes.  The return address is stored in the 25th
+     slot.  */
+  if (target_read_memory (jb_addr + 25 * 8, buf, 8))
+    return 0;
+
+  *pc = extract_unsigned_integer (buf, 8, byte_order);
+
+  return 1;
+}
+
+/* by assigning the 'faultnum' reg in kernel pt_regs with this value,
+   kernel do_signal will not check r0. see tilegx kernel/signal.c
+   for details.  */
+#define INT_SWINT_1_SIGRETURN (~0)
+
+/* Implement the "write_pc" gdbarch method.  */
+
+static void
+tilegx_write_pc (struct regcache *regcache, CORE_ADDR pc)
+{
+  regcache_cooked_write_unsigned (regcache, TILEGX_PC_REGNUM, pc);
+
+  /* We must be careful with modifying the program counter.  If we
+     just interrupted a system call, the kernel might try to restart
+     it when we resume the inferior.  On restarting the system call,
+     the kernel will try backing up the program counter even though it
+     no longer points at the system call.  This typically results in a
+     SIGSEGV or SIGILL.  We can prevent this by writing INT_SWINT_1_SIGRETURN
+     in the "faultnum" pseudo-register.
+
+     Note that "faultnum" is saved when setting up a dummy call frame.
+     This means that it is properly restored when that frame is
+     popped, and that the interrupted system call will be restarted
+     when we resume the inferior on return from a function call from
+     within GDB.  In all other cases the system call will not be
+     restarted.  */
+  regcache_cooked_write_unsigned (regcache, TILEGX_FAULTNUM_REGNUM,
+                                  INT_SWINT_1_SIGRETURN);
 }
 
 /* This is the implementation of gdbarch method breakpoint_from_pc.  */
@@ -821,10 +883,11 @@ tilegx_frame_cache (struct frame_info *this_frame, void **this_cache)
   cache->base = get_frame_register_unsigned (this_frame, TILEGX_SP_REGNUM);
   trad_frame_set_value (cache->saved_regs, TILEGX_SP_REGNUM, cache->base);
 
-  cache->saved_regs[TILEGX_PC_REGNUM] = cache->saved_regs[TILEGX_LR_REGNUM];
   if (cache->start_pc)
     tilegx_analyze_prologue (gdbarch, cache->start_pc, current_pc,
 			     cache, this_frame);
+
+  cache->saved_regs[TILEGX_PC_REGNUM] = cache->saved_regs[TILEGX_LR_REGNUM];
 
   return cache;
 }
@@ -915,7 +978,8 @@ tilegx_cannot_reference_register (struct gdbarch *gdbarch, int regno)
 {
   if (regno >= 0 && regno < TILEGX_NUM_EASY_REGS)
     return 0;
-  else if (regno == TILEGX_PC_REGNUM)
+  else if (regno == TILEGX_PC_REGNUM
+           || regno == TILEGX_FAULTNUM_REGNUM)
     return 0;
   else
     return 1;
@@ -960,7 +1024,6 @@ tilegx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   set_gdbarch_register_name (gdbarch, tilegx_register_name);
   set_gdbarch_register_type (gdbarch, tilegx_register_type);
 
-  set_gdbarch_char_signed (gdbarch, 0);
   set_gdbarch_short_bit (gdbarch, 2 * TARGET_CHAR_BIT);
   set_gdbarch_int_bit (gdbarch, 4 * TARGET_CHAR_BIT);
   set_gdbarch_long_bit (gdbarch, arch_size);
@@ -998,6 +1061,8 @@ tilegx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
 
   /* These values and methods are used when gdb calls a target function.  */
   set_gdbarch_push_dummy_call (gdbarch, tilegx_push_dummy_call);
+  set_gdbarch_get_longjmp_target (gdbarch, tilegx_get_longjmp_target);
+  set_gdbarch_write_pc (gdbarch, tilegx_write_pc);
   set_gdbarch_breakpoint_from_pc (gdbarch, tilegx_breakpoint_from_pc);
   set_gdbarch_return_value (gdbarch, tilegx_return_value);
 

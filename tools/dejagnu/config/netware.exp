@@ -1,21 +1,21 @@
-# Copyright (C) 1994 - 2001 Free Software Foundation, Inc.
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
+# Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+# Foundation, Inc.
+#
+# This file is part of DejaGnu.
+#
+# DejaGnu is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
+#
+# DejaGnu is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
-
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-dejagnu@gnu.org
+# along with DejaGnu; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 # This file was written by J.T. Conklin. (jtc@cygnus.com)
 
@@ -28,27 +28,29 @@ load_lib remote.exp
 
 proc ${board}_init { args } {
     global NLMCONV
-    if ![info exists NLMCONV] then {
+
+    # FIXME: rootme is undefined.
+    if {![info exists NLMCONV]} then {
 	set NLMCONV [findfile "$rootme/../binutils/nlmconv"]
     }
     global LD
-    if ![info exists LD] then {
+    if {![info exists LD]} then {
 	set LD [findfile "$rootme/../ld/ld-new" "$rootme/../ld/ld-new" [transform "ld"]]
     }
 
     set shell_prompt "Password:"
-    set shell_id [remote_open target];
-    if [target_info exists passwd] {
-	set passwd [target_info passwd];
+    set shell_id [remote_open target]
+    if {[target_info exists passwd]} {
+	set passwd [target_info passwd]
     } else {
-	set passwd "";
+	set passwd ""
     }
-    if $shell_id<0 then {
+    if {$shell_id < 0} then {
 	warning "Couldn't connect to target"
 	return -1
     }
 
-    if [string match "" $passwd] then {
+    if {[string match "" $passwd]} then {
 	stty -echo
 	send_user "Password: "
 	expect_user -re "(.*)\n"
@@ -94,24 +96,26 @@ proc ${board}_load { dest prog args } {
     global tmpdir
     global errorCode
 
-    if [board_info $dest exists fileid] {
-	set shell_id [board_info $dest fileid];
+    if {[board_info $dest exists fileid]} {
+	set shell_id [board_info $dest fileid]
     } else {
-	set shell_id -1;
+	set shell_id -1
     }
 
     set output ""
 
-    if $shell_id<0 then {
+    if {$shell_id < 0} then {
 	verbose -log "$prog not executed because there is no target" 3
 	return "untested"
     }
 
-    # 
+    #
     set exe [file tail $prog]
-    
+
     # We can't blindly append a suffix to the object name, because the
     # result may not be valid on netware's 8.3 filesystem.
+    #
+    # FIXME: tmpdir is undefined.
     set nlm "$tmpdir/x.nlm"
     set lnk "$tmpdir/x.lnk"
 
@@ -132,10 +136,10 @@ proc ${board}_load { dest prog args } {
     # run nlmconv
     verbose "Executing: $NLMCONV -l$LD -T$lnk" 1
     catch "exec $NLMCONV -l$LD -T$lnk" output
-    if ![string match "" $output] then {
+    if {![string match "" $output]} then {
 	verbose $output 1
     }
-    if ![string match "NONE" $errorCode] {
+    if {![string match "NONE" $errorCode]} {
 	verbose -log "Can't link $prog" 3
 	return "fail"
     }
@@ -143,7 +147,7 @@ proc ${board}_load { dest prog args } {
     # download
     verbose "Downloading $nlm" 1
     catch "exec cp $nlm /.NetWare/[board_info $dest name].nws/sys.nwv/tmp/x.nlm" output
-    if ![string match "" $output] then {
+    if {![string match "" $output]} then {
 	verbose $output 1
 	verbose -log "cp failed for $nlm" 3
 	return "unresolved"
@@ -151,7 +155,7 @@ proc ${board}_load { dest prog args } {
 
     # Wait a second for the file to "settle" on the NetWare server.
     # I've encountered unexplained failures without this delay.
-#    sleep 1
+    #    sleep 1
 
 
     # The NetWare remote console expects to be connected to a vt100
@@ -210,5 +214,5 @@ proc ${board}_load { dest prog args } {
 #
 
 proc ${board}_exit {} {
-    remote_close target;
+    remote_close target
 }

@@ -1,0 +1,14 @@
+2014-06-18  DJ Delorie  <dj@redhat.com>
+
+	* lto-lang.c (lto_build_c_type_nodes): Check intN types for
+	size-type as well.
+	(lto_init): Initialize all intN types, not just int128.
+	* lto-object.c (lto_obj_begin_section): Do not assume pointers are
+	powers-of-two in size.
+
+2010-04-28  DJ Delorie  <dj@redhat.com>
+
+	Import:
+	2010-04-10  Rainer Orth  <ro@CeBiTec.Uni-Bielefeld.DE>
+	* lto-elf.c [!HAVE_ELF_GETSHDRSTRNDX] (elf_getshdrstrndx): New
+	function.

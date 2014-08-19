@@ -36,3 +36,5 @@ int main(int argc, char **argv)
   static_cast<IFoo*>(b)->Foo();
   return 0;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

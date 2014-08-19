@@ -1,7 +1,2 @@
 MULTILIB_DIRNAMES= 
 MULTILIB_MATCHES = 
-
-# The linker does not (currently) support sh[l]elf64_linux emulations,
-# so skip the 64-media multilibs.
-
-MULTILIB_EXCEPTIONS = *m5-64media* *m5-64media-nofpu*

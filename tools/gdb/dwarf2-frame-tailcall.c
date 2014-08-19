@@ -1,6 +1,6 @@
 /* Virtual tail call frames unwinder for GDB.
 
-   Copyright (C) 2010-2012 Free Software Foundation, Inc.
+   Copyright (C) 2010-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -223,9 +223,9 @@ tailcall_frame_this_id (struct frame_info *this_frame, void **this_cache,
   *this_id = get_frame_id (next_frame);
   (*this_id).code_addr = get_frame_pc (this_frame);
   (*this_id).code_addr_p = 1;
-  (*this_id).inline_depth = (cache->chain_levels
-			     - existing_next_levels (this_frame, cache));
-  gdb_assert ((*this_id).inline_depth > 0);
+  (*this_id).artificial_depth = (cache->chain_levels
+				 - existing_next_levels (this_frame, cache));
+  gdb_assert ((*this_id).artificial_depth > 0);
 }
 
 /* Find PC to be unwound from THIS_FRAME.  THIS_FRAME must be a part of
@@ -374,7 +374,9 @@ dwarf2_tailcall_sniffer_first (struct frame_info *this_frame,
 
   gdb_assert (*tailcall_cachep == NULL);
 
-  this_pc = get_frame_pc (this_frame);
+  /* PC may be after the function if THIS_FRAME calls noreturn function,
+     get_frame_address_in_block will decrease it by 1 in such case.  */
+  this_pc = get_frame_address_in_block (this_frame);
 
   /* Catch any unwinding errors.  */
   TRY_CATCH (except, RETURN_MASK_ERROR)

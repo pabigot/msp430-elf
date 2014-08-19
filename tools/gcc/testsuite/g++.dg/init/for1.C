@@ -11,10 +11,10 @@ int r;
 class A
 {
 public:
-  A() { printf("A ctor\n"); }
+  A() { /*printf("A ctor\n")*/; }
   ~A()
   {
-    printf("A dtor\n");
+    //printf("A dtor\n");
     if (i != 2)
       r = 1;
   }
@@ -23,8 +23,9 @@ public:
 int main(int argc, char **argv)
 {
   for (A a; i < 2; ++i) {
-    printf("iteration %d\n", i);
+    //printf("iteration %d\n", i);
   }
 
   return r;
 }
+// { dg-require-effective-target size32plus }

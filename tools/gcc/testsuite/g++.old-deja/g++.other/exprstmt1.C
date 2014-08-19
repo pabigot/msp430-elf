@@ -1,6 +1,6 @@
 // { dg-do run  }
-// { dg-options "-O" }
 // { dg-require-effective-target int32plus }
+// { dg-options "-O" }
 // { dg-error "limited range of data type" "16-bit target" { target xstormy16-*-* } 0 }
 // { dg-error "shift count >=" "16-bit target" { target xstormy16-*-* } 0 }
 

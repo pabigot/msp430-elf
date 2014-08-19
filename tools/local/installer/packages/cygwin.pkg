@@ -1,0 +1,188 @@
+# Package file for Red Hat GES Releases
+#
+# This file needs to be placed in the packages subdirectory.  One needs
+# to make a custom copy for each host triplet with the regexp of
+# s/TARGETTRIPLET/yourtargettriplethere/g
+#
+# This file contains information on all the packages installed for a
+# Red Hat GES release.  This file is host independent providing the
+# hosts are all using the same archive file format.  All the custom
+# procedures including the custom archive extraction routine are in
+# customproc.tcl in order to keep this file more tidy.
+#
+# The format of a package description is:
+#
+#    package Product_Package {
+#        title "Package Title"
+#        version $product_version
+#        category Product/Type
+#        installcmd redhat_install_package
+#        description {Package Description}
+#        icon $product_icon
+#        parameters {
+#            directory
+#            {Installation Directory}
+#            {Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+#            installdir redhat_get_default_installdir
+#    
+#            form {} {} {files-PackageName}
+#            {-force {path/to/archive/file.zip}}
+#        }
+#
+# "Product" is typically "GNUPro"
+# "Package" is something like "Compiler" or "Debugger" or "Source"
+# "Type" is something like "Binaries", "Source" or "Docs"
+# 
+# The version and icon strings are stored in variables for easy modification
+#    
+# If there is something which is only appropriate for a particular platform,
+# use a test to keep the file host independent:
+#
+#        if {$tcl_platform(platform) == "windows"} {
+#            requires Cygwin_Winsup
+#        }
+#
+# NOTE: You can't use variables or conditionals in the "parameters" list.
+#
+
+# customprocs.tcl includes extraction routines
+source customprocs.tcl
+# find out what we're installing
+redhat_get_relinfo
+
+# commonly used variables
+set gnupro_version {RELEASE}
+# this avoids calling create_photo for every package
+set intro_icon [create_photo shadowman_icon.gif]
+set gnupro_icon [create_photo gnupro_icon.gif]
+set contributed_icon [create_photo contributed_icon.gif]
+
+# Package information
+package *intro {
+    title Introduction
+    category Overview
+    description {
+In the list on left, click on the name of a package to obtain a description of that package.
+For more information on Red Hat, check out http://www.redhat.com
+For more information on Open Source, check out http://sources.redhat.com
+This installer is powered by Tclish.
+For more information about Tclish http://tclish.sourceforge.org/}
+    icon $intro_icon
+}
+
+package Cygwin_Winsup {
+	title Winsup
+	version $gnupro_version
+	category Cygwin/Binaries
+	installcmd redhat_install_package
+	description {Cygwin DLL and supporting binaries required for all Cygwin-based programs.}
+	icon $gnupro_icon
+	parameters {
+		directory 
+		{Installation Directory}
+		{Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+		installdir redhat_get_default_installdir
+		form {} {} {files-Cygwin_Winsup}
+		{-force {native/gnupro/binaries/winsup.zip}}
+	}
+}
+
+package Cygwin_Winsup_Src {
+	title Winsup_Src
+	version $gnupro_version
+	category Cygwin/Sources
+	installcmd redhat_install_package
+	description {Sources to cygwin1.dll and related utilities.}
+	icon $gnupro_icon
+	parameters {
+		directory 
+		{Installation Directory}
+		{Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+		installdir redhat_get_default_installdir
+		form {} {} {files-Cygwin_Winsup_Src}
+		{-force {shared/gnupro/source/src-cygwin.zip}}
+	}
+}
+
+package Cygwin_NetRel {
+	title NetRel
+	version $gnupro_version
+	category Cygwin/Binaries
+	installcmd redhat_install_package
+	description {A complete UNIX-style environment for use with Cygwin.}
+	icon $gnupro_icon
+	parameters {
+		directory 
+		{Installation Directory}
+		{Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+		installdir redhat_get_default_installdir
+		form {} {} {files-Cygwin_NetRel}
+		{-force {native/gnupro/binaries/netrel.zip}}
+	}
+	requires Cygwin_Winsup
+}
+
+package Cygwin_NetRel_Src {
+	title NetRel_Src
+	version $gnupro_version
+	category Cygwin/Sources
+	installcmd redhat_install_package
+	description {Sources for the UNIX-style environment for used with Cygwin.}
+	icon $gnupro_icon
+	parameters {
+		directory 
+		{Installation Directory}
+		{Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+		installdir redhat_get_default_installdir
+		form {} {} {files-Cygwin_NetRel_Src}
+		{-force {shared/gnupro/source/src-net.zip}}
+	}
+}
+
+
+package Windows_Mount {
+	title {Configure Mount Table}
+	version $gnupro_version
+	category Windows/Setup
+	installcmd muck_with_mounts
+	description {Setup the Cygwin mount table.}
+	icon $gnupro_icon
+	parameters {
+		directory 
+		{Installation Directory}
+		{Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+		installdir redhat_get_default_installdir
+	}
+	requires Cygwin_Winsup
+}
+
+package Windows_PATH {
+	title {Update Windows PATH}
+	version $gnupro_version
+	category Windows/Setup
+	installcmd redhat_set_PATH
+	description {Set the PATH environment variable on Windows. (Will require a reboot before taking effect.)}
+	icon $gnupro_icon
+	parameters {
+		directory 
+		{Installation Directory}
+		{Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+		installdir redhat_get_default_installdir
+		form {} {} {setpath} {-force {yes}}
+	}
+}
+
+
+# Installation Types (typical and full)
+installoption typical "Typical Installation.\nInstall Cygwin and Complete Unix-like Environment (Adds PATH and Mounts)."
+installoption_add typical Windows/Setup Windows_PATH
+installoption_add typical Windows/Setup Windows_Mount
+installoption_add typical Cygwin/Binaries Cygwin_NetRel
+installoption_add typical Cygwin/Binaries Cygwin_Winsup
+
+installoption minimal "Minimal Installation.\nInstall Cygwin DLL and bare essential executables (Adds PATH and Mounts)."
+installoption_add minimal Windows/Setup Windows_PATH
+installoption_add minimal Windows/Setup Windows_Mount
+installoption_add minimal Cygwin/Binaries Cygwin_Winsup
+
+installoption full "Full Installation.\nInstall all packages."

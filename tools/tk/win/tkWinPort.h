@@ -10,7 +10,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkWinPort.h,v 1.15 2012/01/17 15:43:45 release Exp $
+ * RCS: @(#) $Id: tkWinPort.h,v 1.4 2012/04/18 00:37:12 kevinb Exp $
  */
 
 #ifndef _WINPORT
@@ -118,6 +118,15 @@
 #define TkpDefineNativeBitmaps()
 #define TkpCreateNativeBitmap(display, source) None
 #define TkpGetNativeAppBitmap(display, name, w, h) None
+
+/*
+ * Define timezone for gettimeofday.
+ */
+
+struct timezone {
+    int tz_minuteswest;
+    int tz_dsttime;
+};
 
 #ifndef _TCLINT
 #include <tclInt.h>

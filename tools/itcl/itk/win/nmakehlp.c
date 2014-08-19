@@ -9,7 +9,7 @@
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
  * ----------------------------------------------------------------------------
- * RCS: @(#) $Id: nmakehlp.c,v 1.1 2009/02/03 19:07:29 kevinb Exp $
+ * RCS: @(#) $Id: nmakehlp.c,v 1.1 2012/04/18 00:44:00 kevinb Exp $
  * ----------------------------------------------------------------------------
  */
 #include <windows.h>

@@ -7,9 +7,6 @@ if [istarget m32r*-*-*] {
     # all machines
     set all_machs "m32r"
 
-    set all_machs "m32r m32rx"
-    # FIXME: This should live in common place.
-    set opts(as,m32rx) "-m32rx --hidden"
 
     # The .cgs suffix is for "cgen .s".
     foreach src [lsort [glob -nocomplain $srcdir/$subdir/*.cgs]] {

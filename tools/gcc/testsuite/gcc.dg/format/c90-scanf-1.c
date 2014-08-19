@@ -117,3 +117,4 @@ foo (int *ip, unsigned int *uip, short int *hp, unsigned short int *uhp,
   scanf ("%"); /* { dg-warning "trailing" "trailing % warning" } */
   scanf ("%d", (int *)0); /* { dg-warning "null" "writing into NULL" } */
 }
+/* { dg-prune-output ".*__int20.*" } */

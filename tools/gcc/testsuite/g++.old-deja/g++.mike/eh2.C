@@ -1,6 +1,6 @@
 // { dg-do run { xfail sparc64-*-elf arm-*-pe } }
-// { dg-options "-fexceptions" }
 // { dg-require-effective-target int32plus }
+// { dg-options "-fexceptions" }
 
 #include <cstdlib>
 #include <iostream>

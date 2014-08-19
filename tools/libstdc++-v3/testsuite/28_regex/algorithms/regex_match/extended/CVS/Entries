@@ -1,7 +1,10 @@
-/cstring_plus.cc/1.2/Sun Feb 24 19:26:34 2013//Tmsp430-130322-branch
-/cstring_questionmark.cc/1.2/Sun Feb 24 19:26:34 2013//Tmsp430-130322-branch
-/string_any.cc/1.2/Sun Feb 24 19:26:34 2013//Tmsp430-130322-branch
-/string_range_00_03.cc/1.2/Sun Feb 24 19:26:34 2013//Tmsp430-130322-branch
-/string_range_01_03.cc/1.2/Sun Feb 24 19:26:34 2013//Tmsp430-130322-branch
-/string_range_02_03.cc/1.2/Sun Feb 24 19:26:34 2013//Tmsp430-130322-branch
+/cstring_bracket_01.cc/1.1/Thu Feb 20 16:43:33 2014//Tmsp430-14r1-branch
+/cstring_plus.cc/1.2/Thu Feb 20 13:47:36 2014//Tmsp430-14r1-branch
+/cstring_questionmark.cc/1.2/Thu Feb 20 13:47:36 2014//Tmsp430-14r1-branch
+/cstring_range.cc/1.1/Thu Feb 20 16:43:33 2014//Tmsp430-14r1-branch
+/string_any.cc/1.2/Thu Feb 20 13:47:36 2014//Tmsp430-14r1-branch
+/string_range_00_03.cc/1.2/Thu Feb 20 13:47:36 2014//Tmsp430-14r1-branch
+/string_range_01_03.cc/1.2/Thu Feb 20 13:47:36 2014//Tmsp430-14r1-branch
+/string_range_02_03.cc/1.2/Thu Feb 20 13:47:36 2014//Tmsp430-14r1-branch
+/wstring_locale.cc/1.1/Thu Feb 20 16:43:33 2014//Tmsp430-14r1-branch
 D

@@ -1,7 +1,7 @@
 ; Simulator generator entry point.
 ; This is invoked to build: desc.h, cpu.h, defs.h, decode.h, decode.cxx,
 ; semantics.cxx, sem-switch.cxx, model.h, model.cxx
-; Copyright (C) 2000, 2003, 2009 Red Hat, Inc.
+; Copyright (C) 2000, 2003 Red Hat, Inc.
 ; This file is part of CGEN.
 ;
 ; This is a standalone script, we don't load anything until we parse the
@@ -10,6 +10,9 @@
 ; Load the various support routines.
 
 (define (load-files srcdir)
+  ; Fix up Scheme to be what we use (guile is always in flux).
+  (primitive-load-path (string-append srcdir "/fixup.scm"))
+
   (load (string-append srcdir "/read.scm"))
   (load (string-append srcdir "/utils-sim.scm"))
   (load (string-append srcdir "/sid.scm"))

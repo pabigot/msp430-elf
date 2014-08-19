@@ -3,7 +3,7 @@
 // Check that sub-word sized structs/classes are passed correctly
 // if the struct/class has a constructor (i.e. ANY constructor).
 
-extern "C" int printf (const char *, ...); 
+// extern "C" int printf (const char *, ...); 
 
 struct base {
 	unsigned int f1 : 8;
@@ -24,9 +24,9 @@ int main ()
 	global_base.f2 = 0xee;
 
 	if (test2 (global_base) == 0)
-	  printf ("PASS\n");
+	  ; /*printf ("PASS\n");*/
 	else
-	  { printf ("FAIL\n"); return 1; }
+	  { /*printf ("FAIL\n"); */ return 1; }
 
 	return 0;
 }

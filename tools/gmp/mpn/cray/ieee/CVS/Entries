@@ -1,8 +1,8 @@
-/addmul_1.c/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/gmp-mparam.h/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/invert_limb.c/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/mul_1.c/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/mul_basecase.c/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/sqr_basecase.c/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/submul_1.c/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
+/addmul_1.c/1.2/Wed Apr 14 09:00:34 2010//Tmsp430-14r1-branch
+/gmp-mparam.h/1.2/Wed Apr 14 09:00:34 2010//Tmsp430-14r1-branch
+/invert_limb.c/1.2/Wed Apr 14 09:00:34 2010//Tmsp430-14r1-branch
+/mul_1.c/1.2/Wed Apr 14 09:00:34 2010//Tmsp430-14r1-branch
+/mul_basecase.c/1.2/Wed Apr 14 09:00:34 2010//Tmsp430-14r1-branch
+/sqr_basecase.c/1.2/Wed Apr 14 09:00:34 2010//Tmsp430-14r1-branch
+/submul_1.c/1.2/Wed Apr 14 09:00:34 2010//Tmsp430-14r1-branch
 D

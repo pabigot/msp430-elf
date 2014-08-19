@@ -1,6 +1,7 @@
 /* { dg-do compile } */
-/* { dg-options "-O2 -Wstrict-aliasing -fstrict-aliasing" } */
 // { dg-require-effective-target int32plus }
+/* { dg-options "-O2 -Wstrict-aliasing -fstrict-aliasing" } */
+
 
 int foo () {
   int i;

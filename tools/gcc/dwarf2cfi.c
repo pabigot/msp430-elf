@@ -1,5 +1,5 @@
 /* Dwarf2 Call Frame Information helper routines.
-   Copyright (C) 1992-2013 Free Software Foundation, Inc.
+   Copyright (C) 1992-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -24,12 +24,15 @@ along with GCC; see the file COPYING3.  If not see
 #include "version.h"
 #include "flags.h"
 #include "rtl.h"
+#include "tree.h"
+#include "stor-layout.h"
 #include "function.h"
 #include "basic-block.h"
 #include "dwarf2.h"
 #include "dwarf2out.h"
 #include "dwarf2asm.h"
 #include "ggc.h"
+#include "hash-table.h"
 #include "tm_p.h"
 #include "target.h"
 #include "common/common-target.h"
@@ -75,6 +78,7 @@ typedef struct GTY(()) reg_saved_in_data_struct {
   rtx orig_reg;
   rtx saved_in_reg;
 } reg_saved_in_data;
+
 
 /* Since we no longer have a proper CFG, we're going to create a facsimile
    of one on the fly while processing the frame-related insns.
@@ -152,10 +156,33 @@ typedef struct
 typedef dw_trace_info *dw_trace_info_ref;
 
 
+/* Hashtable helpers.  */
+
+struct trace_info_hasher : typed_noop_remove <dw_trace_info>
+{
+  typedef dw_trace_info value_type;
+  typedef dw_trace_info compare_type;
+  static inline hashval_t hash (const value_type *);
+  static inline bool equal (const value_type *, const compare_type *);
+};
+
+inline hashval_t
+trace_info_hasher::hash (const value_type *ti)
+{
+  return INSN_UID (ti->head);
+}
+
+inline bool
+trace_info_hasher::equal (const value_type *a, const compare_type *b)
+{
+  return a->head == b->head;
+}
+
+
 /* The variables making up the pseudo-cfg, as described above.  */
 static vec<dw_trace_info> trace_info;
 static vec<dw_trace_info_ref> trace_work_list;
-static htab_t trace_index;
+static hash_table <trace_info_hasher> trace_index;
 
 /* A vector of call frame insns for the CIE.  */
 cfi_vec cie_cfi_vec;
@@ -221,7 +248,8 @@ init_return_column_size (enum machine_mode mode, rtx mem, unsigned int c)
 {
   HOST_WIDE_INT offset = c * GET_MODE_SIZE (mode);
   HOST_WIDE_INT size = GET_MODE_SIZE (Pmode);
-  emit_move_insn (adjust_address (mem, mode, offset), GEN_INT (size));
+  emit_move_insn (adjust_address (mem, mode, offset),
+		  gen_int_mode (size, mode));
 }
 
 /* Generate code to initialize the register size table.  */
@@ -260,7 +288,6 @@ expand_builtin_init_dwarf_reg_sizes (tree address)
 	     pointer size is larger than the integer size, and not a power-of-two.  (Eg MSP430).  */
 	  if (size < GET_MODE_SIZE (targetm.unwind_word_mode ()))
 	    size = GET_MODE_SIZE (targetm.unwind_word_mode ());
-
 	  if (offset < 0)
 	    continue;
 
@@ -280,28 +307,12 @@ expand_builtin_init_dwarf_reg_sizes (tree address)
 }
 
 
-static hashval_t
-dw_trace_info_hash (const void *ptr)
-{
-  const dw_trace_info *ti = (const dw_trace_info *) ptr;
-  return INSN_UID (ti->head);
-}
-
-static int
-dw_trace_info_eq (const void *ptr_a, const void *ptr_b)
-{
-  const dw_trace_info *a = (const dw_trace_info *) ptr_a;
-  const dw_trace_info *b = (const dw_trace_info *) ptr_b;
-  return a->head == b->head;
-}
-
 static dw_trace_info *
 get_trace_info (rtx insn)
 {
   dw_trace_info dummy;
   dummy.head = insn;
-  return (dw_trace_info *)
-    htab_find_with_hash (trace_index, &dummy, INSN_UID (insn));
+  return trace_index.find_with_hash (&dummy, INSN_UID (insn));
 }
 
 static bool
@@ -454,9 +465,9 @@ update_row_reg_save (dw_cfi_row *row, unsigned column, dw_cfi_ref cfi)
    descriptor sequence.  */
 
 static void
-get_cfa_from_loc_descr (dw_cfa_location *cfa, struct dw_loc_descr_struct *loc)
+get_cfa_from_loc_descr (dw_cfa_location *cfa, struct dw_loc_descr_node *loc)
 {
-  struct dw_loc_descr_struct *ptr;
+  struct dw_loc_descr_node *ptr;
   cfa->offset = 0;
   cfa->base_offset = 0;
   cfa->indirect = 0;
@@ -749,7 +760,7 @@ def_cfa_0 (dw_cfa_location *old_cfa, dw_cfa_location *new_cfa)
       /* Construct a DW_CFA_def_cfa_expression instruction to
 	 calculate the CFA using a full location expression since no
 	 register-offset pair is available.  */
-      struct dw_loc_descr_struct *loc_list;
+      struct dw_loc_descr_node *loc_list;
 
       cfi->dw_cfi_opc = DW_CFA_def_cfa_expression;
       loc_list = build_cfa_loc (new_cfa, 0);
@@ -983,8 +994,6 @@ dwarf2out_flush_queued_reg_saves (void)
 	sreg = dwf_regno (q->saved_reg);
       else
 	sreg = INVALID_REGNUM;
-      /* Needed for building libgcc for SH64.  */
-      if (reg != INVALID_REGNUM)
       reg_save (reg, sreg, q->cfa_offset);
     }
 
@@ -1144,18 +1153,15 @@ dwarf2out_frame_debug_cfa_offset (rtx set)
   else
     {
       /* We have a PARALLEL describing where the contents of SRC live.
-   	 Queue register saves for each piece of the PARALLEL.  */
-      int par_index;
-      int limit;
+   	 Adjust the offset for each piece of the PARALLEL.  */
       HOST_WIDE_INT span_offset = offset;
 
       gcc_assert (GET_CODE (span) == PARALLEL);
 
-      limit = XVECLEN (span, 0);
-      for (par_index = 0; par_index < limit; par_index++)
+      const int par_len = XVECLEN (span, 0);
+      for (int par_index = 0; par_index < par_len; par_index++)
 	{
 	  rtx elem = XVECEXP (span, 0, par_index);
-
 	  sregno = dwf_regno (src);
 	  reg_save (sregno, INVALID_REGNUM, span_offset);
 	  span_offset += GET_MODE_SIZE (GET_MODE (elem));
@@ -1224,10 +1230,31 @@ dwarf2out_frame_debug_cfa_expression (rtx set)
 static void
 dwarf2out_frame_debug_cfa_restore (rtx reg)
 {
-  unsigned int regno = dwf_regno (reg);
+  gcc_assert (REG_P (reg));
 
-  add_cfi_restore (regno);
-  update_row_reg_save (cur_row, regno, NULL);
+  rtx span = targetm.dwarf_register_span (reg);
+  if (!span)
+    {
+      unsigned int regno = dwf_regno (reg);
+      add_cfi_restore (regno);
+      update_row_reg_save (cur_row, regno, NULL);
+    }
+  else
+    {
+      /* We have a PARALLEL describing where the contents of REG live.
+	 Restore the register for each piece of the PARALLEL.  */
+      gcc_assert (GET_CODE (span) == PARALLEL);
+
+      const int par_len = XVECLEN (span, 0);
+      for (int par_index = 0; par_index < par_len; par_index++)
+	{
+	  reg = XVECEXP (span, 0, par_index);
+	  gcc_assert (REG_P (reg));
+	  unsigned int regno = dwf_regno (reg);
+	  add_cfi_restore (regno);
+	  update_row_reg_save (cur_row, regno, NULL);
+	}
+    }
 }
 
 /* A subroutine of dwarf2out_frame_debug, process a REG_CFA_WINDOW_SAVE.
@@ -1879,23 +1906,23 @@ dwarf2out_frame_debug_expr (rtx expr)
 	    }
 	}
 
-      span = NULL;
       if (REG_P (src))
 	span = targetm.dwarf_register_span (src);
+      else
+	span = NULL;
+
       if (!span)
 	queue_reg_save (src, NULL_RTX, offset);
       else
 	{
 	  /* We have a PARALLEL describing where the contents of SRC live.
 	     Queue register saves for each piece of the PARALLEL.  */
-	  int par_index;
-	  int limit;
 	  HOST_WIDE_INT span_offset = offset;
 
 	  gcc_assert (GET_CODE (span) == PARALLEL);
 
-	  limit = XVECLEN (span, 0);
-	  for (par_index = 0; par_index < limit; par_index++)
+	  const int par_len = XVECLEN (span, 0);
+	  for (int par_index = 0; par_index < par_len; par_index++)
 	    {
 	      rtx elem = XVECEXP (span, 0, par_index);
 	      queue_reg_save (elem, NULL_RTX, span_offset);
@@ -2210,7 +2237,6 @@ maybe_record_trace_start (rtx start, rtx origin)
   else
     {
       if (0) /* FIXME: Hack for building libgcc for RX.  Remove one day.  */
-
       /* We ought to have the same state incoming to a given trace no
 	 matter how we arrive at the trace.  Anything else means we've
 	 got some kind of optimization error.  */
@@ -2412,9 +2438,6 @@ scan_trace (dw_trace_info *trace)
 
 	  if (JUMP_P (control) && INSN_ANNULLED_BRANCH_P (control))
 	    {
-	      /* Needed for building libgcc for tic6x-elf.  */
-	      if (n > 2)
-		continue;
 	      /* ??? Hopefully multiple delay slots are not annulled.  */
 	      gcc_assert (n == 2);
 	      gcc_assert (!RTX_FRAME_RELATED_P (control));
@@ -2755,22 +2778,20 @@ create_pseudo_cfg (void)
 
   /* Create the trace index after we've finished building trace_info,
      avoiding stale pointer problems due to reallocation.  */
-  trace_index = htab_create (trace_info.length (),
-			     dw_trace_info_hash, dw_trace_info_eq, NULL);
+  trace_index.create (trace_info.length ());
   dw_trace_info *tp;
   FOR_EACH_VEC_ELT (trace_info, i, tp)
     {
-      void **slot;
+      dw_trace_info **slot;
 
       if (dump_file)
 	fprintf (dump_file, "Creating trace %u : start at %s %d%s\n", i,
 		 rtx_name[(int) GET_CODE (tp->head)], INSN_UID (tp->head),
 		 tp->switch_sections ? " (section switch)" : "");
 
-      slot = htab_find_slot_with_hash (trace_index, tp,
-				       INSN_UID (tp->head), INSERT);
+      slot = trace_index.find_slot_with_hash (tp, INSN_UID (tp->head), INSERT);
       gcc_assert (*slot == NULL);
-      *slot = (void *) tp;
+      *slot = tp;
     }
 }
 
@@ -2845,14 +2866,14 @@ create_cie_data (void)
   dw_stack_pointer_regnum = DWARF_FRAME_REGNUM (STACK_POINTER_REGNUM);
   dw_frame_pointer_regnum = DWARF_FRAME_REGNUM (HARD_FRAME_POINTER_REGNUM);
 
-  memset (&cie_trace, 0, sizeof(cie_trace));
+  memset (&cie_trace, 0, sizeof (cie_trace));
   cur_trace = &cie_trace;
 
   add_cfi_vec = &cie_cfi_vec;
   cie_cfi_row = cur_row = new_cfi_row ();
 
   /* On entry, the Canonical Frame Address is at SP.  */
-  memset(&loc, 0, sizeof (loc));
+  memset (&loc, 0, sizeof (loc));
   loc.reg = dw_stack_pointer_regnum;
   loc.offset = INCOMING_FRAME_SP_OFFSET;
   def_cfa_1 (&loc);
@@ -2919,8 +2940,7 @@ execute_dwarf2_frame (void)
   }
   trace_info.release ();
 
-  htab_delete (trace_index);
-  trace_index = NULL;
+  trace_index.dispose ();
 
   return 0;
 }
@@ -3273,7 +3293,7 @@ dump_cfi_row (FILE *f, dw_cfi_row *row)
   if (!cfi)
     {
       dw_cfa_location dummy;
-      memset(&dummy, 0, sizeof(dummy));
+      memset (&dummy, 0, sizeof (dummy));
       dummy.reg = INVALID_REGNUM;
       cfi = def_cfa_0 (&dummy, &row->cfa);
     }
@@ -3376,24 +3396,42 @@ gate_dwarf2_frame (void)
   return dwarf2out_do_frame ();
 }
 
-struct rtl_opt_pass pass_dwarf2_frame =
+namespace {
+
+const pass_data pass_data_dwarf2_frame =
 {
- {
-  RTL_PASS,
-  "dwarf2",			/* name */
-  OPTGROUP_NONE,                /* optinfo_flags */
-  gate_dwarf2_frame,		/* gate */
-  execute_dwarf2_frame,		/* execute */
-  NULL,				/* sub */
-  NULL,				/* next */
-  0,				/* static_pass_number */
-  TV_FINAL,			/* tv_id */
-  0,				/* properties_required */
-  0,				/* properties_provided */
-  0,				/* properties_destroyed */
-  0,				/* todo_flags_start */
-  0				/* todo_flags_finish */
- }
+  RTL_PASS, /* type */
+  "dwarf2", /* name */
+  OPTGROUP_NONE, /* optinfo_flags */
+  true, /* has_gate */
+  true, /* has_execute */
+  TV_FINAL, /* tv_id */
+  0, /* properties_required */
+  0, /* properties_provided */
+  0, /* properties_destroyed */
+  0, /* todo_flags_start */
+  0, /* todo_flags_finish */
 };
+
+class pass_dwarf2_frame : public rtl_opt_pass
+{
+public:
+  pass_dwarf2_frame (gcc::context *ctxt)
+    : rtl_opt_pass (pass_data_dwarf2_frame, ctxt)
+  {}
+
+  /* opt_pass methods: */
+  bool gate () { return gate_dwarf2_frame (); }
+  unsigned int execute () { return execute_dwarf2_frame (); }
+
+}; // class pass_dwarf2_frame
+
+} // anon namespace
+
+rtl_opt_pass *
+make_pass_dwarf2_frame (gcc::context *ctxt)
+{
+  return new pass_dwarf2_frame (ctxt);
+}
 
 #include "gt-dwarf2cfi.h"

@@ -1,5 +1,5 @@
 /* Darwin support for GDB, the GNU debugger.
-   Copyright 1997-2002, 2005, 2008-2012 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
 
    Contributed by Apple Computer, Inc.
 
@@ -33,8 +33,6 @@
 #include "i386-tdep.h"
 #include "osabi.h"
 #include "ui-out.h"
-#include "symtab.h"
-#include "frame.h"
 #include "gdb_assert.h"
 #include "i386-darwin-tdep.h"
 #include "solib.h"
@@ -196,13 +194,12 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
             }
           else
             {
-              int len = TYPE_LENGTH (arg_type);
-              int align = i386_darwin_arg_type_alignment (arg_type);
-
-              args_space = align_up (args_space, align);
+              args_space = align_up (args_space,
+				     i386_darwin_arg_type_alignment (arg_type));
               if (write_pass)
                 write_memory (sp + args_space,
-                              value_contents_all (args[i]), len);
+                              value_contents_all (args[i]),
+			      TYPE_LENGTH (arg_type));
 
               /* The System V ABI says that:
                  
@@ -211,7 +208,7 @@ i386_darwin_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
                  depending on the size of the argument."
                  
                  This makes sure the stack stays word-aligned.  */
-              args_space += align_up (len, 4);
+              args_space += align_up (TYPE_LENGTH (arg_type), 4);
             }
         }
 

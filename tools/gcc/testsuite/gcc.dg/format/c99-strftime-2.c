@@ -21,3 +21,4 @@ foo (char *s, size_t m, const struct tm *tp)
   strftime (s, m, "%20Y", tp); /* { dg-warning "C" "strftime width" } */
   strftime (s, m, "%^A", tp); /* { dg-warning "C" "strftime flags" } */
 }
+/* { dg-prune-output ".*__int20.*" } */

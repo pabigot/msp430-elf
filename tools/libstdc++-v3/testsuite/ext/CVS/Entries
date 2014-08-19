@@ -1,7 +1,7 @@
-/concept_checks.cc/1.7/Sun Feb 24 19:27:13 2013//Tmsp430-130322-branch
-/headers.cc/1.11/Sun Feb 24 19:27:14 2013//Tmsp430-130322-branch
-/median.cc/1.5/Sun Feb 24 19:27:14 2013//Tmsp430-130322-branch
-/pod_char_traits.cc/1.6/Sun Feb 24 19:27:14 2013//Tmsp430-130322-branch
+/concept_checks.cc/1.7/Thu Feb 20 13:47:42 2014//Tmsp430-14r1-branch
+/headers.cc/1.9/Thu Feb 20 13:47:42 2014//Tmsp430-14r1-branch
+/median.cc/1.5/Thu Feb 20 13:47:42 2014//Tmsp430-14r1-branch
+/pod_char_traits.cc/1.5/Thu Feb 20 13:47:42 2014//Tmsp430-14r1-branch
 D/array_allocator////
 D/bitmap_allocator////
 D/codecvt////
@@ -28,7 +28,5 @@ D/stdio_filebuf////
 D/stdio_sync_filebuf////
 D/throw_allocator////
 D/throw_value////
-D/triangular_distribution////
 D/type_traits////
-D/von_mises_distribution////
 D/vstring////

@@ -1,7 +1,7 @@
 // PR c++/6747
 // { dg-do compile }
+/* { dg-skip-if "asm construct does not work with RL78" { rl78-*-* } { "*" } { "" } } */
 // { dg-options "-O" }
-// { dg-skip-if "asm construct does not work with RL78" { rl78-*-* } { "*" } { "" } }
 
 void foo()
 {

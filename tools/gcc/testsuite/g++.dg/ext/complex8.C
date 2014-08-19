@@ -1,6 +1,5 @@
 // PR libstdc++/48760
-// { dg-options -std=c++0x }
-// { dg-do run }
+// { dg-do run { target c++11 } }
 
 constexpr _Complex int i{1,2};
 constexpr _Complex int j{3};
@@ -65,3 +64,5 @@ int main()
   if (__real *p != 3 || __imag *p != 0)
     return 1;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

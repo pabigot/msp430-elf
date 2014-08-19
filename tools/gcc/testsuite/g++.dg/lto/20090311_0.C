@@ -1,3 +1,4 @@
+// { dg-require-effective-target size32plus }
 class C1 {
 public:     virtual ~C1() {
 }

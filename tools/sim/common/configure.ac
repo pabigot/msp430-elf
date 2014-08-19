@@ -32,13 +32,6 @@ else
 fi
 AC_SUBST(TARGET_SUBDIR)
 
-# Link in zlib if we can.  This allows us to read compressed debug
-# sections.  This is used only by readelf.c (objdump uses bfd for
-# reading compressed sections).
-AC_SEARCH_LIBS(zlibVersion, z, [AC_CHECK_HEADERS(zlib.h)])
-
-# BFD_BINARY_FOPEN
-
 # These aren't all needed yet, but will be eventually.
 AC_CHECK_HEADERS(stdlib.h string.h strings.h time.h sys/times.h sys/stat.h sys/mman.h)
 AC_CHECK_FUNCS(mmap munmap lstat truncate ftruncate posix_fallocate)

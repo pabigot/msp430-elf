@@ -1,6 +1,7 @@
 // PR c++/29066
 // Test pointer to member function comparison
 // { dg-do run }
+// { dg-require-effective-target size32plus }
 
 extern "C" void abort (void);
 

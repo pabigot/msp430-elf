@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // Origin: philip_martin@ntlworld.com
 
 #include <new>

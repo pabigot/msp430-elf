@@ -61,3 +61,5 @@ main (void)
   if (x != 3)
     abort ();
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

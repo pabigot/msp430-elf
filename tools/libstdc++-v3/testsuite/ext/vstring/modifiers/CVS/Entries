@@ -1,2 +1,5 @@
-D/char////
-D/wchar_t////
+D/assign////
+D/erase////
+D/insert////
+D/pop_back////
+D/replace////

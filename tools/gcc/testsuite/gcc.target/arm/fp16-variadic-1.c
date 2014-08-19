@@ -1,6 +1,6 @@
 /* Test promotion of __fp16 to double as arguments to variadic function.  */
 
-/* { dg-do run } */
+/* { dg-do compile } */
 /* { dg-options "-mfp16-format=ieee" } */
 
 #include <stdlib.h>

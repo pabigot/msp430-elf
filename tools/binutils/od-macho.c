@@ -1054,10 +1054,10 @@ dump_load_command (bfd *abfd, bfd_mach_o_load_command *cmd,
         bfd_mach_o_main_command *entry = &cmd->command.main;
         printf ("\n"
                 "   entry offset: ");
-	printf_vma ((bfd_vma) entry->entryoff);
+	printf_vma (entry->entryoff);
         printf ("\n"
                 "   stack size:   ");
-	printf_vma ((bfd_vma) entry->stacksize);
+	printf_vma (entry->stacksize);
 	printf ("\n");
         break;
       }

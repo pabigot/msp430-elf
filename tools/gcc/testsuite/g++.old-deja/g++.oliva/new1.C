@@ -18,3 +18,4 @@ struct A {
 };
 
 int main() { try { new A; } catch(...) {} }
+// { dg-require-effective-target size32plus }

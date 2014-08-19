@@ -2,8 +2,8 @@
 /* { dg-require-profiling "-p" } */
 /* { dg-options "-O2 -p" } */
 /* { dg-options "-O2 -p -static" { target hppa*-*-hpux* } } */
-/* { dg-error "profiler" "No profiler support" { target xstormy16-*-* } 0 } */
 /* { dg-skip-if "no profiling support" { "msp430-*-*" } { "*" } { "" } } */
+/* { dg-error "profiler" "No profiler support" { target xstormy16-*-* } 0 } */
 /* { dg-message "" "consider using `-pg' instead of `-p' with gprof(1)" { target *-*-freebsd* } 0 } */
 
 extern void abort (void);

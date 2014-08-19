@@ -59,10 +59,6 @@
 #endif
 #endif
 
-#if _MIPS_ISA == _MIPS_ISA_MIPS1
-#undef USE_PREFETCH
-#endif
-
 #if defined(_MIPS_SIM) && ((_MIPS_SIM == _ABI64) || (_MIPS_SIM == _ABIN32))
 #ifndef DISABLE_DOUBLE
 #define USE_DOUBLE

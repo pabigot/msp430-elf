@@ -36,3 +36,4 @@ int main()
 
   yb.f();
 }
+// { dg-require-effective-target size32plus }

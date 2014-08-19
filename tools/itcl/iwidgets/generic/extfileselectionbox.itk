@@ -11,7 +11,7 @@
 #  AUTHOR: Mark L. Ulferts               EMAIL: mulferts@spd.dsccc.com
 #          Anthony L. Parent                    tony.parent@symbios.com
 #
-#  @(#) $Id: extfileselectionbox.itk,v 1.1 2003/03/19 23:00:55 cagney Exp $
+#  @(#) $Id: extfileselectionbox.itk,v 1.5 2002/03/10 07:34:51 mgbacke Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1997 DSC Technologies Corporation
 # ======================================================================

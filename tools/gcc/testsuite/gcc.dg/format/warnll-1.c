@@ -43,3 +43,4 @@ foo (long long ll, unsigned long long ull, long long *lln,
   scanf ("%Lx", ullp); /* { dg-warning "C" "scanf %Lx" } */
   scanf ("%LX", ullp); /* { dg-warning "C" "scanf %LX" } */
 }
+/* { dg-prune-output ".*__int20.*" } */

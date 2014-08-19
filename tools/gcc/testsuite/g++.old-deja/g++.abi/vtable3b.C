@@ -12,3 +12,4 @@
 #define C_PARENTS B1, B2
 
 #include "vtable3.h"
+// { dg-require-effective-target size32plus }

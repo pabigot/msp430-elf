@@ -1,4 +1,4 @@
-# Copyright 2011-2012 Free Software Foundation, Inc.
+# Copyright 2011-2014 Free Software Foundation, Inc.
 #
 # Contributed by Red Hat, originally written by Keith Seitz.
 #
@@ -34,7 +34,7 @@ proc test_class {class} {
     set conditional2 "if (A::outer::func ())"
     foreach ovld [array names tests] {
 	set method "${class}::foo  ($ovld)  const"
-	set result "Breakpoint (\[0-9\]).*file .*/ovsrch$tests($ovld).*"
+	set result "Breakpoint (\[0-9\]).*file .*ovsrch$tests($ovld).*"
 	gdb_test "break $method" $result
 	gdb_test "break '$method'" $result
 
@@ -57,8 +57,13 @@ if { [skip_cplus_tests] } { continue }
 # Test for c++/11734
 standard_testfile ovsrch1.cc ovsrch2.cc ovsrch3.cc ovsrch4.cc
 
+set opts [list debug c++]
+if [istarget "rl78-*"] then {
+    lappend opts "additional_flags=-Wl,--no-gc-sections"
+}
+
 if {[prepare_for_testing $testfile $testfile \
-	 [list $srcfile $srcfile2 $srcfile3 $srcfile4] {c++ debug}]} {
+	 [list $srcfile $srcfile2 $srcfile3 $srcfile4] $opts]} {
     return -1
 }
 

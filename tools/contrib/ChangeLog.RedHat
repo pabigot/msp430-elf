@@ -1,0 +1,37 @@
+Thu Oct 28 18:30:53 UTC 2004  Brendan Conoboy  <blc@redhat.com>
+
+	* eBuild-Linux: Remove --without-fp from glibc default config.
+
+Wed Aug 25 17:25:26 MDT 2004  Brendan Conoboy  <blc@redhat.com>
+
+        * eBuild-Linux: Apply GNUPro directory tree conventions,
+        enable --CC and -xCC_prefix options.
+
+Fri Jul  2 05:01:09 UTC 2004  Brendan Conoboy  <blc@redhat.com>
+
+	* eBuild-Linux: Add --gml=... for setting GLibc Multilib variations.
+
+Wed Jun 30 15:16:42 UTC 2004  Brendan Conoboy  <blc@redhat.com>
+
+	* eBuild-Linux: Make default settings target agnostic, update AT.
+
+2004-06-02  Alexandre Oliva  <aoliva@redhat.com>
+
+	* eBuild-Linux: Add --sysroot, --CC and --xCC_prefix.  Support
+	header-src, preferred over kernel-src.  Do not disable-shared for
+	glibc stage2.  Add work around for absence of libgcc_eh.a in
+	disable-shared tools stage1.
+
+2004-01-30  Nick Clifton  <nickc@redhat.com>
+
+	* eBuild-Linux: Add two new switch: --tools-config-options and
+          --glibc-config-options.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

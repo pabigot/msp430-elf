@@ -3,7 +3,7 @@
 # This file defines the default bindings for Tk scrollbar widgets.
 # It also provides procedures that help in implementing the bindings.
 #
-# RCS: @(#) $Id: scrlbar.tcl,v 1.10 2003/03/19 23:02:05 cagney Exp $
+# RCS: @(#) $Id: scrlbar.tcl,v 1.3 2012/04/18 00:36:57 kevinb Exp $
 #
 # Copyright (c) 1994 The Regents of the University of California.
 # Copyright (c) 1994-1996 Sun Microsystems, Inc.

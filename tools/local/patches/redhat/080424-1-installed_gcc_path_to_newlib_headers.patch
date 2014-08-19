@@ -1,0 +1,103 @@
+This patch works around a problem with an installed toolchain: A
+cross-GCC will look for system C header files in:
+
+  <prefix>/<target>/include
+
+but (for newlib anyway) they will have been installed in:
+
+  <exec_prefix>/<target>/include
+
+The newlib behaviour in wrong, but fixing this involves changing the
+top level configure and makefiles as well as the newlib configure and
+makefiles, and it is inconsistent with the behaviour from earlier
+releases.  So this patch fixes GCC to look in the <exec_prefix> path.
+
+Note, for comparison the libstdc++-v3 header files are always installed
+into <prefix>/<target>/include/c++/...
+
+
+2008-04-24  Nick Clifton  <nickc@redhat.com>
+
+	* configure.ac (gcc_c_include_dir): Compute & substitute.
+	* Makefile.in (gcc_c_include_dir): Define.
+	(PREPROCESSOR_DEFINES): Use gcc_c_include_dir for
+	TOOLS_INCLUDE_DIR instead of gcc_tooldir.
+	* configure: Regenerate.
+
+
+Index: gcc/configure.ac
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/configure.ac,v
+retrieving revision 1.30
+diff -c -3 -p -r1.30 configure.ac
+*** gcc/configure.ac	10 Mar 2008 10:43:09 -0000	1.30
+--- gcc/configure.ac	24 Apr 2008 10:57:37 -0000
+*************** if test x${gcc_gxx_include_dir} = x; the
+*** 144,149 ****
+--- 144,164 ----
+    fi
+  fi
+  
++ # XXX: FIXME: We have a discrepancy: G++ header files are installed
++ # relative to PREFIX but newlib header files are installed relative
++ # to EXEC_PREFIX.  For now we define gcc_c_include_dir to allow for
++ # this behaviour, but really newlib should be changed (which will
++ # involve changing the top level configure and makefile to pass down
++ # a new variable containing the path for installing headers).  When
++ # this is done this patch can be reverted and TOOL_INCLUDE_DIR in
++ # gcc/Makefile.in can be restored to its original definition based
++ # on $(gcc_tooldir).
++ gcc_c_include_dir='include'
++ if test x$host != x$target; then
++    gcc_c_include_dir="$target_alias/$gcc_c_include_dir"
++ fi
++ gcc_c_include_dir="\$(libsubdir)/\$(libsubdir_to_prefix)\$(prefix_to_exec_prefix)$gcc_c_include_dir"
++ 
+  AC_ARG_WITH(cpp_install_dir,
+  [  --with-cpp-install-dir=DIR
+                            install the user visible C preprocessor in DIR
+*************** AC_SUBST(extra_programs)
+*** 3761,3766 ****
+--- 3776,3782 ----
+  AC_SUBST(float_h_file)
+  AC_SUBST(gcc_config_arguments)
+  AC_SUBST(gcc_gxx_include_dir)
++ AC_SUBST(gcc_c_include_dir)
+  AC_SUBST(host_exeext)
+  AC_SUBST(host_xm_file_list)
+  AC_SUBST(host_xm_include_list)
+Index: gcc/Makefile.in
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/Makefile.in,v
+retrieving revision 1.73
+diff -c -3 -p -r1.73 Makefile.in
+*** gcc/Makefile.in	9 Apr 2008 16:15:25 -0000	1.73
+--- gcc/Makefile.in	24 Apr 2008 10:57:38 -0000
+*************** slibdir = @slibdir@
+*** 503,508 ****
+--- 503,510 ----
+  build_tooldir = $(exec_prefix)/$(target_noncanonical)
+  # Directory in which the compiler finds target-independent g++ includes.
+  gcc_gxx_include_dir = @gcc_gxx_include_dir@
++ # Directory in which the compiler finds target-independent C includes.
++ gcc_c_include_dir = @gcc_c_include_dir@
+  # Directory to search for site-specific includes.
+  local_includedir = $(local_prefix)/include
+  includedir = $(prefix)/include
+*************** PREPROCESSOR_DEFINES = \
+*** 3284,3290 ****
+    -DGPLUSPLUS_BACKWARD_INCLUDE_DIR=\"$(gcc_gxx_include_dir)/backward\" \
+    -DLOCAL_INCLUDE_DIR=\"$(local_includedir)\" \
+    -DCROSS_INCLUDE_DIR=\"$(CROSS_SYSTEM_HEADER_DIR)\" \
+!   -DTOOL_INCLUDE_DIR=\"$(gcc_tooldir)/include\" \
+    -DPREFIX=\"$(prefix)/\" \
+    -DSTANDARD_EXEC_PREFIX=\"$(libdir)/gcc/\" \
+    @TARGET_SYSTEM_ROOT_DEFINE@
+--- 3286,3292 ----
+    -DGPLUSPLUS_BACKWARD_INCLUDE_DIR=\"$(gcc_gxx_include_dir)/backward\" \
+    -DLOCAL_INCLUDE_DIR=\"$(local_includedir)\" \
+    -DCROSS_INCLUDE_DIR=\"$(CROSS_SYSTEM_HEADER_DIR)\" \
+!   -DTOOL_INCLUDE_DIR=\"$(gcc_c_include_dir)\" \
+    -DPREFIX=\"$(prefix)/\" \
+    -DSTANDARD_EXEC_PREFIX=\"$(libdir)/gcc/\" \
+    @TARGET_SYSTEM_ROOT_DEFINE@

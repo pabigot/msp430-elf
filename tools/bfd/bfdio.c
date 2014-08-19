@@ -1,8 +1,6 @@
 /* Low-level I/O routines for BFDs.
 
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998,
-   1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2011
-   Free Software Foundation, Inc.
+   Copyright 1990-2013 Free Software Foundation, Inc.
 
    Written by Cygnus Support.
 
@@ -89,7 +87,7 @@ real_fopen (const char *filename, const char *modes)
 #ifdef VMS
   char *vms_attr;
 
-  /* On VMS, fopen allows file attributes as optionnal arguments.
+  /* On VMS, fopen allows file attributes as optional arguments.
      We need to use them but we'd better to use the common prototype.
      In fopen-vms.h, they are separated from the mode with a comma.
      Split here.  */
@@ -323,56 +321,6 @@ bfd_seek (bfd *abfd, file_ptr position, int direction)
         }
     }
 
-  /* The correct way to fix this problem is to fix the OS, not BFD...  */
-#if defined __BEOS__ || defined _WIN32
-#if ! defined(__CYGWIN__)
-  if (abfd->iovec)
-    {
-      file_ptr bfdeof;
-      file_ptr pos;
-
-      pos = abfd->iovec->btell (abfd);
-      abfd->iovec->bseek (abfd, 0L, SEEK_END);
-      bfdeof = abfd->iovec->btell (abfd);
-
-      if (direction == SEEK_CUR)
-	{
-	  direction = SEEK_SET;
-	  file_position += pos;
-	}
-
-      /* When extending a file beyond its original length the fseek() function
-	 under BeOS or Win32 does not initialise the new space to zero.  This
-	 means that random garbage can be picked up, which in turn means that
-	 two identical files assembled and linked in the same way can
-	 nevertheless still fail a binary compare.  We fix this here by
-	 explicitly initialising the extra space, but only if the file was
-	 opened for writing.  */
-      if (bfdeof < file_position && bfd_write_p (abfd))
-	{
-	  file_ptr     diff;
-	  static char  zeros[512];
-
-	  diff = file_position - bfdeof;
-
-	  while (diff >= sizeof (zeros))
-	    {
-	      abfd->iovec->bwrite (abfd, zeros, sizeof (zeros));
-	      diff -= sizeof (zeros);
-	    }
-
-	  if (diff > 0)
-	    abfd->iovec->bwrite (abfd, zeros, diff);
-
-	  /* In theory we do not need to perform the fseek now, since the fwrite
-	     calls will have moved the file pointer to the correct location.  In
-	     practice however we leave the call in, just in case something went
-	     wrong with the fwrites and we missed it.  (After all we are not
-	     checking their return codes).  */
-	}
-    }
-#endif
-#endif
   if (abfd->iovec)
     result = abfd->iovec->bseek (abfd, file_position, direction);
   else

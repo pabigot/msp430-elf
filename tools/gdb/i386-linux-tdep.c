@@ -1,6 +1,6 @@
 /* Target-dependent code for GNU/Linux i386.
 
-   Copyright (C) 2000-2005, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,7 +27,7 @@
 #include "osabi.h"
 #include "reggroups.h"
 #include "dwarf2-frame.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "i386-tdep.h"
 #include "i386-linux-tdep.h"
@@ -44,12 +44,13 @@
 /* The syscall's XML filename for i386.  */
 #define XML_SYSCALL_FILENAME_I386 "syscalls/i386-linux.xml"
 
-#include "record.h"
+#include "record-full.h"
 #include "linux-record.h"
 #include <stdint.h>
 
 #include "features/i386/i386-linux.c"
 #include "features/i386/i386-mmx-linux.c"
+#include "features/i386/i386-mpx-linux.c"
 #include "features/i386/i386-avx-linux.c"
 
 /* Supported register note sections.  */
@@ -370,23 +371,23 @@ i386_linux_write_pc (struct regcache *regcache, CORE_ADDR pc)
 static int
 i386_all_but_ip_registers_record (struct regcache *regcache)
 {
-  if (record_arch_list_add_reg (regcache, I386_EAX_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_EAX_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, I386_ECX_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_ECX_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, I386_EDX_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_EDX_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, I386_EBX_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_EBX_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, I386_ESP_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_ESP_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, I386_EBP_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_EBP_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, I386_ESI_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_ESI_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, I386_EDI_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_EDI_REGNUM))
     return -1;
-  if (record_arch_list_add_reg (regcache, I386_EFLAGS_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_EFLAGS_REGNUM))
     return -1;
 
   return 0;
@@ -450,7 +451,7 @@ i386_linux_intx80_sysenter_syscall_record (struct regcache *regcache)
     return ret;
 
   /* Record the return value of the system call.  */
-  if (record_arch_list_add_reg (regcache, I386_EAX_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_EAX_REGNUM))
     return -1;
 
   return 0;
@@ -469,7 +470,7 @@ i386_linux_record_signal (struct gdbarch *gdbarch,
   if (i386_all_but_ip_registers_record (regcache))
     return -1;
 
-  if (record_arch_list_add_reg (regcache, I386_EIP_REGNUM))
+  if (record_full_arch_list_add_reg (regcache, I386_EIP_REGNUM))
     return -1;
 
   /* Record the change in the stack.  */
@@ -480,11 +481,11 @@ i386_linux_record_signal (struct gdbarch *gdbarch,
   /* This is for frame_size.
      sp -= sizeof (struct rt_sigframe);  */
   esp -= I386_LINUX_frame_size;
-  if (record_arch_list_add_mem (esp,
-                                I386_LINUX_xstate + I386_LINUX_frame_size))
+  if (record_full_arch_list_add_mem (esp,
+				     I386_LINUX_xstate + I386_LINUX_frame_size))
     return -1;
 
-  if (record_arch_list_add_end ())
+  if (record_full_arch_list_add_end ())
     return -1;
 
   return 0;
@@ -569,6 +570,8 @@ int i386_linux_gregset_reg_offset[] =
   -1, -1, -1, -1, -1, -1, -1, -1,
   -1,
   -1, -1, -1, -1, -1, -1, -1, -1,
+  -1, -1, -1, -1,		/* MPX registers BND0 ... BND3.  */
+  -1, -1,			/* MPX registers BNDCFGU, BNDSTATUS.  */
   11 * 4			/* "orig_eax" */
 };
 
@@ -599,8 +602,7 @@ static int i386_linux_sc_reg_offset[] =
 /* Get XSAVE extended state xcr0 from core dump.  */
 
 uint64_t
-i386_linux_core_read_xcr0 (struct gdbarch *gdbarch,
-			   struct target_ops *target, bfd *abfd)
+i386_linux_core_read_xcr0 (bfd *abfd)
 {
   asection *xstate = bfd_get_section_by_name (abfd, ".reg-xstate");
   uint64_t xcr0;
@@ -642,9 +644,12 @@ i386_linux_core_read_description (struct gdbarch *gdbarch,
 				  bfd *abfd)
 {
   /* Linux/i386.  */
-  uint64_t xcr0 = i386_linux_core_read_xcr0 (gdbarch, target, abfd);
-  switch ((xcr0 & I386_XSTATE_AVX_MASK))
+  uint64_t xcr0 = i386_linux_core_read_xcr0 (abfd);
+
+  switch ((xcr0 & I386_XSTATE_ALL_MASK))
     {
+    case I386_XSTATE_MPX_MASK:
+      return tdesc_i386_mpx_linux;
     case I386_XSTATE_AVX_MASK:
       return tdesc_i386_avx_linux;
     case I386_XSTATE_SSE_MASK:
@@ -980,4 +985,5 @@ _initialize_i386_linux_tdep (void)
   initialize_tdesc_i386_linux ();
   initialize_tdesc_i386_mmx_linux ();
   initialize_tdesc_i386_avx_linux ();
+  initialize_tdesc_i386_mpx_linux ();
 }

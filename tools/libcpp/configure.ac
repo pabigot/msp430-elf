@@ -184,8 +184,7 @@ m4_changequote(,)
 case $target in
 	aarch64*-*-* | \
 	alpha*-*-* | \
-	arm*-*-*eabi* | \
-	arm*-*-symbianelf* | \
+	arm*-*-* | \
 	x86_64-*-* | \
 	ia64-*-* | \
 	hppa*64*-*-* | \
@@ -198,7 +197,7 @@ case $target in
 	sparc*-*-* | \
 	spu-*-* | \
 	sh[123456789lbe]*-*-* | sh-*-* | \
-	tilegx-*-* | tilepro-*-* )
+	tilegx*-*-* | tilepro*-*-* )
 		need_64bit_hwint=yes ;;
 	*)
 		need_64bit_hwint=no ;;
@@ -220,6 +219,13 @@ case $target in
       [AC_DEFINE([HAVE_SSE4], [1],
 		 [Define to 1 if you can assemble SSE4 insns.])])
 esac
+
+# Enable --enable-host-shared.
+AC_ARG_ENABLE(host-shared,
+[AS_HELP_STRING([--enable-host-shared],
+		[build host code as shared libraries])],
+[PICFLAG=-fPIC], [PICFLAG=])
+AC_SUBST(PICFLAG)
 
 # Output.
 

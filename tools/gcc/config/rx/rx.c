@@ -1,5 +1,5 @@
 /* Subroutines used for code generation on Renesas RX processors.
-   Copyright (C) 2008-2013 Free Software Foundation, Inc.
+   Copyright (C) 2008-2014 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
    This file is part of GCC.
@@ -27,6 +27,9 @@
 #include "coretypes.h"
 #include "tm.h"
 #include "tree.h"
+#include "varasm.h"
+#include "stor-layout.h"
+#include "calls.h"
 #include "rtl.h"
 #include "regs.h"
 #include "hard-reg-set.h"
@@ -344,9 +347,9 @@ rx_mode_dependent_address_p (const_rtx addr, addr_space_t as ATTRIBUTE_UNUSED)
 
 	case CONST_INT:
 	  /* REG+INT is only mode independent if INT is a
-	     multiple of 4, positive and will fit into 8-bits.  */
+	     multiple of 4, positive and will fit into 16-bits.  */
 	  if (((INTVAL (addr) & 3) == 0)
-	      && IN_RANGE (INTVAL (addr), 4, 252))
+	      && IN_RANGE (INTVAL (addr), 4, 0xfffc))
 	    return false;
 	  return true;
 
@@ -448,7 +451,7 @@ rx_print_operand_address (FILE * file, rtx addr)
 
 	  /* FIXME: Putting this case label here is an appalling abuse of the C language.  */
 	case UNSPEC:
-	  addr = XVECEXP (addr, 0, 0);
+          addr = XVECEXP (addr, 0, 0);
 	  gcc_assert (CONST_INT_P (addr));
 	}
       /* Fall through.  */
@@ -730,7 +733,7 @@ rx_print_operand (FILE * file, rtx op, int letter)
       break;
 
     case 'R':
-      gcc_assert (GET_MODE_SIZE (GET_MODE (op)) < 4);
+      gcc_assert (GET_MODE_SIZE (GET_MODE (op)) <= 4);
       unsigned_load = true;
       /* Fall through.  */
     case 'Q':
@@ -975,6 +978,8 @@ rx_gen_move_template (rtx * operands, bool is_movu)
 	   loading an immediate into a register.  */
 	extension = ".W";
       break;
+    case DFmode:
+    case DImode:
     case SFmode:
     case SImode:
       extension = ".L";
@@ -988,19 +993,44 @@ rx_gen_move_template (rtx * operands, bool is_movu)
     }
 
   if (MEM_P (src) && rx_pid_data_operand (XEXP (src, 0)) == PID_UNENCODED)
-    src_template = "(%A1-__pid_base)[%P1]";
+    {
+      gcc_assert (GET_MODE (src) != DImode);
+      gcc_assert (GET_MODE (src) != DFmode);
+      
+      src_template = "(%A1 - __pid_base)[%P1]";
+    }
   else if (MEM_P (src) && rx_small_data_operand (XEXP (src, 0)))
-    src_template = "%%gp(%A1)[%G1]";
+    {
+      gcc_assert (GET_MODE (src) != DImode);
+      gcc_assert (GET_MODE (src) != DFmode);
+      
+      src_template = "%%gp(%A1)[%G1]";
+    }
   else
     src_template = "%1";
 
   if (MEM_P (dest) && rx_small_data_operand (XEXP (dest, 0)))
-    dst_template = "%%gp(%A0)[%G0]";
+    {
+      gcc_assert (GET_MODE (dest) != DImode);
+      gcc_assert (GET_MODE (dest) != DFmode);
+      
+      dst_template = "%%gp(%A0)[%G0]";
+    }
   else
     dst_template = "%0";
 
-  sprintf (out_template, "%s%s\t%s, %s", is_movu ? "movu" : "mov",
-	   extension, src_template, dst_template);
+  if (GET_MODE (dest) == DImode || GET_MODE (dest) == DFmode)
+    {
+      gcc_assert (! is_movu);
+
+      if (REG_P (src) && REG_P (dest) && (REGNO (dest) == REGNO (src) + 1))
+	sprintf (out_template, "mov.L\t%%H1, %%H0 ! mov.L\t%%1, %%0");
+      else
+	sprintf (out_template, "mov.L\t%%1, %%0 ! mov.L\t%%H1, %%H0");
+    }
+  else
+    sprintf (out_template, "%s%s\t%s, %s", is_movu ? "movu" : "mov",
+	     extension, src_template, dst_template);
   return out_template;
 }
 
@@ -1041,7 +1071,7 @@ rx_function_arg (cumulative_args_t cum, enum machine_mode mode,
 		 const_tree type, bool named)
 {
   unsigned int next_reg;
-  unsigned int bytes_so_far = * get_cumulative_args (cum);
+  unsigned int bytes_so_far = *get_cumulative_args (cum);
   unsigned int size;
   unsigned int rounded_size;
 
@@ -1078,14 +1108,14 @@ static void
 rx_function_arg_advance (cumulative_args_t cum, enum machine_mode mode,
 			 const_tree type, bool named ATTRIBUTE_UNUSED)
 {
-  * get_cumulative_args (cum) += rx_function_arg_size (mode, type);
+  *get_cumulative_args (cum) += rx_function_arg_size (mode, type);
 }
 
 static unsigned int
 rx_function_arg_boundary (enum machine_mode mode ATTRIBUTE_UNUSED,
 			  const_tree type ATTRIBUTE_UNUSED)
 {
-  /* Older versions of the RX backend aligned all on-stack arguements
+  /* Older versions of the RX backend aligned all on-stack arguments
      to 32-bits.  The RX C ABI however says that they should be
      aligned to their natural alignment.  (See section 5.2.2 of the ABI).  */
   if (TARGET_GCC_ABI)
@@ -1268,9 +1298,6 @@ rx_conditional_register_usage (void)
     }
 }
 
-/* See rx_expand_epilogue() for the purpose of this variable.  */
-static enum machine_mode small_unsigned_return_mode = VOIDmode;
-
 struct decl_chain
 {
   tree fndecl;
@@ -1357,13 +1384,6 @@ rx_set_current_function (tree fndecl)
     }
 
   rx_previous_fndecl = fndecl;
-  if (fndecl != NULL
-      && DECL_UNSIGNED (DECL_RESULT (fndecl))
-      && (DECL_MODE (DECL_RESULT (fndecl)) == QImode
-	  || DECL_MODE (DECL_RESULT (fndecl)) == HImode))
-    small_unsigned_return_mode = DECL_MODE (DECL_RESULT (fndecl));
-  else
-    small_unsigned_return_mode = VOIDmode;
 }
 
 /* Typical stack layout should looks like this after the function's prologue:
@@ -1962,34 +1982,6 @@ rx_expand_epilogue (bool is_sibcall)
       return;
     }
 
-  /* Issue 1109223:
-     The RX ABI requires that functions that return small (less than 32-bit)
-     unsigned values promote those values to an unsigned int.  The ISO C99
-     langauge specification requires that they be returned as a signed int.
-     
-     Since the generic part of GCC cannot be persuaded to break the ISO C99
-     standard, we fix this problem in the epilogue by zero-extending the
-     (sign-extended) value that is currently in the return register.  This
-     return value will then be compatible with both the ISO C99 standard and
-     the RX ABI.
-
-     Note - if we are sibcalling then we do not need to do anything - the
-     sibcalled function will return the correct value for us.  */
-  if (small_unsigned_return_mode != VOIDmode && ! is_sibcall)
-    switch (small_unsigned_return_mode)
-      {
-      case QImode:
-	emit_insn (gen_zero_extendqisi2 (gen_rtx_REG (SImode, FUNC_RETURN_REGNUM),
-					 gen_rtx_REG (QImode, FUNC_RETURN_REGNUM)));
-	break;
-      case HImode:
-	emit_insn (gen_zero_extendhisi2 (gen_rtx_REG (SImode, FUNC_RETURN_REGNUM),
-					 gen_rtx_REG (HImode, FUNC_RETURN_REGNUM)));
-	break;
-      default:
-	gcc_unreachable ();
-      }
-
   rx_get_stack_layout (& low, & high, & register_mask,
 		       & frame_size, & stack_size);
 
@@ -2284,6 +2276,14 @@ static GTY(()) tree rx_builtins[(int) RX_BUILTIN_max];
 static void
 rx_init_builtins (void)
 {
+#define ADD_RX_BUILTIN0(UC_NAME, LC_NAME, RET_TYPE)		\
+   rx_builtins[RX_BUILTIN_##UC_NAME] =					\
+   add_builtin_function ("__builtin_rx_" LC_NAME,			\
+			build_function_type_list (RET_TYPE##_type_node, \
+						  NULL_TREE),		\
+			RX_BUILTIN_##UC_NAME,				\
+			BUILT_IN_MD, NULL, NULL_TREE)
+
 #define ADD_RX_BUILTIN1(UC_NAME, LC_NAME, RET_TYPE, ARG_TYPE)		\
    rx_builtins[RX_BUILTIN_##UC_NAME] =					\
    add_builtin_function ("__builtin_rx_" LC_NAME,			\
@@ -2314,7 +2314,7 @@ rx_init_builtins (void)
 			RX_BUILTIN_##UC_NAME,				\
 			BUILT_IN_MD, NULL, NULL_TREE)
 
-  ADD_RX_BUILTIN1 (BRK,     "brk",     void,  void);
+  ADD_RX_BUILTIN0 (BRK,     "brk",     void);
   ADD_RX_BUILTIN1 (CLRPSW,  "clrpsw",  void,  integer);
   ADD_RX_BUILTIN1 (SETPSW,  "setpsw",  void,  integer);
   ADD_RX_BUILTIN1 (INT,     "int",     void,  integer);
@@ -2322,18 +2322,18 @@ rx_init_builtins (void)
   ADD_RX_BUILTIN2 (MACLO,   "maclo",   void,  intSI, intSI);
   ADD_RX_BUILTIN2 (MULHI,   "mulhi",   void,  intSI, intSI);
   ADD_RX_BUILTIN2 (MULLO,   "mullo",   void,  intSI, intSI);
-  ADD_RX_BUILTIN1 (MVFACHI, "mvfachi", intSI, void);
-  ADD_RX_BUILTIN1 (MVFACMI, "mvfacmi", intSI, void);
+  ADD_RX_BUILTIN0 (MVFACHI, "mvfachi", intSI);
+  ADD_RX_BUILTIN0 (MVFACMI, "mvfacmi", intSI);
   ADD_RX_BUILTIN1 (MVTACHI, "mvtachi", void,  intSI);
   ADD_RX_BUILTIN1 (MVTACLO, "mvtaclo", void,  intSI);
-  ADD_RX_BUILTIN1 (RMPA,    "rmpa",    void,  void);
+  ADD_RX_BUILTIN0 (RMPA,    "rmpa",    void);
   ADD_RX_BUILTIN1 (MVFC,    "mvfc",    intSI, integer);
   ADD_RX_BUILTIN2 (MVTC,    "mvtc",    void,  integer, integer);
   ADD_RX_BUILTIN1 (MVTIPL,  "mvtipl",  void,  integer);
   ADD_RX_BUILTIN1 (RACW,    "racw",    void,  integer);
   ADD_RX_BUILTIN1 (ROUND,   "round",   intSI, float);
   ADD_RX_BUILTIN1 (REVW,    "revw",    intSI, intSI);
-  ADD_RX_BUILTIN1 (WAIT,    "wait",    void,  void);
+  ADD_RX_BUILTIN0 (WAIT,    "wait",    void);
 }
 
 /* Return the RX builtin for CODE.  */
@@ -2637,26 +2637,11 @@ const struct attribute_spec rx_attribute_table[] =
 static void
 rx_override_options_after_change (void)
 {
-  static bool first_time = TRUE;
-
-  if (first_time)
-    {
-      /* If this is the first time through and the user has not disabled
-	 the use of RX FPU hardware then enable -ffinite-math-only,
-	 since the FPU instructions do not support NaNs and infinities.  */
-      if (TARGET_USE_FPU)
-	flag_finite_math_only = 1;
-
-      first_time = FALSE;
-    }
-  else
-    {
-      /* Alert the user if they are changing the optimization options
-	 to use IEEE compliant floating point arithmetic with RX FPU insns.  */
-      if (TARGET_USE_FPU
-	  && !flag_finite_math_only)
-	warning (0, "RX FPU instructions do not support NaNs and infinities");
-    }
+  /* If this is the first time through and the user has not disabled
+     the use of RX FPU hardware then enable -ffinite-math-only,
+     since the FPU instructions do not support NaNs and infinities.  */
+  if (TARGET_USE_FPU)
+    flag_finite_math_only = 1;
 }
 
 static void
@@ -2668,42 +2653,42 @@ rx_option_override (void)
 
   if (v)
     FOR_EACH_VEC_ELT (*v, i, opt)
-    {
-      switch (opt->opt_index)
-	{
-	case OPT_mint_register_:
-	  switch (opt->value)
-	    {
-	    case 4:
-	      fixed_regs[10] = call_used_regs [10] = 1;
-	      /* Fall through.  */
-	    case 3:
-	      fixed_regs[11] = call_used_regs [11] = 1;
-	      /* Fall through.  */
-	    case 2:
-	      fixed_regs[12] = call_used_regs [12] = 1;
-	      /* Fall through.  */
-	    case 1:
-	      fixed_regs[13] = call_used_regs [13] = 1;
-	      /* Fall through.  */
-	    case 0:
-	      rx_num_interrupt_regs = opt->value;
-	      break;
-	    default:
-	      rx_num_interrupt_regs = 0;
-	      /* Error message already given because rx_handle_option
-		 returned false.  */
-	      break;
-	    }
-	  break;
+      {
+	switch (opt->opt_index)
+	  {
+	  case OPT_mint_register_:
+	    switch (opt->value)
+	      {
+	      case 4:
+		fixed_regs[10] = call_used_regs [10] = 1;
+		/* Fall through.  */
+	      case 3:
+		fixed_regs[11] = call_used_regs [11] = 1;
+		/* Fall through.  */
+	      case 2:
+		fixed_regs[12] = call_used_regs [12] = 1;
+		/* Fall through.  */
+	      case 1:
+		fixed_regs[13] = call_used_regs [13] = 1;
+		/* Fall through.  */
+	      case 0:
+		rx_num_interrupt_regs = opt->value;
+		break;
+	      default:
+		rx_num_interrupt_regs = 0;
+		/* Error message already given because rx_handle_option
+		  returned false.  */
+		break;
+	      }
+	    break;
 
-	default:
-	  gcc_unreachable ();
-	}
-    }
+	  default:
+	    gcc_unreachable ();
+	  }
+      }
 
   /* This target defaults to strict volatile bitfields.  */
-  if (flag_strict_volatile_bitfields < 0 && abi_version_at_least (2))
+  if (flag_strict_volatile_bitfields < 0 && abi_version_at_least(2))
     flag_strict_volatile_bitfields = 1;
 
   rx_override_options_after_change ();
@@ -3278,6 +3263,12 @@ rx_ok_to_inline (tree caller, tree callee)
     || lookup_attribute ("gnu_inline", DECL_ATTRIBUTES (callee)) != NULL_TREE;
 }
 
+static bool
+rx_enable_lra (void)
+{
+  return TARGET_ENABLE_LRA;
+}
+
 
 #undef  TARGET_NARROW_VOLATILE_BITFIELD
 #define TARGET_NARROW_VOLATILE_BITFIELD		rx_narrow_volatile_bitfield
@@ -3427,7 +3418,10 @@ rx_ok_to_inline (tree caller, tree callee)
 #define TARGET_LEGITIMIZE_ADDRESS		rx_legitimize_address
 
 #undef  TARGET_WARN_FUNC_RETURN
-#define TARGET_WARN_FUNC_RETURN			rx_warn_func_return
+#define TARGET_WARN_FUNC_RETURN 		rx_warn_func_return
+
+#undef  TARGET_LRA_P
+#define TARGET_LRA_P 				rx_enable_lra
 
 struct gcc_target targetm = TARGET_INITIALIZER;
 

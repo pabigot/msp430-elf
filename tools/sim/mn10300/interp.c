@@ -277,9 +277,6 @@ sim_open (SIM_OPEN_KIND kind,
       return 0;
     }
 
-  /* See comment in configure.ac.  */
-  current_alignment = STRICT_ALIGNMENT;
-
   /* establish any remaining configuration options */
   if (sim_config (sd) != SIM_RC_OK)
     {
@@ -1100,11 +1097,4 @@ fpu_fnmsub (SIM_DESC sd, sim_cpu *cpu, sim_cia cia,
     }
   
   fpu_check_signal_exception (sd, cpu, cia);
-}
-
-SIM_RC
-sim_hardware_watchpoint (SIM_DESC sd, SIM_WATCH_ACTION action,
-                         SIM_WATCH_TYPE type, SIM_ADDR addr, long length)
-{
-  return SIM_RC_FAIL;
 }

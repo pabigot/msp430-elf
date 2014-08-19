@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2009-2014 Free Software Foundation, Inc.
    Contributed by Anatoly Sokolov (aesok@post.ru)
 
    This file is part of GCC.
@@ -26,6 +26,7 @@
 #include "tm_p.h"
 #include "cpplib.h"
 #include "tree.h"
+#include "stor-layout.h"
 #include "target.h"
 #include "c-family/c-common.h"
 #include "langhooks.h"
@@ -114,7 +115,7 @@ avr_resolve_overloaded_builtin (unsigned int iloc, tree fndecl, void *vargs)
       fold = targetm.builtin_decl (id, true);
 
       if (fold != error_mark_node)
-        fold = build_function_call_vec (loc, fold, &args, NULL);
+        fold = build_function_call_vec (loc, vNULL, fold, &args, NULL);
 
       break; // absfx
 
@@ -180,7 +181,7 @@ avr_resolve_overloaded_builtin (unsigned int iloc, tree fndecl, void *vargs)
       fold = targetm.builtin_decl (id, true);
 
       if (fold != error_mark_node)
-        fold = build_function_call_vec (loc, fold, &args, NULL);
+        fold = build_function_call_vec (loc, vNULL, fold, &args, NULL);
 
       break; // roundfx
 
@@ -237,7 +238,7 @@ avr_resolve_overloaded_builtin (unsigned int iloc, tree fndecl, void *vargs)
       fold = targetm.builtin_decl (id, true);
 
       if (fold != error_mark_node)
-        fold = build_function_call_vec (loc, fold, &args, NULL);
+        fold = build_function_call_vec (loc, vNULL, fold, &args, NULL);
 
       break; // countlsfx
     }
@@ -346,13 +347,16 @@ avr_cpu_cpp_builtins (struct cpp_reader *pfile)
   if (TARGET_NO_INTERRUPTS)
     cpp_define (pfile, "__NO_INTERRUPTS__");
 
-  if (avr_current_device->errata_skip)
+  if (avr_current_device->dev_attribute & AVR_ERRATA_SKIP)
     {
       cpp_define (pfile, "__AVR_ERRATA_SKIP__");
 
       if (avr_current_arch->have_jmp_call)
         cpp_define (pfile, "__AVR_ERRATA_SKIP_JMP_CALL__");
     }
+
+  if (avr_current_device->dev_attribute & AVR_ISA_RMW)
+    cpp_define (pfile, "__AVR_ISA_RMW__");
 
   cpp_define_formatted (pfile, "__AVR_SFR_OFFSET__=0x%x",
                         avr_current_arch->sfr_offset);

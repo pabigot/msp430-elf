@@ -7,6 +7,7 @@
 
 /* { dg-do link } */
 /* { dg-options "-fno-finite-math-only" { target sh*-*-* } } */
+/* { dg-skip-if "Denormals not supported" { rx-*-* } "*" "" } */
 
 extern void link_error(int);
 

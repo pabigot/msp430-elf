@@ -17,3 +17,4 @@ int main()
   void (B::*f)() = static_cast<void (B::*)()>(&D::foo);
   (b->*f)();
 }
+// { dg-require-effective-target size32plus }

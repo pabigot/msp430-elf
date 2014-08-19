@@ -3,7 +3,7 @@
 # This file defines the default bindings for Tk listbox widgets
 # and provides procedures that help in implementing those bindings.
 #
-# RCS: @(#) $Id: listbox.tcl,v 1.12 2003/03/19 23:02:04 cagney Exp $
+# RCS: @(#) $Id: listbox.tcl,v 1.3 2012/04/18 00:36:56 kevinb Exp $
 #
 # Copyright (c) 1994 The Regents of the University of California.
 # Copyright (c) 1994-1995 Sun Microsystems, Inc.

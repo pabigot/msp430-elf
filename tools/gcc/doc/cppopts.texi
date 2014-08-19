@@ -1,4 +1,4 @@
-@c Copyright (C) 1999-2013 Free Software Foundation, Inc.
+@c Copyright (C) 1999-2014 Free Software Foundation, Inc.
 @c This is part of the CPP and GCC manuals.
 @c For copying conditions, see the file gcc.texi.
 
@@ -434,12 +434,6 @@ file directory as the first search directory for @code{@w{#include
 @end ifset
 This option has been deprecated.
 
-@item -isystem-c++ @var{dir}
-@opindex -isystem-c++ @var{dir}
-Same behavior as with @option{-isystem}, but do not make headers in
-@var{dir} be implicitly evaluated as if they include the @samp{extern
-"C"} linkage specification.
-
 @item -nostdinc
 @opindex nostdinc
 Do not search the standard system directories for header files.
@@ -532,12 +526,6 @@ Search @var{dir} only for header files requested with
 @end ifset
 If @var{dir} begins with @code{=}, then the @code{=} will be replaced
 by the sysroot prefix; see @option{--sysroot} and @option{-isysroot}.
-
-@item --sysroot=@var{dir}
-@opindex sysroot
-This is a synonym for @option{-isysroot} although it also affects the
-command line passed to the linker, changing where it searches for
-system files such as libraries and run-time object files.
 
 @item -fdirectives-only
 @opindex fdirectives-only

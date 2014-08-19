@@ -1,5 +1,6 @@
 /* { dg-do compile } */
 /* { dg-options "-O1 -fno-trapping-math -fno-finite-math-only -fdump-tree-optimized" } */
+/* { dg-skip-if "test does not match RX behaviour" { "rx-*-*" } { "*" } { "" } } */
   
 extern void f(int);
 extern void link_error ();

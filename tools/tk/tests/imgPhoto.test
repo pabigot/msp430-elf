@@ -9,7 +9,7 @@
 #
 # Author: Paul Mackerras (paulus@cs.anu.edu.au)
 #
-# RCS: @(#) $Id: imgPhoto.test,v 1.13 2003/03/19 23:02:08 cagney Exp $
+# RCS: @(#) $Id: imgPhoto.test,v 1.3 2012/04/18 00:37:05 kevinb Exp $
 
 package require tcltest 2.1
 namespace import -force tcltest::configure

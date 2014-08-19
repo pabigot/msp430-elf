@@ -3,7 +3,7 @@
    Low level functions to implement Oeprating System specific
    code to manipulate I386 debug registers.
 
-   Copyright (C) 2009-2012 Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,8 +19,6 @@
 
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
-
-#include "defs.h"
 
 #ifndef I386_NAT_H
 #define I386_NAT_H 1
@@ -112,9 +110,14 @@ extern void i386_set_debug_register_length (int len);
 
 extern void i386_cleanup_dregs (void);
 
-/* Return a pointer to the the local mirror of the inferior's debug
-   registers.  */
+/* Return a pointer to the local mirror of the debug registers of
+   process PID.  */
 
-extern struct i386_debug_reg_state *i386_debug_reg_state (void);
+extern struct i386_debug_reg_state *i386_debug_reg_state (pid_t pid);
+
+/* Called whenever GDB is no longer debugging process PID.  It deletes
+   data structures that keep track of debug register state.  */
+
+extern void i386_forget_process (pid_t pid);
 
 #endif /* I386_NAT_H */

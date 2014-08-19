@@ -1,6 +1,6 @@
 /* Target-dependent code for AMD64.
 
-   Copyright (C) 2001-2012 Free Software Foundation, Inc.
+   Copyright (C) 2001-2014 Free Software Foundation, Inc.
 
    Contributed by Jiri Smid, SuSE Labs.
 
@@ -43,6 +43,7 @@
 
 #include "features/i386/amd64.c"
 #include "features/i386/amd64-avx.c"
+#include "features/i386/amd64-mpx.c"
 #include "features/i386/x32.c"
 #include "features/i386/x32-avx.c"
 
@@ -92,15 +93,9 @@ static const char *amd64_ymmh_names[] =
   "ymm12h", "ymm13h", "ymm14h", "ymm15h"
 };
 
-/* The registers used to pass integer arguments during a function call.  */
-static int amd64_dummy_call_integer_regs[] =
+static const char *amd64_mpx_names[] =
 {
-  AMD64_RDI_REGNUM,		/* %rdi */
-  AMD64_RSI_REGNUM,		/* %rsi */
-  AMD64_RDX_REGNUM,		/* %rdx */
-  AMD64_RCX_REGNUM,		/* %rcx */
-  8,				/* %r8 */
-  9				/* %r9 */
+  "bnd0raw", "bnd1raw", "bnd2raw", "bnd3raw", "bndcfgu", "bndstatus"
 };
 
 /* DWARF Register Number Mapping as defined in the System V psABI,
@@ -120,7 +115,14 @@ static int amd64_dwarf_regmap[] =
   AMD64_RSP_REGNUM,
 
   /* Extended Integer Registers 8 - 15.  */
-  8, 9, 10, 11, 12, 13, 14, 15,
+  AMD64_R8_REGNUM,		/* %r8 */
+  AMD64_R9_REGNUM,		/* %r9 */
+  AMD64_R10_REGNUM,		/* %r10 */
+  AMD64_R11_REGNUM,		/* %r11 */
+  AMD64_R12_REGNUM,		/* %r12 */
+  AMD64_R13_REGNUM,		/* %r13 */
+  AMD64_R14_REGNUM,		/* %r14 */
+  AMD64_R15_REGNUM,		/* %r15 */
 
   /* Return Address RA.  Mapped to RIP.  */
   AMD64_RIP_REGNUM,
@@ -391,6 +393,20 @@ amd64_pseudo_register_write (struct gdbarch *gdbarch,
 
 
 
+/* Register classes as defined in the psABI.  */
+
+enum amd64_reg_class
+{
+  AMD64_INTEGER,
+  AMD64_SSE,
+  AMD64_SSEUP,
+  AMD64_X87,
+  AMD64_X87UP,
+  AMD64_COMPLEX_X87,
+  AMD64_NO_CLASS,
+  AMD64_MEMORY
+};
+
 /* Return the union class of CLASS1 and CLASS2.  See the psABI for
    details.  */
 
@@ -427,6 +443,8 @@ amd64_merge_classes (enum amd64_reg_class class1, enum amd64_reg_class class2)
   return AMD64_SSE;
 }
 
+static void amd64_classify (struct type *type, enum amd64_reg_class class[2]);
+
 /* Return non-zero if TYPE is a non-POD structure or union type.  */
 
 static int
@@ -446,12 +464,10 @@ amd64_non_pod_p (struct type *type)
 static void
 amd64_classify_aggregate (struct type *type, enum amd64_reg_class class[2])
 {
-  int len = TYPE_LENGTH (type);
-
   /* 1. If the size of an object is larger than two eightbytes, or in
         C++, is a non-POD structure or union type, or contains
         unaligned fields, it has class memory.  */
-  if (len > 16 || amd64_non_pod_p (type))
+  if (TYPE_LENGTH (type) > 16 || amd64_non_pod_p (type))
     {
       class[0] = class[1] = AMD64_MEMORY;
       return;
@@ -471,7 +487,7 @@ amd64_classify_aggregate (struct type *type, enum amd64_reg_class class[2])
 
       /* All fields in an array have the same type.  */
       amd64_classify (subtype, class);
-      if (len > 8 && class[1] == AMD64_NO_CLASS)
+      if (TYPE_LENGTH (type) > 8 && class[1] == AMD64_NO_CLASS)
 	class[1] = class[0];
     }
   else
@@ -548,7 +564,7 @@ amd64_classify_aggregate (struct type *type, enum amd64_reg_class class[2])
 
 /* Classify TYPE, and store the result in CLASS.  */
 
-void
+static void
 amd64_classify (struct type *type, enum amd64_reg_class class[2])
 {
   enum type_code code = TYPE_CODE (type);
@@ -588,6 +604,23 @@ amd64_classify (struct type *type, enum amd64_reg_class class[2])
     /* Class X87 and X87UP.  */
     class[0] = AMD64_X87, class[1] = AMD64_X87UP;
 
+  /* Arguments of complex T where T is one of the types float or
+     double get treated as if they are implemented as:
+
+     struct complexT {
+       T real;
+       T imag;
+     };  */
+  else if (code == TYPE_CODE_COMPLEX && len == 8)
+    class[0] = AMD64_SSE;
+  else if (code == TYPE_CODE_COMPLEX && len == 16)
+    class[0] = class[1] = AMD64_SSE;
+
+  /* A variable of type complex long double is classified as type
+     COMPLEX_X87.  */
+  else if (code == TYPE_CODE_COMPLEX && len == 32)
+    class[0] = AMD64_COMPLEX_X87;
+
   /* Aggregates.  */
   else if (code == TYPE_CODE_ARRAY || code == TYPE_CODE_STRUCT
 	   || code == TYPE_CODE_UNION)
@@ -599,7 +632,6 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
 		    struct type *type, struct regcache *regcache,
 		    gdb_byte *readbuf, const gdb_byte *writebuf)
 {
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   enum amd64_reg_class class[2];
   int len = TYPE_LENGTH (type);
   static int integer_regnum[] = { AMD64_RAX_REGNUM, AMD64_RDX_REGNUM };
@@ -609,10 +641,9 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
   int i;
 
   gdb_assert (!(readbuf && writebuf));
-  gdb_assert (tdep->classify);
 
   /* 1. Classify the return type with the classification algorithm.  */
-  tdep->classify (type, class);
+  amd64_classify (type, class);
 
   /* 2. If the type has class MEMORY, then the caller provides space
      for the return value and passes the address of this storage in
@@ -636,6 +667,30 @@ amd64_return_value (struct gdbarch *gdbarch, struct value *function,
 	}
 
       return RETURN_VALUE_ABI_RETURNS_ADDRESS;
+    }
+
+  /* 8. If the class is COMPLEX_X87, the real part of the value is
+        returned in %st0 and the imaginary part in %st1.  */
+  if (class[0] == AMD64_COMPLEX_X87)
+    {
+      if (readbuf)
+	{
+	  regcache_raw_read (regcache, AMD64_ST0_REGNUM, readbuf);
+	  regcache_raw_read (regcache, AMD64_ST1_REGNUM, readbuf + 16);
+	}
+
+      if (writebuf)
+	{
+	  i387_return_value (gdbarch, regcache);
+	  regcache_raw_write (regcache, AMD64_ST0_REGNUM, writebuf);
+	  regcache_raw_write (regcache, AMD64_ST1_REGNUM, writebuf + 16);
+
+	  /* Fix up the tag word such that both %st(0) and %st(1) are
+	     marked as valid.  */
+	  regcache_raw_write_unsigned (regcache, AMD64_FTAG_REGNUM, 0xfff);
+	}
+
+      return RETURN_VALUE_REGISTER_CONVENTION;
     }
 
   gdb_assert (class[1] != AMD64_MEMORY);
@@ -710,11 +765,15 @@ static CORE_ADDR
 amd64_push_arguments (struct regcache *regcache, int nargs,
 		      struct value **args, CORE_ADDR sp, int struct_return)
 {
-  struct gdbarch *gdbarch = get_regcache_arch (regcache);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
-  int *integer_regs = tdep->call_dummy_integer_regs;
-  int num_integer_regs = tdep->call_dummy_num_integer_regs;
-
+  static int integer_regnum[] =
+  {
+    AMD64_RDI_REGNUM,		/* %rdi */
+    AMD64_RSI_REGNUM,		/* %rsi */
+    AMD64_RDX_REGNUM,		/* %rdx */
+    AMD64_RCX_REGNUM,		/* %rcx */
+    AMD64_R8_REGNUM,		/* %r8 */
+    AMD64_R9_REGNUM		/* %r9 */
+  };
   static int sse_regnum[] =
   {
     /* %xmm0 ... %xmm7 */
@@ -724,19 +783,12 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
     AMD64_XMM0_REGNUM + 6, AMD64_XMM0_REGNUM + 7,
   };
   struct value **stack_args = alloca (nargs * sizeof (struct value *));
-  /* An array that mirrors the stack_args array.  For all arguments
-     that are passed by MEMORY, if that argument's address also needs
-     to be stored in a register, the ARG_ADDR_REGNO array will contain
-     that register number (or a negative value otherwise).  */
-  int *arg_addr_regno = alloca (nargs * sizeof (int));
   int num_stack_args = 0;
   int num_elements = 0;
   int element = 0;
   int integer_reg = 0;
   int sse_reg = 0;
   int i;
-
-  gdb_assert (tdep->classify);
 
   /* Reserve a register for the "hidden" argument.  */
   if (struct_return)
@@ -752,7 +804,7 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
       int j;
 
       /* Classify argument.  */
-      tdep->classify (type, class);
+      amd64_classify (type, class);
 
       /* Calculate the number of integer and SSE registers needed for
          this argument.  */
@@ -766,25 +818,13 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
 
       /* Check whether enough registers are available, and if the
          argument should be passed in registers at all.  */
-      if (integer_reg + needed_integer_regs > num_integer_regs
+      if (integer_reg + needed_integer_regs > ARRAY_SIZE (integer_regnum)
 	  || sse_reg + needed_sse_regs > ARRAY_SIZE (sse_regnum)
 	  || (needed_integer_regs == 0 && needed_sse_regs == 0))
 	{
 	  /* The argument will be passed on the stack.  */
 	  num_elements += ((len + 7) / 8);
-	  stack_args[num_stack_args] = args[i];
-          /* If this is an AMD64_MEMORY argument whose address must also
-             be passed in one of the integer registers, reserve that
-             register and associate this value to that register so that
-             we can store the argument address as soon as we know it.  */
-          if (class[0] == AMD64_MEMORY
-              && tdep->memory_args_by_pointer
-              && integer_reg < tdep->call_dummy_num_integer_regs)
-            arg_addr_regno[num_stack_args] =
-              tdep->call_dummy_integer_regs[integer_reg++];
-          else
-            arg_addr_regno[num_stack_args] = -1;
-          num_stack_args++;
+	  stack_args[num_stack_args++] = args[i];
 	}
       else
 	{
@@ -802,7 +842,7 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
 	      switch (class[j])
 		{
 		case AMD64_INTEGER:
-		  regnum = integer_regs[integer_reg++];
+		  regnum = integer_regnum[integer_reg++];
 		  break;
 
 		case AMD64_SSE:
@@ -840,19 +880,8 @@ amd64_push_arguments (struct regcache *regcache, int nargs,
       struct type *type = value_type (stack_args[i]);
       const gdb_byte *valbuf = value_contents (stack_args[i]);
       int len = TYPE_LENGTH (type);
-      CORE_ADDR arg_addr = sp + element * 8;
 
-      write_memory (arg_addr, valbuf, len);
-      if (arg_addr_regno[i] >= 0)
-        {
-          /* We also need to store the address of that argument in
-             the given register.  */
-          gdb_byte buf[8];
-          enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-
-          store_unsigned_integer (buf, 8, byte_order, arg_addr);
-          regcache_cooked_write (regcache, arg_addr_regno[i], buf);
-        }
+      write_memory (sp + element * 8, valbuf, len);
       element += ((len + 7) / 8);
     }
 
@@ -871,7 +900,6 @@ amd64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		       int struct_return, CORE_ADDR struct_addr)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   gdb_byte buf[8];
 
   /* Pass arguments.  */
@@ -880,18 +908,9 @@ amd64_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
   /* Pass "hidden" argument".  */
   if (struct_return)
     {
-      /* The "hidden" argument is passed throught the first argument
-         register.  */
-      const int arg_regnum = tdep->call_dummy_integer_regs[0];
-
       store_unsigned_integer (buf, 8, byte_order, struct_addr);
-      regcache_cooked_write (regcache, arg_regnum, buf);
+      regcache_cooked_write (regcache, AMD64_RDI_REGNUM, buf);
     }
-
-  /* Reserve some memory on the stack for the integer-parameter registers,
-     if required by the ABI.  */
-  if (tdep->integer_param_regs_saved_in_caller_frame)
-    sp -= tdep->call_dummy_num_integer_regs * 8;
 
   /* Store return address.  */
   sp -= 8;
@@ -1593,7 +1612,7 @@ amd64_relocate_instruction (struct gdbarch *gdbarch,
       /* Where "ret" in the original code will return to.  */
       ret_addr = oldloc + insn_length;
       push_buf[0] = 0x68; /* pushq $...  */
-      memcpy (&push_buf[1], &ret_addr, 4);
+      store_unsigned_integer (&push_buf[1], 4, byte_order, ret_addr);
       /* Push the push.  */
       append_insns (to, 5, push_buf);
 
@@ -1742,7 +1761,7 @@ amd64_analyze_stack_align (CORE_ADDR pc, CORE_ADDR current_pc,
   int reg, r;
   int offset, offset_and;
 
-  if (target_read_memory (pc, buf, sizeof buf))
+  if (target_read_code (pc, buf, sizeof buf))
     return pc;
 
   /* Check caller-saved saved register.  The first instruction has
@@ -2085,7 +2104,7 @@ amd64_analyze_prologue (struct gdbarch *gdbarch,
   else
     pc = amd64_analyze_stack_align (pc, current_pc, cache);
 
-  op = read_memory_unsigned_integer (pc, 1, byte_order);
+  op = read_code_unsigned_integer (pc, 1, byte_order);
 
   if (op == 0x55)		/* pushq %rbp */
     {
@@ -2098,7 +2117,7 @@ amd64_analyze_prologue (struct gdbarch *gdbarch,
       if (current_pc <= pc + 1)
         return current_pc;
 
-      read_memory (pc + 1, buf, 3);
+      read_code (pc + 1, buf, 3);
 
       /* Check for `movq %rsp, %rbp'.  */
       if (memcmp (buf, mov_rsp_rbp_1, 3) == 0
@@ -2166,7 +2185,7 @@ amd64_skip_xmm_prologue (CORE_ADDR pc, CORE_ADDR start_pc)
     return pc;
 
   /* START_PC can be from overlayed memory, ignored here.  */
-  if (target_read_memory (next_sal.pc - 4, buf, sizeof (buf)) != 0)
+  if (target_read_code (next_sal.pc - 4, buf, sizeof (buf)) != 0)
     return pc;
 
   /* test %al,%al */
@@ -2214,6 +2233,22 @@ amd64_skip_prologue (struct gdbarch *gdbarch, CORE_ADDR start_pc)
 {
   struct amd64_frame_cache cache;
   CORE_ADDR pc;
+  CORE_ADDR func_addr;
+
+  if (find_pc_partial_function (start_pc, NULL, &func_addr, NULL))
+    {
+      CORE_ADDR post_prologue_pc
+	= skip_prologue_using_sal (gdbarch, func_addr);
+      struct symtab *s = find_pc_symtab (func_addr);
+
+      /* Clang always emits a line note before the prologue and another
+	 one after.  We trust clang to emit usable line notes.  */
+      if (post_prologue_pc
+	  && (s != NULL
+	      && s->producer != NULL
+	      && strncmp (s->producer, "clang ", sizeof ("clang ") - 1) == 0))
+        return max (start_pc, post_prologue_pc);
+    }
 
   amd64_init_frame_cache (&cache);
   pc = amd64_analyze_prologue (gdbarch, start_pc, 0xffffffffffffffffLL,
@@ -2343,13 +2378,14 @@ amd64_frame_this_id (struct frame_info *this_frame, void **this_cache,
     amd64_frame_cache (this_frame, this_cache);
 
   if (!cache->base_p)
-    return;
-
-  /* This marks the outermost frame.  */
-  if (cache->base == 0)
-    return;
-
-  (*this_id) = frame_id_build (cache->base + 16, cache->pc);
+    (*this_id) = frame_id_build_unavailable_stack (cache->pc);
+  else if (cache->base == 0)
+    {
+      /* This marks the outermost frame.  */
+      return;
+    }
+  else
+    (*this_id) = frame_id_build (cache->base + 16, cache->pc);
 }
 
 static struct value *
@@ -2464,9 +2500,14 @@ amd64_sigtramp_frame_this_id (struct frame_info *this_frame,
     amd64_sigtramp_frame_cache (this_frame, this_cache);
 
   if (!cache->base_p)
-    return;
-
-  (*this_id) = frame_id_build (cache->base + 16, get_frame_pc (this_frame));
+    (*this_id) = frame_id_build_unavailable_stack (get_frame_pc (this_frame));
+  else if (cache->base == 0)
+    {
+      /* This marks the outermost frame.  */
+      return;
+    }
+  else
+    (*this_id) = frame_id_build (cache->base + 16, get_frame_pc (this_frame));
 }
 
 static struct value *
@@ -2635,9 +2676,9 @@ amd64_epilogue_frame_this_id (struct frame_info *this_frame,
 							       this_cache);
 
   if (!cache->base_p)
-    return;
-
-  (*this_id) = frame_id_build (cache->base + 8, cache->pc);
+    (*this_id) = frame_id_build_unavailable_stack (cache->pc);
+  else
+    (*this_id) = frame_id_build (cache->base + 8, cache->pc);
 }
 
 static const struct frame_unwind amd64_epilogue_frame_unwind =
@@ -2797,6 +2838,12 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
 {
   struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
   const struct target_desc *tdesc = info.target_desc;
+  static const char *const stap_integer_prefixes[] = { "$", NULL };
+  static const char *const stap_register_prefixes[] = { "%", NULL };
+  static const char *const stap_register_indirection_prefixes[] = { "(",
+								    NULL };
+  static const char *const stap_register_indirection_suffixes[] = { ")",
+								    NULL };
 
   /* AMD64 generally uses `fxsave' instead of `fsave' for saving its
      floating-point registers.  */
@@ -2814,6 +2861,13 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
       tdep->ymmh_register_names = amd64_ymmh_names;
       tdep->num_ymm_regs = 16;
       tdep->ymm0h_regnum = AMD64_YMM0H_REGNUM;
+    }
+
+  if (tdesc_find_feature (tdesc, "org.gnu.gdb.i386.mpx") != NULL)
+    {
+      tdep->mpx_register_names = amd64_mpx_names;
+      tdep->bndcfgu_regnum = AMD64_BNDCFGU_REGNUM;
+      tdep->bnd0r_regnum = AMD64_BND0R_REGNUM;
     }
 
   tdep->num_byte_regs = 20;
@@ -2867,10 +2921,6 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_push_dummy_call (gdbarch, amd64_push_dummy_call);
   set_gdbarch_frame_align (gdbarch, amd64_frame_align);
   set_gdbarch_frame_red_zone_size (gdbarch, 128);
-  tdep->call_dummy_num_integer_regs =
-    ARRAY_SIZE (amd64_dummy_call_integer_regs);
-  tdep->call_dummy_integer_regs = amd64_dummy_call_integer_regs;
-  tdep->classify = amd64_classify;
 
   set_gdbarch_convert_register_p (gdbarch, i387_convert_register_p);
   set_gdbarch_register_to_value (gdbarch, i387_register_to_value);
@@ -2906,10 +2956,12 @@ amd64_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
   set_gdbarch_gen_return_address (gdbarch, amd64_gen_return_address);
 
   /* SystemTap variables and functions.  */
-  set_gdbarch_stap_integer_prefix (gdbarch, "$");
-  set_gdbarch_stap_register_prefix (gdbarch, "%");
-  set_gdbarch_stap_register_indirection_prefix (gdbarch, "(");
-  set_gdbarch_stap_register_indirection_suffix (gdbarch, ")");
+  set_gdbarch_stap_integer_prefixes (gdbarch, stap_integer_prefixes);
+  set_gdbarch_stap_register_prefixes (gdbarch, stap_register_prefixes);
+  set_gdbarch_stap_register_indirection_prefixes (gdbarch,
+					  stap_register_indirection_prefixes);
+  set_gdbarch_stap_register_indirection_suffixes (gdbarch,
+					  stap_register_indirection_suffixes);
   set_gdbarch_stap_is_single_operand (gdbarch,
 				      i386_stap_is_single_operand);
   set_gdbarch_stap_parse_special_token (gdbarch,
@@ -2946,9 +2998,6 @@ amd64_x32_init_abi (struct gdbarch_info info, struct gdbarch *gdbarch)
     tdesc = tdesc_x32;
   tdep->tdesc = tdesc;
 
-  tdep->sp_regnum_from_eax = AMD64_RSP_REGNUM;
-  tdep->pc_regnum_from_eax = AMD64_RIP_REGNUM;
-
   tdep->num_dword_regs = 17;
   set_tdesc_pseudo_register_type (gdbarch, amd64_x32_pseudo_register_type);
 
@@ -2964,6 +3013,7 @@ _initialize_amd64_tdep (void)
 {
   initialize_tdesc_amd64 ();
   initialize_tdesc_amd64_avx ();
+  initialize_tdesc_amd64_mpx ();
   initialize_tdesc_x32 ();
   initialize_tdesc_x32_avx ();
 }

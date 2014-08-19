@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // { dg-options "-O2" }
 // Origin: Mark Mitchell <mark@codesourcery.com>
 

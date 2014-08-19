@@ -51,6 +51,7 @@ main (int argc, char **argv)
 void
 mem_init (void)
 {
+
   int i, j, k,d;
  
   d = 0;
@@ -81,8 +82,6 @@ mem_init (void)
 	  if (vel[i][j] == (int *) NULL)
 	    {
 	      free (vel[i]);
-	      free (vel);
-	      fprintf (stderr, "malloc failed for vel[%d][%d]\n", i,j);
 	      fflush (stderr);
 	      exit (0);
 	    }

@@ -1,6 +1,5 @@
 #objdump: -s -j .data -j "\$DATA\$"
 #name: .equ redefinitions
-#not-target: msp430-*-*
 
 .*: .*
 

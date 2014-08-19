@@ -2524,19 +2524,6 @@ mn10300_parse_name (char const *name,
   else
     goto no_suffix;
 
-  switch (reloc_type)
-    {
-    case BFD_RELOC_MN10300_TLS_GD:
-    case BFD_RELOC_MN10300_TLS_LD:
-    case BFD_RELOC_MN10300_TLS_LDO:
-    case BFD_RELOC_MN10300_TLS_GOTIE:
-    case BFD_RELOC_MN10300_TLS_IE:
-    case BFD_RELOC_MN10300_TLS_LE:
-      S_SET_THREAD_LOCAL (exprP->X_add_symbol);
-      break;
-    default:
-      break;
-    }
   *input_line_pointer = *nextcharP;
   input_line_pointer = next_end;
   *nextcharP = *input_line_pointer;

@@ -1,6 +1,5 @@
 #source: sort_b_a.s
 #ld: -T sort_b_a.t
-#ld_after_inputfiles: -X
 #name: SORT_BY_ALIGNMENT
 #nm: -n
 

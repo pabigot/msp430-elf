@@ -1,695 +1,151 @@
-2013-03-18  Nick Clifton  <nickc@redhat.com>
+2014-05-19  Nick Clifton  <nickc@redhat.com>
 
-	Issue 3670473
-	* v850.h (V850_INVERSE_PCREL): New opcode flag.
+	* msp430.h (struct msp430_operand_s): Add vshift field.
 
-2013-01-14  Nick Clifton  <nickc@redhat.com>
+2010-07-02  DJ Delorie  <dj@redhat.com>
 
-	* msp430.h (RPT): New pseudo instruction.
+	* rx.h (RX_Opcode_ID): Add nop2 and nop3 for statistics.
 
-2012-12-18  Nick Clifton  <nickc@redhat.com>
+2006-02-15  Nick Clifton  <nickc@redhat.com>
 
-	* msp430.h (RETA): Fix encoding of this insn.
+	* mips.h: Import version from mainline.
 
-2012-12-11  Nick Clifton  <nickc@redhat.com>
-
-	* msp430.h (BRA): Correct fixed part of pattern.
-
-2012-11-26  Nick Clifton  <nickc@redhat.com>
-
-	* msp430.h: Add MSP430X instructions.
-
-2012-11-16  DJ Delorie  <dj@redhat.com>
-
-	* msp430-decode.h: Add 430X operations.
-
-2012-09-06  DJ Delorie  <dj@redhat.com>
-
-	* msp430-decode.h: New.
-
-2012-08-29  Nick Clifton  <nickc@redhat.com>
-
-	* v850.h: Add support for v850e3v5.
-
-2005-02-16  Dave Brolley  <brolley@redhat.com>
-
-	* cgen-bitset.h: Rename CGEN_ISA_MASK to CGEN_BITSET. Rename
-	cgen_isa_mask_* to cgen_bitset_*.
-	* cgen.h: Likewise.
-
-2004-06-16  Alexandre Oliva  <aoliva@redhat.com>
-
-	* h8sx.h: Removed, in favor of h8300.h.
-
-2003-10-21  Richard Sandiford  <rsandifo@redhat.com>
-
-	* cgen.h (CGEN_BITSET_ATTR_VALUE): Fix definition.
-	(CGEN_ATTR_ENTRY): Change "value" to type "unsigned".
-	(CGEN_CPU_TABLE): Make isas a ponter.
-
-2003-09-29  Dave Brolley  <brolley@redhat.com>
-
-	* cgen.h (CGEN_ATTR_VALUE_BITSET_TYPE): New typedef.
-	(CGEN_ATTR_VALUE_ENUM_TYPE): Ditto.
-	(CGEN_ATTR_VALUE_TYPE): Use these new typedefs.
-
-2003-07-18  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (DO_MOVA1, DO_MOVA2): Reformatting.
-	(mac, clrmac, ldmac, stmac): Requires H8S or above.
-
-2003-06-25  Richard Sandiford  <rsandifo@redhat.com>
-
-	* h8sx.h (h8_opcodes): Fix the mov.l @(dd:32,ERs),ERd and
-	mov.l ERs,@(dd:32,ERd) entries.
-
-2003-06-25  Richard Sandiford  <rsandifo@redhat.com>
-
-	* h8sx.h (IMM2_NS, IMM8_NS, IMM16_NS): Remove.
-	(IMM8U, IMM8U_NS): Define.
-	(h8_opcodes): Use IMM8U_NS for mov.[wl] #xx:8,@yy.
-
-2003-05-28  Richard Sandiford  <rsandifo@redhat.com>
-
-	* h8sx.h (IMM4_NS, IMM8_NS): New.
-	(h8_opcodes): Replace IMM4 with IMM4_NS in mov.b and mov.w entries.
-	Likewise IMM8 for mov.w and mov.l.  Likewise IMM16U for mov.l.
-
-2003-05-23  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (enum h8_model): Add AV_H8S to distinguish from H8H.
-	(ldc): Split ccr ops from exr ops (which are only available 
-	on H8S or H8SX).
-	(stc): Ditto.
-	(andc, orc, xorc): Ditto.
-	(ldmac, stmac, clrmac, mac): Change access to AV_H8S.
-
-2003-05-18  Alexandre Oliva  <aoliva@redhat.com>
-
-	* h8sx.h (O_MULUU, O_MULSU, O_MULXU, O_MULXS, O_DIVXU, O_DIVSU):
-	New h8_asm_codes.  Adjust muls/u, mulu/u, mulxs and mulxu.
-
-2003-05-13  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h: Fix typo mov.w -> mov.b.
-
-2003-05-09  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h: Add B31 to jmp/jsr @@VECIND.
-
-2003-05-08  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h: Un-comment shift reg, reg insns.
-
-2003-05-07  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (OP_KIND): New macro.
-	* h8sx.h (mov.l): Fix typo, INDEXW/INDEXL.
-	* h8sx.h (bsr): Replace OR8/OR16 with LOWREG.
-
-2003-05-01  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (BITOP_B): Use op4.
-	(bistz): Use B31 instead of B30.
-	* h8sx.h (DISP8, DISP16): Replace with PCREL8, PCREL16.
-	* h8sx.h (muls, mulu, divs, divu): Make SW/SL sizes match
-	.w/.l sizes.
-	* h8sx.h (addx, subx): Fix up various botches.
-	* h8sx.h ("sub"): Fix some numeric errors.
-	* h8sx.h (PREFIX_78R4WD, PREFIX_78R5WD, 
-	PREFIX_78R6WD, PREFIX_78R7WD): New macros.
-	(EXPAND_TWOOP_B): Use the above new macros.
-	* h8sx.h (EXPAND_FROM_ABS32_W): Fix thinko.
-	* h8sx.h (EXPAND_TWOOP_W): Pass op3, not op1, to EXPAND_FROM_IMM16_W.
-
-2003-04-30  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (mova): Replace 0x6 with 0x4 for ABS16 and ABS32.
-	* h8sx.h (DO_MOVA1, DO_MOVA2): Swap B31 and B30.
-	* h8sx.h (mov.l): Change 0xa to 0x2 for INDEXB etc.
-	* h8sx.h: Use zero for cycle counts of all h8sx insns, 
-	until we get real values from Renesas.
-
-2003-04-21  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (ldm, stm): Use "DATA" instead of "IGNORE".
-	(ldm, stm): Use rs32, rd32 instead of IGNORE.
-
-2003-04-20  Alexandre Oliva  <aoliva@redhat.com>
-
-	* h8sx.h (h8_opcodes): Fix one occurrence of ABSJMP still without
-	a size code.
-
-2003-04-17  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (DATA): New const, replaces some uses of IGNORE.
-
-2003-04-17  Bernd Schmidt  <bernds@redhat.com>
-
-	* h8sx.h (enum h8_flags): Add LOWREG.
-	(h8_opcodes): Use it for BRAB, BRAW and BRAL.
-	Change occurrences of ABSJMP to use a size code, and fix 32 bit
-	absolute jumps to use it.
-
-2003-04-15  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h: Clone a few macros for 8-bit variants.
-	(MOVFROM_STD): Fix a few prefixes.
-	(EXPAND3_L_SRC, EXPAND_STD_MATRIX_B): Ditto.
-	(EXPAND_TWOOP_B): Add a B20 that's not in the spec...
-	
-2003-04-13  Bernd Schmidt  <bernds@redhat.com>
-
-	* h8sx.h (enum h8_flags): Add VECIND.
-	(BRANCH): Swap 8 bit and 16 bit alternatives.
-	(h8_opcodes): Use B30 on register operands for "bra rn" opcodes.
-	Add VECIND type jmp and jsr opcodes.
-	In one addx alternative that doesn't accept an immediate, remove
-	IMM16LIST from the opcode bytes.
-
-2003-04-11  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (mac): Change size to SW.
-
-2003-04-10  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.c (bra/bc, bra/bs, bsr/bc, bsr/bs):
-	Add OP3 flag to operands.
-
-2003-04-10  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (bfst): 2nd operand is DST, third is OP3.
-	* h8sx.h (bfld/bfst): Change register from 16 bits to 8.
-
-2003-04-09  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (movmd): Fix sizes.
-	* h8sx.h (movsd): Change definition to correspond with bra.
-
-2003-04-08  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (h8_asm_codes): Remove explicit values from new tags.
-
-2003-04-07  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (O_SYS_CMDLINE): New pseudo opcode for command line
-	processing (from D.Venkatasubramanian <dvenkat@noida.hcltech.com>).
-
-2003-04-02  Bernd Schmidt  <bernds@redhat.com>
-
-	* h8sx.h (PREFIX_015F): New.
-	(DO_MOVA1, DO_MOVA2, h8_opcodes): Correct some mistakes in MOVA
-	encodings.  Add short form MOVA instructions.  Add rte/l and rts/l.
-	(enum h8_asm_codes): Add O_RTEL and O_RTSL.
-	
-2003-04-04  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (INDEXB, INDEXW, INDEXL): Add DST flag in argument lists.
-
-2003-04-02  Bernd Schmidt  <bernds@redhat.com>
-
-	* h8sx.h (PREFIX_017F): New.
-	(DO_MOVA1, DO_MOVA2): New macros.
-	(h8_opcodes): No longer const.  Reorder things a bit.
-	Add MOVA opcodes.
-	
-2003-04-02  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h: Add movmd, movsd insns.
-	* h8sx.h (ABS16SRC, ABS16DST): Make unsigned.
-	(ABS16LIST, DSTABS16LIST): Make unsigned.
-	(EXPAND_UNOP_STD_L): Add B30 to final IGNORE.
-	(O_BRAB, O_BRAW, O_BRAL, O_BRAS): New opcodes, bra variants.
-	(struct h8_opcodes): Add "bra/s" instruction.
-
-2003-03-31  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h: Implement addx, subx new addressing modes.
-
-2003-03-28  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (EXPAND_UNOP_STD_B): Mark all singleton operands as src.
-	(EXPAND_UNOP_STD_W): Ditto.
-	(EXPAND_UNOP_STD_L): Ditto.
-	* h8sx.h (EXPAND2_STD_DST): Fix src/dst transposition.
-
-2003-03-27  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h: Add all versions of ext, rot, shl, sha, neg, not.
-
-2003-03-26  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h: Attach DST to DISPREG where appropriate.
-
-2003-03-25  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (MOVFROM_IMM): Correct the omission of the immediate data.
-	(MOVFROM_IMM8): New macro, cloned from MOVFROM_IMM.
-
-2003-03-25  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (OP_SIZE): Define.
-
-2003-03-24  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h : Re-implement mov instructions.
-	* h8sx.h: It is never necessary to follow 'E' with zeros.
-	It is not necessary to include B31, B30 etc. with operand lists.
-
-2003-03-22  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (B11, B10, B01, B00): New flags.
-	(EXPAND_TWOOP_B): Add parameter 'BIT', to distinguish between
-	otherwise identical cmp.b #imm8 and sub.b #imm8 instructions.
-	(h8_opcodes): Add new parameter to EXPAND_TWOOP_B calls.
-	(ldc, stc): Newer versions must be word size, to comply 
-	with stricter type checking in the assembler.
-
-2003-03-21  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h: Redo twoop generator macros from scratch.
-	Complete the set of twoop (add, and, cmp, sub, or, xor) opcodes.
-
-2003-03-21  Bernd Schmidt  <bernds@redhat.com>
-
-	* h8sx.h (enum h8_flags): Add R3_16, INDEXB16, INDEXW16, INDEXL16,
-	INDEXB32, INDEXW32, INDEXL32.
-	(OP3ABS16LIST, OP3ABS24LIST, OP3ABS32LIST): Define.
-	(MOVFROM_STD, MOVFROM_AD, MOV_IMM): Take new size arg and use it.
-	All users changed.  Also remove placeholders and replace them with
-	the appropriate indexed addressing modes.
-	(TWOOP_IMM, TWOOP_SHORT_SRC, TWOOP_SHORT_DST, TWOOP_LONG_SRC,
-	TWOOP_1, h8_opcodes): Throughout, do the same placeholder elimination.
-	(BITOP_B, EBITOP_B): New macros.
-	(BITOP, EBITOP): Take new fourth argument.  All users changed.
-	(enum h8_asm_codes): Add O_BRABC, O_BRABS, O_BSRBC, O_BSRBS, O_BCLREQ,
-	O_BCLRNE, O_BSETEQ, O_BSETNE, O_BFLD, O_BFST, O_BISTZ, O_BSTZ).
-	(h8_opcodes): Correct some asm codes (BRA to BRABC and BRABS).
-	Add bsr/bc and bsr/bs insns.  Add new h8sx bitops (bistz, bstz,
-	bset/eq, bset/ne, bclr/eq, bclr/ne, bfld, bfst).
-
-2003-03-20  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (TWOOP_L_IMM16): Use unsigned.
-
-2003-03-19  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (add.w, and.w, cmp.w, sub.w, or.w, xor.w):
-	Add more H8SX instructions.
-	* h8sx.h (NEW_SOP, EOP): Eliminate macros.
-	* h8sx.h (SOP): Eliminate macro.
-	* h8sx.h (B10, B11): New flags.
-	(TWOOP_SHORT_SRC, TWOOP_SHORT_DST, TWOOP_LONG_SRC): New macros.
-	(TWOOP_L_FROMREG, TWOOP_L_TWOREG, TWOOP_MATRIX): New macros.
-	(add.l, and.l, cmp.l, sub.l, or.l, xor.l): Add new H8SX instrs.
-
-2003-03-18  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (h8_opcodes): Add twoop long ops with IMM16, IMM32 src.
-
-2003-03-17  Bernd Schmidt  <bernds@redhat.com>
-
-	* h8sx.h (h8_opcodes): Mark the mov.b reg,ind instruction as available
-	on older H8 processors.
-
-2003-03-17  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h: Define new mov.b insns.
-	
-	* h8sx.h (struct code): Nib array needs to be expanded to 
-	at least 33 elements.
-	(MOVFROM_STD): Move src and dst lists out of infix, make explicit.
-	(MOVFROM_AD): New macro, for ABS and DISP sources.
-	(h8_opcodes): Use MOVFROM_AD for ABS and DISP sources.
-
-	* h8sx.h (MOVW_IM8_PREFIX): Change from 11 to 13.
-	(SRC infix): Replace RS32 with RSIND, RSPOSTINC, etc.
-	(DST infix): Replace RD32 with RDIND, RDPOSTINC, etc.
-	(h8_opcodes): Misc corrections to mov.w, mov.l definitions.
-
-2003-03-17  Bernd Schmidt  <bernds@redhat.com>
-
-	* h8sx.h (enum h8_flags): Add INDEXB, INDEXW, INDEXL, PCIDXB, PCIDXW,
-	PCIDXL, R3_32.
-	(enum h8_asm_codes): Add O_MOVAB, O_MOVAW, O_MOVAL.
-	(h8_opcodes): Add some mova patterns.
-	
-2003-03-17  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (MOVFROM_STD): Parameterize "NAME".
-	(MOV_IMM): Parameterize "NAME".
-	(h8_opcodes): Pass parameterized opcode name to MOV_IMM etc.
-
-2003-03-14  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h: Define new mov.w instructions.
-
-2003-03-14  Bernd Schmidt  <bernds@redhat.com>
-
-	* h8sx.h (SRC_IN_DST): Delete.
-	(OP3): New flag for three-operand instructions.
-	(DSTDISPREG, SRCDISPREG): New tags.
-	(DSTABS16LIST, DSTABS24LIST, DSTABS32LIST): New tags.
-	(DSTDISP16LIST, DSTDISP24LIST, DSTDISP32LIST): New tags.
-	(TWOOP, UNOP3, UNOP3_B, ...): Apply new tags.  
-	(h8_opcodes): Apply new tags.  Add new instructions bra/bc, bra/bs.
-
-2003-03-13  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h: Define new mov.l instructions.
-	(B20, B21): New flags.
-
-	* h8sx.h: ABS16LIST | DST should be DST | ABS16LIST.
-	* h8sx.h (O_MOV_TO_MEM, O_MOV_TO_REG): Replace with O_MOV.
-
-	* h8sx.h (DISP8SRC, DISP8DST): Delete (unused).
-	(DISP2SRC, DISP2DST): Add.
-	(add.w, add.l, cmp.w, cmp.l, mov.w, mov.l, sub.w, sub.l):
-	Use IMM3NZ instead of IMM3.
-	(mov.b, mov.w, mov.l):
-	Use SRC | DISPnnLIST instead of DISPnnSRC, IGNOREn.
-	Use DST | DISPnnLIST instead of DISPnnDST, IGNOREn.
-
-2003-03-06  Bernd Schmidt  <bernds@redhat.com>
-
-	* h8sx.h (UNOP3_B): Add 5 bit immediate forms.
-	(PREFIXLDC, PREFIXSTC, h8_opcodes): When using CCR_EXR, also
-	specify B30.
-
-	(enum h8_flags): Add IMM4.
-	(h8_opcodes): Add new multiply and divide instructions.
-
-2003-03-04  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (TWOOP): Tweak TWOOP so it can be used for sub.b.
-	("sub.b"): Use TWOOP_1.  ("subx.b"): Use TWOOP_1.
-	* h8sx.h (ABS8MEM): Delete unused constant.
-	* h8sx.h (TWOOP): Add ABS8DST, ABS16DST, ABS32DST.
-	* h8sx.h: Those who use L_16U in their args list must also use it in data.
-
-2003-02-27  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (TWOOP): Add opcodes for RS8 -> DISP16, DISP32.
-	* h8sx.h (TWOOP): Add opcodes for IMM8 -> DISP16, DISP32.
-	(ldc, stc): Reduce, normalize.
-	* h8sx.h (TWOOP): Add opcodes for PREINC, PREDEC, POSTINC.
-	* h8sx.h (TWOOP): Add opcodes for RDIND and POSTDEC.
-
-2003-02-27  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (TWOOP2): New macro.  Adds opcodes for RDIND and POSTDEC.
-	(B8IND, B8POSTINC, B8POSTDEC, B8PREINC, B8PREDEC): New prefixes.
-	(addx, subx): Use TWOOP2.
-	(clrmac, stmac, stmac, mac, ldm, stm): Not available on h8300.
-
-2003-02-26  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h ("stc"): Change CCR to CCR_EXR.
-
-2003-02-27  Bernd Schmidt  <bernds@redhat.com>
-
-	* h8sx.h (enum h8_flags): Add L_3NZ, L_8U, L_16U, IMM3NZ, IMM3NZ_NS,
-	IMM16U and IMMM16U_NS.
-	(struct h8_opcode): Use proper immediate codes for new h8sx
-	instructions.
-	(struct h8_opcode): Replace INBASE member with AVAILABLE member.
-	(BITOP, WTWOP, BRANCH, SOP, NEW_SOP, TWOOP, UNOP, UNOP3, UNOP3_B,
-	h8_opcodes): Update accordingly.
-
-2003-02-26  Bernd Schmidt  <bernds@redhat.com>
-
-	* h8sx.h (enum h8_flags): Start at 0x10.  PCREL, KBIT and DBIT are
-	now in MODE.  Add CONST_2, CONST_4, CONST_8, CONST_16, L_5,
-	NO_SYMBOLS, IMM3_NS, IMM2_NS, IMM16_NS.
-	(enum h8_model): New.
-	(UNOP3): Use CONST_2 instead of IMM.
-	(UNOP3_B): Copied from UNOP3 and extended with H*SX instructions.
-	(h8_opcodes): Rearrange so that similar insns with differently sized
-	immediates are sorted in order of increasing width.
-	Use UNOP3 for shlr and shll insns.
-
-2003-02-24  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h ("ldc"): Regularize and eliminate duplicates.
-	("stc"): Ditto.
-
-2003-02-22  Alexandre Oliva  <aoliva@redhat.com>
-
-	* h8sx.h (h8_opcodes): Reorder cmp.w instructions.
-
-2003-02-20  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (L_4): New size code.  Others adjusted.  SIZE becomes 15.
-	(INC, DEC): Define specifically as aliases of POSTINC, PREDEC.
-	(VBR, SBR, MACH, MACL): New members of "mode".
-	(EXR, CCR): Group with VBR, SBR, MACH, MACL.
-	(CTRL): Flag to identify any of the above control registers.
-	(CCR_EXR, VBR_SBR, CC_EX_VB_SB): Identify groups of ctrl regs.
-	(MACREG): Ditto.  Move back into "mode" and group with above.
-	(ABS8SRC, ABS8DST): Redefine without ABS8MEM.
-	(enum ctrlreg): Machine numbering of control regs.
-	(PREFIXLDC): Redefine using CCR_EXR | DST.
-	(PREFIXSTC): New code based on PREFIXLDC.
-	(andc, ldc, orc, stc, xorc): Tweak using the above.
-	Add 'ldc vbr', 'ldc sbr', 'stc vbr', and 'stc vbr'.
-	(ldmac, stmac): Add SRC and DST.
-
-2003-02-20  Alexandre Oliva  <aoliva@redhat.com>
-
-	* h8sx.h: Revert changes to indirect jmp and jsr.
-
-	* h8sx.h: Move MACREG, ABSJMP, ABS8MEM and PCREL back out of
-	MODE.
-
-2003-02-20  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h (struct h8_opcode): Place each opcode on a single line.
-	("ldc"): Match RSIND, not RDIND.
-	("stc"): Match RDIND, not RSIND.
-
-2003-02-20  Bernd Schmidt  <bernds@redhat.com>
-
-	* h8sx.h (enum h8_flags): Make mutually exclusive flags (for
-	size and addressing mode) use combinations of bits instead of
-	one bit each.  Add RSPOSTINC, RDPOSTINC, RSPOSTDEC, RDPOSTDEC,
-	RSPREINC, RDPREINC, RSPREDEC, RDPREDEC.
-	Substitute PRE/POSTINC variants for RDINC etc. throught.
-	
-2003-02-18  Michael Snyder  <msnyder@redhat.com>
-
-	* h8sx.h: New file.
-	* h8300.h: Revert changes for h8sx.
-	* h8sx.h: Fix a merge glitch.
-	* h8sx.h: Change #define constants to enum constants.
-	* h8sx.h: Whitespace clean-up.
-	* h8sx.h: Eliminate extra zero initializers.
-
-2003-02-18  Alexandre Oliva  <aoliva@redhat.com>
-
-	* h8300.h (h8_opcodes): Reorder new entries in decreasing
-	immediate operand size.  Fix register operand of add.l with 3-bit
-	immediate operand.
-
-2003-02-12  Michael Snyder  <msnyder@redhat.com>
-
-	* h8300.h: Add new sub.w instruction.  Change jmp imediate-24 
-	from RSIND to RS32
-
-2003-02-12  Michael Snyder  <msnyder@redhat.com>
-
-	* h8300.h: Add some more new instructions for the h8sx.
-
-2003-02-11  Michael Snyder  <msnyder@redhat.com>
-
-	* h8300.h: Add 10 new instructions for the h8sx.
-
-2002-12-13  Dave Brolley  <brolley@redhat.com>
-
-	* cgen.h (symcat.h): #include it.
-	(cgen-bitset.h): #include it.
-	(CGEN_ATTR_VALUE_TYPE): Now a union.
-	(CGEN_ATTR_VALUE): Reference macros generated in opcodes/<arch>-desc.h.
-	(CGEN_ATTR_ENTRY): 'value' now unsigned.
-	(CGEN_ATTR_CGEN_INSN_ALIAS_VALUE): Duplicated macro definition from
-	opcodes/<arch>-desc.h.
-	(CGEN_CPU_ISAS): New macro.
-	(cgen_cpu_desc): 'isas' now (CGEN_ISA_MASK*).
-	* cgen-bitset.h: New file.
-	
-2002-09-26  Richard Sandiford  <rsandifo@redhat.com>
-
-	* mips.h (INSN_4121): Rename to INSN_4120.
-	(CPU_VR4121): Rename to CPU_VR4120.
-	(COMPUTE_MEMBERS_MASK): Update accordingly.
-
-2002-07-16  Nick Clifton  <nickc@cambridge.redhat.com>
+2003-09-04  Nick Clifton  <nickc@redhat.com>
 
 	* v850.h (PROCESSOR_V850E1): Define.
 
-2002-03-07  Graydon Hoare  <graydon@redhat.com>
+2003-06-30  Nick Clifton  <nickc@redhat.com>
 
-	* cgen.h (cgen_maybe_multi_ifield): const-ify union members.
+	* Import these patches from gcc 3.3 branch:
 
-2001-11-15  graydon hoare  <graydon@redhat.com>
+	2002-12-24    Dmitry Diky <diwil@mail.ru>
 
-	* cgen.h (CGEN_MAYBE_MULTI_IFLD): New structure.
-	(CGEN_OPERAND): Add CGEN_MAYBE_MULTI_IFLD field.
+		* msp430.h: New file.  Defines msp430 opcodes.
 
-2001-10-09  Eric Christopher  <echristo@redhat.com>
+	2002-11-18  Klee Dienes  <kdienes@apple.com>
 
-	* mips.h: Remove mips3264 sanitization.
+		* arc.h (arc_ext_opcodes): Declare as extern.
+		(arc_ext_operands): Declare as extern.
+		* i860.h (i860_opcodes): Declare as const.
 
-2001-08-01  Aldy Hernandez  <aldyh@redhat.com>
+	2003-04-07  Michael Snyder  <msnyder@redhat.com>
 
-       * mips.h (INSN_ISA_MASK): Nuke bits 12-15.
-	(COMPUTE_MEMBERS_MASK): Delete a duplicate check for CPU_VR5400.
+		* h8300.h (ldc/stc): Fix up src/dst swaps.
 
-       * mips.h (INSN_5500): New macro.
-       (CPU_VR5500): New macro.
-       (COMPUTE_MEMBERS_MASK): Add 5500 support.
+	2003-03-17 D.Venkatasubramanian <dvenkat@noida.hcltech.com>
 
-2001-03-18  Eric Christopher  <echristo@redhat.com>
+		* h8300.h (O_SYS_CMDLINE): New pseudo opcode for command line
+		processing.
 
-	* mips.h (OPCODE_IS_MEMBER): Fix typo membership_mask -> member_mask.
+	2003-02-21  Noida D.Venkatasubramanian  <dvenkat@noida.hcltech.com>
 
-2001-02-22  Will Cohen  <wcohen@redhat.com>
+		* h8300.h (ldmac, stmac): Replace MACREG with MS32 and MD32.
 
-	* mips.h (COMPUTE_MEMBERS_MASK): Changed to use cpu parameter and
-	replaced 64 and 32 with appropriate CPU_MIPS32, CPU_MIPS64,
-	ISA_MIPS32, and ISA_MIPS64 defines.
+	2002-12-30 D.Venkatasubramanian <dvenkat@noida.hcltech.com>
 
-2001-01-16  Eric Christopher  <echristo@redhat.com>
+		* h8300.h: Added some more pseudo opcodes for system call
+		processing.
 
-	* mips.h (OPCODE_IS_MEMBER): Fix typo.
+	2002-11-19  Klee Dienes  <kdienes@apple.com>
 
-2001-01-13  Chandrakala Chavva  <cchavva@redhat.com>
+		* h8300.h (h8_opcode): Remove 'noperands', 'idx', and 'size'
+		fields.
+		(h8_opcodes). Modify initializer and initializer macros to
+		no longer initialize the removed fields.
 
-	* mips.h (mips_opcode): Added disable_insn new element.
+	2002-11-18  Klee Dienes  <kdienes@apple.com>
 
-2000-12-20  Chandrakala Chavva  <cchavva@redhat.com>
+		* h8300.h (h8_opcode): Remove 'length' field.
+		(h8_opcodes): Mark as 'const' (both the declaration and
+		definition).  Modify initializer and initializer macros to
+		no longer initialize the length field.
 
-	* mips.h: Added E_MIPS_MACH_4181 and INSN_4181.
+	2002-11-18  Klee Dienes  <kdienes@apple.com>
 
-Wed Apr 12 17:11:20 2000  Donald Lindsay  <dlindsay@hound.cygnus.com>
+		* arc.h (arc_ext_opcodes): Declare as extern.
+		(arc_ext_operands): Declare as extern.
+		* i860.h (i860_opcodes): Declare as const.
 
-	* d10v.h: added ALONE attribute for d10v_opcode.exec_type.
+	2002-12-16  Alan Modra  <amodra@bigpond.net.au>
 
-2000-02-19  Michael Meissner  <meissner@redhat.com>
+		* hppa.h (completer_chars): #if 0 out.
 
-	* d30v.h (FLAG_NOT_WITH_ADDSUBppp): Fix typo.
+		* ns32k.h (struct ns32k_opcode): Constify "name", "operands" and
+		"default_args".
+		(struct not_wot): Constify "args".
+		(struct not): Constify "name".
+		(numopcodes): Delete.
+		(endop): Delete.
 
-2000-02-14  Chandra Chavva  <cchavva@cygnus.com>
+	2003-05-13  Stephane Carrez  <stcarrez@nerim.fr>
 
-	* d30v (FLAG_NOT_WITH_ADDSUBppp): Redefined as operation cannot be 
-	combined in parallel with ADD/SUBppp.
+		* m68hc11.h (M68HC12_BANK_VIRT): Define to 0x010000
 
-2000-04-01  Alexandre Oliva  <aoliva@cygnus.com>
+	2003-01-23  Alan Modra  <amodra@bigpond.net.au>
 
-	* mn10300.h (AM33_2): Renamed from AM33.
+		* m68hc11.h (cpu6812s): Define.
 
-2000-03-31  Alexandre Oliva  <aoliva@cygnus.com>
+	2002-12-13  Alan Modra  <amodra@bigpond.net.au>
 
-	* mn10300.h (AM332, FMT_D3): Defined.
-	(MN10300_OPERAND_FSREG, MN10300_OPERAND_FDREG): Likewise.
-	(MN10300_OPERAND_FPCR): Likewise.
+		* pj.h (pj_opc_info_t): Add union.
 
-Fri Mar 24 16:31:03 2000  Jim Wilson  <wilson@cygnus.com>
+	2002-08-19  Elena Zannoni <ezannoni@redhat.com>
 
-	* ia64.h (ia64_opnd, ia64_dependency_semantics,
-	ia64_resource_specifier): Add MSR support.
+        	From matthew green  <mrg@redhat.com>
 
-2000-02-10  Timothy Wall  <twall@cygnus.com>
+		* ppc.h (PPC_OPCODE_SPE): New opcode flag for Powerpc e500
+		instructions.
+		(PPC_OPCODE_ISEL, PPC_OPCODE_BRLOCK, PPC_OPCODE_PMR,
+		PPC_OPCODE_CACHELCK, PPC_OPCODE_RFMCI): New opcode flags
+		for the e500x2 Integer select, branch locking, performance
+		monitor, cache locking and machine check APUs,
+		respectively.
+		(PPC_OPCODE_EFS): New opcode type for efs* instructions.
+		(PPC_OPCODE_CLASSIC): New opcode type for Classic PowerPC
+		instructions.
 
-	* ia64.h (ia64_resource_specifier): Added RS_AR_FPSR to aid in
-	distinguishing FPSR usage.
+	2003-04-09  J. Grant  <jg-binutils@jguk.org>
 
-2000-02-03  Timothy Wall  <twall@cygnus.com>
-	
-	* ia64.h (IA64_OPCODE_MOD_CFM_RRBS): New flag to optimize looking
-	  up this type of insn.
-	  (ia64_resource_specifier): Add new RSE category of
-	  resource. 
-	
-2000-01-03  Timothy Wall  <twall@cygnus.com>
+		* mips.h: Correct comment typo.
 
-	* ia64.h: add X unit and type
+	2003-01-07  Chris Demetriou  <cgd@broadcom.com>
 
-1999-12-12  Timothy Wall  <twall@cygnus.com>
+		* mips.h: Fix missing space in comment.
+		(INSN_ISA1, INSN_ISA2, INSN_ISA3, INSN_ISA4, INSN_ISA5)
+		(INSN_ISA32, INSN_ISA32R2, INSN_ISA64): Shift values right
+		by four bits.
 
-	* ia64.h (ia64_resource_specifier): add resource specifier enums
-	for cfm, inservice, gr0 and pr63.
+	2003-01-02  Chris Demetriou  <cgd@broadcom.com>
 
-1999-12-04  Timothy Wall  <twall@ppc>
+		* mips.h: Update copyright years to include 2002 (which
+		had been missed previously) and 2003.  Make comments about
+		"+A", "+B", and "+C" operand types more descriptive.
 
-	* ia64.h (struct ia64_opcode_dependency): dependencies now
-	attached to completers rather than main_table opcode templates;
-	group DV chks and regs into a single structure.
+	2002-12-31  Chris Demetriou  <cgd@broadcom.com>
 
-1999-11-21  Timothy Wall  <twall@cygnus.com>
+		* mips.h: Note that the "+D" operand type name is now used.
 
-	* ia64.h (ia64_dependency_mode): dependency checking support.
-	Added dependency lists to ia64_opcode.
+	2002-12-30  Chris Demetriou  <cgd@broadcom.com>
 
-1999-09-30  Tim Wall <twall@cygnus.com>
+		* mips.h: Document "+" as the start of two-character
+		operand type names, and add new "K", "+A", "+B", and "+C"
+		operand types.
+		(OP_MASK_INSMSB, OP_SH_INSMSB, OP_MASK_EXTMSB)
+		(OP_SH_EXTMSB, INSN_ISA32R2, ISA_MIPS32R2, CPU_MIPS32R2):
+		New defines.
 
-        * tic54x.h: add tic54x_unknown_opcode as a separate struct
+	2002-12-19  Chris Demetriou  <cgd@broadcom.com>
 
-1999-09-10  Tim Wall <twall@cygnus.com>
+		* mips.h (OP_OP_COP0, OP_OP_COP1, OP_OP_COP2, OP_OP_COP3,
+		OP_OP_LWC1, OP_OP_LWC2, OP_OP_LWC3, OP_OP_LDC1,
+		OP_OP_LDC2, OP_OP_LDC3, OP_OP_SWC1, OP_OP_SWC2,
+		OP_OP_SWC3, OP_OP_SDC1, OP_OP_SDC2, OP_OP_SDC3): Define.
 
-        * tic54x.h: correct lk addressing decoder; clarify field names
+	2003-03-21  Martin Schwidefsky  <schwidefsky@de.ibm.com>
 
-Thu Mar 18 11:13:18 1999  Jeffrey A Law  (law@cygnus.com)
-
-	* hppa.h (dcor, uxor): New PA2.0 instructions.
-
-	* hppa.h (cmpclr, cmpiclr): New PA2.0 instructions.
-
-	* hppa.h (and, or, xor, andcm): New PA2.0 instructions.
-
-	* hppa.h (addi): New PA2.0 instructions.
-
-Thu Mar 18 02:36:32 1999  Jeffrey A Law  (law@cygnus.com)
-
-	* hppa.h (add, clrbts, pushnom, pushbts, mtia): Add new PA2.0
-	instructions.
-
-Fri Jan 15 23:38:50 1999  Jeffrey A Law  (law@cygnus.com)
-
-	* hppa.h (bve): Add new PA2.0 instruction.
-
-	* hppa.h (mtsarcm): Add new PA2.0 instruction.
-
-	* hppa.h: Fix mask for PA2.0 floating point load instructions.
-
-Mon Jan 11 13:38:32 1999  Jeffrey A Law  (law@cygnus.com)
-
-	* hppa.h (fcmp): Tweak PA2.0 support.
-
-1999-07-31  Tim Wall <twall@cygnus.com>
-
-	* tic54x.h: NEW tic54x opcode info
-	
-Thu Jul 15 19:20:20 1999  Jim Wilson  <wilson@cygnus.com>
-
-	* ia64.h (enum ia64_opnd): Add IA64_OPND_IMM8U4,
-	IA64_OPND_IMM8M1U4, IA64_OPND_IMM8M1U8.
-
-Tue Jun 15 15:42:27 1999  Bob Manson  <manson@charmed.cygnus.com>
-
-	* ia64.h(ia64_dis_opcode): Declare.
-
-1999-06-03  David Mosberger  <davidm@hpl.hp.com>
-
-        * ia64.h: New file.
-
-1998-12-13  Gavin Romig-Koch  <gavin@cygnus.com>
-
-	* mips.h (INSN_4121): New.
-
-Fri Oct 24 22:36:20 1997  Ken Raeburn  <raeburn@cygnus.com>
-
-	* mips.h: (OP_{MASK,SH}_{VECBYTE,VECALIGN}): New macros for VR5400
-	support.
+		* s390.h (s390_opcode_arch_val): Rename to s390_opcode_mode_val.
+		(S390_OPCODE_ESAME): Rename to S390_OPCODE_ZARCH.
+		(s390_opcode): Remove architecture. Add modes and min_cpu.
 
 
 Local Variables:

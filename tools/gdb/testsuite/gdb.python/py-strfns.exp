@@ -1,4 +1,4 @@
-# Copyright (C) 2012 Free Software Foundation, Inc.
+# Copyright (C) 2012-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -64,23 +64,14 @@ gdb_test "p /d {char\[4\]} arg" "= \\{0, 1, 2, 4\\}"
 # Verify use on a core file.
 
 proc test_strfns_core_file { } {
-    global objdir subdir gdb_prompt testfile
+    global gdb_prompt testfile
 
-    set filename "${objdir}/${subdir}/py-strfns.core"
-    set escapedfilename [string_to_regexp $filename]
+    set filename [standard_output_file py-strfns.core]
 
-    gdb_test_multiple "gcore $filename" \
-	"save a corefile" \
-	{
-	    -re "Saved corefile ${escapedfilename}\[\r\n\]+$gdb_prompt $" {
-		pass "save a corefile"
-	    }
-	    -re "Can't create a corefile\[\r\n\]+$gdb_prompt $" {
-		unsupported "save a corefile"
-		# No use proceeding from here.
-		return
-	    }
-	}
+    if {![gdb_gcore_cmd "$filename" "save a corefile"]} {
+	# No use proceeding from here.
+	return
+    }
 
     clean_restart $testfile
 

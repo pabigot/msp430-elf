@@ -3602,3 +3602,4 @@ int mpu_store_mem_test(SIM_DESC sd, unsigned int addr, int size, int base_reg)
 
   return result;
 }
+

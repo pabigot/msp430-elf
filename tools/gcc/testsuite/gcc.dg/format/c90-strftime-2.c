@@ -29,3 +29,4 @@ foo (char *s, size_t m, const struct tm *tp)
   strftime (s, m, "%EX", tp); /* { dg-warning "C" "%E not in C90" } */
   strftime (s, m, "%OW", tp); /* { dg-warning "C" "%O not in C90" } */
 }
+/* { dg-prune-output ".*__int20.*" } */

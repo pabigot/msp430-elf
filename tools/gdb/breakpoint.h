@@ -1,5 +1,5 @@
 /* Data structures associated with breakpoints in GDB.
-   Copyright (C) 1992-2004, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 1992-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,10 +24,11 @@
 #include "vec.h"
 #include "ax.h"
 #include "command.h"
+#include "break-common.h"
 
 struct value;
 struct block;
-struct breakpoint_object;
+struct gdbpy_breakpoint_object;
 struct get_number_or_range_state;
 struct thread_info;
 struct bpstats;
@@ -214,15 +215,6 @@ enum bpdisp
     disp_disable,		/* Disable it */
     disp_donttouch		/* Leave it alone */
   };
-
-enum target_hw_bp_type
-  {
-    hw_write   = 0, 		/* Common  HW watchpoint */
-    hw_read    = 1, 		/* Read    HW watchpoint */
-    hw_access  = 2, 		/* Access  HW watchpoint */
-    hw_execute = 3		/* Execute HW breakpoint */
-  };
-
 
 /* Status of breakpoint conditions used when synchronizing
    conditions with the target.  */
@@ -465,13 +457,17 @@ struct bp_location
      it becomes 0 this location is retired.  */
   int events_till_retirement;
 
-  /* Line number of this address.  */
+  /* Line number which was used to place this location.
+
+     Breakpoint placed into a comment keeps it's user specified line number
+     despite ADDRESS resolves into a different line number.  */
 
   int line_number;
 
-  /* Source file name of this address.  */
+  /* Symtab which was used to place this location.  This is used
+     to find the corresponding source file name.  */
 
-  char *source_file;
+  struct symtab *symtab;
 };
 
 /* This structure is a collection of function pointers that, if available,
@@ -575,8 +571,7 @@ struct breakpoint_ops
      This function is called inside `create_breakpoint'.  */
   void (*create_breakpoints_sal) (struct gdbarch *,
 				  struct linespec_result *,
-				  struct linespec_sals *, char *,
-				  char *,
+				  char *, char *,
 				  enum bptype, enum bpdisp, int, int,
 				  int, const struct breakpoint_ops *,
 				  int, int, int, unsigned);
@@ -588,6 +583,14 @@ struct breakpoint_ops
      This function is called inside `addr_string_to_sals'.  */
   void (*decode_linespec) (struct breakpoint *, char **,
 			   struct symtabs_and_lines *);
+
+  /* Return true if this breakpoint explains a signal.  See
+     bpstat_explains_signal.  */
+  int (*explains_signal) (struct breakpoint *, enum gdb_signal);
+
+  /* Called after evaluating the breakpoint's condition,
+     and only if it evaluated true.  */
+  void (*after_condition_true) (struct bpstats *bs);
 };
 
 /* Helper for breakpoint_ops->print_recreate implementations.  Prints
@@ -700,7 +703,8 @@ struct breakpoint
        there is no condition.  */
     char *cond_string;
 
-    /* String form of extra parameters, or NULL if there are none.  */
+    /* String form of extra parameters, or NULL if there are none.
+     Malloc'd.  */
     char *extra_string;
 
     /* Holds the address of the related watchpoint_scope breakpoint
@@ -733,8 +737,8 @@ struct breakpoint
        Python object that has been associated with this breakpoint.
        This is always NULL for a GDB that is not script enabled.  It
        can sometimes be NULL for enabled GDBs as not all breakpoint
-       types are tracked by the Python scripting API.  */
-    struct breakpoint_object *py_bp_object;
+       types are tracked by the scripting language API.  */
+    struct gdbpy_breakpoint_object *py_bp_object;
   };
 
 /* An instance of this type is used to represent a watchpoint.  It
@@ -756,12 +760,12 @@ struct watchpoint
   struct expression *exp;
   /* The largest block within which it is valid, or NULL if it is
      valid anywhere (e.g. consists just of global symbols).  */
-  struct block *exp_valid_block;
+  const struct block *exp_valid_block;
   /* The conditional expression if any.  */
   struct expression *cond_exp;
   /* The largest block within which it is valid, or NULL if it is
      valid anywhere (e.g. consists just of global symbols).  */
-  struct block *cond_exp_valid_block;
+  const struct block *cond_exp_valid_block;
   /* Value of the watchpoint the last time we checked it, or NULL when
      we do not know the value yet or the value was not readable.  VAL
      is never lazy.  */
@@ -979,11 +983,10 @@ struct bpstat_what bpstat_what (bpstat);
 /* Find the bpstat associated with a breakpoint.  NULL otherwise.  */
 bpstat bpstat_find_breakpoint (bpstat, struct breakpoint *);
 
-/* Nonzero if a signal that we got in wait() was due to circumstances
-   explained by the BS.  */
-/* Currently that is true if we have hit a breakpoint, or if there is
-   a watchpoint enabled.  */
-#define bpstat_explains_signal(bs) ((bs) != NULL)
+/* Nonzero if a signal that we got in target_wait() was due to
+   circumstances explained by the bpstat; the signal is therefore not
+   random.  */
+extern int bpstat_explains_signal (bpstat, enum gdb_signal);
 
 /* Nonzero is this bpstat causes a stop.  */
 extern int bpstat_causes_stop (bpstat);
@@ -1183,7 +1186,10 @@ extern void awatch_command_wrapper (char *, int, int);
 extern void rwatch_command_wrapper (char *, int, int);
 extern void tbreak_command (char *, int);
 
+extern struct breakpoint_ops base_breakpoint_ops;
 extern struct breakpoint_ops bkpt_breakpoint_ops;
+extern struct breakpoint_ops tracepoint_breakpoint_ops;
+extern struct breakpoint_ops dprintf_breakpoint_ops;
 
 extern void initialize_breakpoint_ops (void);
 
@@ -1212,7 +1218,13 @@ extern void
 				 char *addr_string,
 				 const struct breakpoint_ops *ops,
 				 int tempflag,
+				 int enabled,
 				 int from_tty);
+
+extern void init_catchpoint (struct breakpoint *b,
+			     struct gdbarch *gdbarch, int tempflag,
+			     char *cond_string,
+			     const struct breakpoint_ops *ops);
 
 /* Add breakpoint B on the breakpoint list, and notify the user, the
    target and breakpoint_created observers of its existence.  If
@@ -1236,7 +1248,7 @@ enum breakpoint_create_flags
 extern int create_breakpoint (struct gdbarch *gdbarch, char *arg,
 			      char *cond_string, int thread,
 			      char *extra_string,
-			      int parse_condition_and_thread,
+			      int parse_arg,
 			      int tempflag, enum bptype wanted_type,
 			      int ignore_count,
 			      enum auto_boolean pending_break_support,
@@ -1404,6 +1416,11 @@ extern void disable_breakpoints_in_shlibs (void);
 /* This function returns TRUE if ep is a catchpoint.  */
 extern int is_catchpoint (struct breakpoint *);
 
+/* Shared helper function (MI and CLI) for creating and installing
+   a shared object event catchpoint.  */
+extern void add_solib_catchpoint (char *arg, int is_load, int is_temp,
+                                  int enabled);
+
 /* Enable breakpoints and delete when hit.  Called with ARG == NULL
    deletes all breakpoints.  */
 extern void delete_command (char *arg, int from_tty);
@@ -1515,6 +1532,8 @@ extern int user_breakpoint_p (struct breakpoint *);
 /* Attempt to determine architecture of location identified by SAL.  */
 extern struct gdbarch *get_sal_arch (struct symtab_and_line sal);
 
-extern void handle_solib_event (void);
+extern void breakpoint_free_objfile (struct objfile *objfile);
+
+extern char *ep_parse_optional_if_clause (char **arg);
 
 #endif /* !defined (BREAKPOINT_H) */

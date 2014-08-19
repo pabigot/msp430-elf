@@ -1,3 +1,4 @@
+/* { dg-skip-if "" { *-*-* } { "*" } { "" } } */
 typedef union {
   __const struct sockaddr *__restrict __sockaddr__;
 } __CONST_SOCKADDR_ARG __attribute__ ((__transparent_union__));

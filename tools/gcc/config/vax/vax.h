@@ -1,5 +1,5 @@
 /* Definitions of target machine for GNU compiler.  VAX version.
-   Copyright (C) 1987-2013 Free Software Foundation, Inc.
+   Copyright (C) 1987-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -17,23 +17,6 @@ You should have received a copy of the GNU General Public License
 along with GCC; see the file COPYING3.  If not see
 <http://www.gnu.org/licenses/>.  */
 
-
-/* XXX - FIXME - proper defintions needed.
-   Required so that eliminate_reg_to_offset() in dwarf2.c will work. */
-#define ELIMINABLE_REGS						\
-{{ ARG_POINTER_REGNUM,        STACK_POINTER_REGNUM            },\
- { ARG_POINTER_REGNUM,        FRAME_POINTER_REGNUM            },\
- { FRAME_POINTER_REGNUM,      STACK_POINTER_REGNUM            }}
-
-#define INITIAL_ELIMINATION_OFFSET(FROM, TO, OFFSET)		\
-{								\
-  if ((FROM) == FRAME_POINTER_REGNUM)				\
-    (OFFSET) = get_frame_size () + crtl->outgoing_args_size;	\
-  else if ((FROM) == ARG_POINTER_REGNUM)			\
-   (OFFSET) = get_frame_size ();				\
-  else								\
-    gcc_unreachable ();						\
-}
 
 /* Target CPU builtins.  */
 #define TARGET_CPU_CPP_BUILTINS()		\
@@ -312,7 +295,7 @@ enum reg_class { NO_REGS, ALL_REGS, LIM_REG_CLASSES };
 /* 1 if N is a possible register number for function argument passing.
    On the VAX, no registers are used in this way.  */
 
-#define FUNCTION_ARG_REGNO_P(N) 0
+#define FUNCTION_ARG_REGNO_P(N) ((void) (N), 0)
 
 /* Define a data type for recording info about an argument list
    during the scan of that argument list.  This data type should
@@ -448,7 +431,6 @@ enum reg_class { NO_REGS, ALL_REGS, LIM_REG_CLASSES };
 #define REG_OK_FOR_BASE_P(X) REGNO_OK_FOR_BASE_P (REGNO (X))
 
 #endif
-
 
 /* Specify the machine mode that this machine uses
    for the index in the tablejump instruction.  */
@@ -723,3 +705,4 @@ VAX operand formatting codes:
    actually have any code whatsoever for which this isn't overridden
    by the proper FDE definition.  */
 #define INCOMING_RETURN_ADDR_RTX gen_rtx_REG (Pmode, PC_REGNUM)
+

@@ -1,4 +1,4 @@
-# Copyright 2008-2012 Free Software Foundation, Inc.
+# Copyright 2008-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -39,6 +39,11 @@ set bp_location [gdb_get_line_number "set breakpoint here" $hdrfile]
 gdb_test "break $hdrfile:$bp_location" \
     "Breakpoint.*at.*: $hdrfile:$bp_location. \\(2 locations\\).*" \
     "set breakpoint"
+
+# Do "info break" now so we can easily compare it with the later "info break"
+# if problems arise.
+gdb_test "info break" \
+    "\[\r\n\]1\.1.* y .* at .*$hdrfile:$bp_location.*\[\r\n\]1\.2.* y .* at .*$hdrfile:$bp_location.*"
 
 gdb_run_cmd
 gdb_expect {

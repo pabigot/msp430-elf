@@ -1,6 +1,6 @@
 /* Operating system specific defines to be used when targeting GCC for
    hosting on Windows32, using a Unix style C library and tools.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -18,11 +18,20 @@ You should have received a copy of the GNU General Public License
 along with GCC; see the file COPYING3.  If not see
 <http://www.gnu.org/licenses/>.  */
 
-#define EXTRA_OS_CPP_BUILTINS()  /* Nothing.  */
+#define EXTRA_OS_CPP_BUILTINS()					\
+  do								\
+    {								\
+      builtin_define ("__CYGWIN__");				\
+      if (!TARGET_64BIT)					\
+	builtin_define ("__CYGWIN32__");			\
+      builtin_define ("__unix__");				\
+      builtin_define ("__unix");				\
+    }								\
+  while (0)
 
 #undef CPP_SPEC
 #define CPP_SPEC "%(cpp_cpu) %{posix:-D_POSIX_SOURCE} \
-  -D__CYGWIN32__ -D__CYGWIN__ %{!ansi:-Dunix} -D__unix__ -D__unix \
+  %{!ansi:-Dunix} \
   %{mwin32:-DWIN32 -D_WIN32 -D__WIN32 -D__WIN32__ %{!ansi:-DWINNT}} \
   %{!nostdinc:%{!mno-win32:-idirafter ../include/w32api%s -idirafter ../../include/w32api%s}}\
 "
@@ -36,6 +45,7 @@ along with GCC; see the file COPYING3.  If not see
 #undef ENDFILE_SPEC
 #define ENDFILE_SPEC \
   "%{Ofast|ffast-math|funsafe-math-optimizations:crtfastmath.o%s}\
+   %{!shared:%:if-exists(default-manifest.o%s)}\
    crtend.o%s"
 
 /* Normally, -lgcc is not needed since everything in it is in the DLL, but we
@@ -133,5 +143,5 @@ along with GCC; see the file COPYING3.  If not see
 #define LIBGCC_SONAME "cyggcc_s" LIBGCC_EH_EXTN "-1.dll"
 
 /* We should find a way to not have to update this manually.  */
-#define LIBGCJ_SONAME "cyggcj" /*LIBGCC_EH_EXTN*/ "-13.dll"
+#define LIBGCJ_SONAME "cyggcj" /*LIBGCC_EH_EXTN*/ "-15.dll"
 

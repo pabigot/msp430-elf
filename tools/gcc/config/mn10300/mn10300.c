@@ -1,5 +1,5 @@
 /* Subroutines for insn-output.c for Matsushita MN10300 series
-   Copyright (C) 1996-2013 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
    Contributed by Jeff Law (law@cygnus.com).
 
    This file is part of GCC.
@@ -24,6 +24,9 @@
 #include "tm.h"
 #include "rtl.h"
 #include "tree.h"
+#include "stor-layout.h"
+#include "varasm.h"
+#include "calls.h"
 #include "regs.h"
 #include "hard-reg-set.h"
 #include "insn-config.h"
@@ -56,18 +59,15 @@ int mn10300_protect_label;
 /* Selected processor type for tuning.  */
 enum processor_type mn10300_tune_cpu = PROCESSOR_DEFAULT;
 
-int flag_hosted __attribute__((weak));
-
 #define CC_FLAG_Z	1
 #define CC_FLAG_N	2
 #define CC_FLAG_C	4
 #define CC_FLAG_V	8
 
-static int cc_flags_for_mode (enum machine_mode);
-static int cc_flags_for_code (enum rtx_code);
+static int cc_flags_for_mode(enum machine_mode);
+static int cc_flags_for_code(enum rtx_code);
 
 /* Implement TARGET_OPTION_OVERRIDE.  */
-
 static void
 mn10300_option_override (void)
 {
@@ -300,11 +300,10 @@ mn10300_print_operand (FILE *file, rtx x, int code)
 	case CONST_INT:
 	  {
 	    rtx low, high;
-
-	    split_double (x, & low, & high);
-	    fprintf (file, "%ld", (long) INTVAL (low));
+	    split_double (x, &low, &high);
+	    fprintf (file, "%ld", (long)INTVAL (low));
 	    break;
-	  }
+	    }
 
 	default:
 	  gcc_unreachable ();
@@ -342,10 +341,8 @@ mn10300_print_operand (FILE *file, rtx x, int code)
 		REAL_VALUE_TO_TARGET_DOUBLE (rv, val);
 		fprintf (file, "0x%lx", val[1]);
 		break;;
-
 	      case SFmode:
 		gcc_unreachable ();
-
 	      case VOIDmode:
 	      case DImode:
 		mn10300_print_operand_address (file,
@@ -360,9 +357,8 @@ mn10300_print_operand (FILE *file, rtx x, int code)
 	case CONST_INT:
 	  {
 	    rtx low, high;
-
-	    split_double (x, & low, & high);
-	    fprintf (file, "%ld", (long) INTVAL (high));
+	    split_double (x, &low, &high);
+	    fprintf (file, "%ld", (long)INTVAL (high));
 	    break;
 	  }
 
@@ -637,7 +633,6 @@ mn10300_get_live_callee_saved_regs (unsigned int * bytes_saved)
 {
   int mask;
   int i;
-
   unsigned int count;
 
   count = mask = 0;
@@ -693,20 +688,19 @@ static void
 mn10300_gen_multiple_store (unsigned int mask)
 {
   /* The order in which registers are stored, from SP-4 through SP-N*4.  */
-  static const unsigned int store_order[8] =
-    {
-      /* e2, e3: never saved */
-      FIRST_EXTENDED_REGNUM + 4,
-      FIRST_EXTENDED_REGNUM + 5,
-      FIRST_EXTENDED_REGNUM + 6,
-      FIRST_EXTENDED_REGNUM + 7,
-      /* e0, e1, mdrq, mcrh, mcrl, mcvf: never saved. */
-      FIRST_DATA_REGNUM + 2,
-      FIRST_DATA_REGNUM + 3,
-      FIRST_ADDRESS_REGNUM + 2,
-      FIRST_ADDRESS_REGNUM + 3,
-      /* d0, d1, a0, a1, mdr, lir, lar: never saved.  */
-    };
+  static const unsigned int store_order[8] = {
+    /* e2, e3: never saved */
+    FIRST_EXTENDED_REGNUM + 4,
+    FIRST_EXTENDED_REGNUM + 5,
+    FIRST_EXTENDED_REGNUM + 6,
+    FIRST_EXTENDED_REGNUM + 7,
+    /* e0, e1, mdrq, mcrh, mcrl, mcvf: never saved. */
+    FIRST_DATA_REGNUM + 2,
+    FIRST_DATA_REGNUM + 3,
+    FIRST_ADDRESS_REGNUM + 2,
+    FIRST_ADDRESS_REGNUM + 3,
+    /* d0, d1, a0, a1, mdr, lir, lar: never saved.  */
+  };
 
   rtx x, elts[9];
   unsigned int i;
@@ -747,16 +741,31 @@ mn10300_gen_multiple_store (unsigned int mask)
   F (emit_insn (x));
 }
 
+static inline unsigned int
+popcount (unsigned int mask)
+{
+  unsigned int count = 0;
+  
+  while (mask)
+    {
+      ++ count;
+      mask &= ~ (mask & - mask);
+    }
+  return count;
+}
+
 void
 mn10300_expand_prologue (void)
 {
   HOST_WIDE_INT size = mn10300_frame_size ();
+  unsigned int mask;
+
+  mask = mn10300_get_live_callee_saved_regs (NULL);
+  /* If we use any of the callee-saved registers, save them now.  */
+  mn10300_gen_multiple_store (mask);
 
   if (flag_stack_usage_info)
-    current_function_static_stack_size = size;
-
-  /* If we use any of the callee-saved registers, save them now.  */
-  mn10300_gen_multiple_store (mn10300_get_live_callee_saved_regs (NULL));
+    current_function_static_stack_size = size + popcount (mask) * 4;
 
   if (TARGET_AM33_2 && fp_regs_to_save ())
     {
@@ -772,6 +781,9 @@ mn10300_expand_prologue (void)
       } strategy;
       unsigned int strategy_size = (unsigned)-1, this_strategy_size;
       rtx reg;
+
+      if (flag_stack_usage_info)
+	current_function_static_stack_size += num_regs_to_save * 4;
 
       /* We have several different strategies to save FP registers.
 	 We can store them using SP offsets, which is beneficial if
@@ -798,8 +810,7 @@ mn10300_expand_prologue (void)
    : ((S) + 4 * (N) >= (L)) ? (((L) - (S)) / 4 * (SIZE2) \
 			       + ((S) + 4 * (N) - (L)) / 4 * (SIZE1)) \
    : 0 * (S) + (ELSE))
-
-#define SIZE_FMOV_SP_(S,N)		       \
+#define SIZE_FMOV_SP_(S,N) \
   (SIZE_FMOV_LIMIT ((S), (N), (1 << 24), 7, 6, \
                    SIZE_FMOV_LIMIT ((S), (N), (1 << 8), 6, 4, \
 				    (S) ? 4 * (N) : 3 + 4 * ((N) - 1))))
@@ -1240,31 +1251,13 @@ mn10300_expand_epilogue (void)
     emit_jump_insn (gen_return_ret (GEN_INT (size + reg_save_bytes)));
 }
 
-/* Emit the opcodes we need for call-graph profiling.  We have to do
-   this inline because the PLT lookup code may corrupt the temporary
-   registers we would have to use.  */
-
-void
-am33_linux_function_profiler (FILE *f)
-{
-  fprintf (f, "movm [all],(sp)\n");
-  fprintf (f, "\tmov %d,a1\n", cfun->machine->fp_rv_offset);
-  fprintf (f, "\tadd a3,a1\n");
-  fprintf (f, "\tmov (a1),d0\n");
-  fprintf (f, "\tmov pc,a1\n");
-  fprintf (f, "\tmov a1,d1\n");
-  fprintf (f, "\tcalls _mcount\n");
-  fprintf (f, "movm (sp),[all]\n");
-}
-
 /* Recognize the PARALLEL rtx generated by mn10300_gen_multiple_store().
    This function is for MATCH_PARALLEL and so assumes OP is known to be
    parallel.  If OP is a multiple store, return a mask indicating which
    registers it saves.  Return 0 otherwise.  */
 
-int
-mn10300_store_multiple_operation (rtx op,
-				  enum machine_mode mode ATTRIBUTE_UNUSED)
+unsigned int
+mn10300_store_multiple_regs (rtx op)
 {
   int count;
   int mask;
@@ -1354,7 +1347,6 @@ mn10300_preferred_output_reload_class (rtx x, reg_class_t rclass)
 {
   if (x == stack_pointer_rtx && rclass != SP_REGS)
     return (TARGET_AM33 ? GENERAL_REGS : ADDRESS_REGS);
-
   return rclass;
 }
 
@@ -1438,7 +1430,6 @@ mn10300_secondary_reload (bool in_p, rtx x, reg_class_t rclass_i,
       if (addr && CONSTANT_ADDRESS_P (addr))
 	return GENERAL_REGS;
     }
-
   /* Otherwise assume no secondary reloads are needed.  */
   return NO_REGS;
 }
@@ -1500,7 +1491,6 @@ mn10300_builtin_saveregs (void)
   tree fntype = TREE_TYPE (current_function_decl);
   int argadj = ((!stdarg_p (fntype))
                 ? UNITS_PER_WORD : 0);
-
   alias_set_type set = get_varargs_alias_set ();
 
   if (argadj)
@@ -2155,8 +2145,6 @@ mn10300_delegitimize_address (rtx orig_x)
   else
     return orig_x;
 
-  if (GET_CODE (ret) != SYMBOL_REF)
-    return orig_x;
   gcc_assert (GET_CODE (ret) == SYMBOL_REF);
   if (need_mem != MEM_P (orig_x))
     return orig_x;
@@ -2520,6 +2508,7 @@ mn10300_encode_section_info (tree decl, rtx rtl, int first)
 
   if (! MEM_P (rtl))
     return;
+
   symbol = XEXP (rtl, 0);
   if (GET_CODE (symbol) != SYMBOL_REF)
     return;
@@ -2574,7 +2563,6 @@ mn10300_trampoline_init (rtx m_tramp, tree fndecl, rtx chain_value)
   emit_move_insn (mem, gen_int_mode (0xdc00edf8, SImode));
   mem = adjust_address (m_tramp, SImode, 12);
   emit_move_insn (mem, disp);
-  mn10300_flush_trampoline (m_tramp);
 }
 
 /* Output the assembler code for a C++ thunk function.
@@ -2642,7 +2630,10 @@ mn10300_hard_regno_mode_ok (unsigned int regno, enum machine_mode mode)
       || REGNO_REG_CLASS (regno) == FP_ACC_REGS)
     /* Do not store integer values in FP registers.  */
     return GET_MODE_CLASS (mode) == MODE_FLOAT && ((regno & 1) == 0);
-  
+
+  if (! TARGET_AM33 && REGNO_REG_CLASS (regno) == EXTENDED_REGS)
+    return false;
+
   if (((regno) & 1) == 0 || GET_MODE_SIZE (mode) == 4)
     return true;
 
@@ -3256,7 +3247,6 @@ mn10300_loop_contains_call_insn (loop_p loop)
 static void
 mn10300_scan_for_setlb_lcc (void)
 {
-  loop_iterator liter;
   loop_p loop;
 
   DUMP ("Looking for loops that can use the SETLB insn", NULL_RTX);
@@ -3271,7 +3261,7 @@ mn10300_scan_for_setlb_lcc (void)
      if an inner loop is not suitable for use with the SETLB/Lcc insns, it may
      be the case that its parent loop is suitable.  Thus we should check all
      loops, but work from the innermost outwards.  */
-  FOR_EACH_LOOP (liter, loop, LI_ONLY_INNERMOST)
+  FOR_EACH_LOOP (loop, LI_ONLY_INNERMOST)
     {
       const char * reason = NULL;
 
@@ -3335,7 +3325,6 @@ mn10300_reorg (void)
 	mn10300_bundle_liw ();
     }
 }
-
 
 /* Initialize the GCC target structure.  */
 
@@ -3428,11 +3417,10 @@ mn10300_reorg (void)
 #undef  TARGET_CONDITIONAL_REGISTER_USAGE
 #define TARGET_CONDITIONAL_REGISTER_USAGE mn10300_conditional_register_usage
 
-#undef  TARGET_MD_ASM_CLOBBERS
+#undef TARGET_MD_ASM_CLOBBERS
 #define TARGET_MD_ASM_CLOBBERS  mn10300_md_asm_clobbers
 
 #undef  TARGET_FLAGS_REGNUM
 #define TARGET_FLAGS_REGNUM  CC_REG
-
 
 struct gcc_target targetm = TARGET_INITIALIZER;

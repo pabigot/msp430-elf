@@ -1,3 +1,4 @@
+/* Public domain.  */
 int
 __mspabi_cmpf (float x, float y)
 {

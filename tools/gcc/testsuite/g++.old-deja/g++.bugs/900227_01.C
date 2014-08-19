@@ -1,6 +1,6 @@
 // { dg-do assemble  }
-// { dg-options "" }
 // { dg-require-effective-target int32plus }
+// { dg-options "" }
 // g++ 1.37.1 bug 900227_01
 
 // g++ allows pointer type values to be converted to integral types which are

@@ -1,6 +1,6 @@
 // { dg-do assemble  }
-// { dg-options "-O2 -g" }
 // { dg-require-effective-target int32plus }
+// { dg-options "-O2 -g" }
 // (Should preferrably cycle through options.)
 // Origin: Hans-Peter Nilsson <hp@axis.com>
 // See <URL:http://gcc.gnu.org/ml/gcc-patches/2000-06/msg00310.html>

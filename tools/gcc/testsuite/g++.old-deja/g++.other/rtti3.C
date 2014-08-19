@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // { dg-options "-frtti" }
 // test of rtti of single inheritance and multiple inheritance with 
 // virtual functions

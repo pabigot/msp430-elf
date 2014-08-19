@@ -1,5 +1,4 @@
-// { dg-do run }
-// { dg-options "-std=c++0x" }
+// { dg-do run { target c++11 } }
 // Contributed by Sylvain Pion
 static int rvalue_constructions = 0;
 
@@ -23,3 +22,4 @@ int main()
   if (rvalue_constructions != 0)
     abort();
 }
+// { dg-require-effective-target size32plus }

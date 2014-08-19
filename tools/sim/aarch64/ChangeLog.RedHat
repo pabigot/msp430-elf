@@ -1,0 +1,154 @@
+2014-07-04  Nick Clifton  <nickc@redhat.com>
+
+	* simulator.c (do_scalar_SHL): New function.
+	(fstrb_abs): New.
+	(fstrb_scale_ext): New.
+	(fstrh_abs): New.
+	(fstrh_scale_ext): New.
+
+2014-07-03  Nick Clifton  <nickc@redhat.com>
+
+	* simulator.c (fp_immediate_for_encoding): Replace with...
+	(fp_immediate_for_encoding_32): New.
+	(fp_immediate_for_encoding_64): New.
+	(do_vec_FMOV): Delete.
+	(do_vec_MOV_immediate): Add support for FMOV of floating point
+	immediates.
+	(do_vec_MVNI): Likewise.
+	(do_vec_SCVTF): New.
+	(do_vec_compare): Call do_vec_SCVTF.
+	(fmovs): Use fp_immediate_for_encoding_32.
+	(fmovd): Use fp_immediate_for_encoding_64.
+
+2014-07-02  Nick Clifton  <nickc@redhat.com>
+
+	* cpustate.h: Remove long double field from FRegister union
+	* simulator.c: Replace use of long double field with
+	FRegister union.
+	(do_vec_MOV_whole_vector): Remove spurious zeroing of dest register.
+	(RAISE_EXCEPTIONS): Take seperate parameters for the float type
+	and the integer type.
+	(do_fcvtzu): Do not raise an exception for a conversion to
+	ULONG_MAX.
+	(do_vec_mull): Cast unsigned 64-bit multiplies.
+	(do_scalar_FABD): New.
+	(do_UCVTF): Fix conversions.
+	(do_scalar_USHR): New.
+	* memory.c (aarch64_get_mem_long_double): Hand encode.
+	(aarch64_set_mem_long_double): Hand encode.
+
+2014-07-01  Nick Clifton  <nickc@redhat.com>
+
+	* simulator.c (set_flags_for_float_compare): Handle NaNs.
+	(set_flags_for_double_compare): Likewise.
+	(dexSimpleFPCompare): Fix decoding of FCMPE vs FCMPZ.
+	(set_flags_for_double_add): Delete.
+	(do_scalar_FADDP): Do not set flags.
+	(do_double_add): Do not set flags.
+
+2014-03-21  Nick Clifton  <nickc@redhat.com>
+
+	* simulator.c (stxr): Set result register.
+	Handle various write sizes.
+	(ldxr): Handle various read sizes.
+
+2014-03-07  Nick Clifton  <nickc@redhat.com>
+
+	* simulator.c (do_fcvtzu): Fix type of float->64bit conversion.
+
+2014-01-10  Nick Clifton  <nickc@redhat.com>
+
+	* simulator.c (dexCondCompareImmediate): Delete.
+	(dexCondCompareRegister): Delete.
+	(CondCompare): New function: Implements ccmp.
+	(bics64_shift): Load a 64-bit value as value1.
+	(clz32): Do not reduce bit count by one.
+	(clz64): Likewise.
+	(dexDPREG): Call CondCompare.
+	(handle_halt): Return STATUS_HALT on a non program exit status.
+
+2013-07-19  Nick Clifton  <nickc@redhat.com>
+
+	* simulator.c (TOP_LEVEL_RETURN_PC): Fix sizes of compile time
+	constants.
+
+2013-07-15  Nick Clifton  <nickc@redhat.com>
+
+	* cpustate.c (aarch64_get_vec_u16): New.
+	(aarch64_get_vec_u8): New.
+	(aarch64_set_vec_u16): New.
+	(aarch64_set_vec_u8): New.
+	* cpustate.h (FRegister): Add 16-bit and 8-bit arrays.
+	* gdb-if.c: (sim_load): Also call aarch64_init.
+	(sim_open): Likewise.
+	* main.c (main): Add -z to enable misc tracing output.
+	Always load symbol table.
+	Call aarch64_init.
+	* memory.c (aarch64_get_start_PC): New.
+	* simulator.c (do_vec_move): New.
+	(do_vec_dup): New.
+	(do_vec_movi): New.
+	(do_vec_add): New.
+	(set_flags_for_double_add): New.
+	(do_double_add): New.
+	(do_EXTR_32): New.
+	(do_EXTR_64): New.
+	(vec_reg): New.
+	(vec_load): New.
+	(LD4): New.
+	(LD3): New.
+	(LD2): New.
+	(LD1_1): New.
+	(LD1_2): New.
+	(LD1_3): New.
+	(LD1_4): New.
+	(vec_store): New.
+	(ST4): New.
+	(ST3): New.
+	(ST2): New.
+	(ST1_1): New.
+	(ST1_2): New.
+	(ST1_3): New.
+	(ST1_4): New.
+	(do_vec_load_store): New.
+
+2013-07-09  Nick Clifton  <nickc@redhat.com>
+
+	* Upadte license.
+	* cpustate.c: Display decoded CPSR values during tracing.
+	Add vector read/write functionality.
+	* main.c (aarch64_get_sym_value): New.
+	* memory.c: Return StatusCodes for memory accesses.
+	(aarch64_get_heap_start): New.
+	(aarch64_get_stack_start): New.
+	* simulator.c: Check results of memory accesses.
+	(ldrsw_abs): Fix scaling of offset and extension of load.
+	(ldrsw_wb): Likewise.
+	(set_flags_for_sub32): Set N and C flags.
+	(set_flags_for_sub64): Likewise.
+
+2013-07-04  Nick Clifton  <nickc@redhat.com>
+
+	* ChangeLog.RedHat: New.
+	* Makefile.in: New.
+	* aclocal.m4: Generate.
+	* config.in: Generate.
+	* configure: Generate.
+	* configure.ac: New.
+	* cpustate.c: New.
+	* cpustate.h: New.
+	* decode.h: New.
+	* gdb-if.c: New.
+	* main.c: New.
+	* memory.c: New.
+	* memory.h: New.
+	* simulator.c: New.
+	* simulator.h: New.
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

@@ -1,6 +1,5 @@
 // PR c++/46526
-// { dg-do run }
-// { dg-options "-std=c++0x" }
+// { dg-do run { target c++11 } }
 
 struct Base
 {
@@ -25,3 +24,5 @@ main ()
   Base& ar = a;
   ar.getid ();
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

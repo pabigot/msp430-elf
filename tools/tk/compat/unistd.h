@@ -12,7 +12,7 @@
  * software for any purpose.  It is provided "as is" without
  * express or implied warranty.
  *
- * RCS: @(#) $Id: unistd.h,v 1.8 2000/10/11 21:51:51 spolk Exp $
+ * RCS: @(#) $Id: unistd.h,v 1.3 2012/04/18 00:36:43 kevinb Exp $
  */
 
 #ifndef _UNISTD

@@ -1,5 +1,5 @@
 /* Natural loop analysis code for GNU compiler.
-   Copyright (C) 2002-2013 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -64,7 +64,7 @@ just_once_each_iteration_p (const struct loop *loop, const_basic_block bb)
 
    LOOPS is the loop tree.  */
 
-#define LOOP_REPR(LOOP) ((LOOP)->num + last_basic_block)
+#define LOOP_REPR(LOOP) ((LOOP)->num + last_basic_block_for_fn (cfun))
 #define BB_REPR(BB) ((BB)->index + 1)
 
 bool
@@ -77,7 +77,7 @@ mark_irreducible_loops (void)
   int src, dest;
   unsigned depth;
   struct graph *g;
-  int num = number_of_loops ();
+  int num = number_of_loops (cfun);
   struct loop *cloop;
   bool irred_loop_found = false;
   int i;
@@ -85,7 +85,8 @@ mark_irreducible_loops (void)
   gcc_assert (current_loops != NULL);
 
   /* Reset the flags.  */
-  FOR_BB_BETWEEN (act, ENTRY_BLOCK_PTR, EXIT_BLOCK_PTR, next_bb)
+  FOR_BB_BETWEEN (act, ENTRY_BLOCK_PTR_FOR_FN (cfun),
+		  EXIT_BLOCK_PTR_FOR_FN (cfun), next_bb)
     {
       act->flags &= ~BB_IRREDUCIBLE_LOOP;
       FOR_EACH_EDGE (e, ei, act->succs)
@@ -93,13 +94,14 @@ mark_irreducible_loops (void)
     }
 
   /* Create the edge lists.  */
-  g = new_graph (last_basic_block + num);
+  g = new_graph (last_basic_block_for_fn (cfun) + num);
 
-  FOR_BB_BETWEEN (act, ENTRY_BLOCK_PTR, EXIT_BLOCK_PTR, next_bb)
+  FOR_BB_BETWEEN (act, ENTRY_BLOCK_PTR_FOR_FN (cfun),
+		  EXIT_BLOCK_PTR_FOR_FN (cfun), next_bb)
     FOR_EACH_EDGE (e, ei, act->succs)
       {
 	/* Ignore edges to exit.  */
-	if (e->dest == EXIT_BLOCK_PTR)
+	if (e->dest == EXIT_BLOCK_PTR_FOR_FN (cfun))
 	  continue;
 
 	src = BB_REPR (act);
@@ -409,7 +411,7 @@ estimate_reg_pressure_cost (unsigned n_new, unsigned n_old, bool speed,
 
   if (optimize && (flag_ira_region == IRA_REGION_ALL
 		   || flag_ira_region == IRA_REGION_MIXED)
-      && number_of_loops () <= (unsigned) IRA_MAX_LOOPS_NUM)
+      && number_of_loops (cfun) <= (unsigned) IRA_MAX_LOOPS_NUM)
     /* IRA regional allocation deals with high register pressure
        better.  So decrease the cost (to do more accurate the cost
        calculation for IRA, we need to know how many registers lives
@@ -427,10 +429,10 @@ mark_loop_exit_edges (void)
   basic_block bb;
   edge e;
 
-  if (number_of_loops () <= 1)
+  if (number_of_loops (cfun) <= 1)
     return;
 
-  FOR_EACH_BB (bb)
+  FOR_EACH_BB_FN (bb, cfun)
     {
       edge_iterator ei;
 
@@ -468,7 +470,7 @@ single_likely_exit (struct loop *loop)
 	 ruled out by this test.  The static branch prediction algorithm
          will not assign such a low probability to conditionals for usual
          reasons.  */
-      if (profile_status != PROFILE_ABSENT
+      if (profile_status_for_fn (cfun) != PROFILE_ABSENT
 	  && ex->probability < 5 && !ex->count)
 	continue;
       if (!found)

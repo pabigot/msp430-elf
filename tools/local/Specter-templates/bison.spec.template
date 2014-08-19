@@ -1,0 +1,167 @@
+Summary: A GNU general-purpose parser generator.
+Name: bison
+Version: 1.875
+Release: 2
+License: GPL
+Group: Development/Tools
+Source: ftp://ftp.gnu.org/pub/gnu/bison/bison-%{version}.tar.bz2
+Url: http://www.gnu.org/software/bison/bison.html
+Prereq: /sbin/install-info
+BuildRoot: %{_tmppath}/%{name}-root
+
+%description
+Bison is a general purpose parser generator that converts a grammar
+description for an LALR(1) context-free grammar into a C program to
+parse that grammar. Bison can be used to develop a wide range of
+language parsers, from ones used in simple desk calculators to complex
+programming languages. Bison is upwardly compatible with Yacc, so any
+correctly written Yacc grammar should work with Bison without any
+changes. If you know Yacc, you shouldn't have any trouble using
+Bison. You do need to be very proficient in C programming to be able
+to use Bison. Bison is only needed on systems that are used for
+development.
+
+If your system will be used for C development, you should install
+Bison.
+
+%prep
+%setup -q
+
+%build
+%configure
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+%makeinstall
+
+# Remove unpackaged files.
+rm -f $RPM_BUILD_ROOT/%{_bindir}/yacc
+rm -f $RPM_BUILD_ROOT/%{_infodir}/dir
+
+%find_lang %{name}
+
+gzip -9nf ${RPM_BUILD_ROOT}%{_infodir}/bison.info*
+
+%post
+/sbin/install-info %{_infodir}/bison.info.gz %{_infodir}/dir --entry="* bison: (bison).                        The GNU parser generator."
+
+%preun
+if [ $1 = 0 ]; then
+  /sbin/install-info --delete %{_infodir}/bison.info.gz %{_infodir}/dir --entry="* bison: (bison).                        The GNU parser generator."
+fi
+
+%files -f %{name}.lang
+%defattr(-,root,root)
+%{_mandir}/*/bison*
+%{_datadir}/bison
+%{_infodir}/bison.info*
+%{_bindir}/bison
+%{_libdir}/liby.a
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%changelog
+* Sat Mar 22 2003 Roland McGrath <roland@redhat.com> 1.875-2
+- update specs for new files installed by new version
+
+* Wed Mar 19 2003 Roland McGrath <roland@redhat.com> 1.875-1
+- new upstream version 1.875 (bug #83184)
+
+* Wed Jan 22 2003 Tim Powers <timp@redhat.com>
+- rebuilt
+
+* Wed Nov 27 2002 Than Ngo <than@redhat.com> 1.35-5
+- rebuild in new build enviroment
+- remove unneeded file
+
+* Fri Jun 21 2002 Tim Powers <timp@redhat.com>
+- automated rebuild
+
+* Tue Jun 18 2002 Than Ngo <than@redhat.com> 1.35-3
+- don't forcibly strip binaries
+
+* Thu May 23 2002 Tim Powers <timp@redhat.com>
+- automated rebuild
+
+* Wed Mar 27 2002 Than Ngo <than@redhat.com> 1.35-1
+- 1.35 fix incompatible with C++ compilers (bug #62121)
+
+* Sun Mar 17 2002 Florian La Roche <Florian.LaRoche@redhat.de>
+- update to 1.34
+
+* Sat Feb 09 2002 Florian La Roche <Florian.LaRoche@redhat.de>
+- update to 1.33
+
+* Sat Jan 26 2002 Florian La Roche <Florian.LaRoche@redhat.de>
+- update to 1.32
+
+* Tue Jan 15 2002 Florian La Roche <Florian.LaRoche@redhat.de>
+- update to 1.31
+
+* Wed Jan 09 2002 Tim Powers <timp@redhat.com>
+- automated rebuild
+
+* Mon Nov 27 2001 Than Ngo <than@redhat.com> 1.30-4
+- add missing Url
+
+* Sun Nov 25 2001 Than Ngo <than@redhat.com> 1.30-3
+- fixed coredumps on some input bug #56607i, thanks to Enrico for locating this bug
+
+* Tue Nov 06 2001 Than Ngo <than@redhat.com> 1.30-2
+- FHS packaging
+- use find_lang
+
+* Sun Nov 04 2001 Florian La Roche <Florian.LaRoche@redhat.de>
+- update to 1.30
+
+* Mon Oct 15 2001 Than Ngo <than@redhat.de> 1.29-1
+- update to 1.29
+- update Url (bug #54597)
+
+* Sun Jun 24 2001 Elliot Lee <sopwith@redhat.com>
+- Bump release + rebuild.
+
+* Wed Jul 12 2000 Prospector <bugzilla@redhat.com>
+- automatic rebuild
+
+* Sun Jun 18 2000 Than Ngo <than@redhat.de>
+- rebuilt in the new build environment
+- FHS packaging
+
+* Sat May 27 2000 Ngo Than <than@redhat.de>
+- rebuild for 7.0
+- put man pages and info files to correct place
+
+* Thu Feb 03 2000 Preston Brown <pbrown@redhat.com>
+- rebuild to gzip man page.
+
+* Fri Jul 16 1999 Jeff Johnson <jbj@redhat.com>
+- update to 1.28.
+
+* Sun Mar 21 1999 Cristian Gafton <gafton@redhat.com>
+- auto rebuild in the new build environment (release 3)
+
+* Mon Mar  8 1999 Jeff Johnson <jbj@redhat.com>
+- configure with datadir=/usr/lib (#1386).
+
+* Mon Feb 22 1999 Jeff Johnson <jbj@redhat.com>
+- updated text in spec file.
+- update to 1.27
+
+* Thu Dec 17 1998 Cristian Gafton <gafton@redhat.com>
+- build for glibc 2.1
+
+* Fri Apr 24 1998 Prospector System <bugs@redhat.com>
+- translations modified for de, fr, tr
+
+* Wed Apr 08 1998 Cristian Gafton <gafton@redhat.com>
+- built for Manhattan
+- added build root
+
+* Wed Oct 15 1997 Donnie Barnes <djb@redhat.com>
+- various spec file cleanups
+
+* Mon Jun 02 1997 Erik Troan <ewt@redhat.com>
+- built against glibc

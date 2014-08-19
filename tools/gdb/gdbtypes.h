@@ -1,6 +1,6 @@
 /* Internal type definitions for GDB.
 
-   Copyright (C) 1992-2004, 2006-2012 Free Software Foundation, Inc.
+   Copyright (C) 1992-2014 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support, using pieces from other GDB modules.
 
@@ -169,18 +169,18 @@ enum type_code
 
 enum type_flag_value
 {
-  TYPE_FLAG_UNSIGNED = (1 << 7),
-  TYPE_FLAG_NOSIGN = (1 << 8),
-  TYPE_FLAG_STUB = (1 << 9),
-  TYPE_FLAG_TARGET_STUB = (1 << 10),
-  TYPE_FLAG_STATIC = (1 << 11),
-  TYPE_FLAG_PROTOTYPED = (1 << 12),
-  TYPE_FLAG_INCOMPLETE = (1 << 13),
-  TYPE_FLAG_VARARGS = (1 << 14),
-  TYPE_FLAG_VECTOR = (1 << 15),
-  TYPE_FLAG_FIXED_INSTANCE = (1 << 16),
-  TYPE_FLAG_STUB_SUPPORTED = (1 << 17),
-  TYPE_FLAG_GNU_IFUNC = (1 << 18),
+  TYPE_FLAG_UNSIGNED = (1 << 8),
+  TYPE_FLAG_NOSIGN = (1 << 9),
+  TYPE_FLAG_STUB = (1 << 10),
+  TYPE_FLAG_TARGET_STUB = (1 << 11),
+  TYPE_FLAG_STATIC = (1 << 12),
+  TYPE_FLAG_PROTOTYPED = (1 << 13),
+  TYPE_FLAG_INCOMPLETE = (1 << 14),
+  TYPE_FLAG_VARARGS = (1 << 15),
+  TYPE_FLAG_VECTOR = (1 << 16),
+  TYPE_FLAG_FIXED_INSTANCE = (1 << 17),
+  TYPE_FLAG_STUB_SUPPORTED = (1 << 18),
+  TYPE_FLAG_GNU_IFUNC = (1 << 19),
 
   /* Used for error-checking.  */
   TYPE_FLAG_MIN = TYPE_FLAG_UNSIGNED
@@ -198,6 +198,7 @@ enum type_instance_flag_value
   TYPE_INSTANCE_FLAG_ADDRESS_CLASS_1 = (1 << 4),
   TYPE_INSTANCE_FLAG_ADDRESS_CLASS_2 = (1 << 5),
   TYPE_INSTANCE_FLAG_NOTTEXT = (1 << 6),
+  TYPE_INSTANCE_FLAG_RESTRICT = (1 << 7)
 };
 
 /* Unsigned integer type.  If this is not set for a TYPE_CODE_INT, the
@@ -318,6 +319,12 @@ enum type_instance_flag_value
 
 #define TYPE_VOLATILE(t) \
   (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_VOLATILE)
+
+/* Restrict type.  If this is set, the corresponding type has a
+   restrict modifier.  */
+
+#define TYPE_RESTRICT(t) \
+  (TYPE_INSTANCE_FLAGS (t) & TYPE_INSTANCE_FLAG_RESTRICT)
 
 /* Instruction-space delimited type.  This is for Harvard architectures
    which have separate instruction and data address spaces (and perhaps
@@ -837,8 +844,12 @@ struct cplus_struct_type
 	       to reconstruct the rest of the fields).  */
 	    unsigned int is_stub:1;
 
+	    /* True if this function is a constructor, false
+	       otherwise.  */
+	    unsigned int is_constructor : 1;
+
 	    /* Unused.  */
-	    unsigned int dummy:4;
+	    unsigned int dummy:3;
 
 	    /* Index into that baseclass's virtual function table,
 	       minus 2; else if static: VOFFSET_STATIC; else: 0.  */
@@ -852,15 +863,6 @@ struct cplus_struct_type
 
       }
      *fn_fieldlists;
-
-    /* Pointer to information about enclosing scope, if this is a
-       local type.  If it is not a local type, this is NULL. */
-    struct local_type_info
-      {
-	char *file;
-	int line;
-      }
-     *localtype_ptr;
 
     /* typedefs defined inside this class.  TYPEDEF_FIELD points to an array of
        TYPEDEF_FIELD_COUNT elements.  */
@@ -1221,14 +1223,11 @@ extern void allocate_gnat_aux_type (struct type *);
 #define TYPE_FN_FIELD_ARTIFICIAL(thisfn, n) ((thisfn)[n].is_artificial)
 #define TYPE_FN_FIELD_ABSTRACT(thisfn, n) ((thisfn)[n].is_abstract)
 #define TYPE_FN_FIELD_STUB(thisfn, n) ((thisfn)[n].is_stub)
+#define TYPE_FN_FIELD_CONSTRUCTOR(thisfn, n) ((thisfn)[n].is_constructor)
 #define TYPE_FN_FIELD_FCONTEXT(thisfn, n) ((thisfn)[n].fcontext)
 #define TYPE_FN_FIELD_VOFFSET(thisfn, n) ((thisfn)[n].voffset-2)
 #define TYPE_FN_FIELD_VIRTUAL_P(thisfn, n) ((thisfn)[n].voffset > 1)
 #define TYPE_FN_FIELD_STATIC_P(thisfn, n) ((thisfn)[n].voffset == VOFFSET_STATIC)
-
-#define TYPE_LOCALTYPE_PTR(thistype) (TYPE_CPLUS_SPECIFIC(thistype)->localtype_ptr)
-#define TYPE_LOCALTYPE_FILE(thistype) (TYPE_CPLUS_SPECIFIC(thistype)->localtype_ptr->file)
-#define TYPE_LOCALTYPE_LINE(thistype) (TYPE_CPLUS_SPECIFIC(thistype)->localtype_ptr->line)
 
 #define TYPE_TYPEDEF_FIELD_ARRAY(thistype) \
   TYPE_CPLUS_SPECIFIC (thistype)->typedef_field
@@ -1432,8 +1431,12 @@ extern struct type *alloc_type_copy (const struct type *);
    objfile's architecture is returned.  */
 extern struct gdbarch *get_type_arch (const struct type *);
 
+/* This returns the target type (or NULL) of TYPE, also skipping
+   past typedefs.  */
+extern struct type *get_target_type (struct type *type);
+
 /* Helper function to construct objfile-owned types.  */
-extern struct type *init_type (enum type_code, int, int, char *,
+extern struct type *init_type (enum type_code, int, int, const char *,
 			       struct objfile *);
 
 /* Helper functions to construct architecture-owned types.  */
@@ -1479,6 +1482,8 @@ extern struct type *make_reference_type (struct type *, struct type **);
 
 extern struct type *make_cv_type (int, int, struct type *, struct type **);
 
+extern struct type *make_restrict_type (struct type *);
+
 extern void replace_type (struct type *, struct type *);
 
 extern int address_space_name_to_int (struct gdbarch *, char *);
@@ -1507,7 +1512,7 @@ extern const char *type_name_no_tag (const struct type *);
 
 extern const char *type_name_no_tag_or_error (struct type *type);
 
-extern struct type *lookup_struct_elt_type (struct type *, char *, int);
+extern struct type *lookup_struct_elt_type (struct type *, const char *, int);
 
 extern struct type *make_pointer_type (struct type *, struct type **);
 
@@ -1526,11 +1531,11 @@ extern struct type *create_range_type (struct type *, struct type *, LONGEST,
 
 extern struct type *create_array_type (struct type *, struct type *,
 				       struct type *);
-extern struct type *lookup_array_range_type (struct type *, int, int);
+extern struct type *lookup_array_range_type (struct type *, LONGEST, LONGEST);
 
 extern struct type *create_string_type (struct type *, struct type *,
 					struct type *);
-extern struct type *lookup_string_range_type (struct type *, int, int);
+extern struct type *lookup_string_range_type (struct type *, LONGEST, LONGEST);
 
 extern struct type *create_set_type (struct type *, struct type *);
 
@@ -1556,7 +1561,7 @@ extern struct type *lookup_typename (const struct language_defn *,
 				     const struct block *, int);
 
 extern struct type *lookup_template_type (char *, struct type *,
-					  struct block *);
+					  const struct block *);
 
 extern int get_vptr_fieldno (struct type *, struct type **);
 
@@ -1603,8 +1608,8 @@ extern const struct rank FLOAT_CONVERSION_BADNESS;
 extern const struct rank INT_FLOAT_CONVERSION_BADNESS;
 /* Badness of conversion of pointer to void pointer.  */
 extern const struct rank VOID_PTR_CONVERSION_BADNESS;
-/* Badness of conversion of pointer to boolean.  */
-extern const struct rank BOOL_PTR_CONVERSION_BADNESS;
+/* Badness of conversion to boolean.  */
+extern const struct rank BOOL_CONVERSION_BADNESS;
 /* Badness of converting derived to base class.  */
 extern const struct rank BASE_CONVERSION_BADNESS;
 /* Badness of converting from non-reference to reference.  */
@@ -1656,5 +1661,9 @@ extern struct type *copy_type_recursive (struct objfile *objfile,
 					 htab_t copied_types);
 
 extern struct type *copy_type (const struct type *type);
+
+extern int types_equal (struct type *, struct type *);
+
+extern int types_deeply_equal (struct type *, struct type *);
 
 #endif /* GDBTYPES_H */

@@ -171,7 +171,6 @@ subseg_get (const char *segname, int force_new)
       seginfo->bfd_section = secptr;
       bfd_set_section_userdata (stdoutput, secptr, seginfo);
     }
-
   return secptr;
 }
 
@@ -281,7 +280,7 @@ seg_not_empty_p (segT sec ATTRIBUTE_UNUSED)
 
   if (!seginfo)
     return 0;
-  
+
   for (chain = seginfo->frchainP; chain; chain = chain->frch_next)
     {
       for (frag = chain->frch_root; frag; frag = frag->fr_next)

@@ -10,3 +10,4 @@ int main()
   A& (A::*afp)(const A&) = &A::operator=;
   (a.*afp) (b);
 }
+// { dg-require-effective-target size32plus }

@@ -17,3 +17,4 @@ int main() {
   throw_an_unexpected_exception();
   return 1;
 }
+// { dg-require-effective-target size32plus }

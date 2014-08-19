@@ -5,8 +5,8 @@ extern "C" int printf(const char *, ...);
 
 class A {
 public:
-	int foo() { printf("ok nv\n"); return 0; }
-	virtual int vfoo() { printf("ok v\n"); return 0; }
+  int foo() { /* printf("ok nv\n"); */ return 0; }
+  virtual int vfoo() { /* printf("ok v\n"); */ return 0; }
 };
 
 struct S {
@@ -23,6 +23,6 @@ A a;
 int main() {
   (a.*s.pfn1)();
   (a.*s.pfn2)();
-  printf("PASS\n");
+  // printf("PASS\n");
   return 0;
 }

@@ -13,7 +13,7 @@
  *	   Department of Computer Science,
  *	   Australian National University.
  *
- * RCS: @(#) $Id: tkImgPPM.c,v 1.10 2003/03/19 23:02:02 cagney Exp $
+ * RCS: @(#) $Id: tkImgPPM.c,v 1.3 2012/04/18 00:36:53 kevinb Exp $
  */
 
 #define USE_OLD_IMAGE

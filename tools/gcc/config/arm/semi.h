@@ -1,5 +1,5 @@
 /* Definitions of target machine for GNU compiler.  ARM on semi-hosted platform
-   Copyright (C) 1994-2013 Free Software Foundation, Inc.
+   Copyright (C) 1994-2014 Free Software Foundation, Inc.
    Contributed by Richard Earnshaw (richard.earnshaw@arm.com)
 
    This file is part of GCC.
@@ -18,16 +18,7 @@
    along with GCC; see the file COPYING3.  If not see
    <http://www.gnu.org/licenses/>.  */
 
-/* Note: The definitions LOCAL_LABEL_PREFIX and USER_LABEL_PREFIX
-   here *must* match the definitions in bfd/coff-arm.c  */ 
-#undef  LOCAL_LABEL_PREFIX
-#define LOCAL_LABEL_PREFIX "."
-/* #define LOCAL_LABEL_PREFIX "" */
-/* #define NO_DOT_IN_LABEL */
-
-#undef  USER_LABEL_PREFIX
-#define USER_LABEL_PREFIX ""
-#define STARTFILE_SPEC  "%scrt0.o"
+#define STARTFILE_SPEC  "crt0.o%s"
 
 #ifndef LIB_SPEC
 #define LIB_SPEC "-lc"

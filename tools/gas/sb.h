@@ -49,7 +49,6 @@ typedef struct sb
   char *ptr;			/* Points to the current block.  */
   size_t len;			/* How much is used.  */
   size_t max;			/* The maximum length.  */
-  int no_macro_check;		/* Skip macro/conditional nest checking.  */
 }
 sb;
 

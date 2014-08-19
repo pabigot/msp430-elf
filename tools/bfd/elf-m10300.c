@@ -892,6 +892,7 @@ mn10300_do_tls_transition (bfd *         input_bfd,
   int gotreg = 0;
 
 #define TLS_PAIR(r1,r2) ((r1) * R_MN10300_MAX + (r2))
+
   /* This is common to all GD/LD transitions, so break it out.  */
   if (r_type == R_MN10300_TLS_GD
       || r_type == R_MN10300_TLS_LD)
@@ -906,6 +907,7 @@ mn10300_do_tls_transition (bfd *         input_bfd,
       /* Call.  */
       BFD_ASSERT (bfd_get_8 (input_bfd, op + 8) == 0xDD);
     }
+
   switch (TLS_PAIR (r_type, tls_r_type))
     {
     case TLS_PAIR (R_MN10300_TLS_GD, R_MN10300_TLS_GOTIE):
@@ -1082,6 +1084,10 @@ mn10300_elf_check_relocs (bfd *abfd,
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  /* PR15323, ref flags aren't set for references in the same
+	     object.  */
+	  h->root.non_ir_ref = 1;
 	}
 
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -2005,7 +2011,7 @@ mn10300_elf_relocate_section (bfd *output_bfd,
       bfd_reloc_status_type r;
       int tls_r_type;
       bfd_boolean unresolved_reloc = FALSE;
-      bfd_boolean warned;
+      bfd_boolean warned, ignored;
       struct elf_link_hash_entry * hh;
 
       relocation = 0;
@@ -2028,7 +2034,7 @@ mn10300_elf_relocate_section (bfd *output_bfd,
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   hh, sec, relocation,
-				   unresolved_reloc, warned);
+				   unresolved_reloc, warned, ignored);
 	}
       h = elf_mn10300_hash_entry (hh);
 
@@ -2059,7 +2065,7 @@ mn10300_elf_relocate_section (bfd *output_bfd,
       else
 	{
 	  if ((h->root.root.type == bfd_link_hash_defined
-	       || h->root.root.type == bfd_link_hash_defweak)
+	      || h->root.root.type == bfd_link_hash_defweak)
 	      && (   r_type == R_MN10300_GOTPC32
 		  || r_type == R_MN10300_GOTPC16
 		  || ((   r_type == R_MN10300_PLT32
@@ -3212,20 +3218,20 @@ mn10300_elf_relax_section (bfd *abfd,
 			 address.  If so then mark these as having had their
 			 prologue bytes deleted as well.  */
 		      for (hh = elf_sym_hashes (input_bfd); hh < end_hashes; hh++)
-			  {
-			    struct elf32_mn10300_link_hash_entry *h;
+			{
+			  struct elf32_mn10300_link_hash_entry *h;
 
-			    h = (struct elf32_mn10300_link_hash_entry *) * hh;
+			  h = (struct elf32_mn10300_link_hash_entry *) * hh;
 
-			    if (h != sym_hash
-				&& (h->root.root.type == bfd_link_hash_defined
-				    || h->root.root.type == bfd_link_hash_defweak)
-				&& h->root.root.u.def.section == section
-				&& ! (h->flags & MN10300_CONVERT_CALL_TO_CALLS)
-				&& h->root.root.u.def.value == symval
-				&& h->root.type == STT_FUNC)
-			      h->flags |= MN10300_DELETED_PROLOGUE_BYTES;
-			  }
+			  if (h != sym_hash
+			      && (h->root.root.type == bfd_link_hash_defined
+				  || h->root.root.type == bfd_link_hash_defweak)
+			      && h->root.root.u.def.section == section
+			      && ! (h->flags & MN10300_CONVERT_CALL_TO_CALLS)
+			      && h->root.root.u.def.value == symval
+			      && h->root.type == STT_FUNC)
+			    h->flags |= MN10300_DELETED_PROLOGUE_BYTES;
+			}
 
 		      /* Something changed.  Not strictly necessary, but
 			 may lead to more relaxing opportunities.  */
@@ -3409,11 +3415,6 @@ mn10300_elf_relax_section (bfd *abfd,
 	      symval += sym_sec->output_section->vma
 		+ sym_sec->output_offset - irel->r_addend;
 	    }
-	  /* FIXME: We can get negative values for output_offset.
-	     Not sure why this is happening, but do not try to
-	     relax when this happens.  */
-	  else if (((bfd_signed_vma) sym_sec->output_offset) < 0)
-	    continue;
 	  else
 	    symval = (isym->st_value
 		      + sym_sec->output_section->vma
@@ -5535,7 +5536,9 @@ _bfd_mn10300_elf_finish_dynamic_sections (bfd * output_bfd,
    properly.  */
 
 static enum elf_reloc_type_class
-_bfd_mn10300_elf_reloc_type_class (const Elf_Internal_Rela *rela)
+_bfd_mn10300_elf_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
+				   const asection *rel_sec ATTRIBUTE_UNUSED,
+				   const Elf_Internal_Rela *rela)
 {
   switch ((int) ELF32_R_TYPE (rela->r_info))
     {

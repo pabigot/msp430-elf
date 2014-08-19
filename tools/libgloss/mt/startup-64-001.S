@@ -1,5 +1,5 @@
 /*
- * $Header: /cvs/cvsfiles/devo/libgloss/mt/startup-64-001.S,v 1.80 2013/03/17 22:08:58 nickc Exp $
+ * $Header: /cvs/cvsfiles/gnupro/libgloss/mt/startup-64-001.S,v 1.7 2014/02/20 13:42:52 nickc Exp $
  *
  * interrupt_vectors.s -- the interrupt handler jump table. 
  *

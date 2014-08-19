@@ -1,5 +1,5 @@
 /* Optimize jump instructions, for GNU compiler.
-   Copyright (C) 1987-2013 Free Software Foundation, Inc.
+   Copyright (C) 1987-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -118,7 +118,7 @@ rebuild_jump_labels_chain (rtx chain)
    This simple pass moves barriers and removes duplicates so that the
    old code is happy.
  */
-unsigned int
+static unsigned int
 cleanup_barriers (void)
 {
   rtx insn, next, prev;
@@ -133,31 +133,48 @@ cleanup_barriers (void)
 	  if (BARRIER_P (prev))
 	    delete_insn (insn);
 	  else if (prev != PREV_INSN (insn))
-	    reorder_insns (insn, insn, prev);
+	    reorder_insns_nobb (insn, insn, prev);
 	}
     }
   return 0;
 }
 
-struct rtl_opt_pass pass_cleanup_barriers =
+namespace {
+
+const pass_data pass_data_cleanup_barriers =
 {
- {
-  RTL_PASS,
-  "barriers",                           /* name */
-  OPTGROUP_NONE,                        /* optinfo_flags */
-  NULL,                                 /* gate */
-  cleanup_barriers,                     /* execute */
-  NULL,                                 /* sub */
-  NULL,                                 /* next */
-  0,                                    /* static_pass_number */
-  TV_NONE,                              /* tv_id */
-  0,                                    /* properties_required */
-  0,                                    /* properties_provided */
-  0,                                    /* properties_destroyed */
-  0,                                    /* todo_flags_start */
-  0                                     /* todo_flags_finish */
- }
+  RTL_PASS, /* type */
+  "barriers", /* name */
+  OPTGROUP_NONE, /* optinfo_flags */
+  false, /* has_gate */
+  true, /* has_execute */
+  TV_NONE, /* tv_id */
+  0, /* properties_required */
+  0, /* properties_provided */
+  0, /* properties_destroyed */
+  0, /* todo_flags_start */
+  0, /* todo_flags_finish */
 };
+
+class pass_cleanup_barriers : public rtl_opt_pass
+{
+public:
+  pass_cleanup_barriers (gcc::context *ctxt)
+    : rtl_opt_pass (pass_data_cleanup_barriers, ctxt)
+  {}
+
+  /* opt_pass methods: */
+  unsigned int execute () { return cleanup_barriers (); }
+
+}; // class pass_cleanup_barriers
+
+} // anon namespace
+
+rtl_opt_pass *
+make_pass_cleanup_barriers (gcc::context *ctxt)
+{
+  return new pass_cleanup_barriers (ctxt);
+}
 
 
 /* Initialize LABEL_NUSES and JUMP_LABEL fields, add REG_LABEL_TARGET
@@ -258,7 +275,7 @@ mark_all_labels (rtx f)
   if (current_ir_type () == IR_RTL_CFGLAYOUT)
     {
       basic_block bb;
-      FOR_EACH_BB (bb)
+      FOR_EACH_BB_FN (bb, cfun)
 	{
 	  /* In cfglayout mode, we don't bother with trivial next-insn
 	     propagation of LABEL_REFs into JUMP_LABEL.  This will be
@@ -274,17 +291,11 @@ mark_all_labels (rtx f)
 	     basic blocks.  If those non-insns represent tablejump data,
 	     they contain label references that we must record.  */
 	  for (insn = BB_HEADER (bb); insn; insn = NEXT_INSN (insn))
-	    if (INSN_P (insn))
-	      {
-		gcc_assert (JUMP_TABLE_DATA_P (insn));
-		mark_jump_label (PATTERN (insn), insn, 0);
-	      }
+	    if (JUMP_TABLE_DATA_P (insn))
+	      mark_jump_label (PATTERN (insn), insn, 0);
 	  for (insn = BB_FOOTER (bb); insn; insn = NEXT_INSN (insn))
-	    if (INSN_P (insn))
-	      {
-		gcc_assert (JUMP_TABLE_DATA_P (insn));
-		mark_jump_label (PATTERN (insn), insn, 0);
-	      }
+	    if (JUMP_TABLE_DATA_P (insn))
+	      mark_jump_label (PATTERN (insn), insn, 0);
 	}
     }
   else
@@ -296,6 +307,8 @@ mark_all_labels (rtx f)
 	    ;
 	  else if (LABEL_P (insn))
 	    prev_nonjump_insn = NULL;
+	  else if (JUMP_TABLE_DATA_P (insn))
+	    mark_jump_label (PATTERN (insn), insn, 0);
 	  else if (NONDEBUG_INSN_P (insn))
 	    {
 	      mark_jump_label (PATTERN (insn), insn, 0);
@@ -388,9 +401,9 @@ reversed_comparison_code_parts (enum rtx_code code, const_rtx arg0,
       /* These CONST_CAST's are okay because prev_nonnote_insn just
 	 returns its argument and we assign it to a const_rtx
 	 variable.  */
-      for (prev = prev_nonnote_insn (CONST_CAST_RTX(insn));
+      for (prev = prev_nonnote_insn (CONST_CAST_RTX (insn));
 	   prev != 0 && !LABEL_P (prev);
-	   prev = prev_nonnote_insn (CONST_CAST_RTX(prev)))
+	   prev = prev_nonnote_insn (CONST_CAST_RTX (prev)))
 	{
 	  const_rtx set = set_of (arg0, prev);
 	  if (set && GET_CODE (set) == SET
@@ -1163,8 +1176,8 @@ mark_jump_label_1 (rtx x, rtx insn, bool in_mem, bool is_target)
 	return;
       }
 
-  /* Do walk the labels in a vector, but not the first operand of an
-     ADDR_DIFF_VEC.  Don't set the JUMP_LABEL of a vector.  */
+    /* Do walk the labels in a vector, but not the first operand of an
+       ADDR_DIFF_VEC.  Don't set the JUMP_LABEL of a vector.  */
     case ADDR_VEC:
     case ADDR_DIFF_VEC:
       if (! INSN_DELETED_P (insn))
@@ -1303,8 +1316,6 @@ delete_related_insns (rtx insn)
 	  delete_related_insns (XEXP (XVECEXP (pat, diff_vec_p, i), 0));
       while (next && INSN_DELETED_P (next))
 	next = NEXT_INSN (next);
-      if (next && GET_MODE (insn) == TImode)
-	PUT_MODE (next, TImode);
       return next;
     }
 
@@ -1344,6 +1355,13 @@ delete_related_insns (rtx insn)
 	  /* Keep going past other deleted labels to delete what follows.  */
 	  else if (code == CODE_LABEL && INSN_DELETED_P (next))
 	    next = NEXT_INSN (next);
+	  /* Keep the (use (insn))s created by dbr_schedule, which needs
+	     them in order to track liveness relative to a previous
+	     barrier.  */
+	  else if (INSN_P (next)
+		   && GET_CODE (PATTERN (next)) == USE
+		   && INSN_P (XEXP (PATTERN (next), 0)))
+	    next = NEXT_INSN (next);
 	  else if (code == BARRIER || INSN_P (next))
 	    /* Note: if this deletes a jump, it can cause more
 	       deletion of unreachable code, after a different label.
@@ -1361,8 +1379,6 @@ delete_related_insns (rtx insn)
      I hope this works.  */
   while (next && INSN_DELETED_P (next))
     next = NEXT_INSN (next);
-  if (next && GET_MODE (insn) == TImode)
-    PUT_MODE (next, TImode);
   return next;
 }
 
@@ -1429,7 +1445,7 @@ redirect_exp_1 (rtx *loc, rtx olabel, rtx nlabel, rtx insn)
   int i;
   const char *fmt;
 
-      if ((code == LABEL_REF && XEXP (x, 0) == olabel)
+  if ((code == LABEL_REF && XEXP (x, 0) == olabel)
       || x == olabel)
     {
       x = redirect_target (nlabel);
@@ -1569,6 +1585,16 @@ redirect_jump_2 (rtx jump, rtx olabel, rtx nlabel, int delete_unused,
 	  redirect_exp_1 (&XEXP (note, 0), olabel, nlabel, jump);
 	  confirm_change_group ();
 	}
+    }
+
+  /* Handle the case where we had a conditional crossing jump to a return
+     label and are now changing it into a direct conditional return.
+     The jump is no longer crossing in that case.  */
+  if (ANY_RETURN_P (nlabel))
+    {
+      note = find_reg_note (jump, REG_CROSSING_JUMP, NULL_RTX);
+      if (note)
+	remove_note (jump, note);
     }
 
   if (!ANY_RETURN_P (olabel)

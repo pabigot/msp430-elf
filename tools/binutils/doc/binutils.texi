@@ -325,12 +325,15 @@ operation; new members are always placed at the end of the archive.
 
 The modifier @samp{v} makes @command{ar} list each file as it is appended.
 
-Since the point of this operation is speed, the archive's symbol table
-index is not updated, even if it already existed; you can use @samp{ar s} or
-@command{ranlib} explicitly to update the symbol table index.
+Since the point of this operation is speed, implementations of
+@command{ar} have the option of not updating the archive's symbol
+table if one exists.  Too many different systems however assume that
+symbol tables are always up-to-date, so @sc{gnu} @command{ar} will
+rebuild the table even with a quick append.
 
-However, too many different systems assume quick append rebuilds the
-index, so @sc{gnu} @command{ar} implements @samp{q} as a synonym for @samp{r}.
+Note - @sc{gnu} @command{ar} treats the command @samp{qs} as a
+synonym for @samp{r} - replacing already existing files in the
+archive and appending new ones at the end.
 
 @item r
 @cindex replacement in archive
@@ -804,6 +807,9 @@ symbol which if referenced by a relocation does not evaluate to its
 address, but instead must be invoked at runtime.  The runtime
 execution will then return the value to be used in the relocation.
 
+@item I
+The symbol is an indirect reference to another symbol.
+
 @item N
 The symbol is a debugging symbol.
 
@@ -853,10 +859,6 @@ specified.
 The symbol is a stabs symbol in an a.out object file.  In this case, the
 next values printed are the stabs other field, the stabs desc field, and
 the stab type.  Stabs symbols are used to hold debugging information.
-@ifclear man
-For more information, see @ref{Top,Stabs,Stabs Overview,stabs.info, The
-``stabs'' debug format}.
-@end ifclear
 
 @item ?
 The symbol type is unknown, or object file format specific.
@@ -1019,10 +1021,9 @@ both size and value to be printed.
 @item --special-syms
 Display symbols which have a target-specific special meaning.  These
 symbols are usually used by the target for some special processing and
-are not normally helpful when included included in the normal symbol
-lists.  For example for ARM targets this option would skip the mapping
-symbols used to mark transitions between ARM code, THUMB code and
-data.
+are not normally helpful when included in the normal symbol lists.
+For example for ARM targets this option would skip the mapping symbols
+used to mark transitions between ARM code, THUMB code and data.
 
 @item --synthetic
 Include synthetic symbols in the output.  These are special symbols
@@ -1088,6 +1089,7 @@ objcopy [@option{-F} @var{bfdname}|@option{--target=}@var{bfdname}]
         [@option{--change-warnings}] [@option{--no-change-warnings}]
         [@option{--set-section-flags} @var{sectionpattern}=@var{flags}]
         [@option{--add-section} @var{sectionname}=@var{filename}]
+        [@option{--dump-section} @var{sectionname}=@var{filename}]
         [@option{--rename-section} @var{oldname}=@var{newname}[,@var{flags}]]
         [@option{--long-section-names} @{enable,disable,keep@}]
         [@option{--change-leading-char}] [@option{--remove-leading-char}]
@@ -1474,6 +1476,17 @@ Add a new section named @var{sectionname} while copying the file.  The
 contents of the new section are taken from the file @var{filename}.  The
 size of the section will be the size of the file.  This option only
 works on file formats which can support sections with arbitrary names.
+Note - it may be necessary to use the @option{--set-section-flags}
+option to set the attributes of the newly created section.
+
+@item --dump-section @var{sectionname}=@var{filename}
+Place the contents of section named @var{sectionname} into the file
+@var{filename}, overwriting any contents that may have been there
+previously.  This option is the inverse of @option{--add-section}.
+This option is similar to the @option{--only-section} option except
+that it does not create a formatted file, it just dumps the contents
+as raw binary data, without applying any relocations.  The option can
+be specified more than once.
 
 @item --rename-section @var{oldname}=@var{newname}[,@var{flags}]
 Rename a section from @var{oldname} to @var{newname}, optionally
@@ -2113,6 +2126,12 @@ Print the 'raw' instruction mnemonic instead of some pseudo
 instruction mnemonic.  I.e., print 'daddu' or 'or' instead of 'move',
 'sll' instead of 'nop', etc.
 
+@item msa
+Disassemble MSA instructions.
+
+@item virt
+Disassemble the virtualization ASE instructions.
+
 @item gpr-names=@var{ABI}
 Print GPR (general-purpose register) names as appropriate
 for the specified ABI.  By default, GPR names are selected according to
@@ -2170,8 +2189,8 @@ format (the lists of options is displayed with the help).
 
 For XCOFF, the available options are: @option{header}, @option{aout},
 @option{sections}, @option{syms}, @option{relocs}, @option{lineno},
-@option{loader}, @option{except}, @option{typchk}, @option{traceback}
-and @option{toc}.
+@option{loader}, @option{except}, @option{typchk}, @option{traceback},
+@option{toc} and @option{ldinfo}.
 
 @item -r
 @itemx --reloc
@@ -2277,10 +2296,6 @@ ELF file.  This is only useful on systems (such as Solaris 2.0) in which
 section.  In most other file formats, debugging symbol-table entries are
 interleaved with linkage symbols, and are visible in the @option{--syms}
 output.
-@ifclear man
-For more information on stabs symbols, see @ref{Top,Stabs,Stabs
-Overview,stabs.info, The ``stabs'' debug format}.
-@end ifclear
 
 @item --start-address=@var{address}
 @cindex start-address
@@ -2476,8 +2491,10 @@ Operate in @emph{deterministic} mode.  The symbol map archive member's
 header will show zero for the UID, GID, and timestamp.  When this
 option is used, multiple runs will produce identical output files.
 
-This is the default unless @file{binutils} was configured with
-@option{--enable-deterministic-archives}.
+If @file{binutils} was configured with
+@option{--enable-deterministic-archives}, then this mode is on by
+default.  It can be disabled with the @samp{-U} option, described
+below.
 
 @item -t
 Update the timestamp of the symbol map of an archive.
@@ -2489,8 +2506,10 @@ Do @emph{not} operate in @emph{deterministic} mode.  This is the
 inverse of the @samp{-D} option, above: the archive index will get
 actual UID, GID, timestamp, and file mode values.
 
-This is the default unless @file{binutils} was configured with
-@option{--enable-deterministic-archives}.
+If @file{binutils} was configured @emph{without}
+@option{--enable-deterministic-archives}, then this mode is on by
+default.
+
 @end table
 
 @c man end

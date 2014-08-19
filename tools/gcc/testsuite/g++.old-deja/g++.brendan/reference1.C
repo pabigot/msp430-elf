@@ -34,7 +34,7 @@ int main ()
 	base_ref.data_member  = 99;
 
 	if (call_count == 1)
-	  printf ("PASS\n");
+	  ; // printf ("PASS\n");
 	else
 	  { printf ("FAIL\n"); return 1; }
 

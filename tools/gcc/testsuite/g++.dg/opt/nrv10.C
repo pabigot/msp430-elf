@@ -46,3 +46,5 @@ operator+(int i, const A& x)
     a.data1_ = i;
     return a;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

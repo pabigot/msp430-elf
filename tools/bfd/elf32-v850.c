@@ -83,6 +83,10 @@ v850_elf_check_relocs (bfd *abfd,
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  /* PR15323, ref flags aren't set for references in the same
+	     object.  */
+	  h->root.non_ir_ref = 1;
 	}
 
       r_type = ELF32_R_TYPE (rel->r_info);
@@ -1916,6 +1920,12 @@ v850_elf_is_local_label_name (bfd *abfd ATTRIBUTE_UNUSED, const char *name)
   return (   (name[0] == '.' && (name[1] == 'L' || name[1] == '.'))
 	  || (name[0] == '_' &&  name[1] == '.' && name[2] == 'L' && name[3] == '_'));
 }
+
+static bfd_boolean
+v850_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
+{
+  return v850_elf_is_local_label_name (abfd, sym->name);
+}
 
 /* We overload some of the bfd_reloc error codes for own purposes.  */
 #define bfd_reloc_gp_not_found		bfd_reloc_other
@@ -2201,7 +2211,7 @@ v850_elf_relocate_section (bfd *output_bfd,
 	}
       else
 	{
-	  bfd_boolean unresolved_reloc, warned;
+	  bfd_boolean unresolved_reloc, warned, ignored;
 
 	  /* Note - this check is delayed until now as it is possible and
 	     valid to have a file without any symbols but with relocs that
@@ -2218,7 +2228,7 @@ v850_elf_relocate_section (bfd *output_bfd,
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h, sec, relocation,
-				   unresolved_reloc, warned);
+				   unresolved_reloc, warned, ignored);
 	}
 
       if (sec != NULL && discarded_section (sec))
@@ -2396,7 +2406,6 @@ v850_elf_final_write_processing (bfd *abfd,
       elf_elfheader (abfd)->e_flags |= val;
       break;
     default:
-      BFD_ASSERT (0);
       break;
     }
 }
@@ -2446,14 +2455,14 @@ v850_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 
       if (bfd_get_arch (obfd) == bfd_get_arch (ibfd)
 	  && bfd_get_arch_info (obfd)->the_default)
-	result &= bfd_set_arch_mach (obfd, bfd_get_arch (ibfd), bfd_get_mach (ibfd));
+	return bfd_set_arch_mach (obfd, bfd_get_arch (ibfd), bfd_get_mach (ibfd));
 
-      return result;
+      return TRUE;
     }
 
   /* Check flag compatibility.  */
   if (in_flags == out_flags)
-    return result;
+    return TRUE;
 
   if (bfd_get_arch (obfd) == bfd_arch_v850_rh850)
     {
@@ -2464,17 +2473,16 @@ v850_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	  elf_elfheader (obfd)->e_flags |= EF_V800_850E3;
 	}
 
-#if 0
       if ((in_flags & EF_RH850_DATA_ALIGN8) != (out_flags & EF_RH850_DATA_ALIGN8))
 	{
 	  _bfd_error_handler (_("%B: Alignment mismatch with previous modules"),
 			      ibfd);
 	  elf_elfheader (obfd)->e_flags |= EF_RH850_DATA_ALIGN8;
 	}
-#endif
-      return result;
+
+      return TRUE;
     }
-  
+
   if ((in_flags & EF_V850_ARCH) != (out_flags & EF_V850_ARCH)
       && (in_flags & EF_V850_ARCH) != E_V850_ARCH)
     {
@@ -2483,14 +2491,14 @@ v850_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
          which we set to v850e.  */
       if (   (in_flags  & EF_V850_ARCH) == E_V850E1_ARCH
           && (out_flags & EF_V850_ARCH) == E_V850E_ARCH)
-        return result;
+        return TRUE;
 
       if (   (in_flags  & EF_V850_ARCH) == E_V850_ARCH
 	  && (out_flags & EF_V850_ARCH) == E_V850E_ARCH)
 	{
 	  elf_elfheader (obfd)->e_flags =
 	    ((out_flags & ~ EF_V850_ARCH) | E_V850E_ARCH);
-	  return result;
+	  return TRUE;
 	}
 
       if ((   (in_flags & EF_V850_ARCH) == E_V850_ARCH
@@ -2499,7 +2507,7 @@ v850_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	{
 	  elf_elfheader (obfd)->e_flags =
 	    ((out_flags & ~ EF_V850_ARCH) | E_V850E2_ARCH);
-	  return result;
+	  return TRUE;
 	}
 
       if ((   (in_flags & EF_V850_ARCH) == E_V850_ARCH
@@ -2509,7 +2517,7 @@ v850_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	{
 	  elf_elfheader (obfd)->e_flags =
 	    ((out_flags & ~ EF_V850_ARCH) | E_V850E2V3_ARCH);
-	  return result;
+	  return TRUE;
 	}
 
       if ((   (in_flags & EF_V850_ARCH) == E_V850_ARCH
@@ -2520,14 +2528,14 @@ v850_elf_merge_private_bfd_data (bfd *ibfd, bfd *obfd)
 	{
 	  elf_elfheader (obfd)->e_flags =
 	    ((out_flags & ~ EF_V850_ARCH) | E_V850E3V5_ARCH);
-	  return result;
+	  return TRUE;
 	}
 
       _bfd_error_handler (_("%B: Architecture mismatch with previous modules"),
 			  ibfd);
     }
 
-  return result;
+  return TRUE;
 }
 
 /* Display the flags field.  */
@@ -2547,18 +2555,17 @@ v850_elf_print_private_bfd_data (bfd *abfd, void * ptr)
   if (bfd_get_arch (abfd) == bfd_arch_v850_rh850)
     {
       if ((elf_elfheader (abfd)->e_flags & EF_RH850_ABI) != EF_RH850_ABI)
-	fprintf (file, _("unknown v850 architecture"));	
+	fprintf (file, _("unknown v850 architecture"));
       else if (elf_elfheader (abfd)->e_flags & EF_V800_850E3)
 	fprintf (file, _("v850 E3 architecture"));
       else
 	fprintf (file, _("v850 architecture"));
-#if 0
+
       if (elf_elfheader (abfd)->e_flags & EF_RH850_DATA_ALIGN8)
 	fprintf (file, _(", 8-byte data alignment"));
-#endif
     }
   else
-    {	
+    {
       switch (elf_elfheader (abfd)->e_flags & EF_V850_ARCH)
 	{
 	default:
@@ -2572,7 +2579,6 @@ v850_elf_print_private_bfd_data (bfd *abfd, void * ptr)
     }
 
   fputc ('\n', file);
-
 
   return TRUE;
 }
@@ -3135,7 +3141,7 @@ v850_elf_relax_section (bfd *abfd,
 
 	  if (alignmoveto < alignto)
 	    {
-	      unsigned int i;
+	      bfd_vma i;
 
 	      align_pad_size = alignto - alignmoveto;
 #ifdef DEBUG_RELAX
@@ -3263,7 +3269,7 @@ v850_elf_relax_section (bfd *abfd,
 	      /* Get the reloc for the address from which the register is
 	         being loaded.  This reloc will tell us which function is
 	         actually being called.  */
-	      
+
 	      for (hi_irelfn = internal_relocs; hi_irelfn < irelend; hi_irelfn ++)
 		{
 		  r_type = ELF32_R_TYPE (hi_irelfn->r_info);
@@ -3787,12 +3793,14 @@ static const struct bfd_elf_special_section v850_elf_special_sections[] =
 #define elf_backend_gc_mark_hook                v850_elf_gc_mark_hook
 #define elf_backend_special_sections		v850_elf_special_sections
 
-#define elf_backend_can_gc_sections 		1
-#define elf_backend_rela_normal     		1
+#define elf_backend_can_gc_sections 1
+#define elf_backend_rela_normal 1
 
 #define bfd_elf32_bfd_is_local_label_name	v850_elf_is_local_label_name
+#define bfd_elf32_bfd_is_target_special_symbol	v850_elf_is_target_special_symbol
+
 #define bfd_elf32_bfd_reloc_type_lookup		v850_elf_reloc_type_lookup
-#define bfd_elf32_bfd_reloc_name_lookup		v850_elf_reloc_name_lookup
+#define bfd_elf32_bfd_reloc_name_lookup	        v850_elf_reloc_name_lookup
 #define bfd_elf32_bfd_merge_private_bfd_data 	v850_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_set_private_flags		v850_elf_set_private_flags
 #define bfd_elf32_bfd_print_private_bfd_data	v850_elf_print_private_bfd_data
@@ -3892,10 +3900,10 @@ v800_elf_info_to_howto (bfd *               abfd,
   r_type -= R_V810_NONE;
   BFD_ASSERT (r_type < ARRAY_SIZE (v800_elf_howto_table));
 
-  cache_ptr->howto = v800_elf_howto_table + r_type;  
+  cache_ptr->howto = v800_elf_howto_table + r_type;
 }
-
 
+
 #undef  TARGET_LITTLE_SYM
 #define TARGET_LITTLE_SYM			bfd_elf32_v850_rh850_vec
 #undef  TARGET_LITTLE_NAME

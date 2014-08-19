@@ -318,7 +318,7 @@ nios2_control_register_arg_p (const char *str)
 	  || strprefix (str, "pteaddr")
 	  || strprefix (str, "tlbacc")
 	  || strprefix (str, "tlbmisc")
-	  || strprefix (str, "fstatus")
+	  || strprefix (str, "eccinj")
 	  || strprefix (str, "config")
 	  || strprefix (str, "mpubase")
 	  || strprefix (str, "mpuacc")
@@ -1258,7 +1258,8 @@ md_apply_fix (fixS *fixP, valueT *valP, segT seg ATTRIBUTE_UNUSED)
 	      fixup = fixup & 0xFFFF;
 	      break;
 	    case BFD_RELOC_NIOS2_HIADJ16:
-	      fixup = ((fixup >> 16) & 0xFFFF) + ((fixup >> 15) & 0x01);
+	      fixup = ((((fixup >> 16) & 0xFFFF) + ((fixup >> 15) & 0x01))
+		       & 0xFFFF);
 	      break;
 	    default:
 	      {
@@ -1950,15 +1951,17 @@ nios2_consume_arg (nios2_insn_infoS *insn, char *argstr, const char *parsestr)
       /* And whether we are using oci registers.  */
       if (!nios2_as_options.nobreak
 	  && (regno == 25 || strprefix (argstr, "bt")))
-	as_warn (_("The debugger will corrupt bt (r25). If you don't need to "
-		   "debug this\n"
-		   "code then use .set nobreak to turn off this warning."));
+	as_warn (_("The debugger will corrupt bt (r25).\n"
+		   "If you don't need to debug this "
+		   "code use .set nobreak to turn off this warning."));
 	
       if (!nios2_as_options.nobreak
-	  && (regno == 30 || strprefix (argstr, "ba")))
-	as_warn (_("The debugger will corrupt ba (r30). If you don't need to "
-		   "debug this\n"
-		   "code then use .set nobreak to turn off this warning."));
+	  && (regno == 30
+	      || strprefix (argstr, "ba")
+	      || strprefix (argstr, "sstatus")))
+	as_warn (_("The debugger will corrupt sstatus/ba (r30).\n"
+		   "If you don't need to debug this "
+		   "code use .set nobreak to turn off this warning."));
       break;
     case 'i':
     case 'u':
@@ -2078,7 +2081,11 @@ nios2_parse_args (nios2_insn_infoS *insn, char *argstr,
 
   parsed_args[i] = NULL;
 
-  if (*parsestr != '\0' && insn->insn_nios2_opcode->match != OP_MATCH_BREAK)
+  /* The argument to break and trap instructions is optional; complain
+     for other cases of missing arguments.  */
+  if (*parsestr != '\0'
+      && insn->insn_nios2_opcode->match != OP_MATCH_BREAK
+      && insn->insn_nios2_opcode->match != OP_MATCH_TRAP)
     as_bad (_("missing argument"));
 }
 

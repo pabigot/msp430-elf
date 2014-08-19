@@ -1,6 +1,5 @@
 // Test for non-trivial list-initialization with array new.
-// { dg-options -std=c++0x }
-// { dg-do run }
+// { dg-do run { target c++11 } }
 
 struct A
 {
@@ -16,3 +15,4 @@ int main()
     return 1;
   delete[] ap;
 }
+// { dg-require-effective-target size32plus }

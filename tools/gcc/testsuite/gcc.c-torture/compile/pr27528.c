@@ -23,6 +23,7 @@ insn2 (const void *x)
    to the command line.  (Usually because these are separate multilibs from
    the non-pic versions).  */
 #ifndef __pic__
+
 void
 foo (void)
 {
@@ -43,4 +44,5 @@ foo (void)
   asm volatile ("" :: "s" (__FILE__), "i" (__FILE__));
   asm volatile ("" :: "s" (__FUNCTION__), "i" (__FUNCTION__));
 }
+
 #endif

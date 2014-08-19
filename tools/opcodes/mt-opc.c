@@ -75,8 +75,6 @@ static unsigned int dis_hash_insn (const char *, CGEN_INSN_INT);
 
 /* Instruction formats.  */
 
-extern const CGEN_IFLD mt_cgen_ifld_table[];
-
 #define F(f) & mt_cgen_ifld_table[MT_##f]
 static const CGEN_IFMT ifmt_empty ATTRIBUTE_UNUSED = {
   0, 0, 0x0, { { 0 } }

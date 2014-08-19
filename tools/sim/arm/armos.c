@@ -453,6 +453,12 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 
   switch (number)
     {
+    case 0xBE:
+      // GDB breakpoint instruction used in Thumb mode.
+      state->EndCondition = RDIError_BreakpointReached;
+      state->Emulate = FALSE;
+      break;
+
     case SWI_Read:
       if (swi_mask & SWI_MASK_DEMON)
 	SWIread (state, state->Reg[0], state->Reg[1], state->Reg[2]);
@@ -840,8 +846,8 @@ ARMul_OSHandleSWI (ARMul_State * state, ARMword number)
 	      break;
 
 	    case 17: /* Utime.  */
-	      state->Reg[0] = (ARMword) sim_callback->time (sim_callback,
-							    (long *) state->Reg[1]);
+	      state->Reg[0] = (ARMword) sim_callback->time (sim_callback, NULL);
+	      state->Reg[1] = state->Reg[0];
 	      OSptr->ErrorNo = sim_callback->get_errno (sim_callback);
 	      break;
 

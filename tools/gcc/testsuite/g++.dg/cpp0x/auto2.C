@@ -1,6 +1,5 @@
 // Positive test for auto
-// { dg-do run }
-// { dg-options "-std=c++0x" }
+// { dg-do run { target c++11 } }
 
 #include <typeinfo>
 extern "C" void abort();
@@ -72,3 +71,5 @@ int main()
 
   auto j = 42, k = 24;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

@@ -88,3 +88,4 @@ int main () {
   cip->addRef();
   myFoundation* mfp = cip;
 }
+// { dg-require-effective-target size32plus }

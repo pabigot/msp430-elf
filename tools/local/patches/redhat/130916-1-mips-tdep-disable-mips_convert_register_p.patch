@@ -1,0 +1,112 @@
+This patch fixes 20 gdb.base/store.exp for the following multilibs:
+
+vr4300-no-script-sim/-EL/-Tddb.ld
+vr4300-no-script-sim/-EL/-mabi=n32/-Tddb-n32.ld
+vr4300-no-script-sim/-EL/-mabi=64/-Tddb-n64.ld
+
+It does not introduce any regressions for the above multilibs or
+these additional two multilibs:
+
+vr4300-no-script-sim/-EL/-mabi=32/-Tddb.ld
+vr4300-no-script-sim/-EL/-mgp32/-Tddb.ld
+
+(Obviously, more testing should be done, but the first three multilibs
+in the list above do (or did) use the code in question.)
+
+The set of failures that no longer occur when this patch is used
+is as follows:
+
+FAIL: gdb.base/store.exp: f_1.j
+FAIL: gdb.base/store.exp: f_1.k
+FAIL: gdb.base/store.exp: F_1.i
+FAIL: gdb.base/store.exp: F_1.j
+FAIL: gdb.base/store.exp: F_1.k
+FAIL: gdb.base/store.exp: f_2.j
+FAIL: gdb.base/store.exp: f_2.k
+FAIL: gdb.base/store.exp: F_2.i
+FAIL: gdb.base/store.exp: F_2.j
+FAIL: gdb.base/store.exp: F_2.k
+FAIL: gdb.base/store.exp: f_3.j
+FAIL: gdb.base/store.exp: f_3.k
+FAIL: gdb.base/store.exp: F_3.i
+FAIL: gdb.base/store.exp: F_3.j
+FAIL: gdb.base/store.exp: F_3.k
+FAIL: gdb.base/store.exp: f_4.j
+FAIL: gdb.base/store.exp: f_4.k
+FAIL: gdb.base/store.exp: F_4.i
+FAIL: gdb.base/store.exp: F_4.j
+FAIL: gdb.base/store.exp: F_4.k
+
+The lval_register case in value_assign() in valops.c tests
+gdbarch_convert_register_p() to see if gdbarch_value_register()
+should be used to store the value in question.  However, for
+MIPS (and probably all other architectures which use these
+methods) don't account for the bitfield assignment.
+
+It seems to me that the call to gdbarch_value_to_register()
+should be performed at a lower level.  I began to investigate
+this, but then decided to see if these methods still needed to
+be used for mips at all.  I vaguely recall that they were needed
+in the days before pseudo-registers.  It's not clear to me if
+these methods are still needed.  It's possible that there are
+some cases which the testsuite does not test for which these
+calls could be of benefit.
+
+Further investigation will be needed to see if this code is
+still relevant.  If we can prove that it is not, the #if 0'd code
+should be removed and that patch should be submitted upstream.
+
+Note: On 2013-12-03, I reverted this patch as it causes an
+"UNPREDICTABLE" error to occur in the simulator for 
+mips-sim-idt64/-EB/-mips64 and perhaps other multilibs too.
+
+I'm leaving this patch here for the time being, but it should NOT
+be used nor should it be submitted for upstream consideration.
+(I'm leaving it here to remind me of the bitfield problem that
+needs to be addressed in some other fashion.)
+
+
+gdb/ChangeLog.RedHat:
+
+2013-09-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_gdbarch_init): Disable mips_convert_register_p,
+	mips_register_to_value, and mips_value_to_register, and helper
+	functions.
+
+
+Index: gdb/mips-tdep.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/mips-tdep.c,v
+retrieving revision 1.54
+diff -u -p -r1.54 mips-tdep.c
+--- gdb/mips-tdep.c	25 May 2013 03:43:19 -0000	1.54
++++ gdb/mips-tdep.c	17 Sep 2013 05:46:17 -0000
+@@ -811,6 +811,7 @@ set_mips64_transfers_32bit_regs (char *a
+     }
+ }
+ 
++#if 0
+ /* Convert to/from a register and the corresponding memory value.  */
+ 
+ /* This predicate tests for the case of an 8 byte floating point
+@@ -938,6 +939,7 @@ mips_value_to_register (struct frame_inf
+                       _("mips_value_to_register: unrecognized case"));
+     }
+ }
++#endif
+ 
+ /* Return the GDB type object for the "standard" data type of data in
+    register REG.  */
+@@ -8544,9 +8546,11 @@ mips_gdbarch_init (struct gdbarch_info i
+   set_gdbarch_push_dummy_code (gdbarch, mips_push_dummy_code);
+   set_gdbarch_frame_align (gdbarch, mips_frame_align);
+ 
++#if 0
+   set_gdbarch_convert_register_p (gdbarch, mips_convert_register_p);
+   set_gdbarch_register_to_value (gdbarch, mips_register_to_value);
+   set_gdbarch_value_to_register (gdbarch, mips_value_to_register);
++#endif
+ 
+   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+   set_gdbarch_breakpoint_from_pc (gdbarch, mips_breakpoint_from_pc);

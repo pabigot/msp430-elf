@@ -26,3 +26,4 @@ void g() {
 int main () {
   f();
 }
+// { dg-require-effective-target size32plus }

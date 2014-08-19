@@ -5,7 +5,7 @@
 # Copyright (c) 1998-2000 by Scriptics Corporation.
 # All rights reserved.
 # 
-# RCS: @(#) $Id: choosedir.tcl,v 1.3 2003/03/19 23:02:04 cagney Exp $
+# RCS: @(#) $Id: choosedir.tcl,v 1.3 2012/04/18 00:36:56 kevinb Exp $
 
 # Make sure the tk::dialog namespace, in which all dialogs should live, exists
 namespace eval ::tk::dialog {}

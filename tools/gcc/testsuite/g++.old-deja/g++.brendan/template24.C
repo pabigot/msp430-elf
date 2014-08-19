@@ -16,6 +16,6 @@ int main ()
 {
   Temp<int(*)(int, int)> temp (func);
 
-  printf ("PASS\n");
+  // printf ("PASS\n");
   return 0;
 }

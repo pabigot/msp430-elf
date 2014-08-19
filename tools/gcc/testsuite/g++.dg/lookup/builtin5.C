@@ -1,5 +1,5 @@
 // PR c++/37276
-// { dg-do compile { target c++98 } }
+
 // { dg-final { scan-assembler "_ZSt5atanhd" } }
 
 namespace std

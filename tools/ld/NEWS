@@ -1,5 +1,13 @@
 -*- text -*-
 
+* Add support for the Andes NDS32.
+
+Changes in 2.24:
+
+* Add LOG2CEIL() builtin function to the linker script language
+
+* Add support for the Texas Instruments MSP430X processor.
+
 * Add support for Altera Nios II.
 
 * Add support for the V850E3V5 architecture.
@@ -7,6 +15,11 @@
 * Add support for the Imagination Technologies Meta processor.
 
 * --enable-new-dtags no longer generates old dtags in addition to new dtags.
+
+* Remove linker support for MIPS ECOFF targets.
+
+* Add ALIGN_WITH_INPUT to the linker script language to force the alignment of
+  an output section to use the maximum alignment of all its input sections.
 
 Changes in 2.23:
 

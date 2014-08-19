@@ -1,6 +1,5 @@
 #source: sort_b_n.s
 #ld: -T sort_b_n.t
-#ld_after_inputfiles: -X
 #name: SORT_BY_NAME
 #nm: -n
 

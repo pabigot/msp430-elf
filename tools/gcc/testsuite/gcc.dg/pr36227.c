@@ -1,4 +1,5 @@
 /* { dg-do compile } */
+/* { dg-skip-if "non standard pointer size in large memory model" { "msp430-*-*" } { "-mlarge" } { "" } } */
 /* { dg-options "-O2 -Wstrict-overflow=3" } */
 #if (__SIZEOF_LONG_LONG__ == __SIZEOF_POINTER__)
 typedef unsigned long long ptrcast;

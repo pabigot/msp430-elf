@@ -3,7 +3,7 @@
 # generate the file "configure", which is run during Tcl installation
 # to configure the system for the local environment.
 #
-# RCS: @(#) $Id: configure.in,v 1.22 2009/02/03 21:28:14 kevinb Exp $
+# RCS: @(#) $Id: configure.in,v 1.4 2012/04/18 00:36:40 kevinb Exp $
 
 AC_INIT(../generic/tcl.h)
 AC_PREREQ(2.13)

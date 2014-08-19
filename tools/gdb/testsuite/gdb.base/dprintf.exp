@@ -1,4 +1,4 @@
-#   Copyright (C) 2012 Free Software Foundation, Inc.
+#   Copyright (C) 2012-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,8 +40,19 @@ gdb_breakpoint "main"
 gdb_test "dprintf foo,\"At foo entry\\n\"" \
   "Dprintf .*"
 
+gdb_test "ignore \$bpnum 1" ".*Will ignore next crossing of breakpoint.*"
+
 gdb_test "dprintf $dp_location1,\"arg=%d, g=%d\\n\", arg, g" \
   "Dprintf .*"
+
+gdb_test_sequence "info breakpoints" "dprintf info 1" {
+    "\[\r\n\]Num     Type           Disp Enb Address +What"
+    "\[\r\n\]2       breakpoint"
+    "\[\r\n\]3       dprintf"
+    "\[\r\n\]        printf \"At foo entry\\\\n\""
+    "\[\r\n\]4       dprintf"
+    "\[\r\n\]        printf \"arg=%d, g=%d\\\\n\", arg, g"
+}
 
 gdb_test "break $bp_location1" \
   "Breakpoint .*"
@@ -50,7 +61,7 @@ gdb_run_cmd
 
 gdb_test "" "Breakpoint"
 
-gdb_test "continue" "At foo entry.*arg=1234, g=1234.*" "1st dprintf, gdb"
+gdb_test "continue" "arg=1234, g=1234.*" "1st dprintf, gdb"
 
 gdb_test "continue" "At foo entry.*arg=1235, g=2222.*" "2nd dprintf, gdb"
 
@@ -98,7 +109,6 @@ gdb_test_multiple "set dprintf-style agent" $msg {
 }
 
 if $target_can_dprintf {
-
     gdb_run_cmd
 
     gdb_test "" "Breakpoint"
@@ -107,8 +117,18 @@ if $target_can_dprintf {
 
     gdb_test "continue" "Breakpoint \[0-9\]+, foo .*" "2nd dprintf, agent"
 
+    gdb_test_sequence "info breakpoints" "dprintf info 2" {
+	"\[\r\n\]Num     Type           Disp Enb Address +What"
+	"\[\r\n\]2       breakpoint"
+	"\[\r\n\]\tbreakpoint already hit 2 times"
+	"\[\r\n\]3       dprintf"
+	"\[\r\n\]\tbreakpoint already hit 2 times"
+	"\[\r\n\]        agent-printf \"At foo entry\\\\n\""
+	"\[\r\n\]4       dprintf"
+	"\[\r\n\]\tbreakpoint already hit 2 times"
+	"\[\r\n\]        agent-printf \"arg=%d, g=%d\\\\n\", arg, g"
+    }
 }
 
 gdb_test "set dprintf-style foobar" "Undefined item: \"foobar\"." \
     "Set dprintf style to an unrecognized type"
-

@@ -1,6 +1,6 @@
 /* Handle Darwin shared libraries for GDB, the GNU Debugger.
 
-   Copyright (C) 2009-2012 Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -88,10 +88,7 @@ static const struct program_space_data *solib_darwin_pspace_data;
 static void
 darwin_pspace_data_cleanup (struct program_space *pspace, void *arg)
 {
-  struct darwin_info *info;
-
-  info = program_space_data (pspace, solib_darwin_pspace_data);
-  xfree (info);
+  xfree (arg);
 }
 
 /* Get the current darwin data.  If none is found yet, add it now.  This
@@ -127,8 +124,8 @@ static void
 darwin_load_image_infos (struct darwin_info *info)
 {
   gdb_byte buf[24];
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
-  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
   int len;
 
   /* If the structure address is not known, don't continue.  */
@@ -210,10 +207,10 @@ lookup_symbol_from_bfd (bfd *abfd, char *symname)
 
 /* Return program interpreter string.  */
 
-static gdb_byte *
+static char *
 find_program_interpreter (void)
 {
-  gdb_byte *buf = NULL;
+  char *buf = NULL;
 
   /* If we have an exec_bfd, get the interpreter from the load commands.  */
   if (exec_bfd)
@@ -245,8 +242,8 @@ open_symbol_file_object (void *from_ttyp)
 static struct so_list *
 darwin_current_sos (void)
 {
-  struct type *ptr_type = builtin_type (target_gdbarch)->builtin_data_ptr;
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   int ptr_len = TYPE_LENGTH (ptr_type);
   unsigned int image_info_size;
   struct so_list *head = NULL;
@@ -269,7 +266,7 @@ darwin_current_sos (void)
   for (i = 0; i < info->all_image.count; i++)
     {
       CORE_ADDR iinfo = info->all_image.info + i * image_info_size;
-      char buf[image_info_size];
+      gdb_byte buf[image_info_size];
       CORE_ADDR load_addr;
       CORE_ADDR path_addr;
       struct mach_o_header_external hdr;
@@ -288,7 +285,7 @@ darwin_current_sos (void)
       path_addr = extract_typed_address (buf + ptr_len, ptr_type);
 
       /* Read Mach-O header from memory.  */
-      if (target_read_memory (load_addr, (char *) &hdr, sizeof (hdr) - 4))
+      if (target_read_memory (load_addr, (gdb_byte *) &hdr, sizeof (hdr) - 4))
 	break;
       /* Discard wrong magic numbers.  Shouldn't happen.  */
       hdr_val = extract_unsigned_integer
@@ -331,6 +328,51 @@ darwin_current_sos (void)
   return head;
 }
 
+/* Get the load address of the executable.  We assume that the dyld info are
+   correct.  */
+
+static CORE_ADDR
+darwin_read_exec_load_addr (struct darwin_info *info)
+{
+  struct type *ptr_type = builtin_type (target_gdbarch ())->builtin_data_ptr;
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
+  int ptr_len = TYPE_LENGTH (ptr_type);
+  unsigned int image_info_size = ptr_len * 3;
+  int i;
+
+  /* Read infos for each solib.  One of them should be the executable.  */
+  for (i = 0; i < info->all_image.count; i++)
+    {
+      CORE_ADDR iinfo = info->all_image.info + i * image_info_size;
+      gdb_byte buf[image_info_size];
+      CORE_ADDR load_addr;
+      struct mach_o_header_external hdr;
+      unsigned long hdr_val;
+
+      /* Read image info from inferior.  */
+      if (target_read_memory (iinfo, buf, image_info_size))
+	break;
+
+      load_addr = extract_typed_address (buf, ptr_type);
+
+      /* Read Mach-O header from memory.  */
+      if (target_read_memory (load_addr, (gdb_byte *) &hdr, sizeof (hdr) - 4))
+	break;
+      /* Discard wrong magic numbers.  Shouldn't happen.  */
+      hdr_val = extract_unsigned_integer
+        (hdr.magic, sizeof (hdr.magic), byte_order);
+      if (hdr_val != BFD_MACH_O_MH_MAGIC && hdr_val != BFD_MACH_O_MH_MAGIC_64)
+        continue;
+      /* Check executable.  */
+      hdr_val = extract_unsigned_integer
+        (hdr.filetype, sizeof (hdr.filetype), byte_order);
+      if (hdr_val == BFD_MACH_O_MH_EXECUTE)
+	return load_addr;
+    }
+
+  return 0;
+}
+
 /* Return 1 if PC lies in the dynamic symbol resolution code of the
    run time loader.  */
 
@@ -348,13 +390,34 @@ darwin_special_symbol_handling (void)
 {
 }
 
+/* A wrapper for bfd_mach_o_fat_extract that handles reference
+   counting properly.  This will either return NULL, or return a new
+   reference to a BFD.  */
+
+static bfd *
+gdb_bfd_mach_o_fat_extract (bfd *abfd, bfd_format format,
+			    const bfd_arch_info_type *arch)
+{
+  bfd *result = bfd_mach_o_fat_extract (abfd, format, arch);
+
+  if (result == NULL)
+    return NULL;
+
+  if (result == abfd)
+    gdb_bfd_ref (result);
+  else
+    gdb_bfd_mark_parent (result, abfd);
+
+  return result;
+}
+
 /* Extract dyld_all_image_addr when the process was just created, assuming the
    current PC is at the entry of the dynamic linker.  */
 
 static void
 darwin_solib_get_all_image_info_addr_at_init (struct darwin_info *info)
 {
-  gdb_byte *interp_name;
+  char *interp_name;
   CORE_ADDR load_addr = 0;
   bfd *dyld_bfd = NULL;
   struct cleanup *cleanup;
@@ -377,12 +440,11 @@ darwin_solib_get_all_image_info_addr_at_init (struct darwin_info *info)
       bfd *sub;
 
       make_cleanup_bfd_unref (dyld_bfd);
-      sub = bfd_mach_o_fat_extract (dyld_bfd, bfd_object,
-				    gdbarch_bfd_arch_info (target_gdbarch));
+      sub = gdb_bfd_mach_o_fat_extract (dyld_bfd, bfd_object,
+					gdbarch_bfd_arch_info (target_gdbarch ()));
       if (sub)
 	{
 	  dyld_bfd = sub;
-	  gdb_bfd_ref (sub);
 	  make_cleanup_bfd_unref (sub);
 	}
       else
@@ -420,7 +482,7 @@ darwin_solib_read_all_image_info_addr (struct darwin_info *info)
 {
   gdb_byte buf[8 + 8 + 4];
   LONGEST len;
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
 
   len = target_read (&current_target, TARGET_OBJECT_DARWIN_DYLD_INFO, NULL,
                      buf, 0, sizeof (buf));
@@ -436,6 +498,7 @@ static void
 darwin_solib_create_inferior_hook (int from_tty)
 {
   struct darwin_info *info = get_darwin_info ();
+  CORE_ADDR load_addr;
 
   info->all_image_addr = 0;
 
@@ -449,8 +512,40 @@ darwin_solib_create_inferior_hook (int from_tty)
 
   darwin_load_image_infos (info);
 
-  if (darwin_dyld_version_ok (info))
-    create_solib_event_breakpoint (target_gdbarch, info->all_image.notifier);
+  if (!darwin_dyld_version_ok (info))
+    return;
+
+  create_solib_event_breakpoint (target_gdbarch (), info->all_image.notifier);
+
+  /* Possible relocate the main executable (PIE).  */
+  load_addr = darwin_read_exec_load_addr (info);
+  if (load_addr != 0 && symfile_objfile != NULL)
+    {
+      CORE_ADDR vmaddr = 0;
+      struct mach_o_data_struct *md = bfd_mach_o_get_data (exec_bfd);
+      unsigned int i, num;
+
+      /* Find the base address of the executable.  */
+      for (i = 0; i < md->header.ncmds; i++)
+	{
+	  struct bfd_mach_o_load_command *cmd = &md->commands[i];
+
+	  if (cmd->type != BFD_MACH_O_LC_SEGMENT
+	      && cmd->type != BFD_MACH_O_LC_SEGMENT_64)
+	    continue;
+	  if (cmd->command.segment.fileoff == 0
+	      && cmd->command.segment.vmaddr != 0
+	      && cmd->command.segment.filesize != 0)
+	    {
+	      vmaddr = cmd->command.segment.vmaddr;
+	      break;
+	    }
+	}
+
+      /* Relocate.  */
+      if (vmaddr != load_addr)
+	objfile_rebase (symfile_objfile, load_addr - vmaddr);
+    }
 }
 
 static void
@@ -514,14 +609,22 @@ darwin_bfd_open (char *pathname)
   /* Open bfd for shared library.  */
   abfd = solib_bfd_fopen (found_pathname, found_file);
 
-  res = bfd_mach_o_fat_extract (abfd, bfd_object,
-				gdbarch_bfd_arch_info (target_gdbarch));
+  res = gdb_bfd_mach_o_fat_extract (abfd, bfd_object,
+				    gdbarch_bfd_arch_info (target_gdbarch ()));
   if (!res)
     {
       make_cleanup_bfd_unref (abfd);
       error (_("`%s': not a shared-library: %s"),
 	     bfd_get_filename (abfd), bfd_errmsg (bfd_get_error ()));
     }
+
+  /* The current filename for fat-binary BFDs is a name generated
+     by BFD, usually a string containing the name of the architecture.
+     Reset its value to the actual filename.  */
+  xfree (bfd_get_filename (res));
+  res->filename = xstrdup (pathname);
+
+  gdb_bfd_unref (abfd);
   return res;
 }
 

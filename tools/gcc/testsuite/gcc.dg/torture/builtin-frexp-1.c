@@ -10,6 +10,7 @@
 /* In order to fold algebraic exprs below, targets with "composite"
    floating point formats need -funsafe-math-optimizations.  */
 /* { dg-options "-funsafe-math-optimizations" { target powerpc*-*-* } } */
+/* { dg-skip-if "Denormals not supported" { rx-*-* } "*" "" } */
 
 extern void link_error(int);
 

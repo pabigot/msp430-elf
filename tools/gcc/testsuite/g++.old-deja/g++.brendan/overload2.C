@@ -40,5 +40,5 @@ int main ()
 	if (proper_method_called != 1)
 	  { printf ("FAIL\n"); return 1; }
 	else
-	  printf ("PASS\n");
+	  ; // printf ("PASS\n");
 }

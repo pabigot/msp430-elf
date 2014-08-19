@@ -1,4 +1,4 @@
-@c Copyright (C) 2003-2013 Free Software Foundation, Inc.
+@c Copyright (C) 2003-2014 Free Software Foundation, Inc.
 @c This is part of the GCC manual.
 @c For copying conditions, see the file gcc.texi.
 
@@ -478,4 +478,8 @@ record.  @xref{Option file format}.
 @item NoDWARFRecord
 The option is omitted from the producer string written by
 @option{-grecord-gcc-switches}.
+
+@item PchIgnore
+Even if this is a target option, this option will not be recorded / compared
+to determine if a precompiled header file matches.
 @end table

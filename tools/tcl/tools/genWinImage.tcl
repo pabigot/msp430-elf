@@ -5,7 +5,7 @@
 # Copyright (c) 1999 by Scriptics Corporation.
 # All rights reserved.
 # 
-# RCS: @(#) $Id: genWinImage.tcl,v 1.3 2003/03/19 23:01:31 cagney Exp $
+# RCS: @(#) $Id: genWinImage.tcl,v 1.3 2012/04/18 00:36:36 kevinb Exp $
 
 
 # This file is insensitive to the directory from which it is invoked.

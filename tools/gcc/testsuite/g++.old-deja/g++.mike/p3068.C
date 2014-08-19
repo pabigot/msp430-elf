@@ -59,3 +59,4 @@ int main() {
     mv.real(0);
     return 0;
 }
+// { dg-require-effective-target size32plus }

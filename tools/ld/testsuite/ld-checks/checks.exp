@@ -38,6 +38,10 @@ proc section_check {} {
 
     set ldflags "--check-sections -e foo"
 
+    if { [istarget rx-*-*] } {
+	set as "$as -muse-conventional-section-names"
+    }
+
     if { ![ld_assemble $as $srcdir/$subdir/asm.s tmpdir/asm.o]} {
 	unresolved $test
 	return

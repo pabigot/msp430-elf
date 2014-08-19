@@ -1,5 +1,5 @@
-/* { dg-options "-fno-tree-vrp" } *//* XXX nickc: This test does not compile at -O2 or higher on machines without a large amount of stack space (> 2Mb!) because of the tree-vrp pass.  */
 /* { dg-do assemble } */
+/* { dg-options "-fno-tree-vrp" } *//* XXX nickc: This test does not compile at -O2 or higher on machines without a large amount of stack space (> 2Mb!) because of the tree-vrp pass.  */
 /* { dg-skip-if "too much code for avr" { "avr-*-*" } { "*" } { "" } } */
 /* { dg-skip-if "too much code for pdp11" { "pdp11-*-*" } { "*" } { "" } } */
 /* { dg-xfail-if "jump beyond 128K not supported" { xtensa*-*-* } { "-O0" } { "" } } */

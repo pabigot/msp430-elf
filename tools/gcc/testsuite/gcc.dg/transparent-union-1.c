@@ -1,7 +1,7 @@
 /* PR c/20043 */
 /* { dg-do compile } */
-/* { dg-options "-std=gnu99" } */
 /* { dg-skip-if "pointers are not power-of-2 in size" { "msp430-*-*" } { "-mlarge" } { "" } } */
+/* { dg-options "-std=gnu99" } */
 
 extern void f0 (int *);
 extern void f0 (int *__restrict);

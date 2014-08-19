@@ -72,6 +72,8 @@ MAKEOVERRIDES=
 FLAGS_TO_PASS = \
 	"CC=$(CC)" \
 	"CFLAGS=$(CFLAGS)" \
+	"CFLAGS_FOR_TARGET=$(CFLAGS_FOR_TARGET)" \
+	"CCASFLAGS=$(CCASFLAGS)" \
 	"AR=$(AR)" \
 	"RANLIB=$(RANLIB)" \
 	"AR_FLAGS=$(AR_FLAGS)" \
@@ -83,13 +85,16 @@ FLAGS_TO_PASS = \
 	"exec_prefix=$(exec_prefix)" \
 	"prefix=$(prefix)" \
 	"tooldir=$(tooldir)" \
+	"infodir=$(infodir)" \
+	"libdir=$(libdir)" \
+	"top_toollibdir=$(toollibdir)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"DESTDIR=$(DESTDIR)"
 
 all: stmp-bsp force
-	@rootpre=`pwd`/; export rootpre; \
+	+@rootpre=`pwd`/; export rootpre; \
 	srcrootpre=`cd $(srcdir); pwd`/; export srcrootpre; \
 	$(MULTIDO) $(FLAGS_TO_PASS) multi-do DO=all
 
@@ -99,7 +104,7 @@ stmp-bsp: force
 	for dir in .. ${SUBDIRS}; do \
 	  if [ x$$dir != x.. ]; then \
 	    if [ -d $$dir ]; then \
-	      (cd $$dir; $(MAKE) $(FLAGS_TO_PASS)); \
+	      (cd $$dir; $(MAKE) $(FLAGS_TO_PASS)) || exit $$?; \
 	    else true; fi; \
 	  else true; fi; \
 	done
@@ -110,7 +115,7 @@ install: force
 	for dir in .. ${SUBDIRS}; do \
 	  if [ x$$dir != x.. ]; then \
 	    if [ -d $$dir ]; then \
-	      (cd $$dir; $(MAKE) $(FLAGS_TO_PASS) install); \
+	      (cd $$dir; $(MAKE) $(FLAGS_TO_PASS) install) || exit $$?; \
 	    else true; fi; \
 	  else true; fi; \
 	done
@@ -150,7 +155,7 @@ distclean maintainer-clean realclean: clean-here
 	$(MAKE) DO=$@ DODIRS="$(SUBDIRS)" $(FLAGS_TO_PASS) subdir_do; \
 	$(MULTICLEAN) multi-clean DO=$@
 
-.PHONY: info install-info clean-info
+.PHONY: info install-info clean-info html pdf
 subdir_do:
 	@rootpre=`pwd`/; export rootpre; \
 	srcrootpre=`cd $(srcdir); pwd`/; export srcrootpre; \
@@ -166,7 +171,7 @@ subdir_do:
 	  else true; fi; \
 	done
 
-info dvi docs:
+info dvi html pdf docs:
 	rootpre=`pwd`/; export rootpre; \
 	srcrootpre=`cd $(srcdir); pwd`/; export srcrootpre; \
 	$(MAKE) DO=$@ DODIRS=doc $(FLAGS_TO_PASS) subdir_do

@@ -3,6 +3,7 @@
 /* { dg-skip-if "avoid conflicts with multilib options" { *-*-* } { "-mcpu=*" } { "-mcpu=cortex-m4" } } */
 /* { dg-skip-if "avoid conflicts with multilib options" { *-*-* } { "-mfpu=*" } { "-mfpu=fpv4-sp-d16" } } */
 /* { dg-skip-if "avoid conflicts with multilib options" { *-*-* } { "-mfloat-abi=*" } { "-mfloat-abi=hard" } } */
+/* { dg-skip-if "avoid conflicts with multilib options" { *-*-* } { "*" } { "" } } */
 /* { dg-options "-O2 -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mthumb -mfloat-abi=hard" } */
 
 #include "fma.h"

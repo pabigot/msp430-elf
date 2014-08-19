@@ -8,7 +8,7 @@ public:
 private:
   union {
     float vf;
-    struct ff { // { dg-error "" } nested class in anonymous union
+    struct ff { // { dg-excess-errors "" } nested class in anonymous union
       void *ptr;
       char *name;
       int sz;

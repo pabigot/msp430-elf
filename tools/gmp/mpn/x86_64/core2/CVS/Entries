@@ -1,9 +1,9 @@
-/aors_n.asm/1.1/Wed Apr 14 09:42:31 2010//Tmsp430-130322-branch
-/aorslsh1_n.asm/1.1/Wed Apr 14 09:42:31 2010//Tmsp430-130322-branch
-/aorsmul_1.asm/1.1/Wed Apr 14 09:42:31 2010//Tmsp430-130322-branch
-/gmp-mparam.h/1.1/Wed Apr 14 09:42:31 2010//Tmsp430-130322-branch
-/lshift.asm/1.1/Wed Apr 14 09:42:31 2010//Tmsp430-130322-branch
-/lshiftc.asm/1.1/Wed Apr 14 09:42:31 2010//Tmsp430-130322-branch
-/popcount.asm/1.1/Wed Apr 14 09:42:31 2010//Tmsp430-130322-branch
-/rshift.asm/1.1/Wed Apr 14 09:42:31 2010//Tmsp430-130322-branch
+/aors_n.asm/1.1/Wed Apr 14 09:04:43 2010//Tmsp430-14r1-branch
+/aorslsh1_n.asm/1.1/Wed Apr 14 09:04:43 2010//Tmsp430-14r1-branch
+/aorsmul_1.asm/1.1/Wed Apr 14 09:04:43 2010//Tmsp430-14r1-branch
+/gmp-mparam.h/1.1/Wed Apr 14 09:04:43 2010//Tmsp430-14r1-branch
+/lshift.asm/1.1/Wed Apr 14 09:04:43 2010//Tmsp430-14r1-branch
+/lshiftc.asm/1.1/Wed Apr 14 09:04:43 2010//Tmsp430-14r1-branch
+/popcount.asm/1.1/Wed Apr 14 09:04:43 2010//Tmsp430-14r1-branch
+/rshift.asm/1.1/Wed Apr 14 09:04:44 2010//Tmsp430-14r1-branch
 D

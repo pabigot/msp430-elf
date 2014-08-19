@@ -2247,7 +2247,7 @@ elf_adjust_symtab (void)
      can't set up the section contents here yet, because elf section
      indices have yet to be calculated.  elf.c:set_group_contents does
      the rest of the work.  */
-  for (i = 0; i < list.num_group; i++)
+ for (i = 0; i < list.num_group; i++)
     {
       const char *group_name = elf_group_name (list.head[i]);
       const char *sec_name;

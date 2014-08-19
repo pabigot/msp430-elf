@@ -1,6 +1,6 @@
 /* ET-trees data structure implementation.
    Contributed by Pavel Nejedly
-   Copyright (C) 2002-2013 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
 
 This file is part of the libiberty library.
 Libiberty is free software; you can redistribute it and/or
@@ -208,7 +208,7 @@ record_path_before_1 (struct et_occ *occ, int depth)
 
   if (occ->prev)
     {
-      m = record_path_before_1 (occ->prev, depth); 
+      m = record_path_before_1 (occ->prev, depth);
       if (m < mn)
 	mn = m;
     }
@@ -259,7 +259,7 @@ check_path_after_1 (struct et_occ *occ, int depth)
 
   if (occ->next)
     {
-      m = check_path_after_1 (occ->next, depth); 
+      m = check_path_after_1 (occ->next, depth);
       if (m < mn)
 	mn =  m;
     }
@@ -306,7 +306,7 @@ et_splay (struct et_occ *occ)
   record_path_before (occ);
   et_check_tree_sanity (occ);
 #endif
- 
+
   while (occ->parent)
     {
       occ_depth = occ->depth;
@@ -442,7 +442,7 @@ static struct et_occ *
 et_new_occ (struct et_node *node)
 {
   struct et_occ *nw;
-  
+
   if (!et_occurrences)
     et_occurrences = create_alloc_pool ("et_occ pool", sizeof (struct et_occ), 300);
   nw = (struct et_occ *) pool_alloc (et_occurrences);
@@ -465,7 +465,7 @@ struct et_node *
 et_new_tree (void *data)
 {
   struct et_node *nw;
-  
+
   if (!et_nodes)
     et_nodes = create_alloc_pool ("et_node pool", sizeof (struct et_node), 300);
   nw = (struct et_node *) pool_alloc (et_nodes);
@@ -487,8 +487,6 @@ et_new_tree (void *data)
 void
 et_free_tree (struct et_node *t)
 {
-  if (t == NULL)
-    return;
   while (t->son)
     et_split (t->son);
 
@@ -590,7 +588,7 @@ et_split (struct et_node *t)
 
   for (r = rmost->next; r->prev; r = r->prev)
     continue;
-  et_splay (r); 
+  et_splay (r);
 
   r->prev->parent = NULL;
   p_occ = t->parent_occ;

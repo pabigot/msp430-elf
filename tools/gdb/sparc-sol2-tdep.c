@@ -1,6 +1,6 @@
 /* Target-dependent code for Solaris SPARC.
 
-   Copyright (C) 2003-2004, 2006-2012 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,7 +29,7 @@
 #include "trad-frame.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "sol2-tdep.h"
 #include "sparc-tdep.h"
@@ -46,6 +46,12 @@ const struct sparc_gregset sparc32_sol2_gregset =
   37 * 4,			/* %tbr */
   1 * 4,			/* %g1 */
   16 * 4,			/* %l0 */
+};
+
+const struct sparc_fpregset sparc32_sol2_fpregset =
+{
+  0 * 4,			/* %f0 */
+  33 * 4,			/* %fsr */
 };
 
 

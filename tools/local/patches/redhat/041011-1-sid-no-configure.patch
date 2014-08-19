@@ -1,0 +1,40 @@
+This patch disables the configuration of SID by default, and then
+re-enables it only for those cross targets actually supported by SID.
+
+Patch updated 2012-07-11 by Kevin Buettner.
+
+<toplevel>/ChangeLog.RedHat
+2004-10-12  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in (host_tools): Remove sid so that it is not
+	configured/built by default.
+	(mep): Add sid to configdirs.
+	* configure: Regenerate.
+
+Index: configure.ac
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/configure.ac,v
+retrieving revision 1.40
+diff -u -p -r1.40 configure.ac
+--- configure.ac	4 Jul 2012 15:10:37 -0000	1.40
++++ configure.ac	11 Jul 2012 21:38:44 -0000
+@@ -154,7 +154,7 @@ host_libs="intl libiberty opcodes bfd re
+ # binutils, gas and ld appear in that order because it makes sense to run
+ # "make check" in that particular order.
+ # If --enable-gold is used, "gold" may replace "ld".
+-host_tools="texinfo flex bison binutils gas ld fixincludes gcc cgen sid sim gdb gprof etc expect dejagnu m4 utils guile fastjar gnattools"
++host_tools="texinfo flex bison binutils gas ld fixincludes gcc cgen sim gdb gprof etc expect dejagnu m4 utils guile fastjar gnattools"
+ 
+ # libgcj represents the runtime libraries only used by gcj.
+ libgcj="target-libffi \
+@@ -704,6 +704,9 @@ case "${target}" in
+   rs6000-*-aix*)
+     noconfigdirs="$noconfigdirs ${libgcj}"
+     ;;
++  mep-*-*)
++    configdirs="$configdirs sid"
++    ;;    
+   mips*-*-irix6*)
+     # Linking libjava exceeds command-line length limits on at least
+     # IRIX 6.2, but not on IRIX 6.5.
+

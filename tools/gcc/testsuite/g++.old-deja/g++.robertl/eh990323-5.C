@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // check cleanup of partial array objects
 extern "C" void abort (void);
 extern "C" void exit (int);

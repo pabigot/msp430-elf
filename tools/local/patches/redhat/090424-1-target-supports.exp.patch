@@ -1,0 +1,74 @@
+This patch updates the list of targets that are not expected to
+support profling.  It should be submitted upstream one day...
+
+2009-04-24  Nick Clifton  <nickc@redhat.com>
+
+	* lib/target-supports.exp (check_profiling_available): Alpha sort
+	the entries.
+	Add FRV, IQ2000, MMIX, MN10300, SH, V850 and CYGWIN to the list of
+	targets that do not support profiling.
+	(check_effective_target_fpic): Assume that PIC is not available
+	for the FRV.
+
+*** /work/sources/gcc/branches/4.4/gcc/testsuite/lib/target-supports.exp	2009-04-03 17:59:17.000000000 +0100
+--- gcc/testsuite/lib/target-supports.exp	2009-04-24 12:16:07.000000000 +0100
+*************** proc check_profiling_available { test_wh
+*** 477,501 ****
+      if {![info exists profiling_available_saved]} {
+  	# Some targets don't have any implementation of __bb_init_func or are
+  	# missing other needed machinery.
+! 	if { [istarget mmix-*-*]
+! 	     || [istarget arm*-*-eabi*]
+! 	     || [istarget picochip-*-*]
+! 	     || [istarget *-*-netware*]
+  	     || [istarget arm*-*-elf]
+  	     || [istarget arm*-*-symbianelf*]
+  	     || [istarget avr-*-*]
+  	     || [istarget bfin-*-*]
+- 	     || [istarget powerpc-*-eabi*]
+  	     || [istarget cris-*-*]
+  	     || [istarget crisv32-*-*]
+  	     || [istarget fido-*-elf]
+  	     || [istarget h8300-*-*]
+  	     || [istarget m32c-*-elf]
+  	     || [istarget m68k-*-elf]
+  	     || [istarget m68k-*-uclinux*]
+  	     || [istarget mips*-*-elf*]
+  	     || [istarget xstormy16-*]
+  	     || [istarget xtensa*-*-elf]
+  	     || [istarget *-*-rtems*]
+  	     || [istarget *-*-vxworks*] } {
+  	    set profiling_available_saved 0
+--- 477,508 ----
+      if {![info exists profiling_available_saved]} {
+  	# Some targets don't have any implementation of __bb_init_func or are
+  	# missing other needed machinery.
+! 	if {    [istarget arm*-*-eabi*]
+  	     || [istarget arm*-*-elf]
+  	     || [istarget arm*-*-symbianelf*]
+  	     || [istarget avr-*-*]
+  	     || [istarget bfin-*-*]
+  	     || [istarget cris-*-*]
+  	     || [istarget crisv32-*-*]
+  	     || [istarget fido-*-elf]
++ 	     || [istarget frv-*-elf]
+  	     || [istarget h8300-*-*]
++ 	     || [istarget iq2000*-*-*]
+  	     || [istarget m32c-*-elf]
+  	     || [istarget m68k-*-elf]
+  	     || [istarget m68k-*-uclinux*]
+  	     || [istarget mips*-*-elf*]
++ 	     || [istarget mmix-*-*]
++ 	     || [istarget mn10*-*-elf]
++ 	     || [istarget am3*-*-elf]
++ 	     || [istarget picochip-*-*]
++ 	     || [istarget powerpc-*-eabi*]
++ 	     || [istarget sh*-*-*]
++ 	     || [istarget v850*-*-*]
+  	     || [istarget xstormy16-*]
+  	     || [istarget xtensa*-*-elf]
++ 	     || [istarget *-*-cygwin]
++ 	     || [istarget *-*-netware*]
+  	     || [istarget *-*-rtems*]
+  	     || [istarget *-*-vxworks*] } {
+  	    set profiling_available_saved 0

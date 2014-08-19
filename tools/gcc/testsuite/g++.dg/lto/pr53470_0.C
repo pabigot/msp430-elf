@@ -1,5 +1,6 @@
 // { dg-lto-do link }
 // { dg-lto-options { { -g -flto } } }
+// { dg-require-effective-target size32plus }
 
 class sp_counted_base;
 class shared_count {

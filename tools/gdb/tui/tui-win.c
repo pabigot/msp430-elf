@@ -1,6 +1,6 @@
 /* TUI window generic functions.
 
-   Copyright (C) 1998-2004, 2006-2012 Free Software Foundation, Inc.
+   Copyright (C) 1998-2014 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -46,7 +46,7 @@
 
 #include "gdb_curses.h"
 
-#include "gdb_string.h"
+#include <string.h>
 #include <ctype.h>
 #include "readline/readline.h"
 
@@ -466,10 +466,10 @@ tui_update_gdb_sizes (void)
   char cmd[50];
 
   /* Set to TUI command window dimension or use readline values.  */
-  sprintf (cmd, "set width %d",
+  xsnprintf (cmd, sizeof (cmd), "set width %d",
            tui_active ? TUI_CMD_WIN->generic.width : tui_term_width());
   execute_command (cmd, 0);
-  sprintf (cmd, "set height %d",
+  xsnprintf (cmd, sizeof (cmd), "set height %d",
            tui_active ? TUI_CMD_WIN->generic.height : tui_term_height());
   execute_command (cmd, 0);
 }

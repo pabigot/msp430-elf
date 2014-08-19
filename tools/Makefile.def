@@ -4,8 +4,7 @@ AutoGen definitions Makefile.tpl;
 // Makefile.in is generated from Makefile.tpl by 'autogen Makefile.def'.
 // This file was originally written by Nathanael Nerode.
 //
-//   Copyright 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
-//   Free Software Foundation
+//   Copyright 2002-2013 Free Software Foundation
 //
 // This file is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,7 +25,7 @@ AutoGen definitions Makefile.tpl;
 // that recursive target in its Makefile.
 
 build_modules= { module= libiberty; };
-build_modules= { module= bison; extra_configure_flags='LEX="flex"';};
+build_modules= { module= bison; };
 build_modules= { module= flex; };
 build_modules= { module= m4; };
 build_modules= { module= texinfo; };
@@ -47,15 +46,15 @@ host_modules= { module= gas; bootstrap=true; };
 host_modules= { module= gcc; bootstrap=true; 
 		extra_make_flags="$(EXTRA_GCC_FLAGS)"; };
 host_modules= { module= gmp; lib_path=.libs; bootstrap=true;
-		extra_configure_flags='--disable-shared --enable-cxx';
+		extra_configure_flags='--disable-shared';
 		no_install= true;
 		// none-*-* disables asm optimizations, bootstrap-testing
 		// the compiler more thoroughly.
 	        host="none-${host_vendor}-${host_os}";
 		// gmp's configure will complain if given anything
 		// different from host for target.
-		target="none-${host_vendor}-${host_os}"; };
-host_modules= { module= mpfr; lib_path=src/.libs; bootstrap=true;
+	        target="none-${host_vendor}-${host_os}"; };
+host_modules= { module= mpfr; lib_path=.libs; bootstrap=true;
 		extra_configure_flags='--disable-shared @extra_mpfr_configure_flags@';
 		no_install= true; };
 host_modules= { module= mpc; lib_path=.libs; bootstrap=true;
@@ -98,7 +97,7 @@ host_modules= { module= m4; };
 host_modules= { module= readline; };
 host_modules= { module= sid; };
 host_modules= { module= sim; };
-host_modules= { module= texinfo; };
+host_modules= { module= texinfo; no_install= true; };
 host_modules= { module= zlib; no_install=true; no_check=true; bootstrap=true; };
 host_modules= { module= gdb; };
 host_modules= { module= expect; };
@@ -113,9 +112,6 @@ host_modules= { module= utils; no_check=true; };
 host_modules= { module= gnattools; };
 host_modules= { module= lto-plugin; bootstrap=true;
 		extra_configure_flags=--enable-shared; };
-host_modules= { module= ecos-monitors; };
-host_modules= { module= vim; };
-host_modules= { module= acovea; };
 
 target_modules = { module= libstdc++-v3;
 		   bootstrap=true;
@@ -123,6 +119,10 @@ target_modules = { module= libstdc++-v3;
 		   raw_cxx=true; };
 target_modules = { module= libmudflap; lib_path=.libs; };
 target_modules = { module= libsanitizer;
+		   bootstrap=true;
+		   lib_path=.libs;
+		   raw_cxx=true; };
+target_modules = { module= libvtv;
 		   bootstrap=true;
 		   lib_path=.libs;
 		   raw_cxx=true; };
@@ -141,7 +141,7 @@ target_modules = { module= libtermcap; no_check=true;
                    missing=maintainer-clean; };
 target_modules = { module= winsup; };
 target_modules = { module= libgloss; no_check=true; };
-target_modules = { module= libffi; };
+target_modules = { module= libffi; no_install=true; };
 target_modules = { module= libjava; raw_cxx=true;
                    extra_configure_flags="$(EXTRA_CONFIGARGS_LIBJAVA)"; };
 target_modules = { module= zlib; };
@@ -284,8 +284,8 @@ flags_to_pass = { flag= LEAN ; };
 // Inter-module dependencies
 
 // Build modules
+dependencies = { module=all-build-bison; on=all-build-texinfo; };
 dependencies = { module=all-build-flex; on=all-build-texinfo; };
-dependencies = { module=all-build-flex; on=all-build-libiberty; };
 dependencies = { module=all-build-flex; on=all-build-bison; };
 dependencies = { module=all-build-flex; on=all-build-m4; };
 dependencies = { module=all-build-libiberty; on=all-build-texinfo; };
@@ -293,8 +293,6 @@ dependencies = { module=all-build-m4; on=all-build-texinfo; };
 dependencies = { module=all-build-fixincludes; on=all-build-libiberty; };
 
 // Host modules specific to gcc.
-dependencies = { module=configure-gmp; on=all-build-flex; };
-dependencies = { module=configure-gmp; on=all-build-bison; };
 dependencies = { module=configure-gcc; on=configure-intl; };
 dependencies = { module=configure-gcc; on=all-gmp; };
 dependencies = { module=configure-gcc; on=all-lto-plugin; };
@@ -337,6 +335,7 @@ dependencies = { module=all-libcpp; on=all-intl; };
 dependencies = { module=all-fixincludes; on=all-libiberty; };
 
 dependencies = { module=all-gnattools; on=all-target-libada; };
+dependencies = { module=all-gnattools; on=all-target-libstdc++-v3; };
 
 dependencies = { module=all-lto-plugin; on=all-libiberty; };
 
@@ -352,7 +351,6 @@ dependencies = { module=configure-cloog; on=all-gmp; };
 dependencies = { module=configure-gdb; on=all-intl; };
 dependencies = { module=configure-gdb; on=configure-sim; };
 dependencies = { module=configure-gdb; on=all-bfd; };
-dependencies = { module=configure-bfd; on=all-build-bison; };
 // Depend on all-libiconv so that configure checks for iconv
 // functions will work.
 dependencies = { module=configure-gdb; on=all-libiconv; };
@@ -378,14 +376,11 @@ dependencies = { module=all-bfd; on=all-libiberty; };
 dependencies = { module=all-bfd; on=all-intl; };
 dependencies = { module=configure-opcodes; on=configure-libiberty; hard=true; };
 dependencies = { module=all-opcodes; on=all-libiberty; };
-dependencies = { module=all-bfd; on=all-build-texinfo; };
 
 // We must build gas before binutils, gprof, ld and gold to avoid race
 // condition in the prev-gcc/as script during bootstrap of combined tree
 // with GCC and binutils.  See PR gas/14899 for details.
 dependencies = { module=configure-binutils; on=configure-intl; };
-dependencies = { module=configure-binutils; on=all-build-flex; };
-dependencies = { module=configure-binutils; on=all-build-bison; };
 dependencies = { module=all-binutils; on=all-libiberty; };
 dependencies = { module=all-binutils; on=all-opcodes; };
 dependencies = { module=all-binutils; on=all-bfd; };
@@ -405,10 +400,6 @@ dependencies = { module=install-opcodes; on=install-bfd; };
 dependencies = { module=install-strip-opcodes; on=install-strip-bfd; };
 
 dependencies = { module=configure-gas; on=configure-intl; };
-dependencies = { module=configure-gas; on=all-build-flex; };
-dependencies = { module=configure-gas; on=all-build-bison; };
-dependencies = { module=configure-ld; on=all-build-flex; };
-dependencies = { module=configure-ld; on=all-build-bison; };
 dependencies = { module=all-gas; on=all-libiberty; };
 dependencies = { module=all-gas; on=all-opcodes; };
 dependencies = { module=all-gas; on=all-bfd; };
@@ -444,7 +435,6 @@ dependencies = { module=all-opcodes; on=all-libiberty; };
 dependencies = { module=all-opcodes; on=all-intl; };
 
 // Other host modules in the 'src' repository.
-dependencies = { module=configure-dejagnu; on=all-build-flex; };
 dependencies = { module=all-dejagnu; on=all-tcl; };
 dependencies = { module=all-dejagnu; on=all-expect; };
 dependencies = { module=all-dejagnu; on=all-tk; };
@@ -489,11 +479,8 @@ dependencies = { module=all-fastjar; on=all-build-texinfo; };
 dependencies = { module=all-fastjar; on=all-libiberty; };
 
 // Warning, these are not well tested.
-dependencies = { module=configure-bison; on=all-build-flex; };
-dependencies = { module=configure-bison; on=all-build-bison; };
 dependencies = { module=all-bison; on=all-intl; };
 dependencies = { module=all-bison; on=all-build-texinfo; };
-dependencies = { module=configure-flex; on=all-build-bison; };
 dependencies = { module=all-flex; on=all-build-bison; };
 dependencies = { module=all-flex; on=all-intl; };
 dependencies = { module=all-flex; on=all-m4; };
@@ -533,6 +520,7 @@ dependencies = { module=configure-target-libobjc; on=configure-target-boehm-gc; 
 dependencies = { module=all-target-libobjc; on=all-target-boehm-gc; };
 dependencies = { module=configure-target-libstdc++-v3; on=configure-target-libgomp; };
 dependencies = { module=configure-target-libsanitizer; on=all-target-libstdc++-v3; };
+dependencies = { module=configure-target-libvtv; on=all-target-libstdc++-v3; };
 // parallel_list.o and parallel_settings.o depend on omp.h, which is
 // generated by the libgomp configure.  Unfortunately, due to the use of
 //  recursive make, we can't be that specific.
@@ -543,6 +531,8 @@ dependencies = { module=install-target-libgfortran; on=install-target-libquadmat
 dependencies = { module=install-target-libgfortran; on=install-target-libgcc; };
 dependencies = { module=install-target-libsanitizer; on=install-target-libstdc++-v3; };
 dependencies = { module=install-target-libsanitizer; on=install-target-libgcc; };
+dependencies = { module=install-target-libvtv; on=install-target-libstdc++-v3; };
+dependencies = { module=install-target-libvtv; on=install-target-libgcc; };
 dependencies = { module=install-target-libjava; on=install-target-libgcc; };
 dependencies = { module=install-target-libitm; on=install-target-libgcc; };
 dependencies = { module=install-target-libobjc; on=install-target-libgcc; };
@@ -597,6 +587,3 @@ bootstrap_stage = {
 bootstrap_stage = {
 	id=feedback ; prev=profile ;
 	bootstrap_target=profiledbootstrap ; };
-// Local Variables:
-// mode: Makefile
-// End:

@@ -1,5 +1,6 @@
 // { dg-do run  }
 // { dg-additional-files "vtable3.h" }
+// { dg-skip-if "test too big" { msp430-*-* } { "*" } { "" } }
 
 // Copyright (C) 2000, 2003 Free Software Foundation, Inc.
 // Contributed by Nathan Sidwell 4 February 2001 <nathan@codesourcery.com>

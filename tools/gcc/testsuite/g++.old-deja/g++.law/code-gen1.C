@@ -13,7 +13,7 @@ int main()
   int i = 0;
   (++i)++;
   if (i == 2)
-    printf ("PASS\n");
+    ; // printf ("PASS\n");
   else
     { printf ("FAIL\n"); return 1; }
 }

@@ -1,6 +1,5 @@
 /* Routines to help build PEI-format DLLs (Win32 etc)
-   Copyright 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-   2008, 2009, 2010, 2011, 2012 Free Software Foundation, Inc.
+   Copyright 1998-2013 Free Software Foundation, Inc.
    Written by DJ Delorie <dj@cygnus.com>
 
    This file is part of the GNU Binutils.
@@ -782,14 +781,17 @@ process_def_file_and_drectve (bfd *abfd ATTRIBUTE_UNUSED, struct bfd_link_info *
     {
       for (i = 0; i < NE; i++)
 	{
-	  if (strchr (pe_def_file->exports[i].name, '@'))
+	  /* Check for fastcall/stdcall-decoration, but ignore
+	     C++ mangled names.  */
+	  if (pe_def_file->exports[i].name[0] != '?'
+	      && strchr (pe_def_file->exports[i].name, '@'))
 	    {
 	      /* This will preserve internal_name, which may have been
 		 pointing to the same memory as name, or might not
 		 have.  */
 	      int lead_at = (*pe_def_file->exports[i].name == '@');
 	      char *tmp = xstrdup (pe_def_file->exports[i].name + lead_at);
-	      char *tmp_at = strchr (tmp, '@');
+	      char *tmp_at = strrchr (tmp, '@');
 
 	      if (tmp_at)
 	        *tmp_at = 0;
@@ -1167,9 +1169,6 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
   unsigned char *enameptrs;
   unsigned char *eordinals;
   char *enamestr;
-  time_t now;
-
-  time (&now);
 
   edata_d = xmalloc (edata_sz);
 
@@ -1184,7 +1183,10 @@ fill_edata (bfd *abfd, struct bfd_link_info *info ATTRIBUTE_UNUSED)
 		   + edata_s->output_section->vma - image_base)
 
   memset (edata_d, 0, edata_sz);
-  bfd_put_32 (abfd, now, edata_d + 4);
+
+  if (pe_data (abfd)->insert_timestamp)
+    H_PUT_32 (abfd, time (0), edata_d + 4);
+
   if (pe_def_file->version_major != -1)
     {
       bfd_put_16 (abfd, pe_def_file->version_major, edata_d + 8);
@@ -2588,7 +2590,7 @@ pe_create_runtime_relocator_reference (bfd *parent)
 		BSF_NO_FLAGS, 0);
 
   bfd_set_section_size (abfd, extern_rt_rel, PE_IDATA5_SIZE);
-  extern_rt_rel_d = xmalloc (PE_IDATA5_SIZE);
+  extern_rt_rel_d = xcalloc (1, PE_IDATA5_SIZE);
   extern_rt_rel->contents = extern_rt_rel_d;
 
   quick_reloc (abfd, 0, BFD_RELOC_RVA, 1);
@@ -2844,7 +2846,7 @@ pe_find_cdecl_alias_match (struct bfd_link_info *linfo, char *name)
   struct key_value *kv;
   struct key_value key;
   char *at, *lname = (char *) alloca (strlen (name) + 3);
-  
+
   strcpy (lname, name);
 
   at = strchr (lname + (lname[0] == '@'), '@');
@@ -2925,7 +2927,7 @@ pe_find_cdecl_alias_match (struct bfd_link_info *linfo, char *name)
       if (h->type == bfd_link_hash_undefined)
         return h;
     }
-  
+
   return NULL;
 }
 

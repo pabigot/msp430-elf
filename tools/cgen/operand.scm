@@ -1,5 +1,5 @@
 ; Operands
-; Copyright (C) 2000, 2001, 2005, 2009, 2010 Red Hat, Inc.
+; Copyright (C) 2000, 2001, 2005 Red Hat, Inc.
 ; This file is part of CGEN.
 ; See file COPYING.CGEN for details.
 
@@ -17,7 +17,7 @@
 
 (define <operand>
   (class-make '<operand>
-	      '(<source-ident>)
+	      '(<ident>)
 	      '(
 		; Name as used in semantic code.
 		; Generally this is the same as NAME.  It is changed by the
@@ -40,8 +40,6 @@
 		; that require a unique hardware element to be refered to are
 		; required to ensure duplicates are discarded (usually done
 		; by keeping the appropriate machs).
-		; All h/w elements with the same semantic name are required
-		; to be the same kind (register, immediate, etc.).
 		; FIXME: Rename to hw.
 		(type . #f)
 
@@ -93,8 +91,7 @@
 		; the instruction.
 		(cond? . #f)
 		
-		; whether (and by how much) this instance of the operand is
-		; delayed.
+		; whether (and by how much) this instance of the operand is delayed.
 		(delayed . #f)
 		)
 	      nil)
@@ -104,9 +101,7 @@
 
 (method-make!
  <operand> 'make!
- (lambda (self location name comment attrs
-	       hw-name mode-name index handlers getter setter)
-   (elm-set! self 'location location)
+ (lambda (self name comment attrs hw-name mode-name index handlers getter setter)
    (elm-set! self 'name name)
    (elm-set! self 'sem-name name)
    (elm-set! self 'pretty-sem-name hw-name)
@@ -158,7 +153,7 @@
 	    (let* ((hw-name (op:hw-name op))
 		   (hw-objs (current-hw-sem-lookup hw-name)))
 	      (if (!= (length hw-objs) 1)
-		  (error "cannot resolve h/w reference" hw-name))
+		  (error "can't resolve h/w reference" hw-name))
 	      ((elm-make-setter <operand> 'type) op (car hw-objs))
 	      (car hw-objs))))))
 )
@@ -187,12 +182,11 @@
 ; Result is the <ifield> object or #f if there is none.
 
 (define (op-ifield op)
-  (logit 4 "  op-ifield op= " (obj:name op)
-	 ", indx= " (obj:name (op:index op)) "\n")
+  (logit 4 "op-ifield op=" (obj:name op) " indx=" (obj:name (op:index op)) "\n")
   (let ((indx (op:index op)))
     (if indx
 	(let ((maybe-ifld (hw-index:value (op:index op))))
-	  (logit 4 "  ifld=" (obj:name maybe-ifld) "\n")
+	  (logit 4 " ifld=" (obj:name maybe-ifld) "\n")
 	  (cond ((ifield? maybe-ifld) maybe-ifld)
 		((derived-ifield? maybe-ifld) maybe-ifld)
 		((ifield? indx) indx)
@@ -243,27 +237,53 @@
      (string-append "\"" pname "\"")))
 )
 
+; PC support.
+; This is a subclass of <operand>, used to give the simulator a place to
+; hang a couple of methods.
+; At the moment we only support one pc, a reasonable place to stop for now.
+
+(define <pc> (class-make '<pc> '(<operand>) nil nil))
+
+(method-make!
+ <pc> 'make!
+ (lambda (self)
+   (send-next self 'make! 'pc "program counter"
+	      (atlist-parse '(SEM-ONLY) "cgen_operand" "make! of pc")
+	      'h-pc
+	      'DFLT
+	      (make <hw-index> 'anonymous
+		    'ifield 'UINT (current-ifld-lookup 'f-nil))
+	      nil ; handlers
+	      #f #f) ; getter setter
+   self)
+)
+
+; Return a boolean indicating if operand op is the pc.
+; This must not call op:type.  op:type will try to resolve a hardware
+; element that may be multiply specified, and this is used in contexts
+; where that's not possible.
+
+(define (pc? op) (class-instance? <pc> op))
+
 ; Mode support.
 
 ; Create a copy of operand OP in mode NEW-MODE-NAME.
 ; NOTE: Even if the mode isn't changing this creates a copy.
 ; If OP has been subclassed the result must contain the complete class
-; (e.g. the behaviour of `object-copy').
-; NEW-MODE-NAME must be a valid numeric mode.
+; (e.g. the behaviour of `object-copy-top').
 
 (define (op:new-mode op new-mode-name)
-  (let ((result (object-copy op)))
+  (let ((result (object-copy-top op)))
     ; (logit 1 "op:new-mode op=" (op:sem-name op) 
     ;   " class=" (object-class-name op)
     ;   " hw-name=" (op:hw-name op)
     ;   " mode=" (op:mode op)
     ;   " newmode=" new-mode-name)
-;    (if (or (eq? new-mode-name 'DFLT)
-;	    (eq? new-mode-name 'VOID) ; temporary: for upward compatibility
-;	    (mode:eq? new-mode-name (op:mode op)))
-;	; Mode isn't changing.
-;	result
-    (if #t ;; FIXME
+    (if (or (eq? new-mode-name 'DFLT)
+	    (eq? new-mode-name 'VOID) ; temporary: for upward compatibility
+	    (mode:eq? new-mode-name (op:mode op)))
+	; Mode isn't changing.
+	result
 	; See if new mode is supported by the hardware.
 	(if (hw-mode-ok? (op:type op) new-mode-name (op:index op))
 	    (let ((new-mode (mode:lookup new-mode-name)))
@@ -273,7 +293,7 @@
 	      (elm-xset! result 'mode-name new-mode-name)
 	      (elm-xset! result 'mode new-mode)
 	      result)
-	    (parse-error (make-obj-context op "op:new-mode")
+	    (parse-error "op:new-mode"
 			 (string-append "invalid mode for operand `"
 					(->string (obj:name op))
 					"'")
@@ -321,21 +341,17 @@
 ; TYPE is a symbol that indicates what VALUE is.
 ; scalar: the hardware object is a scalar, no index is required
 ;         [MODE and VALUE are #f to denote "undefined" in this case]
-; constant: a (non-negative) integer (FIXME: rename to const)
-; enum: an enum value stored as (enum-name . (enum-lookup-val enum-name)),
-;       i.e. (name value . enum-obj)
+; constant: a (non-negative) integer
 ; str-expr: a C expression as a string
 ; rtx: an rtx to be expanded
-; ifield: an <ifield> object
-; derived-ifield: a <derived-ifield> object ???
-; operand: an <operand> object
+; ifield: an ifield object
+; operand: an operand object
 ; ??? A useful simplification may be to always record the value as an rtx
 ; [which may require extensions to rtl so is deferred].
 ; ??? We could use runtime type identification, but doing things this way
 ; adds more structure.
 ;
-; MODE is the mode of VALUE, as a <mode> object.
-; If DFLT, mode must be obtained from VALUE.
+; MODE is the mode of VALUE.  If DFLT, mode must be obtained from VALUE.
 ; DFLT is only allowable for rtx and operand types.
 
 (define <hw-index> (class-make '<hw-index> nil '(name type mode value) nil))
@@ -352,7 +368,7 @@
  (lambda (self name type mode value)
    (elm-set! self 'name name)
    (elm-set! self 'type type)
-   (elm-set! self 'mode (mode-maybe-lookup mode))
+   (elm-set! self 'mode (mode:lookup mode))
    (elm-set! self 'value value)
    self)
 )
@@ -376,9 +392,9 @@
 ; ??? Until other things settle.
 (method-make!
  <hw-index> 'field-start
- (lambda (self)
+ (lambda (self word-len)
    (if (eq? (hw-index:type self) 'ifield)
-       (send (hw-index:value self) 'field-start)
+       (send (hw-index:value self) 'field-start #f)
        0))
 )
 (method-make!
@@ -389,46 +405,6 @@
        0))
 )
 
-;; Return #t if index is a constant.
-
-(define (hw-index-constant? hw-index)
-  (memq (hw-index:type hw-index) '(constant enum))
-)
-
-;; Given that (hw-index-constant? hw-index) is true, return the value.
-
-(define (hw-index-constant-value hw-index)
-  (case (hw-index:type hw-index)
-    ((constant) (hw-index:value hw-index))
-    ((enum) (hw-index-enum-value hw-index))
-    (else (error "invalid constant hw-index" hw-index)))
-)
-
-;; Make an enum <hw-index> given the enum's name.
-
-(define (make-enum-hw-index name enum-name)
-  (make <hw-index> name 'enum UINT
-	(cons enum-name (enum-lookup-val enum-name)))
-)
-
-;; Given an enum <hw-index>, return the enum's name.
-
-(define (hw-index-enum-name hw-index)
-  (car (hw-index:value hw-index))
-)
-
-;; Given an enum <hw-index>, return the enum's value.
-
-(define (hw-index-enum-value hw-index)
-  (cadr (hw-index:value hw-index))
-)
-
-;; Given an enum <hw-index>, return the enum's object.
-
-(define (hw-index-enum-obj hw-index)
-  (cddr (hw-index:value hw-index))
-)
-
 ; There only ever needs to be one of these objects, so create one.
 
 (define hw-index-scalar
@@ -436,12 +412,12 @@
   ; (a) doesn't exist if we're compiled with Hobbit and mode.scm isn't
   ; and (b) will fail anyway since #f isn't a valid mode.
   (let ((scalar-index (new <hw-index>)))
-    (elm-xset! scalar-index 'name 'hw-index-scalar)
     (elm-xset! scalar-index 'type 'scalar)
     (elm-xset! scalar-index 'mode #f)
     (elm-xset! scalar-index 'value #f)
     (lambda () scalar-index))
 )
+
 
 ; Placeholder for indices of "anyof" operands.
 ; There only needs to be one of these, so we create one and always use that.
@@ -451,7 +427,6 @@
   ; (a) doesn't exist if we're compiled with Hobbit and mode.scm isn't
   ; and (b) will fail anyway since #f isn't a valid mode.
   (let ((anyof-index (new <hw-index>)))
-    (elm-xset! anyof-index 'name 'hw-index-anyof)
     (elm-xset! anyof-index 'type 'scalar)
     (elm-xset! anyof-index 'mode #f)
     (elm-xset! anyof-index 'value #f)
@@ -463,12 +438,13 @@
   ; (a) doesn't exist if we're compiled with Hobbit and mode.scm isn't
   ; and (b) will fail anyway since #f isn't a valid mode.
   (let ((derived-index (new <hw-index>)))
-    (elm-xset! derived-index 'name 'hw-index-derived)
     (elm-xset! derived-index 'type 'scalar)
     (elm-xset! derived-index 'mode #f)
     (elm-xset! derived-index 'value #f)
     (lambda () derived-index))
 )
+
+
 
 ; Hardware selector support.
 ;
@@ -502,10 +478,10 @@
 
 ; Parsing support.
 
-; Utility of /operand-parse-[gs]etter to build the expected syntax,
+; Utility of -operand-parse-[gs]etter to build the expected syntax,
 ; for use in error messages.
 
-(define (/operand-g/setter-syntax rank setter?)
+(define (-operand-g/setter-syntax rank setter?)
   (string-append "("
 		 (string-drop1
 		  (numbers->string (iota rank) " index"))
@@ -522,7 +498,7 @@
 ; Omit `index-names' for scalar objects.
 ; {rank} is the required number of elements in {index-names}.
 
-(define (/operand-parse-getter context getter rank)
+(define (-operand-parse-getter context getter rank)
   (if (null? getter)
       #f ; use default
       (let ()
@@ -530,12 +506,12 @@
 		(!= (length getter) 2)
 		(not (and (list? (car getter))
 			  (= (length (car getter)) rank))))
-	    (parse-error context
-			 (string-append "invalid getter, should be "
-					(/operand-g/setter-syntax rank #f))
-			 getter))
+	    (context-error context
+			   (string-append "invalid getter, should be "
+					  (-operand-g/setter-syntax rank #f))
+			   getter))
 	(if (not (rtx? (cadr getter)))
-	    (parse-error context "invalid rtx expression" getter))
+	    (context-error context "invalid rtx expression" getter))
 	getter))
 )
 
@@ -544,7 +520,7 @@
 ; Omit `index-names' for scalar objects.
 ; {rank} is the required number of elements in {index-names}.
 
-(define (/operand-parse-setter context setter rank)
+(define (-operand-parse-setter context setter rank)
   (if (null? setter)
       #f ; use default
       (let ()
@@ -552,12 +528,12 @@
 		(!= (length setter) 2)
 		(not (and (list? (car setter))
 			  (= (+ 1 (length (car setter)) rank)))))
-	    (parse-error context
-			 (string-append "invalid setter, should be "
-					(/operand-g/setter-syntax rank #t))
-			 setter))
+	    (context-error context
+			   (string-append "invalid setter, should be "
+					  (-operand-g/setter-syntax rank #t))
+			   setter))
 	(if (not (rtx? (cadr setter)))
-	    (parse-error context "invalid rtx expression" setter))
+	    (context-error context "invalid rtx expression" setter))
 	setter))
 )
 
@@ -569,85 +545,65 @@
 ; ??? This only takes insn fields as the index.  May need another proc (or an
 ; enhancement of this one) that takes other kinds of indices.
 
-(define (/operand-parse context name comment attrs hw mode index handlers getter setter)
+(define (-operand-parse errtxt name comment attrs hw mode ifld handlers getter setter)
   (logit 2 "Processing operand " name " ...\n")
 
-  ;; Pick out name first to augment the error context.
-  (let* ((name (parse-name context name))
-	 (context (context-append-name context name))
-	 (atlist-obj (atlist-parse context attrs "cgen_operand"))
-	 (isa-name-list (atlist-attr-value atlist-obj 'ISA #f)))
-
-    ;; Verify all specified ISAs are valid.
-    (if (not (all-true? (map current-isa-lookup isa-name-list)))
-	(parse-error context "unknown isa in isa list" isa-name-list))
+  (let ((name (parse-name name errtxt))
+	(atlist-obj (atlist-parse attrs "cgen_operand" errtxt)))
 
     (if (keep-atlist? atlist-obj #f)
 
 	(let ((hw-objs (current-hw-sem-lookup hw))
-	      (mode-obj (parse-mode-name context mode))
-	      (index-val (cond ((integer? index)
-				index)
-			       ((and (symbol? index) (enum-lookup-val index))
-				=> (lambda (x) x))
-			       ((and (symbol? index) (current-ifld-lookup index isa-name-list))
-				=> (lambda (x) x))
-			       (else
-				(if (symbol? index)
-				    (parse-error context "unknown enum or ifield" index)
-				    (parse-error context "invalid operand index" index))))))
+	      (mode-obj (parse-mode-name mode errtxt))
+	      (ifld-val (if (integer? ifld)
+			    ifld
+			    (current-ifld-lookup ifld)))
+	      ; FIXME: quick hack
+	      (context (context-make-reader errtxt)))
 
 	  (if (not mode-obj)
-	      (parse-error context "unknown mode" mode))
-	  ;; Disallow some obviously invalid numeric indices.
-	  (if (and (number? index-val)
-		   (or (not (integer? index-val))
-		       (< index-val 0)))
-	      (parse-error context "invalid integer index" index))
-	  ;; If an enum is used, it must be non-negative.
-	  (if (and (pair? index-val)
-		   (< (car index-val) 0))
-	      (parse-error context "negative enum value" index))
-	  ;; NOTE: Don't validate HW until we know whether this operand
-	  ;; will be kept or not.  If not, HW may have been discarded too.
+	      (parse-error errtxt "unknown mode" mode))
+	  (if (not ifld-val)
+	      (parse-error errtxt "unknown insn field" ifld))
+	  ; Disallow some obviously invalid numeric indices.
+	  (if (and (integer? ifld-val)
+		   (< ifld-val 0))
+	      (parse-error errtxt "invalid integer index" ifld-val))
+	  ; Don't validate HW until we know whether this operand will be kept
+	  ; or not.  If not, HW may have been discarded too.
 	  (if (null? hw-objs)
-	      (parse-error context "unknown hardware element" hw))
+	      (parse-error errtxt "unknown hardware element" hw))
 
-	  ;; At this point INDEX-VAL is either an integer, (value . enum-obj),
-	  ;; or an <ifield> object.
-	  ;; Since we can't look up the hardware element at this time
-	  ;; [well, actually we should be able to with a bit of work],
-	  ;; we determine scalarness from an index of f-nil.
-	  (let ((hw-index
-		  (cond ((integer? index-val)
-			 (make <hw-index> (symbol-append 'i- name)
-			       ;; FIXME: constant -> const
-			       'constant UINT index-val))
-			((pair? index-val) ;; enum?
-			 (make <hw-index> (symbol-append 'i- name)
-			       'enum UINT (cons index index-val)))
-			((ifld-nil? index-val)
-			 (hw-index-scalar))
-			(else
-			 (make <hw-index> (symbol-append 'i- name)
-			       'ifield UINT index-val)))))
+	  ; At this point IFLD-VAL is either an integer or an <ifield> object.
+	  ; Since we can't look up the hardware element at this time
+	  ; [well, actually we should be able to with a bit of work],
+	  ; we determine scalarness from the index.
+	  (let* ((scalar? (or (integer? ifld-val) (ifld-nil? ifld-val)))
+		 (hw-index
+		  (if (integer? ifld-val)
+		      (make <hw-index> (symbol-append 'i- name)
+			    ; FIXME: constant -> const
+			    'constant 'UINT ifld-val)
+		      (if scalar?
+			  (hw-index-scalar)
+			  (make <hw-index> (symbol-append 'i- name)
+				'ifield 'UINT ifld-val)))))
 	    (make <operand>
-	      (context-location context)
 	      name
-	      (parse-comment context comment)
-	      ;; Copy FLD's attributes so one needn't duplicate attrs like
-	      ;; PCREL-ADDR, etc.  An operand inherits the attributes of
-	      ;; its field.  They are overridable of course, which is why we use
-	      ;; `atlist-append' here.
-	      (if (ifield? index-val)
-		  (atlist-append atlist-obj (obj-atlist index-val))
-		  atlist-obj)
-	      hw ;; note that this is the hw's name, not an object
-	      mode ;; ditto, this is a name, not an object
+	      (parse-comment comment errtxt)
+	      ; Copy FLD's attributes so one needn't duplicate attrs like
+	      ; PCREL-ADDR, etc.  An operand inherits the attributes of
+	      ; its field.  They are overridable of course, which is why we use
+	      ; `atlist-append' here.
+	      (if (integer? ifld-val)
+		  atlist-obj
+		  (atlist-append atlist-obj (obj-atlist ifld-val)))
+	      hw   ; note that this is the hw's name, not an object
+	      mode ; ditto, this is a name, not an object
 	      hw-index
-	      (parse-handlers context '(parse print) handlers)
-	      (/operand-parse-getter context getter (if scalar? 0 1))
-	      (/operand-parse-setter context setter (if scalar? 0 1))
+	      (parse-handlers errtxt '(parse print) handlers)
+	      (-operand-parse-getter context getter (if scalar? 0 1))
+	      (-operand-parse-setter context setter (if scalar? 0 1))
 	      )))
 
 	(begin
@@ -657,12 +613,12 @@
 
 ; Read an operand description.
 ; This is the main routine for analyzing operands in the .cpu file.
-; CONTEXT is a <context> object for error messages.
+; ERRTXT is prepended to error messages to provide context.
 ; ARG-LIST is an associative list of field name and field value.
-; /operand-parse is invoked to create the <operand> object.
+; -operand-parse is invoked to create the <operand> object.
 
-(define (/operand-read context . arg-list)
-  (let (
+(define (-operand-read errtxt . arg-list)
+  (let (; Current operand elements:
 	(name nil)
 	(comment nil)
 	(attrs nil)
@@ -673,7 +629,6 @@
 	(getter nil)
 	(setter nil)
 	)
-
     (let loop ((arg-list arg-list))
       (if (null? arg-list)
 	  nil
@@ -689,20 +644,19 @@
 	      ((handlers) (set! handlers (cdr arg)))
 	      ((getter) (set! getter (cdr arg)))
 	      ((setter) (set! setter (cdr arg)))
-	      (else (parse-error context "invalid operand arg" arg)))
+	      (else (parse-error errtxt "invalid operand arg" arg)))
 	    (loop (cdr arg-list)))))
-
     ; Now that we've identified the elements, build the object.
-    (/operand-parse context name comment attrs type mode index handlers
-		    getter setter))
+    (-operand-parse errtxt name comment attrs type mode index handlers
+		    getter setter)
+    )
 )
 
 ; Define an operand object, name/value pair list version.
 
 (define define-operand
   (lambda arg-list
-    (let ((op (apply /operand-read (cons (make-current-context "define-operand")
-					 arg-list))))
+    (let ((op (apply -operand-read (cons "define-operand" arg-list))))
       (if op
 	  (current-op-add! op))
       op))
@@ -711,8 +665,7 @@
 ; Define an operand object, all arguments specified.
 
 (define (define-full-operand name comment attrs type mode index handlers getter setter)
-  (let ((op (/operand-parse (make-current-context "define-full-operand")
-			    name comment attrs
+  (let ((op (-operand-parse "define-full-operand" name comment attrs
 			    type mode index handlers getter setter)))
     (if op
 	(current-op-add! op))
@@ -771,31 +724,10 @@
 	      '())
 )
 
-;; <derived-operand> constructor.
-;; MODE is a <mode> object.
-
-(method-make!
- <derived-operand> 'make!
- (lambda (self name comment attrs mode
-	       args syntax base-ifield encoding ifield-assertion
-	       getter setter)
-   (elm-set! self 'name name)
-   (elm-set! self 'comment comment)
-   (elm-set! self 'attrs attrs)
-   (elm-set! self 'sem-name name)
-   (elm-set! self 'pretty-sem-name #f) ;; FIXME
-   (elm-set! self 'hw-name #f) ;; FIXME
-   (elm-set! self 'mode mode)
-   (elm-set! self 'mode-name (obj:name mode))
-   (elm-set! self 'getter getter)
-   (elm-set! self 'setter setter)
-   ;; These are the additional fields in <derived-operand>.
-   (elm-set! self 'args args)
-   (elm-set! self 'syntax syntax)
-   (elm-set! self 'base-ifield base-ifield)
-   (elm-set! self 'encoding encoding)
-   (elm-set! self 'ifield-assertion ifield-assertion)
-   self)
+(method-make-make! <derived-operand>
+		   '(name comment attrs mode
+			  args syntax base-ifield encoding ifield-assertion
+			  getter setter)
 )
 
 (define (derived-operand? x) (class-instance? <derived-operand> x))
@@ -826,14 +758,11 @@
 
 (method-make!
  <anyof-operand> 'make!
- (lambda (self name comment attrs mode-name base-ifield choices)
+ (lambda (self name comment attrs mode base-ifield choices)
    (elm-set! self 'name name)
    (elm-set! self 'comment comment)
    (elm-set! self 'attrs attrs)
-   (elm-set! self 'sem-name name)
-   (elm-set! self 'pretty-sem-name #f) ;; FIXME
-   (elm-set! self 'hw-name #f) ;; FIXME
-   (elm-set! self 'mode-name mode-name)
+   (elm-set! self 'mode-name mode)
    (elm-set! self 'base-ifield base-ifield)
    (elm-set! self 'choices choices)
    ; Set index to a special marker value.
@@ -845,20 +774,20 @@
 
 ; Derived/Anyof parsing support.
 
-; Subroutine of /derived-operand-parse to parse the encoding.
+; Subroutine of -derived-operand-parse to parse the encoding.
 ; The result is a <derived-ifield> object.
 ; The {owner} member still needs to be set!
 
-(define (/derived-parse-encoding context isa-name-list operand-name encoding)
+(define (-derived-parse-encoding context operand-name encoding)
   (if (or (null? encoding)
 	  (not (list? encoding)))
-      (parse-error context "encoding not a list" encoding))
+      (context-error context "encoding not a list" encoding))
   (if (not (eq? (car encoding) '+))
-      (parse-error context "encoding must begin with `+'" encoding))
+      (context-error context "encoding must begin with `+'" encoding))
 
-  ; ??? Calling /parse-insn-format is a quick hack.
+  ; ??? Calling -parse-insn-format is a quick hack.
   ; It's an internal routine of some other file.
-  (let ((iflds (/parse-insn-format context #f isa-name-list encoding)))
+  (let ((iflds (-parse-insn-format "anyof encoding" encoding)))
     (make <derived-ifield>
 	  operand-name
 	  'derived-ifield ; (string-append "<derived-ifield> for " operand-name)
@@ -868,15 +797,17 @@
 	  ))
 )
 
-;; Subroutine of /derived-operand-parse to parse the ifield assertion.
-;; The ifield assertion is either () or a (restricted) RTL expression
-;; asserting something about the ifield values of the containing insn.
-;; The result is #f if the assertion is (), or the canonical rtl.
+; Subroutine of -derived-operand-parse to parse the ifield assertion.
+; The ifield assertion is either () or an RTL expression asserting something
+; about the ifield values of the containing insn.
+; Operands are specified by name, but what is used is their indices (there's
+; an implicit `index-of' going on).
 
-(define (/derived-parse-ifield-assertion context isa-name-list ifield-assertion)
+(define (-derived-parse-ifield-assertion context args ifield-assertion)
+  ; FIXME: for now
   (if (null? ifield-assertion)
       #f
-      (rtx-canonicalize context 'INT isa-name-list nil ifield-assertion))
+      ifield-assertion)
 )
 
 ; Parse a derived operand definition.
@@ -888,78 +819,63 @@
 ; ??? Currently no support for handlers(,???) found in normal operands.
 ; Later, when necessary.
 
-(define (/derived-operand-parse context name comment attrs mode
+(define (-derived-operand-parse errtxt name comment attrs mode
 				args syntax
 				base-ifield encoding ifield-assertion
 				getter setter)
   (logit 2 "Processing derived operand " name " ...\n")
 
-  ;; Pick out name first to augment the error context.
-  (let* ((name (parse-name context name))
-	 (context (context-append-name context name))
-	 (atlist-obj (atlist-parse context attrs "cgen_operand"))
-	 (isa-name-list (atlist-attr-value atlist-obj 'ISA #f)))
-
-    ;; Verify all specified ISAs are valid.
-    (if (not (all-true? (map current-isa-lookup isa-name-list)))
-	(parse-error context "unknown isa in isa list" isa-name-list))
+  (let ((name (parse-name name errtxt))
+	(atlist-obj (atlist-parse attrs "cgen_operand" errtxt)))
 
     (if (keep-atlist? atlist-obj #f)
 
-	(let* ((mode-obj (parse-mode-name context mode))
-	       (parsed-encoding (/derived-parse-encoding context isa-name-list
-							 name encoding)))
-
+	(let* ((mode-obj (parse-mode-name mode errtxt))
+	      ; FIXME: quick hack
+	      (context (context-make-reader errtxt))
+	      (parsed-encoding (-derived-parse-encoding context name encoding))
+	      )
 	  (if (not mode-obj)
-	      (parse-error context "unknown mode" mode))
+	      (parse-error errtxt "unknown mode" mode))
 
 	  (let ((result
 		 (make <derived-operand>
 		       name
-		       (parse-comment context comment)
+		       (parse-comment comment errtxt)
 		       atlist-obj
 		       mode-obj
 		       (map (lambda (a)
 			      (if (not (symbol? a))
-				  (parse-error context "arg not a symbol" a))
-			      (let ((op (current-op-lookup a isa-name-list)))
+				  (parse-error errtxt "arg not a symbol" a))
+			      (let ((op (current-op-lookup a)))
 				(if (not op)
-				    (parse-error context "not an operand" a))
+				    (parse-error errtxt "not an operand" a))
 				op))
 			    args)
 		       syntax
 		       base-ifield ; FIXME: validate
 		       parsed-encoding
-		       (/derived-parse-ifield-assertion context isa-name-list
-							ifield-assertion)
+		       (-derived-parse-ifield-assertion context args ifield-assertion)
 		       (if (null? getter)
 			   #f
-			   (/operand-parse-getter
-			    context
-			    (list args
-				  (rtx-canonicalize context mode
-						    isa-name-list nil
-						    getter))
-			    (length args)))
+			   (-operand-parse-getter context
+						  (list args
+							(rtx-canonicalize context getter))
+						  (length args)))
 		       (if (null? setter)
 			   #f
-			   (/operand-parse-setter
-			    context
-			    (list (append args '(newval))
-				  (rtx-canonicalize context 'VOID
-						    isa-name-list
-						    (list (list 'newval mode #f))
-						    setter))
-			    (length args)))
+			   (-operand-parse-setter context
+						  (list (append args '(newval))
+							(rtx-canonicalize context setter))
+						  (length args)))
 		       )))
 	    (elm-set! result 'hw-name (obj:name (hardware-for-mode mode-obj)))
 	    ;(elm-set! result 'hw-name (obj:name parsed-encoding))
 	    ;(elm-set! result 'hw-name base-ifield)
 	    (elm-set! result 'index parsed-encoding)
 	    ; (elm-set! result 'index (hw-index-derived)) ; A temporary dummy
-	    (logit 2 "  new derived-operand; name= " name
-		   ", hw-name= " (op:hw-name result) 
-		   ", index=" (obj:name parsed-encoding) "\n")
+	    (logit 2 "new derived-operand; name=" name " hw-name= " (op:hw-name result) 
+		   " index=" (obj:name parsed-encoding) "\n")
 	    (derived-ifield-set-owner! parsed-encoding result)
 	    result))
 
@@ -970,12 +886,12 @@
 
 ; Read a derived operand description.
 ; This is the main routine for analyzing derived operands in the .cpu file.
-; CONTEXT is a <context> object for error messages.
+; ERRTXT is prepended to error messages to provide context.
 ; ARG-LIST is an associative list of field name and field value.
-; /derived-operand-parse is invoked to create the <derived-operand> object.
+; -derived-operand-parse is invoked to create the <derived-operand> object.
 
-(define (/derived-operand-read context . arg-list)
-  (let (
+(define (-derived-operand-read errtxt . arg-list)
+  (let (; Current derived-operand elements:
 	(name nil)
 	(comment nil)
 	(attrs nil)
@@ -988,7 +904,6 @@
 	(getter nil)
 	(setter nil)
 	)
-
     (let loop ((arg-list arg-list))
       (if (null? arg-list)
 	  nil
@@ -1006,22 +921,21 @@
 	      ((ifield-assertion) (set! ifield-assertion (cadr arg)))
 	      ((getter) (set! getter (cadr arg)))
 	      ((setter) (set! setter (cadr arg)))
-	      (else (parse-error context "invalid derived-operand arg" arg)))
+	      (else (parse-error errtxt "invalid derived-operand arg" arg)))
 	    (loop (cdr arg-list)))))
-
     ; Now that we've identified the elements, build the object.
-    (/derived-operand-parse context name comment attrs mode args
+    (-derived-operand-parse errtxt name comment attrs mode args
 			    syntax base-ifield encoding ifield-assertion
-			    getter setter))
+			    getter setter)
+    )
 )
 
 ; Define a derived operand object, name/value pair list version.
 
 (define define-derived-operand
   (lambda arg-list
-    (let ((op (apply /derived-operand-read
-		     (cons (make-current-context "define-derived-operand")
-			   arg-list))))
+    (let ((op (apply -derived-operand-read
+		     (cons "define-derived-operand" arg-list))))
       (if op
 	  (current-op-add! op))
       op))
@@ -1031,7 +945,7 @@
 ; ??? Not supported (yet).
 ;
 ;(define (define-full-derived-operand name comment attrs mode ...)
-;  (let ((op (/derived-operand-parse (make-current-context "define-full-derived-operand")
+;  (let ((op (-derived-operand-parse "define-full-derived-operand"
 ;				    name comment attrs
 ;				    mode ...)))
 ;    (if op
@@ -1042,12 +956,12 @@
 ; Parse an "anyof" choice, which is a derived-operand name.
 ; The result is {choice} unchanged.
 
-(define (/anyof-parse-choice context choice isa-name-list)
+(define (-anyof-parse-choice context choice)
   (if (not (symbol? choice))
-      (parse-error context "anyof choice not a symbol" choice))
-  (let ((op (current-op-lookup choice isa-name-list)))
+      (context-error context "anyof choice not a symbol" choice))
+  (let ((op (current-op-lookup choice)))
     (if (not (derived-operand? op))
-	(parse-error context "anyof choice not a derived-operand" choice))
+	(context-error context "anyof choice not a derived-operand" choice))
     op)
 )
 
@@ -1060,30 +974,29 @@
 ; ??? Currently no support for handlers(,???) found in normal operands.
 ; Later, when necessary.
 
-(define (/anyof-operand-parse context name comment attrs mode
+(define (-anyof-operand-parse errtxt name comment attrs mode
 			      base-ifield choices)
   (logit 2 "Processing anyof operand " name " ...\n")
 
-  ;; Pick out name first to augment the error context.
-  (let* ((name (parse-name context name))
-	 (context (context-append-name context name))
-	 (atlist-obj (atlist-parse context attrs "cgen_operand")))
+  (let ((name (parse-name name errtxt))
+	(atlist-obj (atlist-parse attrs "cgen_operand" errtxt)))
 
     (if (keep-atlist? atlist-obj #f)
 
-	(let ((mode-obj (parse-mode-name context mode))
-	      (isa-name-list (atlist-attr-value atlist-obj 'ISA #f)))
+	(let ((mode-obj (parse-mode-name mode errtxt))
+	      ; FIXME: quick hack
+	      (context (context-make-reader errtxt)))
 	  (if (not mode-obj)
-	      (parse-error context "unknown mode" mode))
+	      (parse-error errtxt "unknown mode" mode))
 
 	  (make <anyof-operand>
 		name
-		(parse-comment context comment)
+		(parse-comment comment errtxt)
 		atlist-obj
 		mode
 		base-ifield
 		(map (lambda (c)
-		       (/anyof-parse-choice context c isa-name-list))
+		       (-anyof-parse-choice context c))
 		     choices)))
 
 	(begin
@@ -1093,12 +1006,12 @@
 
 ; Read an anyof operand description.
 ; This is the main routine for analyzing anyof operands in the .cpu file.
-; CONTEXT is a <context> object for error messages.
+; ERRTXT is prepended to error messages to provide context.
 ; ARG-LIST is an associative list of field name and field value.
-; /anyof-operand-parse is invoked to create the <anyof-operand> object.
+; -anyof-operand-parse is invoked to create the <anyof-operand> object.
 
-(define (/anyof-operand-read context . arg-list)
-  (let (
+(define (-anyof-operand-read errtxt . arg-list)
+  (let (; Current operand elements:
 	(name nil)
 	(comment nil)
 	(attrs nil)
@@ -1106,7 +1019,6 @@
 	(base-ifield nil)
 	(choices nil)
 	)
-
     (let loop ((arg-list arg-list))
       (if (null? arg-list)
 	  nil
@@ -1119,20 +1031,19 @@
 	      ((mode) (set! mode (cadr arg)))
 	      ((base-ifield) (set! base-ifield (cadr arg)))
 	      ((choices) (set! choices (cdr arg)))
-	      (else (parse-error context "invalid anyof-operand arg" arg)))
+	      (else (parse-error errtxt "invalid anyof-operand arg" arg)))
 	    (loop (cdr arg-list)))))
-
     ; Now that we've identified the elements, build the object.
-    (/anyof-operand-parse context name comment attrs mode base-ifield choices))
+    (-anyof-operand-parse errtxt name comment attrs mode base-ifield choices)
+    )
 )
 
 ; Define an anyof operand object, name/value pair list version.
 
 (define define-anyof-operand
   (lambda arg-list
-    (let ((op (apply /anyof-operand-read
-		     (cons (make-current-context "define-anyof-operand")
-			   arg-list))))
+    (let ((op (apply -anyof-operand-read
+		     (cons "define-anyof-operand" arg-list))))
       (if op
 	  (current-op-add! op))
       op))
@@ -1166,7 +1077,7 @@
 
 ; Return initial list of known ifield values in {anyof-instance}.
 
-(define (/anyof-initial-known anyof-instance)
+(define (-anyof-initial-known anyof-instance)
   (assert (derived-operand? anyof-instance))
   (let ((encoding (derived-encoding anyof-instance)))
     (assert (derived-ifield? encoding))
@@ -1180,33 +1091,31 @@
   (assert (derived-operand? anyof-instance))
   (let ((assertion (derived-ifield-assertion anyof-instance)))
     (if assertion
-	(rtx-solve (make-obj-context anyof-instance #f)
+	(rtx-solve #f ; FIXME: context
 		   anyof-instance ; owner
 		   assertion
 		   known-values)
 	#t))
 )
 
-; Subroutine of /anyof-merge-subchoices.
+; Subroutine of -anyof-merge-subchoices.
 ; Merge syntaxes of VALUE-NAMES/VALUES into SYNTAX.
 ;
 ; Example:
 ; If SYNTAX is "$a+$b", and VALUE-NAMES is (b), and VALUES is
 ; ("$c+$d"-object), then return "$a+$c+$d".
 
-(define (/anyof-syntax anyof-instance)
+(define (-anyof-syntax anyof-instance)
   (elm-get anyof-instance 'syntax)
 )
 
-(define (/anyof-name anyof-instance)
+(define (-anyof-name anyof-instance)
   (elm-get anyof-instance 'name)
 )
 
-; CONTAINER is the <anyof-operand> containing SYNTAX.
 
-(define (/anyof-merge-syntax syntax value-names values container)
-  (let* ((isa-name-list (obj-isa-list container))
-	 (syntax-elements (syntax-break-out syntax isa-name-list)))
+(define (-anyof-merge-syntax syntax value-names values)
+  (let ((syntax-elements (syntax-break-out syntax)))
     (syntax-make (map (lambda (e)
 			(if (anyof-operand? e)
 			    (let* ((name (obj:name e))
@@ -1214,12 +1123,12 @@
 			      (if (not indx)
 				(error "Name " name " not one of " values)
 				)
-			      (/anyof-syntax (list-ref values indx)))
+			      (-anyof-syntax (list-ref values indx)))
 			    e))
 		      syntax-elements)))
 )
 
-; Subroutine of /anyof-merge-subchoices.
+; Subroutine of -anyof-merge-subchoices.
 ; Merge syntaxes of {value-names}/{values} into <derived-ifield> {encoding}.
 ; The result is a new <derived-ifield> object with subfields matching
 ; {value-names} replaced with {values}.
@@ -1230,10 +1139,10 @@
 ; is (b), and {values} is (c-choice-of-b-object), then return
 ; (a-ifield-object c-choice-of-b-ifield-object).
 
-(define (/anyof-merge-encoding container encoding value-names values)
+(define (-anyof-merge-encoding container encoding value-names values)
   (assert (derived-ifield? encoding))
   (let ((subfields (derived-ifield-subfields encoding))
-	(result (object-copy encoding)))
+	(result (object-copy-top encoding)))
     ; Delete all the elements that are being replaced with ifields from
     ; {values} and add the new ifields.
     (derived-ifield-set-subfields! result
@@ -1245,14 +1154,15 @@
     result)
 )
 
-; Subroutine of /anyof-merge-subchoices.
+; Subroutine of -anyof-merge-subchoices.
 ; Merge semantics of VALUE-NAMES/VALUES into GETTER.
 ;
 ; Example:
 ; If GETTER is (mem QI foo), and VALUE-NAMES is (foo), and VALUES is
 ; ((add a b)-object), then return (mem QI (add a b)).
 
-(define (/anyof-merge-getter getter value-names values)
+(define (-anyof-merge-getter getter value-names values)
+  ;(debug-repl-env getter value-names values)
   ; ??? This implementation is a quick hack, intended to evolve or be replaced.
   (cond ((not getter)
 	 #f)
@@ -1264,13 +1174,13 @@
 			     (op:getter (list-ref values indx))
 			     e)))
 		      ((pair? e) ; pair? -> cheap non-null-list?
-		       (/anyof-merge-getter e value-names values))
+		       (-anyof-merge-getter e value-names values))
 		      (else
 		       e)))
 	      getter)))
 )
 
-; Subroutine of /anyof-merge-subchoices.
+; Subroutine of -anyof-merge-subchoices.
 ; Merge semantics of VALUE-NAMES/VALUES into SETTER.
 ;
 ; Example:
@@ -1280,7 +1190,8 @@
 ;
 ; ??? `newval' in this context is a reserved word.
 
-(define (/anyof-merge-setter setter value-names values)
+(define (-anyof-merge-setter setter value-names values)
+  ;(debug-repl-env setter value-names values)
   ; ??? This implementation is a quick hack, intended to evolve or be replaced.
   (cond ((not setter)
 	 #f)
@@ -1288,18 +1199,17 @@
 	 (let ((src (rtx-set-src setter))
 	       (dest (rtx-set-dest setter))
 	       (mode (rtx-mode setter))
-	       (options (rtx-options setter))
-	       (name (rtx-name setter)))
+	       (options (rtx-options setter)))
 	   (if (rtx-kind 'mem dest)
 	       (set! dest
 		     (rtx-change-address dest
-					 (/anyof-merge-getter
+					 (-anyof-merge-getter
 					  (rtx-mem-addr dest)
 					  value-names values))))
-	   (set! src (/anyof-merge-getter src value-names values))
-	   (rtx-make name options mode dest src)))
+	   (set! src (-anyof-merge-getter src value-names values))
+	   (rtx-make 'set options mode dest src)))
 	(else
-	 (error "/anyof-merge-setter: unsupported form" (car setter))))
+	 (error "-anyof-merge-setter: unsupported form" (car setter))))
 )
 
 ; Subroutine of -sub-insn-make!.
@@ -1311,6 +1221,7 @@
 ; ((add a b)-object), then return (mem QI (add a b)).
 
 (define (anyof-merge-semantics semantics value-names values)
+  ;(debug-repl-env semantics value-names values)
   ; ??? This implementation is a quick hack, intended to evolve or be replaced.
   (let ((result
 	 (cond ((not semantics)
@@ -1320,7 +1231,7 @@
 		       (cond ((symbol? e)
 			      (let ((indx (element-lookup-index e value-names 0)))
 				(if indx
-				    (/anyof-name (list-ref values indx))
+				    (-anyof-name (list-ref values indx))
 				    ; (op:sem-name (list-ref values indx))
 				    e)))
 			     ((pair? e) ; pair? -> cheap non-null-list?
@@ -1328,11 +1239,11 @@
 			     (else
 			      e)))
 		     semantics)))))
-    (logit 4 "  merged semantics: [" semantics "] -> [" result "]\n")
+    (logit 4 "Merged semantics [" semantics "] -> [" result "]\n")
     result)
 )
 
-; Subroutine of /anyof-merge-subchoices.
+; Subroutine of -anyof-merge-subchoices.
 ; Merge assertion of VALUE-NAMES/VALUES into ASSERTION.
 ;
 ; Example:
@@ -1343,7 +1254,7 @@
 ; FIXME: Perform simplification pass, based on combined set of known
 ; ifield values.
 
-(define (/anyof-merge-ifield-assertion assertion value-names values)
+(define (-anyof-merge-ifield-assertion assertion value-names values)
   (let ((assertions (find identity
 			  (cons assertion
 				(map derived-ifield-assertion values)))))
@@ -1352,7 +1263,7 @@
 	(rtx-combine 'andif assertions)))
 )
 
-; Subroutine of /anyof-all-subchoices.
+; Subroutine of -anyof-all-subchoices.
 ; Return a copy of <derived-operand> CHOICE with NEW-ARGS from ANYOF-ARGS
 ; merged in.  This is for when a derived operand is itself composed of
 ; anyof operands.
@@ -1361,12 +1272,12 @@
 ; element in ANYOF-ARGS.
 ; CONTAINER is the <anyof-operand> containing CHOICE.
 
-(define (/anyof-merge-subchoices container choice anyof-args new-args)
+(define (-anyof-merge-subchoices container choice anyof-args new-args)
   (assert (all-true? (map anyof-operand? anyof-args)))
   (assert (all-true? (map derived-operand? new-args)))
 
   (let* ((arg-names (map obj:name anyof-args))
-	 (encoding (/anyof-merge-encoding container (derived-encoding choice)
+	 (encoding (-anyof-merge-encoding container (derived-encoding choice)
 					  arg-names new-args))
 	 (result
 	  (make <anyof-instance>
@@ -1379,31 +1290,30 @@
 		(obj-atlist choice)
 		(op:mode choice)
 		(derived-args choice)
-		(/anyof-merge-syntax (derived-syntax choice)
-				     arg-names new-args
-				     container)
+		(-anyof-merge-syntax (derived-syntax choice)
+				     arg-names new-args)
 		(derived-base-ifield choice)
 		encoding
-		(/anyof-merge-ifield-assertion (derived-ifield-assertion choice)
+		(-anyof-merge-ifield-assertion (derived-ifield-assertion choice)
 					       anyof-args new-args)
-		(/anyof-merge-getter (op:getter choice)
+		(-anyof-merge-getter (op:getter choice)
 				     arg-names new-args)
-		(/anyof-merge-setter (op:setter choice)
+		(-anyof-merge-setter (op:setter choice)
 				     arg-names new-args)
 		container)))
-
+    ;
     (elm-set! result 'index encoding)
     ; Creating the link from {encoding} to {result}.
     (derived-ifield-set-owner! encoding result)
     result)
 )
 
-; Subroutine of /anyof-all-choices-1.
+; Subroutine of -anyof-all-choices-1.
 ; Return a list of all possible subchoices of <derived-operand> ANYOF-CHOICE,
 ; known to use <anyof-operand>'s itself.
 ; CONTAINER is the containing <anyof-operand>.
 
-(define (/anyof-all-subchoices container anyof-choice)
+(define (-anyof-all-subchoices container anyof-choice)
   ; Split args into anyof and non-anyof elements.
   (let* ((args (derived-args anyof-choice))
 	 (anyof-args (find anyof-operand? args)))
@@ -1419,10 +1329,10 @@
     ; ((1 a B) (1 a C) (2 a B) (2 a C) (3 a B) (3 a C)).
     ;
     ; Note that some of these values may be derived from nested
-    ; <anyof-operand>'s which is why we recursively call /anyof-all-choices-1.
-    ; ??? /anyof-all-choices-1 should cache the results.
+    ; <anyof-operand>'s which is why we recursively call -anyof-all-choices-1.
+    ; ??? -anyof-all-choices-1 should cache the results.
 
-    (let* ((todo (map /anyof-all-choices-1 anyof-args))
+    (let* ((todo (map -anyof-all-choices-1 anyof-args))
 	   (lengths (map length todo))
 	   (total (apply * lengths))
 	   (result nil))
@@ -1437,7 +1347,7 @@
 	      ;(display (map obj:name new-args) (current-error-port))
 	      ;(newline (current-error-port))
 	      (set! result
-		    (cons (/anyof-merge-subchoices container
+		    (cons (-anyof-merge-subchoices container
 						   anyof-choice
 						   anyof-args
 						   new-args)
@@ -1450,8 +1360,8 @@
 ; Return an <anyof-instance> object from <derived-operand> {derop}, which is a
 ; choice of {anyof-operand}.
 
-(define (/anyof-instance-from-derived anyof-operand derop)
-  (let* ((encoding (object-copy (derived-encoding derop)))
+(define (-anyof-instance-from-derived anyof-operand derop)
+  (let* ((encoding (object-copy-top (derived-encoding derop)))
 	 (result
 	  (make <anyof-instance>
 		(obj:name derop)
@@ -1483,16 +1393,16 @@
 ; Derived operands are the first cut at it.  They'll evolve or be replaced
 ; (and it's the implementation of them that will evolve first).
 
-(define (/anyof-all-choices-1 anyof-operand)
+(define (-anyof-all-choices-1 anyof-operand)
   (assert (anyof-operand? anyof-operand))
 
   (let ((result nil))
 
     ; For each choice, scan the operands for further derived operands.
     ; If found, replace the choice with the list of its subchoices.
-    ; If not found, create an <anyof-instance> object for it.  This is
-    ; basically just a copy of the object, but {anyof-operand} is recorded
-    ; with it so that we can later resolve `follows' specs.
+    ; If not found, create an <anyof-instance> object for it.  This is basically
+    ; just a copy of the object, but {anyof-operand} is recorded with it so
+    ; that we can later resolve `follows' specs.
 
     (let loop ((choices (anyof-choices anyof-operand)))
       (if (not (null? choices))
@@ -1503,13 +1413,13 @@
 
 		; This operand has "anyof" operands so we need to turn this
 		; choice into a list of all possible subchoices.
-		(let ((subchoices (/anyof-all-subchoices anyof-operand this)))
+		(let ((subchoices (-anyof-all-subchoices anyof-operand this)))
 		  (set! result
 			(append subchoices result)))
 
 		; No <anyof-operand> arguments.
 		(set! result
-		      (cons (/anyof-instance-from-derived anyof-operand this)
+		      (cons (-anyof-instance-from-derived anyof-operand this)
 			    result)))
 
 	    (loop (cdr choices)))))
@@ -1518,15 +1428,15 @@
     result)
 )
 
-; Cover fn of /anyof-all-choices-1.
+; Cover fn of -anyof-all-choices-1.
 ; Return list of <anyof-instance> objects, one for each possible variant of
 ; ANYOF-OPERAND.
 ; We want to delete choices that fail their ifield assertions, but since
-; /anyof-all-choices-1 can recursively call itself, assertion checking is
+; -anyof-all-choices-1 can recursively call itself, assertion checking is
 ; defered until it returns.
 
 (define (anyof-all-choices anyof-operand)
-  (let ((all-choices (/anyof-all-choices-1 anyof-operand)))
+  (let ((all-choices (-anyof-all-choices-1 anyof-operand)))
 
     ; Delete ones that fail their ifield assertions.
     ; Sometimes there isn't enough information yet to completely do this.
@@ -1534,7 +1444,7 @@
     ; However, it is our responsibility to assert as much as we can.
     (find (lambda (op)
 	    (anyof-satisfies-assertions? op
-					 (/anyof-initial-known op)))
+					 (-anyof-initial-known op)))
 	  all-choices))
 )
 
@@ -1555,12 +1465,18 @@
 ; Given an operand, return the starting bit number.
 ; Note that the field isn't necessarily contiguous.
 
-(define (op:start operand) (send operand 'field-start))
+(define (op:start operand) (send operand 'field-start #f))
 
 ; Given an operand, return the total length in bits.
 ; Note that the field isn't necessarily contiguous.
 
 (define (op:length operand) (send operand 'field-length))
+
+; Return the nub of a list of operands, base on their names.
+
+(define (op-nub op-list)
+  (nub op-list obj:name)
+)
 
 ; Return a sorted list of operand lists.
 ; Each element in the inner list is an operand with the same name, but for
@@ -1600,37 +1516,6 @@
 ;(define $1 (make <syntax-operand> 1))
 ;(define $2 (make <syntax-operand> 2))
 ;(define $3 (make <syntax-operand> 3))
-
-;; PC support.
-;; This is a subclass of <operand>, used to give the simulator a place to
-;; hang a couple of methods.
-;; At the moment we only support one pc, a reasonable place to stop for now.
-
-(define <pc> (class-make '<pc> '(<operand>) nil nil))
-
-(method-make!
- <pc> 'make!
- (lambda (self)
-   (send-next self '<pc> 'make!
-	      (builtin-location) 'pc "program counter"
-	      (atlist-parse (make-prefix-context "make! of pc")
-			    '(SEM-ONLY) "cgen_operand")
-	      'h-pc ;; FIXME: keep name h-pc hardwired?
-	      'DFLT
-	      ;;(hw-index-scalar) ;; FIXME: change to this
-	      (make <hw-index> 'anonymous
-		    'ifield 'UINT (current-ifld-lookup 'f-nil))
-	      nil ;; handlers
-	      #f #f) ;; getter setter
-   self)
-)
-
-; Return a boolean indicating if operand op is the pc.
-; This must not call op:type.  op:type will try to resolve a hardware
-; element that may be multiply specified, and this is used in contexts
-; where that's not possible.
-
-(define (pc? op) (class-instance? <pc> op))
 
 ; Called before/after loading the .cpu file to initialize/finalize.
 
@@ -1689,7 +1574,6 @@ Define an anyof operand, name/value pair list version.
   ; Also (defined elsewhere): PCREL-ADDR ABS-ADDR.
 
   (set! pc (make <pc>))
-  (obj-cons-attr! pc (all-isas-attr))
   (current-op-add! pc)
 
   *UNSPECIFIED*

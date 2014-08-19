@@ -1,5 +1,5 @@
 /* Subroutines used for code generation on the Renesas M32R cpu.
-   Copyright (C) 1996-2013 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
 
    This file is part of GCC.
 
@@ -22,6 +22,10 @@
 #include "coretypes.h"
 #include "tm.h"
 #include "tree.h"
+#include "stor-layout.h"
+#include "varasm.h"
+#include "stringpool.h"
+#include "calls.h"
 #include "rtl.h"
 #include "regs.h"
 #include "hard-reg-set.h"
@@ -198,16 +202,6 @@ static const struct attribute_spec m32r_attribute_table[] =
 
 #undef TARGET_LEGITIMATE_CONSTANT_P
 #define TARGET_LEGITIMATE_CONSTANT_P m32r_legitimate_constant_p
-
-
-static enum unwind_info_type
-m32r_debug_unwind_info (void)
-{
-  return UI_NONE;
-}
-
-#undef  TARGET_DEBUG_UNWIND_INFO
-#define TARGET_DEBUG_UNWIND_INFO	m32r_debug_unwind_info
 
 struct gcc_target targetm = TARGET_INITIALIZER;
 
@@ -1151,6 +1145,7 @@ m32r_arg_partial_bytes (cumulative_args_t cum_v, enum machine_mode mode,
 			tree type, bool named ATTRIBUTE_UNUSED)
 {
   CUMULATIVE_ARGS *cum = get_cumulative_args (cum_v);
+
   int words;
   unsigned int size =
     (((mode == BLKmode && type)
@@ -1225,7 +1220,7 @@ static void
 m32r_function_arg_advance (cumulative_args_t cum_v, enum machine_mode mode,
 			   const_tree type, bool named ATTRIBUTE_UNUSED)
 {
-  CUMULATIVE_ARGS * cum = get_cumulative_args (cum_v);
+  CUMULATIVE_ARGS *cum = get_cumulative_args (cum_v);
 
   *cum = (ROUND_ADVANCE_CUM (*cum, mode, type)
 	  + ROUND_ADVANCE_ARG (mode, type));
@@ -1289,7 +1284,7 @@ m32r_setup_incoming_varargs (cumulative_args_t cum, enum machine_mode mode,
   /* All BLKmode values are passed by reference.  */
   gcc_assert (mode != BLKmode);
 
-  first_anon_arg = (ROUND_ADVANCE_CUM (* get_cumulative_args (cum), mode, type)
+  first_anon_arg = (ROUND_ADVANCE_CUM (*get_cumulative_args (cum), mode, type)
 		    + ROUND_ADVANCE_ARG (mode, type));
 
   if (first_anon_arg < M32R_MAX_PARM_REGS)
@@ -1318,8 +1313,7 @@ m32r_is_insn (rtx insn)
 {
   return (NONDEBUG_INSN_P (insn)
 	  && GET_CODE (PATTERN (insn)) != USE
-	  && GET_CODE (PATTERN (insn)) != CLOBBER
-	  && GET_CODE (PATTERN (insn)) != ADDR_VEC);
+	  && GET_CODE (PATTERN (insn)) != CLOBBER);
 }
 
 /* Increase the priority of long instructions so that the
@@ -1349,7 +1343,6 @@ m32r_issue_rate (void)
 }
 
 /* Cost functions.  */
-
 /* Memory is 3 times as expensive as registers.
    ??? Is that the right way to look at it?  */
 
@@ -2336,7 +2329,8 @@ m32r_print_operand_address (FILE * file, rtx addr)
 	    fputs ("sda(", file);
 	  else
 	    fputs ("low(", file);
-	  output_addr_const (file, plus_constant (Pmode, XEXP (base, 1), offset));
+	  output_addr_const (file, plus_constant (Pmode, XEXP (base, 1),
+						  offset));
 	  fputs ("),", file);
 	  fputs (reg_names[REGNO (XEXP (base, 0))], file);
 	}

@@ -47,3 +47,4 @@ int main()
   delete bp1;
   return num_d != 0;
 }
+// { dg-require-effective-target size32plus }

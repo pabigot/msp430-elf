@@ -1,8 +1,7 @@
 /* Remote debugging interface to m32r and mon2000 ROM monitors for GDB, 
    the GNU debugger.
 
-   Copyright (C) 1996-2001, 2004-2005, 2007-2012 Free Software
-   Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
 
    Adapted by Michael Snyder of Cygnus Support.
 
@@ -35,12 +34,13 @@
 #include "symfile.h"		/* for generic load */
 #include <sys/time.h>
 #include <time.h>		/* for time_t */
-#include "gdb_string.h"
+#include <string.h>
 #include "objfiles.h"		/* for ALL_OBJFILES etc.  */
 #include "inferior.h"
 #include <ctype.h>
 #include "regcache.h"
 #include "gdb_bfd.h"
+#include "cli/cli-utils.h"
 
 /*
  * All this stuff just to get my host computer's IP address!
@@ -79,7 +79,7 @@ m32r_load_section (bfd *abfd, asection *s, void *obj)
   unsigned int *data_count = obj;
   if (s->flags & SEC_LOAD)
     {
-      int addr_size = gdbarch_addr_bit (target_gdbarch) / 8;
+      int addr_size = gdbarch_addr_bit (target_gdbarch ()) / 8;
       bfd_size_type section_size = bfd_section_size (abfd, s);
       bfd_vma section_base = bfd_section_lma (abfd, s);
       unsigned int buffer, i;
@@ -89,7 +89,7 @@ m32r_load_section (bfd *abfd, asection *s, void *obj)
       printf_filtered ("Loading section %s, size 0x%lx lma ",
 		       bfd_section_name (abfd, s),
 		       (unsigned long) section_size);
-      fputs_filtered (paddress (target_gdbarch, section_base), gdb_stdout);
+      fputs_filtered (paddress (target_gdbarch (), section_base), gdb_stdout);
       printf_filtered ("\n");
       gdb_flush (gdb_stdout);
       monitor_printf ("%s mw\r", phex_nz (section_base, addr_size));
@@ -149,7 +149,7 @@ m32r_load (char *filename, int from_tty)
 
 	printf_filtered ("Loading section %s, size 0x%lx vma ",
 			 bfd_section_name (abfd, s), section_size);
-	fputs_filtered (paddress (target_gdbarch, section_base), gdb_stdout);
+	fputs_filtered (paddress (target_gdbarch (), section_base), gdb_stdout);
 	printf_filtered ("\n");
 	gdb_flush (gdb_stdout);
 	monitor_printf ("%x mw\r", section_base);
@@ -167,6 +167,7 @@ m32r_load (char *filename, int from_tty)
   if (!(catch_errors (m32r_load_1, abfd, "Load aborted!\n", RETURN_MASK_ALL)))
     {
       monitor_printf ("q\n");
+      do_cleanups (cleanup);
       return;
     }
 #endif
@@ -349,7 +350,6 @@ init_m32r_cmds (void)
   					/* register_pattern */
   m32r_cmds.register_pattern = "\\(\\w+\\) += \\([0-9a-fA-F]+\\b\\)";
   m32r_cmds.supply_register = m32r_supply_register;
-  m32r_cmds.load_routine = NULL;	/* load_routine (defaults to SRECs) */
   m32r_cmds.load = NULL;	/* download command */
   m32r_cmds.loadresp = NULL;	/* load response */
   m32r_cmds.prompt = "ok ";	/* monitor command prompt */
@@ -410,7 +410,6 @@ init_mon2000_cmds (void)
 						/* register_pattern */
   mon2000_cmds.register_pattern = "\\(\\w+\\) += \\([0-9a-fA-F]+\\b\\)";
   mon2000_cmds.supply_register = m32r_supply_register;
-  mon2000_cmds.load_routine = NULL;	/* load_routine (defaults to SRECs) */
   mon2000_cmds.load = NULL;	/* download command */
   mon2000_cmds.loadresp = NULL;	/* load response */
   mon2000_cmds.prompt = "Mon2000>";	/* monitor command prompt */
@@ -451,8 +450,7 @@ m32r_upload_command (char *args, int from_tty)
       /* Scan second colon in the output from the "ust" command.  */
       char *myIPaddress = strchr (strchr (buf, ':') + 1, ':') + 1;
 
-      while (isspace (*myIPaddress))
-	myIPaddress++;
+      myIPaddress = skip_spaces (myIPaddress);
 
       if (!strncmp (myIPaddress, "0.0.", 4))	/* empty */
 	error (_("Please use 'set board-address' to "
@@ -548,7 +546,7 @@ m32r_upload_command (char *args, int from_tty)
 	    printf_filtered ("Loading section %s, size 0x%lx lma ",
 			     bfd_section_name (abfd, s),
 			     (unsigned long) section_size);
-	    fputs_filtered (paddress (target_gdbarch, section_base),
+	    fputs_filtered (paddress (target_gdbarch (), section_base),
 			    gdb_stdout);
 	    printf_filtered ("\n");
 	    gdb_flush (gdb_stdout);

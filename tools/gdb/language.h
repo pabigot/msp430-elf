@@ -1,7 +1,6 @@
 /* Source-language-related definitions for GDB.
 
-   Copyright (C) 1991-1995, 1998-2000, 2003-2004, 2007-2012 Free
-   Software Foundation, Inc.
+   Copyright (C) 1991-2014 Free Software Foundation, Inc.
 
    Contributed by the Department of Computer Science at the State University
    of New York at Buffalo.
@@ -24,6 +23,8 @@
 #if !defined (LANGUAGE_H)
 #define LANGUAGE_H 1
 
+#include "symtab.h"
+
 /* Forward decls for prototypes.  */
 struct value;
 struct objfile;
@@ -31,6 +32,8 @@ struct frame_info;
 struct expression;
 struct ui_file;
 struct value_print_options;
+struct type_print_options;
+struct lang_varobj_ops;
 
 #define MAX_FORTRAN_DIMS  7	/* Maximum number of F77 array dims.  */
 
@@ -131,7 +134,11 @@ struct language_defn
   {
     /* Name of the language.  */
 
-    char *la_name;
+    const char *la_name;
+
+    /* Natural or official name of the language.  */
+
+    const char *la_natural_name;
 
     /* its symtab language-enum (defs.h).  */
 
@@ -185,7 +192,7 @@ struct language_defn
     /* Print a type using syntax appropriate for this language.  */
 
     void (*la_print_type) (struct type *, const char *, struct ui_file *, int,
-			   int);
+			   int, const struct type_print_options *);
 
     /* Print a typedef using syntax appropriate for this language.
        TYPE is the underlying type.  NEW_SYMBOL is the symbol naming
@@ -283,8 +290,12 @@ struct language_defn
 
     /* Should return a vector of all symbols which are possible
        completions for TEXT.  WORD is the entire command on which the
-       completion is being made.  */
-    VEC (char_ptr) *(*la_make_symbol_completion_list) (char *text, char *word);
+       completion is being made.  If CODE is TYPE_CODE_UNDEF, then all
+       symbols should be examined; otherwise, only STRUCT_DOMAIN
+       symbols whose type has a code of CODE should be matched.  */
+    VEC (char_ptr) *(*la_make_symbol_completion_list) (const char *text,
+						       const char *word,
+						       enum type_code code);
 
     /* The per-architecture (OS/ABI) language information.  */
     void (*la_language_arch_info) (struct gdbarch *,
@@ -323,9 +334,9 @@ struct language_defn
     /* Find all symbols in the current program space matching NAME in
        DOMAIN, according to this language's rules.
 
-       The search starts with BLOCK.  This function iterates upward
-       through blocks.  When the outermost block has been finished,
-       the function returns.
+       The search is done in BLOCK only.
+       The caller is responsible for iterating up through superblocks
+       if desired.
 
        For each one, call CALLBACK with the symbol and the DATA
        argument.  If CALLBACK returns zero, the iteration ends at that
@@ -339,6 +350,9 @@ struct language_defn
 				     domain_enum domain,
 				     symbol_found_callback_ftype *callback,
 				     void *data);
+
+    /* Various operations on varobj.  */
+    const struct lang_varobj_ops *la_varobj_ops;
 
     /* Add fields above this point, so the magic number is always last.  */
     /* Magic number for compat checking.  */
@@ -416,8 +430,8 @@ extern enum language set_language (enum language);
    the current setting of working_lang, which the user sets
    with the "set language" command.  */
 
-#define LA_PRINT_TYPE(type,varstring,stream,show,level) \
-  (current_language->la_print_type(type,varstring,stream,show,level))
+#define LA_PRINT_TYPE(type,varstring,stream,show,level,flags)		\
+  (current_language->la_print_type(type,varstring,stream,show,level,flags))
 
 #define LA_PRINT_TYPEDEF(type,new_symbol,stream) \
   (current_language->la_print_typedef(type,new_symbol,stream))
@@ -480,7 +494,7 @@ extern enum language language_enum (char *str);
 
 extern const struct language_defn *language_def (enum language);
 
-extern char *language_str (enum language);
+extern const char *language_str (enum language);
 
 /* Add a language to the set known by GDB (at initialization time).  */
 

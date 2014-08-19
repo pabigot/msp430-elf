@@ -7,7 +7,7 @@
  *	originally from Larry Wall.
  *
  *
- * RCS: @(#) $Id: opendir.c,v 1.2 1998/09/14 18:39:44 stanton Exp $
+ * RCS: @(#) $Id: opendir.c,v 1.3 2012/04/18 00:36:12 kevinb Exp $
  */
 
 #include "tclInt.h"

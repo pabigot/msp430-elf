@@ -4,6 +4,7 @@
 /* { dg-do run } */
 /* { dg-add-options ieee } */
 /* { dg-skip-if "No Inf/NaN support" { spu-*-* } } */
+/* { dg-skip-if "non-IEEE math" { "rx-*-*" } { "*" } { "-m64bit-doubles" } } */
 
 #include "../../gcc.dg/tg-tests.h"
 

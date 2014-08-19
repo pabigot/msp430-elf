@@ -124,17 +124,20 @@ SECTIONS
     *(.const:*)
   } ${RELOCATING+ > text}
 
-  .data ${RELOCATING-0} : ${RELOCATING+AT (ADDR (.text) + SIZEOF (.text))}
+  .data ${RELOCATING-0} :
   {  
     ${RELOCATING+ PROVIDE (__data_start = .) ; }
+    ${RELOCATING+. = ALIGN(2);}
     *(.data)
+    *(.data.*)
     *(.gnu.linkonce.d*)
     ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ _edata = . ; }
-  } ${RELOCATING+ > data}
+  } ${RELOCATING+ > data ${RELOCATING+AT> text}}
   
   .bss ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
   {
+    ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ PROVIDE (__bss_start = .) ; }
     *(.bss)
     *(COMMON)
@@ -142,7 +145,7 @@ SECTIONS
     ${RELOCATING+ _end = . ;  }
   } ${RELOCATING+ > data}
 
-  .noinit ${RELOCATING+ SIZEOF(.bss) + ADDR(.bss)} :
+  .noinit ${RELOCATING+ SIZEOF(.bss) + ADDR(.bss)} ${RELOCATING-(NOLOAD)} :
   {
     ${RELOCATING+ PROVIDE (__noinit_start = .) ; }
     *(.noinit)
@@ -174,38 +177,11 @@ SECTIONS
   .stab.indexstr 0 : { *(.stab.indexstr) }
   .comment 0 : { *(.comment) }
  
-  /* DWARF debug sections.
-     Symbols in the DWARF debugging sections are relative to the beginning
-     of the section so we begin them at 0.  */
+EOF
 
-  /* DWARF 1 */
-  .debug          0 : { *(.debug) }
-  .line           0 : { *(.line) }
+. $srcdir/scripttempl/DWARF.sc
 
-  /* GNU DWARF 1 extensions */
-  .debug_srcinfo  0 : { *(.debug_srcinfo) }
-  .debug_sfnames  0 : { *(.debug_sfnames) }
-
-  /* DWARF 1.1 and DWARF 2 */
-  .debug_aranges  0 : { *(.debug_aranges) }
-  .debug_pubnames 0 : { *(.debug_pubnames) }
-
-  /* DWARF 2 */
-  .debug_info     0 : { *(.debug_info) *(.gnu.linkonce.wi.*) }
-  .debug_abbrev   0 : { *(.debug_abbrev) }
-  .debug_line     0 : { *(.debug_line) }
-  .debug_frame    0 : { *(.debug_frame) }
-  .debug_str      0 : { *(.debug_str) }
-  .debug_loc      0 : { *(.debug_loc) }
-  .debug_macinfo  0 : { *(.debug_macinfo) }
-
-  /* DWARF 3 */
-  .debug_pubtypes 0 : { *(.debug_pubtypes) }
-  .debug_ranges   0 : { *(.debug_ranges) }
-
-  /* DWARF Extension.  */
-  .debug_macro    0 : { *(.debug_macro) } 
-
+cat <<EOF
   PROVIDE (__stack = ${STACK}) ;
   PROVIDE (__data_start_rom = _etext) ;
   PROVIDE (__data_end_rom   = _etext + SIZEOF (.data)) ;

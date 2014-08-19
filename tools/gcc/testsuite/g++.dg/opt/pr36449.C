@@ -1,7 +1,7 @@
 // PR middle-end/36449
 // { dg-do run }
-// { dg-options "-O3" }
 // { dg-require-effective-target int32plus }
+// { dg-options "-O3" }
 
 extern "C" void exit (int);
 extern "C" void abort ();
@@ -27,7 +27,7 @@ struct T
 
 struct U
 {
-  long h[0x1ffffff + 1];
+  long h[0x1fffff + 1];
   T i;
 };
 

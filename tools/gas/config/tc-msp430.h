@@ -117,13 +117,12 @@ extern long md_pcrel_from_section (struct fix *, segT);
 extern long msp430_relax_frag (segT, fragS *, long);
 
 #define TC_FORCE_RELOCATION_LOCAL(FIX)	\
-    msp430_force_relocation_local (FIX)
+   msp430_force_relocation_local (FIX)
 extern int msp430_force_relocation_local (struct fix *);
 
 /* We need to add reference symbols for .data/.bss.  */
 #define tc_frob_section(sec) msp430_frob_section (sec)
 extern void msp430_frob_section (asection *);
-
 
 extern int msp430_enable_relax;
 extern int msp430_enable_polys;
@@ -169,5 +168,7 @@ extern bfd_boolean msp430_allow_local_subtract (expressionS *, expressionS *, se
 #define TC_VALIDATE_FIX_SUB(FIX, SEG) 1
 
 #define DWARF2_USE_FIXED_ADVANCE_PC 1
+bfd_boolean msp430_target_is_430x (void);
+#define DWARF2_ADDR_SIZE(BFD) (msp430_target_is_430x() ? 4 : 2)
 
 #define TC_LINKRELAX_FIXUP(seg) (seg->flags & SEC_CODE)

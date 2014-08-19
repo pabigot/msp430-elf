@@ -50,7 +50,7 @@ set build_tests {
    {begin.c end.c} {} "libbar.so"}
   {"Build warn libbar.so"
    "-shared" "-fPIC"
-   {beginwarn.c end.c} {} "libbarw.so"
+   {beginwarn.c end.c} {{readelf {-S --wide} libbarw.rd}} "libbarw.so"
     "C" "^.*\\\): warning: function foo is deprecated$"}
   {"Build hidden libbar.so"
    "-shared" "-fPIC"
@@ -203,6 +203,21 @@ set build_tests {
   {"Build needed1b.so with --no-copy-dt-needed-entries"
    "-shared tmpdir/libneeded1pic.o -Wl,--no-copy-dt-needed-entries -Ltmpdir -lneeded1a" ""
    {dummy.c} {} "needed1d.so"}
+  {"Build librel.so"
+   "-shared" "-fPIC"
+   {rel.c} {} "librel.so"}
+  {"Build libneeded2a.so"
+   "-shared" "-fPIC"
+   {needed2a.c} {} "libneeded2a.so"}
+  {"Build libneeded2b.so"
+   "-shared -Wl,--version-script,needed2.ver" "-fPIC"
+   {needed2b.c} {} "libneeded2b.so"}
+  {"Build libneeded2c.o"
+   "-r -nostdlib" ""
+   {needed2c.c} {} "libneeded2c.o"}
+  {"Build needed2"
+   "tmpdir/libneeded2c.o -Wl,--as-needed tmpdir/libneeded2a.so tmpdir/libneeded2b.so" ""
+   {dummy.c} {} "needed2"}
 }
 
 run_cc_link_tests $build_tests
@@ -347,6 +362,9 @@ set run_tests {
     {"Link with --copy-dt-needed-entries"
      "tmpdir/libneeded1c.o --copy-dt-needed-entries -rpath=tmpdir -Ltmpdir -lneeded1a" ""
      {dummy.c} "needed1b" "needed1.out"}
+    {"Run relmain"
+     "--no-as-needed -rpath=tmpdir -Ltmpdir -lrel" ""
+     {relmain.c} "relmain" "relmain.out"}
 }
 
 # NetBSD ELF systems do not currently support the .*_array sections.
@@ -355,14 +373,14 @@ run_ld_link_exec_tests [list "*-*-netbsdelf*"] $run_tests
 # Check --no-add-needed and --no-copy-dt-needed-entries
 set testname "--no-add-needed"
 set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag tmpdir/libneeded1c.o -Wl,--no-add-needed,-rpath-link=tmpdir -Ltmpdir -lneeded1a"]
-if { [ regexp "'bar' is defined in DSO tmpdir/libneeded1b.so" $exec_output ] } {
+if { [ regexp "tmpdir/libneeded1b.so: .*: DSO missing" $exec_output ] } {
     pass $testname
 } {
     fail $testname
 }
 set testname "--no-copy-dt-needed-entries"
 set exec_output [run_host_cmd "$CC" "$gcc_gas_flag $gcc_ld_flag tmpdir/libneeded1c.o -Wl,--no-copy-dt-needed-entries,-rpath-link=tmpdir -Ltmpdir -lneeded1a"]
-if { [ regexp "'bar' is defined in DSO tmpdir/libneeded1b.so" $exec_output ] } {
+if { [ regexp "tmpdir/libneeded1b.so: .*: DSO missing" $exec_output ] } {
     pass $testname
 } {
     fail $testname

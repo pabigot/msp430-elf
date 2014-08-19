@@ -1,0 +1,73 @@
+This is a patch for Renesas issue #4762333.  It turns on dwarf2 unwinding,
+which is a good thing to do anyway.  Turning on dwarf2 unwinding
+necessitated the addition of rx_swarf_reg_to_regnum in order to get
+PC mapped correctly.
+
+I'm not certain that mapping 16 to RX_PSW_REGNUM is correct, but I
+also doubt that it makes a difference at the present time.
+
+ChangeLog.RedHat:
+
+2014-04-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* rx-tdep.c (RX_PSW_REGNUM): New enum constant.
+	(rx_dwarf_reg_to_regnum): New function.
+	(rx_gdbarch_init): Register rx_dwarf_reg_to_regnum.  Use dwarf2
+	unwinding.
+
+
+Index: gdb/rx-tdep.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/rx-tdep.c,v
+retrieving revision 1.7
+diff -u -p -r1.7 rx-tdep.c
+--- gdb/rx-tdep.c	25 May 2013 03:43:42 -0000	1.7
++++ gdb/rx-tdep.c	15 Apr 2014 07:00:27 -0000
+@@ -45,6 +45,7 @@ enum
+   RX_R4_REGNUM = 4,
+   RX_FP_REGNUM = 6,
+   RX_R15_REGNUM = 15,
++  RX_PSW_REGNUM = 18,
+   RX_PC_REGNUM = 19,
+   RX_ACC_REGNUM = 25,
+   RX_NUM_REGS = 26
+@@ -764,6 +765,23 @@ rx_breakpoint_from_pc (struct gdbarch *g
+   return breakpoint;
+ }
+ 
++/* Implement the dwarf_reg_to_regnum" gdbarch method.  */
++
++static int
++rx_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
++{
++  if (0 <= reg && reg <= 15)
++    return reg;
++  else if (reg == 16)
++    return RX_PSW_REGNUM;
++  else if (reg == 17)
++    return RX_PC_REGNUM;
++  else
++    internal_error (__FILE__, __LINE__,
++                    _("Undefined dwarf2 register mapping of reg %d"),
++		    reg);
++}
++
+ /* Allocate and initialize a gdbarch object.  */
+ static struct gdbarch *
+ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
+@@ -838,12 +856,11 @@ rx_gdbarch_init (struct gdbarch_info inf
+       set_gdbarch_long_double_format (gdbarch, floatformats_ieee_single);
+     }
+ 
++  /* DWARF register mapping.  */
++  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, rx_dwarf_reg_to_regnum);
++
+   /* Frame unwinding.  */
+-#if 0
+-  /* Note: The test results are better with the dwarf2 unwinder disabled,
+-     so it's turned off for now.  */
+   dwarf2_append_unwinders (gdbarch);
+-#endif
+   frame_unwind_append_unwinder (gdbarch, &rx_frame_unwind);
+ 
+   /* Methods for saving / extracting a dummy frame's ID.

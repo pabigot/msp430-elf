@@ -1,6 +1,7 @@
 // { dg-lto-do run }
 // { dg-require-linker-plugin "" }
 // { dg-lto-options {{-O2 -fuse-linker-plugin -fno-early-inlining}}
+// { dg-require-effective-target size32plus }
 
 extern "C" void abort (void);
 extern "C" void linker_error ();

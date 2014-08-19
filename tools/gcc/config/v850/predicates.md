@@ -1,5 +1,5 @@
 ;; Predicate definitions for NEC V850.
-;; Copyright (C) 2005-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2005-2014 Free Software Foundation, Inc.
 ;;
 ;; This file is part of GCC.
 ;;
@@ -501,6 +501,7 @@
 (define_predicate "label_ref_operand"
   (match_code "label_ref")
 )
+
 
 (define_predicate "e3v5_shift_operand"
   (match_code "const_int,reg")

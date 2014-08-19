@@ -30,3 +30,5 @@ main()
     a[0]++;
   return a[0];
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

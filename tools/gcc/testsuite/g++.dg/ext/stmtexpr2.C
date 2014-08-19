@@ -1,7 +1,7 @@
 // { dg-do run }
 // { dg-options "" }
 
-extern "C" int printf (char const *, ...);
+// extern "C" int printf (char const *, ...);
 extern "C" void abort ();
 
 // There are two alternate legal renderings.
@@ -13,7 +13,7 @@ static unsigned int *which;
 
 static void Check (unsigned t, unsigned i, void const *ptr, char const *name)
 {
-  printf ("%d %d %p %s\n", t, i, ptr, name);
+  // printf ("%d %d %p %s\n", t, i, ptr, name);
 
   if (pointer > sizeof(alt1)/sizeof(alt1[0]))
     abort ();
@@ -49,3 +49,5 @@ int main ()
 {
   ({ A(10) + A(11); });
 }
+
+// { dg-require-effective-target size32plus }

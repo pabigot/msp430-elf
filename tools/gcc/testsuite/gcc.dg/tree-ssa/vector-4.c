@@ -1,9 +1,10 @@
 /* { dg-do compile } */
-/* { dg-options "-w -O1 -fdump-tree-gimple" } */
 /* On 16-bit targets vector expansion does not work in the way this test expects.  */
 /* { dg-require-effective-target int32plus } */
+/* { dg-options "-w -O1 -fdump-tree-gimple" } */
 
-typedef int v4si __attribute__ ((vector_size (16)));
+typedef int SItype __attribute__ ((mode (SI)));
+typedef SItype v4si __attribute__ ((vector_size (16)));
 
 v4si vs (v4si a, v4si b)
 {

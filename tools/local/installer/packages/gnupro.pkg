@@ -1,0 +1,677 @@
+#
+# Package file for Red Hat GES Releases
+#
+# This file needs to be placed in the packages subdirectory.  One needs
+# to make a custom copy for each host triplet with the regexp of
+# s/TARGETTRIPLET/yourtargettriplethere/g
+#
+# This file contains information on all the packages installed for a
+# Red Hat GES release.  This file is host independent providing the
+# hosts are all using the same archive file format.  All the custom
+# procedures including the custom archive extraction routine are in
+# customproc.tcl in order to keep this file more tidy.
+#
+# The format of a package description is:
+#
+#    package Product_Package {
+#        title "Package Title"
+#        version $product_version
+#        category Product/Type
+#        installcmd redhat_install_package
+#        description {Package Description}
+#        icon $product_icon
+#        parameters {
+#            directory
+#            {Installation Directory}
+#            {Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+#            installdir redhat_get_default_installdir
+#    
+#            form {} {} {files-PackageName}
+#            {-force {path/to/archive/file.zip}}
+#        }
+#
+# "Product" is typically "GNUPro"
+# "Package" is something like "Compiler" or "Debugger" or "Source"
+# "Type" is something like "Binaries", "Source" or "Docs"
+# 
+# The version and icon strings are stored in variables for easy modification
+#    
+# If there is something which is only appropriate for a particular platform,
+# use a test to keep the file host independent:
+#
+#        if {$tcl_platform(platform) == "windows"} {
+#            requires GNUPro_Winsup
+#        }
+#
+# NOTE: You can't use variables or conditionals in the "parameters" list.
+#
+
+# We need cygwin version 1.6.10 or higher which is 1006010 (1.006.010) or more
+set need_cygwin_version 1.6.10
+
+# customprocs.tcl includes extraction routines
+source customprocs.tcl
+# find out what we're installing
+redhat_get_relinfo
+
+# commonly used variables
+set gnupro_version {RELEASE}
+# this avoids calling create_photo for every package
+set intro_icon [create_photo shadowman_icon.gif]
+set gnupro_icon [create_photo gnupro_icon.gif]
+
+# Initialize every have to 0
+set bsp_target 0
+set windows_host 0
+set need_dll 0
+set need_fixinc 0
+set have_fixinc 0
+set have_sysroot 0
+set have_uclibc 0
+set have_kernel 0
+set have_rootfs 0
+set have_target 0
+set have_kernel_src 0
+set have_rootfs_src 0
+set have_sysroot_src 0
+set have_header_src 0
+set have_uclibc_src 0
+set have_glibc_src 0
+set have_rda_src 0
+
+# Are we a windows host?
+if {$tcl_platform(platform) == "windows"} {
+        set windows_host 1
+        set need_dll [ resolve_cygwin_dll_version $need_cygwin_version  ]
+}
+
+#Is fixincludes needed?
+if {$windows_host == "0"} {
+    if { [string match $relinfo(host) $relinfo(target) ] || [string match *linux* $relinfo(target) ] } {
+       set need_fixinc 1
+    }
+} else {
+    if { [string match *linux* $relinfo(target) ] } {
+       set need_fixinc 1
+    }
+}
+
+#Are we a bsp package?  If so we may want to include kernel and rootfilesystem bits.
+switch -- $relinfo(target) {
+	"armv5-softvfp-linux-gnu" {
+		set bsp_target 1
+	}
+	"armv5l-linux-gnu" {
+		set bsp_target 1
+	}
+	"armv5b-linux-gnu" {
+		set bsp_target 1
+	}
+	"am33_2.0-linux-gnu" {
+		set bsp_target 1
+	}
+	"sh3-linux-gnu" {
+		set bsp_target 1
+	}
+	"sh4-linux-gnu" {
+		set bsp_target 1
+	}
+	"powerpc-linux-gnu" {
+		set bsp_target 1
+	}
+	"mips-linux-gnu" {
+		set bsp_target 1
+	}
+	"mipsel-linux-gnu" {
+		set bsp_target 1
+	}
+}
+
+# Package information
+package *intro {
+    title Introduction
+    category Overview
+    description {
+In the list on left, click on the name of a package to obtain a description of that package.
+For more information on Red Hat, check out http://www.redhat.com
+For more information on Open Source, check out http://sources.redhat.com
+This installer is powered by Tclish.
+For more information about Tclish http://tclish.sourceforge.org/}
+    icon $intro_icon
+}
+
+package GNUPro_Compiler {
+    title "Compilers (Targets TARGETTRIPLET)"
+    version $gnupro_version
+    category GNUPro/Binaries
+    installcmd redhat_install_package
+    description {The compilers that produce assembly language code from the processed C and C++ files.  Also includes the assembler, linker and binary utilities such as objdump and objcopy.}
+    icon $gnupro_icon
+    parameters {
+        directory
+        {Installation Directory}
+          {Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+        installdir redhat_get_default_installdir
+
+        form {} {} {files-GNUPro_Compiler}
+	{-force {TARGETTRIPLET/gnupro/binaries/compiler.zip}}
+    }
+
+    if {$tcl_platform(platform) == "windows"} {
+#        requires GNUPro_Winsup
+    } else {
+  	if {$relinfo(host) == $relinfo(target)} {
+       	requires GNUPro_FixIncludes
+	}
+    }
+}
+
+
+
+package GNUPro_Debugger {
+    title "Debuggers (Targets TARGETTRIPLET)"
+    version $gnupro_version
+    category GNUPro/Binaries
+    installcmd redhat_install_package
+    description {GNUPro provides effective, efficient debugging sessions with the standard command-line based debugger, gdb.  Also available is Red Hat Insight, a visual debugger with a graphical user interface supporting a range of host systems and target microprocessors.}
+    icon $gnupro_icon
+    parameters {
+        directory 
+        {Installation Directory} 
+          {Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+        installdir redhat_get_default_installdir
+
+        form {} {} {files-GNUPro_Debugger}
+	{-force {TARGETTRIPLET/gnupro/binaries/debugger.zip}}
+    }
+
+    if {$tcl_platform(platform) == "windows"} {
+#        requires GNUPro_Winsup
+    }
+}
+
+package GNUPro_DejaGNU {
+    title "DejaGNU test framework"
+    version $gnupro_version
+    category GNUPro/Binaries
+    installcmd redhat_install_package
+    description {DejaGNU is the regression testing framework used at Red Hat. It is based on Tcl and expect.}
+    icon $gnupro_icon
+    parameters {
+        directory 
+        {Installation Directory} 
+          {Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+        installdir redhat_get_default_installdir
+
+        form {} {} {files-GNUPro_DejaGNU}
+	{-force {native/gnupro/binaries/dejagnu.zip}}
+    }
+    if {$tcl_platform(platform) == "windows"} {
+#        requires GNUPro_Winsup
+    }
+}
+
+package GNUPro_Misc {
+    title "Miscellaneous support files"
+    version $gnupro_version
+    category GNUPro/Binaries
+    installcmd redhat_install_package
+    description {Includes Red Hat contact information as well as licensing files.}
+    icon $gnupro_icon
+    parameters {
+        directory 
+        {Installation Directory} 
+          {Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+        installdir redhat_get_default_installdir
+
+        form {} {} {files-GNUPro_Misc}
+	{-force {native/gnupro/binaries/misc.zip}}
+    }
+}
+
+package GNUPro_Utils {
+    title "Utilities for rebuilding from source"
+    version $gnupro_version
+    category GNUPro/Binaries
+    installcmd redhat_install_package
+    description {Additional utilities needed to rebuild the GNUPro Toolkit from source.}
+    icon $gnupro_icon
+    parameters {
+        directory 
+        {Installation Directory} 
+          {Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+        installdir redhat_get_default_installdir
+
+        form {} {} {files-GNUPro_Utils}
+	{-force {native/gnupro/binaries/utils.zip}}
+    }
+
+    if {$tcl_platform(platform) == "windows"} {
+# Winsup is now decoupled from GNUPro
+#        requires GNUPro_Winsup
+    }
+}
+
+package GNUPro_InfoFiles {
+    title {Info Documentation}
+    version $gnupro_version
+    category GNUPro/Docs
+    installcmd redhat_install_package
+    description {Info files for some of the tools provided.}
+    icon $gnupro_icon
+    parameters {
+        directory 
+        {Installation Directory} 
+          {Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+        installdir redhat_get_default_installdir
+
+        form {} {} {files-GNUPro_InfoFiles}
+	{-force {shared/gnupro/docs/infofiles.zip}}
+    }
+}
+
+package GNUPro_Sources {
+    title Sources
+    version $gnupro_version
+    category GNUPro/Sources
+    installcmd redhat_install_package
+    description {Sources for the GNUPro compiler tools. Want to make changes?  Here's the source!}
+    icon $gnupro_icon
+    parameters {
+        directory 
+        {Installation Directory} 
+          {Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+        installdir redhat_get_default_installdir
+
+        form {} {} {files-GNUPro_Sources}
+	{-force {shared/gnupro/source/SOURCE.zip}}
+    }
+}
+
+if { $bsp_target == "1"} {
+	if { [ file exists packages/TARGETTRIPLET/gnupro/binaries/kernel.zip ] } {
+		set have_kernel 1
+		package Target_Kernel {
+			title {Target System Kernel Image}
+			version $relinfo(target)
+			category Target/Binaries
+			installcmd redhat_install_package
+			description {This package includes a pre-built kernel configured specifically for a BOARDNAME target board.}
+			icon $gnupro_icon
+			parameters {
+				directory 
+				{Installation Directory} 
+				{Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+				installdir redhat_get_default_installdir
+				form {} {} {files-Target_Kernel}
+				{-force {TARGETTRIPLET/gnupro/binaries/kernel.zip}}
+			}
+		}
+	}
+
+	if { [ file exists packages/TARGETTRIPLET/gnupro/source/src-headers.zip ] } {
+		set have_header_src 1
+		package Target_Header_Source {
+			title {Target System Header Source}
+			version $relinfo(target)
+			category Target/Source
+			installcmd redhat_install_package
+			description {This package includes the ABI Headers, used when building an embedded Linux toolchain.}
+			icon $gnupro_icon
+			parameters {
+				directory 
+				{Installation Directory} 
+				{Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+				installdir redhat_get_default_installdir
+				form {} {} {files-Target_Header_Source}
+				{-force {TARGETTRIPLET/gnupro/source/src-header.zip}}
+			}
+		}
+	}
+
+	if { [ file exists packages/TARGETTRIPLET/gnupro/source/src-uclibc.zip ] } {
+		set have_uclibc_src 1
+		package Target_uCLibc_Source {
+			title {Target System uCLibc Source}
+			version $relinfo(target)
+			category Target/Source
+			installcmd redhat_install_package
+			description {This package includes the sources for uCLibc, used when building an embedded Linux toolchain.}
+			icon $gnupro_icon
+			parameters {
+				directory 
+				{Installation Directory} 
+				{Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+				installdir redhat_get_default_installdir
+				form {} {} {files-Target_uCLibc_Source}
+				{-force {TARGETTRIPLET/gnupro/source/src-uclibc.zip}}
+			}
+		}
+	}
+
+	if { [ file exists packages/TARGETTRIPLET/gnupro/source/src-rda.zip ] } {
+		set have_rda_src 1
+		package Target_RDA_Source {
+			title {Target System RDA Source}
+			version $relinfo(target)
+			category Target/Source
+			installcmd redhat_install_package
+			description {This package includes the sources for RDA, used when debugging an embedded Linux application on the target hardware.}
+			icon $gnupro_icon
+			parameters {
+				directory 
+				{Installation Directory} 
+				{Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+				installdir redhat_get_default_installdir
+				form {} {} {files-Target_RDA_Source}
+				{-force {TARGETTRIPLET/gnupro/source/src-rda.zip}}
+			}
+		}
+	}
+
+	if { [ file exists packages/TARGETTRIPLET/gnupro/source/src-glibc.zip ] } {
+		set have_glibc_src 1
+		package Target_GLibc_Source {
+			title {Target System GLibc Source}
+			version $relinfo(target)
+			category Target/Source
+			installcmd redhat_install_package
+			description {This package includes the sources for GNU Libc, used when building an embedded Linux toolchain.}
+			icon $gnupro_icon
+			parameters {
+				directory 
+				{Installation Directory} 
+				{Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+				installdir redhat_get_default_installdir
+				form {} {} {files-Target_GLibc_Source}
+				{-force {TARGETTRIPLET/gnupro/source/src-glibc.zip}}
+			}
+		}
+	}
+
+	if { [ file exists packages/TARGETTRIPLET/gnupro/source/src-kernel.zip ] } {
+		set have_kernel_src 1
+		package Target_Kernel_Source {
+			title {Target System Kernel Image Source}
+			version $relinfo(target)
+			category Target/Source
+			installcmd redhat_install_package
+			description {This package includes the sources for the Linux kernel.}
+			icon $gnupro_icon
+			parameters {
+				directory 
+				{Installation Directory} 
+				{Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+				installdir redhat_get_default_installdir
+				form {} {} {files-Target_Kernel_Source}
+				{-force {TARGETTRIPLET/gnupro/source/src-kernel.zip}}
+			}
+		}
+	}
+
+
+	if { [ file exists packages/TARGETTRIPLET/gnupro/binaries/target.zip ] } {
+		set have_target 1
+		package Target_Binaries {
+			title {Binaries for TARGETTRIPLET (BOARDNAME)}
+			version $relinfo(target)
+			category Target/Binaries
+			installcmd redhat_install_package
+			description {This package includes executables for the TARGETTRIPLET system such as rda.}
+			icon $gnupro_icon
+			parameters {
+				directory 
+				{Installation Directory} 
+				{Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+				installdir redhat_get_default_installdir
+				form {} {} {files-Target_Binaries}
+				{-force {TARGETTRIPLET/gnupro/binaries/target.zip}}
+			}
+		}
+	}
+
+	if { [ file exists packages/TARGETTRIPLET/gnupro/binaries/rootfs.zip ] } {
+		set have_rootfs 1
+		package Target_RootFS {
+			title {Root Filesystem for TARGETTRIPLET (BOARDNAME)}
+			version $relinfo(target)
+			category Target/Binaries
+			installcmd redhat_install_package
+			description {This package includes a pre-built root filesystem configured for use with the BOARDNAME target board.}
+			icon $gnupro_icon
+			parameters {
+				directory 
+				{Installation Directory} 
+				{Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+				installdir redhat_get_default_installdir
+				form {} {} {files-Target_RootFS}
+				{-force {TARGETTRIPLET/gnupro/binaries/rootfs.zip}}
+			}
+		}
+	}
+
+	if { [ file exists packages/TARGETTRIPLET/gnupro/source/src-rootfs.zip ] } {
+		set have_rootfs_src 1
+		package Target_RootFS_Source {
+			title {Root Filesystem Sources for TARGETTRIPLET (BOARDNAME)}
+			version $relinfo(target)
+			category Target/Source
+			installcmd redhat_install_package
+			description {This package includes the sources for the Linux Root Filesystem, built for use with the BOARDNAME target board.}
+			icon $gnupro_icon
+			parameters {
+				directory 
+				{Installation Directory} 
+				{Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+				installdir redhat_get_default_installdir
+				form {} {} {files-Target_RootFS_Source}
+				{-force {TARGETTRIPLET/gnupro/source/src-rootfs.zip}}
+			}
+		}
+	}
+
+
+
+
+}
+
+# We can have a sysroot even if we're not a BSP
+if { [ file exists packages/TARGETTRIPLET/gnupro/binaries/sysroot.zip ] } {
+    set have_sysroot 1
+    package Target_SysRoot {
+      title {Target System Root}
+      version $relinfo(target)
+      category Target/Binaries
+      installcmd redhat_install_package
+      description {This package includes libraries and headers compatible with TARGETTRIPLET systems.  Installing this package when the host and target are the same will allow the compiler tools to create executables with maximum compatibility across the entire range of TARGETTRIPLET system, though it is not a required component in this configuration.  When targetting a different OS than the host, this package is mandatory, as it includes essential header and library files for the compiler tools to compile and link against.}
+      icon $gnupro_icon
+      parameters {
+          directory 
+          {Installation Directory} 
+          {Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+          installdir redhat_get_default_installdir
+
+          form {} {} {files-Target_SysRoot}
+	    {-force {TARGETTRIPLET/gnupro/binaries/sysroot.zip}}
+      }
+    requires GNUPro_FixIncludes
+    }
+}
+
+if { [ file exists packages/TARGETTRIPLET/gnupro/source/src-sysroot.zip ] } {
+    set have_sysroot_src 1
+    package Target_SysRootSrc {
+      title {TARGETTRIPLET System Root Source}
+      version $relinfo(target)
+      category Target/Source
+      installcmd redhat_install_package
+      description {This package contains the sources to the TARGETTRIPLET System Root}
+      icon $gnupro_icon
+      parameters {
+          directory 
+          {Installation Directory} 
+          {Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+          installdir redhat_get_default_installdir
+
+          form {} {} {files-Target_SysRootSrc}
+	    {-force {TARGETTRIPLET/gnupro/source/src-sysroot.zip}}
+      }
+    }
+}
+
+# Following are Windows only packages including the magic Windows PATH
+# addition package.
+
+if { "$windows_host" == "1"} {
+  package Windows_PATH {
+      title {Update Windows PATH}
+      version $gnupro_version
+      category Windows/Setup
+      installcmd redhat_set_PATH
+      description {Set the PATH environment variable on Windows. (Will require a reboot before taking effect.)}
+      icon $gnupro_icon
+      parameters {
+          directory 
+          {Installation Directory}
+          {Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+          installdir redhat_get_default_installdir
+
+	  form {} {} {setpath} {-force {yes}}
+	}
+  }
+
+  package GNUPro_Winsup {
+      title Winsup
+      version $gnupro_version
+      category GNUPro/Binaries
+      installcmd redhat_install_package
+      description {Cygwin DLL and supporting binaries required for all Cygwin-based programs.  Install this package if you have not previously installed the Cygwin environment.}
+      icon $gnupro_icon
+      parameters {
+          directory 
+          {Installation Directory}
+          {Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+          installdir redhat_get_default_installdir
+
+          form {} {} {files-GNUPro_Winsup}
+	  {-force {native/gnupro/binaries/winsup.zip}}
+      }
+  }
+
+  package Windows_Mount {
+      title {Configure Mount Table}
+      version $gnupro_version
+      category Windows/Setup
+      installcmd muck_with_mounts
+      description {Setup the Cygwin mount table.}
+      icon $gnupro_icon
+      parameters {
+          directory 
+          {Installation Directory}
+          {Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+          installdir redhat_get_default_installdir
+    }
+#    requires GNUPro_Winsup
+  }
+}
+
+## Obsoleted by cygwin-1.6.0 release
+
+if { $need_fixinc == "1" } {
+	set have_fixinc 1
+	package GNUPro_FixIncludes {
+		title {Run fixincludes}
+		version $gnupro_version
+		category UNIX/FixIncludes
+		installcmd redhat_fixincludes
+		description {Run fixincludes after installing compiler.}
+		icon $gnupro_icon
+		parameters {
+			directory 
+			{Installation Directory}
+			{Please select the installation directory prefix.  All files will be installed under this directory in a subdirectory named RELEASE}
+			installdir redhat_get_default_installdir
+		}
+	}
+}
+
+##########################################################################
+### Package definitions are complete.  Now for install definitions #######
+##########################################################################
+
+#Typical (contains varients for BSP, Fixincs)
+if {$windows_host == "1"} {
+	if { $need_dll == "1" } {
+		installoption typical "Typical Installation.\nInstall binaries and documentation.\n(Includes required cygwin1.dll)"
+	} else {
+		installoption typical "Typical Installation.\nInstall binaries and documentation.\n(Uses pre-existing cygwin1.dll)"
+	}
+} else {
+	installoption typical "Typical Installation.\nInstall binaries and documentation."
+}
+installoption_add typical GNUPro/Binaries GNUPro_Compiler
+installoption_add typical GNUPro/Binaries GNUPro_Debugger
+installoption_add typical GNUPro/Binaries GNUPro_DejaGNU
+installoption_add typical GNUPro/Binaries GNUPro_Misc
+installoption_add typical GNUPro/Binaries GNUPro_Utils
+installoption_add typical GNUPro/Docs GNUPro_InfoFiles
+if { $bsp_target == "1" } {
+	if { $have_target == "1" } {
+		installoption_add typical Target/Binaries Target_Binaries
+	}
+	if { $have_rootfs == "1" } {
+		installoption_add typical Target/Binaries Target_RootFS
+	}
+	if { $have_kernel == "1" } {
+		installoption_add typical Target/Binaries Target_Kernel
+	}
+	if { $have_sysroot == "1" } {
+		installoption_add typical Target/Binaries Target_SysRoot
+	}
+	if { $have_fixinc == "1" } {
+		installoption_add typical UNIX/FixIncludes GNUPro_FixIncludes
+	}
+# Don't want sources in typical install
+#	if { $have_kernel_src == "1" } {
+#		installoption_add typical Target/Binaries Target_Kernel_Source
+#	}
+#	if { $have_header_src == "1" } {
+#		installoption_add typical Target/Binaries Target_Header_Source
+#	}
+#	if { $have_uclibc_src == "1" } {
+#		installoption_add typical Target/Binaries Target_uCLibc_Source
+#	}
+#	if { $have_glibc_src == "1" } {
+#		installoption_add typical Target/Binaries Target_GLibc_Source
+#	}
+} elseif {$windows_host == "0"} {
+	if { $have_sysroot == "1" } {
+		installoption_add typical Target/Binaries Target_SysRoot
+	}
+	if { $have_fixinc == "1" } {
+		installoption_add typical UNIX/FixIncludes GNUPro_FixIncludes
+	}
+} elseif {$windows_host == "1"} {
+	if { $need_dll == "1" } {
+		installoption_add typical GNUPro/Binaries GNUPro_Winsup
+	}
+	installoption_add typical Windows/Setup Windows_PATH
+	installoption_add typical Windows/Setup Windows_Mount
+}
+
+# For instance, if we include a RHEL3 rootfs to target against
+if {  $bsp_target == "0" && $have_sysroot == "1" } {
+	installoption sysroot "Typical Installation + SysRoot\nIncludes $relinfo(target)\nheaders and libraries."
+	installoption_add sysroot GNUPro/Binaries GNUPro_Compiler
+	installoption_add sysroot GNUPro/Binaries GNUPro_Debugger
+	installoption_add sysroot GNUPro/Binaries GNUPro_DejaGNU
+	installoption_add sysroot GNUPro/Binaries GNUPro_Misc
+	installoption_add sysroot GNUPro/Binaries GNUPro_Utils
+	installoption_add sysroot GNUPro/Docs GNUPro_InfoFiles
+	installoption_add sysroot Target/SysRoot Target_SysRoot
+	if { $have_fixinc == "1" } {
+		installoption_add typical UNIX/FixIncludes GNUPro_FixIncludes
+	}
+}
+
+installoption full "Full Installation.\nInstall all binaries, documentation, and sources."

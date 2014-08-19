@@ -28,3 +28,4 @@ int main()
   A const& r1 = B(); 
   r1.func(); 
 } 
+// { dg-require-effective-target size32plus }

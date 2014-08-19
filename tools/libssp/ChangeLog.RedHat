@@ -1,0 +1,19 @@
+2008-08-07  DJ Delorie  <dj@redhat.com>
+
+	* configure: Fix typo, fix from libtool.m4.
+
+2006-02-08  Nick Clifton  <nickc@redhat.com>
+
+	* configure.ac (GCC_NO_EXECUTABLES): Use.
+	(AC_CHECK_FUNCS): Only run if link tests are allowed.
+	(symbol versioning): Likewise.
+	* aclocal.m4: Regenerate.
+	* configure: Regenerate.
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

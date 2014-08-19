@@ -1,7 +1,6 @@
 /* Print in infix form a struct expression.
 
-   Copyright (C) 1986, 1988-1989, 1991-2000, 2003, 2007-2012 Free
-   Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,15 +26,13 @@
 #include "parser-defs.h"
 #include "user-regs.h"		/* For user_reg_map_regnum_to_name.  */
 #include "target.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "block.h"
 #include "objfiles.h"
 #include "gdb_assert.h"
 #include "valprint.h"
 
-#ifdef HAVE_CTYPE_H
 #include <ctype.h>
-#endif
 
 void
 print_expression (struct expression *exp, struct ui_file *stream)
@@ -102,7 +99,7 @@ print_subexp_standard (struct expression *exp, int *pos,
       {
 	struct value_print_options opts;
 
-	get_raw_print_options (&opts);
+	get_no_prettyformat_print_options (&opts);
 	(*pos) += 3;
 	value_print (value_from_longest (exp->elts[pc + 1].type,
 					 exp->elts[pc + 2].longconst),
@@ -114,7 +111,7 @@ print_subexp_standard (struct expression *exp, int *pos,
       {
 	struct value_print_options opts;
 
-	get_raw_print_options (&opts);
+	get_no_prettyformat_print_options (&opts);
 	(*pos) += 3;
 	value_print (value_from_double (exp->elts[pc + 1].type,
 					exp->elts[pc + 2].doubleconst),
@@ -124,7 +121,7 @@ print_subexp_standard (struct expression *exp, int *pos,
 
     case OP_VAR_VALUE:
       {
-	struct block *b;
+	const struct block *b;
 
 	(*pos) += 3;
 	b = exp->elts[pc + 1].block;
@@ -206,7 +203,8 @@ print_subexp_standard (struct expression *exp, int *pos,
 	   additional parameter to LA_PRINT_STRING.  -fnf */
 	get_user_print_options (&opts);
 	LA_PRINT_STRING (stream, builtin_type (exp->gdbarch)->builtin_char,
-			 &exp->elts[pc + 2].string, nargs, NULL, 0, &opts);
+			 (gdb_byte *) &exp->elts[pc + 2].string, nargs,
+			 NULL, 0, &opts);
       }
       return;
 
@@ -220,7 +218,8 @@ print_subexp_standard (struct expression *exp, int *pos,
 	fputs_filtered ("@\"", stream);
 	get_user_print_options (&opts);
 	LA_PRINT_STRING (stream, builtin_type (exp->gdbarch)->builtin_char,
-			 &exp->elts[pc + 2].string, nargs, NULL, 0, &opts);
+			 (gdb_byte *) &exp->elts[pc + 2].string, nargs,
+			 NULL, 0, &opts);
 	fputs_filtered ("\"", stream);
       }
       return;
@@ -310,7 +309,7 @@ print_subexp_standard (struct expression *exp, int *pos,
 
 	  get_user_print_options (&opts);
 	  LA_PRINT_STRING (stream, builtin_type (exp->gdbarch)->builtin_char,
-			   tempstr, nargs - 1, NULL, 0, &opts);
+			   (gdb_byte *) tempstr, nargs - 1, NULL, 0, &opts);
 	  (*pos) = pc;
 	}
       else
@@ -326,21 +325,6 @@ print_subexp_standard (struct expression *exp, int *pos,
 	    }
 	  fputs_filtered ("}", stream);
 	}
-      return;
-
-    case OP_LABELED:
-      tem = longest_to_int (exp->elts[pc + 1].longconst);
-      (*pos) += 3 + BYTES_TO_EXP_ELEM (tem + 1);
-      /* Gcc support both these syntaxes.  Unsure which is preferred.  */
-#if 1
-      fputs_filtered (&exp->elts[pc + 2].string, stream);
-      fputs_filtered (": ", stream);
-#else
-      fputs_filtered (".", stream);
-      fputs_filtered (&exp->elts[pc + 2].string, stream);
-      fputs_filtered ("=", stream);
-#endif
-      print_subexp (exp, pos, stream, PREC_SUFFIX);
       return;
 
     case TERNOP_COND:
@@ -464,7 +448,7 @@ print_subexp_standard (struct expression *exp, int *pos,
 	  (*pos) += 4;
 	  val = value_at_lazy (exp->elts[pc + 1].type,
 			       (CORE_ADDR) exp->elts[pc + 5].longconst);
-	  get_raw_print_options (&opts);
+	  get_no_prettyformat_print_options (&opts);
 	  value_print (val, stream, &opts);
 	}
       else
@@ -685,7 +669,7 @@ op_name_standard (enum exp_opcode opcode)
       {
 	static char buf[30];
 
-	sprintf (buf, "<unknown %d>", opcode);
+	xsnprintf (buf, sizeof (buf), "<unknown %d>", opcode);
 	return buf;
       }
 #define OP(name)	\
@@ -950,7 +934,7 @@ dump_subexp_body_standard (struct expression *exp,
       gdb_print_host_address (exp->elts[elt + 1].type, stream);
       fprintf_filtered (stream, " (__thread /* \"%s\" */ ",
                         (exp->elts[elt].objfile == NULL ? "(null)"
-			 : exp->elts[elt].objfile->name));
+			 : objfile_name (exp->elts[elt].objfile)));
       type_print (exp->elts[elt + 1].type, NULL, stream, 0);
       fprintf_filtered (stream, ")");
       elt = dump_subexp (exp, stream, elt + 3);
@@ -966,6 +950,11 @@ dump_subexp_body_standard (struct expression *exp,
     case OP_TYPEOF:
     case OP_DECLTYPE:
       fprintf_filtered (stream, "Typeof (");
+      elt = dump_subexp (exp, stream, elt);
+      fprintf_filtered (stream, ")");
+      break;
+    case OP_TYPEID:
+      fprintf_filtered (stream, "typeid (");
       elt = dump_subexp (exp, stream, elt);
       fprintf_filtered (stream, ")");
       break;
@@ -1031,7 +1020,6 @@ dump_subexp_body_standard (struct expression *exp,
     case OP_BOOL:
     case OP_M2_STRING:
     case OP_THIS:
-    case OP_LABELED:
     case OP_NAME:
       fprintf_filtered (stream, "Unknown format");
     }

@@ -24,7 +24,7 @@ int main()
    int x = (int&)t;  // This should call operator int&() but it does not ...
    int y = t.geti(); // x and y should both be 5 ...
    if (x == 5 && y == 5)
-     printf ("PASS\n");
+     ; // printf ("PASS\n");
    else
      { printf ("FAIL\n"); return 1; }
 }

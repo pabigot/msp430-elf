@@ -1,4 +1,5 @@
 // { dg-lto-do run }
+// { dg-require-effective-target size32plus }
 
 static const char *fname;
 struct S

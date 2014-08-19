@@ -39,3 +39,4 @@ void func1 ()
 }
 
 int main () { return 0; }
+// { dg-require-effective-target size32plus }

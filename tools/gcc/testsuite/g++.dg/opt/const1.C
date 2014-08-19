@@ -127,3 +127,5 @@ main ()
   H b;
   b = H () + H ();
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

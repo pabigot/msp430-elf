@@ -1,0 +1,63 @@
+#! /bin/sh
+
+# cd to the parent of the obsolete directory and run
+#   rm-cvs-directory <name-of-obsolete-directory>
+#
+# This script will remove the directory and all of its sub-directoies
+# from the CVS repository
+
+# Note: In devo use rm-devo-cvs-directory as this takes care of %redact
+# files as well.
+
+if test "x$1" = "x" ; then
+  echo "Usage $0 <directory-name>"
+  exit 1
+fi
+
+if test "x$2" != "x" ; then
+  echo "Only one directory name at a time please."
+  exit 1
+fi
+
+dir=`basename $1`
+
+if ! test -d $1 ; then
+  if test -f $1 ; then
+    echo "$0: '$dir' is a file - just using 'cvs delete' on it" ;
+    rm -f $1 ;
+    cvs -q delete $1 > /dev/null ;
+    exit 0
+  else
+    echo "$0: argument '$1' must be a directory"
+    exit 1
+  fi
+fi
+
+if test "x$dir" = "x." ; then
+  # echo "Skipping " $dir
+  exit 0
+fi
+  
+if test "x$dir" = "xCVS" ; then
+  # echo "Skipping " $dir
+  exit 0
+fi
+  
+echo "Removing directory: $dir"
+
+pushd $1 > /dev/null
+
+for A in * ; do
+  if test -f $A ; then
+    echo "Removing file: $A" ;
+    rm -f $A ;
+    cvs -q delete $A > /dev/null 2>/dev/null ;
+  else
+    # Recurse into sub-directories.
+    $0 $A ;
+  fi
+done;
+
+popd > /dev/null
+
+cvs -q delete $1 > /dev/null

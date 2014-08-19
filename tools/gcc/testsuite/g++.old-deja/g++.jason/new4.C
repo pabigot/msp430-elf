@@ -21,3 +21,4 @@ main ()
   if (ap->i != 1 || ap2[0].i != 42 || ap2[1].i != 42 || ap2[2].i != 42)
     return 1;
 }
+// { dg-require-effective-target size32plus }

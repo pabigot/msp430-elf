@@ -1,22 +1,21 @@
 #    Makefile template for Configure for the sim library.
-#    Copyright (C) 1993, 1995, 1997, 1998 Free Software Foundation, Inc.
+#    Copyright (C) 1993-2014 Free Software Foundation, Inc.
 #    Written by Cygnus Support.
 # 
 # This file is part of BFD, the Binary File Descriptor library.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 VPATH = @srcdir@
 srcdir = @srcdir@
@@ -31,6 +30,7 @@ bindir = @bindir@
 libdir = @libdir@
 tooldir = $(libdir)/$(target_alias)
 
+datarootdir = @datarootdir@
 datadir = @datadir@
 mandir = @mandir@
 man1dir = $(mandir)/man1
@@ -56,6 +56,7 @@ AR_FLAGS = rc
 CC = @CC@
 CFLAGS = @CFLAGS@
 CC_FOR_BUILD = @CC_FOR_BUILD@
+CFLAGS_FOR_BUILD = @CFLAGS_FOR_BUILD@
 MAKEINFO = makeinfo
 RANLIB = @RANLIB@
 
@@ -65,17 +66,12 @@ INCDIR = $(srcdir)/../include
 CSEARCH = -I. -I$(srcdir) -I$(INCDIR)
 DEP = mkdep
 
-# compilers to use to create programs which must be run in the build
-# environment.
-CC_FOR_BUILD = $(CC)
-
 #### Makefile fragments come in here.
 # @target_makefile_frag@
 ###
 
 # Name of the ChangeLog file.
 ChangeLog = ChangeLog
-ChangeLog=ChangeLog.RedHat
 
 
 RUNTEST = `if [ -f $${srcdir}/../dejagnu/runtest ] ; then \
@@ -86,17 +82,22 @@ RUNTESTFLAGS=
 FLAGS_TO_PASS = \
 	"prefix=$(prefix)" \
 	"exec_prefix=$(exec_prefix)" \
+	"bindir=$(bindir)" \
+	"mandir=$(mandir)" \
+	"libdir=$(libdir)" \
 	"against=$(against)" \
 	"AR=$(AR)" \
 	"AR_FLAGS=$(AR_FLAGS)" \
 	"CC=$(CC)" \
 	"CC_FOR_BUILD=$(CC_FOR_BUILD)" \
 	"CFLAGS=$(CFLAGS)" \
+	"CFLAGS_FOR_BUILD=$(CFLAGS_FOR_BUILD)" \
 	"RANLIB=$(RANLIB)" \
 	"MAKEINFO=$(MAKEINFO)" \
 	"INSTALL=$(INSTALL)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
+	"RUNTEST=$(RUNTEST)" \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)" \
 	"SHELL=$(SHELL)"
 
@@ -120,6 +121,7 @@ TARGET_FLAGS_TO_PASS = \
 	"INSTALL_PROGRAM=$(INSTALL_PROGRAM)" \
 	"INSTALL_DATA=$(INSTALL_DATA)" \
 	"MAKEINFO=$(MAKEINFO)" \
+	"RUNTEST=$(RUNTEST)" \
 	"RUNTESTFLAGS=$(RUNTESTFLAGS)"
 
 
@@ -129,7 +131,7 @@ all:
 		if [ "$$dir" = "." ]; then \
 			true; \
 		elif [ -d $$dir ]; then \
-			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS)); \
+			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS)) || exit 1; \
 		else true; fi; \
 	done
 
@@ -139,7 +141,7 @@ clean mostlyclean:
 		if [ "$$dir" = "." ]; then \
 			true; \
 		elif [ -d $$dir ]; then \
-			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) $@); \
+			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) $@) || exit 1; \
 		else true; fi; \
 	done
 
@@ -149,7 +151,7 @@ distclean maintainer-clean realclean:
 		if [ "$$dir" = "." ]; then \
 			true; \
 		elif [ -d $$dir ]; then \
-			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) $@); \
+			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) $@) || exit 1; \
 		else true; fi; \
 	done
 	rm -f Makefile config.cache config.log config.status
@@ -160,7 +162,7 @@ install:
 		if [ "$$dir" = "." ]; then \
 			true; \
 		elif [ -d $$dir ]; then \
-			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) install); \
+			(cd $$dir; $(MAKE) $(FLAGS_TO_PASS) install) || exit 1; \
 		else true; fi; \
 	done
 
@@ -184,6 +186,10 @@ check: force
 info:
 install-info:
 dvi:
+pdf:
+install-pdf:
+html:
+install-html:
 
 ### 
 ### 
@@ -207,19 +213,19 @@ config.status: configure
 
 # Utility to run autoconf in each directory that uses the common framework.
 # This is intended to be invoked in $srcdir as
-# "make -f Makefile.in autoconf-common".
-.PHONY: autoconf-common
+# "make -f Makefile.in autoconf-common SHELL=/bin/sh".
+.PHONY: autoconf-common autoheader-common
 autoconf-common autoheader-common:
 	for d in * ; \
 	do \
-	    if [ -d $$d -a -f $$d/configure.in ] ; \
+	    if [ -d $$d -a -f $$d/configure.ac ] ; \
 	    then \
 		 echo "Running autoconf in $$d ..." ; \
-		 (cd $$d && autoconf) ; \
-		 if [ $@ = autoheader-common ] ; \
+		 (cd $$d && autoconf --force) ; \
+		 if [ $@ = autoheader-common ] && [ -f $$d/config.in ] ; \
 		 then \
 		   echo "Running autoheader in $$d ..." ; \
-		   (cd $$d && autoheader) ; \
+		   (cd $$d && autoheader --force) ; \
 		 fi ; \
 	    fi ; \
 	done
@@ -236,7 +242,7 @@ autoconf-changelog autoheader-changelog:
 	echo "$$date $$name $$id@$$host" ; \
 	for d in * ; \
 	do \
-	    if [ -d $$d -a -f $$d/configure.in ] ; \
+	    if [ -d $$d -a -f $$d/configure.ac ] ; \
 	    then \
 		 echo "Creating new-$(ChangeLog) in $$d ..." ; \
 		 ( echo "$$date  $$name  <$$id@$$host>" ; \
@@ -255,7 +261,7 @@ autoconf-changelog autoheader-changelog:
 autoconf-install autoheader-install:
 	for d in * ; \
 	do \
-	    if [ -d $$d -a -f $$d/configure.in ] ; \
+	    if [ -d $$d -a -f $$d/configure.ac ] ; \
 	    then \
 		 echo "Moving $$d/new-$(ChangeLog) to $$d/$(ChangeLog) ..." ; \
 		 mv $$d/new-$(ChangeLog) $$d/$(ChangeLog) ; \

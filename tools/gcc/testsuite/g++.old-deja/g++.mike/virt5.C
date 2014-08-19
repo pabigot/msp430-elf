@@ -52,3 +52,4 @@ int main() {
   delete o;
   return fail;
 }
+// { dg-require-effective-target size32plus }

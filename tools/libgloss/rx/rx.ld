@@ -63,6 +63,7 @@ SECTIONS
     . = ALIGN(4);
     KEEP (*(.init))
     KEEP (*(.fini))
+    KEEP (*(.tm_clone_table))
   } > ROM
 
   .rodata : {

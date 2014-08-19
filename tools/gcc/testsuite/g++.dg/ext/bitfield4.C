@@ -1,4 +1,5 @@
 /* { dg-do compile } */
+// { dg-require-effective-target non_ms_bitfield_layout }
 /* { dg-options "" } */
 /* { dg-options "-Wno-packed-bitfield-compat -mno-ms-bitfields" { target { i?86-*-mingw* x86_64-*-mingw* } } } */
 

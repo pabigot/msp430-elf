@@ -1,6 +1,6 @@
 /* Native debugging support for GNU/Linux (LWP layer).
 
-   Copyright (C) 2000-2012 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,20 +22,6 @@
 #include <signal.h>
 
 struct arch_lwp_info;
-
-/* Ways to "resume" a thread.  */
-
-enum resume_kind
-{
-  /* Thread should continue.  */
-  resume_continue,
-
-  /* Thread should single-step.  */
-  resume_step,
-
-  /* Thread should be stopped.  */
-  resume_stop
-};
 
 /* Structure describing an LWP.  This is public only for the purposes
    of ALL_LWPS; target-specific code should generally not access it
@@ -124,11 +110,6 @@ extern struct lwp_info *lwp_list;
        (LP) != NULL;							\
        (LP) = (LP)->next)
 
-#define GET_LWP(ptid)		ptid_get_lwp (ptid)
-#define GET_PID(ptid)		ptid_get_pid (ptid)
-#define is_lwp(ptid)		(GET_LWP (ptid) != 0)
-#define BUILD_LWP(lwp, pid)	ptid_build (pid, lwp, 0)
-
 /* Attempt to initialize libthread_db.  */
 void check_for_thread_db (void);
 
@@ -141,9 +122,6 @@ extern void lin_thread_get_thread_signals (sigset_t *mask);
 void linux_proc_pending_signals (int pid, sigset_t *pending,
 				 sigset_t *blocked, sigset_t *ignored);
 
-/* linux-nat functions for handling fork events.  */
-extern void linux_enable_event_reporting (ptid_t ptid);
-
 extern int lin_lwp_attach_lwp (ptid_t ptid);
 
 extern void linux_stop_lwp (struct lwp_info *lwp);
@@ -153,12 +131,6 @@ struct lwp_info *iterate_over_lwps (ptid_t filter,
 				    int (*callback) (struct lwp_info *,
 						     void *), 
 				    void *data);
-
-typedef int (*linux_nat_iterate_watchpoint_lwps_ftype) (struct lwp_info *lwp,
-							void *arg);
-
-extern void linux_nat_iterate_watchpoint_lwps
-  (linux_nat_iterate_watchpoint_lwps_ftype callback, void *callback_data);
 
 /* Create a prototype generic GNU/Linux target.  The client can
    override it with local methods.  */
@@ -175,6 +147,23 @@ void linux_nat_add_target (struct target_ops *);
 
 /* Register a method to call whenever a new thread is attached.  */
 void linux_nat_set_new_thread (struct target_ops *, void (*) (struct lwp_info *));
+
+
+/* Register a method to call whenever a new fork is attached.  */
+typedef void (linux_nat_new_fork_ftype) (struct lwp_info *parent,
+					 pid_t child_pid);
+void linux_nat_set_new_fork (struct target_ops *ops,
+			     linux_nat_new_fork_ftype *fn);
+
+/* Register a method to call whenever a process is killed or
+   detached.  */
+typedef void (linux_nat_forget_process_ftype) (pid_t pid);
+void linux_nat_set_forget_process (struct target_ops *ops,
+				   linux_nat_forget_process_ftype *fn);
+
+/* Call the method registered with the function above.  PID is the
+   process to forget about.  */
+void linux_nat_forget_process (pid_t pid);
 
 /* Register a method that converts a siginfo object between the layout
    that ptrace returns, and the layout in the architecture of the

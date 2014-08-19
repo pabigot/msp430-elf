@@ -1,0 +1,19 @@
+The contents in this directory are needed for creating a GNUPro documentation
+plugin into Eclipse IDE. 
+
+doc_plugin	 A shell script which packes all the docs in doc.zip file and
+		 copies all the necessary files into a new directory under 
+		 BUILDDIR/eclipse which is a plugin to Eclipse IDE.
+
+book.bss
+notnetscape4.css Eclipse uses CSS implementation Stylesheet for all 
+		 documentation. These files represent the stylesheet used by
+		 Eclipse.
+
+
+plugin.properties Contains plugin name and provider name used by Eclipse.
+
+plugin.xml	 This is the plugin for declaring the help contributions 
+		 of a doc component plugin. Needed by Eclipse plugin.
+
+

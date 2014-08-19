@@ -1,0 +1,111 @@
+This patch fixes building flex.
+
+<toplevel>/ChangeLog.RedHat
+2008-03-06  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.def: Add extra_exports setting for flex on the build
+	machine.  Use this to disable setting LEX in the environment, so
+	the flex can configure itself.
+	Do not have flex depend upon bison, it is no longer needed.
+	Make the binutils and gas configures depend upon a built flex,
+	since it will be pointed to by the FLEX environment variable.
+	* Makefile.tpl: Run the extra_exports variable, if it is defined,
+	when configuring build targets.
+	Run the build configures quietly.
+
+
+*** /work/sources/gcc/current/Makefile.def	2009-03-19 07:57:11.000000000 +0000
+--- Makefile.def	2009-03-23 10:52:44.000000000 +0000
+*************** AutoGen definitions Makefile.tpl;
+*** 28,34 ****
+  build_modules= { module= libiberty; };
+  build_modules= { module= bison; };
+  build_modules= { module= byacc; };
+! build_modules= { module= flex; };
+  build_modules= { module= m4; };
+  build_modules= { module= texinfo; };
+  build_modules= { module= fixincludes; };
+--- 28,41 ----
+  build_modules= { module= libiberty; };
+  build_modules= { module= bison; };
+  build_modules= { module= byacc; };
+! // Flex is weird - in order to build it you need a working flex
+! // executable...  The problem here is that the top level makefile
+! // will setup the FLEX and LEX environment variables to be the
+! // flex executable that we are trying to build (and which has not
+! // been created yet).  The solution is to override these two
+! // variables when configuring and building flex and to hope that
+! // a working alternative is somewhere in the user's PATH.
+! build_modules= { module= flex; extra_configure_flags='LEX="flex"'; extra_make_flags='LEX=flex FLEX=flex'; };
+  build_modules= { module= m4; };
+  build_modules= { module= texinfo; };
+  build_modules= { module= fixincludes; };
+*************** flags_to_pass = { flag= LEAN ; };
+*** 297,303 ****
+  dependencies = { module=all-build-bison; on=all-build-texinfo; };
+  dependencies = { module=all-build-byacc; on=all-build-texinfo; };
+  dependencies = { module=all-build-flex; on=all-build-texinfo; };
+- dependencies = { module=all-build-flex; on=all-build-bison; };
+  dependencies = { module=all-build-flex; on=all-build-byacc; };
+  dependencies = { module=all-build-flex; on=all-build-m4; };
+  dependencies = { module=all-build-libiberty; on=all-build-texinfo; };
+--- 296,301 ----
+*************** dependencies = { module=configure-opcode
+*** 374,379 ****
+--- 368,374 ----
+  dependencies = { module=all-opcodes; on=all-libiberty; };
+  
+  dependencies = { module=configure-binutils; on=configure-intl; };
++ dependencies = { module=configure-binutils; on=all-build-flex; };
+  dependencies = { module=all-binutils; on=all-libiberty; };
+  dependencies = { module=all-binutils; on=all-opcodes; };
+  dependencies = { module=all-binutils; on=all-bfd; };
+*************** dependencies = { module=install-binutils
+*** 391,396 ****
+--- 386,392 ----
+  dependencies = { module=install-opcodes; on=install-bfd; };
+  
+  dependencies = { module=configure-gas; on=configure-intl; };
++ dependencies = { module=configure-gas; on=all-build-flex; };
+  dependencies = { module=all-gas; on=all-libiberty; };
+  dependencies = { module=all-gas; on=all-opcodes; };
+  dependencies = { module=all-gas; on=all-bfd; };
+*** /work/sources/gcc/current/Makefile.tpl	2009-02-06 07:49:10.000000000 +0000
+--- Makefile.tpl	2009-03-23 10:36:30.000000000 +0000
+*************** configure-[+prefix+][+module+]: [+ IF bo
+*** 839,844 ****
+--- 839,845 ----
+  	[+ ENDIF check_multilibs +]test ! -f [+subdir+]/[+module+]/Makefile || exit 0; \
+  	$(SHELL) $(srcdir)/mkinstalldirs [+subdir+]/[+module+] ; \
+  	[+exports+] \
++ 	[+extra_exports+] \
+  	echo Configuring in [+subdir+]/[+module+]; \
+  	cd "[+subdir+]/[+module+]" || exit 1; \
+  	case $(srcdir) in \
+*************** configure-[+prefix+][+module+]: [+ IF bo
+*** 850,856 ****
+  	libsrcdir="$$s/[+module+]"; \
+  	[+ IF no-config-site +]rm -f no-such-file || : ; \
+  	CONFIG_SITE=no-such-file [+ ENDIF +]$(SHELL) $${libsrcdir}/configure \
+! 	  [+args+] --build=${build_alias} --host=[+host_alias+] \
+  	  --target=[+target_alias+] $${srcdiroption} [+extra_configure_flags+] \
+  	  || exit 1
+  @endif [+prefix+][+module+]
+--- 851,857 ----
+  	libsrcdir="$$s/[+module+]"; \
+  	[+ IF no-config-site +]rm -f no-such-file || : ; \
+  	CONFIG_SITE=no-such-file [+ ENDIF +]$(SHELL) $${libsrcdir}/configure \
+! 	  [+args+] --quiet --build=${build_alias} --host=[+host_alias+] \
+  	  --target=[+target_alias+] $${srcdiroption} [+extra_configure_flags+] \
+  	  || exit 1
+  @endif [+prefix+][+module+]
+*************** all-[+prefix+][+module+]: configure-[+pr
+*** 921,926 ****
+--- 922,928 ----
+  	@r=`${PWD_COMMAND}`; export r; \
+  	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+  	[+exports+] \
++ 	[+extra_exports+] \
+  	(cd [+subdir+]/[+module+] && \
+  	  $(MAKE) $(BASE_FLAGS_TO_PASS) [+args+] [+extra_make_flags+] \
+  		$(TARGET-[+prefix+][+module+]))

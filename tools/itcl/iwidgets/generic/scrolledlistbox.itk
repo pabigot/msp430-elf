@@ -9,7 +9,7 @@
 # ----------------------------------------------------------------------
 #  AUTHOR: Mark L. Ulferts             EMAIL: mulferts@austin.dsccc.com
 #
-#  @(#) $Id: scrolledlistbox.itk,v 1.1 2003/03/19 23:00:55 cagney Exp $
+#  @(#) $Id: scrolledlistbox.itk,v 1.9 2002/03/16 16:25:44 mgbacke Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1995 DSC Technologies Corporation
 # ======================================================================

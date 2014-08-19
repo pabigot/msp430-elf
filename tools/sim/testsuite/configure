@@ -1823,11 +1823,6 @@ sim_common=yes
 sim_igen=no
 sim_arch=
 case "${target}" in
-   m68k*-*-*)
-       sim_arch=m68k
-       sim_testsuite=yes
-       sim_common=yes
-       ;;
    arm*-*-*)
        sim_arch=arm
        sim_testsuite=yes
@@ -1933,9 +1928,6 @@ case "${target}" in
        ;;
 esac
 
-# Local variables:
-# mode: autoconf
-# End:
 
 
 ac_config_files="$ac_config_files Makefile"

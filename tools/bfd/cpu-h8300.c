@@ -83,7 +83,7 @@ h8300_scan (const struct bfd_arch_info *info, const char *string)
 
 	  return (info->mach == bfd_mach_h8300sx);
 	}
-      
+
       return (info->mach == bfd_mach_h8300s);
     }
   else
@@ -107,8 +107,6 @@ compatible (const bfd_arch_info_type *in, const bfd_arch_info_type *out)
     return in;
   if (in->mach == bfd_mach_h8300sn && out->mach == bfd_mach_h8300sxn)
     return out;
-  if (out->mach == bfd_mach_h8300)
-    return in;
   /* It's really not a good idea to mix and match modes.  */
   if (in->mach != out->mach)
     return 0;

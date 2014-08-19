@@ -1,0 +1,193 @@
+This patch was written for issue 2148593 in which Matt Newsome asked for
+the sim's load command to print out the names of the segments that are
+loaded along with size and load address.
+
+When I use this patch for an rx-elf build, I see:
+
+(gdb) load testsuite/gdb.base/break
+You can't do that when your target is `None'
+(gdb) file testsuite/gdb.base/break
+Reading symbols from /mesquite2/.ironwood2/gnupro-cross/rx-elf/bld64/gdb/testsuite/gdb.base/break...done.
+(gdb) target sim
+Connected to the simulator.
+(gdb) load
+Loading section .text, size 0x7408 lma 01000000 vma 01000000
+Loading section .vectors, size 0x30 lma ffffffd0 vma ffffffd0
+
+Without this patch, the "load" command succeeds silently.
+
+This patch should go upstream, but only after Renesas has verified that
+it meets their needs.
+
+
+sim/rx/ChangeLog.RedHat:
+
+	* load.h (rx_load): Add `callback' parameter to function prototype.
+	(gdb/callback.h): Include.
+	* load.c (load.h): Include.
+	(xprintf, find_section_name_by_offset): New functions.
+	(rx_load): Add `callback' parameter.  Add code for printing
+	out section loaded using GDB's printf facilities.
+	* gdb-if.c (sim_load, sim_create_inferior): Update calls to
+	rx_load().
+	* main.c (main): Update call to rx_load().
+	* syscalls.c, syscalls.h (get_callbacks): New function.
+
+Index: sim/rx/gdb-if.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/rx/gdb-if.c,v
+retrieving revision 1.5
+diff -u -p -r1.5 gdb-if.c
+--- sim/rx/gdb-if.c	5 Jul 2011 23:20:28 -0000	1.5
++++ sim/rx/gdb-if.c	8 Jul 2011 04:49:52 -0000
+@@ -201,7 +201,7 @@ sim_load (SIM_DESC sd, char *prog, struc
+   if (!abfd)
+     return SIM_RC_FAIL;
+ 
+-  rx_load (abfd);
++  rx_load (abfd, get_callbacks ());
+   build_swap_list (abfd);
+ 
+   return SIM_RC_OK;
+@@ -214,7 +214,7 @@ sim_create_inferior (SIM_DESC sd, struct
+ 
+   if (abfd)
+     {
+-      rx_load (abfd);
++      rx_load (abfd, 0);
+       build_swap_list (abfd);
+     }
+ 
+Index: sim/rx/load.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/rx/load.c,v
+retrieving revision 1.3
+diff -u -p -r1.3 load.c
+--- sim/rx/load.c	5 Jul 2011 23:20:28 -0000	1.3
++++ sim/rx/load.c	8 Jul 2011 04:49:52 -0000
+
+@@ -29,9 +29,36 @@ along with this program.  If not, see <h
+ #include "libbfd.h"
+ #include "cpu.h"
+ #include "mem.h"
++#include "load.h"
+ #include "elf/internal.h"
+ #include "elf/common.h"
+ 
++/* Helper function for invoking a GDB-specified printf.  */
++static void
++xprintf (host_callback *callback, const char *fmt, ...)
++{
++  va_list ap;
++
++  va_start (ap, fmt);
++
++  (*callback->vprintf_filtered) (callback, fmt, ap);
++
++  va_end (ap);
++}
++
++/* Given a file offset, look up the section name.  */
++static char *
++find_section_name_by_offset (bfd *abfd, file_ptr filepos)
++{
++  asection *s;
++
++  for (s = abfd->sections; s; s = s->next)
++    if (s->filepos == filepos)
++      return bfd_get_section_name (abfd, s);
++
++  return "(unknown)";
++}
++
+ /* A note about endianness and swapping...
+ 
+    The RX chip is CISC-like in that the opcodes are variable length
+@@ -57,7 +84,7 @@ along with this program.  If not, see <h
+    encoded in little-endian format.  */
+ 
+ void
+-rx_load (bfd *prog)
++rx_load (bfd *prog, host_callback *callback)
+ {
+   unsigned long highest_addr_loaded = 0;
+   Elf_Internal_Phdr * phdrs;
+@@ -106,6 +133,11 @@ rx_load (bfd *prog)
+       if (verbose > 1)
+ 	fprintf (stderr, "[load segment: lma=%08x vma=%08x size=%08x]\n",
+ 		 (int) base, (int) p->p_vaddr, (int) size);
++      if (callback)
++	xprintf (callback,
++	         "Loading section %s, size %#lx lma %08lx vma %08lx\n",
++	         find_section_name_by_offset (prog, p->p_offset),
++		 size, base, p->p_vaddr);
+ 
+       buf = malloc (size);
+       if (buf == NULL)
+Index: sim/rx/load.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/rx/load.h,v
+retrieving revision 1.2
+diff -u -p -r1.2 load.h
+--- sim/rx/load.h	5 Jul 2011 23:20:28 -0000	1.2
++++ sim/rx/load.h	8 Jul 2011 04:49:52 -0000
+@@ -20,8 +20,9 @@ along with this program.  If not, see <h
+ 
+ 
+ #include "bfd.h"
++#include "gdb/callback.h"
+ 
+ extern int default_machine;
+ 
+ void rx_set_mach (int mach);
+-void rx_load (bfd *);
++void rx_load (bfd *, host_callback *callback);
+Index: sim/rx/main.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/rx/main.c,v
+retrieving revision 1.4
+diff -u -p -r1.4 main.c
+--- sim/rx/main.c	5 Jul 2011 23:20:28 -0000	1.4
++++ sim/rx/main.c	8 Jul 2011 04:49:52 -0000
+@@ -175,7 +175,7 @@ main (int argc, char **argv)
+   rx_in_gdb = 0;
+   save_trace = trace;
+   trace = 0;
+-  rx_load (prog);
++  rx_load (prog, 0);
+   trace = save_trace;
+ 
+   sim_disasm_init (prog);
+Index: sim/rx/syscalls.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/rx/syscalls.c,v
+retrieving revision 1.3
+diff -u -p -r1.3 syscalls.c
+--- sim/rx/syscalls.c	5 Jul 2011 23:20:28 -0000	1.3
++++ sim/rx/syscalls.c	8 Jul 2011 04:49:52 -0000
+@@ -44,6 +44,12 @@ set_callbacks (struct host_callback_stru
+   callbacks = cb;
+ }
+ 
++struct host_callback_struct *
++get_callbacks (void)
++{
++  return callbacks;
++}
++
+ 
+ /* Arguments 1..4 are in R1..R4, remainder on stack.
+ 
+Index: sim/rx/syscalls.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/rx/syscalls.h,v
+retrieving revision 1.2
+diff -u -p -r1.2 syscalls.h
+--- sim/rx/syscalls.h	5 Jul 2011 23:20:28 -0000	1.2
++++ sim/rx/syscalls.h	8 Jul 2011 04:49:52 -0000
+@@ -22,4 +22,5 @@ along with this program.  If not, see <h
+ 
+ struct host_callback_struct;
+ extern void set_callbacks (struct host_callback_struct *);
++extern struct host_callback_struct * get_callbacks (void);
+ extern int rx_syscall (int id);

@@ -3,7 +3,6 @@
 #include <sys/stat.h>
 #include "trap.h"
 
-int write (int, char *, size_t) __attribute__ ((weak, alias ("_write")));
 
 int
 _write ( int file,

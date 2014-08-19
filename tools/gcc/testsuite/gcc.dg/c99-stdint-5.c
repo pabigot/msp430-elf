@@ -67,3 +67,4 @@ check_types (void)
   CHECK_TYPES(__SIG_ATOMIC_TYPE__, sig_atomic_t);
 #endif
 }
+/* { dg-prune-output ".*__int20.*" } */

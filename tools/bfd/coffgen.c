@@ -221,8 +221,12 @@ make_a_section_from_file (bfd *abfd,
 
 /* Read in a COFF object and make it into a BFD.  This is used by
    ECOFF as well.  */
-
-static const bfd_target *
+const bfd_target *
+coff_real_object_p (bfd *,
+                    unsigned,
+                    struct internal_filehdr *,
+                    struct internal_aouthdr *);
+const bfd_target *
 coff_real_object_p (bfd *abfd,
 		    unsigned nscns,
 		    struct internal_filehdr *internal_f,
@@ -647,7 +651,7 @@ fixup_symbol_value (bfd *abfd,
 		    struct internal_syment *syment)
 {
   /* Normalize the symbol flags.  */
-  if (coff_symbol_ptr->symbol.section 
+  if (coff_symbol_ptr->symbol.section
       && bfd_is_com_section (coff_symbol_ptr->symbol.section))
     {
       /* A common symbol is undefined with a value.  */
@@ -1519,7 +1523,7 @@ coff_pointerize_aux (bfd *abfd,
   /* Otherwise patch up.  */
 #define N_TMASK coff_data  (abfd)->local_n_tmask
 #define N_BTSHFT coff_data (abfd)->local_n_btshft
-  
+
   if ((ISFCN (type) || ISTAG (n_sclass) || n_sclass == C_BLOCK
        || n_sclass == C_FCN)
       && auxent->u.auxent.x_sym.x_fcnary.x_fcn.x_endndx.l > 0)
@@ -1942,7 +1946,7 @@ coff_bfd_make_debug_symbol (bfd *abfd,
   new_symbol->lineno = NULL;
   new_symbol->done_lineno = FALSE;
   new_symbol->symbol.the_bfd = abfd;
-  
+
   return & new_symbol->symbol;
 }
 
@@ -2337,8 +2341,6 @@ coff_find_nearest_line_with_names (bfd *abfd,
 	    {
 	      /* Get the symbol this line number points at.  */
 	      coff_symbol_type *coff = (coff_symbol_type *) (l->u.sym);
-	      if (coff == NULL)
-		break;
 	      if (coff->symbol.value > offset)
 		break;
 	      *functionname_ptr = coff->symbol.name;

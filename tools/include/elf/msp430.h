@@ -1,5 +1,5 @@
 /* MSP430 ELF support for BFD.
-   Copyright (C) 2002, 2003, 2004, 2010 Free Software Foundation, Inc.
+   Copyright (C) 2002-2013 Free Software Foundation, Inc.
    Contributed by Dmitry Diky <diwil@mail.ru>
 
    This file is part of BFD, the Binary File Descriptor library.
@@ -33,6 +33,11 @@
 #define E_MSP430_MACH_MSP430x14  14
 #define E_MSP430_MACH_MSP430x15  15
 #define E_MSP430_MACH_MSP430x16  16
+#define E_MSP430_MACH_MSP430x20  20
+#define E_MSP430_MACH_MSP430x22  22
+#define E_MSP430_MACH_MSP430x23  23
+#define E_MSP430_MACH_MSP430x24  24
+#define E_MSP430_MACH_MSP430x26  26
 #define E_MSP430_MACH_MSP430x31  31
 #define E_MSP430_MACH_MSP430x32  32
 #define E_MSP430_MACH_MSP430x33  33
@@ -40,15 +45,10 @@
 #define E_MSP430_MACH_MSP430x42  42
 #define E_MSP430_MACH_MSP430x43  43
 #define E_MSP430_MACH_MSP430x44  44
-#define E_MSP430_MACH_MSP430x20  20
-#define E_MSP430_MACH_MSP430x22  22
-#define E_MSP430_MACH_MSP430x23  23
-#define E_MSP430_MACH_MSP430x24  24
-#define E_MSP430_MACH_MSP430x26  26
+#define E_MSP430_MACH_MSP430X    45
 #define E_MSP430_MACH_MSP430x46  46
 #define E_MSP430_MACH_MSP430x47  47
 #define E_MSP430_MACH_MSP430x54  54
-#define E_MSP430_MACH_MSP430X    45
 
 #define SHT_MSP430_ATTRIBUTES	0x70000003	/* Section holds ABI attributes.  */
 #define SHT_MSP430_SEC_FLAGS	0x7f000005	/* Holds TI compiler's section flags.  */
@@ -59,7 +59,6 @@
 #define OFBA_MSPABI_Tag_Code_Model	6
 #define OFBA_MSPABI_Tag_Data_Model	8
 
-   
 /* Relocations.  */
 START_RELOC_NUMBERS (elf_msp430_reloc_type)
      RELOC_NUMBER (R_MSP430_NONE,		0)
@@ -73,7 +72,6 @@ START_RELOC_NUMBERS (elf_msp430_reloc_type)
      RELOC_NUMBER (R_MSP430_RL_PCREL,		8)
      RELOC_NUMBER (R_MSP430_8,			9)
      RELOC_NUMBER (R_MSP430_SYM_DIFF,		10)
-     
 END_RELOC_NUMBERS (R_MSP430_max)
 
 START_RELOC_NUMBERS (elf_msp430x_reloc_type)

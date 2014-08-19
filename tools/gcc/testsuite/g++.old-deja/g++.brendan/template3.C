@@ -45,6 +45,6 @@ int main()
     b.f(); //- bugged, (A::f() called instead of B::f())
     c.f(); //- works fine (C::f() called)
 
-    printf ("PASS\n");
+    // printf ("PASS\n");
     return 0;
 }

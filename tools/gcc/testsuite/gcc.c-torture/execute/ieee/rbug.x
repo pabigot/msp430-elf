@@ -7,4 +7,14 @@ if [istarget "avr-*-*"] {
     # AVR doubles are floats
     return 1
 }
+set torture_eval_before_execute {
+
+    set compiler_conditional_xfail_data {
+        "RX uses 32-bit doubles by default" \
+        "rx-*-*" \
+        { "-O0" "-O1" } \
+        { "-m64bit-doubles" }
+        }    
+}
+
 return 0

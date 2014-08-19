@@ -1,0 +1,77 @@
+Add support for running PlumHall tests.
+Note: In addition to patching gcc/Makefile.in you must also install
+the files in the plumhall-files.tar.bz2 tarball which should also be
+in this directory.
+
+No changelog - this patch should never be checked in.
+
+Index: gcc/Makefile.in
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/Makefile.in,v
+retrieving revision 1.70
+diff -c -3 -p -r1.70 Makefile.in
+*** gcc/Makefile.in	4 Jun 2007 17:56:04 -0000	1.70
+--- gcc/Makefile.in	31 Oct 2007 10:46:02 -0000
+*************** check-consistency: testsuite/site.exp
+*** 4089,4094 ****
+--- 4089,4148 ----
+  	   export TCL_LIBRARY ; fi ; \
+  	$(RUNTEST) --tool consistency $(RUNTESTFLAGS)
+  
++ check-gcc-plumhall: check-gcc-plumhall-07
++ 
++ check-gcc-plumhall-07: testsuite/site.exp
++ 	-rootme=`${PWD_COMMAND}`; export rootme; \
++ 	srcdir=`cd ${srcdir}; ${PWD_COMMAND}` ; export srcdir ; \
++ 	cd testsuite; \
++ 	EXPECT=${EXPECT} ; export EXPECT ; \
++ 	if [ -f $${rootme}/../expect/expect ] ; then  \
++ 	   TCL_LIBRARY=`cd .. ; cd ${srcdir}/../tcl/library ; ${PWD_COMMAND}` ; \
++ 	   export TCL_LIBRARY ; fi ; \
++ 	$(RUNTEST) --tool gcc --directory gcc_plumhall.07a $(RUNTESTFLAGS)
++ 
++ check-gcc-plumhall-04: testsuite/site.exp
++ 	-rootme=`${PWD_COMMAND}`; export rootme; \
++ 	srcdir=`cd ${srcdir}; ${PWD_COMMAND}` ; export srcdir ; \
++ 	cd testsuite; \
++ 	EXPECT=${EXPECT} ; export EXPECT ; \
++ 	if [ -f $${rootme}/../expect/expect ] ; then  \
++ 	   TCL_LIBRARY=`cd .. ; cd ${srcdir}/../tcl/library ; ${PWD_COMMAND}` ; \
++ 	   export TCL_LIBRARY ; fi ; \
++ 	$(RUNTEST) --tool gcc --directory gcc_plumhall.04a $(RUNTESTFLAGS)
++ 
++ check-gcc-plumhall-03: testsuite/site.exp
++ 	-rootme=`${PWD_COMMAND}`; export rootme; \
++ 	srcdir=`cd ${srcdir}; ${PWD_COMMAND}` ; export srcdir ; \
++ 	cd testsuite; \
++ 	EXPECT=${EXPECT} ; export EXPECT ; \
++ 	if [ -f $${rootme}/../expect/expect ] ; then  \
++ 	   TCL_LIBRARY=`cd .. ; cd ${srcdir}/../tcl/library ; ${PWD_COMMAND}` ; \
++ 	   export TCL_LIBRARY ; fi ; \
++ 	$(RUNTEST) --tool gcc --directory gcc_plumhall.03a $(RUNTESTFLAGS)
++ 
++ check-gcc-plumhall-99: testsuite/site.exp
++ 	-rootme=`${PWD_COMMAND}`; export rootme; \
++ 	srcdir=`cd ${srcdir}; ${PWD_COMMAND}` ; export srcdir ; \
++ 	cd testsuite; \
++ 	EXPECT=${EXPECT} ; export EXPECT ; \
++ 	if [ -f $${rootme}/../expect/expect ] ; then  \
++ 	   TCL_LIBRARY=`cd .. ; cd ${srcdir}/../tcl/library ; ${PWD_COMMAND}` ; \
++ 	   export TCL_LIBRARY ; fi ; \
++ 	$(RUNTEST) --tool gcc --directory gcc_plumhall.99b $(RUNTESTFLAGS)
++ 
++ check-g++-plumhall: check-g++-plumhall-99
++ 
++ check-g++-plumhall-99: testsuite/site.exp
++ 	-rootme=`${PWD_COMMAND}`; export rootme; \
++ 	srcdir=`cd ${srcdir}; ${PWD_COMMAND}` ; export srcdir ; \
++ 	cd testsuite; \
++ 	EXPECT=${EXPECT} ; export EXPECT ; \
++ 	if [ -f $${rootme}/../expect/expect ] ; then  \
++ 	   TCL_LIBRARY=`cd .. ; cd ${srcdir}/../tcl/library ; ${PWD_COMMAND}` ; \
++ 	   export TCL_LIBRARY ; fi ; \
++ 	$(RUNTEST) --tool g++ --directory g++_plumhall.99 $(RUNTESTFLAGS)
++ 
+  # QMTest targets
+  
+  # The path to qmtest.

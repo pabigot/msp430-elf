@@ -1,0 +1,23 @@
+/gcc-build-full/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-build-simple/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-cleanup/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-svn-checkfail/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-svn-ids/1.2/Fri Mar 25 11:07:23 2011//Tmsp430-14r1-branch
+/gcc-svn-patchlist/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-svn-recordfail/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-svn-report/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-svn-update/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-svn-update-fix/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-test-accepts-invalid/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-test-bogus-warning/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-test-compiler-hangs/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-test-ice-on-invalid-code/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-test-ice-on-valid-code/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-test-missing-warning/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-test-rejects-valid/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-test-segfault-on-valid-code/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/gcc-test-wrong-code/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/reg-hunt/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/reg-newmid/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+/reg-test/1.1/Wed Mar 18 17:14:07 2009//Tmsp430-14r1-branch
+D

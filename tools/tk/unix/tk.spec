@@ -1,4 +1,4 @@
-# $Id: tk.spec,v 1.1 2003/03/19 23:02:10 cagney Exp $
+# $Id: tk.spec,v 1.3 2003/01/21 20:24:52 hunt Exp $
 # This file is the basis for a binary Tk Linux RPM.
 
 %define version 8.4.1

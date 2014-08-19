@@ -1,5 +1,5 @@
 ; CPU description file generator for the GNU assembler testsuite.
-; Copyright (C) 2000, 2001, 2009 Red Hat, Inc.
+; Copyright (C) 2000, 2001 Red Hat, Inc.
 ; This file is part of CGEN.
 ; See file COPYING.CGEN for details.
 
@@ -20,8 +20,7 @@
 (define (gas-test-analyze!)
   (opcodes-analyze!)
   (map (lambda (insn)
-	 (elm-xset! insn 'tmp (syntax-break-out (insn-syntax insn)
-						(obj-isa-list insn))))
+	 (elm-xset! insn 'tmp (syntax-break-out (insn-syntax insn))))
        (non-multi-insns (current-insn-list)))
   *UNSPECIFIED*
 )
@@ -31,53 +30,25 @@
 ; in the operand's position.
 
 ; For a general assembler operand, just turn the value into a string.
-
 (method-make!
  <hw-asm> 'test-data
  (lambda (self ops)
-   (map (lambda (op)
-	  (cond ((null? op) "")
-		((number? op) (number->string op))
-		(else (error "unsupported assembler operand" op))))
-	ops))
+   (map number->string ops))
 )
 
 ; For a keyword operand, choose the appropriate keyword.
-; OPS is a list of values, e.g. from an ifield.
-
 (method-make!
  <keyword> 'test-data
  (lambda (self ops)
    (let* ((test-cases (elm-get self 'values))
-	  (prefix (elm-get self 'name-prefix))
-	  (find-kw (lambda (val)
-		     (find-first (lambda (kw) (= (cadr kw) val)) test-cases))))
+	  (prefix (elm-get self 'prefix)))
      (map (lambda (n)
-	    ;; If an ifield has, e.g., 2 bits (values 0,1,2,3) and the keyword
-	    ;; only has two values, e.g. (foo 0) (bar 1), then we can get
-	    ;; invalid requests, i.e. for ifield values of 2 and 3.
-	    ;; It's not clear what to do here, but it seems like this is an
-	    ;; error in the description file.
-	    ;; So it seems like we should flag an error for invalid requests.
-	    ;; OTOH, we're just generating testcases.  So instead we just
-	    ;; flag a warning and cope by returning the first keyword in the
-	    ;; list.
-	    (let ((kw (find-kw n)))
-	      (if (not kw)
-		  (begin
-		    (message "WARNING: Invalid test data request for keyword "
-			     (obj:name self)
-			     ": "
-			     n
-			     ".\n"
-			     "         Compensating by picking a different value.\n")
-		    (set! kw (car test-cases))))
-	      (string-append 
-	       (if (and (not (string=? prefix ""))
-			(eq? (string-ref prefix 0) #\$))
-		   "\\" "")
-	       prefix
-	       (->string (car kw)))))
+ 	    (string-append 
+ 	     (if (and (not (string=? prefix ""))
+		      (eq? (string-ref prefix 0) #\$))
+		 "\\" "")
+ 	     prefix 
+	     (car (list-ref test-cases n))))
  	  ops)))
 )
 
@@ -85,9 +56,8 @@
  <hw-address> 'test-data
  (lambda (self ops)
    (let* ((test-cases '("foodata" "4" "footext" "-4"))
-	  (nr-ops (length ops))
-	  (selection (map (lambda (z) (random (length test-cases)))
-			  (iota nr-ops))))
+	  (n (length ops))
+	  (selection (map (lambda (z) (random (length test-cases))) (iota n))))
      (map (lambda (n) (list-ref test-cases n)) selection)))
 )
 
@@ -95,9 +65,8 @@
  <hw-iaddress> 'test-data
  (lambda (self ops)
    (let* ((test-cases '("footext" "4" "foodata" "-4"))
-	  (nr-ops (length ops))
-	  (selection (map (lambda (z) (random (length test-cases)))
-			  (iota nr-ops))))
+	  (n (length ops))
+	  (selection (map (lambda (z) (random (length test-cases))) (iota n))))
      (map (lambda (n) (list-ref test-cases n)) selection)))
 )
 
@@ -107,7 +76,6 @@
 ; Test data for a field is chosen firstly out of some bit patterns,
 ; then randomly.  It is then interpreted based on whether there 
 ; is a decode method.
-
 (method-make!
  <ifield> 'test-data
  (lambda (self n)
@@ -136,19 +104,13 @@
 			(mode:class (ifld-mode self))))))))
 )
 
-;; Return N values for assembler test data, or nil if there are none
-;; (e.g. scalars).
-;; ??? This also returns nil for str-expr and rtx.
-
 (method-make!
  <hw-index> 'test-data
  (lambda (self n)
    (case (hw-index:type self)
      ((ifield operand) (send (hw-index:value self) 'test-data n))
-     ((constant enum) (make-list n (hw-index-constant-value self)))
-     ((scalar) (make-list n nil))
-     ((str-expr rtx) (make-list n nil)) ;; ???
-     (else (error "invalid hw-index type" (hw-index:type self)))))
+     ((constant) (hw-index:value self))
+     (else nil)))
 )
 
 (method-make!
@@ -179,13 +141,12 @@
 ; Input is a list of operand lists. Returns a collated set of test
 ; inputs. For example:
 ; ((r0 r1 r2) (r3 r4 r5) (2 3 8)) => ((r0 r3 2) (r1 r4 3) (r2 r5 8))
-; L is a list of lists.  All elements must have the same length.
 
-(define (/collate-test-set L)
-  (if (= (length (car L)) 0)
+(define (-collate-test-set L)
+  (if (=? (length (car L)) 0)
       '()
       (cons (map car L)
-	    (/collate-test-set (map cdr L))))
+	    (-collate-test-set (map cdr L))))
 )
 
 ; Given a list of operands for an instruction, return the test set
@@ -196,8 +157,8 @@
 (define (build-test-set op-list n)
   (let ((test-data (map (lambda (op) (operand-test-data op n)) op-list))
 	(len (length op-list)))
-    (cond ((= len 0) (list (list)))
-	  (else (/collate-test-set test-data))))
+    (cond ((=? len 0) (list (list)))
+	  (else (-collate-test-set test-data))))
 )
 
 ; Given an assembler expression and a set of operands build a testcase.
@@ -254,7 +215,7 @@
   (string-append
    "\
 #/bin/sh
-# Generate test result data for " (->string (current-arch-name)) " GAS testing.
+# Generate test result data for " (current-arch-name) " GAS testing.
 # This script is machine generated.
 # It is intended to be run in the testsuite source directory.
 #
@@ -322,9 +283,9 @@ footext:\n"
   (logit 1 "Generating allinsn.exp ...\n")
   (string-append
    "\
-# " (string-upcase (->string (current-arch-name))) " assembler testsuite. -*- Tcl -*-
+# " (string-upcase (current-arch-name)) " assembler testsuite. -*- Tcl -*-
 
-if [istarget " (->string (current-arch-name)) "*-*-*] {
+if [istarget " (current-arch-name) "*-*-*] {
     run_dump_test \"allinsn\"
 }\n"
    )

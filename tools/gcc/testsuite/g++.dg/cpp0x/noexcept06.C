@@ -1,7 +1,6 @@
 // Test that checking of a nothrow specification uses the one on the
 // definition.
-// { dg-options "-std=c++0x" }
-// { dg-do run }
+// { dg-do run { target c++11 } }
 
 #include <exception>
 #include <cstdlib>
@@ -28,3 +27,5 @@ int main()
   f();
   return 1;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

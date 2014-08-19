@@ -6,7 +6,7 @@
 // { dg-do run }
 // { dg-options "-O2" }
 
-extern "C" int printf (const char *, ...);
+// extern "C" int printf (const char *, ...);
 
 bool b;
 
@@ -20,20 +20,23 @@ int main()
   try
     {
     one:
-      printf ("one!\n");
+      // printf ("one!\n");
       if (b)
 	throw 42;
       goto **p++;
 
     two:
-      printf ("two!\n");
+      // printf ("two!\n");
       goto **p++;
 
     done:
-      printf ("done!\n");
+      //printf ("done!\n");
+      ;
     }
   catch (int)
     {
-      printf ("caught!\n");
+      //printf ("caught!\n");
+      ;
     }
 }
+// { dg-require-effective-target size32plus }

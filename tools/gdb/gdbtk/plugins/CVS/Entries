@@ -1,12 +1,12 @@
-/ChangeLog/1.4/Tue Jul  7 19:23:56 2009//Tmsp430-130322-branch
-/HOW-TO/1.2/Thu Aug 15 22:08:33 2002//Tmsp430-130322-branch
-/Make-rules/1.4/Tue Dec 16 23:13:35 2008//Tmsp430-130322-branch
-/Makefile.am/1.1/Thu Aug 15 22:08:33 2002//Tmsp430-130322-branch
-/Makefile.in/1.5/Fri Apr  1 00:28:46 2011//Tmsp430-130322-branch
-/acinclude.m4/1.2/Tue Dec 16 23:13:35 2008//Tmsp430-130322-branch
-/aclocal.m4/1.5/Fri Apr  1 00:28:46 2011//Tmsp430-130322-branch
-/configure/1.6/Fri Apr  1 00:28:46 2011//Tmsp430-130322-branch
-/configure.ac/1.2/Tue Dec 16 23:13:35 2008//Tmsp430-130322-branch
-/plugins.tcl/1.2/Thu Aug 15 22:08:33 2002//Tmsp430-130322-branch
+/ChangeLog/1.6/Mon Feb  1 23:49:30 2010//Tmsp430-14r1-branch
+/HOW-TO/1.5/Mon Feb  1 23:49:30 2010//Tmsp430-14r1-branch
+/Make-rules/1.6/Mon Feb  1 23:49:30 2010//Tmsp430-14r1-branch
+/Makefile.am/1.5/Mon Feb  1 23:49:30 2010//Tmsp430-14r1-branch
+/Makefile.in/1.10/Thu Apr 29 22:01:33 2010//Tmsp430-14r1-branch
+/acinclude.m4/1.5/Mon Feb  1 23:49:30 2010//Tmsp430-14r1-branch
+/aclocal.m4/1.8/Thu Apr 29 22:01:33 2010//Tmsp430-14r1-branch
+/configure/1.8/Thu Apr 29 22:01:33 2010//Tmsp430-14r1-branch
+/configure.ac/1.5/Mon Feb  1 23:49:30 2010//Tmsp430-14r1-branch
+/plugins.tcl/1.5/Mon Feb  1 23:49:30 2010//Tmsp430-14r1-branch
 D/intel-pentium////
 D/rhabout////

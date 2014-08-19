@@ -1,0 +1,69 @@
+When debugging a -mfdpic multilib against the simulator, there are very
+few PASSes.  An example of something simple that obviously fails is to
+do:
+
+    target sim
+    load
+    b main
+
+A memory error will occur during the b main.  While searching the
+symbol table, GDB will attempt to convert a function pointer address,
+but will fail to do so because the target (simulator at this point)
+flag `target_has_execution' fails.  (This is an early check in
+gdbsim_xfer_inferior_memory.)
+
+It is possible to use a non-target memory read function, such as
+read_memory_unsigned_integer(), but this too will fail, though at
+a later point.
+
+My solution is to wrap the memory reading functions in a TRY_CATCH
+and return a reasonable value when the attempt to read memory fails.
+
+It may be desirable, however, to use (also) use read_memory_unsigned_integer()
+in place of get_target_memory_unsigned().
+
+This patch should be submitted upstream.
+
+The following test shows the problem:
+
+make check RUNTESTFLAGS="--target_board=frv-sim/-mcpu=frv/-mfdpic break.exp"
+
+gdb/ChangeLog.RedHat:
+
+	* frv-tdep.c (exceptions.h): Include.
+	(frv_convert_from_func_ptr_addr): Use TRY_CATCH on memory reads.
+
+Index: gdb/frv-tdep.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/frv-tdep.c,v
+retrieving revision 1.16
+diff -u -p -r1.16 frv-tdep.c
+--- gdb/frv-tdep.c	29 Apr 2010 22:01:06 -0000	1.16
++++ gdb/frv-tdep.c	19 May 2010 23:30:12 -0000
+@@ -40,6 +40,7 @@
+ #include "infcall.h"
+ #include "solib.h"
+ #include "frv-tdep.h"
++#include "exceptions.h"
+ 
+ extern void _initialize_frv_tdep (void);
+ 
+@@ -1176,9 +1177,16 @@ frv_convert_from_func_ptr_addr (struct g
+   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
+   CORE_ADDR entry_point;
+   CORE_ADDR got_address;
++  volatile struct gdb_exception ex;
++
++  TRY_CATCH (ex, RETURN_MASK_ERROR)
++    {
++      entry_point = get_target_memory_unsigned (targ, addr, 4, byte_order);
++      got_address = get_target_memory_unsigned (targ, addr + 4, 4, byte_order);
++    }
++  if (ex.reason < 0)
++    return addr;
+ 
+-  entry_point = get_target_memory_unsigned (targ, addr, 4, byte_order);
+-  got_address = get_target_memory_unsigned (targ, addr + 4, 4, byte_order);
+ 
+   if (got_address == frv_fdpic_find_global_pointer (entry_point))
+     return entry_point;

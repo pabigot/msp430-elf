@@ -1,7 +1,6 @@
 #source: zero-rel.s
 #ld: -T discard.ld
 #objdump: -s -j .debug_info
-#xfail: "cy16-*-*" "ip4k-*-*" "nios-*-*"
 
 .*:     file format .*elf.*
 

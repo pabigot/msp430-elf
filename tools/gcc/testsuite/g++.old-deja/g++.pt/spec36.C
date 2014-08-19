@@ -5,7 +5,7 @@
 // Bug 1617. We didn't resolve partial ordering properly. The std is rather
 // vague about it anyway, DR 214 talks about this.
 
-extern "C" int puts (char const *);
+static void puts (char const * c) {}
 
 template <typename T> int Foo (T *) {puts (__PRETTY_FUNCTION__); return 1;}
 template <typename T> int Foo (T &) {puts (__PRETTY_FUNCTION__); return 2;}

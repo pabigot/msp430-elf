@@ -1,4 +1,5 @@
 /* { dg-do compile } */
+/* { dg-skip-if "asm construct does not work with RL78" { rl78-*-* } { "*" } { "" } } */
 /* { dg-options "-O1 -fdump-tree-optimized -fdump-tree-alias-vops" } */
 /* Test to make sure that inline-asm causes a VDEF and that we call test_function twice. */
 

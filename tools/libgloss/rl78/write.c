@@ -85,7 +85,6 @@ tputc (char c)
   SDR00 = c;
 }
 
-
 int
 _write(int fd, char *ptr, int len)
 {

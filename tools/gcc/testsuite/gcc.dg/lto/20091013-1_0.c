@@ -1,7 +1,7 @@
 /* { dg-lto-do link } */
 /* { dg-require-effective-target fpic } */
 /* { dg-lto-options {{-fPIC -r -nostdlib -flto} {-fPIC -r -nostdlib -O2 -flto}} } */
-/* { dg-skip-if "test too big" { msp430-*-* } "*" "" } */
+/* { dg-skip-if "tries to convert long to pointer" { msp430-*-* rl78-*-* } "*" "" } */
 
 void * HeapAlloc(void*,unsigned int,unsigned long);
 

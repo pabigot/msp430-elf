@@ -27,7 +27,7 @@ along with the GNU MP Library.  If not, see http://www.gnu.org/licenses/.  */
 #define RCSID(msg) \
 static /**/const char *const rcsid[] = { (char *)rcsid, "\100(#)" msg }
 
-RCSID("$Id: findlc.c,v 1.2 2010/04/14 09:40:54 nickc Exp $");
+RCSID("$Id: findlc.c,v 1.3 2012/04/18 13:05:10 nickc Exp $");
 
 int g_debug = 0;
 

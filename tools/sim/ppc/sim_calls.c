@@ -258,9 +258,8 @@ sim_do_command (SIM_DESC sd, char *cmd)
   }
 }
 
-
 char **
-sim_complete_command (SIM_DESC sd, char *text, char *word)
+sim_complete_command (SIM_DESC sd, const char *text, const char *word)
 {
   return NULL;
 }
@@ -394,11 +393,4 @@ zalloc(long size)
     error("xmalloc failed\n");
   memset(memory, 0, size);
   return memory;
-}
-
-SIM_RC
-sim_hardware_watchpoint (SIM_DESC sd, SIM_WATCH_ACTION action,
-                         SIM_WATCH_TYPE type, SIM_ADDR addr, long length)
-{
-  return SIM_RC_FAIL;
 }

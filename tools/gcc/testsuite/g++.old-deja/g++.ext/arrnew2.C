@@ -6,3 +6,4 @@ int main ()
 {
   return foo[0] != 42;
 }
+// { dg-require-effective-target size32plus }

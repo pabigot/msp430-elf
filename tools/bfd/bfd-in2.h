@@ -7,9 +7,7 @@
 
 /* Main header file for the bfd library -- portable access to object files.
 
-   Copyright 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
-   2012 Free Software Foundation, Inc.
+   Copyright 1990-2013 Free Software Foundation, Inc.
 
    Contributed by Cygnus Support.
 
@@ -301,9 +299,6 @@ typedef struct bfd_section *sec_ptr;
 
 #define bfd_is_com_section(ptr) (((ptr)->flags & SEC_IS_COMMON) != 0)
 
-#define bfd_set_section_vma(bfd, ptr, val) (((ptr)->vma = (ptr)->lma = (val)), ((ptr)->user_set_vma = TRUE), TRUE)
-#define bfd_set_section_alignment(bfd, ptr, val) (((ptr)->alignment_power = (val)),TRUE)
-#define bfd_set_section_userdata(bfd, ptr, val) (((ptr)->userdata = (val)),TRUE)
 /* Find the address one past the end of SEC.  */
 #define bfd_get_section_limit(bfd, sec) \
   (((bfd)->direction != write_direction && (sec)->rawsize != 0	\
@@ -525,8 +520,6 @@ extern void warn_deprecated (const char *, const char *, int, const char *);
 #define bfd_get_dynamic_symcount(abfd) ((abfd)->dynsymcount)
 
 #define bfd_get_symbol_leading_char(abfd) ((abfd)->xvec->symbol_leading_char)
-
-#define bfd_set_cacheable(abfd,bool) (((abfd)->cacheable = bool), TRUE)
 
 extern bfd_boolean bfd_cache_close
   (bfd *abfd);
@@ -918,7 +911,8 @@ extern void elf32_arm_next_input_section
   (struct bfd_link_info *, struct bfd_section *);
 extern bfd_boolean elf32_arm_size_stubs
   (bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
-   struct bfd_section * (*) (const char *, struct bfd_section *), void (*) (void));
+   struct bfd_section * (*) (const char *, struct bfd_section *, unsigned int),
+   void (*) (void));
 extern bfd_boolean elf32_arm_build_stubs
   (struct bfd_link_info *);
 
@@ -940,7 +934,13 @@ extern unsigned int _bfd_elf_ppc_at_tprel_transform
 extern void bfd_elf64_aarch64_init_maps
   (bfd *);
 
-void bfd_elf64_aarch64_set_options
+extern void bfd_elf32_aarch64_init_maps
+  (bfd *);
+
+extern void bfd_elf64_aarch64_set_options
+  (bfd *, struct bfd_link_info *, int, int, int);
+
+extern void bfd_elf32_aarch64_set_options
   (bfd *, struct bfd_link_info *, int, int, int);
 
 /* ELF AArch64 mapping symbol support.  */
@@ -951,7 +951,7 @@ void bfd_elf64_aarch64_set_options
 extern bfd_boolean bfd_is_aarch64_special_symbol_name
   (const char * name, int type);
 
-/* AArch64 stub generation support.  Called from the linker.  */
+/* AArch64 stub generation support for ELF64.  Called from the linker.  */
 extern int elf64_aarch64_setup_section_lists
   (bfd *, struct bfd_link_info *);
 extern void elf64_aarch64_next_input_section
@@ -962,6 +962,18 @@ extern bfd_boolean elf64_aarch64_size_stubs
    void (*) (void));
 extern bfd_boolean elf64_aarch64_build_stubs
   (struct bfd_link_info *);
+/* AArch64 stub generation support for ELF32.  Called from the linker.  */
+extern int elf32_aarch64_setup_section_lists
+  (bfd *, struct bfd_link_info *);
+extern void elf32_aarch64_next_input_section
+  (struct bfd_link_info *, struct bfd_section *);
+extern bfd_boolean elf32_aarch64_size_stubs
+  (bfd *, bfd *, struct bfd_link_info *, bfd_signed_vma,
+   struct bfd_section * (*) (const char *, struct bfd_section *),
+   void (*) (void));
+extern bfd_boolean elf32_aarch64_build_stubs
+  (struct bfd_link_info *);
+
 
 /* TI COFF load page support.  */
 extern void bfd_ticoff_set_section_load_page
@@ -998,9 +1010,8 @@ struct coff_comdat_info
   long symbol;
 };
 
-extern struct coff_comdat_info *bfd_coff_get_comdat_section
+extern struct coff_comdat_info * bfd_coff_get_comdat_section
   (bfd *, struct bfd_section *);
-
 /* Extracted from init.c.  */
 void bfd_init (void);
 
@@ -1013,7 +1024,7 @@ bfd *bfd_openr (const char *filename, const char *target);
 
 bfd *bfd_fdopenr (const char *filename, const char *target, int fd);
 
-bfd *bfd_openstreamr (const char *, const char *, void *);
+bfd *bfd_openstreamr (const char * filename, const char * target, void * stream);
 
 bfd *bfd_openr_iovec (const char *filename, const char *target,
     void *(*open_func) (struct bfd *nbfd,
@@ -1051,7 +1062,13 @@ unsigned long bfd_calc_gnu_debuglink_crc32
 
 char *bfd_get_debug_link_info (bfd *abfd, unsigned long *crc32_out);
 
+char *bfd_get_alt_debug_link_info (bfd * abfd,
+    bfd_size_type *buildid_len,
+    bfd_byte **buildid_out);
+
 char *bfd_follow_gnu_debuglink (bfd *abfd, const char *dir);
+
+char *bfd_follow_gnu_debugaltlink (bfd *abfd, const char *dir);
 
 struct bfd_section *bfd_create_gnu_debuglink_section
    (bfd *abfd, const char *filename);
@@ -1574,6 +1591,32 @@ struct relax_table {
   int size;
 };
 
+/* Note: the following are provided as inline functions rather than macros
+   because not all callers use the return value.  A macro implementation
+   would use a comma expression, eg: "((ptr)->foo = val, TRUE)" and some
+   compilers will complain about comma expressions that have no effect.  */
+static inline bfd_boolean
+bfd_set_section_userdata (bfd * abfd ATTRIBUTE_UNUSED, asection * ptr, void * val)
+{
+  ptr->userdata = val;
+  return TRUE;
+}
+
+static inline bfd_boolean
+bfd_set_section_vma (bfd * abfd ATTRIBUTE_UNUSED, asection * ptr, bfd_vma val)
+{
+  ptr->vma = ptr->lma = val;
+  ptr->user_set_vma = TRUE;
+  return TRUE;
+}
+
+static inline bfd_boolean
+bfd_set_section_alignment (bfd * abfd ATTRIBUTE_UNUSED, asection * ptr, unsigned int val)
+{
+  ptr->alignment_power = val;
+  return TRUE;
+}
+
 /* These sections are global, and are managed by BFD.  The application
    and target back end are not permitted to change the values in
    these sections.  */
@@ -1933,6 +1976,10 @@ enum bfd_architecture
   bfd_arch_k1om,   /* Intel K1OM */
 #define bfd_mach_k1om                  (1 << 6)
 #define bfd_mach_k1om_intel_syntax     (bfd_mach_k1om | bfd_mach_i386_intel_syntax)
+#define bfd_mach_i386_nacl             (1 << 7)
+#define bfd_mach_i386_i386_nacl        (bfd_mach_i386_i386 | bfd_mach_i386_nacl)
+#define bfd_mach_x86_64_nacl           (bfd_mach_x86_64 | bfd_mach_i386_nacl)
+#define bfd_mach_x64_32_nacl           (bfd_mach_x64_32 | bfd_mach_i386_nacl)
   bfd_arch_we32k,     /* AT&T WE32xxx */
   bfd_arch_tahoe,     /* CCI/Harris Tahoe */
   bfd_arch_i860,      /* Intel 860 */
@@ -2047,6 +2094,12 @@ enum bfd_architecture
 #define bfd_mach_arm_ep9312    11
 #define bfd_mach_arm_iWMMXt    12
 #define bfd_mach_arm_iWMMXt2   13
+  bfd_arch_nds32,     /* Andes NDS32 */
+#define bfd_mach_n1            1
+#define bfd_mach_n1h           2
+#define bfd_mach_n1h_v2        3
+#define bfd_mach_n1h_v3        4
+#define bfd_mach_n1h_v3m       5
   bfd_arch_ns32k,     /* National Semiconductors ns32000 */
   bfd_arch_w65,       /* WDC 65816 */
   bfd_arch_tic30,     /* Texas Instruments TMS320C30 */
@@ -2170,7 +2223,12 @@ enum bfd_architecture
 #define bfd_mach_msp14          14
 #define bfd_mach_msp15          15
 #define bfd_mach_msp16          16
+#define bfd_mach_msp20          20
 #define bfd_mach_msp21          21
+#define bfd_mach_msp22          22
+#define bfd_mach_msp23          23
+#define bfd_mach_msp24          24
+#define bfd_mach_msp26          26
 #define bfd_mach_msp31          31
 #define bfd_mach_msp32          32
 #define bfd_mach_msp33          33
@@ -2178,15 +2236,10 @@ enum bfd_architecture
 #define bfd_mach_msp42          42
 #define bfd_mach_msp43          43
 #define bfd_mach_msp44          44
-#define bfd_mach_msp20          20
-#define bfd_mach_msp22          22
-#define bfd_mach_msp23          23
-#define bfd_mach_msp24          24
-#define bfd_mach_msp26          26
+#define bfd_mach_msp430x        45
 #define bfd_mach_msp46          46
 #define bfd_mach_msp47          47
 #define bfd_mach_msp54          54
-#define bfd_mach_msp430x        45
   bfd_arch_xc16x,     /* Infineon's XC16X Series.               */
 #define bfd_mach_xc16x         1
 #define bfd_mach_xc16xl        2
@@ -2210,6 +2263,7 @@ enum bfd_architecture
 #define bfd_mach_tilegx32  2
   bfd_arch_aarch64,   /* AArch64  */
 #define bfd_mach_aarch64 0
+#define bfd_mach_aarch64_ilp32 32
   bfd_arch_nios2,
 #define bfd_mach_nios2 0
   bfd_arch_last
@@ -2490,7 +2544,7 @@ enum bfd_reloc_code_real {
   _dummy_first_bfd_reloc_code_real,
 
 
-/* Basic absolute relocations of N bits. */
+/* Basic absolute relocations of N bits.  */
   BFD_RELOC_64,
   BFD_RELOC_32,
   BFD_RELOC_26,
@@ -2503,7 +2557,7 @@ enum bfd_reloc_code_real {
 of the relocation itself; sometimes they are relative to the start of
 the section containing the relocation.  It depends on the specific target.
 
-The 24-bit relocation is used in some Intel 960 configurations. */
+The 24-bit relocation is used in some Intel 960 configurations.  */
   BFD_RELOC_64_PCREL,
   BFD_RELOC_32_PCREL,
   BFD_RELOC_24_PCREL,
@@ -2511,10 +2565,10 @@ The 24-bit relocation is used in some Intel 960 configurations. */
   BFD_RELOC_12_PCREL,
   BFD_RELOC_8_PCREL,
 
-/* Section relative relocations.  Some targets need this for DWARF2. */
+/* Section relative relocations.  Some targets need this for DWARF2.  */
   BFD_RELOC_32_SECREL,
 
-/* For ELF. */
+/* For ELF.  */
   BFD_RELOC_32_GOT_PCREL,
   BFD_RELOC_16_GOT_PCREL,
   BFD_RELOC_8_GOT_PCREL,
@@ -2537,11 +2591,11 @@ The 24-bit relocation is used in some Intel 960 configurations. */
   BFD_RELOC_HI16_S_PLTOFF,
   BFD_RELOC_8_PLTOFF,
 
-/* Size relocations. */
+/* Size relocations.  */
   BFD_RELOC_SIZE32,
   BFD_RELOC_SIZE64,
 
-/* Relocations used by 68K ELF. */
+/* Relocations used by 68K ELF.  */
   BFD_RELOC_68K_GLOB_DAT,
   BFD_RELOC_68K_JMP_SLOT,
   BFD_RELOC_68K_RELATIVE,
@@ -2561,7 +2615,7 @@ The 24-bit relocation is used in some Intel 960 configurations. */
   BFD_RELOC_68K_TLS_LE16,
   BFD_RELOC_68K_TLS_LE8,
 
-/* Linkage-table relative. */
+/* Linkage-table relative.  */
   BFD_RELOC_32_BASEREL,
   BFD_RELOC_16_BASEREL,
   BFD_RELOC_LO16_BASEREL,
@@ -2570,7 +2624,7 @@ The 24-bit relocation is used in some Intel 960 configurations. */
   BFD_RELOC_8_BASEREL,
   BFD_RELOC_RVA,
 
-/* Absolute 8-bit relocation, but used to form an address like 0xFFnn. */
+/* Absolute 8-bit relocation, but used to form an address like 0xFFnn.  */
   BFD_RELOC_8_FFnn,
 
 /* These PC-relative relocations are stored as word displacements --
@@ -2578,28 +2632,28 @@ i.e., byte displacements shifted right two bits.  The 30-bit word
 displacement (<<32_PCREL_S2>> -- 32 bits, shifted 2) is used on the
 SPARC.  (SPARC tools generally refer to this as <<WDISP30>>.)  The
 signed 16-bit displacement is used on the MIPS, and the 23-bit
-displacement is used on the Alpha. */
+displacement is used on the Alpha.  */
   BFD_RELOC_32_PCREL_S2,
   BFD_RELOC_16_PCREL_S2,
   BFD_RELOC_23_PCREL_S2,
 
 /* High 22 bits and low 10 bits of 32-bit value, placed into lower bits of
-the target word.  These are used on the SPARC. */
+the target word.  These are used on the SPARC.  */
   BFD_RELOC_HI22,
   BFD_RELOC_LO10,
 
 /* For systems that allocate a Global Pointer register, these are
 displacements off that register.  These relocation types are
 handled specially, because the value the register will have is
-decided relatively late. */
+decided relatively late.  */
   BFD_RELOC_GPREL16,
   BFD_RELOC_GPREL32,
 
-/* Reloc types used for i960/b.out. */
+/* Reloc types used for i960/b.out.  */
   BFD_RELOC_I960_CALLJ,
 
 /* SPARC ELF relocations.  There is probably some overlap with other
-relocation types already defined. */
+relocation types already defined.  */
   BFD_RELOC_NONE,
   BFD_RELOC_SPARC_WDISP22,
   BFD_RELOC_SPARC22,
@@ -2625,11 +2679,11 @@ relocation types already defined. */
   BFD_RELOC_SPARC_JMP_IREL,
   BFD_RELOC_SPARC_IRELATIVE,
 
-/* I think these are specific to SPARC a.out (e.g., Sun 4). */
+/* I think these are specific to SPARC a.out (e.g., Sun 4).  */
   BFD_RELOC_SPARC_BASE13,
   BFD_RELOC_SPARC_BASE22,
 
-/* SPARC64 relocations */
+/* SPARC64 relocations  */
 #define BFD_RELOC_SPARC_64 BFD_RELOC_64
   BFD_RELOC_SPARC_10,
   BFD_RELOC_SPARC_11,
@@ -2659,10 +2713,10 @@ relocation types already defined. */
   BFD_RELOC_SPARC_SIZE64,
   BFD_RELOC_SPARC_WDISP10,
 
-/* SPARC little endian relocation */
+/* SPARC little endian relocation  */
   BFD_RELOC_SPARC_REV32,
 
-/* SPARC TLS relocations */
+/* SPARC TLS relocations  */
   BFD_RELOC_SPARC_TLS_GD_HI22,
   BFD_RELOC_SPARC_TLS_GD_LO10,
   BFD_RELOC_SPARC_TLS_GD_ADD,
@@ -2688,7 +2742,7 @@ relocation types already defined. */
   BFD_RELOC_SPARC_TLS_TPOFF32,
   BFD_RELOC_SPARC_TLS_TPOFF64,
 
-/* SPU Relocations. */
+/* SPU Relocations.  */
   BFD_RELOC_SPU_IMM7,
   BFD_RELOC_SPU_IMM8,
   BFD_RELOC_SPU_IMM10,
@@ -2710,18 +2764,18 @@ relocation types already defined. */
 For GPDISP_HI16 ("gpdisp") relocations, the symbol is ignored when
 writing; when reading, it will be the absolute section symbol.  The
 addend is the displacement in bytes of the "lda" instruction from
-the "ldah" instruction (which is at the address of this reloc). */
+the "ldah" instruction (which is at the address of this reloc).  */
   BFD_RELOC_ALPHA_GPDISP_HI16,
 
 /* For GPDISP_LO16 ("ignore") relocations, the symbol is handled as
 with GPDISP_HI16 relocs.  The addend is ignored when writing the
 relocations out, and is filled in with the file's GP value on
-reading, for convenience. */
+reading, for convenience.  */
   BFD_RELOC_ALPHA_GPDISP_LO16,
 
 /* The ELF GPDISP relocation is exactly the same as the GPDISP_HI16
 relocation except that there is no accompanying GPDISP_LO16
-relocation. */
+relocation.  */
   BFD_RELOC_ALPHA_GPDISP,
 
 /* The Alpha LITERAL/LITUSE relocs are produced by a symbol reference;
@@ -2746,51 +2800,51 @@ as the absolute section symbol), and the "addend" indicates the type
 of instruction using the register:
 1 - "memory" fmt insn
 2 - byte-manipulation (byte offset reg)
-3 - jsr (target of branch) */
+3 - jsr (target of branch)  */
   BFD_RELOC_ALPHA_LITERAL,
   BFD_RELOC_ALPHA_ELF_LITERAL,
   BFD_RELOC_ALPHA_LITUSE,
 
 /* The HINT relocation indicates a value that should be filled into the
 "hint" field of a jmp/jsr/ret instruction, for possible branch-
-prediction logic which may be provided on some processors. */
+prediction logic which may be provided on some processors.  */
   BFD_RELOC_ALPHA_HINT,
 
 /* The LINKAGE relocation outputs a linkage pair in the object file,
-which is filled by the linker. */
+which is filled by the linker.  */
   BFD_RELOC_ALPHA_LINKAGE,
 
 /* The CODEADDR relocation outputs a STO_CA in the object file,
-which is filled by the linker. */
+which is filled by the linker.  */
   BFD_RELOC_ALPHA_CODEADDR,
 
 /* The GPREL_HI/LO relocations together form a 32-bit offset from the
-GP register. */
+GP register.  */
   BFD_RELOC_ALPHA_GPREL_HI16,
   BFD_RELOC_ALPHA_GPREL_LO16,
 
 /* Like BFD_RELOC_23_PCREL_S2, except that the source and target must
 share a common GP, and the target address is adjusted for
-STO_ALPHA_STD_GPLOAD. */
+STO_ALPHA_STD_GPLOAD.  */
   BFD_RELOC_ALPHA_BRSGP,
 
 /* The NOP relocation outputs a NOP if the longword displacement
-between two procedure entry points is < 2^21. */
+between two procedure entry points is < 2^21.  */
   BFD_RELOC_ALPHA_NOP,
 
 /* The BSR relocation outputs a BSR if the longword displacement
-between two procedure entry points is < 2^21. */
+between two procedure entry points is < 2^21.  */
   BFD_RELOC_ALPHA_BSR,
 
 /* The LDA relocation outputs a LDA if the longword displacement
-between two procedure entry points is < 2^16. */
+between two procedure entry points is < 2^16.  */
   BFD_RELOC_ALPHA_LDA,
 
 /* The BOH relocation outputs a BSR if the longword displacement
-between two procedure entry points is < 2^21, or else a hint. */
+between two procedure entry points is < 2^21, or else a hint.  */
   BFD_RELOC_ALPHA_BOH,
 
-/* Alpha thread-local storage relocations. */
+/* Alpha thread-local storage relocations.  */
   BFD_RELOC_ALPHA_TLSGD,
   BFD_RELOC_ALPHA_TLSLDM,
   BFD_RELOC_ALPHA_DTPMOD64,
@@ -2805,55 +2859,55 @@ between two procedure entry points is < 2^21, or else a hint. */
   BFD_RELOC_ALPHA_TPREL_LO16,
   BFD_RELOC_ALPHA_TPREL16,
 
-/* The MIPS jump instruction. */
+/* The MIPS jump instruction.  */
   BFD_RELOC_MIPS_JMP,
   BFD_RELOC_MICROMIPS_JMP,
 
-/* The MIPS16 jump instruction. */
+/* The MIPS16 jump instruction.  */
   BFD_RELOC_MIPS16_JMP,
 
-/* MIPS16 GP relative reloc. */
+/* MIPS16 GP relative reloc.  */
   BFD_RELOC_MIPS16_GPREL,
 
-/* High 16 bits of 32-bit value; simple reloc. */
+/* High 16 bits of 32-bit value; simple reloc.  */
   BFD_RELOC_HI16,
 
 /* High 16 bits of 32-bit value but the low 16 bits will be sign
 extended and added to form the final result.  If the low 16
 bits form a negative number, we need to add one to the high value
-to compensate for the borrow when the low bits are added. */
+to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_HI16_S,
 
-/* Low 16 bits. */
+/* Low 16 bits.  */
   BFD_RELOC_LO16,
 
-/* High 16 bits of 32-bit pc-relative value */
+/* High 16 bits of 32-bit pc-relative value  */
   BFD_RELOC_HI16_PCREL,
 
-/* High 16 bits of 32-bit pc-relative value, adjusted */
+/* High 16 bits of 32-bit pc-relative value, adjusted  */
   BFD_RELOC_HI16_S_PCREL,
 
-/* Low 16 bits of pc-relative value */
+/* Low 16 bits of pc-relative value  */
   BFD_RELOC_LO16_PCREL,
 
 /* Equivalent of BFD_RELOC_MIPS_*, but with the MIPS16 layout of
-16-bit immediate fields */
+16-bit immediate fields  */
   BFD_RELOC_MIPS16_GOT16,
   BFD_RELOC_MIPS16_CALL16,
 
-/* MIPS16 high 16 bits of 32-bit value. */
+/* MIPS16 high 16 bits of 32-bit value.  */
   BFD_RELOC_MIPS16_HI16,
 
 /* MIPS16 high 16 bits of 32-bit value but the low 16 bits will be sign
 extended and added to form the final result.  If the low 16
 bits form a negative number, we need to add one to the high value
-to compensate for the borrow when the low bits are added. */
+to compensate for the borrow when the low bits are added.  */
   BFD_RELOC_MIPS16_HI16_S,
 
-/* MIPS16 low 16 bits. */
+/* MIPS16 low 16 bits.  */
   BFD_RELOC_MIPS16_LO16,
 
-/* MIPS16 TLS relocations */
+/* MIPS16 TLS relocations  */
   BFD_RELOC_MIPS16_TLS_GD,
   BFD_RELOC_MIPS16_TLS_LDM,
   BFD_RELOC_MIPS16_TLS_DTPREL_HI16,
@@ -2862,22 +2916,22 @@ to compensate for the borrow when the low bits are added. */
   BFD_RELOC_MIPS16_TLS_TPREL_HI16,
   BFD_RELOC_MIPS16_TLS_TPREL_LO16,
 
-/* Relocation against a MIPS literal section. */
+/* Relocation against a MIPS literal section.  */
   BFD_RELOC_MIPS_LITERAL,
   BFD_RELOC_MICROMIPS_LITERAL,
 
-/* microMIPS PC-relative relocations. */
+/* microMIPS PC-relative relocations.  */
   BFD_RELOC_MICROMIPS_7_PCREL_S1,
   BFD_RELOC_MICROMIPS_10_PCREL_S1,
   BFD_RELOC_MICROMIPS_16_PCREL_S1,
 
-/* microMIPS versions of generic BFD relocs. */
+/* microMIPS versions of generic BFD relocs.  */
   BFD_RELOC_MICROMIPS_GPREL16,
   BFD_RELOC_MICROMIPS_HI16,
   BFD_RELOC_MICROMIPS_HI16_S,
   BFD_RELOC_MICROMIPS_LO16,
 
-/* MIPS ELF relocations. */
+/* MIPS ELF relocations.  */
   BFD_RELOC_MIPS_GOT16,
   BFD_RELOC_MICROMIPS_GOT16,
   BFD_RELOC_MIPS_CALL16,
@@ -2933,18 +2987,19 @@ to compensate for the borrow when the low bits are added. */
   BFD_RELOC_MICROMIPS_TLS_TPREL_HI16,
   BFD_RELOC_MIPS_TLS_TPREL_LO16,
   BFD_RELOC_MICROMIPS_TLS_TPREL_LO16,
+  BFD_RELOC_MIPS_EH,
 
 
-/* MIPS ELF relocations (VxWorks and PLT extensions). */
+/* MIPS ELF relocations (VxWorks and PLT extensions).  */
   BFD_RELOC_MIPS_COPY,
   BFD_RELOC_MIPS_JUMP_SLOT,
 
 
-/* Moxie ELF relocations. */
+/* Moxie ELF relocations.  */
   BFD_RELOC_MOXIE_10_PCREL,
 
 
-/* Fujitsu Frv Relocations. */
+/* Fujitsu Frv Relocations.  */
   BFD_RELOC_FRV_LABEL16,
   BFD_RELOC_FRV_LABEL24,
   BFD_RELOC_FRV_LO16,
@@ -2986,44 +3041,44 @@ to compensate for the borrow when the low bits are added. */
   BFD_RELOC_FRV_TLSMOFF,
 
 
-/* This is a 24bit GOT-relative reloc for the mn10300. */
+/* This is a 24bit GOT-relative reloc for the mn10300.  */
   BFD_RELOC_MN10300_GOTOFF24,
 
 /* This is a 32bit GOT-relative reloc for the mn10300, offset by two bytes
-in the instruction. */
+in the instruction.  */
   BFD_RELOC_MN10300_GOT32,
 
 /* This is a 24bit GOT-relative reloc for the mn10300, offset by two bytes
-in the instruction. */
+in the instruction.  */
   BFD_RELOC_MN10300_GOT24,
 
 /* This is a 16bit GOT-relative reloc for the mn10300, offset by two bytes
-in the instruction. */
+in the instruction.  */
   BFD_RELOC_MN10300_GOT16,
 
-/* Copy symbol at runtime. */
+/* Copy symbol at runtime.  */
   BFD_RELOC_MN10300_COPY,
 
-/* Create GOT entry. */
+/* Create GOT entry.  */
   BFD_RELOC_MN10300_GLOB_DAT,
 
-/* Create PLT entry. */
+/* Create PLT entry.  */
   BFD_RELOC_MN10300_JMP_SLOT,
 
-/* Adjust by program base. */
+/* Adjust by program base.  */
   BFD_RELOC_MN10300_RELATIVE,
 
 /* Together with another reloc targeted at the same location,
 allows for a value that is the difference of two symbols
-in the same section. */
+in the same section.  */
   BFD_RELOC_MN10300_SYM_DIFF,
 
 /* The addend of this reloc is an alignment power that must
 be honoured at the offset's location, regardless of linker
-relaxation. */
+relaxation.  */
   BFD_RELOC_MN10300_ALIGN,
 
-/* Various TLS-related relocations. */
+/* Various TLS-related relocations.  */
   BFD_RELOC_MN10300_TLS_GD,
   BFD_RELOC_MN10300_TLS_LD,
   BFD_RELOC_MN10300_TLS_LDO,
@@ -3035,15 +3090,15 @@ relaxation. */
   BFD_RELOC_MN10300_TLS_TPOFF,
 
 /* This is a 32bit pcrel reloc for the mn10300, offset by two bytes in the
-instruction. */
+instruction.  */
   BFD_RELOC_MN10300_32_PCREL,
 
 /* This is a 16bit pcrel reloc for the mn10300, offset by two bytes in the
-instruction. */
+instruction.  */
   BFD_RELOC_MN10300_16_PCREL,
 
 
-/* i386/elf relocations */
+/* i386/elf relocations  */
   BFD_RELOC_386_GOT32,
   BFD_RELOC_386_PLT32,
   BFD_RELOC_386_COPY,
@@ -3069,7 +3124,7 @@ instruction. */
   BFD_RELOC_386_TLS_DESC,
   BFD_RELOC_386_IRELATIVE,
 
-/* x86-64/elf relocations */
+/* x86-64/elf relocations  */
   BFD_RELOC_X86_64_GOT32,
   BFD_RELOC_X86_64_PLT32,
   BFD_RELOC_X86_64_COPY,
@@ -3097,8 +3152,10 @@ instruction. */
   BFD_RELOC_X86_64_TLSDESC_CALL,
   BFD_RELOC_X86_64_TLSDESC,
   BFD_RELOC_X86_64_IRELATIVE,
+  BFD_RELOC_X86_64_PC32_BND,
+  BFD_RELOC_X86_64_PLT32_BND,
 
-/* ns32k relocations */
+/* ns32k relocations  */
   BFD_RELOC_NS32K_IMM_8,
   BFD_RELOC_NS32K_IMM_16,
   BFD_RELOC_NS32K_IMM_32,
@@ -3112,11 +3169,11 @@ instruction. */
   BFD_RELOC_NS32K_DISP_16_PCREL,
   BFD_RELOC_NS32K_DISP_32_PCREL,
 
-/* PDP11 relocations */
+/* PDP11 relocations  */
   BFD_RELOC_PDP11_DISP_8_PCREL,
   BFD_RELOC_PDP11_DISP_6_PCREL,
 
-/* Picojava relocs.  Not all of these appear in object files. */
+/* Picojava relocs.  Not all of these appear in object files.  */
   BFD_RELOC_PJ_CODE_HI16,
   BFD_RELOC_PJ_CODE_LO16,
   BFD_RELOC_PJ_CODE_DIR16,
@@ -3124,7 +3181,7 @@ instruction. */
   BFD_RELOC_PJ_CODE_REL16,
   BFD_RELOC_PJ_CODE_REL32,
 
-/* Power(rs6000) and PowerPC relocations. */
+/* Power(rs6000) and PowerPC relocations.  */
   BFD_RELOC_PPC_B26,
   BFD_RELOC_PPC_BA26,
   BFD_RELOC_PPC_TOC16,
@@ -3195,8 +3252,10 @@ instruction. */
   BFD_RELOC_PPC64_TOC16_LO_DS,
   BFD_RELOC_PPC64_PLTGOT16_DS,
   BFD_RELOC_PPC64_PLTGOT16_LO_DS,
+  BFD_RELOC_PPC64_ADDR16_HIGH,
+  BFD_RELOC_PPC64_ADDR16_HIGHA,
 
-/* PowerPC and PowerPC64 thread-local storage relocations. */
+/* PowerPC and PowerPC64 thread-local storage relocations.  */
   BFD_RELOC_PPC_TLS,
   BFD_RELOC_PPC_TLSGD,
   BFD_RELOC_PPC_TLSLD,
@@ -3239,40 +3298,44 @@ instruction. */
   BFD_RELOC_PPC64_DTPREL16_HIGHERA,
   BFD_RELOC_PPC64_DTPREL16_HIGHEST,
   BFD_RELOC_PPC64_DTPREL16_HIGHESTA,
+  BFD_RELOC_PPC64_TPREL16_HIGH,
+  BFD_RELOC_PPC64_TPREL16_HIGHA,
+  BFD_RELOC_PPC64_DTPREL16_HIGH,
+  BFD_RELOC_PPC64_DTPREL16_HIGHA,
 
-/* IBM 370/390 relocations */
+/* IBM 370/390 relocations  */
   BFD_RELOC_I370_D12,
 
 /* The type of reloc used to build a constructor table - at the moment
 probably a 32 bit wide absolute relocation, but the target can choose.
-It generally does map to one of the other relocation types. */
+It generally does map to one of the other relocation types.  */
   BFD_RELOC_CTOR,
 
 /* ARM 26 bit pc-relative branch.  The lowest two bits must be zero and are
-not stored in the instruction. */
+not stored in the instruction.  */
   BFD_RELOC_ARM_PCREL_BRANCH,
 
 /* ARM 26 bit pc-relative branch.  The lowest bit must be zero and is
 not stored in the instruction.  The 2nd lowest bit comes from a 1 bit
-field in the instruction. */
+field in the instruction.  */
   BFD_RELOC_ARM_PCREL_BLX,
 
 /* Thumb 22 bit pc-relative branch.  The lowest bit must be zero and is
 not stored in the instruction.  The 2nd lowest bit comes from a 1 bit
-field in the instruction. */
+field in the instruction.  */
   BFD_RELOC_THUMB_PCREL_BLX,
 
-/* ARM 26-bit pc-relative branch for an unconditional BL or BLX instruction. */
+/* ARM 26-bit pc-relative branch for an unconditional BL or BLX instruction.  */
   BFD_RELOC_ARM_PCREL_CALL,
 
-/* ARM 26-bit pc-relative branch for B or conditional BL instruction. */
+/* ARM 26-bit pc-relative branch for B or conditional BL instruction.  */
   BFD_RELOC_ARM_PCREL_JUMP,
 
 /* Thumb 7-, 9-, 12-, 20-, 23-, and 25-bit pc-relative branches.
 The lowest bit must be zero and is not stored in the instruction.
 Note that the corresponding ELF R_ARM_THM_JUMPnn constant has an
 "nn" one smaller in all cases.  Note further that BRANCH23
-corresponds to R_ARM_THM_CALL. */
+corresponds to R_ARM_THM_CALL.  */
   BFD_RELOC_THUMB_PCREL_BRANCH7,
   BFD_RELOC_THUMB_PCREL_BRANCH9,
   BFD_RELOC_THUMB_PCREL_BRANCH12,
@@ -3280,31 +3343,31 @@ corresponds to R_ARM_THM_CALL. */
   BFD_RELOC_THUMB_PCREL_BRANCH23,
   BFD_RELOC_THUMB_PCREL_BRANCH25,
 
-/* 12-bit immediate offset, used in ARM-format ldr and str instructions. */
+/* 12-bit immediate offset, used in ARM-format ldr and str instructions.  */
   BFD_RELOC_ARM_OFFSET_IMM,
 
-/* 5-bit immediate offset, used in Thumb-format ldr and str instructions. */
+/* 5-bit immediate offset, used in Thumb-format ldr and str instructions.  */
   BFD_RELOC_ARM_THUMB_OFFSET,
 
 /* Pc-relative or absolute relocation depending on target.  Used for
-entries in .init_array sections. */
+entries in .init_array sections.  */
   BFD_RELOC_ARM_TARGET1,
 
-/* Read-only segment base relative address. */
+/* Read-only segment base relative address.  */
   BFD_RELOC_ARM_ROSEGREL32,
 
-/* Data segment base relative address. */
+/* Data segment base relative address.  */
   BFD_RELOC_ARM_SBREL32,
 
 /* This reloc is used for references to RTTI data from exception handling
 tables.  The actual definition depends on the target.  It may be a
-pc-relative or some form of GOT-indirect relocation. */
+pc-relative or some form of GOT-indirect relocation.  */
   BFD_RELOC_ARM_TARGET2,
 
-/* 31-bit PC relative address. */
+/* 31-bit PC relative address.  */
   BFD_RELOC_ARM_PREL31,
 
-/* Low and High halfword relocations for MOVW and MOVT instructions. */
+/* Low and High halfword relocations for MOVW and MOVT instructions.  */
   BFD_RELOC_ARM_MOVW,
   BFD_RELOC_ARM_MOVT,
   BFD_RELOC_ARM_MOVW_PCREL,
@@ -3314,7 +3377,7 @@ pc-relative or some form of GOT-indirect relocation. */
   BFD_RELOC_ARM_THUMB_MOVW_PCREL,
   BFD_RELOC_ARM_THUMB_MOVT_PCREL,
 
-/* Relocations for setting up GOTs and PLTs for shared libraries. */
+/* Relocations for setting up GOTs and PLTs for shared libraries.  */
   BFD_RELOC_ARM_JUMP_SLOT,
   BFD_RELOC_ARM_GLOB_DAT,
   BFD_RELOC_ARM_GOT32,
@@ -3324,7 +3387,7 @@ pc-relative or some form of GOT-indirect relocation. */
   BFD_RELOC_ARM_GOTPC,
   BFD_RELOC_ARM_GOT_PREL,
 
-/* ARM thread-local storage relocations. */
+/* ARM thread-local storage relocations.  */
   BFD_RELOC_ARM_TLS_GD32,
   BFD_RELOC_ARM_TLS_LDO32,
   BFD_RELOC_ARM_TLS_LDM32,
@@ -3340,7 +3403,7 @@ pc-relative or some form of GOT-indirect relocation. */
   BFD_RELOC_ARM_THM_TLS_DESCSEQ,
   BFD_RELOC_ARM_TLS_DESC,
 
-/* ARM group relocations. */
+/* ARM group relocations.  */
   BFD_RELOC_ARM_ALU_PC_G0_NC,
   BFD_RELOC_ARM_ALU_PC_G0,
   BFD_RELOC_ARM_ALU_PC_G1_NC,
@@ -3370,14 +3433,14 @@ pc-relative or some form of GOT-indirect relocation. */
   BFD_RELOC_ARM_LDC_SB_G1,
   BFD_RELOC_ARM_LDC_SB_G2,
 
-/* Annotation of BX instructions. */
+/* Annotation of BX instructions.  */
   BFD_RELOC_ARM_V4BX,
 
-/* ARM support for STT_GNU_IFUNC. */
+/* ARM support for STT_GNU_IFUNC.  */
   BFD_RELOC_ARM_IRELATIVE,
 
 /* These relocs are only used within the ARM assembler.  They are not
-(at present) written to any object files. */
+(at present) written to any object files.  */
   BFD_RELOC_ARM_IMMEDIATE,
   BFD_RELOC_ARM_ADRL_IMMEDIATE,
   BFD_RELOC_ARM_T32_IMMEDIATE,
@@ -3405,7 +3468,7 @@ pc-relative or some form of GOT-indirect relocation. */
   BFD_RELOC_ARM_THUMB_IMM,
   BFD_RELOC_ARM_THUMB_SHIFT,
 
-/* Renesas / SuperH SH relocs.  Not all of these appear in object files. */
+/* Renesas / SuperH SH relocs.  Not all of these appear in object files.  */
   BFD_RELOC_SH_PCDISP8BY2,
   BFD_RELOC_SH_PCDISP12BY2,
   BFD_RELOC_SH_IMM3,
@@ -3507,48 +3570,48 @@ pc-relative or some form of GOT-indirect relocation. */
 /* ARC Cores relocs.
 ARC 22 bit pc-relative branch.  The lowest two bits must be zero and are
 not stored in the instruction.  The high 20 bits are installed in bits 26
-through 7 of the instruction. */
+through 7 of the instruction.  */
   BFD_RELOC_ARC_B22_PCREL,
 
 /* ARC 26 bit absolute branch.  The lowest two bits must be zero and are not
 stored in the instruction.  The high 24 bits are installed in bits 23
-through 0. */
+through 0.  */
   BFD_RELOC_ARC_B26,
 
-/* ADI Blackfin 16 bit immediate absolute reloc. */
+/* ADI Blackfin 16 bit immediate absolute reloc.  */
   BFD_RELOC_BFIN_16_IMM,
 
-/* ADI Blackfin 16 bit immediate absolute reloc higher 16 bits. */
+/* ADI Blackfin 16 bit immediate absolute reloc higher 16 bits.  */
   BFD_RELOC_BFIN_16_HIGH,
 
-/* ADI Blackfin 'a' part of LSETUP. */
+/* ADI Blackfin 'a' part of LSETUP.  */
   BFD_RELOC_BFIN_4_PCREL,
 
-/* ADI Blackfin. */
+/* ADI Blackfin.  */
   BFD_RELOC_BFIN_5_PCREL,
 
-/* ADI Blackfin 16 bit immediate absolute reloc lower 16 bits. */
+/* ADI Blackfin 16 bit immediate absolute reloc lower 16 bits.  */
   BFD_RELOC_BFIN_16_LOW,
 
-/* ADI Blackfin. */
+/* ADI Blackfin.  */
   BFD_RELOC_BFIN_10_PCREL,
 
-/* ADI Blackfin 'b' part of LSETUP. */
+/* ADI Blackfin 'b' part of LSETUP.  */
   BFD_RELOC_BFIN_11_PCREL,
 
-/* ADI Blackfin. */
+/* ADI Blackfin.  */
   BFD_RELOC_BFIN_12_PCREL_JUMP,
 
-/* ADI Blackfin Short jump, pcrel. */
+/* ADI Blackfin Short jump, pcrel.  */
   BFD_RELOC_BFIN_12_PCREL_JUMP_S,
 
-/* ADI Blackfin Call.x not implemented. */
+/* ADI Blackfin Call.x not implemented.  */
   BFD_RELOC_BFIN_24_PCREL_CALL_X,
 
-/* ADI Blackfin Long Jump pcrel. */
+/* ADI Blackfin Long Jump pcrel.  */
   BFD_RELOC_BFIN_24_PCREL_JUMP_L,
 
-/* ADI Blackfin FD-PIC relocations. */
+/* ADI Blackfin FD-PIC relocations.  */
   BFD_RELOC_BFIN_GOT17M4,
   BFD_RELOC_BFIN_GOTHI,
   BFD_RELOC_BFIN_GOTLO,
@@ -3564,184 +3627,184 @@ through 0. */
   BFD_RELOC_BFIN_GOTOFFHI,
   BFD_RELOC_BFIN_GOTOFFLO,
 
-/* ADI Blackfin GOT relocation. */
+/* ADI Blackfin GOT relocation.  */
   BFD_RELOC_BFIN_GOT,
 
-/* ADI Blackfin PLTPC relocation. */
+/* ADI Blackfin PLTPC relocation.  */
   BFD_RELOC_BFIN_PLTPC,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_PUSH,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_CONST,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_ADD,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_SUB,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_MULT,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_DIV,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_MOD,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_LSHIFT,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_RSHIFT,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_AND,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_OR,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_XOR,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_LAND,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_LOR,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_LEN,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_NEG,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_COMP,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_PAGE,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_HWPAGE,
 
-/* ADI Blackfin arithmetic relocation. */
+/* ADI Blackfin arithmetic relocation.  */
   BFD_ARELOC_BFIN_ADDR,
 
 /* Mitsubishi D10V relocs.
 This is a 10-bit reloc with the right 2 bits
-assumed to be 0. */
+assumed to be 0.  */
   BFD_RELOC_D10V_10_PCREL_R,
 
 /* Mitsubishi D10V relocs.
 This is a 10-bit reloc with the right 2 bits
 assumed to be 0.  This is the same as the previous reloc
 except it is in the left container, i.e.,
-shifted left 15 bits. */
+shifted left 15 bits.  */
   BFD_RELOC_D10V_10_PCREL_L,
 
 /* This is an 18-bit reloc with the right 2 bits
-assumed to be 0. */
+assumed to be 0.  */
   BFD_RELOC_D10V_18,
 
 /* This is an 18-bit reloc with the right 2 bits
-assumed to be 0. */
+assumed to be 0.  */
   BFD_RELOC_D10V_18_PCREL,
 
 /* Mitsubishi D30V relocs.
-This is a 6-bit absolute reloc. */
+This is a 6-bit absolute reloc.  */
   BFD_RELOC_D30V_6,
 
 /* This is a 6-bit pc-relative reloc with
-the right 3 bits assumed to be 0. */
+the right 3 bits assumed to be 0.  */
   BFD_RELOC_D30V_9_PCREL,
 
 /* This is a 6-bit pc-relative reloc with
 the right 3 bits assumed to be 0. Same
 as the previous reloc but on the right side
-of the container. */
+of the container.  */
   BFD_RELOC_D30V_9_PCREL_R,
 
 /* This is a 12-bit absolute reloc with the
-right 3 bitsassumed to be 0. */
+right 3 bitsassumed to be 0.  */
   BFD_RELOC_D30V_15,
 
 /* This is a 12-bit pc-relative reloc with
-the right 3 bits assumed to be 0. */
+the right 3 bits assumed to be 0.  */
   BFD_RELOC_D30V_15_PCREL,
 
 /* This is a 12-bit pc-relative reloc with
 the right 3 bits assumed to be 0. Same
 as the previous reloc but on the right side
-of the container. */
+of the container.  */
   BFD_RELOC_D30V_15_PCREL_R,
 
 /* This is an 18-bit absolute reloc with
-the right 3 bits assumed to be 0. */
+the right 3 bits assumed to be 0.  */
   BFD_RELOC_D30V_21,
 
 /* This is an 18-bit pc-relative reloc with
-the right 3 bits assumed to be 0. */
+the right 3 bits assumed to be 0.  */
   BFD_RELOC_D30V_21_PCREL,
 
 /* This is an 18-bit pc-relative reloc with
 the right 3 bits assumed to be 0. Same
 as the previous reloc but on the right side
-of the container. */
+of the container.  */
   BFD_RELOC_D30V_21_PCREL_R,
 
-/* This is a 32-bit absolute reloc. */
+/* This is a 32-bit absolute reloc.  */
   BFD_RELOC_D30V_32,
 
-/* This is a 32-bit pc-relative reloc. */
+/* This is a 32-bit pc-relative reloc.  */
   BFD_RELOC_D30V_32_PCREL,
 
-/* DLX relocs */
+/* DLX relocs  */
   BFD_RELOC_DLX_HI16_S,
 
-/* DLX relocs */
+/* DLX relocs  */
   BFD_RELOC_DLX_LO16,
 
-/* DLX relocs */
+/* DLX relocs  */
   BFD_RELOC_DLX_JMP26,
 
-/* Renesas M16C/M32C Relocations. */
+/* Renesas M16C/M32C Relocations.  */
   BFD_RELOC_M32C_HI8,
   BFD_RELOC_M32C_RL_JUMP,
   BFD_RELOC_M32C_RL_1ADDR,
   BFD_RELOC_M32C_RL_2ADDR,
 
 /* Renesas M32R (formerly Mitsubishi M32R) relocs.
-This is a 24 bit absolute address. */
+This is a 24 bit absolute address.  */
   BFD_RELOC_M32R_24,
 
-/* This is a 10-bit pc-relative reloc with the right 2 bits assumed to be 0. */
+/* This is a 10-bit pc-relative reloc with the right 2 bits assumed to be 0.  */
   BFD_RELOC_M32R_10_PCREL,
 
-/* This is an 18-bit reloc with the right 2 bits assumed to be 0. */
+/* This is an 18-bit reloc with the right 2 bits assumed to be 0.  */
   BFD_RELOC_M32R_18_PCREL,
 
-/* This is a 26-bit reloc with the right 2 bits assumed to be 0. */
+/* This is a 26-bit reloc with the right 2 bits assumed to be 0.  */
   BFD_RELOC_M32R_26_PCREL,
 
 /* This is a 16-bit reloc containing the high 16 bits of an address
-used when the lower 16 bits are treated as unsigned. */
+used when the lower 16 bits are treated as unsigned.  */
   BFD_RELOC_M32R_HI16_ULO,
 
 /* This is a 16-bit reloc containing the high 16 bits of an address
-used when the lower 16 bits are treated as signed. */
+used when the lower 16 bits are treated as signed.  */
   BFD_RELOC_M32R_HI16_SLO,
 
-/* This is a 16-bit reloc containing the lower 16 bits of an address. */
+/* This is a 16-bit reloc containing the lower 16 bits of an address.  */
   BFD_RELOC_M32R_LO16,
 
 /* This is a 16-bit reloc containing the small data area offset for use in
-add3, load, and store instructions. */
+add3, load, and store instructions.  */
   BFD_RELOC_M32R_SDA16,
 
-/* For PIC. */
+/* For PIC.  */
   BFD_RELOC_M32R_GOT24,
   BFD_RELOC_M32R_26_PLTREL,
   BFD_RELOC_M32R_COPY,
@@ -3760,169 +3823,341 @@ add3, load, and store instructions. */
   BFD_RELOC_M32R_GOTPC_HI_SLO,
   BFD_RELOC_M32R_GOTPC_LO,
 
-/* This is a 9-bit reloc */
+/* NDS32 relocs.
+This is a 20 bit absolute address.  */
+  BFD_RELOC_NDS32_20,
+
+/* This is a 9-bit pc-relative reloc with the right 1 bit assumed to be 0.  */
+  BFD_RELOC_NDS32_9_PCREL,
+
+/* This is a 9-bit pc-relative reloc with the right 1 bit assumed to be 0.  */
+  BFD_RELOC_NDS32_WORD_9_PCREL,
+
+/* This is an 15-bit reloc with the right 1 bit assumed to be 0.  */
+  BFD_RELOC_NDS32_15_PCREL,
+
+/* This is an 17-bit reloc with the right 1 bit assumed to be 0.  */
+  BFD_RELOC_NDS32_17_PCREL,
+
+/* This is a 25-bit reloc with the right 1 bit assumed to be 0.  */
+  BFD_RELOC_NDS32_25_PCREL,
+
+/* This is a 20-bit reloc containing the high 20 bits of an address
+used with the lower 12 bits  */
+  BFD_RELOC_NDS32_HI20,
+
+/* This is a 12-bit reloc containing the lower 12 bits of an address
+then shift right by 3. This is used with ldi,sdi...  */
+  BFD_RELOC_NDS32_LO12S3,
+
+/* This is a 12-bit reloc containing the lower 12 bits of an address
+then shift left by 2. This is used with lwi,swi...  */
+  BFD_RELOC_NDS32_LO12S2,
+
+/* This is a 12-bit reloc containing the lower 12 bits of an address
+then shift left by 1. This is used with lhi,shi...  */
+  BFD_RELOC_NDS32_LO12S1,
+
+/* This is a 12-bit reloc containing the lower 12 bits of an address
+then shift left by 0. This is used with lbisbi...  */
+  BFD_RELOC_NDS32_LO12S0,
+
+/* This is a 12-bit reloc containing the lower 12 bits of an address
+then shift left by 0. This is only used with branch relaxations  */
+  BFD_RELOC_NDS32_LO12S0_ORI,
+
+/* This is a 15-bit reloc containing the small data area 18-bit signed offset
+and shift left by 3 for use in ldi, sdi...  */
+  BFD_RELOC_NDS32_SDA15S3,
+
+/* This is a 15-bit reloc containing the small data area 17-bit signed offset
+and shift left by 2 for use in lwi, swi...  */
+  BFD_RELOC_NDS32_SDA15S2,
+
+/* This is a 15-bit reloc containing the small data area 16-bit signed offset
+and shift left by 1 for use in lhi, shi...  */
+  BFD_RELOC_NDS32_SDA15S1,
+
+/* This is a 15-bit reloc containing the small data area 15-bit signed offset
+and shift left by 0 for use in lbi, sbi...  */
+  BFD_RELOC_NDS32_SDA15S0,
+
+/* This is a 16-bit reloc containing the small data area 16-bit signed offset
+and shift left by 3  */
+  BFD_RELOC_NDS32_SDA16S3,
+
+/* This is a 17-bit reloc containing the small data area 17-bit signed offset
+and shift left by 2 for use in lwi.gp, swi.gp...  */
+  BFD_RELOC_NDS32_SDA17S2,
+
+/* This is a 18-bit reloc containing the small data area 18-bit signed offset
+and shift left by 1 for use in lhi.gp, shi.gp...  */
+  BFD_RELOC_NDS32_SDA18S1,
+
+/* This is a 19-bit reloc containing the small data area 19-bit signed offset
+and shift left by 0 for use in lbi.gp, sbi.gp...  */
+  BFD_RELOC_NDS32_SDA19S0,
+
+/* for PIC  */
+  BFD_RELOC_NDS32_GOT20,
+  BFD_RELOC_NDS32_9_PLTREL,
+  BFD_RELOC_NDS32_25_PLTREL,
+  BFD_RELOC_NDS32_COPY,
+  BFD_RELOC_NDS32_GLOB_DAT,
+  BFD_RELOC_NDS32_JMP_SLOT,
+  BFD_RELOC_NDS32_RELATIVE,
+  BFD_RELOC_NDS32_GOTOFF,
+  BFD_RELOC_NDS32_GOTOFF_HI20,
+  BFD_RELOC_NDS32_GOTOFF_LO12,
+  BFD_RELOC_NDS32_GOTPC20,
+  BFD_RELOC_NDS32_GOT_HI20,
+  BFD_RELOC_NDS32_GOT_LO12,
+  BFD_RELOC_NDS32_GOTPC_HI20,
+  BFD_RELOC_NDS32_GOTPC_LO12,
+
+/* for relax  */
+  BFD_RELOC_NDS32_INSN16,
+  BFD_RELOC_NDS32_LABEL,
+  BFD_RELOC_NDS32_LONGCALL1,
+  BFD_RELOC_NDS32_LONGCALL2,
+  BFD_RELOC_NDS32_LONGCALL3,
+  BFD_RELOC_NDS32_LONGJUMP1,
+  BFD_RELOC_NDS32_LONGJUMP2,
+  BFD_RELOC_NDS32_LONGJUMP3,
+  BFD_RELOC_NDS32_LOADSTORE,
+  BFD_RELOC_NDS32_9_FIXED,
+  BFD_RELOC_NDS32_15_FIXED,
+  BFD_RELOC_NDS32_17_FIXED,
+  BFD_RELOC_NDS32_25_FIXED,
+
+/* for PIC  */
+  BFD_RELOC_NDS32_PLTREL_HI20,
+  BFD_RELOC_NDS32_PLTREL_LO12,
+  BFD_RELOC_NDS32_PLT_GOTREL_HI20,
+  BFD_RELOC_NDS32_PLT_GOTREL_LO12,
+
+/* for floating point  */
+  BFD_RELOC_NDS32_SDA12S2_DP,
+  BFD_RELOC_NDS32_SDA12S2_SP,
+  BFD_RELOC_NDS32_LO12S2_DP,
+  BFD_RELOC_NDS32_LO12S2_SP,
+
+/* for dwarf2 debug_line.  */
+  BFD_RELOC_NDS32_DWARF2_OP1,
+  BFD_RELOC_NDS32_DWARF2_OP2,
+  BFD_RELOC_NDS32_DWARF2_LEB,
+
+/* for eliminate 16-bit instructions  */
+  BFD_RELOC_NDS32_UPDATE_TA,
+
+/* for PIC object relaxation  */
+  BFD_RELOC_NDS32_PLT_GOTREL_LO20,
+  BFD_RELOC_NDS32_PLT_GOTREL_LO15,
+  BFD_RELOC_NDS32_PLT_GOTREL_LO19,
+  BFD_RELOC_NDS32_GOT_LO15,
+  BFD_RELOC_NDS32_GOT_LO19,
+  BFD_RELOC_NDS32_GOTOFF_LO15,
+  BFD_RELOC_NDS32_GOTOFF_LO19,
+  BFD_RELOC_NDS32_GOT15S2,
+  BFD_RELOC_NDS32_GOT17S2,
+
+/* NDS32 relocs.
+This is a 5 bit absolute address.  */
+  BFD_RELOC_NDS32_5,
+
+/* This is a 10-bit unsigned pc-relative reloc with the right 1 bit assumed to be 0.  */
+  BFD_RELOC_NDS32_10_UPCREL,
+
+/* If fp were omitted, fp can used as another gp.  */
+  BFD_RELOC_NDS32_SDA_FP7U2_RELA,
+
+/* relaxation relative relocation types  */
+  BFD_RELOC_NDS32_RELAX_ENTRY,
+  BFD_RELOC_NDS32_GOT_SUFF,
+  BFD_RELOC_NDS32_GOTOFF_SUFF,
+  BFD_RELOC_NDS32_PLT_GOT_SUFF,
+  BFD_RELOC_NDS32_MULCALL_SUFF,
+  BFD_RELOC_NDS32_PTR,
+  BFD_RELOC_NDS32_PTR_COUNT,
+  BFD_RELOC_NDS32_PTR_RESOLVED,
+  BFD_RELOC_NDS32_PLTBLOCK,
+  BFD_RELOC_NDS32_RELAX_REGION_BEGIN,
+  BFD_RELOC_NDS32_RELAX_REGION_END,
+  BFD_RELOC_NDS32_MINUEND,
+  BFD_RELOC_NDS32_SUBTRAHEND,
+  BFD_RELOC_NDS32_DIFF8,
+  BFD_RELOC_NDS32_DIFF16,
+  BFD_RELOC_NDS32_DIFF32,
+  BFD_RELOC_NDS32_DIFF_ULEB128,
+  BFD_RELOC_NDS32_25_ABS,
+  BFD_RELOC_NDS32_DATA,
+  BFD_RELOC_NDS32_TRAN,
+  BFD_RELOC_NDS32_17IFC_PCREL,
+  BFD_RELOC_NDS32_10IFCU_PCREL,
+
+/* This is a 9-bit reloc  */
   BFD_RELOC_V850_9_PCREL,
 
-/* This is a 22-bit reloc */
+/* This is a 22-bit reloc  */
   BFD_RELOC_V850_22_PCREL,
 
-/* This is a 16 bit offset from the short data area pointer. */
+/* This is a 16 bit offset from the short data area pointer.  */
   BFD_RELOC_V850_SDA_16_16_OFFSET,
 
 /* This is a 16 bit offset (of which only 15 bits are used) from the
-short data area pointer. */
+short data area pointer.  */
   BFD_RELOC_V850_SDA_15_16_OFFSET,
 
-/* This is a 16 bit offset from the zero data area pointer. */
+/* This is a 16 bit offset from the zero data area pointer.  */
   BFD_RELOC_V850_ZDA_16_16_OFFSET,
 
 /* This is a 16 bit offset (of which only 15 bits are used) from the
-zero data area pointer. */
+zero data area pointer.  */
   BFD_RELOC_V850_ZDA_15_16_OFFSET,
 
 /* This is an 8 bit offset (of which only 6 bits are used) from the
-tiny data area pointer. */
+tiny data area pointer.  */
   BFD_RELOC_V850_TDA_6_8_OFFSET,
 
 /* This is an 8bit offset (of which only 7 bits are used) from the tiny
-data area pointer. */
+data area pointer.  */
   BFD_RELOC_V850_TDA_7_8_OFFSET,
 
-/* This is a 7 bit offset from the tiny data area pointer. */
+/* This is a 7 bit offset from the tiny data area pointer.  */
   BFD_RELOC_V850_TDA_7_7_OFFSET,
 
-/* This is a 16 bit offset from the tiny data area pointer. */
+/* This is a 16 bit offset from the tiny data area pointer.  */
   BFD_RELOC_V850_TDA_16_16_OFFSET,
 
 /* This is a 5 bit offset (of which only 4 bits are used) from the tiny
-data area pointer. */
+data area pointer.  */
   BFD_RELOC_V850_TDA_4_5_OFFSET,
 
-/* This is a 4 bit offset from the tiny data area pointer. */
+/* This is a 4 bit offset from the tiny data area pointer.  */
   BFD_RELOC_V850_TDA_4_4_OFFSET,
 
 /* This is a 16 bit offset from the short data area pointer, with the
-bits placed non-contiguously in the instruction. */
+bits placed non-contiguously in the instruction.  */
   BFD_RELOC_V850_SDA_16_16_SPLIT_OFFSET,
 
 /* This is a 16 bit offset from the zero data area pointer, with the
-bits placed non-contiguously in the instruction. */
+bits placed non-contiguously in the instruction.  */
   BFD_RELOC_V850_ZDA_16_16_SPLIT_OFFSET,
 
-/* This is a 6 bit offset from the call table base pointer. */
+/* This is a 6 bit offset from the call table base pointer.  */
   BFD_RELOC_V850_CALLT_6_7_OFFSET,
 
-/* This is a 16 bit offset from the call table base pointer. */
+/* This is a 16 bit offset from the call table base pointer.  */
   BFD_RELOC_V850_CALLT_16_16_OFFSET,
 
-/* Used for relaxing indirect function calls. */
+/* Used for relaxing indirect function calls.  */
   BFD_RELOC_V850_LONGCALL,
 
-/* Used for relaxing indirect jumps. */
+/* Used for relaxing indirect jumps.  */
   BFD_RELOC_V850_LONGJUMP,
 
-/* Used to maintain alignment whilst relaxing. */
+/* Used to maintain alignment whilst relaxing.  */
   BFD_RELOC_V850_ALIGN,
 
 /* This is a variation of BFD_RELOC_LO16 that can be used in v850e ld.bu
-instructions. */
+instructions.  */
   BFD_RELOC_V850_LO16_SPLIT_OFFSET,
 
-/* This is a 16-bit reloc. */
+/* This is a 16-bit reloc.  */
   BFD_RELOC_V850_16_PCREL,
 
-/* This is a 17-bit reloc. */
+/* This is a 17-bit reloc.  */
   BFD_RELOC_V850_17_PCREL,
 
-/* This is a 23-bit reloc. */
+/* This is a 23-bit reloc.  */
   BFD_RELOC_V850_23,
 
-/* This is a 32-bit reloc. */
+/* This is a 32-bit reloc.  */
   BFD_RELOC_V850_32_PCREL,
 
-/* This is a 32-bit reloc. */
+/* This is a 32-bit reloc.  */
   BFD_RELOC_V850_32_ABS,
 
-/* This is a 16-bit reloc. */
+/* This is a 16-bit reloc.  */
   BFD_RELOC_V850_16_SPLIT_OFFSET,
 
-/* This is a 16-bit reloc. */
+/* This is a 16-bit reloc.  */
   BFD_RELOC_V850_16_S1,
 
-/* Low 16 bits. 16 bit shifted by 1. */
+/* Low 16 bits. 16 bit shifted by 1.  */
   BFD_RELOC_V850_LO16_S1,
 
-/* This is a 16 bit offset from the call table base pointer. */
+/* This is a 16 bit offset from the call table base pointer.  */
   BFD_RELOC_V850_CALLT_15_16_OFFSET,
 
-/* DSO relocations. */
+/* DSO relocations.  */
   BFD_RELOC_V850_32_GOTPCREL,
 
-/* DSO relocations. */
+/* DSO relocations.  */
   BFD_RELOC_V850_16_GOT,
 
-/* DSO relocations. */
+/* DSO relocations.  */
   BFD_RELOC_V850_32_GOT,
 
-/* DSO relocations. */
+/* DSO relocations.  */
   BFD_RELOC_V850_22_PLT_PCREL,
 
-/* DSO relocations. */
+/* DSO relocations.  */
   BFD_RELOC_V850_32_PLT_PCREL,
 
-/* DSO relocations. */
+/* DSO relocations.  */
   BFD_RELOC_V850_COPY,
 
-/* DSO relocations. */
+/* DSO relocations.  */
   BFD_RELOC_V850_GLOB_DAT,
 
-/* DSO relocations. */
+/* DSO relocations.  */
   BFD_RELOC_V850_JMP_SLOT,
 
-/* DSO relocations. */
+/* DSO relocations.  */
   BFD_RELOC_V850_RELATIVE,
 
-/* DSO relocations. */
+/* DSO relocations.  */
   BFD_RELOC_V850_16_GOTOFF,
 
-/* DSO relocations. */
+/* DSO relocations.  */
   BFD_RELOC_V850_32_GOTOFF,
 
-/* start code. */
+/* start code.  */
   BFD_RELOC_V850_CODE,
 
-/* start data in text. */
+/* start data in text.  */
   BFD_RELOC_V850_DATA,
 
 /* This is a 8bit DP reloc for the tms320c30, where the most
 significant 8 bits of a 24 bit word are placed into the least
-significant 8 bits of the opcode. */
+significant 8 bits of the opcode.  */
   BFD_RELOC_TIC30_LDP,
 
 /* This is a 7bit reloc for the tms320c54x, where the least
 significant 7 bits of a 16 bit word are placed into the least
-significant 7 bits of the opcode. */
+significant 7 bits of the opcode.  */
   BFD_RELOC_TIC54X_PARTLS7,
 
 /* This is a 9bit DP reloc for the tms320c54x, where the most
 significant 9 bits of a 16 bit word are placed into the least
-significant 9 bits of the opcode. */
+significant 9 bits of the opcode.  */
   BFD_RELOC_TIC54X_PARTMS9,
 
-/* This is an extended address 23-bit reloc for the tms320c54x. */
+/* This is an extended address 23-bit reloc for the tms320c54x.  */
   BFD_RELOC_TIC54X_23,
 
 /* This is a 16-bit reloc for the tms320c54x, where the least
 significant 16 bits of a 23-bit extended address are placed into
-the opcode. */
+the opcode.  */
   BFD_RELOC_TIC54X_16_OF_23,
 
 /* This is a reloc for the tms320c54x, where the most
 significant 7 bits of a 23-bit extended address are placed into
-the opcode. */
+the opcode.  */
   BFD_RELOC_TIC54X_MS7_OF_23,
 
-/* TMS320C6000 relocations. */
+/* TMS320C6000 relocations.  */
   BFD_RELOC_C6000_PCR_S21,
   BFD_RELOC_C6000_PCR_S12,
   BFD_RELOC_C6000_PCR_S10,
@@ -3954,38 +4189,38 @@ the opcode. */
   BFD_RELOC_C6000_FPHEAD,
   BFD_RELOC_C6000_NOCMP,
 
-/* This is a 48 bit reloc for the FR30 that stores 32 bits. */
+/* This is a 48 bit reloc for the FR30 that stores 32 bits.  */
   BFD_RELOC_FR30_48,
 
 /* This is a 32 bit reloc for the FR30 that stores 20 bits split up into
-two sections. */
+two sections.  */
   BFD_RELOC_FR30_20,
 
 /* This is a 16 bit reloc for the FR30 that stores a 6 bit word offset in
-4 bits. */
+4 bits.  */
   BFD_RELOC_FR30_6_IN_4,
 
 /* This is a 16 bit reloc for the FR30 that stores an 8 bit byte offset
-into 8 bits. */
+into 8 bits.  */
   BFD_RELOC_FR30_8_IN_8,
 
 /* This is a 16 bit reloc for the FR30 that stores a 9 bit short offset
-into 8 bits. */
+into 8 bits.  */
   BFD_RELOC_FR30_9_IN_8,
 
 /* This is a 16 bit reloc for the FR30 that stores a 10 bit word offset
-into 8 bits. */
+into 8 bits.  */
   BFD_RELOC_FR30_10_IN_8,
 
 /* This is a 16 bit reloc for the FR30 that stores a 9 bit pc relative
-short offset into 8 bits. */
+short offset into 8 bits.  */
   BFD_RELOC_FR30_9_PCREL,
 
 /* This is a 16 bit reloc for the FR30 that stores a 12 bit pc relative
-short offset into 11 bits. */
+short offset into 11 bits.  */
   BFD_RELOC_FR30_12_PCREL,
 
-/* Motorola Mcore relocations. */
+/* Motorola Mcore relocations.  */
   BFD_RELOC_MCORE_PCREL_IMM8BY4,
   BFD_RELOC_MCORE_PCREL_IMM11BY2,
   BFD_RELOC_MCORE_PCREL_IMM4BY2,
@@ -3993,7 +4228,7 @@ short offset into 11 bits. */
   BFD_RELOC_MCORE_PCREL_JSR_IMM11BY2,
   BFD_RELOC_MCORE_RVA,
 
-/* Toshiba Media Processor Relocations. */
+/* Toshiba Media Processor Relocations.  */
   BFD_RELOC_MEP_8,
   BFD_RELOC_MEP_16,
   BFD_RELOC_MEP_32,
@@ -4016,7 +4251,7 @@ short offset into 11 bits. */
   BFD_RELOC_MEP_GNU_VTENTRY,
 
 
-/* Imagination Technologies Meta relocations. */
+/* Imagination Technologies Meta relocations.  */
   BFD_RELOC_METAG_HIADDR16,
   BFD_RELOC_METAG_LOADDR16,
   BFD_RELOC_METAG_RELBRANCH,
@@ -4056,169 +4291,168 @@ short offset into 11 bits. */
   BFD_RELOC_METAG_TLS_LE_HI16,
   BFD_RELOC_METAG_TLS_LE_LO16,
 
-/* These are relocations for the GETA instruction. */
+/* These are relocations for the GETA instruction.  */
   BFD_RELOC_MMIX_GETA,
   BFD_RELOC_MMIX_GETA_1,
   BFD_RELOC_MMIX_GETA_2,
   BFD_RELOC_MMIX_GETA_3,
 
-/* These are relocations for a conditional branch instruction. */
+/* These are relocations for a conditional branch instruction.  */
   BFD_RELOC_MMIX_CBRANCH,
   BFD_RELOC_MMIX_CBRANCH_J,
   BFD_RELOC_MMIX_CBRANCH_1,
   BFD_RELOC_MMIX_CBRANCH_2,
   BFD_RELOC_MMIX_CBRANCH_3,
 
-/* These are relocations for the PUSHJ instruction. */
+/* These are relocations for the PUSHJ instruction.  */
   BFD_RELOC_MMIX_PUSHJ,
   BFD_RELOC_MMIX_PUSHJ_1,
   BFD_RELOC_MMIX_PUSHJ_2,
   BFD_RELOC_MMIX_PUSHJ_3,
   BFD_RELOC_MMIX_PUSHJ_STUBBABLE,
 
-/* These are relocations for the JMP instruction. */
+/* These are relocations for the JMP instruction.  */
   BFD_RELOC_MMIX_JMP,
   BFD_RELOC_MMIX_JMP_1,
   BFD_RELOC_MMIX_JMP_2,
   BFD_RELOC_MMIX_JMP_3,
 
 /* This is a relocation for a relative address as in a GETA instruction or
-a branch. */
+a branch.  */
   BFD_RELOC_MMIX_ADDR19,
 
-/* This is a relocation for a relative address as in a JMP instruction. */
+/* This is a relocation for a relative address as in a JMP instruction.  */
   BFD_RELOC_MMIX_ADDR27,
 
 /* This is a relocation for an instruction field that may be a general
-register or a value 0..255. */
+register or a value 0..255.  */
   BFD_RELOC_MMIX_REG_OR_BYTE,
 
 /* This is a relocation for an instruction field that may be a general
-register. */
+register.  */
   BFD_RELOC_MMIX_REG,
 
 /* This is a relocation for two instruction fields holding a register and
-an offset, the equivalent of the relocation. */
+an offset, the equivalent of the relocation.  */
   BFD_RELOC_MMIX_BASE_PLUS_OFFSET,
 
 /* This relocation is an assertion that the expression is not allocated as
-a global register.  It does not modify contents. */
+a global register.  It does not modify contents.  */
   BFD_RELOC_MMIX_LOCAL,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit pc relative
-short offset into 7 bits. */
+short offset into 7 bits.  */
   BFD_RELOC_AVR_7_PCREL,
 
 /* This is a 16 bit reloc for the AVR that stores 13 bit pc relative
-short offset into 12 bits. */
+short offset into 12 bits.  */
   BFD_RELOC_AVR_13_PCREL,
 
 /* This is a 16 bit reloc for the AVR that stores 17 bit value (usually
-program memory address) into 16 bits. */
+program memory address) into 16 bits.  */
   BFD_RELOC_AVR_16_PM,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (usually
-data memory address) into 8 bit immediate value of LDI insn. */
+data memory address) into 8 bit immediate value of LDI insn.  */
   BFD_RELOC_AVR_LO8_LDI,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
-of data memory address) into 8 bit immediate value of LDI insn. */
+of data memory address) into 8 bit immediate value of LDI insn.  */
   BFD_RELOC_AVR_HI8_LDI,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
-of program memory address) into 8 bit immediate value of LDI insn. */
+of program memory address) into 8 bit immediate value of LDI insn.  */
   BFD_RELOC_AVR_HH8_LDI,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
-of 32 bit value) into 8 bit immediate value of LDI insn. */
+of 32 bit value) into 8 bit immediate value of LDI insn.  */
   BFD_RELOC_AVR_MS8_LDI,
 
 /* This is a 16 bit reloc for the AVR that stores negated 8 bit value
-(usually data memory address) into 8 bit immediate value of SUBI insn. */
+(usually data memory address) into 8 bit immediate value of SUBI insn.  */
   BFD_RELOC_AVR_LO8_LDI_NEG,
 
 /* This is a 16 bit reloc for the AVR that stores negated 8 bit value
 (high 8 bit of data memory address) into 8 bit immediate value of
-SUBI insn. */
+SUBI insn.  */
   BFD_RELOC_AVR_HI8_LDI_NEG,
 
 /* This is a 16 bit reloc for the AVR that stores negated 8 bit value
 (most high 8 bit of program memory address) into 8 bit immediate value
-of LDI or SUBI insn. */
+of LDI or SUBI insn.  */
   BFD_RELOC_AVR_HH8_LDI_NEG,
 
 /* This is a 16 bit reloc for the AVR that stores negated 8 bit value (msb
-of 32 bit value) into 8 bit immediate value of LDI insn. */
+of 32 bit value) into 8 bit immediate value of LDI insn.  */
   BFD_RELOC_AVR_MS8_LDI_NEG,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (usually
-command address) into 8 bit immediate value of LDI insn. */
+command address) into 8 bit immediate value of LDI insn.  */
   BFD_RELOC_AVR_LO8_LDI_PM,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value
 (command address) into 8 bit immediate value of LDI insn. If the address
 is beyond the 128k boundary, the linker inserts a jump stub for this reloc
-in the lower 128k. */
+in the lower 128k.  */
   BFD_RELOC_AVR_LO8_LDI_GS,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
-of command address) into 8 bit immediate value of LDI insn. */
+of command address) into 8 bit immediate value of LDI insn.  */
   BFD_RELOC_AVR_HI8_LDI_PM,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (high 8 bit
 of command address) into 8 bit immediate value of LDI insn.  If the address
 is beyond the 128k boundary, the linker inserts a jump stub for this reloc
-below 128k. */
+below 128k.  */
   BFD_RELOC_AVR_HI8_LDI_GS,
 
 /* This is a 16 bit reloc for the AVR that stores 8 bit value (most high 8 bit
-of command address) into 8 bit immediate value of LDI insn. */
+of command address) into 8 bit immediate value of LDI insn.  */
   BFD_RELOC_AVR_HH8_LDI_PM,
 
 /* This is a 16 bit reloc for the AVR that stores negated 8 bit value
-(usually command address) into 8 bit immediate value of SUBI insn. */
+(usually command address) into 8 bit immediate value of SUBI insn.  */
   BFD_RELOC_AVR_LO8_LDI_PM_NEG,
 
 /* This is a 16 bit reloc for the AVR that stores negated 8 bit value
 (high 8 bit of 16 bit command address) into 8 bit immediate value
-of SUBI insn. */
+of SUBI insn.  */
   BFD_RELOC_AVR_HI8_LDI_PM_NEG,
 
 /* This is a 16 bit reloc for the AVR that stores negated 8 bit value
 (high 6 bit of 22 bit command address) into 8 bit immediate
-value of SUBI insn. */
+value of SUBI insn.  */
   BFD_RELOC_AVR_HH8_LDI_PM_NEG,
 
 /* This is a 32 bit reloc for the AVR that stores 23 bit value
-into 22 bits. */
+into 22 bits.  */
   BFD_RELOC_AVR_CALL,
 
 /* This is a 16 bit reloc for the AVR that stores all needed bits
-for absolute addressing with ldi with overflow check to linktime */
+for absolute addressing with ldi with overflow check to linktime  */
   BFD_RELOC_AVR_LDI,
 
 /* This is a 6 bit reloc for the AVR that stores offset for ldd/std
-instructions */
+instructions  */
   BFD_RELOC_AVR_6,
 
 /* This is a 6 bit reloc for the AVR that stores offset for adiw/sbiw
-instructions */
+instructions  */
   BFD_RELOC_AVR_6_ADIW,
 
 /* This is a 8 bit reloc for the AVR that stores bits 0..7 of a symbol
-in .byte lo8(symbol) */
+in .byte lo8(symbol)  */
   BFD_RELOC_AVR_8_LO,
 
 /* This is a 8 bit reloc for the AVR that stores bits 8..15 of a symbol
-in .byte hi8(symbol) */
+in .byte hi8(symbol)  */
   BFD_RELOC_AVR_8_HI,
 
 /* This is a 8 bit reloc for the AVR that stores bits 16..23 of a symbol
-in .byte hlo8(symbol) */
+in .byte hlo8(symbol)  */
   BFD_RELOC_AVR_8_HLO,
 
-
-/* Renesas RL78 Relocations. */
+/* Renesas RL78 Relocations.  */
   BFD_RELOC_RL78_NEG8,
   BFD_RELOC_RL78_NEG16,
   BFD_RELOC_RL78_NEG24,
@@ -4253,7 +4487,7 @@ in .byte hlo8(symbol) */
   BFD_RELOC_RL78_LO16,
   BFD_RELOC_RL78_CODE,
 
-/* Renesas RX Relocations. */
+/* Renesas RX Relocations.  */
   BFD_RELOC_RX_NEG8,
   BFD_RELOC_RX_NEG16,
   BFD_RELOC_RX_NEG24,
@@ -4282,85 +4516,97 @@ in .byte hlo8(symbol) */
   BFD_RELOC_RX_ABS16UL,
   BFD_RELOC_RX_RELAX,
 
-/* Direct 12 bit. */
+/* Direct 12 bit.  */
   BFD_RELOC_390_12,
 
-/* 12 bit GOT offset. */
+/* 12 bit GOT offset.  */
   BFD_RELOC_390_GOT12,
 
-/* 32 bit PC relative PLT address. */
+/* 32 bit PC relative PLT address.  */
   BFD_RELOC_390_PLT32,
 
-/* Copy symbol at runtime. */
+/* Copy symbol at runtime.  */
   BFD_RELOC_390_COPY,
 
-/* Create GOT entry. */
+/* Create GOT entry.  */
   BFD_RELOC_390_GLOB_DAT,
 
-/* Create PLT entry. */
+/* Create PLT entry.  */
   BFD_RELOC_390_JMP_SLOT,
 
-/* Adjust by program base. */
+/* Adjust by program base.  */
   BFD_RELOC_390_RELATIVE,
 
-/* 32 bit PC relative offset to GOT. */
+/* 32 bit PC relative offset to GOT.  */
   BFD_RELOC_390_GOTPC,
 
-/* 16 bit GOT offset. */
+/* 16 bit GOT offset.  */
   BFD_RELOC_390_GOT16,
 
-/* PC relative 16 bit shifted by 1. */
+/* PC relative 12 bit shifted by 1.  */
+  BFD_RELOC_390_PC12DBL,
+
+/* 12 bit PC rel. PLT shifted by 1.  */
+  BFD_RELOC_390_PLT12DBL,
+
+/* PC relative 16 bit shifted by 1.  */
   BFD_RELOC_390_PC16DBL,
 
-/* 16 bit PC rel. PLT shifted by 1. */
+/* 16 bit PC rel. PLT shifted by 1.  */
   BFD_RELOC_390_PLT16DBL,
 
-/* PC relative 32 bit shifted by 1. */
+/* PC relative 24 bit shifted by 1.  */
+  BFD_RELOC_390_PC24DBL,
+
+/* 24 bit PC rel. PLT shifted by 1.  */
+  BFD_RELOC_390_PLT24DBL,
+
+/* PC relative 32 bit shifted by 1.  */
   BFD_RELOC_390_PC32DBL,
 
-/* 32 bit PC rel. PLT shifted by 1. */
+/* 32 bit PC rel. PLT shifted by 1.  */
   BFD_RELOC_390_PLT32DBL,
 
-/* 32 bit PC rel. GOT shifted by 1. */
+/* 32 bit PC rel. GOT shifted by 1.  */
   BFD_RELOC_390_GOTPCDBL,
 
-/* 64 bit GOT offset. */
+/* 64 bit GOT offset.  */
   BFD_RELOC_390_GOT64,
 
-/* 64 bit PC relative PLT address. */
+/* 64 bit PC relative PLT address.  */
   BFD_RELOC_390_PLT64,
 
-/* 32 bit rel. offset to GOT entry. */
+/* 32 bit rel. offset to GOT entry.  */
   BFD_RELOC_390_GOTENT,
 
-/* 64 bit offset to GOT. */
+/* 64 bit offset to GOT.  */
   BFD_RELOC_390_GOTOFF64,
 
-/* 12-bit offset to symbol-entry within GOT, with PLT handling. */
+/* 12-bit offset to symbol-entry within GOT, with PLT handling.  */
   BFD_RELOC_390_GOTPLT12,
 
-/* 16-bit offset to symbol-entry within GOT, with PLT handling. */
+/* 16-bit offset to symbol-entry within GOT, with PLT handling.  */
   BFD_RELOC_390_GOTPLT16,
 
-/* 32-bit offset to symbol-entry within GOT, with PLT handling. */
+/* 32-bit offset to symbol-entry within GOT, with PLT handling.  */
   BFD_RELOC_390_GOTPLT32,
 
-/* 64-bit offset to symbol-entry within GOT, with PLT handling. */
+/* 64-bit offset to symbol-entry within GOT, with PLT handling.  */
   BFD_RELOC_390_GOTPLT64,
 
-/* 32-bit rel. offset to symbol-entry within GOT, with PLT handling. */
+/* 32-bit rel. offset to symbol-entry within GOT, with PLT handling.  */
   BFD_RELOC_390_GOTPLTENT,
 
-/* 16-bit rel. offset from the GOT to a PLT entry. */
+/* 16-bit rel. offset from the GOT to a PLT entry.  */
   BFD_RELOC_390_PLTOFF16,
 
-/* 32-bit rel. offset from the GOT to a PLT entry. */
+/* 32-bit rel. offset from the GOT to a PLT entry.  */
   BFD_RELOC_390_PLTOFF32,
 
-/* 64-bit rel. offset from the GOT to a PLT entry. */
+/* 64-bit rel. offset from the GOT to a PLT entry.  */
   BFD_RELOC_390_PLTOFF64,
 
-/* s390 tls relocations. */
+/* s390 tls relocations.  */
   BFD_RELOC_390_TLS_LOAD,
   BFD_RELOC_390_TLS_GDCALL,
   BFD_RELOC_390_TLS_LDCALL,
@@ -4382,78 +4628,78 @@ in .byte hlo8(symbol) */
   BFD_RELOC_390_TLS_DTPOFF,
   BFD_RELOC_390_TLS_TPOFF,
 
-/* Long displacement extension. */
+/* Long displacement extension.  */
   BFD_RELOC_390_20,
   BFD_RELOC_390_GOT20,
   BFD_RELOC_390_GOTPLT20,
   BFD_RELOC_390_TLS_GOTIE20,
 
-/* STT_GNU_IFUNC relocation. */
+/* STT_GNU_IFUNC relocation.  */
   BFD_RELOC_390_IRELATIVE,
 
 /* Score relocations
-Low 16 bit for load/store */
+Low 16 bit for load/store  */
   BFD_RELOC_SCORE_GPREL15,
 
-/* This is a 24-bit reloc with the right 1 bit assumed to be 0 */
+/* This is a 24-bit reloc with the right 1 bit assumed to be 0  */
   BFD_RELOC_SCORE_DUMMY2,
   BFD_RELOC_SCORE_JMP,
 
-/* This is a 19-bit reloc with the right 1 bit assumed to be 0 */
+/* This is a 19-bit reloc with the right 1 bit assumed to be 0  */
   BFD_RELOC_SCORE_BRANCH,
 
-/* This is a 32-bit reloc for 48-bit instructions. */
+/* This is a 32-bit reloc for 48-bit instructions.  */
   BFD_RELOC_SCORE_IMM30,
 
-/* This is a 32-bit reloc for 48-bit instructions. */
+/* This is a 32-bit reloc for 48-bit instructions.  */
   BFD_RELOC_SCORE_IMM32,
 
-/* This is a 11-bit reloc with the right 1 bit assumed to be 0 */
+/* This is a 11-bit reloc with the right 1 bit assumed to be 0  */
   BFD_RELOC_SCORE16_JMP,
 
-/* This is a 8-bit reloc with the right 1 bit assumed to be 0 */
+/* This is a 8-bit reloc with the right 1 bit assumed to be 0  */
   BFD_RELOC_SCORE16_BRANCH,
 
-/* This is a 9-bit reloc with the right 1 bit assumed to be 0 */
+/* This is a 9-bit reloc with the right 1 bit assumed to be 0  */
   BFD_RELOC_SCORE_BCMP,
 
-/* Undocumented Score relocs */
+/* Undocumented Score relocs  */
   BFD_RELOC_SCORE_GOT15,
   BFD_RELOC_SCORE_GOT_LO16,
   BFD_RELOC_SCORE_CALL15,
   BFD_RELOC_SCORE_DUMMY_HI16,
 
-/* Scenix IP2K - 9-bit register number / data address */
+/* Scenix IP2K - 9-bit register number / data address  */
   BFD_RELOC_IP2K_FR9,
 
-/* Scenix IP2K - 4-bit register/data bank number */
+/* Scenix IP2K - 4-bit register/data bank number  */
   BFD_RELOC_IP2K_BANK,
 
-/* Scenix IP2K - low 13 bits of instruction word address */
+/* Scenix IP2K - low 13 bits of instruction word address  */
   BFD_RELOC_IP2K_ADDR16CJP,
 
-/* Scenix IP2K - high 3 bits of instruction word address */
+/* Scenix IP2K - high 3 bits of instruction word address  */
   BFD_RELOC_IP2K_PAGE3,
 
-/* Scenix IP2K - ext/low/high 8 bits of data address */
+/* Scenix IP2K - ext/low/high 8 bits of data address  */
   BFD_RELOC_IP2K_LO8DATA,
   BFD_RELOC_IP2K_HI8DATA,
   BFD_RELOC_IP2K_EX8DATA,
 
-/* Scenix IP2K - low/high 8 bits of instruction word address */
+/* Scenix IP2K - low/high 8 bits of instruction word address  */
   BFD_RELOC_IP2K_LO8INSN,
   BFD_RELOC_IP2K_HI8INSN,
 
-/* Scenix IP2K - even/odd PC modifier to modify snb pcl.0 */
+/* Scenix IP2K - even/odd PC modifier to modify snb pcl.0  */
   BFD_RELOC_IP2K_PC_SKIP,
 
-/* Scenix IP2K - 16 bit word address in text section. */
+/* Scenix IP2K - 16 bit word address in text section.  */
   BFD_RELOC_IP2K_TEXT,
 
-/* Scenix IP2K - 7-bit sp or dp offset */
+/* Scenix IP2K - 7-bit sp or dp offset  */
   BFD_RELOC_IP2K_FR_OFFSET,
 
-/* Scenix VPE4K coprocessor - data/insn-space addressing */
+/* Scenix VPE4K coprocessor - data/insn-space addressing  */
   BFD_RELOC_VPE4KMATH_DATA,
   BFD_RELOC_VPE4KMATH_INSN,
 
@@ -4473,11 +4719,11 @@ virtual function table entry.  The reloc's symbol should refer to the
 table of the class mentioned in the code.  Off of that base, an offset
 describes the entry that is being used.  For Rela hosts, this offset
 is stored in the reloc's addend.  For Rel hosts, we are forced to put
-this offset in the reloc's section offset. */
+this offset in the reloc's section offset.  */
   BFD_RELOC_VTABLE_INHERIT,
   BFD_RELOC_VTABLE_ENTRY,
 
-/* Intel IA64 Relocations. */
+/* Intel IA64 Relocations.  */
   BFD_RELOC_IA64_IMM14,
   BFD_RELOC_IA64_IMM22,
   BFD_RELOC_IA64_IMM64,
@@ -4559,130 +4805,130 @@ this offset in the reloc's section offset. */
   BFD_RELOC_IA64_LTOFF_DTPREL22,
 
 /* Motorola 68HC11 reloc.
-This is the 8 bit high part of an absolute address. */
+This is the 8 bit high part of an absolute address.  */
   BFD_RELOC_M68HC11_HI8,
 
 /* Motorola 68HC11 reloc.
-This is the 8 bit low part of an absolute address. */
+This is the 8 bit low part of an absolute address.  */
   BFD_RELOC_M68HC11_LO8,
 
 /* Motorola 68HC11 reloc.
-This is the 3 bit of a value. */
+This is the 3 bit of a value.  */
   BFD_RELOC_M68HC11_3B,
 
 /* Motorola 68HC11 reloc.
 This reloc marks the beginning of a jump/call instruction.
 It is used for linker relaxation to correctly identify beginning
 of instruction and change some branches to use PC-relative
-addressing mode. */
+addressing mode.  */
   BFD_RELOC_M68HC11_RL_JUMP,
 
 /* Motorola 68HC11 reloc.
 This reloc marks a group of several instructions that gcc generates
 and for which the linker relaxation pass can modify and/or remove
-some of them. */
+some of them.  */
   BFD_RELOC_M68HC11_RL_GROUP,
 
 /* Motorola 68HC11 reloc.
 This is the 16-bit lower part of an address.  It is used for 'call'
 instruction to specify the symbol address without any special
-transformation (due to memory bank window). */
+transformation (due to memory bank window).  */
   BFD_RELOC_M68HC11_LO16,
 
 /* Motorola 68HC11 reloc.
 This is a 8-bit reloc that specifies the page number of an address.
 It is used by 'call' instruction to specify the page number of
-the symbol. */
+the symbol.  */
   BFD_RELOC_M68HC11_PAGE,
 
 /* Motorola 68HC11 reloc.
 This is a 24-bit reloc that represents the address with a 16-bit
 value and a 8-bit page number.  The symbol address is transformed
-to follow the 16K memory bank of 68HC12 (seen as mapped in the window). */
+to follow the 16K memory bank of 68HC12 (seen as mapped in the window).  */
   BFD_RELOC_M68HC11_24,
 
 /* Motorola 68HC12 reloc.
-This is the 5 bits of a value. */
+This is the 5 bits of a value.  */
   BFD_RELOC_M68HC12_5B,
 
 /* Freescale XGATE reloc.
-This reloc marks the beginning of a bra/jal instruction. */
+This reloc marks the beginning of a bra/jal instruction.  */
   BFD_RELOC_XGATE_RL_JUMP,
 
 /* Freescale XGATE reloc.
 This reloc marks a group of several instructions that gcc generates
 and for which the linker relaxation pass can modify and/or remove
-some of them. */
+some of them.  */
   BFD_RELOC_XGATE_RL_GROUP,
 
 /* Freescale XGATE reloc.
 This is the 16-bit lower part of an address.  It is used for the '16-bit'
-instructions. */
+instructions.  */
   BFD_RELOC_XGATE_LO16,
 
-/* Freescale XGATE reloc. */
+/* Freescale XGATE reloc.  */
   BFD_RELOC_XGATE_GPAGE,
 
-/* Freescale XGATE reloc. */
+/* Freescale XGATE reloc.  */
   BFD_RELOC_XGATE_24,
 
 /* Freescale XGATE reloc.
-This is a 9-bit pc-relative reloc. */
+This is a 9-bit pc-relative reloc.  */
   BFD_RELOC_XGATE_PCREL_9,
 
 /* Freescale XGATE reloc.
-This is a 10-bit pc-relative reloc. */
+This is a 10-bit pc-relative reloc.  */
   BFD_RELOC_XGATE_PCREL_10,
 
 /* Freescale XGATE reloc.
 This is the 16-bit lower part of an address.  It is used for the '16-bit'
-instructions. */
+instructions.  */
   BFD_RELOC_XGATE_IMM8_LO,
 
 /* Freescale XGATE reloc.
 This is the 16-bit higher part of an address.  It is used for the '16-bit'
-instructions. */
+instructions.  */
   BFD_RELOC_XGATE_IMM8_HI,
 
 /* Freescale XGATE reloc.
-This is a 3-bit pc-relative reloc. */
+This is a 3-bit pc-relative reloc.  */
   BFD_RELOC_XGATE_IMM3,
 
 /* Freescale XGATE reloc.
-This is a 4-bit pc-relative reloc. */
+This is a 4-bit pc-relative reloc.  */
   BFD_RELOC_XGATE_IMM4,
 
 /* Freescale XGATE reloc.
-This is a 5-bit pc-relative reloc. */
+This is a 5-bit pc-relative reloc.  */
   BFD_RELOC_XGATE_IMM5,
 
 /* Motorola 68HC12 reloc.
-This is the 9 bits of a value. */
+This is the 9 bits of a value.  */
   BFD_RELOC_M68HC12_9B,
 
 /* Motorola 68HC12 reloc.
-This is the 16 bits of a value. */
+This is the 16 bits of a value.  */
   BFD_RELOC_M68HC12_16B,
 
 /* Motorola 68HC12/XGATE reloc.
-This is a PCREL9 branch. */
+This is a PCREL9 branch.  */
   BFD_RELOC_M68HC12_9_PCREL,
 
 /* Motorola 68HC12/XGATE reloc.
-This is a PCREL10 branch. */
+This is a PCREL10 branch.  */
   BFD_RELOC_M68HC12_10_PCREL,
 
 /* Motorola 68HC12/XGATE reloc.
 This is the 8 bit low part of an absolute address and immediately precedes
-a matching HI8XG part. */
+a matching HI8XG part.  */
   BFD_RELOC_M68HC12_LO8XG,
 
 /* Motorola 68HC12/XGATE reloc.
 This is the 8 bit high part of an absolute address and immediately follows
-a matching LO8XG part. */
+a matching LO8XG part.  */
   BFD_RELOC_M68HC12_HI8XG,
 
-/* NS CR16C Relocations. */
+/* NS CR16C Relocations.  */
   BFD_RELOC_16C_NUM08,
   BFD_RELOC_16C_NUM08_C,
   BFD_RELOC_16C_NUM16,
@@ -4724,7 +4970,7 @@ a matching LO8XG part. */
   BFD_RELOC_16C_IMM32,
   BFD_RELOC_16C_IMM32_C,
 
-/* NS CR16 Relocations. */
+/* NS CR16 Relocations.  */
   BFD_RELOC_CR16_NUM8,
   BFD_RELOC_CR16_NUM16,
   BFD_RELOC_CR16_NUM32,
@@ -4759,7 +5005,7 @@ a matching LO8XG part. */
   BFD_RELOC_CR16_GOTC_REGREL20,
   BFD_RELOC_CR16_GLOB_DAT,
 
-/* NS CRX Relocations. */
+/* NS CRX Relocations.  */
   BFD_RELOC_CRX_REL4,
   BFD_RELOC_CRX_REL8,
   BFD_RELOC_CRX_REL8_CMP,
@@ -4782,7 +5028,7 @@ a matching LO8XG part. */
   BFD_RELOC_CRX_SWITCH32,
 
 /* These relocs are only used within the CRIS assembler.  They are not
-(at present) written to any object files. */
+(at present) written to any object files.  */
   BFD_RELOC_CRIS_BDISP8,
   BFD_RELOC_CRIS_UNSIGNED_5,
   BFD_RELOC_CRIS_SIGNED_6,
@@ -4794,34 +5040,34 @@ a matching LO8XG part. */
   BFD_RELOC_CRIS_LAPCQ_OFFSET,
   BFD_RELOC_CRIS_UNSIGNED_4,
 
-/* Relocs used in ELF shared libraries for CRIS. */
+/* Relocs used in ELF shared libraries for CRIS.  */
   BFD_RELOC_CRIS_COPY,
   BFD_RELOC_CRIS_GLOB_DAT,
   BFD_RELOC_CRIS_JUMP_SLOT,
   BFD_RELOC_CRIS_RELATIVE,
 
-/* 32-bit offset to symbol-entry within GOT. */
+/* 32-bit offset to symbol-entry within GOT.  */
   BFD_RELOC_CRIS_32_GOT,
 
-/* 16-bit offset to symbol-entry within GOT. */
+/* 16-bit offset to symbol-entry within GOT.  */
   BFD_RELOC_CRIS_16_GOT,
 
-/* 32-bit offset to symbol-entry within GOT, with PLT handling. */
+/* 32-bit offset to symbol-entry within GOT, with PLT handling.  */
   BFD_RELOC_CRIS_32_GOTPLT,
 
-/* 16-bit offset to symbol-entry within GOT, with PLT handling. */
+/* 16-bit offset to symbol-entry within GOT, with PLT handling.  */
   BFD_RELOC_CRIS_16_GOTPLT,
 
-/* 32-bit offset to symbol, relative to GOT. */
+/* 32-bit offset to symbol, relative to GOT.  */
   BFD_RELOC_CRIS_32_GOTREL,
 
-/* 32-bit offset to symbol with PLT entry, relative to GOT. */
+/* 32-bit offset to symbol with PLT entry, relative to GOT.  */
   BFD_RELOC_CRIS_32_PLT_GOTREL,
 
-/* 32-bit offset to symbol with PLT entry, relative to this relocation. */
+/* 32-bit offset to symbol with PLT entry, relative to this relocation.  */
   BFD_RELOC_CRIS_32_PLT_PCREL,
 
-/* Relocs used in TLS code for CRIS. */
+/* Relocs used in TLS code for CRIS.  */
   BFD_RELOC_CRIS_32_GOT_GD,
   BFD_RELOC_CRIS_16_GOT_GD,
   BFD_RELOC_CRIS_32_GD,
@@ -4835,7 +5081,7 @@ a matching LO8XG part. */
   BFD_RELOC_CRIS_DTPMOD,
   BFD_RELOC_CRIS_32_IE,
 
-/* Intel i860 Relocations. */
+/* Intel i860 Relocations.  */
   BFD_RELOC_860_COPY,
   BFD_RELOC_860_GLOB_DAT,
   BFD_RELOC_860_JUMP_SLOT,
@@ -4869,57 +5115,58 @@ a matching LO8XG part. */
   BFD_RELOC_860_HIGOT,
   BFD_RELOC_860_HIGOTOFF,
 
-/* OpenRISC Relocations. */
+/* OpenRISC Relocations.  */
   BFD_RELOC_OPENRISC_ABS_26,
   BFD_RELOC_OPENRISC_REL_26,
 
-/* H8 elf Relocations. */
+/* H8 elf Relocations.  */
   BFD_RELOC_H8_DIR16A8,
   BFD_RELOC_H8_DIR16R8,
   BFD_RELOC_H8_DIR24A8,
   BFD_RELOC_H8_DIR24R8,
   BFD_RELOC_H8_DIR32A16,
+  BFD_RELOC_H8_DISP32A16,
 
-/* Sony Xstormy16 Relocations. */
+/* Sony Xstormy16 Relocations.  */
   BFD_RELOC_XSTORMY16_REL_12,
   BFD_RELOC_XSTORMY16_12,
   BFD_RELOC_XSTORMY16_24,
   BFD_RELOC_XSTORMY16_FPTR16,
 
-/* Self-describing complex relocations. */
+/* Self-describing complex relocations.  */
   BFD_RELOC_RELC,
 
 
-/* Infineon Relocations. */
+/* Infineon Relocations.  */
   BFD_RELOC_XC16X_PAG,
   BFD_RELOC_XC16X_POF,
   BFD_RELOC_XC16X_SEG,
   BFD_RELOC_XC16X_SOF,
 
-/* Relocations used by VAX ELF. */
+/* Relocations used by VAX ELF.  */
   BFD_RELOC_VAX_GLOB_DAT,
   BFD_RELOC_VAX_JMP_SLOT,
   BFD_RELOC_VAX_RELATIVE,
 
-/* Morpho MT - 16 bit immediate relocation. */
+/* Morpho MT - 16 bit immediate relocation.  */
   BFD_RELOC_MT_PC16,
 
-/* Morpho MT - Hi 16 bits of an address. */
+/* Morpho MT - Hi 16 bits of an address.  */
   BFD_RELOC_MT_HI16,
 
-/* Morpho MT - Low 16 bits of an address. */
+/* Morpho MT - Low 16 bits of an address.  */
   BFD_RELOC_MT_LO16,
 
-/* Morpho MT - Used to tell the linker which vtable entries are used. */
+/* Morpho MT - Used to tell the linker which vtable entries are used.  */
   BFD_RELOC_MT_GNU_VTINHERIT,
 
-/* Morpho MT - Used to tell the linker which vtable entries are used. */
+/* Morpho MT - Used to tell the linker which vtable entries are used.  */
   BFD_RELOC_MT_GNU_VTENTRY,
 
-/* Morpho MT - 8 bit immediate relocation. */
+/* Morpho MT - 8 bit immediate relocation.  */
   BFD_RELOC_MT_PCINSN8,
 
-/* msp430 specific relocation codes */
+/* msp430 specific relocation codes  */
   BFD_RELOC_MSP430_10_PCREL,
   BFD_RELOC_MSP430_16_PCREL,
   BFD_RELOC_MSP430_16,
@@ -4943,7 +5190,7 @@ a matching LO8XG part. */
   BFD_RELOC_MSP430_PREL31,
   BFD_RELOC_MSP430_SYM_DIFF,
 
-/* Relocations used by the Altera Nios II core. */
+/* Relocations used by the Altera Nios II core.  */
   BFD_RELOC_NIOS2_S16,
   BFD_RELOC_NIOS2_U16,
   BFD_RELOC_NIOS2_CALL26,
@@ -4979,23 +5226,23 @@ a matching LO8XG part. */
   BFD_RELOC_NIOS2_RELATIVE,
   BFD_RELOC_NIOS2_GOTOFF,
 
-/* IQ2000 Relocations. */
+/* IQ2000 Relocations.  */
   BFD_RELOC_IQ2000_OFFSET_16,
   BFD_RELOC_IQ2000_OFFSET_21,
   BFD_RELOC_IQ2000_UHI16,
 
 /* Special Xtensa relocation used only by PLT entries in ELF shared
 objects to indicate that the runtime linker should set the value
-to one of its own internal functions or data structures. */
+to one of its own internal functions or data structures.  */
   BFD_RELOC_XTENSA_RTLD,
 
-/* Xtensa relocations for ELF shared objects. */
+/* Xtensa relocations for ELF shared objects.  */
   BFD_RELOC_XTENSA_GLOB_DAT,
   BFD_RELOC_XTENSA_JMP_SLOT,
   BFD_RELOC_XTENSA_RELATIVE,
 
 /* Xtensa relocation used in ELF object files for symbols that may require
-PLT entries.  Otherwise, this is just a generic 32-bit relocation. */
+PLT entries.  Otherwise, this is just a generic 32-bit relocation.  */
   BFD_RELOC_XTENSA_PLT,
 
 /* Xtensa relocations to mark the difference of two local symbols.
@@ -5003,7 +5250,7 @@ These are only needed to support linker relaxation and can be ignored
 when not relaxing.  The field is set to the value of the difference
 assuming no relaxation.  The relocation encodes the position of the
 first symbol so the linker can determine whether to adjust the field
-value. */
+value.  */
   BFD_RELOC_XTENSA_DIFF8,
   BFD_RELOC_XTENSA_DIFF16,
   BFD_RELOC_XTENSA_DIFF32,
@@ -5011,7 +5258,7 @@ value. */
 /* Generic Xtensa relocations for instruction operands.  Only the slot
 number is encoded in the relocation.  The relocation applies to the
 last PC-relative immediate operand, or if there are no PC-relative
-immediates, to the last immediate operand. */
+immediates, to the last immediate operand.  */
   BFD_RELOC_XTENSA_SLOT0_OP,
   BFD_RELOC_XTENSA_SLOT1_OP,
   BFD_RELOC_XTENSA_SLOT2_OP,
@@ -5029,7 +5276,7 @@ immediates, to the last immediate operand. */
   BFD_RELOC_XTENSA_SLOT14_OP,
 
 /* Alternate Xtensa relocations.  Only the slot is encoded in the
-relocation.  The meaning of these relocations is opcode-specific. */
+relocation.  The meaning of these relocations is opcode-specific.  */
   BFD_RELOC_XTENSA_SLOT0_ALT,
   BFD_RELOC_XTENSA_SLOT1_ALT,
   BFD_RELOC_XTENSA_SLOT2_ALT,
@@ -5047,23 +5294,23 @@ relocation.  The meaning of these relocations is opcode-specific. */
   BFD_RELOC_XTENSA_SLOT14_ALT,
 
 /* Xtensa relocations for backward compatibility.  These have all been
-replaced by BFD_RELOC_XTENSA_SLOT0_OP. */
+replaced by BFD_RELOC_XTENSA_SLOT0_OP.  */
   BFD_RELOC_XTENSA_OP0,
   BFD_RELOC_XTENSA_OP1,
   BFD_RELOC_XTENSA_OP2,
 
 /* Xtensa relocation to mark that the assembler expanded the
 instructions from an original target.  The expansion size is
-encoded in the reloc size. */
+encoded in the reloc size.  */
   BFD_RELOC_XTENSA_ASM_EXPAND,
 
 /* Xtensa relocation to mark that the linker should simplify
 assembler-expanded instructions.  This is commonly used
 internally by the linker after analysis of a
-BFD_RELOC_XTENSA_ASM_EXPAND. */
+BFD_RELOC_XTENSA_ASM_EXPAND.  */
   BFD_RELOC_XTENSA_ASM_SIMPLIFY,
 
-/* Xtensa TLS relocations. */
+/* Xtensa TLS relocations.  */
   BFD_RELOC_XTENSA_TLSDESC_FN,
   BFD_RELOC_XTENSA_TLSDESC_ARG,
   BFD_RELOC_XTENSA_TLS_DTPOFF,
@@ -5072,19 +5319,19 @@ BFD_RELOC_XTENSA_ASM_EXPAND. */
   BFD_RELOC_XTENSA_TLS_ARG,
   BFD_RELOC_XTENSA_TLS_CALL,
 
-/* 8 bit signed offset in (ix+d) or (iy+d). */
+/* 8 bit signed offset in (ix+d) or (iy+d).  */
   BFD_RELOC_Z80_DISP8,
 
-/* DJNZ offset. */
+/* DJNZ offset.  */
   BFD_RELOC_Z8K_DISP7,
 
-/* CALR offset. */
+/* CALR offset.  */
   BFD_RELOC_Z8K_CALLR,
 
-/* 4 bit value. */
+/* 4 bit value.  */
   BFD_RELOC_Z8K_IMM4L,
 
-/* Lattice Mico32 relocations. */
+/* Lattice Mico32 relocations.  */
   BFD_RELOC_LM32_CALL,
   BFD_RELOC_LM32_BRANCH,
   BFD_RELOC_LM32_16_GOT,
@@ -5096,348 +5343,415 @@ BFD_RELOC_XTENSA_ASM_EXPAND. */
   BFD_RELOC_LM32_RELATIVE,
 
 /* Difference between two section addreses.  Must be followed by a
-BFD_RELOC_MACH_O_PAIR. */
+BFD_RELOC_MACH_O_PAIR.  */
   BFD_RELOC_MACH_O_SECTDIFF,
 
-/* Like BFD_RELOC_MACH_O_SECTDIFF but with a local symbol. */
+/* Like BFD_RELOC_MACH_O_SECTDIFF but with a local symbol.  */
   BFD_RELOC_MACH_O_LOCAL_SECTDIFF,
 
-/* Pair of relocation.  Contains the first symbol. */
+/* Pair of relocation.  Contains the first symbol.  */
   BFD_RELOC_MACH_O_PAIR,
 
 /* PCREL relocations.  They are marked as branch to create PLT entry if
-required. */
+required.  */
   BFD_RELOC_MACH_O_X86_64_BRANCH32,
   BFD_RELOC_MACH_O_X86_64_BRANCH8,
 
-/* Used when referencing a GOT entry. */
+/* Used when referencing a GOT entry.  */
   BFD_RELOC_MACH_O_X86_64_GOT,
 
 /* Used when loading a GOT entry with movq.  It is specially marked so that
-the linker could optimize the movq to a leaq if possible. */
+the linker could optimize the movq to a leaq if possible.  */
   BFD_RELOC_MACH_O_X86_64_GOT_LOAD,
 
-/* Symbol will be substracted.  Must be followed by a BFD_RELOC_64. */
+/* Symbol will be substracted.  Must be followed by a BFD_RELOC_64.  */
   BFD_RELOC_MACH_O_X86_64_SUBTRACTOR32,
 
-/* Symbol will be substracted.  Must be followed by a BFD_RELOC_64. */
+/* Symbol will be substracted.  Must be followed by a BFD_RELOC_64.  */
   BFD_RELOC_MACH_O_X86_64_SUBTRACTOR64,
 
-/* Same as BFD_RELOC_32_PCREL but with an implicit -1 addend. */
+/* Same as BFD_RELOC_32_PCREL but with an implicit -1 addend.  */
   BFD_RELOC_MACH_O_X86_64_PCREL32_1,
 
-/* Same as BFD_RELOC_32_PCREL but with an implicit -2 addend. */
+/* Same as BFD_RELOC_32_PCREL but with an implicit -2 addend.  */
   BFD_RELOC_MACH_O_X86_64_PCREL32_2,
 
-/* Same as BFD_RELOC_32_PCREL but with an implicit -4 addend. */
+/* Same as BFD_RELOC_32_PCREL but with an implicit -4 addend.  */
   BFD_RELOC_MACH_O_X86_64_PCREL32_4,
 
 /* This is a 32 bit reloc for the microblaze that stores the
-low 16 bits of a value */
+low 16 bits of a value  */
   BFD_RELOC_MICROBLAZE_32_LO,
 
 /* This is a 32 bit pc-relative reloc for the microblaze that
-stores the low 16 bits of a value */
+stores the low 16 bits of a value  */
   BFD_RELOC_MICROBLAZE_32_LO_PCREL,
 
 /* This is a 32 bit reloc for the microblaze that stores a
-value relative to the read-only small data area anchor */
+value relative to the read-only small data area anchor  */
   BFD_RELOC_MICROBLAZE_32_ROSDA,
 
 /* This is a 32 bit reloc for the microblaze that stores a
-value relative to the read-write small data area anchor */
+value relative to the read-write small data area anchor  */
   BFD_RELOC_MICROBLAZE_32_RWSDA,
 
 /* This is a 32 bit reloc for the microblaze to handle
-expressions of the form "Symbol Op Symbol" */
+expressions of the form "Symbol Op Symbol"  */
   BFD_RELOC_MICROBLAZE_32_SYM_OP_SYM,
 
 /* This is a 64 bit reloc that stores the 32 bit pc relative
 value in two words (with an imm instruction).  No relocation is
-done here - only used for relaxing */
+done here - only used for relaxing  */
   BFD_RELOC_MICROBLAZE_64_NONE,
 
 /* This is a 64 bit reloc that stores the 32 bit pc relative
 value in two words (with an imm instruction).  The relocation is
-PC-relative GOT offset */
+PC-relative GOT offset  */
   BFD_RELOC_MICROBLAZE_64_GOTPC,
 
 /* This is a 64 bit reloc that stores the 32 bit pc relative
 value in two words (with an imm instruction).  The relocation is
-GOT offset */
+GOT offset  */
   BFD_RELOC_MICROBLAZE_64_GOT,
 
 /* This is a 64 bit reloc that stores the 32 bit pc relative
 value in two words (with an imm instruction).  The relocation is
-PC-relative offset into PLT */
+PC-relative offset into PLT  */
   BFD_RELOC_MICROBLAZE_64_PLT,
 
 /* This is a 64 bit reloc that stores the 32 bit GOT relative
 value in two words (with an imm instruction).  The relocation is
-relative offset from _GLOBAL_OFFSET_TABLE_ */
+relative offset from _GLOBAL_OFFSET_TABLE_  */
   BFD_RELOC_MICROBLAZE_64_GOTOFF,
 
 /* This is a 32 bit reloc that stores the 32 bit GOT relative
-value in a word.  The relocation is relative offset from */
+value in a word.  The relocation is relative offset from  */
   BFD_RELOC_MICROBLAZE_32_GOTOFF,
 
 /* This is used to tell the dynamic linker to copy the value out of
-the dynamic object into the runtime process image. */
+the dynamic object into the runtime process image.  */
   BFD_RELOC_MICROBLAZE_COPY,
 
-/* Unused Reloc */
+/* Unused Reloc  */
   BFD_RELOC_MICROBLAZE_64_TLS,
 
 /* This is a 64 bit reloc that stores the 32 bit GOT relative value
 of the GOT TLS GD info entry in two words (with an imm instruction). The
-relocation is GOT offset. */
+relocation is GOT offset.  */
   BFD_RELOC_MICROBLAZE_64_TLSGD,
 
 /* This is a 64 bit reloc that stores the 32 bit GOT relative value
 of the GOT TLS LD info entry in two words (with an imm instruction). The
-relocation is GOT offset. */
+relocation is GOT offset.  */
   BFD_RELOC_MICROBLAZE_64_TLSLD,
 
-/* This is a 32 bit reloc that stores the Module ID to GOT(n). */
+/* This is a 32 bit reloc that stores the Module ID to GOT(n).  */
   BFD_RELOC_MICROBLAZE_32_TLSDTPMOD,
 
-/* This is a 32 bit reloc that stores TLS offset to GOT(n+1). */
+/* This is a 32 bit reloc that stores TLS offset to GOT(n+1).  */
   BFD_RELOC_MICROBLAZE_32_TLSDTPREL,
 
 /* This is a 32 bit reloc for storing TLS offset to two words (uses imm
-instruction) */
+instruction)  */
   BFD_RELOC_MICROBLAZE_64_TLSDTPREL,
 
 /* This is a 64 bit reloc that stores 32-bit thread pointer relative offset
-to two words (uses imm instruction). */
+to two words (uses imm instruction).  */
   BFD_RELOC_MICROBLAZE_64_TLSGOTTPREL,
 
 /* This is a 64 bit reloc that stores 32-bit thread pointer relative offset
-to two words (uses imm instruction). */
+to two words (uses imm instruction).  */
   BFD_RELOC_MICROBLAZE_64_TLSTPREL,
 
+/* AArch64 pseudo relocation code to mark the start of the AArch64
+relocation enumerators.  N.B. the order of the enumerators is
+important as several tables in the AArch64 bfd backend are indexed
+by these enumerators; make sure they are all synced.  */
+  BFD_RELOC_AARCH64_RELOC_START,
+
+/* AArch64 null relocation code.  */
+  BFD_RELOC_AARCH64_NONE,
+
+/* Basic absolute relocations of N bits.  These are equivalent to
+BFD_RELOC_N and they were added to assist the indexing of the howto
+table.  */
+  BFD_RELOC_AARCH64_64,
+  BFD_RELOC_AARCH64_32,
+  BFD_RELOC_AARCH64_16,
+
+/* PC-relative relocations.  These are equivalent to BFD_RELOC_N_PCREL
+and they were added to assist the indexing of the howto table.  */
+  BFD_RELOC_AARCH64_64_PCREL,
+  BFD_RELOC_AARCH64_32_PCREL,
+  BFD_RELOC_AARCH64_16_PCREL,
+
+/* AArch64 MOV[NZK] instruction with most significant bits 0 to 15
+of an unsigned address/value.  */
+  BFD_RELOC_AARCH64_MOVW_G0,
+
+/* AArch64 MOV[NZK] instruction with less significant bits 0 to 15 of
+an address/value.  No overflow checking.  */
+  BFD_RELOC_AARCH64_MOVW_G0_NC,
+
+/* AArch64 MOV[NZK] instruction with most significant bits 16 to 31
+of an unsigned address/value.  */
+  BFD_RELOC_AARCH64_MOVW_G1,
+
+/* AArch64 MOV[NZK] instruction with less significant bits 16 to 31
+of an address/value.  No overflow checking.  */
+  BFD_RELOC_AARCH64_MOVW_G1_NC,
+
+/* AArch64 MOV[NZK] instruction with most significant bits 32 to 47
+of an unsigned address/value.  */
+  BFD_RELOC_AARCH64_MOVW_G2,
+
+/* AArch64 MOV[NZK] instruction with less significant bits 32 to 47
+of an address/value.  No overflow checking.  */
+  BFD_RELOC_AARCH64_MOVW_G2_NC,
+
+/* AArch64 MOV[NZK] instruction with most signficant bits 48 to 64
+of a signed or unsigned address/value.  */
+  BFD_RELOC_AARCH64_MOVW_G3,
+
+/* AArch64 MOV[NZ] instruction with most significant bits 0 to 15
+of a signed value.  Changes instruction to MOVZ or MOVN depending on the
+value's sign.  */
+  BFD_RELOC_AARCH64_MOVW_G0_S,
+
+/* AArch64 MOV[NZ] instruction with most significant bits 16 to 31
+of a signed value.  Changes instruction to MOVZ or MOVN depending on the
+value's sign.  */
+  BFD_RELOC_AARCH64_MOVW_G1_S,
+
+/* AArch64 MOV[NZ] instruction with most significant bits 32 to 47
+of a signed value.  Changes instruction to MOVZ or MOVN depending on the
+value's sign.  */
+  BFD_RELOC_AARCH64_MOVW_G2_S,
+
+/* AArch64 Load Literal instruction, holding a 19 bit pc-relative word
+offset.  The lowest two bits must be zero and are not stored in the
+instruction, giving a 21 bit signed byte offset.  */
+  BFD_RELOC_AARCH64_LD_LO19_PCREL,
+
+/* AArch64 ADR instruction, holding a simple 21 bit pc-relative byte offset.  */
+  BFD_RELOC_AARCH64_ADR_LO21_PCREL,
+
+/* AArch64 ADRP instruction, with bits 12 to 32 of a pc-relative page
+offset, giving a 4KB aligned page base address.  */
+  BFD_RELOC_AARCH64_ADR_HI21_PCREL,
+
+/* AArch64 ADRP instruction, with bits 12 to 32 of a pc-relative page
+offset, giving a 4KB aligned page base address, but with no overflow
+checking.  */
+  BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL,
+
 /* AArch64 ADD immediate instruction, holding bits 0 to 11 of the address.
-Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL. */
+Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL.  */
   BFD_RELOC_AARCH64_ADD_LO12,
+
+/* AArch64 8-bit load/store instruction, holding bits 0 to 11 of the
+address.  Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL.  */
+  BFD_RELOC_AARCH64_LDST8_LO12,
+
+/* AArch64 14 bit pc-relative test bit and branch.
+The lowest two bits must be zero and are not stored in the instruction,
+giving a 16 bit signed byte offset.  */
+  BFD_RELOC_AARCH64_TSTBR14,
+
+/* AArch64 19 bit pc-relative conditional branch and compare & branch.
+The lowest two bits must be zero and are not stored in the instruction,
+giving a 21 bit signed byte offset.  */
+  BFD_RELOC_AARCH64_BRANCH19,
+
+/* AArch64 26 bit pc-relative unconditional branch.
+The lowest two bits must be zero and are not stored in the instruction,
+giving a 28 bit signed byte offset.  */
+  BFD_RELOC_AARCH64_JUMP26,
+
+/* AArch64 26 bit pc-relative unconditional branch and link.
+The lowest two bits must be zero and are not stored in the instruction,
+giving a 28 bit signed byte offset.  */
+  BFD_RELOC_AARCH64_CALL26,
+
+/* AArch64 16-bit load/store instruction, holding bits 0 to 11 of the
+address.  Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL.  */
+  BFD_RELOC_AARCH64_LDST16_LO12,
+
+/* AArch64 32-bit load/store instruction, holding bits 0 to 11 of the
+address.  Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL.  */
+  BFD_RELOC_AARCH64_LDST32_LO12,
+
+/* AArch64 64-bit load/store instruction, holding bits 0 to 11 of the
+address.  Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL.  */
+  BFD_RELOC_AARCH64_LDST64_LO12,
+
+/* AArch64 128-bit load/store instruction, holding bits 0 to 11 of the
+address.  Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL.  */
+  BFD_RELOC_AARCH64_LDST128_LO12,
 
 /* AArch64 Load Literal instruction, holding a 19 bit PC relative word
 offset of the global offset table entry for a symbol.  The lowest two
 bits must be zero and are not stored in the instruction, giving a 21
 bit signed byte offset.  This relocation type requires signed overflow
-checking. */
+checking.  */
   BFD_RELOC_AARCH64_GOT_LD_PREL19,
 
 /* Get to the page base of the global offset table entry for a symbol as
 part of an ADRP instruction using a 21 bit PC relative value.Used in
-conjunction with BFD_RELOC_AARCH64_LD64_GOT_LO12_NC. */
+conjunction with BFD_RELOC_AARCH64_LD64_GOT_LO12_NC.  */
   BFD_RELOC_AARCH64_ADR_GOT_PAGE,
-
-/* AArch64 ADRP instruction, with bits 12 to 32 of a pc-relative page
-offset, giving a 4KB aligned page base address. */
-  BFD_RELOC_AARCH64_ADR_HI21_PCREL,
-
-/* AArch64 ADRP instruction, with bits 12 to 32 of a pc-relative page
-offset, giving a 4KB aligned page base address, but with no overflow
-checking. */
-  BFD_RELOC_AARCH64_ADR_HI21_NC_PCREL,
-
-/* AArch64 ADR instruction, holding a simple 21 bit pc-relative byte offset. */
-  BFD_RELOC_AARCH64_ADR_LO21_PCREL,
-
-/* AArch64 19 bit pc-relative conditional branch and compare & branch.
-The lowest two bits must be zero and are not stored in the instruction,
-giving a 21 bit signed byte offset. */
-  BFD_RELOC_AARCH64_BRANCH19,
-
-/* AArch64 26 bit pc-relative unconditional branch and link.
-The lowest two bits must be zero and are not stored in the instruction,
-giving a 28 bit signed byte offset. */
-  BFD_RELOC_AARCH64_CALL26,
-
-/* AArch64 pseudo relocation code to be used internally by the AArch64
-assembler and not (currently) written to any object files. */
-  BFD_RELOC_AARCH64_GAS_INTERNAL_FIXUP,
-
-/* AArch64 26 bit pc-relative unconditional branch.
-The lowest two bits must be zero and are not stored in the instruction,
-giving a 28 bit signed byte offset. */
-  BFD_RELOC_AARCH64_JUMP26,
-
-/* AArch64 Load Literal instruction, holding a 19 bit pc-relative word
-offset.  The lowest two bits must be zero and are not stored in the
-instruction, giving a 21 bit signed byte offset. */
-  BFD_RELOC_AARCH64_LD_LO19_PCREL,
 
 /* Unsigned 12 bit byte offset for 64 bit load/store from the page of
 the GOT entry for this symbol.  Used in conjunction with
-BFD_RELOC_AARCH64_ADR_GOTPAGE. */
+BFD_RELOC_AARCH64_ADR_GOTPAGE.  Valid in LP64 ABI only.  */
   BFD_RELOC_AARCH64_LD64_GOT_LO12_NC,
 
-/* AArch64 unspecified load/store instruction, holding bits 0 to 11 of the
-address.  Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL. */
-  BFD_RELOC_AARCH64_LDST_LO12,
-
-/* AArch64 8-bit load/store instruction, holding bits 0 to 11 of the
-address.  Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL. */
-  BFD_RELOC_AARCH64_LDST8_LO12,
-
-/* AArch64 16-bit load/store instruction, holding bits 0 to 11 of the
-address.  Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL. */
-  BFD_RELOC_AARCH64_LDST16_LO12,
-
-/* AArch64 32-bit load/store instruction, holding bits 0 to 11 of the
-address.  Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL. */
-  BFD_RELOC_AARCH64_LDST32_LO12,
-
-/* AArch64 64-bit load/store instruction, holding bits 0 to 11 of the
-address.  Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL. */
-  BFD_RELOC_AARCH64_LDST64_LO12,
-
-/* AArch64 128-bit load/store instruction, holding bits 0 to 11 of the
-address.  Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL. */
-  BFD_RELOC_AARCH64_LDST128_LO12,
-
-/* AArch64 MOV[NZK] instruction with most significant bits 0 to 15
-of an unsigned address/value. */
-  BFD_RELOC_AARCH64_MOVW_G0,
-
-/* AArch64 MOV[NZ] instruction with most significant bits 0 to 15
-of a signed value.  Changes instruction to MOVZ or MOVN depending on the
-value's sign. */
-  BFD_RELOC_AARCH64_MOVW_G0_S,
-
-/* AArch64 MOV[NZK] instruction with less significant bits 0 to 15 of
-an address/value.  No overflow checking. */
-  BFD_RELOC_AARCH64_MOVW_G0_NC,
-
-/* AArch64 MOV[NZK] instruction with most significant bits 16 to 31
-of an unsigned address/value. */
-  BFD_RELOC_AARCH64_MOVW_G1,
-
-/* AArch64 MOV[NZK] instruction with less significant bits 16 to 31
-of an address/value.  No overflow checking. */
-  BFD_RELOC_AARCH64_MOVW_G1_NC,
-
-/* AArch64 MOV[NZ] instruction with most significant bits 16 to 31
-of a signed value.  Changes instruction to MOVZ or MOVN depending on the
-value's sign. */
-  BFD_RELOC_AARCH64_MOVW_G1_S,
-
-/* AArch64 MOV[NZK] instruction with most significant bits 32 to 47
-of an unsigned address/value. */
-  BFD_RELOC_AARCH64_MOVW_G2,
-
-/* AArch64 MOV[NZK] instruction with less significant bits 32 to 47
-of an address/value.  No overflow checking. */
-  BFD_RELOC_AARCH64_MOVW_G2_NC,
-
-/* AArch64 MOV[NZ] instruction with most significant bits 32 to 47
-of a signed value.  Changes instruction to MOVZ or MOVN depending on the
-value's sign. */
-  BFD_RELOC_AARCH64_MOVW_G2_S,
-
-/* AArch64 MOV[NZK] instruction with most signficant bits 48 to 64
-of a signed or unsigned address/value. */
-  BFD_RELOC_AARCH64_MOVW_G3,
-
-/* AArch64 TLS relocation. */
-  BFD_RELOC_AARCH64_TLSDESC,
-
-/* AArch64 TLS DESC relocation. */
-  BFD_RELOC_AARCH64_TLSDESC_ADD,
-
-/* AArch64 TLS DESC relocation. */
-  BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC,
-
-/* AArch64 TLS DESC relocation. */
-  BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE,
-
-/* AArch64 TLS DESC relocation. */
-  BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21,
-
-/* AArch64 TLS DESC relocation. */
-  BFD_RELOC_AARCH64_TLSDESC_CALL,
-
-/* AArch64 TLS DESC relocation. */
-  BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC,
-
-/* AArch64 TLS DESC relocation. */
-  BFD_RELOC_AARCH64_TLSDESC_LD64_PREL19,
-
-/* AArch64 TLS DESC relocation. */
-  BFD_RELOC_AARCH64_TLSDESC_LDR,
-
-/* AArch64 TLS DESC relocation. */
-  BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC,
-
-/* AArch64 TLS DESC relocation. */
-  BFD_RELOC_AARCH64_TLSDESC_OFF_G1,
-
-/* Unsigned 12 bit byte offset to global offset table entry for a symbols
-tls_index structure.  Used in conjunction with
-BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21. */
-  BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC,
+/* Unsigned 12 bit byte offset for 32 bit load/store from the page of
+the GOT entry for this symbol.  Used in conjunction with
+BFD_RELOC_AARCH64_ADR_GOTPAGE.  Valid in ILP32 ABI only.  */
+  BFD_RELOC_AARCH64_LD32_GOT_LO12_NC,
 
 /* Get to the page base of the global offset table entry for a symbols
 tls_index structure as part of an adrp instruction using a 21 bit PC
 relative value.  Used in conjunction with
-BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC. */
+BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC.  */
   BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21,
 
-/* AArch64 TLS INITIAL EXEC relocation. */
-  BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21,
+/* Unsigned 12 bit byte offset to global offset table entry for a symbols
+tls_index structure.  Used in conjunction with
+BFD_RELOC_AARCH64_TLSGD_ADR_PAGE21.  */
+  BFD_RELOC_AARCH64_TLSGD_ADD_LO12_NC,
 
-/* AArch64 TLS INITIAL EXEC relocation. */
-  BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19,
-
-/* AArch64 TLS INITIAL EXEC relocation. */
-  BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC,
-
-/* AArch64 TLS INITIAL EXEC relocation. */
-  BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC,
-
-/* AArch64 TLS INITIAL EXEC relocation. */
+/* AArch64 TLS INITIAL EXEC relocation.  */
   BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G1,
 
-/* AArch64 TLS LOCAL EXEC relocation. */
-  BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12,
+/* AArch64 TLS INITIAL EXEC relocation.  */
+  BFD_RELOC_AARCH64_TLSIE_MOVW_GOTTPREL_G0_NC,
 
-/* AArch64 TLS LOCAL EXEC relocation. */
-  BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12,
+/* AArch64 TLS INITIAL EXEC relocation.  */
+  BFD_RELOC_AARCH64_TLSIE_ADR_GOTTPREL_PAGE21,
 
-/* AArch64 TLS LOCAL EXEC relocation. */
-  BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC,
+/* AArch64 TLS INITIAL EXEC relocation.  */
+  BFD_RELOC_AARCH64_TLSIE_LD64_GOTTPREL_LO12_NC,
 
-/* AArch64 TLS LOCAL EXEC relocation. */
-  BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0,
+/* AArch64 TLS INITIAL EXEC relocation.  */
+  BFD_RELOC_AARCH64_TLSIE_LD32_GOTTPREL_LO12_NC,
 
-/* AArch64 TLS LOCAL EXEC relocation. */
-  BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC,
+/* AArch64 TLS INITIAL EXEC relocation.  */
+  BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_PREL19,
 
-/* AArch64 TLS LOCAL EXEC relocation. */
-  BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1,
-
-/* AArch64 TLS LOCAL EXEC relocation. */
-  BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC,
-
-/* AArch64 TLS LOCAL EXEC relocation. */
+/* AArch64 TLS LOCAL EXEC relocation.  */
   BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G2,
 
-/* AArch64 TLS relocation. */
-  BFD_RELOC_AARCH64_TLS_DTPMOD64,
+/* AArch64 TLS LOCAL EXEC relocation.  */
+  BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1,
 
-/* AArch64 TLS relocation. */
-  BFD_RELOC_AARCH64_TLS_DTPREL64,
+/* AArch64 TLS LOCAL EXEC relocation.  */
+  BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G1_NC,
 
-/* AArch64 TLS relocation. */
-  BFD_RELOC_AARCH64_TLS_TPREL64,
+/* AArch64 TLS LOCAL EXEC relocation.  */
+  BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0,
 
-/* AArch64 14 bit pc-relative test bit and branch.
-The lowest two bits must be zero and are not stored in the instruction,
-giving a 16 bit signed byte offset. */
-  BFD_RELOC_AARCH64_TSTBR14,
+/* AArch64 TLS LOCAL EXEC relocation.  */
+  BFD_RELOC_AARCH64_TLSLE_MOVW_TPREL_G0_NC,
 
-/* Tilera TILEPro Relocations. */
+/* AArch64 TLS LOCAL EXEC relocation.  */
+  BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_HI12,
+
+/* AArch64 TLS LOCAL EXEC relocation.  */
+  BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12,
+
+/* AArch64 TLS LOCAL EXEC relocation.  */
+  BFD_RELOC_AARCH64_TLSLE_ADD_TPREL_LO12_NC,
+
+/* AArch64 TLS DESC relocation.  */
+  BFD_RELOC_AARCH64_TLSDESC_LD_PREL19,
+
+/* AArch64 TLS DESC relocation.  */
+  BFD_RELOC_AARCH64_TLSDESC_ADR_PREL21,
+
+/* AArch64 TLS DESC relocation.  */
+  BFD_RELOC_AARCH64_TLSDESC_ADR_PAGE21,
+
+/* AArch64 TLS DESC relocation.  */
+  BFD_RELOC_AARCH64_TLSDESC_LD64_LO12_NC,
+
+/* AArch64 TLS DESC relocation.  */
+  BFD_RELOC_AARCH64_TLSDESC_LD32_LO12_NC,
+
+/* AArch64 TLS DESC relocation.  */
+  BFD_RELOC_AARCH64_TLSDESC_ADD_LO12_NC,
+
+/* AArch64 TLS DESC relocation.  */
+  BFD_RELOC_AARCH64_TLSDESC_OFF_G1,
+
+/* AArch64 TLS DESC relocation.  */
+  BFD_RELOC_AARCH64_TLSDESC_OFF_G0_NC,
+
+/* AArch64 TLS DESC relocation.  */
+  BFD_RELOC_AARCH64_TLSDESC_LDR,
+
+/* AArch64 TLS DESC relocation.  */
+  BFD_RELOC_AARCH64_TLSDESC_ADD,
+
+/* AArch64 TLS DESC relocation.  */
+  BFD_RELOC_AARCH64_TLSDESC_CALL,
+
+/* AArch64 TLS relocation.  */
+  BFD_RELOC_AARCH64_COPY,
+
+/* AArch64 TLS relocation.  */
+  BFD_RELOC_AARCH64_GLOB_DAT,
+
+/* AArch64 TLS relocation.  */
+  BFD_RELOC_AARCH64_JUMP_SLOT,
+
+/* AArch64 TLS relocation.  */
+  BFD_RELOC_AARCH64_RELATIVE,
+
+/* AArch64 TLS relocation.  */
+  BFD_RELOC_AARCH64_TLS_DTPMOD,
+
+/* AArch64 TLS relocation.  */
+  BFD_RELOC_AARCH64_TLS_DTPREL,
+
+/* AArch64 TLS relocation.  */
+  BFD_RELOC_AARCH64_TLS_TPREL,
+
+/* AArch64 TLS relocation.  */
+  BFD_RELOC_AARCH64_TLSDESC,
+
+/* AArch64 support for STT_GNU_IFUNC.  */
+  BFD_RELOC_AARCH64_IRELATIVE,
+
+/* AArch64 pseudo relocation code to mark the end of the AArch64
+relocation enumerators that have direct mapping to ELF reloc codes.
+There are a few more enumerators after this one; those are mainly
+used by the AArch64 assembler for the internal fixup or to select
+one of the above enumerators.  */
+  BFD_RELOC_AARCH64_RELOC_END,
+
+/* AArch64 pseudo relocation code to be used internally by the AArch64
+assembler and not (currently) written to any object files.  */
+  BFD_RELOC_AARCH64_GAS_INTERNAL_FIXUP,
+
+/* AArch64 unspecified load/store instruction, holding bits 0 to 11 of the
+address.  Used in conjunction with BFD_RELOC_AARCH64_ADR_HI21_PCREL.  */
+  BFD_RELOC_AARCH64_LDST_LO12,
+
+/* AArch64 pseudo relocation code to be used internally by the AArch64
+assembler and not (currently) written to any object files.  */
+  BFD_RELOC_AARCH64_LD_GOT_LO12_NC,
+
+/* AArch64 pseudo relocation code to be used internally by the AArch64
+assembler and not (currently) written to any object files.  */
+  BFD_RELOC_AARCH64_TLSIE_LD_GOTTPREL_LO12_NC,
+
+/* AArch64 pseudo relocation code to be used internally by the AArch64
+assembler and not (currently) written to any object files.  */
+  BFD_RELOC_AARCH64_TLSDESC_LD_LO12_NC,
+
+/* Tilera TILEPro Relocations.  */
   BFD_RELOC_TILEPRO_COPY,
   BFD_RELOC_TILEPRO_GLOB_DAT,
   BFD_RELOC_TILEPRO_JMP_SLOT,
@@ -5518,7 +5832,7 @@ giving a 16 bit signed byte offset. */
   BFD_RELOC_TILEPRO_IMM16_X0_TLS_LE_HA,
   BFD_RELOC_TILEPRO_IMM16_X1_TLS_LE_HA,
 
-/* Tilera TILE-Gx Relocations. */
+/* Tilera TILE-Gx Relocations.  */
   BFD_RELOC_TILEGX_HW0,
   BFD_RELOC_TILEGX_HW1,
   BFD_RELOC_TILEGX_HW2,
@@ -5629,25 +5943,25 @@ giving a 16 bit signed byte offset. */
   BFD_RELOC_TILEGX_IMM8_Y0_TLS_ADD,
   BFD_RELOC_TILEGX_IMM8_Y1_TLS_ADD,
 
-/* Adapteva EPIPHANY - 8 bit signed pc-relative displacement */
+/* Adapteva EPIPHANY - 8 bit signed pc-relative displacement  */
   BFD_RELOC_EPIPHANY_SIMM8,
 
-/* Adapteva EPIPHANY - 24 bit signed pc-relative displacement */
+/* Adapteva EPIPHANY - 24 bit signed pc-relative displacement  */
   BFD_RELOC_EPIPHANY_SIMM24,
 
-/* Adapteva EPIPHANY - 16 most-significant bits of absolute address */
+/* Adapteva EPIPHANY - 16 most-significant bits of absolute address  */
   BFD_RELOC_EPIPHANY_HIGH,
 
-/* Adapteva EPIPHANY - 16 least-significant bits of absolute address */
+/* Adapteva EPIPHANY - 16 least-significant bits of absolute address  */
   BFD_RELOC_EPIPHANY_LOW,
 
-/* Adapteva EPIPHANY - 11 bit signed number - add/sub immediate */
+/* Adapteva EPIPHANY - 11 bit signed number - add/sub immediate  */
   BFD_RELOC_EPIPHANY_SIMM11,
 
-/* Adapteva EPIPHANY - 11 bit sign-magnitude number (ld/st displacement) */
+/* Adapteva EPIPHANY - 11 bit sign-magnitude number (ld/st displacement)  */
   BFD_RELOC_EPIPHANY_IMM11,
 
-/* Adapteva EPIPHANY - 8 bit immediate for 16 bit mov instruction. */
+/* Adapteva EPIPHANY - 8 bit immediate for 16 bit mov instruction.  */
   BFD_RELOC_EPIPHANY_IMM8,
   BFD_RELOC_UNUSED };
 typedef enum bfd_reloc_code_real bfd_reloc_code_real_type;
@@ -6122,6 +6436,14 @@ struct bfd
   unsigned int selective_search : 1;
 };
 
+/* See note beside bfd_set_section_userdata.  */
+static inline bfd_boolean
+bfd_set_cacheable (bfd * abfd, bfd_boolean val)
+{
+  abfd->cacheable = val;
+  return TRUE;
+}
+
 typedef enum bfd_error
 {
   bfd_error_no_error = 0,
@@ -6135,6 +6457,7 @@ typedef enum bfd_error
   bfd_error_no_armap,
   bfd_error_no_more_archived_files,
   bfd_error_malformed_archive,
+  bfd_error_missing_dso,
   bfd_error_file_not_recognized,
   bfd_error_file_ambiguously_recognized,
   bfd_error_no_contents,

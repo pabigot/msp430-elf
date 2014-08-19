@@ -1,6 +1,6 @@
 /* Print values for GDB, the GNU debugger.
 
-   Copyright (C) 1986, 1988-2012 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -18,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "value.h"
@@ -40,10 +40,50 @@
 
 #include <errno.h>
 
+/* Maximum number of wchars returned from wchar_iterate.  */
+#define MAX_WCHARS 4
+
+/* A convenience macro to compute the size of a wchar_t buffer containing X
+   characters.  */
+#define WCHAR_BUFLEN(X) ((X) * sizeof (gdb_wchar_t))
+
+/* Character buffer size saved while iterating over wchars.  */
+#define WCHAR_BUFLEN_MAX WCHAR_BUFLEN (MAX_WCHARS)
+
+/* A structure to encapsulate state information from iterated
+   character conversions.  */
+struct converted_character
+{
+  /* The number of characters converted.  */
+  int num_chars;
+
+  /* The result of the conversion.  See charset.h for more.  */
+  enum wchar_iterate_result result;
+
+  /* The (saved) converted character(s).  */
+  gdb_wchar_t chars[WCHAR_BUFLEN_MAX];
+
+  /* The first converted target byte.  */
+  const gdb_byte *buf;
+
+  /* The number of bytes converted.  */
+  size_t buflen;
+
+  /* How many times this character(s) is repeated.  */
+  int repeat_count;
+};
+
+typedef struct converted_character converted_character_d;
+DEF_VEC_O (converted_character_d);
+
+/* Command lists for set/show print raw.  */
+struct cmd_list_element *setprintrawlist;
+struct cmd_list_element *showprintrawlist;
+
 /* Prototypes for local functions */
 
 static int partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
-				int len, int *errnoptr);
+				int len, int *errptr);
 
 static void show_print (char *, int);
 
@@ -67,9 +107,9 @@ void _initialize_valprint (void);
 
 struct value_print_options user_print_options =
 {
-  Val_pretty_default,		/* pretty */
-  0,				/* prettyprint_arrays */
-  0,				/* prettyprint_structs */
+  Val_prettyformat_default,	/* prettyformat */
+  0,				/* prettyformat_arrays */
+  0,				/* prettyformat_structs */
   0,				/* vtblprint */
   1,				/* unionprint */
   1,				/* addressprint */
@@ -79,7 +119,6 @@ struct value_print_options user_print_options =
   0,				/* output_format */
   0,				/* format */
   0,				/* stop_print_at_null */
-  0,				/* inspect_it */
   0,				/* print_array_indexes */
   0,				/* deref_ref */
   1,				/* static_field_print */
@@ -97,12 +136,12 @@ get_user_print_options (struct value_print_options *opts)
 }
 
 /* Initialize *OPTS to be a copy of the user print options, but with
-   pretty-printing disabled.  */
+   pretty-formatting disabled.  */
 void
-get_raw_print_options (struct value_print_options *opts)
+get_no_prettyformat_print_options (struct value_print_options *opts)
 {  
   *opts = user_print_options;
-  opts->pretty = Val_no_prettyprint;
+  opts->prettyformat = Val_no_prettyformat;
 }
 
 /* Initialize *OPTS to be a copy of the user print options, but using
@@ -185,19 +224,19 @@ show_stop_print_at_null (struct ui_file *file, int from_tty,
 /* Controls pretty printing of structures.  */
 
 static void
-show_prettyprint_structs (struct ui_file *file, int from_tty,
+show_prettyformat_structs (struct ui_file *file, int from_tty,
 			  struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Prettyprinting of structures is %s.\n"), value);
+  fprintf_filtered (file, _("Pretty formatting of structures is %s.\n"), value);
 }
 
 /* Controls pretty printing of arrays.  */
 
 static void
-show_prettyprint_arrays (struct ui_file *file, int from_tty,
+show_prettyformat_arrays (struct ui_file *file, int from_tty,
 			 struct cmd_list_element *c, const char *value)
 {
-  fprintf_filtered (file, _("Prettyprinting of arrays is %s.\n"), value);
+  fprintf_filtered (file, _("Pretty formatting of arrays is %s.\n"), value);
 }
 
 /* If nonzero, causes unions inside structures or other unions to be
@@ -236,8 +275,8 @@ show_symbol_print (struct ui_file *file, int from_tty,
    we want to print scalar arguments, but not aggregate arguments.
    This function distinguishes between the two.  */
 
-static int
-scalar_type_p (struct type *type)
+int
+val_print_scalar_type_p (struct type *type)
 {
   CHECK_TYPEDEF (type);
   while (TYPE_CODE (type) == TYPE_CODE_REF)
@@ -275,7 +314,7 @@ valprint_check_validity (struct ui_file *stream,
       if (!value_bits_valid (val, TARGET_CHAR_BIT * embedded_offset,
 			     TARGET_CHAR_BIT * TYPE_LENGTH (type)))
 	{
-	  val_print_optimized_out (stream);
+	  val_print_optimized_out (val, stream);
 	  return 0;
 	}
 
@@ -297,9 +336,18 @@ valprint_check_validity (struct ui_file *stream,
 }
 
 void
-val_print_optimized_out (struct ui_file *stream)
+val_print_optimized_out (const struct value *val, struct ui_file *stream)
 {
-  fprintf_filtered (stream, _("<optimized out>"));
+  if (val != NULL && value_lval_const (val) == lval_register)
+    val_print_not_saved (stream);
+  else
+    fprintf_filtered (stream, _("<optimized out>"));
+}
+
+void
+val_print_not_saved (struct ui_file *stream)
+{
+  fprintf_filtered (stream, _("<not saved>"));
 }
 
 void
@@ -334,7 +382,6 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
 		   const struct generic_val_print_decorations *decorations)
 {
   struct gdbarch *gdbarch = get_type_arch (type);
-  enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   unsigned int i = 0;	/* Number of characters printed.  */
   unsigned len;
   struct type *elttype, *unresolved_elttype;
@@ -355,7 +402,7 @@ generic_val_print (struct type *type, const gdb_byte *valaddr,
           if (!get_array_bounds (type, &low_bound, &high_bound))
             error (_("Could not determine the array high bound"));
 
-	  if (options->prettyprint_arrays)
+	  if (options->prettyformat_arrays)
 	    {
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
@@ -701,9 +748,9 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
   struct value_print_options local_opts = *options;
   struct type *real_type = check_typedef (type);
 
-  if (local_opts.pretty == Val_pretty_default)
-    local_opts.pretty = (local_opts.prettyprint_structs
-			 ? Val_prettyprint : Val_no_prettyprint);
+  if (local_opts.prettyformat == Val_prettyformat_default)
+    local_opts.prettyformat = (local_opts.prettyformat_structs
+			       ? Val_prettyformat : Val_no_prettyformat);
 
   QUIT;
 
@@ -732,7 +779,7 @@ val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
 
   /* Handle summary mode.  If the value is a scalar, print it;
      otherwise, print an ellipsis.  */
-  if (options->summary && !scalar_type_p (type))
+  if (options->summary && !val_print_scalar_type_p (type))
     {
       fprintf_filtered (stream, "...");
       return;
@@ -764,10 +811,19 @@ value_check_printable (struct value *val, struct ui_file *stream,
 
   if (value_entirely_optimized_out (val))
     {
-      if (options->summary && !scalar_type_p (value_type (val)))
+      if (options->summary && !val_print_scalar_type_p (value_type (val)))
 	fprintf_filtered (stream, "...");
       else
-	val_print_optimized_out (stream);
+	val_print_optimized_out (val, stream);
+      return 0;
+    }
+
+  if (value_entirely_unavailable (val))
+    {
+      if (options->summary && !val_print_scalar_type_p (value_type (val)))
+	fprintf_filtered (stream, "...");
+      else
+	val_print_unavailable (stream);
       return 0;
     }
 
@@ -928,7 +984,7 @@ val_print_scalar_formatted (struct type *type,
      printed, because all bits contribute to its representation.  */
   if (!value_bits_valid (val, TARGET_CHAR_BIT * embedded_offset,
 			      TARGET_CHAR_BIT * TYPE_LENGTH (type)))
-    val_print_optimized_out (stream);
+    val_print_optimized_out (val, stream);
   else if (!value_bytes_available (val, embedded_offset, TYPE_LENGTH (type)))
     val_print_unavailable (stream);
   else
@@ -1607,7 +1663,7 @@ val_print_array_elements (struct type *type,
     {
       if (i != 0)
 	{
-	  if (options->prettyprint_arrays)
+	  if (options->prettyformat_arrays)
 	    {
 	      fprintf_filtered (stream, ",\n");
 	      print_spaces_filtered (2 + 2 * recurse, stream);
@@ -1670,15 +1726,15 @@ val_print_array_elements (struct type *type,
 
 /* Read LEN bytes of target memory at address MEMADDR, placing the
    results in GDB's memory at MYADDR.  Returns a count of the bytes
-   actually read, and optionally an errno value in the location
-   pointed to by ERRNOPTR if ERRNOPTR is non-null.  */
+   actually read, and optionally a target_xfer_error value in the
+   location pointed to by ERRPTR if ERRPTR is non-null.  */
 
 /* FIXME: cagney/1999-10-14: Only used by val_print_string.  Can this
    function be eliminated.  */
 
 static int
 partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
-		     int len, int *errnoptr)
+		     int len, int *errptr)
 {
   int nread;			/* Number of bytes actually read.  */
   int errcode;			/* Error from last read.  */
@@ -1703,9 +1759,9 @@ partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
 	  nread--;
 	}
     }
-  if (errnoptr != NULL)
+  if (errptr != NULL)
     {
-      *errnoptr = errcode;
+      *errptr = errcode;
     }
   return (nread);
 }
@@ -1714,13 +1770,15 @@ partial_memory_read (CORE_ADDR memaddr, gdb_byte *myaddr,
    each.  Fetch at most FETCHLIMIT characters.  BUFFER will be set to a newly
    allocated buffer containing the string, which the caller is responsible to
    free, and BYTES_READ will be set to the number of bytes read.  Returns 0 on
-   success, or errno on failure.
+   success, or a target_xfer_error on failure.
 
-   If LEN > 0, reads exactly LEN characters (including eventual NULs in
-   the middle or end of the string).  If LEN is -1, stops at the first
-   null character (not necessarily the first null byte) up to a maximum
-   of FETCHLIMIT characters.  Set FETCHLIMIT to UINT_MAX to read as many
-   characters as possible from the string.
+   If LEN > 0, reads the lesser of LEN or FETCHLIMIT characters
+   (including eventual NULs in the middle or end of the string).
+
+   If LEN is -1, stops at the first null character (not necessarily
+   the first null byte) up to a maximum of FETCHLIMIT characters.  Set
+   FETCHLIMIT to UINT_MAX to read as many characters as possible from
+   the string.
 
    Unless an exception is thrown, BUFFER will always be allocated, even on
    failure.  In this case, some characters might have been read before the
@@ -1766,10 +1824,12 @@ read_string (CORE_ADDR addr, int len, int width, unsigned int fetchlimit,
 
   if (len > 0)
     {
-      *buffer = (gdb_byte *) xmalloc (len * width);
+      unsigned int fetchlen = min (len, fetchlimit);
+
+      *buffer = (gdb_byte *) xmalloc (fetchlen * width);
       bufptr = *buffer;
 
-      nfetch = partial_memory_read (addr, bufptr, len * width, &errcode)
+      nfetch = partial_memory_read (addr, bufptr, fetchlen * width, &errcode)
 	/ width;
       addr += nfetch * width;
       bufptr += nfetch * width;
@@ -1937,9 +1997,10 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig,
 		/* If the value fits in 3 octal digits, print it that
 		   way.  Otherwise, print it as a hex escape.  */
 		if (value <= 0777)
-		  sprintf (octal, "\\%.3o", (int) (value & 0777));
+		  xsnprintf (octal, sizeof (octal), "\\%.3o",
+			     (int) (value & 0777));
 		else
-		  sprintf (octal, "\\x%lx", (long) value);
+		  xsnprintf (octal, sizeof (octal), "\\x%lx", (long) value);
 		append_string_as_wide (octal, output);
 	      }
 	    /* If we somehow have extra bytes, print them now.  */
@@ -1947,7 +2008,7 @@ print_wchar (gdb_wint_t w, const gdb_byte *orig,
 	      {
 		char octal[5];
 
-		sprintf (octal, "\\%.3o", orig[i] & 0xff);
+		xsnprintf (octal, sizeof (octal), "\\%.3o", orig[i] & 0xff);
 		append_string_as_wide (octal, output);
 		++i;
 	      }
@@ -2035,14 +2096,251 @@ generic_emit_char (int c, struct type *type, struct ui_file *stream,
   make_cleanup_obstack_free (&output);
 
   convert_between_encodings (INTERMEDIATE_ENCODING, host_charset (),
-			     obstack_base (&wchar_buf),
+			     (gdb_byte *) obstack_base (&wchar_buf),
 			     obstack_object_size (&wchar_buf),
-			     1, &output, translit_char);
+			     sizeof (gdb_wchar_t), &output, translit_char);
   obstack_1grow (&output, '\0');
 
   fputs_filtered (obstack_base (&output), stream);
 
   do_cleanups (cleanups);
+}
+
+/* Return the repeat count of the next character/byte in ITER,
+   storing the result in VEC.  */
+
+static int
+count_next_character (struct wchar_iterator *iter,
+		      VEC (converted_character_d) **vec)
+{
+  struct converted_character *current;
+
+  if (VEC_empty (converted_character_d, *vec))
+    {
+      struct converted_character tmp;
+      gdb_wchar_t *chars;
+
+      tmp.num_chars
+	= wchar_iterate (iter, &tmp.result, &chars, &tmp.buf, &tmp.buflen);
+      if (tmp.num_chars > 0)
+	{
+	  gdb_assert (tmp.num_chars < MAX_WCHARS);
+	  memcpy (tmp.chars, chars, tmp.num_chars * sizeof (gdb_wchar_t));
+	}
+      VEC_safe_push (converted_character_d, *vec, &tmp);
+    }
+
+  current = VEC_last (converted_character_d, *vec);
+
+  /* Count repeated characters or bytes.  */
+  current->repeat_count = 1;
+  if (current->num_chars == -1)
+    {
+      /* EOF  */
+      return -1;
+    }
+  else
+    {
+      gdb_wchar_t *chars;
+      struct converted_character d;
+      int repeat;
+
+      d.repeat_count = 0;
+
+      while (1)
+	{
+	  /* Get the next character.  */
+	  d.num_chars
+	    = wchar_iterate (iter, &d.result, &chars, &d.buf, &d.buflen);
+
+	  /* If a character was successfully converted, save the character
+	     into the converted character.  */
+	  if (d.num_chars > 0)
+	    {
+	      gdb_assert (d.num_chars < MAX_WCHARS);
+	      memcpy (d.chars, chars, WCHAR_BUFLEN (d.num_chars));
+	    }
+
+	  /* Determine if the current character is the same as this
+	     new character.  */
+	  if (d.num_chars == current->num_chars && d.result == current->result)
+	    {
+	      /* There are two cases to consider:
+
+		 1) Equality of converted character (num_chars > 0)
+		 2) Equality of non-converted character (num_chars == 0)  */
+	      if ((current->num_chars > 0
+		   && memcmp (current->chars, d.chars,
+			      WCHAR_BUFLEN (current->num_chars)) == 0)
+		  || (current->num_chars == 0
+		      && current->buflen == d.buflen
+		      && memcmp (current->buf, d.buf, current->buflen) == 0))
+		++current->repeat_count;
+	      else
+		break;
+	    }
+	  else
+	    break;
+	}
+
+      /* Push this next converted character onto the result vector.  */
+      repeat = current->repeat_count;
+      VEC_safe_push (converted_character_d, *vec, &d);
+      return repeat;
+    }
+}
+
+/* Print the characters in CHARS to the OBSTACK.  QUOTE_CHAR is the quote
+   character to use with string output.  WIDTH is the size of the output
+   character type.  BYTE_ORDER is the the target byte order.  OPTIONS
+   is the user's print options.  */
+
+static void
+print_converted_chars_to_obstack (struct obstack *obstack,
+				  VEC (converted_character_d) *chars,
+				  int quote_char, int width,
+				  enum bfd_endian byte_order,
+				  const struct value_print_options *options)
+{
+  unsigned int idx;
+  struct converted_character *elem;
+  enum {START, SINGLE, REPEAT, INCOMPLETE, FINISH} state, last;
+  gdb_wchar_t wide_quote_char = gdb_btowc (quote_char);
+  int need_escape = 0;
+
+  /* Set the start state.  */
+  idx = 0;
+  last = state = START;
+  elem = NULL;
+
+  while (1)
+    {
+      switch (state)
+	{
+	case START:
+	  /* Nothing to do.  */
+	  break;
+
+	case SINGLE:
+	  {
+	    int j;
+
+	    /* We are outputting a single character
+	       (< options->repeat_count_threshold).  */
+
+	    if (last != SINGLE)
+	      {
+		/* We were outputting some other type of content, so we
+		   must output and a comma and a quote.  */
+		if (last != START)
+		  obstack_grow_wstr (obstack, LCST (", "));
+		obstack_grow (obstack, &wide_quote_char, sizeof (gdb_wchar_t));
+	      }
+	    /* Output the character.  */
+	    for (j = 0; j < elem->repeat_count; ++j)
+	      {
+		if (elem->result == wchar_iterate_ok)
+		  print_wchar (elem->chars[0], elem->buf, elem->buflen, width,
+			       byte_order, obstack, quote_char, &need_escape);
+		else
+		  print_wchar (gdb_WEOF, elem->buf, elem->buflen, width,
+			       byte_order, obstack, quote_char, &need_escape);
+	      }
+	  }
+	  break;
+
+	case REPEAT:
+	  {
+	    int j;
+	    char *s;
+
+	    /* We are outputting a character with a repeat count
+	       greater than options->repeat_count_threshold.  */
+
+	    if (last == SINGLE)
+	      {
+		/* We were outputting a single string.  Terminate the
+		   string.  */
+		obstack_grow (obstack, &wide_quote_char, sizeof (gdb_wchar_t));
+	      }
+	    if (last != START)
+	      obstack_grow_wstr (obstack, LCST (", "));
+
+	    /* Output the character and repeat string.  */
+	    obstack_grow_wstr (obstack, LCST ("'"));
+	    if (elem->result == wchar_iterate_ok)
+	      print_wchar (elem->chars[0], elem->buf, elem->buflen, width,
+			   byte_order, obstack, quote_char, &need_escape);
+	    else
+	      print_wchar (gdb_WEOF, elem->buf, elem->buflen, width,
+			   byte_order, obstack, quote_char, &need_escape);
+	    obstack_grow_wstr (obstack, LCST ("'"));
+	    s = xstrprintf (_(" <repeats %u times>"), elem->repeat_count);
+	    for (j = 0; s[j]; ++j)
+	      {
+		gdb_wchar_t w = gdb_btowc (s[j]);
+		obstack_grow (obstack, &w, sizeof (gdb_wchar_t));
+	      }
+	    xfree (s);
+	  }
+	  break;
+
+	case INCOMPLETE:
+	  /* We are outputting an incomplete sequence.  */
+	  if (last == SINGLE)
+	    {
+	      /* If we were outputting a string of SINGLE characters,
+		 terminate the quote.  */
+	      obstack_grow (obstack, &wide_quote_char, sizeof (gdb_wchar_t));
+	    }
+	  if (last != START)
+	    obstack_grow_wstr (obstack, LCST (", "));
+
+	  /* Output the incomplete sequence string.  */
+	  obstack_grow_wstr (obstack, LCST ("<incomplete sequence "));
+	  print_wchar (gdb_WEOF, elem->buf, elem->buflen, width, byte_order,
+		       obstack, 0, &need_escape);
+	  obstack_grow_wstr (obstack, LCST (">"));
+
+	  /* We do not attempt to outupt anything after this.  */
+	  state = FINISH;
+	  break;
+
+	case FINISH:
+	  /* All done.  If we were outputting a string of SINGLE
+	     characters, the string must be terminated.  Otherwise,
+	     REPEAT and INCOMPLETE are always left properly terminated.  */
+	  if (last == SINGLE)
+	    obstack_grow (obstack, &wide_quote_char, sizeof (gdb_wchar_t));
+
+	  return;
+	}
+
+      /* Get the next element and state.  */
+      last = state;
+      if (state != FINISH)
+	{
+	  elem = VEC_index (converted_character_d, chars, idx++);
+	  switch (elem->result)
+	    {
+	    case wchar_iterate_ok:
+	    case wchar_iterate_invalid:
+	      if (elem->repeat_count > options->repeat_count_threshold)
+		state = REPEAT;
+	      else
+		state = SINGLE;
+	      break;
+
+	    case wchar_iterate_incomplete:
+	      state = INCOMPLETE;
+	      break;
+
+	    case wchar_iterate_eof:
+	      state = FINISH;
+	      break;
+	    }
+	}
+    }
 }
 
 /* Print the character string STRING, printing at most LENGTH
@@ -2064,16 +2362,13 @@ generic_printstr (struct ui_file *stream, struct type *type,
 {
   enum bfd_endian byte_order = gdbarch_byte_order (get_type_arch (type));
   unsigned int i;
-  unsigned int things_printed = 0;
-  int in_quotes = 0;
-  int need_comma = 0;
   int width = TYPE_LENGTH (type);
   struct obstack wchar_buf, output;
   struct cleanup *cleanup;
   struct wchar_iterator *iter;
   int finished = 0;
-  int need_escape = 0;
-  gdb_wchar_t wide_quote_char = gdb_btowc (quote_char);
+  struct converted_character *last;
+  VEC (converted_character_d) *converted_chars;
 
   if (length == -1)
     {
@@ -2107,166 +2402,46 @@ generic_printstr (struct ui_file *stream, struct type *type,
   /* Arrange to iterate over the characters, in wchar_t form.  */
   iter = make_wchar_iterator (string, length * width, encoding, width);
   cleanup = make_cleanup_wchar_iterator (iter);
+  converted_chars = NULL;
+  make_cleanup (VEC_cleanup (converted_character_d), &converted_chars);
+
+  /* Convert characters until the string is over or the maximum
+     number of printed characters has been reached.  */
+  i = 0;
+  while (i < options->print_max)
+    {
+      int r;
+
+      QUIT;
+
+      /* Grab the next character and repeat count.  */
+      r = count_next_character (iter, &converted_chars);
+
+      /* If less than zero, the end of the input string was reached.  */
+      if (r < 0)
+	break;
+
+      /* Otherwise, add the count to the total print count and get
+	 the next character.  */
+      i += r;
+    }
+
+  /* Get the last element and determine if the entire string was
+     processed.  */
+  last = VEC_last (converted_character_d, converted_chars);
+  finished = (last->result == wchar_iterate_eof);
+
+  /* Ensure that CONVERTED_CHARS is terminated.  */
+  last->result = wchar_iterate_eof;
 
   /* WCHAR_BUF is the obstack we use to represent the string in
      wchar_t form.  */
   obstack_init (&wchar_buf);
   make_cleanup_obstack_free (&wchar_buf);
 
-  while (!finished && things_printed < options->print_max)
-    {
-      int num_chars;
-      enum wchar_iterate_result result;
-      gdb_wchar_t *chars;
-      const gdb_byte *buf;
-      size_t buflen;
-
-      QUIT;
-
-      if (need_comma)
-	{
-	  obstack_grow_wstr (&wchar_buf, LCST (", "));
-	  need_comma = 0;
-	}
-
-      num_chars = wchar_iterate (iter, &result, &chars, &buf, &buflen);
-      /* We only look at repetitions when we were able to convert a
-	 single character in isolation.  This makes the code simpler
-	 and probably does the sensible thing in the majority of
-	 cases.  */
-      while (num_chars == 1 && things_printed < options->print_max)
-	{
-	  /* Count the number of repetitions.  */
-	  unsigned int reps = 0;
-	  gdb_wchar_t current_char = chars[0];
-	  const gdb_byte *orig_buf = buf;
-	  int orig_len = buflen;
-
-	  if (need_comma)
-	    {
-	      obstack_grow_wstr (&wchar_buf, LCST (", "));
-	      need_comma = 0;
-	    }
-
-	  while (num_chars == 1 && current_char == chars[0])
-	    {
-	      num_chars = wchar_iterate (iter, &result, &chars,
-					 &buf, &buflen);
-	      ++reps;
-	    }
-
-	  /* Emit CURRENT_CHAR according to the repetition count and
-	     options.  */
-	  if (reps > options->repeat_count_threshold)
-	    {
-	      if (in_quotes)
-		{
-		  if (options->inspect_it)
-		    obstack_grow_wstr (&wchar_buf, LCST ("\\"));
-		  obstack_grow (&wchar_buf, &wide_quote_char,
-				sizeof (gdb_wchar_t));
-		  obstack_grow_wstr (&wchar_buf, LCST (", "));
-		  in_quotes = 0;
-		}
-	      obstack_grow_wstr (&wchar_buf, LCST ("'"));
-	      need_escape = 0;
-	      print_wchar (current_char, orig_buf, orig_len, width,
-			   byte_order, &wchar_buf, '\'', &need_escape);
-	      obstack_grow_wstr (&wchar_buf, LCST ("'"));
-	      {
-		/* Painful gyrations.  */
-		int j;
-		char *s = xstrprintf (_(" <repeats %u times>"), reps);
-
-		for (j = 0; s[j]; ++j)
-		  {
-		    gdb_wchar_t w = gdb_btowc (s[j]);
-		    obstack_grow (&wchar_buf, &w, sizeof (gdb_wchar_t));
-		  }
-		xfree (s);
-	      }
-	      things_printed += options->repeat_count_threshold;
-	      need_comma = 1;
-	    }
-	  else
-	    {
-	      /* Saw the character one or more times, but fewer than
-		 the repetition threshold.  */
-	      if (!in_quotes)
-		{
-		  if (options->inspect_it)
-		    obstack_grow_wstr (&wchar_buf, LCST ("\\"));
-		  obstack_grow (&wchar_buf, &wide_quote_char,
-				sizeof (gdb_wchar_t));
-		  in_quotes = 1;
-		  need_escape = 0;
-		}
-
-	      while (reps-- > 0)
-		{
-		  print_wchar (current_char, orig_buf,
-			       orig_len, width,
-			       byte_order, &wchar_buf,
-			       quote_char, &need_escape);
-		  ++things_printed;
-		}
-	    }
-	}
-
-      /* NUM_CHARS and the other outputs from wchar_iterate are valid
-	 here regardless of which branch was taken above.  */
-      if (num_chars < 0)
-	{
-	  /* Hit EOF.  */
-	  finished = 1;
-	  break;
-	}
-
-      switch (result)
-	{
-	case wchar_iterate_invalid:
-	  if (!in_quotes)
-	    {
-	      if (options->inspect_it)
-		obstack_grow_wstr (&wchar_buf, LCST ("\\"));
-	      obstack_grow (&wchar_buf, &wide_quote_char,
-			    sizeof (gdb_wchar_t));
-	      in_quotes = 1;
-	    }
-	  need_escape = 0;
-	  print_wchar (gdb_WEOF, buf, buflen, width, byte_order,
-		       &wchar_buf, quote_char, &need_escape);
-	  break;
-
-	case wchar_iterate_incomplete:
-	  if (in_quotes)
-	    {
-	      if (options->inspect_it)
-		obstack_grow_wstr (&wchar_buf, LCST ("\\"));
-	      obstack_grow (&wchar_buf, &wide_quote_char,
-			    sizeof (gdb_wchar_t));
-	      obstack_grow_wstr (&wchar_buf, LCST (","));
-	      in_quotes = 0;
-	    }
-	  obstack_grow_wstr (&wchar_buf,
-			     LCST (" <incomplete sequence "));
-	  print_wchar (gdb_WEOF, buf, buflen, width,
-		       byte_order, &wchar_buf,
-		       0, &need_escape);
-	  obstack_grow_wstr (&wchar_buf, LCST (">"));
-	  finished = 1;
-	  break;
-	}
-    }
-
-  /* Terminate the quotes if necessary.  */
-  if (in_quotes)
-    {
-      if (options->inspect_it)
-	obstack_grow_wstr (&wchar_buf, LCST ("\\"));
-      obstack_grow (&wchar_buf, &wide_quote_char,
-		    sizeof (gdb_wchar_t));
-    }
+  /* Print the output string to the obstack.  */
+  print_converted_chars_to_obstack (&wchar_buf, converted_chars, quote_char,
+				    width, byte_order, options);
 
   if (force_ellipses || !finished)
     obstack_grow_wstr (&wchar_buf, LCST ("..."));
@@ -2276,9 +2451,9 @@ generic_printstr (struct ui_file *stream, struct type *type,
   make_cleanup_obstack_free (&output);
 
   convert_between_encodings (INTERMEDIATE_ENCODING, host_charset (),
-			     obstack_base (&wchar_buf),
+			     (gdb_byte *) obstack_base (&wchar_buf),
 			     obstack_object_size (&wchar_buf),
-			     1, &output, translit_char);
+			     sizeof (gdb_wchar_t), &output, translit_char);
   obstack_1grow (&output, '\0');
 
   fputs_filtered (obstack_base (&output), stream);
@@ -2368,18 +2543,14 @@ val_print_string (struct type *elttype, const char *encoding,
 
   if (errcode != 0)
     {
-      if (errcode == EIO)
-	{
-	  fprintf_filtered (stream, "<Address ");
-	  fputs_filtered (paddress (gdbarch, addr), stream);
-	  fprintf_filtered (stream, " out of bounds>");
-	}
-      else
-	{
-	  fprintf_filtered (stream, "<Error reading address ");
-	  fputs_filtered (paddress (gdbarch, addr), stream);
-	  fprintf_filtered (stream, ": %s>", safe_strerror (errcode));
-	}
+      char *str;
+
+      str = memory_error_message (errcode, gdbarch, addr);
+      make_cleanup (xfree, str);
+
+      fprintf_filtered (stream, "<error: ");
+      fputs_filtered (str, stream);
+      fprintf_filtered (stream, ">");
     }
 
   gdb_flush (stream);
@@ -2536,6 +2707,21 @@ show_print (char *args, int from_tty)
 {
   cmd_show_list (showprintlist, from_tty, "");
 }
+
+static void
+set_print_raw (char *arg, int from_tty)
+{
+  printf_unfiltered (
+     "\"set print raw\" must be followed by the name of a \"print raw\" subcommand.\n");
+  help_list (setprintrawlist, "set print raw ", -1, gdb_stdout);
+}
+
+static void
+show_print_raw (char *args, int from_tty)
+{
+  cmd_show_list (showprintrawlist, from_tty, "");
+}
+
 
 void
 _initialize_valprint (void)
@@ -2553,11 +2739,19 @@ _initialize_valprint (void)
   add_alias_cmd ("p", "print", no_class, 1, &showlist);
   add_alias_cmd ("pr", "print", no_class, 1, &showlist);
 
+  add_prefix_cmd ("raw", no_class, set_print_raw,
+		  _("\
+Generic command for setting what things to print in \"raw\" mode."),
+		  &setprintrawlist, "set print raw ", 0, &setprintlist);
+  add_prefix_cmd ("raw", no_class, show_print_raw,
+		  _("Generic command for showing \"print raw\" settings."),
+		  &showprintrawlist, "show print raw ", 0, &showprintlist);
+
   add_setshow_uinteger_cmd ("elements", no_class,
 			    &user_print_options.print_max, _("\
 Set limit on string chars or array elements to print."), _("\
 Show limit on string chars or array elements to print."), _("\
-\"set print elements 0\" causes there to be no limit."),
+\"set print elements unlimited\" causes there to be no limit."),
 			    NULL,
 			    show_print_max,
 			    &setprintlist, &showprintlist);
@@ -2574,17 +2768,17 @@ Show printing of char arrays to stop at first null char."), NULL,
 			    &user_print_options.repeat_count_threshold, _("\
 Set threshold for repeated print elements."), _("\
 Show threshold for repeated print elements."), _("\
-\"set print repeats 0\" causes all elements to be individually printed."),
+\"set print repeats unlimited\" causes all elements to be individually printed."),
 			    NULL,
 			    show_repeat_count_threshold,
 			    &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("pretty", class_support,
-			   &user_print_options.prettyprint_structs, _("\
-Set prettyprinting of structures."), _("\
-Show prettyprinting of structures."), NULL,
+			   &user_print_options.prettyformat_structs, _("\
+Set pretty formatting of structures."), _("\
+Show pretty formatting of structures."), NULL,
 			   NULL,
-			   show_prettyprint_structs,
+			   show_prettyformat_structs,
 			   &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("union", class_support,
@@ -2596,11 +2790,11 @@ Show printing of unions interior to structures."), NULL,
 			   &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("array", class_support,
-			   &user_print_options.prettyprint_arrays, _("\
-Set prettyprinting of arrays."), _("\
-Show prettyprinting of arrays."), NULL,
+			   &user_print_options.prettyformat_arrays, _("\
+Set pretty formatting of arrays."), _("\
+Show pretty formatting of arrays."), NULL,
 			   NULL,
-			   show_prettyprint_arrays,
+			   show_prettyformat_arrays,
 			   &setprintlist, &showprintlist);
 
   add_setshow_boolean_cmd ("address", class_support,

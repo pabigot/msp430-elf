@@ -1,5 +1,5 @@
 /* Definitions of target machine for GCC for IA-32.
-   Copyright (C) 1988-2013 Free Software Foundation, Inc.
+   Copyright (C) 1988-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -36,12 +36,11 @@ extern void ix86_expand_split_stack_prologue (void);
 
 extern void ix86_output_addr_vec_elt (FILE *, int);
 extern void ix86_output_addr_diff_elt (FILE *, int, int);
-extern int ix86_initial_elimination_offset_fsa (int, int);
-extern void ix86_expand_prologue_fsa           (void);
-extern void ix86_expand_epilogue_fsa           (int);
 
 extern enum calling_abi ix86_cfun_abi (void);
 extern enum calling_abi ix86_function_type_abi (const_tree);
+
+extern void ix86_reset_previous_fndecl (void);
 
 #ifdef RTX_CODE
 extern int standard_80387_constant_p (rtx);
@@ -59,9 +58,9 @@ extern enum machine_mode ix86_cc_mode (enum rtx_code, rtx, rtx);
 extern int avx_vpermilp_parallel (rtx par, enum machine_mode mode);
 extern int avx_vperm2f128_parallel (rtx par, enum machine_mode mode);
 
-extern bool ix86_expand_movmem (rtx, rtx, rtx, rtx, rtx, rtx);
-extern bool ix86_expand_setmem (rtx, rtx, rtx, rtx, rtx, rtx);
 extern bool ix86_expand_strlen (rtx, rtx, rtx, rtx);
+extern bool ix86_expand_set_or_movmem (rtx, rtx, rtx, rtx, rtx, rtx,
+				       rtx, rtx, rtx, rtx, bool);
 
 extern bool constant_address_p (rtx);
 extern bool legitimate_pic_operand_p (rtx);
@@ -85,7 +84,6 @@ extern void ix86_expand_clear (rtx);
 extern void ix86_expand_move (enum machine_mode, rtx[]);
 extern void ix86_expand_vector_move (enum machine_mode, rtx[]);
 extern void ix86_expand_vector_move_misalign (enum machine_mode, rtx[]);
-extern void ix86_expand_push (enum machine_mode, rtx);
 extern rtx ix86_fixup_binary_operands (enum rtx_code,
 				       enum machine_mode, rtx[]);
 extern void ix86_fixup_binary_operands_no_copy (enum rtx_code,
@@ -114,7 +112,7 @@ extern void ix86_expand_convert_uns_sidf_sse (rtx, rtx);
 extern void ix86_expand_convert_uns_sisf_sse (rtx, rtx);
 extern void ix86_expand_convert_sign_didf_sse (rtx, rtx);
 extern void ix86_expand_vector_convert_uns_vsivsf (rtx, rtx);
-extern rtx  ix86_expand_adjust_ufix_to_sfix_si (rtx, rtx *);
+extern rtx ix86_expand_adjust_ufix_to_sfix_si (rtx, rtx *);
 extern enum ix86_fpcmp_strategy ix86_fp_comparison_strategy (enum rtx_code);
 extern void ix86_expand_fp_absneg_operator (enum rtx_code, enum machine_mode,
 					    rtx[]);
@@ -144,6 +142,7 @@ extern void ix86_split_lshr (rtx *, rtx, enum machine_mode);
 extern rtx ix86_find_base_term (rtx);
 extern bool ix86_check_movabs (rtx, int);
 extern void ix86_split_idivmod (enum machine_mode, rtx[], bool);
+extern bool ix86_emit_cfi ();
 
 extern rtx assign_386_stack_local (enum machine_mode, enum ix86_stack_slot);
 extern int ix86_attr_length_immediate_default (rtx, bool);
@@ -155,23 +154,24 @@ extern enum machine_mode ix86_fp_compare_mode (enum rtx_code);
 extern rtx ix86_libcall_value (enum machine_mode);
 extern bool ix86_function_arg_regno_p (int);
 extern void ix86_asm_output_function_label (FILE *, const char *, tree);
-extern rtx ix86_force_to_memory (enum machine_mode, rtx);
-extern void ix86_free_from_memory (enum machine_mode);
 extern void ix86_call_abi_override (const_tree);
 extern int ix86_reg_parm_stack_space (const_tree);
 
 extern void ix86_split_fp_branch (enum rtx_code code, rtx, rtx,
-				  rtx, rtx, rtx, rtx);
+				  rtx, rtx, rtx);
 extern bool ix86_hard_regno_mode_ok (int, enum machine_mode);
 extern bool ix86_modes_tieable_p (enum machine_mode, enum machine_mode);
 extern bool ix86_secondary_memory_needed (enum reg_class, enum reg_class,
 					  enum machine_mode, int);
 extern bool ix86_cannot_change_mode_class (enum machine_mode,
 					   enum machine_mode, enum reg_class);
+
 extern int ix86_mode_needed (int, rtx);
 extern int ix86_mode_after (int, int, rtx);
 extern int ix86_mode_entry (int);
 extern int ix86_mode_exit (int);
+
+extern bool ix86_libc_has_function (enum function_class fn_class);
 
 #ifdef HARD_CONST
 extern void ix86_emit_mode_set (int, int, HARD_REG_SET);
@@ -209,7 +209,7 @@ extern void init_cumulative_args (CUMULATIVE_ARGS *, tree, rtx, tree, int);
 #endif	/* RTX_CODE  */
 
 #ifdef TREE_CODE
-extern int ix86_data_alignment (tree, int);
+extern int ix86_data_alignment (tree, int, bool);
 extern unsigned int ix86_local_alignment (tree, enum machine_mode,
 					  unsigned int);
 extern unsigned int ix86_minimum_alignment (tree, enum machine_mode,
@@ -218,8 +218,11 @@ extern int ix86_constant_alignment (tree, int);
 extern tree ix86_handle_shared_attribute (tree *, tree, tree, int, bool *);
 extern tree ix86_handle_selectany_attribute (tree *, tree, tree, int, bool *);
 extern int x86_field_alignment (tree, int);
-extern tree ix86_valid_target_attribute_tree (tree);
+extern tree ix86_valid_target_attribute_tree (tree,
+					      struct gcc_options *,
+					      struct gcc_options *);
 extern unsigned int ix86_get_callcvt (const_tree);
+
 #endif
 
 extern rtx ix86_tls_module_base (void);
@@ -235,6 +238,7 @@ extern void ix86_expand_mul_widen_evenodd (rtx, rtx, rtx, bool, bool);
 extern void ix86_expand_mul_widen_hilo (rtx, rtx, rtx, bool, bool);
 extern void ix86_expand_sse2_mulv4si3 (rtx, rtx, rtx);
 extern void ix86_expand_sse2_mulvxdi3 (rtx, rtx, rtx);
+extern void ix86_expand_sse2_abs (rtx, rtx);
 
 /* In i386-c.c  */
 extern void ix86_target_macros (void);
@@ -261,6 +265,7 @@ extern void i386_pe_end_function (FILE *, const char *, tree);
 extern void i386_pe_assemble_visibility (tree, int);
 extern tree i386_pe_mangle_decl_assembler_name (tree, tree);
 extern tree i386_pe_mangle_assembler_name (const char *);
+extern void i386_pe_record_stub (const char *);
 
 extern void i386_pe_seh_init (FILE *);
 extern void i386_pe_seh_end_prologue (FILE *);
@@ -274,6 +279,7 @@ extern bool i386_pe_type_dllimport_p (tree);
 extern bool i386_pe_type_dllexport_p (tree);
 
 extern int i386_pe_reloc_rw_mask (void);
+
 extern rtx maybe_get_pool_constant (rtx);
 
 extern char internal_label_prefix[16];
@@ -298,13 +304,13 @@ extern void x86_elf_aligned_common (FILE *, const char *,
 extern void ix86_fp_comparison_codes (enum rtx_code code, enum rtx_code *,
 				      enum rtx_code *, enum rtx_code *);
 extern enum rtx_code ix86_fp_compare_code_to_integer (enum rtx_code);
-extern int sse_comparison_operator (rtx, enum machine_mode);
 #endif
 extern int asm_preferred_eh_data_format (int, int);
 
 #ifdef HAVE_ATTR_cpu
 extern enum attr_cpu ix86_schedule;
 #endif
+
 extern const char * ix86_output_call_insn (rtx insn, rtx call_op);
 
 #ifdef RTX_CODE

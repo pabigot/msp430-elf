@@ -8,8 +8,9 @@
    reported to maintainer of that copy if still present in the latest
    version).  */
 /* { dg-do compile } */
-/* { dg-options "-std=iso9899:1999 -pedantic-errors -fhosted" } */
 /* { dg-require-effective-target ilp32 } */
+/* { dg-options "-std=iso9899:1999 -pedantic-errors -fhosted" } */
+/* { dg-require-effective-target ptr32plus } */
 
 #include <limits.h>
 #include <stdint.h>
@@ -215,7 +216,6 @@ test_max (void)
 void
 test_misc_limits (void)
 {
-/* { dg-bogus  "size" "ptrdiff is 16bits" { xfail avr-*-* } 222 } */
   CHECK_SIGNED_LIMITS_2(__PTRDIFF_TYPE__, PTRDIFF_MIN, PTRDIFF_MAX, -65535L, 65535L);
 #ifndef SIGNAL_SUPPRESS
   CHECK_LIMITS_2(sig_atomic_t, SIG_ATOMIC_MIN, SIG_ATOMIC_MAX, -127, 127, 255);

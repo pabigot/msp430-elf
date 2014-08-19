@@ -10,7 +10,7 @@ template <typename T> int Foo (T const *ptr)
 {
   static int count;
   
-  printf ("%s\n", __PRETTY_FUNCTION__);
+  // printf ("%s\n", __PRETTY_FUNCTION__);
   count++;
   
   return count;

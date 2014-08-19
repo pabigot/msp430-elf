@@ -3,7 +3,6 @@
 #include <sys/stat.h>
 #include "trap.h"
 
-int read (int, char *, size_t) __attribute__ ((weak, alias ("_read")));
 
 _read (int file,
        char *ptr,

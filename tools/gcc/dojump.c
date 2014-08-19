@@ -1,5 +1,5 @@
 /* Convert tree expression to rtl instructions, for GNU compiler.
-   Copyright (C) 1988-2013 Free Software Foundation, Inc.
+   Copyright (C) 1988-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -23,6 +23,7 @@ along with GCC; see the file COPYING3.  If not see
 #include "tm.h"
 #include "rtl.h"
 #include "tree.h"
+#include "stor-layout.h"
 #include "flags.h"
 #include "function.h"
 #include "insn-config.h"
@@ -93,6 +94,29 @@ do_pending_stack_adjust (void)
       if (pending_stack_adjust != 0)
         adjust_stack (GEN_INT (pending_stack_adjust));
       pending_stack_adjust = 0;
+    }
+}
+
+/* Remember pending_stack_adjust/stack_pointer_delta.
+   To be used around code that may call do_pending_stack_adjust (),
+   but the generated code could be discarded e.g. using delete_insns_since.  */
+
+void
+save_pending_stack_adjust (saved_pending_stack_adjust *save)
+{
+  save->x_pending_stack_adjust = pending_stack_adjust;
+  save->x_stack_pointer_delta = stack_pointer_delta;
+}
+
+/* Restore the saved pending_stack_adjust/stack_pointer_delta.  */
+
+void
+restore_pending_stack_adjust (saved_pending_stack_adjust *save)
+{
+  if (inhibit_defer_pop == 0)
+    {
+      pending_stack_adjust = save->x_pending_stack_adjust;
+      stack_pointer_delta = save->x_stack_pointer_delta;
     }
 }
 
@@ -311,32 +335,66 @@ do_jump_1 (enum tree_code code, tree op0, tree op1,
       break;
 
     case TRUTH_ANDIF_EXPR:
-      if (if_false_label == NULL_RTX)
-        {
-	  drop_through_label = gen_label_rtx ();
-	  do_jump (op0, drop_through_label, NULL_RTX, prob);
-	  do_jump (op1, NULL_RTX, if_true_label, prob);
-	}
-      else
-	{
-	  do_jump (op0, if_false_label, NULL_RTX, prob);
-	  do_jump (op1, if_false_label, if_true_label, prob);
-	}
-      break;
+      {
+        /* Spread the probability that the expression is false evenly between
+           the two conditions. So the first condition is false half the total
+           probability of being false. The second condition is false the other
+           half of the total probability of being false, so its jump has a false
+           probability of half the total, relative to the probability we
+           reached it (i.e. the first condition was true).  */
+        int op0_prob = -1;
+        int op1_prob = -1;
+        if (prob != -1)
+          {
+            int false_prob = inv (prob);
+            int op0_false_prob = false_prob / 2;
+            int op1_false_prob = GCOV_COMPUTE_SCALE ((false_prob / 2),
+                                                     inv (op0_false_prob));
+            /* Get the probability that each jump below is true.  */
+            op0_prob = inv (op0_false_prob);
+            op1_prob = inv (op1_false_prob);
+          }
+        if (if_false_label == NULL_RTX)
+          {
+            drop_through_label = gen_label_rtx ();
+            do_jump (op0, drop_through_label, NULL_RTX, op0_prob);
+            do_jump (op1, NULL_RTX, if_true_label, op1_prob);
+          }
+        else
+          {
+            do_jump (op0, if_false_label, NULL_RTX, op0_prob);
+            do_jump (op1, if_false_label, if_true_label, op1_prob);
+          }
+        break;
+      }
 
     case TRUTH_ORIF_EXPR:
-      if (if_true_label == NULL_RTX)
-	{
-          drop_through_label = gen_label_rtx ();
-	  do_jump (op0, NULL_RTX, drop_through_label, prob);
-	  do_jump (op1, if_false_label, NULL_RTX, prob);
-	}
-      else
-	{
-	  do_jump (op0, NULL_RTX, if_true_label, prob);
-	  do_jump (op1, if_false_label, if_true_label, prob);
-	}
-      break;
+      {
+        /* Spread the probability evenly between the two conditions. So
+           the first condition has half the total probability of being true.
+           The second condition has the other half of the total probability,
+           so its jump has a probability of half the total, relative to
+           the probability we reached it (i.e. the first condition was false).  */
+        int op0_prob = -1;
+        int op1_prob = -1;
+        if (prob != -1)
+          {
+            op0_prob = prob / 2;
+            op1_prob = GCOV_COMPUTE_SCALE ((prob / 2), inv (op0_prob));
+          }
+        if (if_true_label == NULL_RTX)
+          {
+            drop_through_label = gen_label_rtx ();
+            do_jump (op0, NULL_RTX, drop_through_label, op0_prob);
+            do_jump (op1, if_false_label, NULL_RTX, op1_prob);
+          }
+        else
+          {
+            do_jump (op0, NULL_RTX, if_true_label, op0_prob);
+            do_jump (op1, if_false_label, if_true_label, op1_prob);
+          }
+        break;
+      }
 
     default:
       gcc_unreachable ();
@@ -624,10 +682,6 @@ do_jump_by_parts_greater_rtx (enum machine_mode mode, int unsignedp, rtx op0,
       drop_through_if_false = true;
     }
 
-  /* This test is to prevent an infinite recursion between this function
-     and do_compare_rtx_and_jump().  This can happen if the target fails
-     to implement a cbranch<mode> template.  */
-  gcc_assert (nwords > 1);
   /* Deal with the special case 0 > x: only one comparison is necessary and
      we reverse it to avoid jumping to the drop-through label.  */
   if (op0 == const0_rtx && drop_through_if_true && !drop_through_if_false)
@@ -707,10 +761,6 @@ do_jump_by_parts_zero_rtx (enum machine_mode mode, rtx op0,
   int i;
   rtx drop_through_label = 0;
 
-  /* This test is to prevent an infinite recursion between this function
-     and do_compare_rtx_and_jump().  This can happen if the target fails
-     to implement a cbranch<mode> template.  */
-  gcc_assert (nwords > 1);
   /* The fastest way of doing this comparison on almost any machine is to
      "or" all the words and compare the result.  If all have to be loaded
      from memory and this is a very wide item, it's possible this may
@@ -759,11 +809,6 @@ do_jump_by_parts_equality_rtx (enum machine_mode mode, rtx op0, rtx op1,
   rtx drop_through_label = 0;
   int i;
 
-  /* This test is to prevent an infinite recursion between this function
-     and do_compare_rtx_and_jump().  This can happen if the target fails
-     to implement a cbranch<mode> template, or if it puts a mode on the
-     match_operator parameter (operand 0).  */
-  gcc_assert (nwords > 1);
   if (op1 == const0_rtx)
     {
       do_jump_by_parts_zero_rtx (mode, op0, if_false_label, if_true_label,
@@ -1058,6 +1103,11 @@ do_compare_rtx_and_jump (rtx op0, rtx op1, enum rtx_code code, int unsignedp,
 
 	  else
 	    {
+	      int first_prob = prob;
+	      if (first_code == UNORDERED)
+		first_prob = REG_BR_PROB_BASE / 100;
+	      else if (first_code == ORDERED)
+		first_prob = REG_BR_PROB_BASE - REG_BR_PROB_BASE / 100;
 	      if (and_them)
 		{
 		  rtx dest_label;
@@ -1071,11 +1121,13 @@ do_compare_rtx_and_jump (rtx op0, rtx op1, enum rtx_code code, int unsignedp,
 		  else
 		    dest_label = if_false_label;
                   do_compare_rtx_and_jump (op0, op1, first_code, unsignedp, mode,
-					   size, dest_label, NULL_RTX, prob);
+					   size, dest_label, NULL_RTX,
+					   first_prob);
 		}
               else
                 do_compare_rtx_and_jump (op0, op1, first_code, unsignedp, mode,
-					 size, NULL_RTX, if_true_label, prob);
+					 size, NULL_RTX, if_true_label,
+					 first_prob);
 	    }
 	}
 

@@ -1,0 +1,67 @@
+#### Makefile.in --- Makefile template for the AARCH64 simulator
+
+### Copyright (C) 2013 Red Hat, Inc.
+
+### This file is part of the GNU simulators.
+
+### Redistribution and use in source and binary forms, with or without
+### modification, are permitted provided that the following conditions are
+### met:
+### 
+###     (1) Redistributions of source code must retain the above copyright
+###     notice, this list of conditions and the following disclaimer. 
+### 
+###     (2) Redistributions in binary form must reproduce the above copyright
+###     notice, this list of conditions and the following disclaimer in
+###     the documentation and/or other materials provided with the
+###     distribution.  
+###     
+###     (3)The name of the author may not be used to
+###     endorse or promote products derived from this software without
+###     specific prior written permission.
+### 
+### THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+### IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+### WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+### DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
+### INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+### (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+### SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+### HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+### STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+### IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+### POSSIBILITY OF SUCH DAMAGE.  */ 
+
+## COMMON_PRE_CONFIG_FRAG
+
+SIM_EXTRA_CFLAGS = -Wall -Werror
+SIM_EXTRA_LIBS = -lm
+
+SIM_RUN_OBJS = \
+	main.o \
+	$(ENDLIST)
+
+SIM_OBJS = \
+	gdb-if.o \
+	cpustate.o \
+	simulator.o \
+	memory.o \
+	$(ENDLIST)
+
+LIBS = $B/bfd/libbfd.a $B/libiberty/libiberty.a
+
+## COMMON_POST_CONFIG_FRAG
+
+arch = aarch64
+
+
+gdb-if.o : memory.h cpustate.h simulator.h \
+           $(srcdir)/../../include/gdb/callback.h \
+	   $(srcdir)/../../include/gdb/remote-sim.h \
+	   $(srcdir)/../../include/gdb/signals.h \
+	   $(srcdir)/../../include/gdb/sim-aarch64.h
+
+cpustate.o:  cpustate.h simulator.h
+simulator.o: cpustate.h memory.h simulator.h
+main.o:      cpustate.h memory.h simulator.h
+memory.o:    memory.h simulator.h

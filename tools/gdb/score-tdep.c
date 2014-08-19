@@ -1,7 +1,7 @@
 /* Target-dependent code for the S+core architecture, for GDB,
    the GNU Debugger.
 
-   Copyright (C) 2006-2012 Free Software Foundation, Inc.
+   Copyright (C) 2006-2014 Free Software Foundation, Inc.
 
    Contributed by Qinwei (qinwei@sunnorth.com.cn)
    Contributed by Ching-Peng Lin (cplin@sunplus.com)
@@ -137,11 +137,11 @@ score_print_insn (bfd_vma memaddr, struct disassemble_info *info)
 }
 
 static inst_t *
-score7_fetch_inst (struct gdbarch *gdbarch, CORE_ADDR addr, char *memblock)
+score7_fetch_inst (struct gdbarch *gdbarch, CORE_ADDR addr, gdb_byte *memblock)
 {
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
   static inst_t inst = { 0, 0, 0 };
-  char buf[SCORE_INSTLEN] = { 0 };
+  gdb_byte buf[SCORE_INSTLEN] = { 0 };
   int big;
   int ret;
 
@@ -807,11 +807,11 @@ score3_in_function_epilogue_p (struct gdbarch *gdbarch, CORE_ADDR cur_pc)
     return 0;
 }
 
-static char *
+static gdb_byte *
 score7_malloc_and_get_memblock (CORE_ADDR addr, CORE_ADDR size)
 {
   int ret;
-  char *memblock = NULL;
+  gdb_byte *memblock = NULL;
 
   if (size < 0)
     {
@@ -822,7 +822,7 @@ score7_malloc_and_get_memblock (CORE_ADDR addr, CORE_ADDR size)
   else if (size == 0)
     return NULL;
 
-  memblock = (char *) xmalloc (size);
+  memblock = xmalloc (size);
   memset (memblock, 0, size);
   ret = target_read_memory (addr & ~0x3, memblock, size);
   if (ret)
@@ -835,13 +835,13 @@ score7_malloc_and_get_memblock (CORE_ADDR addr, CORE_ADDR size)
 }
 
 static void
-score7_free_memblock (char *memblock)
+score7_free_memblock (gdb_byte *memblock)
 {
   xfree (memblock);
 }
 
 static void
-score7_adjust_memblock_ptr (char **memblock, CORE_ADDR prev_pc,
+score7_adjust_memblock_ptr (gdb_byte **memblock, CORE_ADDR prev_pc,
                            CORE_ADDR cur_pc)
 {
   if (prev_pc == -1)
@@ -877,8 +877,8 @@ score7_analyze_prologue (CORE_ADDR startaddr, CORE_ADDR pc,
   int fp_offset_p = 0;
   int inst_len = 0;
 
-  char *memblock = NULL;
-  char *memblock_ptr = NULL;
+  gdb_byte *memblock = NULL;
+  gdb_byte *memblock_ptr = NULL;
   CORE_ADDR prev_pc = -1;
 
   /* Allocate MEMBLOCK if PC - STARTADDR > 0.  */

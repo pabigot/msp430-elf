@@ -1,7 +1,6 @@
 	.file "memcpy.S"
 
 	.section .text
-#if 0
 	.global _memcpy
 	.type	 _memcpy,@function
 _memcpy:
@@ -64,104 +63,6 @@ _memcpy:
 	mov d2,a0
 .Lepilogue:
 	ret [d2,d3,a2,a3],16
-#else
-	.global  _memcpy
-	.type	 _memcpy,@function
-_memcpy:
-	movm	[d2], (sp)
-.Lend_of_prologue:
-	mov	d0, d2
-	mov	d1, a0
-	mov	d2, a1
-	mov	(16, sp), d1
-
-/*	Newlib for the MN10300 is compiled with -Os enabled all the time,
-	so normally the code below will not be triggered.  The test for
-	__LIW__ however enables us to build a speed optimized version when
-	building -mliw enabled multilibs.  -mliw allows long instruction
-	word generation which is faster but occupies more space.  LIW
-	instructions are not acutally used in the code below, but enabling
-	their generation implies that the user is more interested in code
-	performance than code size.  */
-#if ! defined __OPTIMIZE_SIZE__ || defined __LIW__
-	mov	a0, d0
-	or	d2, d0
-	btst	3, d0
-	bne	.L37
-	cmp	15, d1
-	bls	.L34
-#ifdef __NO_SETLB__
-.Loop1:
-#else
-	setlb
-#endif
-	mov	(a0), d0
-	mov	d0, (a1)
-	inc4	a0
-	inc4	a1
-	mov	(a0), d0
-	mov	d0, (a1)
-	inc4	a0
-	inc4	a1
-	mov	(a0), d0
-	mov	d0, (a1)
-	inc4	a0
-	inc4	a1
-	mov	(a0),d0
-	mov	d0, (a1)
-	inc4	a0
-	inc4	a1
-	add	-16, d1
-	cmp	15, d1
-#ifdef __NO_SETLB__
-	bhi	.Loop1
-#else
-	lhi
-#endif
-.L34:
-	cmp	3, d1
-	bls	.L37
-#ifdef __NO_SETLB__
-.Loop2:
-#else
-	setlb
-#endif
-	mov	(a0), d0
-	mov	d0, (a1)
-	inc4	a0
-	inc4	a1
-	add	-4, d1
-	cmp	3, d1
-#ifdef __NO_SETLB__
-	bhi	.Loop2
-#else
-	lhi
-#endif
-.L37:
-#endif /* Optimize for speed.  */
-
-	cmp	0, d1
-	beq	.L36
-#ifdef __NO_SETLB__
-.Loop3:
-#else
-	setlb
-#endif
-	movbu	(a0), d0
-	movbu	d0, (a1)
-	inc	a0
-	inc	a1
-	sub	1, d1
-#ifdef __NO_SETLB__
-	bne	.Loop3
-#else
-	lne
-#endif
-.L36:
-	mov	d2, a0
-	mov	d2, d0
-	ret	[d2], 4
-#endif
 .Lend_of_memcpy:
 	.size	 _memcpy, .Lend_of_memcpy - _memcpy
 

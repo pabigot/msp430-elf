@@ -1,3 +1,5 @@
+# Test procedures in lib/utils.exp.
+
 set srcdir [lindex $argv 0]
 set subdir [lindex $argv 1]
 set objdir [lindex $argv 2]
@@ -13,15 +15,14 @@ if [ file exists $srcdir/$subdir/default_procs.tcl ] {
     puts "ERROR: $srcdir$subdir/default_procs.tcl doesn't exist"
 }
 
-set file $srcdir/../lib/utils.exp    
+set file $srcdir/../lib/utils.exp
 if [ file exists $file] {
     source $file
 } else {
     puts "ERROR: $file doesn't exist"
 }
 
-#
-# getdirs tests
+# Test getdirs:
 #
 if [lib_pat_test "getdirs" "${srcdir}/runtest.all" "runtest.all/topdir" ] {
     puts "FAILED: getdirs toplevel, no arguments"
@@ -41,8 +42,7 @@ if [lib_pat_test "getdirs" "${srcdir}/runtest.all/topdir" "subdir1*subdir2" ] {
     puts "PASSED: getdirs toplevel, two subdirs"
 }
 
-#
-# find tests
+# Test find:
 #
 if [string match "*/subdir2/subfile2" "[find ${srcdir}/runtest.all/topdir/subdir2 sub*]"] {
     puts "PASSED: find, only one level deep"
@@ -50,35 +50,34 @@ if [string match "*/subdir2/subfile2" "[find ${srcdir}/runtest.all/topdir/subdir
     puts "FAILED: find, only one level deep"
 }
 
-#set path ${srcdir}/runtest.all/topdir/subdir1
-#exp_test "find ${path} sub*" "Adding */subdir1/subsubdir1/subsubfile1" "find, two levels deep"
-
-if [string match "*/subdir1/subsubdir1/subsubfile1" "[find ${srcdir}/runtest.all/topdir/subdir1 sub*]"] {
+if [regexp ".*/subdir1/subsubdir1/subsubfile1( |$)" "[find ${srcdir}/runtest.all/topdir/subdir1 sub*]"] {
     puts "PASSED: find, two levels deep"
 } else {
     puts "FAILED: find, two  levels deep"
 }
 
-#
-# environment varible utility tests
+# Environment varible utility tests.
 #
 
 if [info exists env(TESTRUN)] {
     unset env(TESTRUN)
 }
 
-# test setenv
+# Test setenv:
+#
 setenv TESTRUN FooBar
 if [info exists env(TESTRUN)] {
     if { $env(TESTRUN) == "FooBar" } {
         pass "setenv, set an environment variable"
     } else {
-        fail "setenv, set an environment variable       
+        fail "setenv, set an environment variable
     }
 } else {
     fail "setenv, set an environment variable"
 }
-# test getenv
+
+# Test getenv:
+#
 if [info exists env(TESTRUN)] {
     if { [getenv TESTRUN] == "FooBar" } {
         pass "getenv, get an environment variable"
@@ -89,7 +88,8 @@ if [info exists env(TESTRUN)] {
     untested "getenv, get an environment variable"
 }
 
-# test unsetenv
+# Test unsetenv:
+#
 if [info exists env(TESTRUN)] {
     unsetenv TESTRUN
     if [info exists env(TESTRUN)] {
@@ -103,16 +103,5 @@ if [info exists env(TESTRUN)] {
 
 # which file
 # grep args
-# prune list pattern
-# slay name
-# absolute path
-# psource file
 # diff file_1 file_2
-
-
-
-
-
-
-
-
+# runtest_file_p

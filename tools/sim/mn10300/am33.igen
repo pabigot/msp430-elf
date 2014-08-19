@@ -119,7 +119,6 @@
 *am33
 *am33_2
 {
-#if 0 /* This code is bogus.  */
   unsigned32 sp, next_pc;
 
   PC = cia;
@@ -129,10 +128,6 @@
   store_word (sp - 8, PSW);
   State.regs[REG_PC] = 0x40000000 + IMM4 * 8;
   nia = PC;
-#else
-  PC = cia;
-  do_syscall ();
-#endif
 }
 
 

@@ -7,7 +7,7 @@
 // of whether or not the constructor for the given class is defined
 // before or after the new operator is even declared.
 
-extern "C" int printf (const char *, ...); 
+// extern "C" int printf (const char *, ...); 
 
 typedef __SIZE_TYPE__ size_t;
 
@@ -42,9 +42,9 @@ int main ()
 	derived_ptr = new derived ();
 
 	if ((new_call_count != 2) || (errors != 0))
-	  { printf ("FAIL\n"); return 1; }
+	  { /* printf ("FAIL\n"); */ return 1; }
 	else
-	  printf ("PASS\n");
+	  ; // printf ("PASS\n");
 
 	return 0;
 }

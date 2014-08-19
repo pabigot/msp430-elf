@@ -1,0 +1,38 @@
+This patch fixes some internal errors in the gdb.trace tests when running
+the mips simulator.  Sumbitted upstream.
+
+Comments from upstream were as follows:
+
+    1) The trace mechanism in the stub (or whereever it resides) isn't
+       likely to understand GDB's notion of pseudo registers.
+    2) Daniel Jacobowitz has stated that he plans to make SP_REGNUM into
+       a real register on MIPS thus obviating the need for this patch.
+
+I'm going to leave this patch in our gnupro sources for the time being,
+but this patch should be discarded at the next import.
+
+- Kevin
+
+
+In gdb/ChangeLog.RedHat:
+
+	* arch-utils.c (legacy_virtual_frame_pointer): SP_REGNUM might
+	be a pseudo-register; revise test accordingly.
+
+Index: arch-utils.c
+===================================================================
+RCS file: /cvs/src/src/gdb/arch-utils.c,v
+retrieving revision 1.145
+diff -u -p -r1.145 arch-utils.c
+--- arch-utils.c	28 Apr 2007 21:52:38 -0000	1.145
++++ arch-utils.c	7 May 2007 21:39:03 -0000
+@@ -198,7 +198,7 @@ legacy_virtual_frame_pointer (CORE_ADDR 
+      with things like Dwarf2's CFI.  */
+   if (DEPRECATED_FP_REGNUM >= 0 && DEPRECATED_FP_REGNUM < NUM_REGS)
+     *frame_regnum = DEPRECATED_FP_REGNUM;
+-  else if (SP_REGNUM >= 0 && SP_REGNUM < NUM_REGS)
++  else if (SP_REGNUM >= 0 && SP_REGNUM < NUM_REGS + NUM_PSEUDO_REGS)
+     *frame_regnum = SP_REGNUM;
+   else
+     /* Should this be an internal error?  I guess so, it is reflecting
+

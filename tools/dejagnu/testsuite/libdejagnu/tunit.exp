@@ -1,11 +1,27 @@
+# Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+# 2001, 2002, 2003 Free Software Foundation, Inc.
+#
+# This file is part of DejaGnu.
+#
+# DejaGnu is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# DejaGnu is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with DejaGnu; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+
 load_lib "dejagnu.exp"
 
 # Uncomment these for debugging help
 #strace $tracelevel
 # exp_internal -f dbg.log 1
-
-# Execute everything in the test subdir so all the output files go there.
-cd $subdir
 
 # Get the size of the module being tested.
 set sizes [exe_size "unit"]
@@ -29,14 +45,4 @@ verbose "Data section size of proctor is 0x$datasize"
 # Execute the test case, and analyse the output
 if { [host_execute "unit"] != "" } {
     perror "unit had an execution error" 0
-} 
-
-# All done, back to the top level test directory
-cd ..
-
-
-
-
-
-
-
+}

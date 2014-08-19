@@ -1,6 +1,5 @@
 // Test that a virtual defaulted constructor is still virtual.
-// { dg-do run }
-// { dg-options -std=c++0x }
+// { dg-do run { target c++11 } }
 
 int r = 1;
 
@@ -21,3 +20,4 @@ int main()
   delete ap;
   return r;
 }
+// { dg-require-effective-target size32plus }

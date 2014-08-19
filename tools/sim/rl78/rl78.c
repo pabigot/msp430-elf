@@ -1,6 +1,6 @@
 /* rl78.c --- opcode semantics for stand-alone RL78 simulator.
 
-   Copyright (C) 2008-2013 Free Software Foundation, Inc.
+   Copyright (C) 2008-2014 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of the GNU simulators.
@@ -853,9 +853,6 @@ decode_opcode (void)
       opcode_size = rl78_decode_opcode (pc, &opcode,
 					rl78_get_byte, &rl78_data);
       pc += opcode_size;
-      /* Manual says 1 clock always, but the chip takes two clocks if
-        it skips the instruction (i.e. takes the branch).  */
-      CLOCKS (2);
       tprintf (" skipped: %s\n", opcode.syntax);
       break;
 

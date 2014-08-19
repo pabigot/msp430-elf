@@ -79,3 +79,5 @@ int main(int, char**)
 {
   C t;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

@@ -1,4 +1,5 @@
 /* { dg-do link } */
+/* { dg-skip-if "no NaN support" { "rx-*-*" } { "*" } { "" } } */
 /* { dg-options "-fno-finite-math-only" }  */
 
 void link_error ();

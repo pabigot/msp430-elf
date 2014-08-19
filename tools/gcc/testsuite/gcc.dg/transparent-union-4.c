@@ -2,8 +2,8 @@
    -pedantic.  Bug 22240.  */
 /* Origin: Joseph Myers <joseph@codesourcery.com> */
 /* { dg-do compile } */
-/* { dg-options "-pedantic" } */
 /* { dg-skip-if "pointers are not power-of-2 in size" { "msp430-*-*" } { "-mlarge" } { "" } } */
+/* { dg-options "-pedantic" } */
 
 typedef union { union w *u; int *i; } H __attribute__ ((transparent_union));
 void (*h) (H);

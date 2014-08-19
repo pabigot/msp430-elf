@@ -9,9 +9,15 @@ static int dupname(int y)
  label: return y;
 }
 
+static int twodup ()
+{
+  return 0;
+}
+
 int n(int y)
 {
-  return dupname(y) - 23;	/* thefile breakpoint */
+  int v = dupname(y) - 23;	/* thefile breakpoint */
+  return v + twodup ();		/* after dupname */
 }
 
 int NameSpace::overload(double x)

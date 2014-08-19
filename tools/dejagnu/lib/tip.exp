@@ -1,26 +1,25 @@
-# Copyright (C) 1997 - 2001 Free Software Foundation, Inc.
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
+# Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+# 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
+#
+# This file is part of DejaGnu.
+#
+# DejaGnu is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.  
-
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-dejagnu@gnu.org
-
 #
-# Connect via tip as part of remote_open.
-# returns -1 if it failed, the spawn_id if it worked; also sets
-# [board_info ${hostname} fileid] with the spawn_id on success.
+# DejaGnu is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with DejaGnu; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+
+# Connect to HOSTNAME using tip(1).  Sets the board's fileid field
+# with the spawn_id on success and returns the spawn id, otherwise
+# returns -1.
 #
 proc tip_open { hostname } {
     global verbose
@@ -29,18 +28,19 @@ proc tip_open { hostname } {
     set tries 0
     set result -1
 
-    if [board_info $hostname exists name] {
-	set hostname [board_info ${hostname} name];
+    if {[board_info $hostname exists name]} {
+	set hostname [board_info ${hostname} name]
     }
     set port [board_info ${hostname} tipname]
-    if [board_info ${hostname} exists shell_prompt] {
+    if {[board_info ${hostname} exists shell_prompt]} {
 	set shell_prompt [board_info ${hostname} shell_prompt]
     } else {
-	set shell_prompt ".*> " # Pick something reasonably generic.
+	# Pick something reasonably generic.
+	set shell_prompt ".*> "
     }
- 
-    if [board_info ${hostname} exists fileid] {
-	unset board_info(${hostname},fileid);
+
+    if {[board_info ${hostname} exists fileid]} {
+	unset board_info(${hostname},fileid)
     }
     spawn tip -v $port
     if { $spawn_id < 0 } {
@@ -48,7 +48,7 @@ proc tip_open { hostname } {
 	return -1
     }
     expect {
-	-re ".*connected.*$" { 
+	-re ".*connected.*$" {
 	    send "\r\n"
 	    expect {
 		-re ".*$shell_prompt.*$" {
@@ -72,7 +72,7 @@ proc tip_open { hostname } {
 	    incr tries
 	    if { $tries <= 2 } {
 		exp_continue
-	    }	    
+	    }
 	}
 	-re "Connection Closed.*$" {
 	    perror "Never connected."
@@ -119,30 +119,28 @@ proc tip_open { hostname } {
     }
 }
 
-#
-# Downloads using the ~put command under tip
-#     arg - is a full path name to the file to download
-#     returns -1 if an error occured, otherwise it returns 0.
+# Download FILE to DEST using the ~put command in tip(1).
+# Returns -1 if an error occurred, otherwise returns 0.
 #
 proc tip_download { dest file args } {
     global verbose
     global decimal
     global expect_out
 
-    if [board_info $dest exists shell_prompt] {
-	set shell_prompt [board_info $dest shell_prompt];
+    if {[board_info $dest exists shell_prompt]} {
+	set shell_prompt [board_info $dest shell_prompt]
     } else {
 	set shell_prompt ".*>"
     }
 
     set result ""
-    if ![board_info $dest exists fileid] {
+    if {![board_info $dest exists fileid]} {
 	perror "tip_download: no connection to $dest."
-	return $result;
+	return $result
     }
-    set shell_id [board_info $dest fileid];
+    set shell_id [board_info $dest fileid]
 
-    if ![file exists $file] {
+    if {![file exists $file]} {
 	perror "$file doesn't exist."
 	return $result
     }
@@ -159,13 +157,13 @@ proc tip_download { dest file args } {
 		}
 		-i $shell_id -re ".*lines transferred in.*minute.*seconds.*$shell_prompt.*$" {
 		    verbose "Download $file successfully" 1
-		    set result $file;
+		    set result $file
 		}
 		-i $shell_id -re ".*Invalid command.*$shell_prompt$" {
 		    warning "Got an invalid command to the remote shell."
 		}
 		-i $shell_id -re ".*$decimal\r" {
-		    if [info exists expect_out(buffer)] {
+		    if {[info exists expect_out(buffer)]} {
 			verbose "$expect_out(buffer)"
 			exp_continue
 		    }

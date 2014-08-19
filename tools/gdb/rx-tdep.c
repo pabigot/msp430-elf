@@ -1,6 +1,6 @@
 /* Target-dependent code for the Renesas RX for GDB, the GNU debugger.
 
-   Copyright (C) 2008-2012 Free Software Foundation, Inc.
+   Copyright (C) 2008-2014 Free Software Foundation, Inc.
 
    Contributed by Red Hat, Inc.
 
@@ -45,7 +45,10 @@ enum
   RX_R4_REGNUM = 4,
   RX_FP_REGNUM = 6,
   RX_R15_REGNUM = 15,
+  RX_PSW_REGNUM = 18,
   RX_PC_REGNUM = 19,
+  RX_BPSW_REGNUM = 21,
+  RX_FPSW_REGNUM = 24,
   RX_ACC_REGNUM = 25,
   RX_NUM_REGS = 26
 };
@@ -55,6 +58,12 @@ struct gdbarch_tdep
 {
   /* The ELF header flags specify the multilib used.  */
   int elf_flags;
+
+  /* Type of PSW and BPSW.  */
+  struct type *rx_psw_type;
+
+  /* Type of FPSW.  */
+  struct type *rx_fpsw_type;
 };
 
 /* This structure holds the results of a prologue analysis.  */
@@ -131,8 +140,14 @@ rx_register_name (struct gdbarch *gdbarch, int regnr)
 static struct type *
 rx_register_type (struct gdbarch *gdbarch, int reg_nr)
 {
+  struct gdbarch_tdep *tdep = gdbarch_tdep (gdbarch);
+
   if (reg_nr == RX_PC_REGNUM)
     return builtin_type (gdbarch)->builtin_func_ptr;
+  else if (reg_nr == RX_PSW_REGNUM || reg_nr == RX_BPSW_REGNUM)
+    return tdep->rx_psw_type;
+  else if (reg_nr == RX_FPSW_REGNUM)
+    return tdep->rx_fpsw_type;
   else if (reg_nr == RX_ACC_REGNUM)
     return builtin_type (gdbarch)->builtin_unsigned_long_long;
   else
@@ -154,7 +169,7 @@ check_for_saved (void *result_untyped, pv_t addr, CORE_ADDR size, pv_t value)
   if (value.kind == pvk_register
       && value.k == 0
       && pv_is_register (addr, RX_SP_REGNUM)
-      && size == register_size (target_gdbarch, value.reg))
+      && size == register_size (target_gdbarch (), value.reg))
     result->reg_offset[value.reg] = addr.k;
 }
 
@@ -207,7 +222,7 @@ rx_analyze_prologue (CORE_ADDR start_pc,
       result->reg_offset[rn] = 1;
     }
 
-  stack = make_pv_area (RX_SP_REGNUM, gdbarch_addr_bit (target_gdbarch));
+  stack = make_pv_area (RX_SP_REGNUM, gdbarch_addr_bit (target_gdbarch ()));
   back_to = make_cleanup_free_pv_area (stack);
 
   /* The call instruction has saved the return address on the stack.  */
@@ -764,6 +779,23 @@ rx_breakpoint_from_pc (struct gdbarch *gdbarch, CORE_ADDR *pcptr, int *lenptr)
   return breakpoint;
 }
 
+/* Implement the dwarf_reg_to_regnum" gdbarch method.  */
+
+static int
+rx_dwarf_reg_to_regnum (struct gdbarch *gdbarch, int reg)
+{
+  if (0 <= reg && reg <= 15)
+    return reg;
+  else if (reg == 16)
+    return RX_PSW_REGNUM;
+  else if (reg == 17)
+    return RX_PC_REGNUM;
+  else
+    internal_error (__FILE__, __LINE__,
+                    _("Undefined dwarf2 register mapping of reg %d"),
+		    reg);
+}
+
 /* Allocate and initialize a gdbarch object.  */
 static struct gdbarch *
 rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
@@ -797,6 +829,43 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
   tdep = (struct gdbarch_tdep *) xmalloc (sizeof (struct gdbarch_tdep));
   gdbarch = gdbarch_alloc (&info, tdep);
   tdep->elf_flags = elf_flags;
+
+  /* Initialize the flags type for PSW and BPSW.  */
+  tdep->rx_psw_type = arch_flags_type (gdbarch, "rx_psw_type", 4);
+  append_flags_type_flag (tdep->rx_psw_type, 0, "C");
+  append_flags_type_flag (tdep->rx_psw_type, 1, "Z");
+  append_flags_type_flag (tdep->rx_psw_type, 2, "S");
+  append_flags_type_flag (tdep->rx_psw_type, 3, "O");
+  append_flags_type_flag (tdep->rx_psw_type, 16, "I");
+  append_flags_type_flag (tdep->rx_psw_type, 17, "U");
+  append_flags_type_flag (tdep->rx_psw_type, 20, "PM");
+  append_flags_type_flag (tdep->rx_psw_type, 24, "IPL0");
+  append_flags_type_flag (tdep->rx_psw_type, 25, "IPL1");
+  append_flags_type_flag (tdep->rx_psw_type, 26, "IPL2");
+  append_flags_type_flag (tdep->rx_psw_type, 27, "IPL3");
+
+  /* Initialize flags type for FPSW.  */
+  tdep->rx_fpsw_type = arch_flags_type (gdbarch, "rx_fpsw_type", 4);
+  append_flags_type_flag (tdep->rx_fpsw_type, 0, "RM0");
+  append_flags_type_flag (tdep->rx_fpsw_type, 1, "RM1");
+  append_flags_type_flag (tdep->rx_fpsw_type, 2, "CV");
+  append_flags_type_flag (tdep->rx_fpsw_type, 3, "CO");
+  append_flags_type_flag (tdep->rx_fpsw_type, 4, "CZ");
+  append_flags_type_flag (tdep->rx_fpsw_type, 5, "CU");
+  append_flags_type_flag (tdep->rx_fpsw_type, 6, "CX");
+  append_flags_type_flag (tdep->rx_fpsw_type, 7, "CE");
+  append_flags_type_flag (tdep->rx_fpsw_type, 8, "DN");
+  append_flags_type_flag (tdep->rx_fpsw_type, 10, "EV");
+  append_flags_type_flag (tdep->rx_fpsw_type, 11, "EO");
+  append_flags_type_flag (tdep->rx_fpsw_type, 12, "EZ");
+  append_flags_type_flag (tdep->rx_fpsw_type, 13, "EU");
+  append_flags_type_flag (tdep->rx_fpsw_type, 14, "EX");
+  append_flags_type_flag (tdep->rx_fpsw_type, 26, "FV");
+  append_flags_type_flag (tdep->rx_fpsw_type, 27, "FO");
+  append_flags_type_flag (tdep->rx_fpsw_type, 28, "FZ");
+  append_flags_type_flag (tdep->rx_fpsw_type, 29, "FU");
+  append_flags_type_flag (tdep->rx_fpsw_type, 30, "FX");
+  append_flags_type_flag (tdep->rx_fpsw_type, 31, "FS");
 
   set_gdbarch_num_regs (gdbarch, RX_NUM_REGS);
   set_gdbarch_num_pseudo_regs (gdbarch, 0);
@@ -838,12 +907,11 @@ rx_gdbarch_init (struct gdbarch_info info, struct gdbarch_list *arches)
       set_gdbarch_long_double_format (gdbarch, floatformats_ieee_single);
     }
 
+  /* DWARF register mapping.  */
+  set_gdbarch_dwarf2_reg_to_regnum (gdbarch, rx_dwarf_reg_to_regnum);
+
   /* Frame unwinding.  */
-#if 0
-  /* Note: The test results are better with the dwarf2 unwinder disabled,
-     so it's turned off for now.  */
   dwarf2_append_unwinders (gdbarch);
-#endif
   frame_unwind_append_unwinder (gdbarch, &rx_frame_unwind);
 
   /* Methods for saving / extracting a dummy frame's ID.

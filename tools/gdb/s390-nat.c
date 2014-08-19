@@ -1,6 +1,5 @@
 /* S390 native-dependent code for GDB, the GNU debugger.
-   Copyright (C) 2001, 2003-2007, 2009, 2012 Free Software Foundation,
-   Inc.
+   Copyright (C) 2001-2013 Free Software Foundation, Inc.
 
    Contributed by D.J. Barrow (djbarrow@de.ibm.com,barrow_dj@yahoo.com)
    for IBM Deutschland Entwicklung GmbH, IBM Corporation.
@@ -601,7 +600,7 @@ s390_auxv_parse (struct target_ops *ops, gdb_byte **readptr,
 		 gdb_byte *endptr, CORE_ADDR *typep, CORE_ADDR *valp)
 {
   int sizeof_auxv_field = s390_target_wordsize ();
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   gdb_byte *ptr = *readptr;
 
   if (endptr == ptr)

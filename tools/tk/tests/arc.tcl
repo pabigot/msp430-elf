@@ -1,7 +1,7 @@
 # This file creates a visual test for arcs.  It is part of the Tk
 # visual test suite, which is invoked via the "visual" script.
 #
-# RCS: @(#) $Id: arc.tcl,v 1.9 2003/03/19 23:02:08 cagney Exp $
+# RCS: @(#) $Id: arc.tcl,v 1.3 2012/04/18 00:37:02 kevinb Exp $
 
 catch {destroy .t}
 toplevel .t

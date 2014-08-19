@@ -1,3 +1,116 @@
+2013-12-20  Nick Clifton  <nickc@redhat.com>
+
+	PR binutils/16218
+	* binutils-all/dw2-1.W:	Update expected objdump output.
+	* binutils-all/i386/compressed-1a.d: Likewise.
+	* binutils-all/objdump.W: Likewise.
+	* binutils-all/x86-64/compressed-1a.d: Likewise.
+
+2013-12-19  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16317
+	* binutils-all/readelf.s: Updated.
+	* binutils-all/readelf.s-64: Likewise.
+
+2013-12-13  Kuan-Lin Chen  <kuanlinchentw@gmail.com>
+	    Wei-Cheng Wang  <cole945@gmail.com>
+
+	* binutils-all/objdump.exp: Add NDS32 cpu.
+	* binutils-all/readelf.r: Skip extra reloc created by NDS32.
+
+2013-12-12  H.J. Lu  <hongjiu.lu@intel.com>
+
+	PR binutils/16318
+	* binutils-all/strip-10.d: Check OS/ABI.
+
+2013-12-07  Mike Frysinger  <vapier@gentoo.org>
+
+	* binutils-all/windres/escapex-2.rc: Remove +x file mode.
+	* binutils-all/windres/version_small.rc: Likewise.
+	* binutils-all/windres/version_small.rsd: Likewise.
+
+2013-12-03  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/windres/windres.exp: Run for x86_64-pc-cygwin.
+	Add test of "objump -p" output.
+
+2013-11-27  Matthew Fortune <matthew.fortune@imgtec.com>
+
+	* binutils-all/objcopy.exp: Consider mips-mti-elf the same as
+	mips-sde-elf
+	* binutils-all/readelf.exp: Likewise
+
+2013-11-21  Tristan Gingold  <gingold@adacore.com>
+
+	* binutils-all/dlltool.exp: Add dlltool_gas_flag to version.dll test.
+
+2013-11-02  Alan Modra  <amodra@gmail.com>
+
+	* binutils-all/x86-64/compressed-1a.d: Allow wide display of addresses.
+
+	* binutils-all/dw2-1.S: Use .4byte rather than .int.
+	* binutils-all/dw2-2.S: Likewise.
+
+2013-10-24  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/objdump.exp (cps_expected): Add MSP430 to list.
+
+2013-09-27  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/x86-64/compressed-1a.d: Updated for 64-bit addresses.
+
+2013-09-12  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/x86-64/compressed-1a.d: Update expected output to
+	allow for 64-bit addresses.
+
+2013-08-22  Nick Clifton  <nickc@redhat.com>
+
+	* binutils-all/nm.exp: --size-sort test: Add more ELF-like
+	targets.
+	* binutils-all/nm-1.s: Use .byte instead of .long.
+	Provide a terminating symbol.
+
+2013-08-21  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* binutils-all/nm.exp: Revert last change.  Instead use nm-elf-1.s
+	for mmix-knuth-mmixware.
+
+2013-08-20  Hans-Peter Nilsson  <hp@bitrange.com>
+
+	* binutils-all/nm.exp: Xfail test for nm --size-sort for
+	mmix-knuth-mmixware.
+
+2013-08-19  Tristan Gingold  <gingold@adacore.com>
+
+	* binutils-all/nm.exp: Add a test for nm --size-sort
+	* binutils-all/nm-elf-1.s: New file.
+	* binutils-all/nm-1.s: New file.
+
+2013-05-31  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* binutils-all/i386/compressed-1b.d: Updated for text/data/bss
+	section alignment change.
+	* binutils-all/i386/compressed-1c.d: Likewise.
+	* binutils-all/x86-64/compressed-1b.d: Likewise.
+	* binutils-all/x86-64/compressed-1c.d: Likewise.
+
+2013-05-28  Cary Coutant  <ccoutant@google.com>
+
+	* binutils-all/dw2-1.W: Adjust expected output.
+	* binutils-all/objdump.W: Likewise.
+	* binutils-all/i386/compressed-1a.d: Likewise.
+	* binutils-all/x86-64/compressed-1a.d: Likewise.
+
+2013-05-02  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.exp: Expect -wi test to fail for the MSP430.
+
+2013-05-01  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* lib/binutils-common.exp (is_elf_format): Also exclude
+	*-*-linux*ecoff*.
+
 2013-02-26  Nick Clifton  <nickc@redhat.com>
 
 	PR binutils/15191

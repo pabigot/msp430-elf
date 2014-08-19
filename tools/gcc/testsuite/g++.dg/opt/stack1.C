@@ -133,3 +133,5 @@ int main ()
   matrix_swap (bam1, bam2);
   return 0;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

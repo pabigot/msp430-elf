@@ -3,7 +3,7 @@
 // Check that type float parameters can be correctly passed to
 // methods.
 
-extern "C" int printf (const char *, ...); 
+// extern "C" int printf (const char *, ...); 
 
 class tres_floats {
 	float ff1;
@@ -25,9 +25,9 @@ int main ()
 	tres_floats tf (v1, v2, v3);
 
 	if ((tf.get_f1() != v1) || (tf.get_f2() != v2) || (tf.get_f3() != v3))
-	  { printf ("FAIL\n"); return 1; }
+	  { /* printf ("FAIL\n"); */ return 1; }
 	else
-	  printf ("PASS\n");
+	  ; // printf ("PASS\n");
 
 	return 0;
 }

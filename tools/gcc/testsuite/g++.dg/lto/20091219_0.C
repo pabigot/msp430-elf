@@ -1,5 +1,6 @@
 // { dg-lto-do run }
 // { dg-lto-options {{-O3 -flto}} }
+// { dg-require-effective-target size32plus }
 
 #include <string>
 #include <map>

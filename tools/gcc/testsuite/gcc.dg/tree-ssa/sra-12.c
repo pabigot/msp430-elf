@@ -21,5 +21,4 @@ int foo (struct S *p)
   *p = l;
 }
 
-/* { dg-final { scan-tree-dump-times "l;" 0 "release_ssa" { target { ! "avr*-*-*" } } } } */
 /* { dg-final { cleanup-tree-dump "release_ssa" } } */

@@ -61,3 +61,4 @@ int main()
     // the badTest will have failed
     printf ("PASS\n");
 }
+// { dg-require-effective-target size32plus }

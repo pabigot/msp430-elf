@@ -34,7 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
  *
  * "fannkuch"	for C gcc
  *
- * $Id: fannkuch.c,v 1.13 2013/03/17 23:17:24 nickc Exp $
+ * $Id: fannkuch.c,v 1.3 2014/02/20 16:41:30 nickc Exp $
  */
 
 #include <stdio.h>

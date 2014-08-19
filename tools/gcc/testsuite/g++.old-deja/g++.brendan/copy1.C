@@ -1,6 +1,6 @@
 // { dg-do run  }
 // GROUPS passed copy-ctors
-extern "C" int printf (const char *, ...);
+// extern "C" int printf (const char *, ...);
 int count = 0;
 
 class C {
@@ -16,7 +16,7 @@ main ()
   C c2 (c1);
 
   if (count != 1)
-    { printf ("FAIL\n"); return 1; }
+    { /* printf ("FAIL\n"); */ return 1; }
   else
-    printf ("PASS\n");
+    ; // printf ("PASS\n");
 }

@@ -1,5 +1,6 @@
 /* PR c/37106 */
 /* { dg-do compile } */
+/* { dg-skip-if "test confuses option parser" { "rx-*-*" } { "*" } { "" } } */
 /* { dg-options "-O3" } */
 /* { dg-options "-O3 -fpic" { target fpic } } */
 

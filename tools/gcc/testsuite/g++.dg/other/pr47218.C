@@ -19,3 +19,5 @@ int main ()
 }
 
 // { dg-final { cleanup-saved-temps } }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

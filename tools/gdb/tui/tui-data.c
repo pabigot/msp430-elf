@@ -1,6 +1,6 @@
 /* TUI data manipulation routines.
 
-   Copyright (C) 1998-2004, 2006-2012 Free Software Foundation, Inc.
+   Copyright (C) 1998-2014 Free Software Foundation, Inc.
 
    Contributed by Hewlett-Packard Company.
 
@@ -25,7 +25,7 @@
 #include "tui/tui-data.h"
 #include "tui/tui-wingeneral.h"
 
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_curses.h"
 
 /****************************
@@ -510,7 +510,7 @@ init_content_element (struct tui_win_element *element,
       element->which_element.data.content = (char*) NULL;
       break;
     case LOCATOR_WIN:
-      element->which_element.locator.file_name[0] =
+      element->which_element.locator.full_name[0] =
 	element->which_element.locator.proc_name[0] = (char) 0;
       element->which_element.locator.line_no = 0;
       element->which_element.locator.addr = 0;
@@ -541,7 +541,7 @@ init_win_info (struct tui_win_info *win_info)
       win_info->detail.source_info.gdbarch = NULL;
       win_info->detail.source_info.start_line_or_addr.loa = LOA_ADDRESS;
       win_info->detail.source_info.start_line_or_addr.u.addr = 0;
-      win_info->detail.source_info.filename = 0;
+      win_info->detail.source_info.fullname = NULL;
       break;
     case DATA_WIN:
       win_info->detail.data_display_info.data_content = (tui_win_content) NULL;
@@ -681,10 +681,10 @@ tui_del_window (struct tui_win_info *win_info)
 	  generic_win->handle = (WINDOW *) NULL;
 	  generic_win->is_visible = FALSE;
 	}
-      if (win_info->detail.source_info.filename)
+      if (win_info->detail.source_info.fullname)
         {
-          xfree (win_info->detail.source_info.filename);
-          win_info->detail.source_info.filename = 0;
+          xfree (win_info->detail.source_info.fullname);
+          win_info->detail.source_info.fullname = NULL;
         }
       generic_win = win_info->detail.source_info.execution_info;
       if (generic_win != (struct tui_gen_win_info *) NULL)
@@ -731,10 +731,10 @@ tui_free_window (struct tui_win_info *win_info)
 	  generic_win->handle = (WINDOW *) NULL;
 	}
       tui_free_win_content (generic_win);
-      if (win_info->detail.source_info.filename)
+      if (win_info->detail.source_info.fullname)
         {
-          xfree (win_info->detail.source_info.filename);
-          win_info->detail.source_info.filename = 0;
+          xfree (win_info->detail.source_info.fullname);
+          win_info->detail.source_info.fullname = NULL;
         }
       generic_win = win_info->detail.source_info.execution_info;
       if (generic_win != (struct tui_gen_win_info *) NULL)

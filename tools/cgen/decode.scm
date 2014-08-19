@@ -1,5 +1,5 @@
 ; Application independent decoder support.
-; Copyright (C) 2000, 2004, 2009 Red Hat, Inc.
+; Copyright (C) 2000, 2004 Red Hat, Inc.
 ; This file is part of CGEN.
 ;
 ; This file provides utilities for building instruction set decoders.
@@ -17,21 +17,19 @@
 ;
 ; Main procedure call tree:
 ; decode-build-table
-;     /build-slots
-;     /build-decode-table-guts
-;         /build-decode-table-entry
-;             /build-slots
-;             /build-decode-table-guts
+;     -build-slots
+;     -build-decode-table-guts
+;         -build-decode-table-entry
+;             -build-slots
+;             -build-decode-table-guts
 ;
-; /build-slots//build-decode-table-guts are recursively called to construct a
+; -build-slots/-build-decode-table-guts are recursively called to construct a
 ; tree of "table-guts" elements, and then the application recurses on the
 ; result.  For example see sim-decode.scm.
 ;
-; The decoder exits when insns are unambiguously determined, even if there are
-; more opcode bits to examine, leaving it to the caller to validate any
-; remaining bits.
-;
 ; FIXME: Don't create more than 3 shifts (i.e. no more than 3 groups).
+; FIXME: Exits when insns are unambiguously determined, even if there are more
+; opcode bits to examine.
 
 ; Decoder data structures and accessors.
 ; The set of instruction is internally recorded as a tree of two data
@@ -39,12 +37,12 @@
 ; [The choice of "table-guts" is historical, a better name will come to mind
 ; eventually.]
 
-; Decoded tables data structure, termed "dtable-guts".
+; Decoded tables data structure, termed "table guts".
 ; A simple data structure of 4 elements:
 ; bitnums:  list of bits that have been used thus far to decode the insn
 ; startbit: bit offset in instruction of value in C local variable `insn'
-;           (note that this is independent of LSB0?)
-; bitsize:  size of value in C local variable `insn'
+; bitsize:  size of value in C local variable `insn', the number
+;           of bits of the instruction read thus far
 ; entries:  list of insns that match the decoding thus far,
 ;           each entry in the list is a `dtable-entry' record
 
@@ -76,9 +74,9 @@
 (define (subdtable-name st) (caddr st))
 
 ; List of decode subtables.
-(define /decode-subtables nil)
+(define -decode-subtables nil)
 
-(define (subdtable-lookup key) (assv key /decode-subtables))
+(define (subdtable-lookup key) (assv key -decode-subtables))
 
 ; Add SUBTABLE-GUTS to the subtables list if not already present.
 ; Result is the subtable entry already present, or new entry.
@@ -104,9 +102,9 @@
 	 (entry (subdtable-lookup key)))
     (if (not entry)
 	(begin
-	  (set! /decode-subtables (cons (subdtable-make key subtable-guts name)
-					/decode-subtables))
-	  (car /decode-subtables))
+	  (set! -decode-subtables (cons (subdtable-make key subtable-guts name)
+					-decode-subtables))
+	  (car -decode-subtables))
 	entry))
 )
 
@@ -145,7 +143,7 @@
 ; Return the name of the expr table for INSN-EXPRS,
 ; which is a list of exprtable-entry elements.
 
-(define (/gen-exprtable-name insn-exprs)
+(define (-gen-exprtable-name insn-exprs)
   (string-map (lambda (x)
 		(string-append (obj:str-name (exprtable-entry-insn x))
 			       "-"
@@ -203,7 +201,7 @@
 ; It would be better to compute use counts of all of them and then see
 ; if there's a cluster of high use counts.
 
-(define (/usable-decode-bit? masks mask-lens bitnum lsb0?)
+(define (-usable-decode-bit? masks mask-lens bitnum lsb0?)
   (let* ((has-bit (map (lambda (msk len)
 			 (bit-set? msk (if lsb0? bitnum (- len bitnum 1))))
 		       masks mask-lens)))
@@ -221,14 +219,8 @@
 ; be used to distinguish.  Raw mask popularity is not enough -- popular masks
 ; may include useless "reserved" fields whose values don't change, and thus are
 ; useless in distinguishing.
-;
-; NOTE: mask-lens are not necessarily all the same value.
-; E.g. for the m32r it can consist of both 16 and 32.
-; But all masks must exist in the window specified by STARTBIT,DECODE-BITSIZE,
-; and all bits in the result must live in that window.
-; If no distinguishing bit fits in the window, return an empty vector.
 
-(define (/distinguishing-bit-population masks mask-lens values lsb0?)
+(define (-distinguishing-bit-population masks mask-lens values lsb0?)
   (let* ((max-length (apply max mask-lens))
 	 (0-population (make-vector max-length 0))
 	 (1-population (make-vector max-length 0))
@@ -242,9 +234,9 @@
 			      (if (bit-set? mask lsb-bitno)
 				(let ((chosen-pop-vector (if (bit-set? value lsb-bitno)
 							     1-population 0-population)))
-				  (vector-set! chosen-pop-vector bitno
-					       (+ 1 (vector-ref chosen-pop-vector bitno)))))))
-			  (/range len)))
+				  (vector-set! chosen-pop-vector bitno 
+					     (+ 1 (vector-ref chosen-pop-vector bitno)))))))
+			  (-range len)))
 	      masks mask-lens values)
     ; Compute an aggregate "distinguishing value" for each bit.
     (list->vector
@@ -272,49 +264,45 @@
 	  (vector->list 0-population) (vector->list 1-population))))
 )
 
-; Return a list (0 ... LIMIT-1).
+; Return a list (0 ... limit-1)
 
-(define (/range limit)
+(define (-range limit)
   (let loop ((i 0)
 	     (indices (list)))
-    (if (= i limit)
-	(reverse! indices)
-	(loop (+ i 1) (cons i indices))))
+    (if (= i limit) (reverse indices) (loop (+ i 1) (cons i indices))))
 )
 
-; Return a list (BASE ... BASE+SIZE-1).
+; Return a list (base ... base+size-1)
 
-(define (/range2 base size)
+(define (-range2 base size)
   (let loop ((i base)
 	     (indices (list)))
-    (if (= i (+ base size))
-	(reverse! indices)
-	(loop (+ i 1) (cons i indices))))
+    (if (= i (+ base size)) (reverse indices) (loop (+ i 1) (cons i indices))))
 )
 
-; Return a copy of VECTOR, with all entries with given INDICES set
-; to VALUE.
+; Return a copy of given vector, with all entries with given indices set
+; to `value'
 
-(define (/vector-copy-set-all vector indices value)
+(define (-vector-copy-set-all vector indices value)
   (let ((new-vector (make-vector (vector-length vector))))
     (for-each (lambda (index)
 		(vector-set! new-vector index (if (memq index indices)
 						  value
 						  (vector-ref vector index))))
-	      (/range (vector-length vector)))
+	      (-range (vector-length vector)))
     new-vector)
 )
 
 ; Return a list of indices whose counts in the given vector exceed the given
 ; threshold.
-; Sort them in decreasing order of popularity.
+; Sort them in decreasing order of populatority.
 
-(define (/population-above-threshold population threshold)
+(define (-population-above-threshold population threshold)
   (let* ((unsorted
-	  (find (lambda (index) (if (vector-ref population index)
+	  (find (lambda (index) (if (vector-ref population index) 
 				    (>= (vector-ref population index) threshold)
 				    #f))
-		(/range (vector-length population))))
+		(-range (vector-length population))))
 	 (sorted
 	  (sort unsorted (lambda (i1 i2) (> (vector-ref population i1)
 					    (vector-ref population i2))))))
@@ -325,27 +313,27 @@
 ; ignoring any that are already used (marked by #f).  Don't exceed
 ; `size' unless the clustering is just too good to pass up.
 
-(define (/population-top-few population size)
+(define (-population-top-few population size)
   (let loop ((old-picks (list))
 	     (remaining-population population)
-	     (count-threshold (apply max (map (lambda (value) (or value 0))
+	     (count-threshold (apply max (map (lambda (value) (if value value 0))
 					      (vector->list population)))))
-      (let* ((new-picks (/population-above-threshold remaining-population count-threshold)))
-	(logit 4 "/population-top-few"
+      (let* ((new-picks (-population-above-threshold remaining-population count-threshold)))
+	(logit 4 "-population-top-few"
 	       " desired=" size
 	       " picks=(" old-picks ") pop=(" remaining-population ")"
 	       " threshold=" count-threshold " new-picks=(" new-picks ")\n")
-	(cond
+	(cond 
 	 ; No point picking bits with population count of zero.  This leads to
 	 ; the generation of layers of subtables which resolve nothing.  Generating
 	 ; these tables can slow the build by several orders of magnitude.
 	 ((= 0 count-threshold)
-	  (logit 2 "/population-top-few: count-threshold is zero!\n")
+	  (logit 2 "-population-top-few: count-threshold is zero!\n")
 	  old-picks)
 	 ; No new matches?
 	 ((null? new-picks)
 	  (if (null? old-picks)
-	      (logit 2 "/population-top-few: No bits left to pick from!\n"))
+	      (logit 2 "-population-top-few: No bits left to pick from!\n"))
 	  old-picks)
 	 ; Way too many matches?
 	 ((> (+ (length new-picks) (length old-picks)) (+ size 3))
@@ -356,7 +344,7 @@
 	 ; Not enough?  Lower the threshold a bit and try to add some more.
 	 (else
 	  (loop (append old-picks new-picks)
-		(/vector-copy-set-all remaining-population new-picks #f)
+		(-vector-copy-set-all remaining-population new-picks #f)
 		; Notice magic clustering decay parameter
 		;  vvvv
 		(* 0.75 count-threshold))))))
@@ -371,10 +359,9 @@
 ; LSB0? is non-#f if bit number 0 is the least significant bit.
 ;
 ; Nil is returned if there are none, meaning that there is an ambiguity in
-; the specification up to the current word as defined by startbit,
-; decode-bitsize, and more bytes need to be fetched.
+; the specification up to the current word.
 ;
-; We assume INSN-LIST matches all opcode bits before STARTBIT (if any).
+; We assume INSN-LIST matches all opcode bits before STARTBIT.
 ; FIXME: Revisit, as a more optimal decoder is sometimes achieved by doing
 ; a cluster of opcode bits that appear later in the insn, and then coming
 ; back to earlier ones.
@@ -388,26 +375,24 @@
 ; we also have to handle the case where the initial set of decode bits misses
 ; some and thus we have to go back and look at them.  It may also turn out
 ; that an opcode bit is skipped over because it doesn't contribute much
-; information to the decoding process (see /usable-decode-bit?).  As the
+; information to the decoding process (see -usable-decode-bit?).  As the
 ; possible insn list gets wittled down, the bit will become significant.  Thus
-; the optimization is left for later.
-; Also, see preceding FIXME: We can't proceed past startbit + decode-bitsize
-; until we've processed all bits up to startbit + decode-bitsize.
+; the optimization is left for later.  Also, see preceding FIXME.
 
 (define (decode-get-best-bits insn-list already-used startbit max decode-bitsize lsb0?)
-  (let* ((raw-population (/distinguishing-bit-population (map insn-base-mask insn-list)
+  (let* ((raw-population (-distinguishing-bit-population (map insn-base-mask insn-list)
 							 (map insn-base-mask-length insn-list)
 							 (map insn-value insn-list)
 							 lsb0?))
-	 ;; (undecoded (if lsb0?
-	 ;; 		(/range2 startbit (+ startbit decode-bitsize))
-	 ;;		(/range2 (- startbit decode-bitsize) startbit)))
+	 ; (undecoded (if lsb0?
+	; 		(-range2 startbit (+ startbit decode-bitsize))
+		;	(-range2 (- startbit decode-bitsize) startbit)))
 	 (used+undecoded already-used) ; (append already-used undecoded))
-	 (filtered-population (/vector-copy-set-all raw-population used+undecoded #f))
-	 (favorite-indices (/population-top-few filtered-population max))
+	 (filtered-population (-vector-copy-set-all raw-population used+undecoded #f))
+	 (favorite-indices (-population-top-few filtered-population max))
 	 (sorted-indices (sort favorite-indices (lambda (a b) 
 						  (if lsb0? (> a b) (< a b))))))
-    (logit 3
+    (logit 3 
 	   "Best decode bits (prev=" already-used " start=" startbit " decode=" decode-bitsize ")"
 	   "=>"
 	   "(" sorted-indices ")\n")
@@ -430,37 +415,10 @@
       (if (or (= (length result) max) (= bitnum endbit))
 	  (reverse! result)
 	  (if (and (not (memq bitnum already-used))
-		   (/usable-decode-bit? masks mask-lens bitnum lsb0?))
+		   (-usable-decode-bit? masks mask-lens bitnum lsb0?))
 	      (loop (cons bitnum result) (+ bitnum incr))
 	      (loop result (+ bitnum incr))))
       ))
-)
-
-;; Subroutine of /opcode-slots to simplify it.
-;; Compute either the opcode value or mask for the bits in BITNUMS.
-;; DEFAULT is 0 when computing the opcode value, 1 for the mask value.
-;; DECODE-LEN is (length BITNUMS).
-
-(define (/get-subopcode-value value insn-len decode-len bitnums default lsb0?)
-  ;;(display (list val insn-len decode-len bl)) (newline)
-  ;; Oh My God.  This isn't tail recursive.
-  (letrec ((compute
-	    ;; BNS is the remaining elements of BITNUMS to examine.
-	    ;; THIS-BN ranges from (length bitnums), ..., 3, 2, 1.
-	    (lambda (bns this-bn)
-	      (if (null? bns)
-		  0
-		  (let ((bn (car bns)))
-		    (+ (if (or (and (>= bn insn-len) (= default 1))
-			       (and (< bn insn-len)
-				    (bit-set? value
-					      (if lsb0?
-						  bn
-						  (- insn-len bn 1)))))
-			   (integer-expt 2 (- this-bn 1))
-			   0)
-		       (compute (cdr bns) (- this-bn 1))))))))
-    (compute bitnums decode-len))
 )
 
 ; Return list of decode table entry numbers for INSN's opcode bits BITNUMS.
@@ -471,12 +429,26 @@
 ; the those bits of INSN is #b1100xx (where 'x' indicates a non-constant
 ; part), then the result is (#b110000 #b110001 #b110010 #b110011).
 
-(define (/opcode-slots insn bitnums lsb0?)
-  (let ((opcode (insn-value insn)) ;; FIXME: unused, overridden below
-	(insn-len (insn-base-mask-length insn))
-	(decode-len (length bitnums)))
-    (let* ((opcode (/get-subopcode-value (insn-value insn) insn-len decode-len bitnums 0 lsb0?))
-	   (opcode-mask (/get-subopcode-value (insn-base-mask insn) insn-len decode-len bitnums 1 lsb0?))
+(define (-opcode-slots insn bitnums lsb0?)
+  (letrec ((opcode (insn-value insn))
+	   (insn-len (insn-base-mask-length insn))
+	   (decode-len (length bitnums))
+	   (compute (lambda (val insn-len decode-len bl default)
+		      ;(display (list val insn-len decode-len bl)) (newline)
+		      ; Oh My God.  This isn't tail recursive.
+		      (if (null? bl)
+			  0
+			  (+ (if (or (and (>= (car bl) insn-len) (= default 1))
+				     (and (< (car bl) insn-len)
+					  (bit-set? val
+						    (if lsb0?
+							(car bl)
+							(- insn-len (car bl) 1)))))
+				 (integer-expt 2 (- (length bl) 1))
+				 0)
+			     (compute val insn-len decode-len (cdr bl) default))))))
+    (let* ((opcode (compute (insn-value insn) insn-len decode-len bitnums 0))
+	   (opcode-mask (compute (insn-base-mask insn) insn-len decode-len bitnums 1))
 	   (indices (missing-bit-indices opcode-mask (- (integer-expt 2 decode-len) 1))))
       (logit 3 "insn =" (obj:name insn)
 	     " insn-value=" (number->hex (insn-value insn))
@@ -489,7 +461,7 @@
       (map (lambda (index) (+ opcode index)) indices)))
 )
 
-; Subroutine of /build-slots.
+; Subroutine of -build-slots.
 ; Fill slot in INSN-VEC that INSN goes into.
 ; BITNUMS is the list of opcode bits.
 ; LSB0? is non-#f if bit number 0 is the least significant bit.
@@ -499,10 +471,9 @@
 ; part), then elements 48 49 50 51 of INSN-VEC are cons'd with INSN.
 ; Each "slot" is a list of matching instructions.
 
-(define (/fill-slot! insn-vec insn bitnums lsb0?)
-  (logit 3 "Filling slots for " (obj:str-name insn)
-	 ", bitnums " bitnums "\n")
-  (let ((slot-nums (/opcode-slots insn bitnums lsb0?)))
+(define (-fill-slot! insn-vec insn bitnums lsb0?)
+  ;(display (string-append "fill-slot!: " (obj:str-name insn) " ")) (display bitnums) (newline)
+  (let ((slot-nums (-opcode-slots insn bitnums lsb0?)))
     ;(display (list "Filling slot(s)" slot-nums "...")) (newline)
     (for-each (lambda (slot-num)
 		(vector-set! insn-vec slot-num
@@ -518,11 +489,11 @@
 ; The result is a vector of insn lists.  Each slot is a list of insns
 ; that go in that slot.
 
-(define (/build-slots insn-list bitnums lsb0?)
+(define (-build-slots insn-list bitnums lsb0?)
   (let ((result (make-vector (integer-expt 2 (length bitnums)) nil)))
     ; Loop over each element, filling RESULT.
     (for-each (lambda (insn)
-		(/fill-slot! result insn bitnums lsb0?))
+		(-fill-slot! result insn bitnums lsb0?))
 	      insn-list)
     result)
 )
@@ -532,7 +503,7 @@
 ; in reverse order of traversal (since they're built with cons).
 ; INDEX-LIST may be empty.
 
-(define (/gen-decode-table-name prefix index-list)
+(define (-gen-decode-table-name prefix index-list)
   (set! index-list (reverse index-list))
   (string-append
    prefix
@@ -555,14 +526,14 @@
 ; The result is a dtable-entry element (or "slot").
 
 ; ??? For debugging.
-(define /build-decode-table-entry-args #f)
+(define -build-decode-table-entry-args #f)
 
-(define (/build-decode-table-entry insn-vec startbit decode-bitsize index index-list lsb0? invalid-insn)
+(define (-build-decode-table-entry insn-vec startbit decode-bitsize index index-list lsb0? invalid-insn)
   (let ((slot (vector-ref insn-vec index)))
     (logit 2 "Processing decode entry "
 	   (number->string index)
 	   " in "
-	   (/gen-decode-table-name "decode_" index-list)
+	   (-gen-decode-table-name "decode_" index-list)
 	   ", "
 	   (cond ((null? slot) "invalid")
 		 ((= 1 (length slot)) (insn-syntax (car slot)))
@@ -601,12 +572,9 @@
 	      ; We might be able to resolve the ambiguity by reading more bits.
 	      ; We know from the < test that there are, indeed, more bits to
 	      ; be read.
-	      ; FIXME: It's technically possible that the next
-	      ; startbit+decode-bitsize chunk has no usable bits and we have to
-	      ; iterate, but rather unlikely.
-	      ; The calculation of the new startbit, decode-bitsize will
-	      ; undoubtedly need refinement.
 	      (set! startbit (+ startbit decode-bitsize))
+	      ; FIXME: The calculation of the new decode-bitsize will
+	      ; undoubtedly need refinement.
 	      (set! decode-bitsize
 		    (min decode-bitsize
 			 (- (apply min (map insn-length slot))
@@ -655,14 +623,12 @@
 			; to the programmer to get it right).  This can be made more
 			; clever later.
 			; FIXME: May need to back up startbit if we've tried to read
-			; more of the instruction.  We currently require that
-			; all bits get used before advancing startbit, so this
-			; shouldn't be necessary.  Verify.
+			; more of the instruction.
 			(let ((assertions (map insn-ifield-assertion slot)))
 			  (if (not (all-true? assertions))
 			      (begin
 				; Save arguments for debugging purposes.
-				(set! /build-decode-table-entry-args
+				(set! -build-decode-table-entry-args
 				      (list insn-vec startbit decode-bitsize index index-list lsb0? invalid-insn))
 				(error "Unable to resolve ambiguity (maybe need some ifield-assertion specs?)")))
 				; FIXME: Punt on even simple cleverness for now.
@@ -672,29 +638,31 @@
 						      assertions))))
 			    (dtable-entry-make index 'expr
 					       (exprtable-make
-						(/gen-exprtable-name exprtable-entries)
+						(-gen-exprtable-name exprtable-entries)
 						exprtable-entries))))))))
 
 	    ; There is no ambiguity so generate the subtable.
 	    ; Need to build `subtable' separately because we
-	    ; may be appending to /decode-subtables recursively.
-	    (let* ((insn-vec (/build-slots slot bitnums lsb0?))
+	    ; may be appending to -decode-subtables recursively.
+	    (let* ((insn-vec (-build-slots slot bitnums lsb0?))
 		   (subtable
-		    (/build-decode-table-guts insn-vec bitnums startbit
+		    (-build-decode-table-guts insn-vec bitnums startbit
 					      decode-bitsize index-list lsb0?
 					      invalid-insn)))
 	      (dtable-entry-make index 'table
 				 (subdtable-add subtable
-						(/gen-decode-table-name "" index-list)))))))
+						(-gen-decode-table-name "" index-list)))))))
      )
     )
 )
 
-; Given a vector of insn slots INSN-VEC, generate the guts of the decode table,
-; recorded as a "dtable-guts" data structure.
+; Given vector of insn slots, generate the guts of the decode table, recorded
+; as a list of 3 elements: bitnums, decode-bitsize, and list of entries.
+; Bitnums is recorded with the guts so that tables whose contents are
+; identical but are accessed by different bitnums are treated as separate in
+; -decode-subtables.  Not sure this will ever happen, but play it safe.
 ;
 ; BITNUMS is the list of bit numbers used to build the slot table.
-; I.e., (= (vector-length insn-vec) (ash 1 (length bitnums))).
 ; STARTBIT is the bit offset of the instruction value that C variable `insn'
 ; holds (note that this is independent of LSB0?).
 ; For example, it is initially zero.  If DECODE-BITSIZE is 16 and after
@@ -706,24 +674,16 @@
 ; pointers to other tables.
 ; LSB0? is non-#f if bit number 0 is the least significant bit.
 ; INVALID-INSN is an <insn> object representing invalid insns.
-;
-; BITNUMS is recorded with the guts so that tables whose contents are
-; identical but are accessed by different bitnums are treated as separate in
-; /decode-subtables.  Not sure this will ever happen, but play it safe.
 
-(define (/build-decode-table-guts insn-vec bitnums startbit decode-bitsize index-list lsb0? invalid-insn)
+(define (-build-decode-table-guts insn-vec bitnums startbit decode-bitsize index-list lsb0? invalid-insn)
   (logit 2 "Processing decoder for bits"
 	 (numbers->string bitnums " ")
-	 ", startbit " startbit
-	 ", decode-bitsize " decode-bitsize
-	 ", index-list " index-list
 	 " ...\n")
-  (assert (= (vector-length insn-vec) (ash 1 (length bitnums))))
 
   (dtable-guts-make
    bitnums startbit decode-bitsize
    (map (lambda (index)
-	  (/build-decode-table-entry insn-vec startbit decode-bitsize index
+	  (-build-decode-table-entry insn-vec startbit decode-bitsize index
 				     (cons (cons bitnums index)
 					   index-list)
 				     lsb0? invalid-insn))
@@ -732,8 +692,6 @@
 
 ; Entry point.
 ; Return a table that efficiently decodes INSN-LIST.
-; The table is a "dtable-guts" data structure, see dtable-guts-make.
-;
 ; BITNUMS is the set of bits to initially key off of.
 ; DECODE-BITSIZE is the number of bits of the instruction that `insn' holds.
 ; LSB0? is non-#f if bit number 0 is the least significant bit.
@@ -742,7 +700,7 @@
 
 (define (decode-build-table insn-list bitnums decode-bitsize lsb0? invalid-insn)
   ; Initialize the list of subtables computed.
-  (set! /decode-subtables nil)
+  (set! -decode-subtables nil)
 
   ; ??? Another way to handle simple forms of ifield-assertions (like those
   ; created by insn specialization) is to record a copy of the insn for each
@@ -752,8 +710,8 @@
   ; that recorded the necessary bits (insn, ifield-list, remaining
   ; ifield-assertions).
 
-  (let ((insn-vec (/build-slots insn-list bitnums lsb0?)))
-    (let ((table-guts (/build-decode-table-guts insn-vec bitnums
+  (let ((insn-vec (-build-slots insn-list bitnums lsb0?)))
+    (let ((table-guts (-build-decode-table-guts insn-vec bitnums
 						0 decode-bitsize
 						nil lsb0?
 						invalid-insn)))

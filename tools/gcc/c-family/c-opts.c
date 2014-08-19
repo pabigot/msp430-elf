@@ -1,5 +1,5 @@
 /* C/ObjC/C++ command line option handling.
-   Copyright (C) 2002-2013 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
    Contributed by Neil Booth.
 
 This file is part of GCC.
@@ -34,6 +34,7 @@ along with GCC; see the file COPYING3.  If not see
 #include "debug.h"		/* For debug_hooks.  */
 #include "opts.h"
 #include "options.h"
+#include "plugin.h"		/* For PLUGIN_INCLUDE_FILE event.  */
 #include "mkdeps.h"
 #include "c-target.h"
 #include "tm.h"			/* For BYTES_BIG_ENDIAN,
@@ -495,12 +496,6 @@ c_common_handle_option (size_t scode, const char *arg, int value,
       constant_string_class_name = arg;
       break;
 
-    case OPT_fembedded_cxx:
-      flag_embedded_cxx = value;
-      if (value)
-	flag_rtti = flag_exceptions = 0;
-      break;
-
     case OPT_fextended_identifiers:
       cpp_opts->extended_identifiers = value;
       break;
@@ -613,7 +608,6 @@ c_common_handle_option (size_t scode, const char *arg, int value,
       break;
 
     case OPT_isysroot:
-    case OPT_fsysroot:
       sysroot = arg;
       break;
 
@@ -834,6 +828,16 @@ c_common_post_options (const char **pfilename)
 				     ? EXCESS_PRECISION_STANDARD
 				     : EXCESS_PRECISION_FAST);
 
+  /* ISO C restricts floating-point expression contraction to within
+     source-language expressions (-ffp-contract=on, currently an alias
+     for -ffp-contract=off).  */
+  if (flag_iso
+      && !c_dialect_cxx ()
+      && (global_options_set.x_flag_fp_contract_mode
+	  == (enum fp_contract_mode) 0)
+      && flag_unsafe_math_optimizations == 0)
+    flag_fp_contract_mode = FP_CONTRACT_OFF;
+
   /* By default we use C99 inline semantics in GNU99 or C99 mode.  C99
      inline semantics are not supported in GNU89 or C89 mode.  */
   if (flag_gnu89_inline == -1)
@@ -846,6 +850,12 @@ c_common_post_options (const char **pfilename)
     flag_objc_sjlj_exceptions = flag_next_runtime;
   if (flag_objc_exceptions && !flag_objc_sjlj_exceptions)
     flag_exceptions = 1;
+
+  /* If -ffreestanding, -fno-hosted or -fno-builtin then disable
+     pattern recognition.  */
+  if (!global_options_set.x_flag_tree_loop_distribute_patterns
+      && flag_no_builtin)
+    flag_tree_loop_distribute_patterns = 0;
 
   /* -Woverlength-strings is off by default, but is enabled by -Wpedantic.
      It is never enabled in C++, as the minimum limit is not normative
@@ -896,7 +906,11 @@ c_common_post_options (const char **pfilename)
   if (warn_implicit_function_declaration == -1)
     warn_implicit_function_declaration = flag_isoc99;
 
-  if (cxx_dialect >= cxx0x)
+  /* Declone C++ 'structors if -Os.  */
+  if (flag_declone_ctor_dtor == -1)
+    flag_declone_ctor_dtor = optimize_size;
+
+  if (cxx_dialect >= cxx11)
     {
       /* If we're allowing C++0x constructs, don't warn about C++98
 	 identifiers which are keywords in C++0x.  */
@@ -1205,6 +1219,7 @@ sanitize_cpp_opts (void)
 
   cpp_opts->unsigned_char = !flag_signed_char;
   cpp_opts->stdc_0_in_system_headers = STDC_0_IN_SYSTEM_HEADERS;
+  cpp_opts->warn_date_time = cpp_warn_date_time;
 
   /* Wlong-long is disabled by default. It is enabled by:
       [-Wpedantic | -Wtraditional] -std=[gnu|c]++98 ; or
@@ -1265,17 +1280,18 @@ c_finish_options (void)
     {
       size_t i;
 
-      {
-	/* Make sure all of the builtins about to be declared have
-	  BUILTINS_LOCATION has their source_location.  */
-	source_location builtins_loc = BUILTINS_LOCATION;
-	cpp_force_token_locations (parse_in, &builtins_loc);
+      cb_file_change (parse_in,
+		      linemap_add (line_table, LC_RENAME, 0,
+				   _("<built-in>"), 0));
+      /* Make sure all of the builtins about to be declared have
+	 BUILTINS_LOCATION has their source_location.  */
+      source_location builtins_loc = BUILTINS_LOCATION;
+      cpp_force_token_locations (parse_in, &builtins_loc);
 
-	cpp_init_builtins (parse_in, flag_hosted);
-	c_cpp_builtins (parse_in);
+      cpp_init_builtins (parse_in, flag_hosted);
+      c_cpp_builtins (parse_in);
 
-	cpp_stop_forcing_token_locations (parse_in);
-      }
+      cpp_stop_forcing_token_locations (parse_in);
 
       /* We're about to send user input to cpplib, so make it warn for
 	 things that we previously (when we sent it internal definitions)
@@ -1394,6 +1410,17 @@ cb_file_change (cpp_reader * ARG_UNUSED (pfile),
   else
     fe_file_change (new_map);
 
+  if (new_map 
+      && (new_map->reason == LC_ENTER || new_map->reason == LC_RENAME))
+    {
+      /* Signal to plugins that a file is included.  This could happen
+	 several times with the same file path, e.g. because of
+	 several '#include' or '#line' directives...  */
+      invoke_plugin_callbacks 
+	(PLUGIN_INCLUDE_FILE,
+	 const_cast<char*> (ORDINARY_MAP_FILE_NAME (new_map)));
+    }
+
   if (new_map == 0 || (new_map->reason == LC_LEAVE && MAIN_FILE_P (new_map)))
     {
       pch_cpp_save_state ();
@@ -1478,7 +1505,7 @@ set_std_cxx11 (int iso)
 static void
 set_std_cxx1y (int iso)
 {
-  cpp_set_lang (parse_in, iso ? CLK_CXX11: CLK_GNUCXX11);
+  cpp_set_lang (parse_in, iso ? CLK_CXX1Y: CLK_GNUCXX1Y);
   flag_no_gnu_keywords = iso;
   flag_no_nonansi_builtin = iso;
   flag_iso = iso;

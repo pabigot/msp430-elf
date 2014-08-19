@@ -1,12 +1,12 @@
-/lns-big-delta.d/1.5.2.1/Wed Mar 27 02:37:35 2013//Tmsp430-130322-branch
-/lns-big-delta.s/1.2/Sun Jun 10 14:10:30 2012//Tmsp430-130322-branch
-/lns-common-1-alt.d/1.4.2.1/Wed Mar 27 02:37:35 2013//Tmsp430-130322-branch
-/lns-common-1-ia64.s/1.2/Sun May 31 21:34:09 2009//Tmsp430-130322-branch
-/lns-common-1.d/1.5.2.1/Wed Mar 27 02:37:36 2013//Tmsp430-130322-branch
-/lns-common-1.s/1.3/Sun Sep 27 21:07:06 2009//Tmsp430-130322-branch
-/lns-diag-1.l/1.1/Sun Oct  9 14:11:24 2005//Tmsp430-130322-branch
-/lns-diag-1.s/1.1/Sun Oct  9 14:11:24 2005//Tmsp430-130322-branch
-/lns-duplicate.d/1.4.2.1/Wed Mar 27 02:37:36 2013//Tmsp430-130322-branch
-/lns-duplicate.s/1.1/Sun Sep 23 17:56:41 2007//Tmsp430-130322-branch
-/lns.exp/1.19.2.1/Wed Mar 27 02:37:36 2013//Tmsp430-130322-branch
+/lns-big-delta.d/1.3/Thu Feb 20 13:29:31 2014//Tmsp430-14r1-branch
+/lns-big-delta.s/1.2/Thu May  2 21:24:39 2013//Tmsp430-14r1-branch
+/lns-common-1-alt.d/1.4/Thu Feb 20 13:29:31 2014//Tmsp430-14r1-branch
+/lns-common-1-ia64.s/1.2/Thu Jan 21 20:53:17 2010//Tmsp430-14r1-branch
+/lns-common-1.d/1.5/Thu Feb 20 13:29:31 2014//Tmsp430-14r1-branch
+/lns-common-1.s/1.2/Thu Jan 21 20:53:17 2010//Tmsp430-14r1-branch
+/lns-diag-1.l/1.1/Fri Aug  4 09:09:33 2006//Tmsp430-14r1-branch
+/lns-diag-1.s/1.1/Fri Aug  4 09:09:33 2006//Tmsp430-14r1-branch
+/lns-duplicate.d/1.3/Thu Feb 20 13:29:31 2014//Tmsp430-14r1-branch
+/lns-duplicate.s/1.1/Wed Dec 31 12:19:19 2008//Tmsp430-14r1-branch
+/lns.exp/1.11/Thu Mar  6 15:05:05 2014//Tmsp430-14r1-branch
 D

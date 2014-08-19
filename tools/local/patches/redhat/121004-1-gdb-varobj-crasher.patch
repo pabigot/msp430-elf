@@ -1,0 +1,72 @@
+This patch is for Renesas issue #3163223.  It fixes a crash varobj.c
+related crash.
+
+It should be submitted upstream.
+
+Note: As of 2014-02-03, I was unable to reproduce this.  I don't see
+equivalent changes in the upstream sources, but it may have been fixed
+in some other fashion.  It's also possible that the bug still exists,
+but the test case provided by the customer is no longer sufficient for
+triggering the problem.  Therefore, I'm leaving this patch in our
+repository.
+
+
+gdb/ChangeLog.RedHat:
+
+	* varobj.c (varobj_invalidate_iter): Mark floating varobjs as
+	invalid.
+	(varobj_update): Don't consider floating varobjs to be invalid
+	even if they're marked that way.
+	(value_of_root): Mark floating varobj as valid again.  Don't
+	attempt a strcmp on a NULL pointer.
+
+
+Index: gdb/varobj.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/varobj.c,v
+retrieving revision 1.20
+diff -u -p -r1.20 varobj.c
+--- gdb/varobj.c	31 Aug 2012 23:01:49 -0000	1.20
++++ gdb/varobj.c	4 Oct 2012 22:29:54 -0000
+@@ -1982,7 +1982,10 @@ varobj_update (struct varobj **varp, int
+   if (!explicit && (*varp)->frozen)
+     return result;
+ 
+-  if (!(*varp)->root->is_valid)
++  /* A floating varobj may have been marked invalid when reloading
++     symbols.  We want to allow the expression to be reparsed,
++     potentially allowing it to become valid again.  */
++  if (!(*varp)->root->is_valid && !(*varp)->root->floating)
+     {
+       varobj_update_result r = {0};
+ 
+@@ -2751,8 +2754,9 @@ value_of_root (struct varobj **var_handl
+ 	  return NULL;
+ 	}
+       old_type = varobj_get_type (var);
++      var->root->is_valid = 1;
+       new_type = varobj_get_type (tmp_var);
+-      if (strcmp (old_type, new_type) == 0)
++      if (old_type != NULL && strcmp (old_type, new_type) == 0)
+ 	{
+ 	  /* The expression presently stored inside var->root->exp
+ 	     remembers the locations of local variables relatively to
+@@ -4187,9 +4191,16 @@ static void
+ varobj_invalidate_iter (struct varobj *var, void *unused)
+ {
+   /* Floating varobjs are reparsed on each stop, so we don't care if the
+-     presently parsed expression refers to something that's gone.  */
++     presently parsed expression refers to something that's gone.
++     
++     That said, the presently parsed expression, type, etc might not
++     be accessible after reloading the symbols.  So mark it invalid
++     now.  Its validity will be restored during an update.  */
+   if (var->root->floating)
+-    return;
++    {
++      var->root->is_valid = 0;
++      return;
++    }
+ 
+   /* global var must be re-evaluated.  */     
+   if (var->root->valid_block == NULL)

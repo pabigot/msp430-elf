@@ -1,6 +1,5 @@
 // PR c++/40308, 40311
-// { dg-do run }
-// { dg-options "-std=c++0x" }
+// { dg-do run { target c++11 } }
 
 template< typename T >
 struct test {
@@ -17,3 +16,5 @@ int main()
    int * b = new int{5};
    return 0;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

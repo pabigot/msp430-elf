@@ -1,4 +1,4 @@
-/template/1.2/Wed Mar  2 05:00:24 1994//Tmsp430-130322-branch
+/template/1.1/Fri Aug 23 16:00:40 2002//Tmsp430-14r1-branch
 D/aarch64////
 D/all////
 D/alpha////
@@ -42,6 +42,7 @@ D/mn10300////
 D/mri////
 D/msp430////
 D/mt////
+D/nds32////
 D/nios2////
 D/openrisc////
 D/pdp11////

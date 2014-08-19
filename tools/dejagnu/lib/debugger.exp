@@ -1,27 +1,26 @@
-# Copyright (C) 1992 - 2001 Free Software Foundation, Inc.
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
+# Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+# 2001, 2002, 2003 Free Software Foundation, Inc.
+#
+# This file is part of DejaGnu.
+#
+# DejaGnu is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  
-
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-dejagnu@gnu.org
-
-# This file was written by Rob Savoye. (rob@welcomehome.org)
-
 #
-# Dump the values of a shell expression representing variable
-# names.
+# DejaGnu is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with DejaGnu; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+
+# This file was written by Rob Savoye <rob@welcomehome.org>.
+
+# Dump the values of a shell expression representing variable names.
+#
 proc dumpvars { args } {
     uplevel 1 [list foreach i [uplevel 1 "info vars $args"] {
 	if { [catch "array names $i" names ] } {
@@ -32,12 +31,11 @@ proc dumpvars { args } {
 	    }
 	}
     }
-       ]
+	      ]
 }
 
+# Dump the values of a shell expression representing variable names.
 #
-# dump the values of a shell expression representing variable
-# names.
 proc dumplocals { args } {
     uplevel 1 [list foreach i [uplevel 1 "info locals $args"] {
 	if { [catch "array names $i" names ] } {
@@ -48,9 +46,9 @@ proc dumplocals { args } {
 	    }
 	}
     }
-       ]
+	      ]
 }
-#
+
 # Dump the body of procedures specified by a regexp.
 #
 proc dumprocs { args } {
@@ -59,21 +57,20 @@ proc dumprocs { args } {
     }
 }
 
-#
-# Dump all the current watchpoints
+# Dump all the current watchpoints.
 #
 proc dumpwatch { args } {
     foreach i [uplevel 1 "info vars $args"] {
 	set tmp ""
 	if { [catch "uplevel 1 array name $i" names] } {
 	    set tmp [uplevel 1 trace vinfo $i]
-	    if ![string match "" $tmp] {
+	    if {![string match "" $tmp]} {
 		puts "$i $tmp"
 	    }
 	} else {
 	    foreach k $names {
 		set tmp [uplevel 1 trace vinfo [set i]($k)]
-		if ![string match "" $tmp] {
+		if {![string match "" $tmp]} {
 		    puts "[set i]($k) = $tmp"
 		}
 	    }
@@ -81,40 +78,38 @@ proc dumpwatch { args } {
     }
 }
 
+# Trap a watchpoint for an array.
 #
-# Trap a watchpoint for an array
-#
-proc watcharray { element type} {
+proc watcharray { array element op } {
     upvar [set array]($element) avar
-    case $type {
+    switch $op {
 	"w" { puts "New value of [set array]($element) is $avar" }
 	"r" { puts "[set array]($element) (= $avar) was just read" }
 	"u" { puts "[set array]($element) (= $avar) was just unset" }
     }
 }
 
-proc watchvar { v type } {
+proc watchvar { v ignored op } {
     upvar $v var
-    case $type {
+    switch $op {
 	"w" { puts "New value of $v is $var" }
 	"r" { puts "$v (=$var) was just read" }
 	"u" { puts "$v (=$var) was just unset" }
     }
 }
 
-#
-# Watch when a variable is written
+# Watch when a variable is written.
 #
 proc watchunset { arg } {
     if { [catch "uplevel 1 array name $arg" names ] } {
-	if ![uplevel 1 info exists $arg] {
+	if {![uplevel 1 info exists $arg]} {
 	    puts stderr "$arg does not exist"
 	    return
 	}
 	uplevel 1 trace variable $arg u watchvar
     } else {
 	foreach k $names {
-	    if ![uplevel 1 info exists $arg] {
+	    if {![uplevel 1 info exists $arg]} {
 		puts stderr "$arg does not exist"
 		return
 	    }
@@ -123,19 +118,18 @@ proc watchunset { arg } {
     }
 }
 
-#
-# Watch when a variable is written
+# Watch when a variable is written.
 #
 proc watchwrite { arg } {
     if { [catch "uplevel 1 array name $arg" names ] } {
-	if ![uplevel 1 info exists $arg] {
+	if {![uplevel 1 info exists $arg]} {
 	    puts stderr "$arg does not exist"
 	    return
 	}
 	uplevel 1 trace variable $arg w watchvar
     } else {
 	foreach k $names {
-	    if ![uplevel 1 info exists $arg] {
+	    if {![uplevel 1 info exists $arg]} {
 		puts stderr "$arg does not exist"
 		return
 	    }
@@ -144,19 +138,18 @@ proc watchwrite { arg } {
     }
 }
 
-#
-# Watch when a variable is read
+# Watch when a variable is read.
 #
 proc watchread { arg } {
     if { [catch "uplevel 1 array name $arg" names ] } {
-	if ![uplevel 1 info exists $arg] {
+	if {![uplevel 1 info exists $arg]} {
 	    puts stderr "$arg does not exist"
 	    return
 	}
 	uplevel 1 trace variable $arg r watchvar
     } else {
 	foreach k $names {
-	    if ![uplevel 1 info exists $arg] {
+	    if {![uplevel 1 info exists $arg]} {
 		puts stderr "$arg does not exist"
 		return
 	    }
@@ -165,8 +158,7 @@ proc watchread { arg } {
     }
 }
 
-#
-# Delete a watch point
+# Delete a watchpoint.
 #
 proc watchdel { args } {
     foreach i [uplevel 1 "info vars $args"] {
@@ -185,7 +177,6 @@ proc watchdel { args } {
     }
 }
 
-#
 # This file creates GDB style commands for the Tcl debugger
 #
 proc print { var } {
@@ -193,26 +184,26 @@ proc print { var } {
 }
 
 proc quit { } {
-    log_and_exit;
+    log_and_exit
 }
 
 proc bt { } {
+    # The w command is provided by the Tcl debugger.
     puts "[w]"
 }
 
-#
-# create some stub procedures since we can't alias the command names
+# Create some stub procedures since we can't alias the command names.
 #
 proc dp { args } {
-  uplevel 1 dumprocs $args
+    uplevel 1 dumprocs $args
 }
 
 proc dv { args } {
-  uplevel 1 dumpvars $args
+    uplevel 1 dumpvars $args
 }
 
 proc dl { args } {
-  uplevel 1 dumplocals $args
+    uplevel 1 dumplocals $args
 }
 
 proc dw { args } {

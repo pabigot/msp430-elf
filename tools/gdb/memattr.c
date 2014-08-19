@@ -1,6 +1,6 @@
 /* Memory attributes support, for GDB.
 
-   Copyright (C) 2001-2012 Free Software Foundation, Inc.
+   Copyright (C) 2001-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -22,10 +22,11 @@
 #include "gdbcmd.h"
 #include "memattr.h"
 #include "target.h"
+#include "target-dcache.h"
 #include "value.h"
 #include "language.h"
 #include "vec.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "breakpoint.h"
 #include "cli/cli-utils.h"
 
@@ -431,10 +432,10 @@ mem_info_command (char *args, int from_tty)
   printf_filtered ("Num ");
   printf_filtered ("Enb ");
   printf_filtered ("Low Addr   ");
-  if (gdbarch_addr_bit (target_gdbarch) > 32)
+  if (gdbarch_addr_bit (target_gdbarch ()) > 32)
     printf_filtered ("        ");
   printf_filtered ("High Addr  ");
-  if (gdbarch_addr_bit (target_gdbarch) > 32)
+  if (gdbarch_addr_bit (target_gdbarch ()) > 32)
     printf_filtered ("        ");
   printf_filtered ("Attrs ");
   printf_filtered ("\n");
@@ -446,14 +447,14 @@ mem_info_command (char *args, int from_tty)
       printf_filtered ("%-3d %-3c\t",
 		       m->number,
 		       m->enabled_p ? 'y' : 'n');
-      if (gdbarch_addr_bit (target_gdbarch) <= 32)
+      if (gdbarch_addr_bit (target_gdbarch ()) <= 32)
 	tmp = hex_string_custom ((unsigned long) m->lo, 8);
       else
 	tmp = hex_string_custom ((unsigned long) m->lo, 16);
       
       printf_filtered ("%s ", tmp);
 
-      if (gdbarch_addr_bit (target_gdbarch) <= 32)
+      if (gdbarch_addr_bit (target_gdbarch ()) <= 32)
 	{
 	  if (m->hi == 0)
 	    tmp = "0x100000000";

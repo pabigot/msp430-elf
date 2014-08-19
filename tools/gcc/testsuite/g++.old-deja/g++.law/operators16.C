@@ -24,7 +24,7 @@ int main(void)
 {
         B b = A();
 	if (pass)
-		printf ("PASS\n");
+	  ;// printf ("PASS\n");
 	else
 		{ printf ("FAIL\n"); return 1; }
 }

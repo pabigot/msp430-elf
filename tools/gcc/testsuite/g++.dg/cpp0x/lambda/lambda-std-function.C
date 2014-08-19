@@ -1,6 +1,6 @@
 // Test using std::function wrapper.
-// { dg-do run }
-// { dg-options -std=c++0x }
+// { dg-do run { target c++11 } }
+// { dg-require-effective-target size32plus }
 
 #include <functional>
 

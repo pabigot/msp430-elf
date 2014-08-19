@@ -1,5 +1,5 @@
 ; CPU documentation generator, html output
-; Copyright (C) 2003, 2009 Doug Evans
+; Copyright (C) 2003, Doug Evans
 ; This file is part of CGEN.  See file COPYING.CGEN for details.
 ;
 ; TODO:
@@ -289,22 +289,22 @@ See the input .cpu file(s) for copyright information.
 		      "<br>\n"
 		      "<li>condition:\n"
 		      "<font size=+2>\n"
-		      "<pre>" ; no trailing newline here on purpose
+		      "<plaintext>" ; no trailing newline here on purpose
 		      (with-output-to-string
 			(lambda ()
 			  (pretty-print (cadr (isa-condition isa)))))
-		      "</pre></font>\n"
+		      "</plaintext></font>\n"
 		      "</li>\n"
 		      "<br>\n")
        "")
    (if (isa-setup-semantics isa)
        (string-append "<li>setup-semantics:\n"
 		      "<font size=+2>\n"
-		      "<pre>" ; no trailing newline here on purpose
+		      "<plaintext>" ; no trailing newline here on purpose
 		      (with-output-to-string
 			(lambda ()
 			  (pretty-print (cdr (isa-setup-semantics isa)))))
-		      "</pre></font>\n"
+		      "</plaintext></font>\n"
 		      "</li>\n"
 		      "<br>\n")
        "")
@@ -456,7 +456,7 @@ See the input .cpu file(s) for copyright information.
    "machines: "
    (string-map (lambda (mach)
 		 (string-append " " (symbol->string mach)))
-	       (obj-attr-value reg 'MACH))
+	       (bitset-attr->list (obj-attr-value reg 'MACH)))
    "\n"
    "</li>\n"
    "<li>\n"
@@ -575,7 +575,7 @@ See the input .cpu file(s) for copyright information.
    "machines: "
    (string-map (lambda (mach)
 		 (string-append " " (symbol->string mach)))
-	       (obj-attr-value insn 'MACH))
+	       (bitset-attr->list (obj-attr-value insn 'MACH)))
    "\n"
    "</li>\n"
    "<br>\n"
@@ -595,23 +595,23 @@ See the input .cpu file(s) for copyright information.
        (string-append "<li>\n"
 		      "instruction field constraint:\n"
 		      "<font size=+2>\n"
-		      "<pre>" ; no trailing newline here on purpose
+		      "<plaintext>" ; no trailing newline here on purpose
 		      (with-output-to-string
 			(lambda ()
 			  (pretty-print (insn-ifield-assertion insn))))
-		      "</pre></font>\n"
+		      "</plaintext></font>\n"
 		      "</li>\n"
 		      "<br>\n")
        "")
    "<li>\n"
    "semantics:\n"
    "<font size=+2>\n"
-   "<pre>" ; no trailing newline here on purpose
+   "<plaintext>" ; no trailing newline here on purpose
    (with-output-to-string
      (lambda ()
        ; Print the const-folded semantics, computed in `tmp'.
        (pretty-print (rtx-trim-for-doc (insn-tmp insn)))))
-   "</pre></font>\n"
+   "</plaintext></font>\n"
    "</li>\n"
    ; "<br>\n" ; not present on purpose
    (if (not (null? (insn-timing insn)))
@@ -679,10 +679,11 @@ See the input .cpu file(s) for copyright information.
 ; The possibilities are: MEM, FPU.
 
 (define (get-insn-properties insn)
-  (logit 2 "Collecting properties of insn " (obj:name insn) " ...\n")
-
   (let*
       ((context #f) ; ??? do we need a better context?
+
+       ; String for error messages.
+       (errtxt "semantic attribute computation for html")
 
        ; List of attributes computed from SEM-CODE-LIST.
        ; The first element is just a dummy so that append! always works.
@@ -690,14 +691,13 @@ See the input .cpu file(s) for copyright information.
 
        ; Called for expressions encountered in SEM-CODE-LIST.
        (process-expr!
-	(lambda (rtx-obj expr parent-expr op-pos tstate appstuff)
+	(lambda (rtx-obj expr mode parent-expr op-pos tstate appstuff)
 	  (case (car expr)
 
-	    ((operand) (if (memory? (op:type (current-op-lookup (rtx-arg1 expr)
-								(obj-isa-list insn))))
+	    ((operand) (if (memory? (op:type (rtx-operand-obj expr)))
 			   ; Don't change to '(MEM), since we use append!.
 			   (append! sem-attrs (list 'MEM)))
-		       (if (mode-float? (mode:lookup (rtx-mode expr)))
+		       (if (mode-float? (op:mode (rtx-operand-obj expr)))
 			   ; Don't change to '(FPU), since we use append!.
 			   (append! sem-attrs (list 'FPU)))
 		       )
@@ -831,8 +831,9 @@ See the input .cpu file(s) for copyright information.
   ; First simplify the semantics, e.g. do constant folding.
   ; For insns built up from macros, often this will remove a lot of clutter.
   (for-each (lambda (insn)
-	      (logit 2 "Simplifying the rtl for insn " (obj:name insn) " ...\n")
-	      (insn-set-tmp! insn (rtx-simplify-insn #f insn)))
+	      (insn-set-tmp! insn (rtx-simplify #f insn
+						(insn-semantics insn)
+						(insn-build-known-values insn))))
 	    (current-insn-list))
 
   (let ((machs (current-mach-list))
@@ -895,11 +896,11 @@ See the input .cpu file(s) for copyright information.
    "<li>\n"
    "transformation:\n"
    "<font size=+2>\n"
-   "<pre>" ; no trailing newline here on purpose
+   "<plaintext>" ; no trailing newline here on purpose
    (with-output-to-string
      (lambda ()
        (pretty-print (minsn-expansions minsn))))
-   "</pre></font>\n"
+   "</plaintext></font>\n"
    "</li>\n"
    "</ul>\n"
    )
@@ -954,7 +955,7 @@ See the input .cpu file(s) for copyright information.
 
 ; Documentation init,finish,analyzer support.
 
-; Initialize any doc specific things before loading the .cpu file.
+; Initialize any opcodes specific things before loading the .cpu file.
 
 (define (doc-init!)
   (desc-init!)
@@ -962,7 +963,7 @@ See the input .cpu file(s) for copyright information.
   *UNSPECIFIED*
 )
 
-; Finish any doc specific things after loading the .cpu file.
+; Finish any opcodes specific things after loading the .cpu file.
 ; This is separate from analyze-data! as cpu-load performs some
 ; consistency checks in between.
 
@@ -977,21 +978,6 @@ See the input .cpu file(s) for copyright information.
 
 (define (doc-analyze!)
   (desc-analyze!)
-
-  ; If the IDOC attribute isn't defined, provide a default one.
-  (if (not (current-attr-lookup 'IDOC))
-      (define-attr
-	'(for insn)
-	'(type enum)
-	'(name IDOC)
-	'(comment "insn kind for documentation")
-	'(attrs META)
-	'(values
-	  (MEM - () "Memory")
-	  (ALU - () "ALU")
-	  (FPU - () "FPU")
-	  (BR - () "Branch")
-	  (MISC - () "Miscellaneous"))))
 
   ; Initialize the rtl->c translator.
   (rtl-c-config!)

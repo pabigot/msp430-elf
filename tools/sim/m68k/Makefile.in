@@ -24,7 +24,7 @@ SIM_EXTRA_LIBS = -lm
 SIM_EXTRA_CLEAN = m68k-clean
 # NOTE -DREGPARAM define is a hack.
 SIM_EXTRA_CFLAGS = -DHAVE_ENDIAN_H=1 -I$(srcdir)/include -DREGPARAM="" \
-	-DNO_INLINE_MEMORY_ACCESS -DSIM_HAVE_ENVIRONMENT -DSIM_M68K -MMD
+	-DNO_INLINE_MEMORY_ACCESS -DSIM_HAVE_ENVIRONMENT -DSIM_M68K -MMD -ffloat-store
 
 # Flags to use when cross-building m68k sim.
 # Prefix to apply to names of object files when using them

@@ -1,7 +1,7 @@
 // { dg-do assemble }
+// { dg-require-effective-target int32plus }
 // { dg-xfail-if "" { xstormy16-*-* } { "*" } { "" } }
 // { dg-options "" }
-// { dg-require-effective-target int32plus }
 
 extern "C" void qsort(void *base, __SIZE_TYPE__ nmemb, __SIZE_TYPE__ size,
               int (*compar)(const void *, const void *));

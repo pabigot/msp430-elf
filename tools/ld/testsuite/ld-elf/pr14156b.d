@@ -4,7 +4,6 @@
 #source: fini3.s
 #source: finin.s
 #ld: --sort-section=alignment
-#ld_after_inputfiles: --discard-none
 #nm: -n
 
 #...

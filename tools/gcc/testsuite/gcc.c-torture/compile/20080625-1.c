@@ -1,5 +1,5 @@
-/* { dg-skip-if "too much data" { "avr-*-*" "m32c-*-*" "pdp11-*-*" } { "*" } { "" } } */
-/* { dg-skip-if "too much data" { "msp430-*-*" "rl78-*-*" "xstormy16-*-*" } { "*" } { "" } } */
+/* { dg-require-effective-target int32plus } */
+
 struct peakbufStruct {
     unsigned int lnum [5000];
     int lscan [5000][4000];
@@ -10,9 +10,12 @@ struct peakbufStruct {
     unsigned char freelistl [5000];
     unsigned int LastFreeL;
 } peakbuf;
+
 void foo(int);
-void findmzROI(int i, int *p_scan)
+
+void
+findmzROI (int i, int *p_scan)
 {
-    foo(peakbuf.PeaksInBuf);
-    __builtin_memmove(p_scan, peakbuf.lscan[i], peakbuf.lnum[i]*sizeof(int));
+  foo (peakbuf.PeaksInBuf);
+  __builtin_memmove (p_scan, peakbuf.lscan[i], peakbuf.lnum[i] * sizeof (int));
 }

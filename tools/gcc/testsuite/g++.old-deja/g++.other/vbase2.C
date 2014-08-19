@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // Origin: Mark Mitchell <mark@codesourcery.com>
 
 int i;

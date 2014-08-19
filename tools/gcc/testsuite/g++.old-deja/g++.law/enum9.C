@@ -22,6 +22,6 @@
     if (sizeof (E) != 4)
 	{ printf ("FAIL\n"); return 1; }
     else
-	printf ("PASS\n");
+      ; // printf ("PASS\n");
     return 0;
   }

@@ -3,6 +3,7 @@
 enum region { oriental, egyptian, greek, etruscan, roman };
 
 void keepalive(bool *var) { }
+void keepalive_int (int *var) { }
 
 // Test one.
 class gnu_obj_1
@@ -17,13 +18,25 @@ protected:
 
 public:
   gnu_obj_1(antiquities a, long l) {}
+  ~gnu_obj_1() {}
 
   long method ()
   {
+    static int sintvar = 4;
     static bool svar = true;
+
     keepalive (&svar);
+    keepalive_int (&sintvar);
     return key2;
   }
+};
+
+// An object with a single constructor.
+class single_constructor
+{
+public:
+  single_constructor () { }
+  ~single_constructor () { }
 };
 
 const bool gnu_obj_1::test;
@@ -76,6 +89,7 @@ int main()
   gnu_obj_2<long>	test2(roman);
   gnu_obj_3<long>	test3(greek);
   gnu_obj_4		test4;
+  single_constructor	test5;
 
   test4.dummy = test4.elsewhere;
   test4.dummy = 0;

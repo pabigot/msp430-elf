@@ -45,3 +45,5 @@ int main () {
      `func2'.  */
   func2(f);
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

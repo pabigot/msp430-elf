@@ -1,0 +1,54 @@
+This patch changes the default use of python in gdb from "auto" to
+"no".  This is a Red Hat local patch that must not be submitted
+upstream.
+
+For 10r1, we made the decision to disable python support due to the fact
+that Linux OS releases that we care about use different python library
+versions.  E.g, RHEL5 uses libpython2.4, F10 uses libpython2.5, and
+both F11 and F12 use libpython2.6.  We would like to build gdb on RHEL5
+and be able to run it on later OS releases such as F10, F11, and F12.
+The fact that the python library version differs between OS releases
+prevents us from doing so.
+
+It's not clear to me why the python version number is being encoded
+into the library name.  One good reason for doing so might be that the
+library interfaces are different.  If the library interfaces between
+python versions are actually identical, then it would have been better
+to use shared library versioning in which the version number is
+specified after the .so suffix.
+
+My examination of GDB shows that python support is, as of the 7.1
+release, being used for pretty printing and as a better extension
+language.  It appears to me that the python pretty printing support
+is currently little better than that provided by C.  (Of course,
+the potential exists to do much, much better...)
+
+Anyway,... given the problems with the library versioning plus the
+fact that the python support is still a nascent stage, we've decided
+to disable the default use of python for GNUPro 10r1.   We should
+revisit this matter for 11r1 and beyond.
+
+
+gdb/ChangeLog.RedHat:
+
+	* configure.ac (include python support): Disable default use
+	of python.
+	* configure: Regenerate.
+
+
+Index: gdb/configure.ac
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/configure.ac,v
+retrieving revision 1.13
+diff -u -p -r1.13 configure.ac
+--- gdb/configure.ac	29 Apr 2010 22:01:03 -0000	1.13
++++ gdb/configure.ac	14 May 2010 21:12:07 -0000
+@@ -609,7 +609,7 @@ AC_DEFUN([AC_TRY_LIBPYTHON],
+ 
+ AC_ARG_WITH(python,
+   AS_HELP_STRING([--with-python], [include python support (auto/yes/no/<path>)]),
+-  [], [with_python=auto])
++  [], [with_python=no])
+ AC_MSG_CHECKING([whether to use python])
+ AC_MSG_RESULT([$with_python])
+ 

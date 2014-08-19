@@ -1,0 +1,45 @@
+Adds a stub definition of _isatty.  Patch is pending submission upstream.
+
+newlib/ChangeLog.RedHat
+2008-08-13  Nick Clifton  <nickc@redhat.com>
+
+	* libc/sys/sysnecv850/isatty.c (_isatty): Define.
+
+Index: newlib/libc/sys/sysnecv850/isatty.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/newlib/libc/sys/sysnecv850/isatty.c,v
+retrieving revision 1.1.1.1
+diff -c -3 -p -r1.1.1.1 isatty.c
+*** newlib/libc/sys/sysnecv850/isatty.c	3 Dec 2002 19:09:56 -0000	1.1.1.1
+--- newlib/libc/sys/sysnecv850/isatty.c	13 Aug 2008 10:31:18 -0000
+***************
+*** 3,16 ****
+  #include <sys/stat.h>
+  #include "sys/syscall.h"
+  
+! int errno;
+  
+! int __trap0 (int function, int p1, int p2, int p3);
+! 
+! #define TRAP0(f, p1, p2, p3) __trap0(f, (int)(p1), (int)(p2), (int)(p3))
+! 
+! isatty (fd)
+!      int fd;
+  {
+    return 1;
+  }
+--- 3,16 ----
+  #include <sys/stat.h>
+  #include "sys/syscall.h"
+  
+! int
+! isatty (int fd)
+! {
+!   return 1;
+! }
+  
+! int
+! _isatty (int fd)
+  {
+    return 1;
+  }

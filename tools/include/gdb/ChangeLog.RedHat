@@ -1,27 +1,35 @@
-2008-08-26  Nick Clifton  <nickc@redhat.com>
+2003-06-30  Kevin Buettner  <kevinb@redhat.com>
 
-	* remote-sim.h (sim_target_display_usage): Update prototype.
+	* Import these patches from gdb 6.0 branch:
 
-2008-05-02  DJ Delorie  <dj@redhat.com>
+	2003-06-10  Corinna Vinschen  <vinschen@redhat.com>
 
-	* sim-rx.h (sim_rx_regnum): Remove vct register, add fintv.
+		* gdb/fileio.h: New file.
 
-2008-04-11  Kevin Buettner  <kevinb@redhat.com>
+2003-06-30  Nick Clifton  <nickc@redhat.com>
 
-	* sim-rx.h (sim_rx_num_regs): New constant.
+	* Import these patches from gcc 3.3 branch:
 
-2008-04-10  Kevin Buettner  <kevinb@redhat.com>
+	2002-07-23  Andrey Volkov  <avolkov@transas.com>
 
-	* sim-rx.h: New file.
+		* sim-h8300.h: New file.
 
-2005-02-22  Jim Blandy  <jimb@redhat.com>
+	2003-03-27  Nick Clifton  <nickc@redhat.com>
 
-	* sim-m32c.h: New file.
+		* sim-arm.h (sim_arm_regs): Add iWMMXt registers.
 
-2002-04-18  Andrew Cagney  <cagney@redhat.com>
+	2003-03-20  Nick Clifton  <nickc@redhat.com>
 
-	* sim-arm.h: New file
+		* sim-arm.h (sim_arm_regs): Add Maverick co-processor
+		registers.
 
+	Wed Jul 17 19:36:38 2002  J"orn Rennecke <joern.rennecke@superh.com>
+
+		* sim-sh.h: Add enum constants for sh[1-4], sh3e, sh3?-dsp,
+		renumbering the sh-dsp registers to use distinct numbers.
+
+
+
 Local Variables:
 mode: change-log
 left-margin: 8

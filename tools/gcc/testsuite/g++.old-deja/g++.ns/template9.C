@@ -39,3 +39,4 @@ int main(void)
   double **m=matrix::alloc<double>(10,20);
 
 }
+// { dg-require-effective-target size32plus }

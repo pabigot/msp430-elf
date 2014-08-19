@@ -1,6 +1,6 @@
-/* trace.h --- interface to tracing output for the RX simulator.
+/* trace.h --- interface to tracing output for the MSP430 simulator.
 
-   Copyright (C) 2005, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 2005-2014 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of the GNU simulators.
@@ -18,8 +18,8 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
-#ifndef SIM_RL78_TRACE_H_
-#define SIM_RL78_TRACE_H_
+#ifndef SIM_MSP430_TRACE_H_
+#define SIM_MSP430_TRACE_H_
 
 extern void  msp430_trace_init (bfd *);
 extern void  msp430_trace_one (int pc);

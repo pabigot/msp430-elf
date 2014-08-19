@@ -23,3 +23,4 @@ int main ()
 
   return (sp1 != sp2);
 }
+// { dg-require-effective-target size32plus }

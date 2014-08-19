@@ -1,3 +1,4 @@
+/* Public domain.  */
 extern int __mulhi3 (int, int);
 
 int

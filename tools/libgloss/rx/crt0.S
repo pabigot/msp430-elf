@@ -63,7 +63,7 @@ _start:
 	/* Initialise the small data area pointer.  */
 	mov	#__gp, r13
 #endif
-
+	
 	bsr.a	__rx_init
 
 #ifdef PROFILE_SUPPORT	/* Defined in gcrt0.S.  */

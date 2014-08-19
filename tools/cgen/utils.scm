@@ -1,5 +1,5 @@
 ; Generic Utilities.
-; Copyright (C) 2000, 2005, 2006, 2007, 2009, 2010 Red Hat, Inc.
+; Copyright (C) 2000-2005 Red Hat, Inc.
 ; This file is part of CGEN.
 ; See file COPYING.CGEN for details.
 
@@ -52,21 +52,16 @@
 
 (define (verbose? level) (>= verbose-level level))
 
-; Print to stderr, takes an arbitrary number of objects, possibly nested.
-; ??? Audit callers, can we maybe just use "display" here (except that
-; we still might want some control over the output).
+; Print to stderr, takes an arbitrary number of strings, possibly nested.
 
 (define message
   (lambda args
     (for-each (lambda (str)
 		(if (pair? str)
-		    (if (list? str)
-			;; ??? Incorrect for improper lists, later.
-			(begin
-			  (message "(")
-			  (for-each (lambda (s) (message s " ")) str)
-			  (message ")"))
-			(message "(" (car str) " . " (cdr str) ")"))
+		    (begin 
+		      (message "(")
+		      (for-each (lambda (s) (message s " ")) str)
+		      (message ")"))
 		    (display str (current-error-port))))
 	      args))
 )
@@ -89,12 +84,6 @@
   (let ((port (if (null? port) (current-output-port) (car port))))
     (write (spaces n) port))
 )
-
-; Concatenate all the arguments and make a string.  Symbols are
-; converted to strings.
-(define (string/symbol-append . sequences)
-  (define (sequence->string o) (if (symbol? o) (symbol->string o) o))
-  (apply string-append (map sequence->string sequences)))
 
 ; Often used idiom.
 
@@ -316,41 +305,10 @@
 
 ; Output routines.
 
-;; Given some state that has a setter function (SETTER NEW-VALUE) and
-;; a getter function (GETTER), call THUNK with the state set to VALUE,
-;; and restore the original value when THUNK returns.  Ensure that the
-;; original value is restored whether THUNK returns normally, throws
-;; an exception, or invokes a continuation that leaves the call's
-;; dynamic scope.
-
-(define (setter-getter-fluid-let setter getter value thunk)
-  (let ((swap (lambda ()
-		(let ((temp (getter)))
-		  (setter value)
-		  (set! value temp)))))
-    (dynamic-wind swap thunk swap)))
-      
-
-;; Call THUNK with the current input and output ports set to PORT, and
-;; then restore the current ports to their original values.
-;; 
-;; This ensures the current ports get restored whether THUNK exits
-;; normally, throws an exception, or leaves the call's dynamic scope
-;; by applying a continuation.
-
-(define (with-input-and-output-to port thunk)
-  (setter-getter-fluid-let
-   set-current-input-port current-input-port port
-   (lambda ()
-     (setter-getter-fluid-let
-      set-current-output-port current-output-port port
-      thunk))))
-
-
 ; Extension to the current-output-port.
 ; Only valid inside string-write.
 
-(define /current-print-state #f)
+(define -current-print-state #f)
 
 ; Create a print-state object.
 ; This is written in portable Scheme so we don't use COS objects, etc.
@@ -406,21 +364,21 @@
 (define string-write
   (lambda strings
     (let ((pstate (make-print-state)))
-      (set! /current-print-state pstate)
-      (for-each (lambda (elm) (/string-write pstate elm))
+      (set! -current-print-state pstate)
+      (for-each (lambda (elm) (-string-write pstate elm))
 		strings)
-      (set! /current-print-state #f)
+      (set! -current-print-state #f)
       ""))
 )
 
 ; Subroutine of string-write and string-write-map.
 
-(define (/string-write pstate expr)
+(define (-string-write pstate expr)
   (cond ((string? expr) (display expr)) ; not write, we want raw text
 	((symbol? expr) (display expr))
-	((procedure? expr) (/string-write pstate (expr)))
+	((procedure? expr) (-string-write pstate (expr)))
 	((pstate-cmd? expr) (display (pstate-cmd-do pstate expr)))
-	((list? expr) (for-each (lambda (x) (/string-write pstate x)) expr))
+	((list? expr) (for-each (lambda (x) (-string-write pstate x)) expr))
 	(else (error "string-write: bad arg:" expr)))
   *UNSPECIFIED*
 )
@@ -428,8 +386,8 @@
 ; Combination of string-map and string-write.
 
 (define (string-write-map proc arglist)
-  (let ((pstate /current-print-state))
-    (for-each (lambda (arg) (/string-write pstate (proc arg)))
+  (let ((pstate -current-print-state))
+    (for-each (lambda (arg) (-string-write pstate (proc arg)))
 	      arglist))
   ""
 )
@@ -439,16 +397,16 @@
 (define string-list list)
 (define string-list-map map)
 
-; Subroutine of string-list->string.  Does same thing /string-write does.
+; Subroutine of string-list->string.  Does same thing -string-write does.
 
-(define (/string-list-flatten pstate strlist)
+(define (-string-list-flatten pstate strlist)
   (cond ((string? strlist) strlist)
 	((symbol? strlist) strlist)
-	((procedure? strlist) (/string-list-flatten pstate (strlist)))
+	((procedure? strlist) (-string-list-flatten pstate (strlist)))
 	((pstate-cmd? strlist) (pstate-cmd-do pstate strlist))
 	((list? strlist) (apply string-append
 				(map (lambda (str)
-				       (/string-list-flatten pstate str))
+				       (-string-list-flatten pstate str))
 				     strlist)))
 	(else (error "string-list->string: bad arg:" strlist)))
 )
@@ -456,7 +414,7 @@
 ; Flatten out a string list.
 
 (define (string-list->string strlist)
-  (/string-list-flatten (make-print-state) strlist)
+  (-string-list-flatten (make-print-state) strlist)
 )
 
 ; Prefix CHARS, a string of characters, with backslash in STR.
@@ -571,22 +529,20 @@
 )
 
 ;; left fold
-
 (define (foldl kons accum lis) 
   (if (null? lis) accum 
       (foldl kons (kons accum (car lis)) (cdr lis))))
 
 ;; right fold
-
 (define (foldr kons knil lis) 
   (if (null? lis) knil 
       (kons (car lis) (foldr kons knil (cdr lis)))))
 
 ;; filter list on predicate
-
 (define (filter p ls)
   (foldr (lambda (x a) (if (p x) (cons x a) a)) 
 	 '() ls))
+
 
 ; APL's +\ operation on a vector of numbers.
 
@@ -662,18 +618,6 @@
 
 (define (intersection a b) 
   (foldl (lambda (l e) (if (memq e a) (cons e l) l)) '() b))
-
-; Return #t if the intersection of A and B is non-null.
-
-(define (non-null-intersection? a b)
-  (let loop ((todo a))
-    (cond ((null? todo)
-	   #f)
-	  ((memq (car todo) b)
-	   #t)
-	  (else
-	   (loop (cdr todo)))))
-)
 
 ; Return union of two lists.
 
@@ -849,15 +793,6 @@
 	  (remainder (logslr value (- size (+ start length))) (integer-expt 2 length))))
 )
 
-; Return numeric value of bit N in a word of size WORD-BITSIZE.
-
-(define (word-bit-value bitnum word-bitsize lsb0?)
-  (assert (< bitnum word-bitsize))
-  (if lsb0?
-      (ash 1 bitnum)
-      (ash 1 (- word-bitsize bitnum 1)))
-)
-
 ; Return a bit mask of size SIZE beginning at the LSB.
 
 (define (mask size)
@@ -1026,7 +961,6 @@
 
 (define (logslr val shift) (ash val (- shift)))
 (define logsll ash) ; (logsll val shift) (ash val shift))
-
 ; logand, logior, logxor defined by guile so we don't need to
 ; (define (logand a b) ...)
 ; (define (logxor a b) ...)
@@ -1088,13 +1022,6 @@
     (map compute-indices selectors))
 )
 
-; Return #t if n is a non-negative integer.
-
-(define (non-negative-integer? n)
-  (and (integer? n)
-       (>= n 0))
-)
-
 ; Convert a list of numbers to a string, separated by SEP.
 ; The result is prefixed by SEP too.
 
@@ -1106,20 +1033,6 @@
 
 (define (number->hex num)
   (number->string num 16)
-)
-
-; Convert a number to a hex C constant,
-; taking care to handle large numbers.
-; If NUM won't fit in a portable int (32-bits), cast it to BIG-NUM-TYPE.
-
-(define (gen-c-hex-constant num big-num-type)
-  (cond ((< num (- (ash 1 31)))
-	 ;; Skip outputting -ve numbers in hex for now.
-	 (string-append "((" big-num-type ") " (number->string num) "LL)"))
-	((> num (- (ash 1 32) 1))
-	 (string-append "((" big-num-type ") 0x" (number->string num 16) "LL)"))
-	(else
-	 (string-append "0x" (number->string num 16))))
 )
 
 ; Given a list of numbers NUMS, generate text to pass them as arguments to a
@@ -1186,7 +1099,7 @@
 )
 
 ; Return list of index numbers of elements in list L that satisfy PRED.
-; I is added to each index, it's usually 0.
+; I is usually 0.
 
 (define (find-index i pred l)
   (define (find1 i pred l result)
@@ -1194,16 +1107,6 @@
 	  ((pred (car l)) (find1 (+ 1 i) pred (cdr l) (cons i result)))
 	  (else (find1 (+ 1 i) pred (cdr l) result))))
   (reverse! (find1 i pred l nil))
-)
-
-; Return index number of first element in list L that satisfy PRED.
-; Returns #f if not present.
-; I is added to the result, it's usually 0.
-
-(define (find-first-index i pred l)
-  (cond ((null? l) #f)
-	((pred (car l)) i)
-	(else (find-first-index (+ 1 i) pred (cdr l))))
 )
 
 ; Return list of elements of L that satisfy PRED.
@@ -1291,7 +1194,27 @@
 ;      (a b 4 c d 6))
 
 (define (list-expand l)
-  (error "wip")
+  #f ; ??? wip
+)
+
+; Given X, a number or symbol, reduce it to a constant if possible.
+; Numbers always reduce to themselves.
+; Symbols are reduced to a number if they're defined as such,
+; or to an enum constant if one exists; otherwise X is returned unchanged.
+; Requires: symbol-bound? enum-lookup-val
+
+(define (reduce x)
+  (if (number? x)
+      x
+      ; A symbol bound to a number?
+      (if (and (symbol? x) (symbol-bound? #f x) (number? (eval1 x)))
+	  (eval1 x)
+	  ; An enum value that has a known numeric value?
+	  (let ((e (enum-lookup-val x)))
+	    (if (number? (car e))
+		(car e)
+		; Otherwise return X unchanged.
+		x))))
 )
 
 ; If OBJ has a dump method call it, otherwise return OBJ untouched.
@@ -1310,22 +1233,22 @@
   (cons "\
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright 1996-2010 Free Software Foundation, Inc.
+Copyright 1996-2005 Free Software Foundation, Inc.
 "
 	"\
-   This file is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3, or (at your option)
-   any later version.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2, or (at your option)
+any later version.
 
-   It is distributed in the hope that it will be useful, but WITHOUT
-   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
-   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
-   License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License along
-   with this program; if not, write to the Free Software Foundation, Inc.,
-   51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+You should have received a copy of the GNU General Public License along
+with this program; if not, write to the Free Software Foundation, Inc.,
+51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 "
 ))
 
@@ -1335,7 +1258,7 @@ Copyright 1996-2010 Free Software Foundation, Inc.
   (cons "\
 THIS FILE IS MACHINE GENERATED WITH CGEN.
 
-Copyright (C) 2000-2010 Red Hat, Inc.
+Copyright (C) 2000-2005 Red Hat, Inc.
 "
 	"\
 "))
@@ -1429,76 +1352,4 @@ This file is part of CGEN.
   (let ((now (time-current)))
     (do ((i 0 (+ i 1))) ((= i n) (time-elapsed now))
       (proc)))
-)
-
-;; Debugging repls.
-
-; Record of arguments passed to debug-repl, so they can be accessed in
-; the repl loop.
-
-(define debug-env #f)
-
-; Return list of recorded variables for debugging.
-
-(define (debug-var-names) (map car debug-env))
-
-; Return value of recorded var NAME.
-
-(define (debug-var name) (assq-ref debug-env name))
-
-; A handle on /dev/tty, so we can be sure we're talking with the user.
-; We open this the first time we actually need it.
-
-(define debug-tty #f)
-
-; Return the port we should use for interacting with the user,
-; opening it if necessary.
-
-(define (debug-tty-port)
-  (if (not debug-tty)
-      (set! debug-tty (open-file "/dev/tty" "r+")))
-  debug-tty)
-
-; Enter a repl loop for debugging purposes.
-; Use (quit) to exit cgen completely.
-; Use (debug-quit) or (quit 0) to exit the debugging session and
-; resume argument processing.
-;
-; ENV-ALIST can be anything, but it is intended to be an alist of values
-; the caller will want to be able to access in the repl loop.
-; It is stored in global `debug-env'.
-
-(define (debug-repl env-alist)
-  (with-input-and-output-to
-   (debug-tty-port)
-   (lambda ()
-     (set! debug-env env-alist)
-     (let loop ()
-       (let ((rc (top-repl)))
-	 (if (null? rc)
-	     (quit 1))			; indicate error to `make'
-	 (if (not (equal? rc '(0)))
-	     (loop))))))
-)
-
-; Utility for debug-repl.
-
-(define (debug-quit)
-  ; Keep around for later debugging.
-  ;(set! debug-env #f)
-
-  (quit 0)
-)
-
-; Macro to simplify calling debug-repl.
-; Usage: (debug-repl-env var-name1 var-name2 ...)
-;
-; This is for debugging cgen itself, and is inserted into code at the point
-; where one wants to start a repl.
-
-(defmacro debug-repl-env var-names
-  (let ((env (map (lambda (var-name)
-		    (list 'cons (list 'quote var-name) var-name))
-		  var-names)))
-    (list 'debug-repl (cons 'list env)))
 )

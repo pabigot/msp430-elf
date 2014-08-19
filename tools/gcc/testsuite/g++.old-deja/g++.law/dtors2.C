@@ -39,3 +39,4 @@ int main() {
 
 
 }
+// { dg-require-effective-target size32plus }

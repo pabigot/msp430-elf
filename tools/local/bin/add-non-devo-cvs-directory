@@ -1,0 +1,64 @@
+#! /bin/sh
+
+# NOTE - This script does not clean out old CVS directories, so if
+# you have copied a directory from a different repository you must
+# run:
+#   find <new-directory-name> -depth -type d -name CVS -exec rm -fr {} \;
+# first!
+#
+# cd to the parent of the new directory and run
+#   add-cvs-directory <name-of-new-directory>
+#
+# This script will add the directory to the CVS repository,
+# run cvs add on all the files in the new directory and
+# recursively invoke itself on any sub-directories of the new directory.
+
+progname=`basename $0`
+
+if test "x$1" = "x" ; then
+  echo "Usage $progname <directory-name>"
+  exit 0
+fi
+
+dir=`basename $1`
+
+if ! test -d $1 ; then
+  if test -f $1 ; then
+    echo " $progname: '$dir' is a file - just adding it normally."
+    pushd `dirname $1` > /dev/null
+    cvs -Q add $dir
+    popd > /dev/null
+    exit 0
+  else
+    echo " $progname: argument '$1' must be a directory"
+    exit 1
+  fi
+fi
+
+if test "x$dir" = "x." ; then
+  echo " $progname: Skipping " $dir
+  exit 0
+fi
+  
+if test "x$dir" = "xCVS" ; then
+  echo " $progname: Skipping " $dir
+  exit 0
+fi
+  
+echo " $progname: Adding directory: $dir"
+
+pushd `dirname $1` > /dev/null
+
+cvs -Q add $dir;
+
+cd $dir
+
+cvs -Q add *;
+
+for A in * ; do
+  if test -d $A ; then
+    $0 $A ;
+  fi
+done;
+
+popd > /dev/null

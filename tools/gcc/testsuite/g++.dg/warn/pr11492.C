@@ -1,6 +1,7 @@
 // PR11492 
 // { dg-do compile }
 // { dg-options "-Wsign-compare" }
+// { dg-require-effective-target int32plus }
 int main( void )
 {
   unsigned int a;

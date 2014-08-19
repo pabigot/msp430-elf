@@ -1,0 +1,191 @@
+# from gcc
+file	${release}/H-${host}/bin/${targetPrefix}gcc${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}gcc-.*${EXTEXT}
+file	${release}/H-${host}/bin/${host}-c++${EXEEXT} native
+file	${release}/H-${host}/bin/${host}-g++${EXEEXT} native
+file	${release}/H-${host}/bin/${host}-gcc${EXEEXT} native
+file	${release}/H-${host}/bin/${host}-gcc-.*${EXEEXT} native
+file	${release}/H-${host}/bin/${targetPrefix}cpp${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}gcov${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}gprof${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}c++${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}g++${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}c++filt${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}protoize${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}unprotoize${EXEEXT}
+file	${release}/H-${host}/bin/gcov${EXEEXT}
+fixinc	${release}/H-${host}/lib/gcc/${target}
+dir	${release}/H-${host}/libexec/gcc/${target}
+# libintl bits for gcc
+file	${release}/H-${host}/lib/charset.alias
+# for natives and host-x-host - now uner libexec/gcc/target!
+dir	${release}/H-${host}/${target}/install-tools
+# from binutils/gas/ld
+file	${release}/H-${host}/bin/${targetPrefix}addr2line${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}ar${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}as${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}dlltool${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}windmc${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}gasp${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}ld${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}nm${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}objcopy${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}objdump${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}ranlib${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}readelf${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}size${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}strings${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}strip${EXEEXT}
+dir	${release}/H-${host}/${target}/bin
+# these are only for cygwin as far as I can tell
+file	${release}/H-${host}/bin/${targetPrefix}dllwrap${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}windres${EXEEXT}
+# these are only for Hitachi targets, but they're safe for all
+file	${release}/H-${host}/bin/${targetPrefix}coffdump${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}srconv${EXEEXT}
+file	${release}/H-${host}/bin/${targetPrefix}sysdump${EXEEXT}
+# from libstdc++/libio, newlib, libgloss, bsp (target libs)
+# also gets ldscripts for ld by default
+dir	${release}/H-${host}/lib/sparcv9 native
+file	${release}/H-${host}/lib/libgomp.* native
+file	${release}/H-${host}/lib/libssp.* native
+file	${release}/H-${host}/lib/libgcc.*a native
+file	${release}/H-${host}/lib/libgcc.* native
+file	${release}/H-${host}/lib/libgcc_s.*
+file	${release}/H-${host}/lib/libstdc++.a native
+file	${release}/H-${host}/lib/libstdc++.so.*
+file	${release}/H-${host}/lib/libsupc++.* native
+file	${release}/H-${host}/lib/readline.* native
+stdcrap	${release}/H-${host}/lib[a-z0-9]*/libgcc.* native
+stdcrap	${release}/H-${host}/lib[a-z0-9]*/libstdc++.* native
+stdcrap	${release}/H-${host}/lib[a-z0-9]*/libsupc++.* native
+stdcrap	${release}/H-${host}/lib[a-z0-9]*/readline.* native
+dir	${release}/H-${host}/${target}/include
+dir	${release}/${target}/include/c++ nog++
+dir	${release}/H-${host}/${target}/lib.*
+file	${release}/include/ansidecl.h
+dir	${release}/include/g++-2 nog++
+dir	${release}/include/g++-3 nog++
+dir	${release}/include/g++-v3 nog++
+#g++ header files
+dir	${release}/${target}include/c++  nog++
+dir	${release}/include/c++/.*/backward  nog++
+dir	${release}/include/c++/.*/debug  nog++
+dir	${release}/include/c++/.*/bits  nog++
+dir	${release}/include/c++/.*/${target}/bits  nog++
+dir	${release}/include/c++/.*/ext  nog++
+dir	${release}/include/c++/.*/tr1  nog++
+dir	${release}/include/c++/.*/tr1_impl  nog++
+dir	${release}/include/c++/.*/parallel  nog++
+dir	${release}/include/c++/.*/${target}  nog++
+file	${release}/include/c++/.*/array  nog++
+file	${release}/include/c++/.*/ccomplex  nog++
+file	${release}/include/c++/.*/cfenv  nog++
+file	${release}/include/c++/.*/chrono  nog++
+file	${release}/include/c++/.*/condition_variable  nog++
+file	${release}/include/c++/.*/cinttypes  nog++
+file	${release}/include/c++/.*/cstdatomic  nog++
+file	${release}/include/c++/.*/cstdbool  nog++
+file	${release}/include/c++/.*/cstdint  nog++
+file	${release}/include/c++/.*/ctgmath  nog++
+file	${release}/include/c++/.*/complex.h  nog++
+file	${release}/include/c++/.*/cxxabi-forced.h  nog++
+file	${release}/include/c++/.*/fenv.h  nog++
+file	${release}/include/c++/.*/algorithm  nog++
+file	${release}/include/c++/.*/tuple  nog++
+file	${release}/include/c++/.*/type_traits  nog++
+file	${release}/include/c++/.*/unordered_map  nog++
+file	${release}/include/c++/.*/unordered_set  nog++
+file	${release}/include/c++/.*/c++0x_warning.h  nog++
+file	${release}/include/c++/.*/bitset  nog++
+file	${release}/include/c++/.*/cassert  nog++
+file	${release}/include/c++/.*/cctype  nog++
+file	${release}/include/c++/.*/cerrno  nog++
+file	${release}/include/c++/.*/cfloat  nog++
+file	${release}/include/c++/.*/ciso646  nog++
+file	${release}/include/c++/.*/climits  nog++
+file	${release}/include/c++/.*/clocale  nog++
+file	${release}/include/c++/.*/cmath  nog++
+file	${release}/include/c++/.*/complex  nog++
+file	${release}/include/c++/.*/csetjmp  nog++
+file	${release}/include/c++/.*/csignal  nog++
+file	${release}/include/c++/.*/cstdarg  nog++
+file	${release}/include/c++/.*/cstddef  nog++
+file	${release}/include/c++/.*/cstdio  nog++
+file	${release}/include/c++/.*/cstdlib  nog++
+file	${release}/include/c++/.*/cstring  nog++
+file	${release}/include/c++/.*/ctime  nog++
+file	${release}/include/c++/.*/cwchar  nog++
+file	${release}/include/c++/.*/cwctype  nog++
+file	${release}/include/c++/.*/cxxabi.h  nog++
+file	${release}/include/c++/.*/deque  nog++
+file	${release}/include/c++/.*/exception  nog++
+file	${release}/include/c++/.*/exception_defines.h  nog++
+file	${release}/include/c++/.*/fstream  nog++
+file	${release}/include/c++/.*/functional  nog++
+file	${release}/include/c++/.*/iomanip  nog++
+file	${release}/include/c++/.*/ios  nog++
+file	${release}/include/c++/.*/iosfwd  nog++
+file	${release}/include/c++/.*/iostream  nog++
+file	${release}/include/c++/.*/istream  nog++
+file	${release}/include/c++/.*/iterator  nog++
+file	${release}/include/c++/.*/limits  nog++
+file	${release}/include/c++/.*/list  nog++
+file	${release}/include/c++/.*/locale  nog++
+file	${release}/include/c++/.*/map  nog++
+file	${release}/include/c++/.*/memory  nog++
+file	${release}/include/c++/.*/new  nog++
+file	${release}/include/c++/.*/numeric  nog++
+file	${release}/include/c++/.*/ostream  nog++
+file	${release}/include/c++/.*/queue  nog++
+file	${release}/include/c++/.*/random  nog++
+file	${release}/include/c++/.*/regex  nog++
+file	${release}/include/c++/.*/set  nog++
+file	${release}/include/c++/.*/sstream  nog++
+file	${release}/include/c++/.*/stack  nog++
+file	${release}/include/c++/.*/stdexcept  nog++
+file	${release}/include/c++/.*/streambuf  nog++
+file	${release}/include/c++/.*/string  nog++
+file	${release}/include/c++/.*/typeinfo  nog++
+file	${release}/include/c++/.*/tgmath.h  nog++
+file	${release}/include/c++/.*/utility  nog++
+file	${release}/include/c++/.*/valarray  nog++
+file	${release}/include/c++/.*/vector  nog++
+file	${release}/include/c++/.*/exception_ptr.h  nog++
+file	${release}/include/c++/.*/forward_list  nog++
+file	${release}/include/c++/.*/initializer_list  nog++
+file	${release}/include/c++/.*/mutex  nog++
+file	${release}/include/c++/.*/ratio  nog++
+file	${release}/include/c++/.*/stdatomic.h  nog++
+file	${release}/include/c++/.*/system_error  nog++
+file	${release}/include/c++/.*/thread  nog++
+# from gperf
+file	${release}/H-${host}/bin/${targetPrefix}gperf${EXEEXT}
+# if java
+file	${release}/H-${host}/bin/${targetPrefix}gcj${EXEEXT} java
+file	${release}/H-${host}/bin/${targetPrefix}gcjh${EXEEXT} java
+file	${release}/H-${host}/bin/${targetPrefix}jar${EXEEXT} java
+file	${release}/H-${host}/bin/${targetPrefix}jcf-dump${EXEEXT} java
+file	${release}/H-${host}/bin/${targetPrefix}jv-scan${EXEEXT} java
+file	${release}/H-${host}/bin/${targetPrefix}grepjar${EXEEXT} java
+file	${release}/H-${host}/bin/${targetPrefix}addr2name.awk${EXEEXT} java
+file	${release}/H-${host}/bin/jcf-dump${EXEEXT} java
+file	${release}/H-${host}/bin/jv-convert${EXEEXT} java
+file	${release}/H-${host}/bin/jv-scan${EXEEXT} java
+file	${release}/H-${host}/bin/zip${EXEEXT} java
+file	${release}/H-${host}/lib/lib.*gcj.* java
+file	${release}/H-${host}/lib/logging.properties java
+file	${release}/H-${host}/lib/security/classpath.security java
+file	${release}/H-${host}/lib/security/libgcj.security java
+file	${release}/share/java/libgcj-.*.jar java
+file	${release}/share/libgcj.zip java
+file	${release}/include/ffi.h java
+dir	${release}/include/gcj java
+dir	${release}/include/gnu java
+dir	${release}/include/java java
+dir	${release}/include/javax java
+dir	${release}/include/org java
+file	${release}/include/jni.h java
+file	${release}/include/jvmpi.h java
+file	${release}/H-${host}/bin/tk84.dll cygwin
+file	${release}/H-${host}/bin/cyg.*.dll cygwin

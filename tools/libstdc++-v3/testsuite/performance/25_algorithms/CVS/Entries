@@ -1,8 +1,11 @@
-/copy_backward_deque_iterators.cc/1.2/Sun Nov 18 22:01:19 2012//Tmsp430-130322-branch
-/copy_deque_iterators.cc/1.2/Sun Nov 18 22:01:19 2012//Tmsp430-130322-branch
-/copy_streambuf_iterators.cc/1.3/Sun Feb 24 19:27:44 2013//Tmsp430-130322-branch
-/find_istreambuf_iterators.cc/1.3/Sun Feb 24 19:27:44 2013//Tmsp430-130322-branch
-/lexicographical_compare.cc/1.3/Sun Feb 24 19:27:44 2013//Tmsp430-130322-branch
-/nth_element_worst_case.cc/1.3/Sun Feb 24 19:27:44 2013//Tmsp430-130322-branch
-/search_n.cc/1.7/Sun Feb 24 19:27:44 2013//Tmsp430-130322-branch
+/copy_backward_deque_iterators.cc/1.2/Thu May  2 22:21:36 2013//Tmsp430-14r1-branch
+/copy_deque_iterators.cc/1.2/Thu May  2 22:21:36 2013//Tmsp430-14r1-branch
+/copy_streambuf_iterators.cc/1.4/Thu Feb 20 13:47:46 2014//Tmsp430-14r1-branch
+/find_istreambuf_iterators.cc/1.4/Thu Feb 20 13:47:46 2014//Tmsp430-14r1-branch
+/lexicographical_compare.cc/1.4/Thu Feb 20 13:47:46 2014//Tmsp430-14r1-branch
+/nth_element_worst_case.cc/1.4/Thu Feb 20 13:47:46 2014//Tmsp430-14r1-branch
+/search_n.cc/1.7/Thu Feb 20 13:47:46 2014//Tmsp430-14r1-branch
+/sort.cc/1.2/Thu Feb 20 13:47:46 2014//Tmsp430-14r1-branch
+/sort_heap.cc/1.2/Thu Feb 20 13:47:46 2014//Tmsp430-14r1-branch
+/stable_sort.cc/1.2/Thu Feb 20 13:47:46 2014//Tmsp430-14r1-branch
 D

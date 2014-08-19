@@ -21,6 +21,7 @@
 #ifndef GCC_MSP430_PROTOS_H
 #define GCC_MSP430_PROTOS_H
 
+bool	msp430_do_not_relax_short_jumps (void);
 rtx	msp430_eh_return_stackadj_rtx (void);
 void	msp430_expand_eh_return (rtx);
 void	msp430_expand_epilogue (int);
@@ -30,12 +31,16 @@ const char * msp430x_extendhisi (rtx *);
 void	msp430_fixup_compare_operands (enum machine_mode, rtx *);
 int	msp430_hard_regno_mode_ok (int, enum machine_mode);
 int	msp430_hard_regno_nregs (int, enum machine_mode);
+int	msp430_hard_regno_nregs_has_padding (int, enum machine_mode);
+int	msp430_hard_regno_nregs_with_padding (int, enum machine_mode);
+bool    msp430_hwmult_enabled (void);
 rtx	msp430_incoming_return_addr_rtx (void);
 void	msp430_init_cumulative_args (CUMULATIVE_ARGS *, tree, rtx, tree, int);
 int	msp430_initial_elimination_offset (int, int);
 bool    msp430_is_interrupt_func (void);
 const char * msp430x_logical_shift_right (rtx);
 const char * msp430_mcu_name (void);
+bool	msp430_modes_tieable_p (enum machine_mode, enum machine_mode);
 void	msp430_output_labelref (FILE *, const char *);
 void	msp430_register_pragmas (void);
 rtx	msp430_return_addr_rtx (int);

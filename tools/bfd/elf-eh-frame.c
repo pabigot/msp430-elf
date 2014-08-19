@@ -235,6 +235,7 @@ cie_eq (const void *e1, const void *e2)
       && c1->lsda_encoding == c2->lsda_encoding
       && c1->fde_encoding == c2->fde_encoding
       && c1->initial_insn_length == c2->initial_insn_length
+      && c1->initial_insn_length <= sizeof (c1->initial_instructions)
       && memcmp (c1->initial_instructions,
 		 c2->initial_instructions,
 		 c1->initial_insn_length) == 0)
@@ -254,6 +255,7 @@ static hashval_t
 cie_compute_hash (struct cie *c)
 {
   hashval_t h = 0;
+  size_t len;
   h = iterative_hash_object (c->length, h);
   h = iterative_hash_object (c->version, h);
   h = iterative_hash (c->augmentation, strlen (c->augmentation) + 1, h);
@@ -267,7 +269,10 @@ cie_compute_hash (struct cie *c)
   h = iterative_hash_object (c->lsda_encoding, h);
   h = iterative_hash_object (c->fde_encoding, h);
   h = iterative_hash_object (c->initial_insn_length, h);
-  h = iterative_hash (c->initial_instructions, c->initial_insn_length, h);
+  len = c->initial_insn_length;
+  if (len > sizeof (c->initial_instructions))
+    len = sizeof (c->initial_instructions);
+  h = iterative_hash (c->initial_instructions, len, h);
   c->hash = h;
   return h;
 }
@@ -762,11 +767,10 @@ _bfd_elf_parse_eh_frame (bfd *abfd, struct bfd_link_info *info,
 	    cie->fde_encoding = DW_EH_PE_absptr;
 
 	  initial_insn_length = end - buf;
-	  if (initial_insn_length <= sizeof (cie->initial_instructions))
-	    {
-	      cie->initial_insn_length = initial_insn_length;
-	      memcpy (cie->initial_instructions, buf, initial_insn_length);
-	    }
+	  cie->initial_insn_length = initial_insn_length;
+	  memcpy (cie->initial_instructions, buf,
+		  initial_insn_length <= sizeof (cie->initial_instructions)
+		  ? initial_insn_length : sizeof (cie->initial_instructions));
 	  insns = buf;
 	  buf += initial_insn_length;
 	  ENSURE_NO_RELOCS (buf);
@@ -1719,15 +1723,6 @@ _bfd_elf_write_section_eh_frame (bfd *abfd,
      have padded CIE/FDE records to multiple of pointer size with
      size_of_output_cie_fde.  */
   if ((sec->size % ptr_size) != 0)
-    {
-      /* This situation can occur when a binary is too big for
-	 its execution environment.  (Think compiling C++ programs
-	 on 16-bit targets).  Rather than abort, issue an error
-	 message and adjust the section size.  */
-      info->callbacks->einfo (_("%P: Forced to truncate .eh_frame section\n"));
-      sec->size &= ~ ptr_size;
-    }
-  if (0)
     abort ();
 
   /* FIXME: octets_per_byte.  */

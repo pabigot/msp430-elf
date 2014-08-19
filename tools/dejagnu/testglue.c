@@ -40,7 +40,15 @@
 #define ORIG__EXIT __wrap__exit
 #define ORIG_ABORT __wrap_abort
 #define ORIG_MAIN __wrap_main
+
+extern void abort (void);
+extern void exit (int);
+
 #endif
+
+extern void abort (void);
+extern void exit (int);
+
 #endif
 
 #ifdef REAL_MAIN
@@ -53,7 +61,6 @@ extern void REAL__EXIT ();
 #endif
 
 static int done_exit_message = 0;
-
 int ___constval = 1;
 
 #ifdef VXWORKS

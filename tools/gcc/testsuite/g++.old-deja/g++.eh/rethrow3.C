@@ -38,3 +38,4 @@ int main ()
   std::set_terminate (&eh_terminate);
   eh_test (0);
 }
+// { dg-require-effective-target size32plus }

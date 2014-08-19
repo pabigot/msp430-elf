@@ -34,3 +34,4 @@ int main(int arg, char** argv) {
      blahPtr = new blah[100];
      printf ("PASS\n");
 }
+// { dg-require-effective-target size32plus }

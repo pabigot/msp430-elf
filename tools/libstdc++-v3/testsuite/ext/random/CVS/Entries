@@ -1,9 +1,12 @@
 D/arcsine_distribution////
 D/beta_distribution////
 D/hoyt_distribution////
+D/hypergeometric_distribution////
 D/k_distribution////
 D/nakagami_distribution////
 D/normal_mv_distribution////
 D/pareto_distribution////
 D/rice_distribution////
 D/simd_fast_mersenne_twister_engine////
+D/triangular_distribution////
+D/von_mises_distribution////

@@ -1,36 +1,35 @@
-# Copyright (C) 1992 - 2001 Free Software Foundation, Inc.
-
-# This program is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
+# Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+# 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
+#
+# This file is part of DejaGnu.
+#
+# DejaGnu is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
 # the Free Software Foundation; either version 2 of the License, or
 # (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
+#
+# DejaGnu is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA. 
-
-# Please email any bugs, comments, and/or additions to this file to:
-# bug-dejagnu@gnu.org
+# along with DejaGnu; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
 
 # This file was written by Rob Savoye. (rob@welcomehome.org)
 
-#
-# Most of the procedures found here mimic their unix counter-part. 
-# This file is sourced by runtest.exp, so they are usable by any test case.
-#
+# Most of the procedures found here mimic their UNIX counterpart.
+# This file is sourced by runtest.exp, so they are usable by any test
+# script.
 
-#
-# Gets the directories in a directory
+# Gets the directories in a directory, or in a directory tree.
 #     args: the first is the dir to look in, the next
 #         is the pattern to match. It
 #         defaults to *. Patterns are csh style
 #   	  globbing rules
-#     returns: a list of dirs or NULL
+#     options: -all  search the tree recursively
+#     returns: a list of dirs or NULL; the root directory is not returned.
 #
 proc getdirs { args } {
     if { [lindex $args 0] == "-all" } {
@@ -50,7 +49,7 @@ proc getdirs { args } {
     catch "glob ${path}/${pattern}" tmp
     if { ${tmp} != "" } {
 	foreach i ${tmp} {
-	    if [file isdirectory $i] {
+	    if {[file isdirectory $i]} {
 		switch -- "[file tail $i]" {
 		    "testsuite" -
 		    "config" -
@@ -62,7 +61,7 @@ proc getdirs { args } {
 			continue
 		    }
 		    default {
-			if [file readable $i] {
+			if {[file readable $i]} {
 			    verbose "Found directory [file tail $i]" 3
 			    lappend dirs $i
 			    if { $alldirs } {
@@ -72,102 +71,78 @@ proc getdirs { args } {
 		    }
 		}
 	    }
-	}
+	}	
     } else {
 	perror "$tmp"
 	return ""
     }
-    
-    if ![info exists dirs] {
+
+    if {![info exists dirs]} {
 	return ""
     } else {
 	return $dirs
     }
 }
 
-#
-# Finds all the files recursively
-#     rootdir - this is the directory to start the search
-#   	  from. This is and all subdirectories are search for
-#   	  filenames. Directory names are not included in the
-#   	  list, but the filenames have path information. 
-#     pattern - this is the pattern to match. Patterns are csh style
-#   	  globbing rules.
-#     returns: a list or a NULL.
+# Finds paths of all non-directory files, recursively, whose names match
+# a pattern.  Certain directory name are not searched (see proc getdirs).
+#     rootdir - search in this directory and its subdirectories, recursively.
+#     pattern - specified with Tcl string match "globbing" rules.
+#     returns: a possibly empty list of pathnames.
 #
 proc find { rootdir pattern } {
-    # first find all the directories
-    set dirs "$rootdir "
-    while 1 {
-	set tmp $rootdir
-	set rootdir ""
-	if [string match "" $tmp] {
-	    break
-	}
-	foreach i $tmp {
-	    set j [getdirs -all $i]
-	    if ![string match "" $j] {
-		append dirs "$j "
-		set rootdir $j
-		unset j
-	    } else {
-		set rootdir ""
-	    }
-	}
-	set tmp ""
+    set files [list]
+    if { [string length $rootdir] == 0 || [string length $pattern] == 0 } {
+	return $files
     }
-    
-    # find all the files that match the pattern
+
+    # find all the directories
+    set dirs [concat [getdirs -all $rootdir] $rootdir]
+
+    # find all the files in the directories that match the pattern
     foreach i $dirs {
 	verbose "Looking in $i" 3
-	set tmp [glob -nocomplain $i/$pattern]
-	if { [llength $tmp] != 0 } {
-	    foreach j $tmp {
-		if ![file isdirectory $j] {
-		    lappend files $j
-		    verbose "Adding $j to file list" 3
-		}
+	foreach match [glob -nocomplain $i/$pattern] {
+	    if {![file isdirectory $match]} {
+		lappend files $match
+		verbose "Adding $match to file list" 3
 	    }
 	}
     }
-    
-    if ![info exists files] {
-	lappend files ""
-    }
+
     return $files
 }
 
-#
-# Search the path for a file. This is basically a version
-# of the BSD-unix which utility. This procedure depends on
-# the shell environment variable $PATH. It returns 0 if $PATH
-# does not exist or the binary is not in the path. If the
-# binary is in the path, it returns the full path to the binary.
+# Search the path for a file. This is basically a version of the BSD
+# Unix which(1) utility. This procedure depends on the shell
+# environment variable $PATH. It returns 0 if $PATH does not exist or
+# the binary is not in the path. If the binary is in the path, it
+# returns the full path to the binary.
 #
 proc which { file } {
     global env
-    
+
     # strip off any extraneous arguments (like flags to the compiler)
     set file [lindex $file 0]
-    
+
     # if it exists then the path must be OK
     # ??? What if $file has no path and "." isn't in $PATH?
-    if [file exists $file] {
+    if {[file exists $file]} {
 	return $file
     }
-    if [info exists env(PATH)] {
+    if {[info exists env(PATH)]} {
 	set path [split $env(PATH) ":"]
     } else {
 	return 0
     }
-    
+
     foreach i $path {
 	verbose "Checking against $i" 3
-	if [file exists $i/$file] {
-	    if [file executable $i/$file] {
-		return $i/$file
+	if {[file exists [file join $i $file]]} {
+	    if {[file executable [file join $i $file]]} {
+		return [file join $i $file]
 	    } else {
-		warning "$i/$file exists but is not an executable"
+		warning "[file join $i $file] exists but is not an executable"
 	    }
 	}
     }
@@ -175,8 +150,7 @@ proc which { file } {
     return 0
 }
 
-#
-# Looks for a string in a file. 
+# Looks for occurrences of a string in a file.
 #     return:list of lines that matched or NULL if none match.
 #     args:  first arg is the filename,
 #            second is the pattern,
@@ -184,12 +158,12 @@ proc which { file } {
 #     Options: line  - puts line numbers of match in list
 #
 proc grep { args } {
-    
+
     set file [lindex $args 0]
     set pattern [lindex $args 1]
-    
+
     verbose "Grepping $file for the pattern \"$pattern\"" 3
-    
+
     set argc [llength $args]
     if { $argc > 2 } {
 	for { set i 2 } { $i < $argc } { incr i } {
@@ -199,15 +173,15 @@ proc grep { args } {
     } else {
 	set options ""
     }
-    
+
     set i 0
     set fd [open $file r]
     while { [gets $fd cur_line]>=0 } {
 	incr i
-	if [regexp -- "$pattern" $cur_line match] {
-	    if ![string match "" $options] {
+	if {[regexp -- "$pattern" $cur_line match]} {
+	    if {![string match "" $options]} {
 		foreach opt $options {
-		    case $opt in {
+		    switch $opt {
 			"line" {
 			    lappend grep_out [concat $i $match]
 			}
@@ -221,7 +195,7 @@ proc grep { args } {
     close $fd
     unset fd
     unset i
-    if ![info exists grep_out] {
+    if {![info exists grep_out]} {
 	set grep_out ""
     }
     return $grep_out
@@ -237,7 +211,7 @@ proc prune { list pattern } {
     set tmp {}
     foreach i $list {
 	verbose "Checking pattern \"$pattern\" against $i" 3
-	if ![string match $pattern $i] {
+	if {![string match $pattern $i]} {
 	    lappend tmp $i
 	} else {
 	    verbose "Removing element $i from list" 3
@@ -246,16 +220,16 @@ proc prune { list pattern } {
     return $tmp
 }
 
-# 
+#
 # Attempt to kill a process that you started on the local machine.
 #
 proc slay { name } {
     set in [open [concat "|ps"] r]
     while {[gets $in line]>-1} {
-	if ![string match "*expect*slay*" $line] {
-	    if [string match "*$name*" $line] {
+	if {![string match "*expect*slay*" $line]} {
+	    if {[string match "*$name*" $line]} {
 		set pid [lindex $line 0]
-		catch "exec kill -9 $pid]"
+		catch "exec kill -9 $pid"
 		verbose "Killing $name, pid = $pid\n"
 	    }
 	}
@@ -267,10 +241,10 @@ proc slay { name } {
 # Convert a relative path to an absolute one on the local machine.
 #
 proc absolute { path } {
-    if [string match "." $path] {
+    if {[string match "." $path]} {
         return [pwd]
     }
-    
+
     set basedir [pwd]
     cd $path
     set path [pwd]
@@ -287,9 +261,9 @@ proc psource { file } {
     global errorCode
 
     unset errorInfo
-    if [file exists $file] {
+    if {[file exists $file]} {
 	catch "source $file"
-	if [info exists errorInfo] {
+	if {[info exists errorInfo]} {
 	    send_error "ERROR: errors in $file\n"
 	    send_error "$errorInfo"
 	    return 1
@@ -311,12 +285,12 @@ proc psource { file } {
 # Eg: RUNTESTFLAGS="bar.exp=foo1.c foo2.c foo3*.c bar/baz*.c"
 #
 proc runtest_file_p { runtests testcase } {
-    if [string length [lindex $runtests 1]] {
+    if {[string length [lindex $runtests 1]]} {
 	foreach ptn [lindex $runtests 1] {
-	    if [string match "*/$ptn" $testcase] {
+	    if {[string match "*/$ptn" $testcase]} {
 		return 1
 	    }
-	    if [string match $ptn $testcase] {
+	    if {[string match $ptn $testcase]} {
 		return 1
 	    }
 	}
@@ -343,36 +317,36 @@ proc runtest_file_p { runtests testcase } {
 proc diff { file_1 file_2 } {
     set eof -1
     set differences 0
-    
-    if [file exists ${file_1}] {
+
+    if {[file exists ${file_1}]} {
         set file_a [open ${file_1} r]
     } else {
         warning "${file_1} doesn't exist"
         return 0
     }
-    
-    if [file exists ${file_2}] {
+
+    if {[file exists ${file_2}]} {
         set file_b [open ${file_2} r]
     } else {
         warning "${file_2} doesn't exist"
         return 0
     }
-    
+
     verbose "# Diff'ing: ${file_1} ${file_2}\n" 1
-    
+
     set list_a ""
     while { [gets ${file_a} line] != ${eof} } {
-        if [regexp "^#.*$" ${line}] {
+        if {[regexp "^#.*$" ${line}]} {
             continue
         } else {
             lappend list_a ${line}
         }
     }
     close ${file_a}
-    
+
     set list_b ""
     while { [gets ${file_b} line] != ${eof} } {
-        if [regexp "^#.*$" ${line}] {
+        if {[regexp "^#.*$" ${line}]} {
             continue
         } else {
             lappend list_b ${line}
@@ -383,9 +357,9 @@ proc diff { file_1 file_2 } {
         set line_a [lindex ${list_a} ${i}]
         set line_b [lindex ${list_b} ${i}]
 
-#        verbose "\t${file_1}: ${i}: ${line_a}\n" 3
-#        verbose "\t${file_2}: ${i}: ${line_b}\n" 3
-        if [string compare ${line_a} ${line_b}] {
+	#        verbose "\t${file_1}: ${i}: ${line_a}\n" 3
+	#        verbose "\t${file_2}: ${i}: ${line_b}\n" 3
+        if {[string compare ${line_a} ${line_b}]} {
 	    verbose "line #${i}\n" 2
             verbose "\< ${line_a}\n" 2
             verbose "\> ${line_b}\n" 2
@@ -397,7 +371,7 @@ proc diff { file_1 file_2 } {
             set differences -1
         }
     }
-    
+
     if { $differences == -1 || [llength ${list_a}] != [llength ${list_b}] } {
 	verbose "Files not the same" 2
         set differences -1
@@ -413,7 +387,7 @@ proc diff { file_1 file_2 } {
 #
 proc setenv { var val } {
     global env
-    
+
     set env($var) $val
 }
 
@@ -431,9 +405,10 @@ proc unsetenv { var } {
 proc getenv { var } {
     global env
 
-    if [info exists env($var)] {
+    if {[info exists env($var)]} {
 	return $env($var)
     } else {
 	return ""
     }
 }
+

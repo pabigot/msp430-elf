@@ -1,43 +1,48 @@
-2013-02-06  Nick Clifton  <nickc@redhat.com>
+2014-06-27  Nick Clifton  <nickc@redhat.com>
 
-	* binutils-all/readelf.exp (readelf_wi_test): Xfail for the
-	MSP430.
+	* binutils-all/objcopy.exp: Expect simple copy to fail on MSP430.
 
-2012-01-06  Nick Clifton  <nickc@redhat.com>
+2014-05-20  Nick Clifton  <nickc@redhat.com>
 
-	* binutils-all/objdump.exp (cpu_expected): Add am33-2.
+	* binutils-all/ar.exp: Only run the bfdtest checks if the
+	executables exist.
 
-2003-08-26  Dave Brolley  <brolley@redhat.com>
+2014-03-17  Nick Clifton  <nickc@redhat.com>
 
-	* binutils-all/objdump.exp (cpu_expected): Add fr550.
+	* lib/utils-lib.exp (proc default_binutils_assemble_flags): Add
+	-muse-conventional-section-names for the RX target.
 
-2001-06-20  Frank Ch. Eigler  <fche@redhat.com>
+2007-02-14  Nick Clifton  <nickc@redhat.com>
 
-	* binutils-all/relctest.exp: New test driver.
-	* binutils-all/relctest.s, relctest.d: New test files.
+	* Import this patch from mainline:
 
-2000-05-02  Nick Clifton  <nickc@cygnus.com>
+	2007-02-14  Nick Clifton  <nickc@redhat.com>
 
-	* binutils-all/readelf.exp: Fix typo.
+	* binutils-all/readelf.exp (readelf_wi_test): Fix unexpected
+	output failure message.
 
-2000-04-26  Jerry Quinn <jquinn@nortelnetworks.com>
+2003-08-05  Nick Clifton  <nickc@redhat.com>
 
-	* binutils-all/hppa/freg.s:  New file.
-	* binutils-all/hppa/objdump.exp:  Add freg.s test.
+	* Import new files from 2.14 branch:
 
-2000-03-13  Nick Clifton  <nickc@cygnus.com>
+	binutils-all/windres/dialogid.rc
+	binutils-all/windres/dialogid.rsd
+	binutils-all/dlltool.exp
+	binutils-all/fastcall.def
 
-	* binutils-all/readelf.s: Fix testsuite failures.
-	* binutils-all/readelf.ss: Fix testsuite failures.
+2003-07-04  Nick Clifton  <nickc@redhat.com>
 
-2000-01-09  Nick Clifton  <nickc@cygnus.com>
+	* Import this patch from 2.14 branch:
 
-	* binutils-all/readelf.wi: Remove path dependency in test of
-	compile_unit debug info.
+	2003-04-26  Nick Clifton  <nickc@redhat.com>
 
-1999-12-17  Timothy Wall <twall@cygnus.com>
-
-        * binutils-all/objdump.exp: change expected section sizes for c54x
+		* binutils-all/readelf.exp (prune_read_warnings): Rename
+		to prune_readelf_wi_warnings.
+		(readelf_wi_test): New proc: Test 'readelf -wi' by
+		grepping through its output.
+		Replace invocation of "readelf_test -wi" with
+		"readelf_wi_test"
+		* binutils-all/readelf.wi: Delete.
 
 
 Local Variables:

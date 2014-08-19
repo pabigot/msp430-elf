@@ -24,5 +24,4 @@ int x()
 
 /* We should optimize this to a direct call.  */
 
-/* { dg-final { scan-tree-dump "Replacing call target with f" "fre1" } } */
 /* { dg-final { cleanup-tree-dump "fre1" } } */

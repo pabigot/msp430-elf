@@ -8,7 +8,7 @@
 #  AUTHOR: Michael J. McLennan          EMAIL: mmclennan@lucent.com
 #          Mark L. Ulferts              EMAIL: mulferts@austin.dsccc.com
 #
-#  @(#) $Id: radiobox.itk,v 1.1 2003/03/19 23:00:55 cagney Exp $
+#  @(#) $Id: radiobox.itk,v 1.8 2002/02/27 05:59:07 mgbacke Exp $
 # ----------------------------------------------------------------------
 #            Copyright (c) 1995 DSC Technologies Corporation
 # ======================================================================

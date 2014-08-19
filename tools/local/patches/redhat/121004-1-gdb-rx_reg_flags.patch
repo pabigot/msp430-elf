@@ -1,0 +1,444 @@
+This patch was created for Renesas issue #3143503.
+
+It implements flag support for psw, bpsw, and fpsw.  It also sets the
+type for bpc to `code_ptr' whereas before it was uint32.  (The type
+for pc was already `code_ptr'.)
+
+This patch should go upstream.
+
+
+gdb/ChangeLog.RedHat:
+
+	* rx-tdep.c (target-descriptions.h, features/rx.c): Include.
+	(rx_register_name, rx_register_type): Delete these functions.
+	(rx_register_names): New static global.
+	(rx_gdbarch_init): Use target description mechanism to
+	implement support for `register_name' and `register_type'.
+	(_initialize_rx_tdep): Do target description initialization.
+	* features/Makefile (WHICH): Add rx.
+	(rx-expedite): Add.
+	* features/rx-core.xml, features/rx.xml: New files.
+	* features/rx.c, regformats/rx.dat: New generated files.
+
+
+Index: gdb/rx-tdep.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/rx-tdep.c,v
+retrieving revision 1.5
+diff -u -p -r1.5 rx-tdep.c
+--- gdb/rx-tdep.c	31 Aug 2012 23:01:40 -0000	1.5
++++ gdb/rx-tdep.c	4 Oct 2012 22:29:54 -0000
+@@ -37,6 +37,9 @@
+ #include "elf/rx.h"
+ #include "elf-bfd.h"
+ 
++#include "target-descriptions.h"
++#include "features/rx.c"
++
+ /* Certain important register numbers.  */
+ enum
+ {
+@@ -91,54 +94,35 @@ struct rx_prologue
+   int reg_offset[RX_NUM_REGS];
+ };
+ 
+-/* Implement the "register_name" gdbarch method.  */
+-static const char *
+-rx_register_name (struct gdbarch *gdbarch, int regnr)
+-{
+-  static const char *const reg_names[] = {
+-    "r0",
+-    "r1",
+-    "r2",
+-    "r3",
+-    "r4",
+-    "r5",
+-    "r6",
+-    "r7",
+-    "r8",
+-    "r9",
+-    "r10",
+-    "r11",
+-    "r12",
+-    "r13",
+-    "r14",
+-    "r15",
+-    "usp",
+-    "isp",
+-    "psw",
+-    "pc",
+-    "intb",
+-    "bpsw",
+-    "bpc",
+-    "fintv",
+-    "fpsw",
+-    "acc"
+-  };
+-
+-  return reg_names[regnr];
+-}
+-
+-/* Implement the "register_type" gdbarch method.  */
+-static struct type *
+-rx_register_type (struct gdbarch *gdbarch, int reg_nr)
+-{
+-  if (reg_nr == RX_PC_REGNUM)
+-    return builtin_type (gdbarch)->builtin_func_ptr;
+-  else if (reg_nr == RX_ACC_REGNUM)
+-    return builtin_type (gdbarch)->builtin_unsigned_long_long;
+-  else
+-    return builtin_type (gdbarch)->builtin_unsigned_long;
+-}
+-
++/* Used to check the validity of the tdesc information.  */
++static const char *const rx_register_names[] = {
++  "r0",
++  "r1",
++  "r2",
++  "r3",
++  "r4",
++  "r5",
++  "r6",
++  "r7",
++  "r8",
++  "r9",
++  "r10",
++  "r11",
++  "r12",
++  "r13",
++  "r14",
++  "r15",
++  "usp",
++  "isp",
++  "psw",
++  "pc",
++  "intb",
++  "bpsw",
++  "bpc",
++  "fintv",
++  "fpsw",
++  "acc"
++};
+ 
+ /* Function for finding saved registers in a 'struct pv_area'; this
+    function is passed to pv_area_scan.
+@@ -770,8 +754,39 @@ rx_gdbarch_init (struct gdbarch_info inf
+ {
+   struct gdbarch *gdbarch;
+   struct gdbarch_tdep *tdep;
++  struct tdesc_arch_data *tdesc_data = NULL;
++  const struct target_desc *tdesc;
+   int elf_flags;
+ 
++  tdesc = info.target_desc;
++  if (!tdesc_has_registers (tdesc))
++    tdesc = tdesc_rx;
++
++  /* Check target description for validity.  */
++  if (tdesc_has_registers (tdesc))
++    {
++      const struct tdesc_feature *feature;
++      int valid_p, i;
++
++      feature = tdesc_find_feature (tdesc, "org.gnu.gdb.rx.core");
++
++      if (feature == NULL)
++	return NULL;
++
++      tdesc_data = tdesc_data_alloc ();
++
++      valid_p = 1;
++      for (i = 0; i < RX_NUM_REGS; i++)
++	valid_p &= tdesc_numbered_register (feature, tdesc_data, i,
++					    rx_register_names[i]);
++
++      if (!valid_p)
++	{
++	  tdesc_data_cleanup (tdesc_data);
++	  return NULL;
++	}
++    }
++
+   /* Extract the elf_flags if available.  */
+   if (info.abfd != NULL
+       && bfd_get_flavour (info.abfd) == bfd_target_elf_flavour)
+@@ -800,8 +815,6 @@ rx_gdbarch_init (struct gdbarch_info inf
+ 
+   set_gdbarch_num_regs (gdbarch, RX_NUM_REGS);
+   set_gdbarch_num_pseudo_regs (gdbarch, 0);
+-  set_gdbarch_register_name (gdbarch, rx_register_name);
+-  set_gdbarch_register_type (gdbarch, rx_register_type);
+   set_gdbarch_pc_regnum (gdbarch, RX_PC_REGNUM);
+   set_gdbarch_sp_regnum (gdbarch, RX_SP_REGNUM);
+   set_gdbarch_inner_than (gdbarch, core_addr_lessthan);
+@@ -856,6 +869,9 @@ rx_gdbarch_init (struct gdbarch_info inf
+   /* Virtual tables.  */
+   set_gdbarch_vbit_in_delta (gdbarch, 1);
+ 
++  if (tdesc_data)
++    tdesc_use_registers (gdbarch, tdesc, tdesc_data);
++
+   return gdbarch;
+ }
+ 
+@@ -868,4 +884,6 @@ void
+ _initialize_rx_tdep (void)
+ {
+   register_gdbarch_init (bfd_arch_rx, rx_gdbarch_init);
++
++  initialize_tdesc_rx ();
+ }
+Index: gdb/features/Makefile
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/features/Makefile,v
+retrieving revision 1.6
+diff -u -p -r1.6 Makefile
+--- gdb/features/Makefile	31 Aug 2012 23:01:57 -0000	1.6
++++ gdb/features/Makefile	4 Oct 2012 22:29:54 -0000
+@@ -49,7 +49,8 @@ WHICH = arm-with-iwmmxt arm-with-vfpv2 a
+ 	s390-linux32v1 s390-linux64v1 s390x-linux64v1 \
+ 	s390-linux32v2 s390-linux64v2 s390x-linux64v2 \
+ 	tic6x-c64xp tic6x-c64x tic6x-c62x \
+-	tic6x-c64xp-linux tic6x-c64x-linux tic6x-c62x-linux
++	tic6x-c64xp-linux tic6x-c64x-linux tic6x-c62x-linux \
++	rx
+ 
+ # Record which registers should be sent to GDB by default after stop.
+ arm-expedite = r11,sp,pc
+@@ -89,6 +90,7 @@ tic6x-c62x-expedite = A15,PC
+ tic6x-c64xp-linux-expedite = A15,PC
+ tic6x-c64x-linux-expedite = A15,PC
+ tic6x-c62x-linux-expedite = A15,PC
++rx-expedite = r0,pc
+ 
+ 
+ XSLTPROC = xsltproc
+Index: gdb/features/rx-core.xml
+===================================================================
+RCS file: gdb/features/rx-core.xml
+diff -N gdb/features/rx-core.xml
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ gdb/features/rx-core.xml	4 Oct 2012 22:29:54 -0000
+@@ -0,0 +1,76 @@
++<?xml version="1.0"?>
++<!-- Copyright (C) 2012 Free Software Foundation Inc.
++
++     Copying and distribution of this file with or without modification
++     are permitted in any medium without royalty provided the copyright
++     notice and this notice are preserved.  -->
++
++<!DOCTYPE feature SYSTEM "gdb-target.dtd">
++<feature name="org.gnu.gdb.rx.core">
++
++  <flags id="rx_psw_flags" size="4">
++    <field name="C" start="0" end="0"/>
++    <field name="Z" start="1" end="1"/>
++    <field name="S" start="2" end="2"/>
++    <field name="O" start="3" end="3"/>
++    <field name="" start="4" end="15"/>
++    <field name="I" start="16" end="16"/>
++    <field name="U" start="17" end="17"/>
++    <field name="" start="18" end="19"/>
++    <field name="PM" start="20" end="20"/>
++    <field name="" start="21" end="23"/>
++    <field name="IPL" start="24" end="26"/>
++    <field name="" start="27" end="31"/>
++  </flags>
++
++  <flags id="rx_fpsw_flags" size="4">
++    <field name="RM" start="0" end="1"/>
++    <field name="CV" start="2" end="2"/>
++    <field name="CO" start="3" end="3"/>
++    <field name="CZ" start="4" end="4"/>
++    <field name="CU" start="5" end="5"/>
++    <field name="CX" start="6" end="6"/>
++    <field name="CE" start="7" end="7"/>
++    <field name="DN" start="8" end="8"/>
++    <field name="" start="9" end="9"/>
++    <field name="EV" start="10" end="10"/>
++    <field name="EO" start="11" end="11"/>
++    <field name="EZ" start="12" end="12"/>
++    <field name="EU" start="13" end="13"/>
++    <field name="EX" start="14" end="14"/>
++    <field name="" start="15" end="25"/>
++    <field name="FV" start="26" end="26"/>
++    <field name="FO" start="27" end="27"/>
++    <field name="FZ" start="28" end="28"/>
++    <field name="FU" start="29" end="29"/>
++    <field name="FX" start="30" end="30"/>
++    <field name="FS" start="31" end="31"/>
++  </flags>
++
++  <reg name="r0" bitsize="32" regnum="0" type="uint32"/>
++  <reg name="r1" bitsize="32" type="uint32"/>
++  <reg name="r2" bitsize="32" type="uint32"/>
++  <reg name="r3" bitsize="32" type="uint32"/>
++  <reg name="r4" bitsize="32" type="uint32"/>
++  <reg name="r5" bitsize="32" type="uint32"/>
++  <reg name="r6" bitsize="32" type="uint32"/>
++  <reg name="r7" bitsize="32" type="uint32"/>
++  <reg name="r8" bitsize="32" type="uint32"/>
++  <reg name="r9" bitsize="32" type="uint32"/>
++  <reg name="r10" bitsize="32" type="uint32"/>
++  <reg name="r11" bitsize="32" type="uint32"/>
++  <reg name="r12" bitsize="32" type="uint32"/>
++  <reg name="r13" bitsize="32" type="uint32"/>
++  <reg name="r14" bitsize="32" type="uint32"/>
++  <reg name="r15" bitsize="32" type="uint32"/>
++  <reg name="usp" bitsize="32" type="uint32"/>
++  <reg name="isp" bitsize="32" type="uint32"/>
++  <reg name="psw" bitsize="32" type="rx_psw_flags"/>
++  <reg name="pc" bitsize="32" type="code_ptr"/>
++  <reg name="intb" bitsize="32" type="uint32"/>
++  <reg name="bpsw" bitsize="32" type="rx_psw_flags"/>
++  <reg name="bpc" bitsize="32" type = "code_ptr"/>
++  <reg name="fintv" bitsize="32" type="uint32"/>
++  <reg name="fpsw" bitsize="32" type="rx_fpsw_flags"/>
++  <reg name="acc" bitsize="64" type="uint64"/>
++</feature>
+Index: gdb/features/rx.c
+===================================================================
+RCS file: gdb/features/rx.c
+diff -N gdb/features/rx.c
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ gdb/features/rx.c	4 Oct 2012 22:29:54 -0000
+@@ -0,0 +1,83 @@
++/* THIS FILE IS GENERATED.  Original: rx.xml */
++
++#include "defs.h"
++#include "osabi.h"
++#include "target-descriptions.h"
++
++struct target_desc *tdesc_rx;
++static void
++initialize_tdesc_rx (void)
++{
++  struct target_desc *result = allocate_target_description ();
++  struct tdesc_feature *feature;
++  struct tdesc_type *field_type, *type;
++
++  set_tdesc_architecture (result, bfd_scan_arch ("rx"));
++
++  feature = tdesc_create_feature (result, "org.gnu.gdb.rx.core");
++  field_type = tdesc_create_flags (feature, "rx_psw_flags", 4);
++  tdesc_add_flag (field_type, 0, "C");
++  tdesc_add_flag (field_type, 1, "Z");
++  tdesc_add_flag (field_type, 2, "S");
++  tdesc_add_flag (field_type, 3, "O");
++  tdesc_add_flag (field_type, 4, "");
++  tdesc_add_flag (field_type, 16, "I");
++  tdesc_add_flag (field_type, 17, "U");
++  tdesc_add_flag (field_type, 18, "");
++  tdesc_add_flag (field_type, 20, "PM");
++  tdesc_add_flag (field_type, 21, "");
++  tdesc_add_flag (field_type, 24, "IPL");
++  tdesc_add_flag (field_type, 27, "");
++
++  field_type = tdesc_create_flags (feature, "rx_fpsw_flags", 4);
++  tdesc_add_flag (field_type, 0, "RM");
++  tdesc_add_flag (field_type, 2, "CV");
++  tdesc_add_flag (field_type, 3, "CO");
++  tdesc_add_flag (field_type, 4, "CZ");
++  tdesc_add_flag (field_type, 5, "CU");
++  tdesc_add_flag (field_type, 6, "CX");
++  tdesc_add_flag (field_type, 7, "CE");
++  tdesc_add_flag (field_type, 8, "DN");
++  tdesc_add_flag (field_type, 9, "");
++  tdesc_add_flag (field_type, 10, "EV");
++  tdesc_add_flag (field_type, 11, "EO");
++  tdesc_add_flag (field_type, 12, "EZ");
++  tdesc_add_flag (field_type, 13, "EU");
++  tdesc_add_flag (field_type, 14, "EX");
++  tdesc_add_flag (field_type, 15, "");
++  tdesc_add_flag (field_type, 26, "FV");
++  tdesc_add_flag (field_type, 27, "FO");
++  tdesc_add_flag (field_type, 28, "FZ");
++  tdesc_add_flag (field_type, 29, "FU");
++  tdesc_add_flag (field_type, 30, "FX");
++  tdesc_add_flag (field_type, 31, "FS");
++
++  tdesc_create_reg (feature, "r0", 0, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "r1", 1, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "r2", 2, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "r3", 3, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "r4", 4, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "r5", 5, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "r6", 6, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "r7", 7, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "r8", 8, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "r9", 9, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "r10", 10, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "r11", 11, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "r12", 12, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "r13", 13, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "r14", 14, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "r15", 15, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "usp", 16, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "isp", 17, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "psw", 18, 1, NULL, 32, "rx_psw_flags");
++  tdesc_create_reg (feature, "pc", 19, 1, NULL, 32, "code_ptr");
++  tdesc_create_reg (feature, "intb", 20, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "bpsw", 21, 1, NULL, 32, "rx_psw_flags");
++  tdesc_create_reg (feature, "bpc", 22, 1, NULL, 32, "code_ptr");
++  tdesc_create_reg (feature, "fintv", 23, 1, NULL, 32, "uint32");
++  tdesc_create_reg (feature, "fpsw", 24, 1, NULL, 32, "rx_fpsw_flags");
++  tdesc_create_reg (feature, "acc", 25, 1, NULL, 64, "uint64");
++
++  tdesc_rx = result;
++}
+Index: gdb/features/rx.xml
+===================================================================
+RCS file: gdb/features/rx.xml
+diff -N gdb/features/rx.xml
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ gdb/features/rx.xml	4 Oct 2012 22:29:54 -0000
+@@ -0,0 +1,12 @@
++<?xml version="1.0"?>
++<!-- Copyright (C) 2010-2012 Free Software Foundation, Inc.
++
++     Copying and distribution of this file, with or without modification,
++     are permitted in any medium without royalty provided the copyright
++     notice and this notice are preserved.  -->
++
++<!DOCTYPE target SYSTEM "gdb-target.dtd">
++<target>
++  <architecture>rx</architecture>
++  <xi:include href="rx-core.xml"/>
++</target>
+Index: gdb/regformats/rx.dat
+===================================================================
+RCS file: gdb/regformats/rx.dat
+diff -N gdb/regformats/rx.dat
+--- /dev/null	1 Jan 1970 00:00:00 -0000
++++ gdb/regformats/rx.dat	4 Oct 2012 22:29:54 -0000
+@@ -0,0 +1,30 @@
++# DO NOT EDIT: generated from rx.xml
++name:rx
++xmltarget:rx.xml
++expedite:r0,pc
++32:r0
++32:r1
++32:r2
++32:r3
++32:r4
++32:r5
++32:r6
++32:r7
++32:r8
++32:r9
++32:r10
++32:r11
++32:r12
++32:r13
++32:r14
++32:r15
++32:usp
++32:isp
++32:psw
++32:pc
++32:intb
++32:bpsw
++32:bpc
++32:fintv
++32:fpsw
++64:acc

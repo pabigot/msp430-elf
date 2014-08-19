@@ -1,6 +1,6 @@
 # This testcase is part of GDB, the GNU debugger.
 
-# Copyright 2001, 2004, 2007-2012 Free Software Foundation, Inc.
+# Copyright 2001-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -21,10 +21,9 @@
 # Test GDB's character set support.
 
 
-set testfile "charset"
-set srcfile ${testfile}.c
-set srcmallocfile ${testfile}-malloc.c
-if { [prepare_for_testing ${testfile}.exp ${testfile} [list $srcfile $srcmallocfile]] } {
+standard_testfile .c charset-malloc.c
+
+if { [prepare_for_testing ${testfile}.exp ${testfile} [list $srcfile $srcfile2]] } {
     return -1
 }
 
@@ -578,7 +577,7 @@ if {$ucs2_ok && $ucs4_ok} {
 
 if {$ucs2_ok} {
     set go 1
-    gdb_test_multiple "python print 'hello, world!'" \
+    gdb_test_multiple "python print ('hello, world!')" \
 	"verify python support for charset tests" {
 	    -re "not supported.*$gdb_prompt $"	{
 		unsupported "python support is disabled"
@@ -591,7 +590,7 @@ if {$ucs2_ok} {
 	gdb_test "print u\"abcdef\"" " = u\"abcdef\"" \
 	    "set up for python printing of utf-16 string"
 
-	gdb_test "python print gdb.history(0).string()" "abcdef" \
+	gdb_test "python print (gdb.history(0).string())" "abcdef" \
 	    "extract utf-16 string using python"
     }
 }

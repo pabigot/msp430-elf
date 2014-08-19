@@ -1,4 +1,5 @@
 /* { dg-require-effective-target ilp32 } */
+
 #define NMAX 3000
 #define MEASURE_TIME 1
 

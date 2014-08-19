@@ -1,0 +1,213 @@
+#!/bin/sh
+
+#
+# Specter -- Create a spec file from a template
+#
+# example use:
+# ./Specter --rel=gnupro-03q4 --rev=1 --package=gcc --outdir=/tmp
+
+ConfigDir=../Specter-configs
+TemplateDir=../Specter-templates
+
+usage()
+{
+cat << EndOfUsage
+Usage: Specter --rel=release --pack=package [options]
+Options:
+  --rel=RELEASE		Release name to use (Required!)
+  --pack=Package	Package config+template to load (Required!)
+  --rev=REVISION	Numerical revision (Defaults to 1)
+  --out=OutputDir	Location for output files (Default is .)
+  --tag=BranchTag	Branch to checkout sources from (Optional)
+  --src=SourcePath	Copy existing sources instead of doing a cvs checkout
+  --mak=MakeExtra	Make flags for spec (Default from package description)
+  --con=ConfigExtra	Config flags for spec (Default from package description)
+
+Example:
+  The following command:
+  etc/Specter --rel=gnupro-03r2 --package=gcc --outdir=/tmp
+  
+  Will create:
+  /tmp/gcc-gnupro-03r2_1.tar.bz2 and /tmp/gcc.spec
+
+EndOfUsage
+}
+
+
+# use /bin/sh5 on Ultrix systems to get shell functions
+if [ -f /bin/sh5 ] ; then 
+   if [ ! -n "${RUNNING_UNDER_BIN_SH5}" ] ; then
+       RUNNING_UNDER_BIN_SH5=yes
+       export RUNNING_UNDER_BIN_SH5
+       exec /bin/sh5 $0 $*
+   fi
+fi
+
+ProgName=`basename $0`
+DirName=`dirname $0`
+
+OldDir="`/bin/pwd`"
+cd $DirName
+DirName="`/bin/pwd`"
+cd "$OldDir"
+
+ConfigDir="$DirName/$ConfigDir"
+TemplateDir="$DirName/$TemplateDir"
+
+# reasonable umask
+umask 0002
+
+# exit on any error
+set -e
+
+# tmp file for sed output
+TmpFile="/tmp/mkspec.$$"
+
+# go away on certain signals
+trap "echo \"${ProgName}: Caught a sig @ \`date\`, exiting.\" ; rm -f $TmpFile; exit 1" 1 2 3 15
+
+TRUE=1
+FALSE=0
+
+# arg parsing time
+while [ $# -ne 0 ]; do
+    option=$1
+    shift
+
+    case $option in
+    --*=*)
+        optarg=`echo $option | sed -e 's/^[^=]*=//'`
+        ;;
+    esac
+
+    case $option in
+    --x)
+        set -x
+        ;;
+    --rel*)
+        Release="$optarg"
+        ;;
+    --rev*)
+        Revision="$optarg"
+        ;;
+    --mak*)
+        makeextra="$optarg"
+        ;;
+    --con*)
+        configextra="$optarg"
+        ;;
+    --pac*)
+        Package="$optarg"
+	PackageConfig="$ConfigDir/$optarg.config"
+        ;;
+    --tag*)
+        Tag="$optarg"
+        ;;
+    --src*)
+        SrcIn="$optarg"
+        ;;
+    --out*)
+        OutDir="$optarg"
+        ;;
+    --help|-h)
+        usage
+        exit 0
+        ;;
+    *)
+	echo "${ProgName}: Invalid argument \"$option\""
+	;;
+    esac
+done
+
+# if package not given, exit
+if [ "$Package" = "" ]; then
+    echo "${ProgName}: package name is null.  Use --package="
+    exit 1
+fi
+
+#Read in package config
+if [ -f "$PackageConfig" ]; then
+  . "$PackageConfig"
+else
+  echo "Can not read $PackageConfig, exiting"
+  exit 1
+fi
+
+# if revision not given, set to 1
+if [ "$Revision" = "" ]; then
+    Revision=1
+fi
+
+# if Tag specified, make a command line arguement out of it
+if [ "$Tag" != "" ]; then
+    Tag="-r $Tag"
+fi
+
+# if releases not given, exit
+if [ "$Release" = "" ]; then
+    echo "${ProgName}: release is null.  Use --release="
+    exit 1
+fi
+
+RelVer=`echo $Release | sed 's/.*-\([a-zA-Z0-9_]*$\)/\1/g'`
+RelName=`echo $Release | sed 's/\(.*\)-[a-zA-Z0-9_]*$/\1/g'`
+
+infile="$TemplateDir/$Package.spec.template"
+if [ ! -r "$infile" ]; then
+  echo "Can't read template for $infile.  Exiting"
+  exit 1
+fi
+
+# if outdir not given, use current directory
+if [ -z "${OutDir}" ]; then
+  OutDir=.
+fi
+
+echo "Outputting spec file to $OutDir/$Package.spec"
+cat "$infile" |
+  sed \
+    -e "s/RELEASE/$RelName/" \
+    -e "s/GNUPROREV/${RelVer}_${Revision}/" \
+    -e "s/CONFIGEXTRA/$configextra/" \
+    -e "s/MAKEEXTRA/$makeextra/" \
+    -e "s/ETCEXTRA1/$etcextra1/" \
+    -e "s/ETCEXTRA2/$etcextra2/" \
+    -e "s/ETCEXTRA3/$etcextra3/" \
+    -e "s/ETCEXTRA4/$etcextra4/" \
+    -e "s/ETCEXTRA5/$etcextra5/" \
+  > "$OutDir/$Package.spec"
+
+OutFile="$OutDir/${Package}-${RelName}-${RelVer}_${Revision}.tar.bz2"
+OutTmp="$OutDir/${ProgName}-tmp.$$"
+
+if [ -z $top ]; then
+  echo "No top for $Package found, check $PackageConfig"
+  exit 1
+fi
+
+mkdir -p $OutTmp
+cd $OutTmp
+if [ "X$SrcIn" = X ]; then
+  echo "Checking out sources into $OutTmp"
+  cvs -Q -z9 co $Tag $module
+else
+  echo "Copying sources from $SrcIn/$top to $OutTmp/$top"
+  ( cd $SrcIn; tar cf - $top ) | tar xf -
+fi
+
+echo "Updating version numbers"
+export SRCROOT="$OutTmp/$top"
+$DirName/ChVer --release="${RelName}-${RelVer}_${Revision}" > /dev/null
+
+echo "Pruning unwanted files"
+$DirName/MakePrune $top > prunelist.sh
+sh prunelist.sh
+rm prunelist.sh
+
+cd $top
+cp "$OutDir/$Package.spec" .
+echo "Creating $OutFile"
+tar cf - * | bzip2 -9c > $OutFile
+cd ..
+rm -rf "${OutTmp}"
+

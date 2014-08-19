@@ -9,10 +9,13 @@ struct frob {
 };
 
 template <class T>
-void frob<T>::print () {
+void frob<T>::print ()
+{
+#if 0
   printf ("this = %08x\n", this);
   printf (" ptr = %08x\n", ptr);
   printf (" values = %x %x %x ...\n", ptr[0], ptr[1], ptr[2]);
+#endif
 }
 
   static int x[10];

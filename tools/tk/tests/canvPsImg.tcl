@@ -2,7 +2,7 @@
 # for images in canvases.  It is part of the Tk visual test suite,
 # which is invoked via the "visual" script.
 #
-# RCS: @(#) $Id: canvPsImg.tcl,v 1.3 2003/03/19 23:02:08 cagney Exp $
+# RCS: @(#) $Id: canvPsImg.tcl,v 1.3 2012/04/18 00:37:03 kevinb Exp $
 
 # Build a test image in a canvas
 proc BuildTestImage {} {

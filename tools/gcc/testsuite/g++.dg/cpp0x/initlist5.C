@@ -1,5 +1,6 @@
 // Test for narrowing diagnostics
-// { dg-options "-std=c++0x -pedantic-errors" }
+// { dg-do compile { target c++11 } }
+// { dg-require-effective-target large_double }
 // { dg-require-effective-target int32plus }
 
 #include <initializer_list>

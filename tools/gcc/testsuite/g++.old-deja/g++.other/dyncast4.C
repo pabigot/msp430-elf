@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // Author: Alfred Miniarik <a8601248@unet.univie.ac.at>
 
 // Even in a derived class, a private base cannot be dynamically downcasted

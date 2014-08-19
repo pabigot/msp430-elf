@@ -36,3 +36,4 @@ main ()
 	a[i].push_back ();
       }
 }
+// { dg-require-effective-target size32plus }

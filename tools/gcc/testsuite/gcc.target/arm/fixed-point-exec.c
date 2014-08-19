@@ -1,4 +1,4 @@
-/* { dg-do run { target { fixed_point } } } */
+/* { dg-do compile { target { fixed_point } } } */
 /* { dg-options "-std=gnu99" } */
 
 /* Check basic arithmetic ops for ARM fixed-point/saturating operation support.

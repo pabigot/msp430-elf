@@ -1,0 +1,771 @@
+#!/bin/bash
+
+# This is a script to built "fat" ARM binaries that contain two separate
+# sets of executable code, one using the soft-float API and one using
+# the hard-float API.
+#
+# Copyright (c) Red Hat 2011
+# Written by: Nick Clifton  <nickc@redhat.com>
+# Released under the LGPL v3.  See: http://www.gnu.org/licenses/lgpl.html
+
+# For a description of the command line options supported by this script
+# see the show_help() function.
+#
+# Note: if you are modifying this script to run in a new enviroment then
+# you should only need to change the contents of the init_user() function.
+#
+# Note: the intention is that this script should be named "gcc" and
+# placed in the execution path ahead of the real gcc.  Then it can
+# be used inside rpm build scripts and makefiles.
+#
+# Note: The latest version of this script can be found here:
+#   http://intranet.ges.redhat.com/arm-linux/
+#
+# To Do:
+#   * Add detection of already swapped binaries.
+#
+#   * Detect alt API binaries that are the same as the original API binaries.
+#
+#   * Support GCC switches that take an argument where that argument is
+#     provided as a second option, rather than after an equals sign.
+#----------------------------------------------------------------
+
+# Initialise user modifiable global variables.
+init_user ()
+{
+    # The command line switch(es) to add to the end of a compilation
+    # in order to generate the alternative API:
+    ALT_API="-mfloat-abi=hard"
+
+    # The prefix of the section name that is inserted into a binary
+    # that contains the alternative API code:
+    ALT_PREFIX=".note.alt-api"
+
+    # The exec base for the tools to use.  If this is initialised
+    # and any of the program variables are not initialised
+    # then they will be automatically filled in based on this variable.
+    EXEC_BASE=/work/builds/gcc/current/arm-eabi/install/bin/arm-eabi
+
+    # The compiler to use:
+    GCC=${EXEC_BASE}-gcc # This is an example of how this variable would
+                         # be automatically initialised.
+
+    # The other program variables are:
+    #   OBJCOPY
+    #   OBJDUMP
+    #   READELF
+}
+
+#----------------------------------------------------------------
+
+show_help ()
+{
+    # The following exec goop is so that we don't have to manually
+    # redirect every message to stderr in this function.
+    exec 4>&1    # Save stdout fd to fd #4.
+    exec 1>&2    # Redirect stdout to stderr.
+
+    cat <<__EOM__
+  This is a shell script that acts as a wrapper to gcc and which allows the
+  building of "fat binaries".  These are files that contain code that supports
+  two different APIs.  The normal API code is visible to other tools and the
+  kernel, whilst the alternative API code is stored hidden inside the binary.
+  The --fat-swap option of this script can be used to swap the two APIs over.
+
+Usage: $SCRIPT_NAME {<fat-option(s)>} [<fat-command>|<gcc-options>] <file-name(s)>
+
+<fat-option> is zero or more of:
+
+  --fat-version
+    Report the version of this script, plus the user-customisable variables.
+
+  --fat-help
+    Displays this information.
+
+  --fat-verbose
+    This tells the script to be verbose about what it is doing.  The same
+    effect can achieved by using gcc's --verbose command line option,
+    except that that makes gcc generate verbose output as well.
+
+  --fat-save-temps
+    Do not delete any temporary files created by the script.
+
+<fat-command> is one of:
+
+  --fat-status
+    Reports on the status of the specified files, showing which API is in
+    use and which is stored internally.
+
+  --fat-swap
+    Swaps the contents of the specified files so that the stored
+    alternative version is the one that will be seen by other tools.
+
+  <gcc-options>
+    This is a normal gcc command line.  If the -c option is present
+    then a compilation will be performed, creating a fat object file.
+    Otherwise a link will be performed, creating a fat executable.
+__EOM__
+
+    exec 1>&4   # Copy stdout fd back from temporary save fd, #4
+}
+
+#----------------------------------------------------------------
+# Utility functions:
+
+report ()
+{
+    if [ $SHOW_PROGRESS -ne 0 ]
+    then
+	echo $SCRIPT_NAME": " ${1+"$@"}
+    fi
+}
+
+verbose ()
+{
+    if [ $SHOW_PROGRESS -gt 1 ] || [ $SHOW_PROGRESS -lt -1 ]
+    then
+	report ${1+"$@"}
+    fi
+}
+
+warn ()
+{
+    if test "x$1" != "x" ;
+    then
+	report "Warning: $1"
+    fi
+}
+
+fail ()
+{
+    echo "$SCRIPT_NAME: Internal error: " ${1+"$@"}
+    exit 1
+}
+
+init_internal ()
+{
+    # The version of this script:
+    VERSION=0.5
+
+    # The name that was used to invoke this script.
+    SCRIPT_NAME=`basename $0`
+    # FIXME: If the $prog is "gcc" then maybe an alternative name should be used ?
+
+    # Multi-state variable:
+    # -2 => Do not do anything, be verbose about what would be done.
+    # -1 => Do not do anything, just show what would be done.
+    #  0 => Do not report anything, just return an exit code.
+    #  1 => Provide a basic desription of what is going on.
+    #  2 => Be verbose about what is going on.
+    SHOW_PROGRESS=1
+
+    # Set to 1 if temporary files should not be deleted.
+    SAVE_TEMPS=0
+    
+    # Fill in the executable variables, if necessary.
+    if test "x$GCC" == "x" ;
+    then
+	if test "x$EXEC_BASE" == "x" ;
+	then
+	    fail "No GCC executable specified and no base name either."
+	else
+	    GCC=${EXEC_BASE}-gcc
+	fi
+    fi
+
+    if test "x$OBJCOPY" == "x" ;
+    then
+	if test "x$EXEC_BASE" == "x" ;
+	then
+	    fail "No OBJCOPY executable specified and no base name either."
+	else
+	    OBJCOPY=${EXEC_BASE}-objcopy
+	fi
+    fi
+
+    if test "x$OBJDUMP" == "x" ;
+    then
+	if test "x$EXEC_BASE" == "x" ;
+	then
+	    fail "No OBJDUMP executable specified and no base name either."
+	else
+	    OBJDUMP=${EXEC_BASE}-objdump
+	fi
+    fi
+
+    if test "x$READELF" == "x" ;
+    then
+	if test "x$EXEC_BASE" == "x" ;
+	then
+	    fail "No READELF executable specified and no base name either."
+	else
+	    READELF=${EXEC_BASE}-readelf
+	fi
+    fi
+}
+
+# Delete a file or directory.
+delete_file ()
+{
+    if [ $SAVE_TEMPS -eq 0 ]
+    then
+	verbose "Deleting: $1"
+
+	if [ $SHOW_PROGRESS -ge 0 ]
+	then
+	    rm -fr $1
+	fi
+    fi
+}
+
+# syntax: run_command <command> [<args>]
+#  If being verbose report the command being run, and
+#   the directory in which it is run.
+#  If not performing a dry run execute the command and
+#   issue a warning message if the command fails.
+# Sets RUN_RESULT to 0 upon success, 1 otherwise.
+run_command ()
+{
+    RUN_RESULT=0
+    verbose "Executing: $*"
+
+    if [ $SHOW_PROGRESS -lt 0 ]
+    then
+	return
+    fi
+
+    ( $* ) && return
+
+    verbose "Problems encountered whilst executing: $*"
+    RUN_RESULT=1
+}
+
+# Determine which API is in use in a given file.
+# Written as separate function in order to make it easier to port
+# this script to other architectures.
+uses_hard_api ()
+{
+    verbose "Running: $READELF --arch-specific $1 | grep --quiet Tag_ABI_HardFP_use"
+    return `$READELF --arch-specific $1 | grep --quiet Tag_ABI_HardFP_use`
+}
+
+#----------------------------------------------------------------
+
+show_version ()
+{
+    report "Fat Binary building script"
+    report "Version: $VERSION"
+    report "Copyright (c) 2011 Red Hat"
+    report " "
+    report "GCC executable:     $GCC"
+    report "Objcopy executable: $OBJCOPY"
+    report "Objdump executable: $OBJDUMP"
+    report "Readelf executable: $READELF"
+    report "Alternative API option(s):       $ALT_API"
+    report "Alternative API section prefix:  $ALT_PREFIX"
+}
+
+# Returns the status of the given file in FILE_STATUS.
+# Values are:
+#  -1 Does not exist/Not readable
+#   0 Does not contain alternate API
+#   1 Contains alternate API, using soft-API
+#   2 Contains alternate API, using hard-API
+get_file_status ()
+{
+    if test "x$1" = "x" ;
+    then
+	fail "get_file_status needs a filename argument"
+    fi
+    if test "x$2" != "x" ;
+    then
+	fail "get_file_status only takes one argument"
+    fi
+
+    if [ -r $1 ]
+    then
+	if `$OBJDUMP --section-headers $1 | grep --quiet " $ALT_PREFIX"`
+	then
+	    if uses_hard_api $1
+	    then
+		FILE_STATUS=2
+	    else
+		FILE_STATUS=1
+	    fi
+	else
+	    FILE_STATUS=0
+	fi
+    else
+	FILE_STATUS=-1
+    fi
+}
+
+# syntax:  extract_api  FILE  SECTION  NEW_FILE
+# Extracts the named section from file and stores it into the new file.
+extract_api ()
+{
+    if test "x$3" = "x" ;
+    then
+	fail "extract_api needs three arguments"
+    fi
+    if test "x$4" != "x" ;
+    then
+	fail "extract_api only takes three arguments"
+    fi
+
+    local input_name=$1
+    local section_name=$2
+    local output_name=$3
+
+    verbose "Extracting section $section_name from $input_name and storing it in $output_name"
+    run_command $OBJCOPY \
+	--only-section $section_name \
+	--output-target=binary \
+	--set-section-flags $section_name=alloc,contents,load \
+	$input_name $output_name
+    if [ $RUN_RESULT -ne 0 ]
+    then
+	fail "could not extract section $section_name from $input_name"
+    fi
+
+    # Paranoia check.
+    get_file_status $output_name
+    if [ $FILE_STATUS -gt 0 ]
+    then
+	fail "extracted alternative API file '$output_name' already contains another API section!"
+    fi
+
+    verbose "Removing section $section_name from $input_name"
+    run_command $OBJCOPY --remove-section $section_name $input_name
+    if [ $RUN_RESULT -ne 0 ]
+    then
+	fail "could not remove section $section_name from $input_name"
+    fi    
+}
+
+# Switch the API on the specified file.
+swap_file ()
+{
+    if test "x$1" = "x" ;
+    then
+	fail "swap_file needs a filename argument"
+    fi
+    if test "x$2" != "x" ;
+    then
+	fail "swap_file only takes one argument"
+    fi
+
+    local file_name=`basename $1`
+    verbose "Swapping APIs in: $file_name"
+
+    get_file_status $1
+    if [ $FILE_STATUS -le 0 ]
+    then
+	if [ $FILE_STATUS -lt 0 ]
+	then
+	    warn "could not find/read file: $file_name"
+	elif [ $WARN_NO_SWAP -eq 1 ]
+	then
+	    verbose "$file_name: does not contain an alternative API binary"
+	fi
+
+	return
+    fi
+
+    local alt_api_file=`mktemp fat-alt-XXXXXXXXXX-$file_name`
+    local sec_name=$ALT_PREFIX.$file_name
+
+    extract_api $1 $sec_name $alt_api_file
+
+    # Insert the original file as an alternative API section into the temporary file.
+    run_command $OBJCOPY --add-section $sec_name=$file_name $alt_api_file
+    if [ $RUN_RESULT -ne 0 ]
+    then
+	fail "Could not insert the alternative API code"
+    fi
+
+    verbose "Replace $file_name with $alt_api_file"
+    mv $1 $1.tmp
+    mv $alt_api_file $1
+    delete_file $1.tmp
+
+    # Tidy up.
+    delete_file $alt_api_file
+}
+
+# Switch over the APIs in use in the given files.
+swap_files ()
+{
+    if test "x$1" = "x" ;
+    then
+	warn "no file names specified for --fat-swap option"
+    fi
+
+    WARN_NO_SWAP=1
+
+    while [ $# -gt 0 ]
+    do
+	if [ -r $1 ]
+	then
+	    swap_file $1
+	else
+	    warn "Unable to read file: $1"
+	fi
+	shift
+    done
+}
+
+# Scans a list of files, reporting on their API status.
+show_status ()
+{
+    if test "x$1" = "x" ;
+    then
+	warn "no file names specified for --fat-status option"
+    fi
+
+    while [ $# -gt 0 ]
+    do
+	get_file_status $1
+	case "$FILE_STATUS" in
+	    -1)	warn "Unable to read file: $1"
+		;;
+	    0)	report "$1: does not contain an alternative API binary"
+		;;
+	    1)	report "$1: uses the soft API, contains a hard API alternative"
+		;;
+	    2)	report "$1: uses the hard API, contains a soft API alternative"
+		;;
+	    *)	fail "unexpected result from get_file_status"
+		;;
+	esac
+	shift
+    done
+}
+
+# Given SOURCE_FILE as an argument, set OBJECT_FILE to the same with
+# the suffix changed to .o and any directories removed.
+translate_source_name ()
+{
+    if test "x$1" = "x" ;
+    then
+	fail "translate_source_name needs an argument"
+    fi
+
+    if test "x$2" != "x" ;
+    then
+	fail "translate_source_name only takes one argument"
+    fi
+
+    # There is probably a sed expression to do this, but I am no good at sed-fu.
+    local -i index=-1
+    local -i length=${#1}
+    
+    while test "x${1:$index:1}" != "x."
+    do
+	if [ $((0 - $index)) -eq $length ]
+	then
+	    OBJECT_FILE=`basename $1`
+	    return
+	fi
+
+	index+=-1
+    done
+
+    OBJECT_FILE=`basename ${1:0:$(($length + $index))}`
+    OBJECT_FILE+=".o"
+}
+
+# Rename all of the filename in SOURCE_FILES into their object file
+# equivalents.
+rename_source_files ()
+{
+    local -i index=0
+
+    while [ $index -lt ${#SOURCE_FILES[*]} ]
+    do
+	local OBJECT_FILE
+
+	translate_source_name ${SOURCE_FILES[$index]}
+	SOURCE_FILES[$index]=$OBJECT_FILE
+	index+=1
+    done
+}
+
+# Link together object files and libraries to create an executable.
+# Then re-link them to create an alternative-API executable and
+# insert this into the first executable.
+perform_link ()
+{    
+    if test "x$OUTPUT_FILE" == "x" ;
+    then
+	OUTPUT_FILE="a.out"
+    fi
+    
+    if [ ${#SOURCE_FILES[*]} -ne 0 ]
+    then
+	rename_source_files
+    elif [ ${#OBJECT_FILES[*]} -eq 0 ]
+    then
+	warn "Nothing to do!"
+	return
+    fi
+    
+    run_command $GCC ${SOURCE_FILES[*]} ${OBJECT_FILES[*]} ${GCC_SWITCHES[*]} -o $OUTPUT_FILE
+    if [ $RUN_RESULT -ne 0 ]
+    then
+	warn "Alternative executable not created because original link failed"
+	return
+    fi
+
+    # Note - we do not have to find and swap any static libraries, or the object
+    # files involved in the link.  The linker will have done all of the searching
+    # for us, and placed the alternative API files in ALT_PREFIX sections in the
+    # executable.  All we need to do is to extract *all* of the alternate API
+    # object files from inside the linked binary and then link them using the
+    # original command line.  (This assumes that there will not be any duplicated
+    # object file names).
+
+    declare -a alt_sections
+    verbose "Runing: $OBJDUMP --section-headers $OUTPUT_FILE | grep $ALT_PREFIX"
+    read -a alt_sections <<<`$OBJDUMP --section-headers $OUTPUT_FILE | grep --only-matching "$ALT_PREFIX.[^ ]*"`
+    verbose "Alt section list: ${alt_sections[*]}"
+
+    local -i index=0
+    while [ $index -lt ${#alt_sections[*]} ]
+    do
+	alt_api_file=`mktemp fat-sec-XXXXXXXXXX-${alt_sections[$index]}`
+	extract_api $OUTPUT_FILE ${alt_sections[$index]} $alt_api_file
+	alt_sections[$index]=$alt_api_file
+	index+=1
+    done
+
+    # Rerun the gcc command line with the swapped binaries in place
+    # and creating a new output file.
+    new_output_file=`mktemp fat-aout-XXXXXXXXXX-$OUTPUT_FILE`
+    run_command $GCC ${alt_sections[*]} ${GCC_SWITCHES[*]} $ALT_API -o $new_output_file
+    if [ $RUN_RESULT -ne 0 ]
+    then
+	fail "Alternative link failed"
+    fi
+
+    get_file_status $new_output_file
+    if [ $FILE_STATUS -gt 0 ]
+    then
+	fail "New alt file still contains alternative API sections"
+    fi
+
+    # Insert the new output file into the original output file.
+    run_command $OBJCOPY --add-section $ALT_PREFIX.`basename $OUTPUT_FILE`=$new_output_file $OUTPUT_FILE
+    if [ $RUN_RESULT -ne 0 ]
+    then
+	fail "Unable to store alternative API code inside original binary"
+    fi
+
+    # Tidy up.
+    delete_file $new_output_file
+    index=0
+    while [ $index -lt ${#alt_sections[*]} ]
+    do
+	delete_file ${alt_sections[$index]}
+	index+=1
+    done
+}
+
+# Compile source file(s) to object file(s).
+perform_compiles ()
+{
+    if [ ${#SOURCE_FILES[*]} -eq 0 ]
+    then
+	fail "No source files found"
+    fi
+
+    # Catch an unusual combination of command line options
+    # (that is currently unsupported).
+    if test "x$OUTPUT_FILE" != "x" && [ $NO_LINK -ne 0 ]
+    then
+	warn "Using -o to set the output object file name is not supported"
+    fi
+
+    local -i index=0
+    while [ $index -lt ${#SOURCE_FILES[*]} ]
+    do
+	local OBJECT_FILE
+
+	translate_source_name ${SOURCE_FILES[$index]}
+
+	run_command $GCC -c ${SOURCE_FILES[$index]} -o $OBJECT_FILE ${GCC_SWITCHES[*]}
+	if [ $RUN_RESULT -ne 0 ]
+	then
+	    verbose "Compilation failed."
+	    return
+	fi
+
+	local temp_file
+	local file_name
+
+	file_name=`basename $OBJECT_FILE`
+	temp_file=`mktemp fat-obj-XXXXXXXXXX-$file_name`
+
+	run_command $GCC -c ${SOURCE_FILES[$index]} ${GCC_SWITCHES[*]} $ALT_API "-o $temp_file"
+	if [ $RUN_RESULT -ne 0 ]
+	then
+	    fail "Alternative compilation failed"
+	fi
+
+        # FIXME: As an optimization we could check here to see if the
+        # fat binary is essentially identical to the thin binary.  If so
+        # then there is no need to store the full fat binary inside the thin
+	# one, and instead we could use a marker.
+
+        # Store the fat version inside the thin version
+        run_command $OBJCOPY --add-section $ALT_PREFIX.$OBJECT_FILE=$temp_file $OBJECT_FILE
+        if [ $RUN_RESULT -ne 0 ]
+        then
+	    fail "Unable to store alternative API code inside original binary"
+	fi
+
+	delete_file $temp_file
+
+	index+=1
+    done
+}
+
+# Parses a GCC command line.  The script has already removed any
+# its own switches from the command line.
+parse_args ()
+{
+    while [ $# -gt 0 ]
+    do
+	case "$1" in
+	    # Look for options controlling verbosity.
+	    # FIXME: we only do a simplistic scan.  Ideally we would
+	    # scan the command line twice, once for verbosity switches
+	    # and then afterwards for other types of switches.
+	    --verbose | -v)
+		if [ $SHOW_PROGRESS -eq -1 ]
+		then
+		    SHOW_PROGRESS=-2
+		else
+		    SHOW_PROGRESS=2
+		fi
+		;;
+	    --quiet | -q)
+		if [ $SHOW_PROGRESS -gt 0 ]
+		then
+		    SHOW_PROGRESS=0
+		fi
+		;;
+
+            # Look for filenames
+	    -o)
+		if test "x$OUTPUT_FILE" != "x" ;
+		then
+		    warn "Multiple output file names detected"
+		else
+		    shift
+		    OUTPUT_FILE=$1
+		fi
+		verbose "Output file name: $OUTPUT_FILE"
+		;;
+
+	    # Look for compling only.
+	    -c)
+		NO_LINK=1
+		;;
+
+	    # Keep the remaining switches so that we can pass them to gcc
+	    # FIXME: Handle switches that take arguments where the user has not used an equals sign.
+	    -*)
+		GCC_SWITCHES[${#GCC_SWITCHES[*]}]=$1
+		verbose "Add $1 to list of gcc command line switches"
+		;;
+
+	    # Record source files names.
+	    # FIXME: Add Java, Fortran, etc.
+	    *.cxx | *.cc | *.cpp | *.CPP | *.c | *.S | *.s | *.asm)
+		SOURCE_FILES[${#SOURCE_FILES[*]}]=$1
+		verbose "Add $1 to list of source files"
+		;;
+
+	    # Anything else is assumed to be an object filename.
+	    # This fails with switches that take an argument.
+	    *)
+		OBJECT_FILES[${#OBJECT_FILES[*]}]=$1
+		verbose "Add $1 to list of object files"
+		;;
+	esac
+	shift
+    done
+}
+
+# Execute the rest of the command line, after the script specific
+# switches have been removed.
+process_files ()
+{
+    # Create arraya for object files and source files.
+    declare -a OBJECT_FILES
+    declare -a SOURCE_FILES
+    declare -a GCC_SWITCHES
+    
+    NO_LINK=0
+    OUTPUT_FILE=""
+
+    parse_args ${1+"$@"}
+
+    if [ ${#SOURCE_FILES[*]} -ne 0 ]
+    then
+	perform_compiles
+    fi
+
+    if [ $NO_LINK -eq 0 ]
+    then
+	perform_link
+    fi
+}
+
+#-------------------------------------------------------
+
+main ()
+{
+    # Initialise user modifiable variables.
+    init_user
+
+    # Initialise internal variables.
+    init_internal
+
+    if test "x$1" = "x" ;
+    then
+	warn "use the --fat-help option to see a description of this script"
+	exit 1
+    fi
+
+    while [ $# -gt 0 ]
+    do
+        # For simplicity we specify that any script
+	# specific switch(es) must come first.
+	case "$1" in
+	    --version | --fat-version)	show_version
+		;;
+	    --fat-help)		show_help
+		;;
+	    --fat-save-temps)	SAVE_TEMPS=1
+		;;
+	    --fat-verbose)	SHOW_PROGRESS=2
+		;;
+	    --fat-status)	shift ; show_status ${1+"$@"} ; break
+		;;
+	    --fat-swap)		shift ; swap_files ${1+"$@"} ; 	break
+		;;
+	    *)			process_files ${1+"$@"} ; break
+		;;
+	esac
+	shift
+    done
+
+    exit 0
+}
+
+#-------------------------------------------------------
+
+# Invoke main
+main ${1+"$@"}

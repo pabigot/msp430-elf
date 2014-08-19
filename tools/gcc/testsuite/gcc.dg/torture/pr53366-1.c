@@ -1,6 +1,7 @@
 /* PR tree-optimization/53366 */
-/* { dg-do run } */
-/* { dg-skip-if "test too big for msp430" { msp430*-*-* } "*" "" } */
+/* { dg-do run { target { size32plus } } } */
+/* { dg-require-effective-target size32plus } */
+/* { dg-require-effective-target int32plus } */
 
 extern void abort (void);
 

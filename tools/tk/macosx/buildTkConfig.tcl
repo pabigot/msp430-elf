@@ -3,7 +3,7 @@
 # Synthesize tkConfig.sh for Mac OS X based
 # on tclConfig.sh and tkConfig.sh.in
 #
-# RCS: @(#) $Id: buildTkConfig.tcl,v 1.1 2003/03/19 23:02:07 cagney Exp $
+# RCS: @(#) $Id: buildTkConfig.tcl,v 1.1 2002/09/26 17:07:33 das Exp $
 #
 # the next line restarts using tclsh \
 exec tclsh8.4 "$0" "$@"

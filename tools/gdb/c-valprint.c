@@ -1,7 +1,6 @@
 /* Support for printing C values for GDB, the GNU debugger.
 
-   Copyright (C) 1986, 1988-1989, 1991-2001, 2003, 2005-2012 Free
-   Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -19,7 +18,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
@@ -162,7 +161,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 
 	  eltlen = TYPE_LENGTH (elttype);
 	  len = high_bound - low_bound + 1;
-	  if (options->prettyprint_arrays)
+	  if (options->prettyformat_arrays)
 	    {
 	      print_spaces_filtered (2 + 2 * recurse, stream);
 	    }
@@ -177,6 +176,8 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 				   TARGET_CHAR_BIT * embedded_offset,
 				   TARGET_CHAR_BIT * TYPE_LENGTH (type)))
 	    {
+	      int force_ellipses = 0;
+
 	      /* If requested, look for the first null char and only
 	         print elements up to it.  */
 	      if (options->stop_print_at_null)
@@ -191,12 +192,26 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 						     eltlen, byte_order) != 0);
 		       ++temp_len)
 		    ;
+
+		  /* Force LA_PRINT_STRING to print ellipses if
+		     we've printed the maximum characters and
+		     the next character is not \000.  */
+		  if (temp_len == options->print_max && temp_len < len)
+		    {
+		      ULONGEST val
+			= extract_unsigned_integer (valaddr + embedded_offset
+						    + temp_len * eltlen,
+						    eltlen, byte_order);
+		      if (val != 0)
+			force_ellipses = 1;
+		    }
+
 		  len = temp_len;
 		}
 
 	      LA_PRINT_STRING (stream, unresolved_elttype,
 			       valaddr + embedded_offset, len,
-			       NULL, 0, options);
+			       NULL, force_ellipses, options);
 	      i = len;
 	    }
 	  else
@@ -295,18 +310,18 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 	      CORE_ADDR vt_address = unpack_pointer (type,
 						     valaddr
 						     + embedded_offset);
-	      struct minimal_symbol *msymbol =
-	      lookup_minimal_symbol_by_pc (vt_address);
+	      struct bound_minimal_symbol msymbol =
+		lookup_minimal_symbol_by_pc (vt_address);
 
 	      /* If 'symbol_print' is set, we did the work above.  */
 	      if (!options->symbol_print
-		  && (msymbol != NULL)
-		  && (vt_address == SYMBOL_VALUE_ADDRESS (msymbol)))
+		  && (msymbol.minsym != NULL)
+		  && (vt_address == SYMBOL_VALUE_ADDRESS (msymbol.minsym)))
 		{
 		  if (want_space)
 		    fputs_filtered (" ", stream);
 		  fputs_filtered (" <", stream);
-		  fputs_filtered (SYMBOL_PRINT_NAME (msymbol), stream);
+		  fputs_filtered (SYMBOL_PRINT_NAME (msymbol.minsym), stream);
 		  fputs_filtered (">", stream);
 		  want_space = 1;
 		}
@@ -317,13 +332,13 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 		  struct symbol *wsym = (struct symbol *) NULL;
 		  struct type *wtype;
 		  struct block *block = (struct block *) NULL;
-		  int is_this_fld;
+		  struct field_of_this_result is_this_fld;
 
 		  if (want_space)
 		    fputs_filtered (" ", stream);
 
-		  if (msymbol != NULL)
-		    wsym = lookup_symbol (SYMBOL_LINKAGE_NAME (msymbol),
+		  if (msymbol.minsym != NULL)
+		    wsym = lookup_symbol (SYMBOL_LINKAGE_NAME (msymbol.minsym),
 					  block, VAR_DOMAIN,
 					  &is_this_fld);
 
@@ -338,7 +353,7 @@ c_val_print (struct type *type, const gdb_byte *valaddr,
 		  vt_val = value_at (wtype, vt_address);
 		  common_val_print (vt_val, stream, recurse + 1,
 				    options, current_language);
-		  if (options->pretty)
+		  if (options->prettyformat)
 		    {
 		      fprintf_filtered (stream, "\n");
 		      print_spaces_filtered (2 + 2 * recurse, stream);
@@ -482,18 +497,11 @@ c_value_print (struct value *val, struct ui_file *stream,
       else if (options->objectprint
 	       && (TYPE_CODE (TYPE_TARGET_TYPE (type)) == TYPE_CODE_CLASS))
 	{
+	  int is_ref = TYPE_CODE (type) == TYPE_CODE_REF;
 
-	  if (TYPE_CODE(type) == TYPE_CODE_REF)
-	    {
-	      /* Copy value, change to pointer, so we don't get an
-	         error about a non-pointer type in
-	         value_rtti_target_type.  */
-	      struct value *temparg;
-	      temparg=value_copy(val);
-	      deprecated_set_value_type
-		(temparg, lookup_pointer_type (TYPE_TARGET_TYPE (type)));
-	      val = temparg;
-	    }
+	  if (is_ref)
+	    val = value_addr (val);
+
 	  /* Pointer to class, check real type of object.  */
 	  fprintf_filtered (stream, "(");
 
@@ -507,7 +515,14 @@ c_value_print (struct value *val, struct ui_file *stream,
 		  type = real_type;
 
 		  /* Need to adjust pointer value.  */
-		  val = value_from_pointer (type, value_as_address (val) - top);
+		  val = value_from_pointer (real_type,
+					    value_as_address (val) - top);
+
+		  if (is_ref)
+		    {
+		      val = value_ref (value_ind (val));
+		      type = value_type (val);
+		    }
 
 		  /* Note: When we look up RTTI entries, we don't get
 		     any information on const or volatile

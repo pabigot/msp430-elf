@@ -1,0 +1,42 @@
+This patch adds baseboards/msp430-sim.exp to Makefile.am and contains
+a regeneration of Makefile.in.  It's needed for local msp430 testing.
+
+
+dejagnu/ChangeLog.RedHat:
+
+2014-04-13  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.am (baseboard_DATA): Add msp430-sim.exp.
+	* Makefile.in: Regenerate.
+
+
+Index: dejagnu/Makefile.am
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/dejagnu/Makefile.am,v
+retrieving revision 1.15
+diff -u -p -r1.15 Makefile.am
+--- dejagnu/Makefile.am	13 Aug 2013 19:01:40 -0000	1.15
++++ dejagnu/Makefile.am	13 May 2014 15:03:19 -0000
+@@ -123,6 +123,7 @@ baseboard_DATA = baseboards/README \
+ 	baseboards/mn10200-sim.exp \
+ 	baseboards/mn10300-cygmon.exp \
+ 	baseboards/mn10300-sim.exp \
++	baseboards/msp430-sim.exp \
+ 	baseboards/msparc-cygmon.exp \
+ 	baseboards/mt-sid.exp \
+ 	baseboards/op50n.exp \
+Index: dejagnu/Makefile.in
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/dejagnu/Makefile.in,v
+retrieving revision 1.17
+diff -u -p -r1.17 Makefile.in
+--- dejagnu/Makefile.in	13 Aug 2013 19:01:40 -0000	1.17
++++ dejagnu/Makefile.in	13 May 2014 15:03:20 -0000
+@@ -340,6 +340,7 @@ baseboard_DATA = baseboards/README \
+ 	baseboards/mn10200-sim.exp \
+ 	baseboards/mn10300-cygmon.exp \
+ 	baseboards/mn10300-sim.exp \
++	baseboards/msp430-sim.exp \
+ 	baseboards/msparc-cygmon.exp \
+ 	baseboards/mt-sid.exp \
+ 	baseboards/op50n.exp \

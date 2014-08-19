@@ -10,7 +10,7 @@
 # Copyright (c) 2000 Andreas Kupries.
 # All rights reserved.
 # 
-# RCS: @(#) $Id: iogt.test,v 1.3 2003/03/19 23:01:29 cagney Exp $
+# RCS: @(#) $Id: iogt.test,v 1.3 2012/04/18 00:36:32 kevinb Exp $
 
 if {[catch {package require tcltest 2.1}]} {
     puts stderr "Skipping tests in [info script].  tcltest 2.1 required."

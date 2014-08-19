@@ -1,5 +1,6 @@
 // { dg-do run  }
 // { dg-require-effective-target int32plus }
+
 #include <iostream>
 #include <cstdlib>
 #include <cstddef>

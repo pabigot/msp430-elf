@@ -42,3 +42,5 @@ main (void)
   }
   return count;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

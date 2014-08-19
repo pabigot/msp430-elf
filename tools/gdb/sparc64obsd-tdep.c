@@ -1,6 +1,6 @@
 /* Target-dependent code for OpenBSD/sparc64.
 
-   Copyright (C) 2004-2012 Free Software Foundation, Inc.
+   Copyright (C) 2004-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -64,7 +64,7 @@ sparc64obsd_supply_gregset (const struct regset *regset,
   const char *regs = gregs;
 
   sparc64_supply_gregset (&sparc64obsd_core_gregset, regcache, regnum, regs);
-  sparc64_supply_fpregset (regcache, regnum, regs + 288);
+  sparc64_supply_fpregset (&sparc64_bsd_fpregset, regcache, regnum, regs + 288);
 }
 
 

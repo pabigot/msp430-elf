@@ -1,22 +1,22 @@
 /* load.c --- loading object files into the RX simulator.
 
-   Copyright (C) 2005-2013 Free Software Foundation, Inc.
-   Contributed by Red Hat, Inc.
+Copyright (C) 2005-2014 Free Software Foundation, Inc.
+Contributed by Red Hat, Inc.
 
-   This file is part of the GNU simulators.
+This file is part of the GNU simulators.
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 
 #include "config.h"
@@ -127,12 +127,13 @@ rx_load (bfd *prog, host_callback *callback)
       size = p->p_filesz;
       if (size <= 0)
 	continue;
+      if ((p->p_flags & PF_R) == 0)
+	continue;
 
       base = p->p_paddr;
       if (verbose > 1)
 	fprintf (stderr, "[load segment: lma=%08x vma=%08x size=%08x]\n",
 		 (int) base, (int) p->p_vaddr, (int) size);
-
       if (callback)
 	xprintf (callback,
 	         "Loading section %s, size %#lx lma %08lx vma %08lx\n",
@@ -145,7 +146,7 @@ rx_load (bfd *prog, host_callback *callback)
 	  fprintf (stderr, "Failed to allocate buffer to hold program segment\n");
 	  continue;
 	}
-
+      
       offset = p->p_offset;
       if (prog->iovec->bseek (prog, offset, SEEK_SET) != 0)
 	{

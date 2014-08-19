@@ -1,7 +1,6 @@
 	.file "strcpy.S"
 
 	.section .text
-#if 0
 	.global _strcpy
 	.type	 _strcpy,@function
 _strcpy:
@@ -46,81 +45,6 @@ _strcpy:
 	cmp 0,d0
 	lne
 	mov d3,a0
-#else
-	.global  _strcpy
-	.type	 _strcpy,@function
-_strcpy:
-	movm	[d2,d3,a3],(sp)
-.Lend_of_prologue:
-	mov	d0, d3
-	mov	d1, a0
-	mov	d3, a1
-	mov	a0, d0
-
-/*	Newlib for the MN10300 is compiled with -Os enabled all the time,
-	so normally the code below will not be triggered.  The test for
-	__LIW__ however enables us to build a speed optimized version when
-	building -mliw enabled multilibs.  -mliw allows long instruction
-	word generation which is faster but occupies more space.  LIW
-	instructions are not acutally used in the code below, but enabling
-	their generation implies that the user is more interested in code
-	performance than code size.  */
-#if ! defined __OPTIMIZE_SIZE__ || defined __LIW__
-	or	d3, d0
-	btst	3, d0
-	bne	.L2
-	mov	(a0), d0
-	mov	-16843009, a3
-	mov	a3, d1
-	add	d0, d1
-	not	d0
-	and	d0, d1
-	mov	-2139062144, d2
-	btst	-2139062144, d1
-	bne	.L2
-#ifdef __NO_SETLB__
-.Loop1:
-#else
-	setlb
-#endif
-	mov	(a0), d0
-	mov	d0, (a1)
-	inc4	a0
-	inc4	a1
-	mov	(a0), d0
-	mov	a3, d1
-	add	d0, d1
-	not	d0
-	and	d0, d1
-	and	d2, d1
-#ifdef __NO_SETLB__
-	beq    .Loop1
-#else
-	leq
-#endif
-.L2:
-#endif /* Optimize for speed.  */
-
-#ifdef __NO_SETLB__
-.Loop2:
-#else
-	setlb
-#endif
-	movbu	(a0), d0
-	movbu	d0, (a1)
-	inc	a0
-	inc	a1
-	cmp	0, d0
-#ifdef __NO_SETLB__
-	bne	.Loop2
-#else
-	lne
-#endif
-
-	mov	d3, a0
-	mov	d3, d0
-	ret	[d2,d3,a3], 12
-#endif
 .Lepilogue:
 	ret [d2,d3,a2,a3],16
 .Lend_of_strcpy:

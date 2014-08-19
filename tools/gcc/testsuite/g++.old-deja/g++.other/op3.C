@@ -5,7 +5,7 @@
 // Related to bug 91. We'd not preserve constness accessing a member of the
 // source type in copy ctor and assignment op.
 
-#include <stdio.h>
+void printf (const char * c, ...) { }
 
 int value = 0;
 

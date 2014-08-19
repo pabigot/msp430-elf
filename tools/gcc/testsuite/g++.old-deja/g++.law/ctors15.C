@@ -25,3 +25,4 @@ int main() {
     delete x;
     printf ("PASS\n");
 }
+// { dg-require-effective-target size32plus }

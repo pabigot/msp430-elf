@@ -23,3 +23,5 @@ int main () {
   abort_new = true;
   new (X);
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

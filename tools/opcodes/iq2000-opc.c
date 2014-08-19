@@ -40,8 +40,6 @@ static unsigned int dis_hash_insn (const char *, CGEN_INSN_INT);
 
 /* Instruction formats.  */
 
-extern const CGEN_IFLD iq2000_cgen_ifld_table[];
-
 #define F(f) & iq2000_cgen_ifld_table[IQ2000_##f]
 static const CGEN_IFMT ifmt_empty ATTRIBUTE_UNUSED = {
   0, 0, 0x0, { { 0 } }

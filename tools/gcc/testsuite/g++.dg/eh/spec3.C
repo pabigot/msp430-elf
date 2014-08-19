@@ -22,3 +22,5 @@ int main(void)
   try {	func(); }
   catch (A& a) { }
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

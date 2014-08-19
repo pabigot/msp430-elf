@@ -1,0 +1,34 @@
+This patch changes the version string for gcc so that it says "(GNUPro 05r2)".
+---
+gcc/ChangeLog.Redhat
+2008-03-05  Nick Clifton  <nickc@redhat.com>
+
+	* version.c (version_string): Annotate for a GNUPro release.
+	* configure.ac (ACX_BUGURL): Change to GNUPro URL.
+	* confgiure: Regenerate.
+
+---
+Index: gcc/configure.ac
+===================================================================
+--- gcc/configure.ac	(revision 132894)
++++ gcc/configure.ac	(working copy)
+@@ -778,7 +778,7 @@
+ AC_SUBST(onestep)
+ 
+ ACX_PKGVERSION([GCC])
+-ACX_BUGURL([http://gcc.gnu.org/bugs.html])
++ACX_BUGURL([https://enterprise.redhat.com/gnupro/])
+ 
+ # Sanity check enable_languages in case someone does not run the toplevel
+ # configure # script.
+Index: gcc/version.c
+===================================================================
+--- gcc/version.c	(revision 132894)
++++ gcc/version.c	(working copy)
+@@ -13,5 +13,5 @@
+    BASEVER, DATESTAMP, DEVPHASE, and REVISION are defined by the
+    Makefile.  */
+ 
+-const char version_string[] = BASEVER DATESTAMP DEVPHASE REVISION;
++const char version_string[] = BASEVER DATESTAMP DEVPHASE " (GNUPro 12r1) (Based on: GCC 4.7 GDB 7.4 Binutils 2.22 Newlib 1.20)" REVISION;
+ const char pkgversion_string[] = PKGVERSION;

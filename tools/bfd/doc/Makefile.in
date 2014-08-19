@@ -71,10 +71,10 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/../config/plugins.m4 \
 	$(top_srcdir)/../config/po.m4 \
 	$(top_srcdir)/../config/progtest.m4 \
-	$(top_srcdir)/../config/stdint.m4 $(top_srcdir)/../bfd/bfd.m4 \
-	$(top_srcdir)/../bfd/warning.m4 $(top_srcdir)/../libtool.m4 \
+	$(top_srcdir)/../config/stdint.m4 $(top_srcdir)/../libtool.m4 \
 	$(top_srcdir)/../ltoptions.m4 $(top_srcdir)/../ltsugar.m4 \
 	$(top_srcdir)/../ltversion.m4 $(top_srcdir)/../lt~obsolete.m4 \
+	$(top_srcdir)/bfd.m4 $(top_srcdir)/warning.m4 \
 	$(top_srcdir)/acinclude.m4 $(top_srcdir)/../config/zlib.m4 \
 	$(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -776,9 +776,9 @@ uninstall-am: uninstall-dvi-am uninstall-html-am uninstall-info-am \
 
 
 $(MKDOC): $(srcdir)/chew.c
-	$(CC_FOR_BUILD) -o chew.$$$$ $(CFLAGS_FOR_BUILD) $(LDFLAGS_FOR_BUILD) \
-	  $(H_CFLAGS) $(AM_CPPFLAGS) $(srcdir)/chew.c; \
-	$(SHELL) $(srcdir)/../../move-if-change chew.$$$$ $(MKDOC)
+	$(CC_FOR_BUILD) -o chw$$$$$(EXEEXT_FOR_BUILD) $(CFLAGS_FOR_BUILD) \
+	  $(LDFLAGS_FOR_BUILD) $(H_CFLAGS) $(AM_CPPFLAGS) $(srcdir)/chew.c; \
+	$(SHELL) $(srcdir)/../../move-if-change chw$$$$$(EXEEXT_FOR_BUILD) $(MKDOC)
 
 protos: libbfd.h libcoff.h bfd.h
 

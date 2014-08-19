@@ -1,0 +1,139 @@
+# from byacc, bison, diff, flex, make, patch, texinfo
+file	${release}/H-${host}/bin/bison${EXEEXT}
+file	${release}/share/bison.hairy
+file	${release}/share/bison.simple
+dir	${release}/share/bison
+dir	${release}/share/texinfo
+file	${release}/H-${host}/bin/byacc${EXEEXT}
+file	${release}/H-${host}/bin/yacc${EXEEXT}
+file	${release}/H-${host}/bin/yacc
+file	${release}/H-${host}/bin/m4${EXEEXT}
+file	${release}/H-${host}/bin/flex${EXEEXT}
+file	${release}/H-${host}/bin/flex++${EXEEXT}
+file	${release}/H-${host}/lib/liby.a
+file	${release}/H-${host}/lib/libfl.a
+file	${release}/H-${host}/lib/libfl_pic.a
+file	${release}/include/FlexLexer.h
+file	${release}/H-${host}/bin/patch${EXEEXT}
+file	${release}/H-${host}/bin/make${EXEEXT}
+file	${release}/H-${host}/bin/diff${EXEEXT}
+file	${release}/H-${host}/bin/sdiff${EXEEXT}
+file	${release}/H-${host}/bin/diff3${EXEEXT}
+file	${release}/H-${host}/bin/cmp${EXEEXT}
+file	${release}/H-${host}/bin/info${EXEEXT}
+file	${release}/H-${host}/bin/infokey${EXEEXT}
+file	${release}/H-${host}/bin/install-info${EXEEXT}
+file	${release}/H-${host}/bin/texi2pdf
+file	${release}/H-${host}/bin/makeinfo${EXEEXT}
+file	${release}/H-${host}/bin/texi2dvi
+file	${release}/H-${host}/bin/texindex${EXEEXT}
+# extra expect/tcl/tk/itcl files
+#   cygwin specific
+file	${release}/H-${host}/bin/tclsh84.exe cygwin
+file	${release}/H-${host}/bin/wish84.exe cygwin
+#   !cygwin
+file	${release}/H-${host}/bin/tclsh8.4
+file	${release}/H-${host}/bin/wish8.4
+#   generic
+file	${release}/H-${host}/lib/tclConfig.sh
+file	${release}/H-${host}/lib/tkConfig.sh
+file	${release}/H-${host}/lib/itclConfig.sh
+file	${release}/H-${host}/lib/itkConfig.sh
+dir	${release}/H-${host}/lib/tk8.4
+#   cygwin libs
+dir	${release}/H-${host}/lib/dde1.2 cygwin
+dir	${release}/H-${host}/lib/reg1.1 cygwin
+file	${release}/H-${host}/lib/libexpect526.a cygwin
+file	${release}/H-${host}/lib/libitcl32.a cygwin
+file	${release}/H-${host}/lib/libitclstub32.a cygwin
+file	${release}/H-${host}/lib/libitclstub84.a cygwin
+file	${release}/H-${host}/lib/libtclstub84.a cygwin
+file	${release}/H-${host}/lib/libitk32.a cygwin
+file	${release}/H-${host}/lib/libitkstub32.a cygwin
+file	${release}/H-${host}/lib/libitkstub84.a cygwin
+file	${release}/H-${host}/lib/libtkstub84.a cygwin
+file	${release}/H-${host}/lib/libtcl84.a cygwin
+file	${release}/H-${host}/lib/libtk84.a cygwin
+#   !cygwin libs
+file	${release}/H-${host}/lib/libexpect5.26.a
+file	${release}/H-${host}/lib/libitcl3.2.a
+file	${release}/H-${host}/lib/libitclstub3.2.a
+file	${release}/H-${host}/lib/libitclstub8.4.a
+file	${release}/H-${host}/lib/libtclstub8.4.a
+file	${release}/H-${host}/lib/libitk3.2.a
+file	${release}/H-${host}/lib/libitkstub3.2.a
+file	${release}/H-${host}/lib/libitkstub8.4.a
+file	${release}/H-${host}/lib/libtkstub8.4.a
+file	${release}/H-${host}/lib/libtcl8.4.a
+file	${release}/H-${host}/lib/libtk8.4.a
+file    ${release}/H-${host}/lib/libbfd.a
+file    ${release}/H-${host}/lib/libbfd.la
+file    ${release}/H-${host}/lib/libiberty.a
+# pickup multilibed libiberties as well
+file    ${release}/H-${host}/lib.*/libiberty.a
+file    ${release}/H-${host}/lib/libmmalloc.a
+file    ${release}/H-${host}/lib/libopcodes.a
+file    ${release}/H-${host}/lib/libopcodes.la
+#   includes
+file	${release}/include/Dbg.h
+file	${release}/include/dis-asm.h
+file	${release}/include/expect.h
+file	${release}/include/expect_comm.h
+file	${release}/include/expect_tcl.h
+file	${release}/include/itcl.h
+file	${release}/include/itk.h
+file	${release}/include/itclDecls.h
+file	${release}/include/itclInt.h
+file	${release}/include/itclIntDecls.h
+file	${release}/include/itkDecls.h
+file	${release}/include/tcl.h
+file	${release}/include/tclRegexp.h
+file	${release}/include/tclDecls.h
+file	${release}/include/tclPlatDecls.h
+file	${release}/include/tk.h
+file	${release}/include/tkDecls.h
+file	${release}/include/tkInt.h
+file	${release}/include/tkIntXlibDecls.h
+file	${release}/include/tkPlatDecls.h
+file    ${release}/include/bfd.h
+file    ${release}/include/bfdlink.h
+file    ${release}/include/symcat.h                           
+# for guile
+file    ${release}/H-${host}/bin/guile-config
+file    ${release}/H-${host}/bin/guile-snarf
+file    ${release}/H-${host}/bin/guile-tools
+file    ${release}/H-${host}/bin/guile${EXEEXT}
+file    ${release}/H-${host}/lib/libguile.*
+dir     ${release}/share/guile
+file    ${release}/share/aclocal/bison-i18n.m4
+file    ${release}/share/aclocal/guile.m4
+file    ${release}/share/aclocal/qthreads.m4
+file    ${release}/include/libguile.h
+dir     ${release}/include/libguile
+dir     ${release}/include/guile
+dir     ${release}/include/guile-readline
+file    ${release}/include/gc.h
+file    ${release}/include/gc_backptr.h
+file    ${release}/include/gc_cpp.h
+file    ${release}/include/gc_local_alloc.h
+file    ${release}/include/gc_pthread_redirects.h
+file    ${release}/include/gc_pthread_redirects.h
+# for readline
+file    ${release}/H-${host}/lib/libreadline.a
+file    ${release}/H-${host}/lib/libhistory.a
+# for acpvea
+file ${release}/H-${host}/bin/${targetPrefix}runacovea${EXEEXT}
+file ${release}/H-${host}/bin/${targetPrefix}runfuncopt${EXEEXT}
+file ${release}/H-${host}/bin/${targetPrefix}test_maze${EXEEXT}
+file ${release}/H-${host}/bin/${targetPrefix}test_prng${EXEEXT}
+file ${release}/H-${host}/lib/libacovea.*
+file ${release}/H-${host}/lib/libcoyotl.a
+file ${release}/H-${host}/lib/libcoyotl.*
+file ${release}/H-${host}/lib/libevocosm.a
+file ${release}/H-${host}/lib/libevocosm.*
+dir ${release}/include/libcoyotl
+dir ${release}/include/libacovea
+dir ${release}/include/libevocosm
+dir ${release}/share/doc/libcoyotl
+dir ${release}/share/doc/libevocosm
+dir ${release}/share/libacovea

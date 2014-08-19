@@ -1,0 +1,1420 @@
+DO NOT APPLY THIS PATCH unless you want to disable the gdb.mi tests.
+
+This patch disables the gdb.mi tests.  We use it when testing against
+the rockhopper and vr boards due to the test machinery not being set
+up to work correctly with these boards.
+
+This patch should NOT go upstream.  Do not apply this patch to local
+sources unless absolutely necessary.
+
+gdb/testsuite/ChangeLog.RedHat:
+
+	* gdb.mi/gdb2549.exp, gdb.mi/gdb669.exp, gdb.mi/gdb680.exp,
+	gdb.mi/gdb701.exp, gdb.mi/gdb792.exp, gdb.mi/mi-async.exp,
+	gdb.mi/mi-basics.exp, gdb.mi/mi-break.exp, gdb.mi/mi-cli.exp,
+	gdb.mi/mi-console.exp, gdb.mi/mi-disassemble.exp,
+	gdb.mi/mi-eval.exp, gdb.mi/mi-file-transfer.exp,
+	gdb.mi/mi-file.exp, gdb.mi/mi-hack-cli.exp,
+	gdb.mi/mi-nonstop-exit.exp, gdb.mi/mi-nonstop.exp,
+	gdb.mi/mi-nsintrall.exp, gdb.mi/mi-nsmoribund.exp,
+	gdb.mi/mi-nsthrexec.exp, gdb.mi/mi-pending.exp,
+	gdb.mi/mi-pthreads.exp, gdb.mi/mi-read-memory.exp,
+	gdb.mi/mi-regs.exp, gdb.mi/mi-return.exp,
+	gdb.mi/mi-reverse.exp, gdb.mi/mi-simplerun.exp,
+	gdb.mi/mi-stack.exp, gdb.mi/mi-stepi.exp,
+	gdb.mi/mi-syn-frame.exp, gdb.mi/mi-until.exp,
+	gdb.mi/mi-var-block.exp, gdb.mi/mi-var-child-f.exp,
+	gdb.mi/mi-var-child.exp, gdb.mi/mi-var-cmd.exp,
+	gdb.mi/mi-var-cp.exp, gdb.mi/mi-var-display.exp,
+	gdb.mi/mi-var-invalidate.exp, gdb.mi/mi-watch.exp,
+	gdb.mi/mi2-basics.exp, gdb.mi/mi2-break.exp,
+	gdb.mi/mi2-cli.exp, gdb.mi/mi2-console.exp,
+	gdb.mi/mi2-disassemble.exp, gdb.mi/mi2-eval.exp,
+	gdb.mi/mi2-file.exp, gdb.mi/mi2-hack-cli.exp,
+	gdb.mi/mi2-pthreads.exp, gdb.mi/mi2-read-memory.exp,
+	gdb.mi/mi2-regs.exp, gdb.mi/mi2-return.exp,
+	gdb.mi/mi2-simplerun.exp, gdb.mi/mi2-stack.exp,
+	gdb.mi/mi2-stepi.exp, gdb.mi/mi2-syn-frame.exp,
+	gdb.mi/mi2-until.exp, gdb.mi/mi2-var-block.exp,
+	gdb.mi/mi2-var-child.exp, gdb.mi/mi2-var-cmd.exp,
+	gdb.mi/mi2-var-display.exp, gdb.mi/mi2-watch.exp:  Disable mi
+	tests.
+
+Index: gdb/testsuite/gdb.mi/gdb2549.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/gdb2549.exp,v
+retrieving revision 1.2
+diff -u -p -r1.2 gdb2549.exp
+--- gdb/testsuite/gdb.mi/gdb2549.exp	29 Apr 2010 22:01:49 -0000	1.2
++++ gdb/testsuite/gdb.mi/gdb2549.exp	25 Jan 2011 18:19:07 -0000
+@@ -21,6 +21,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ 
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+Index: gdb/testsuite/gdb.mi/gdb669.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/gdb669.exp,v
+retrieving revision 1.6
+diff -u -p -r1.6 gdb669.exp
+--- gdb/testsuite/gdb.mi/gdb669.exp	29 Apr 2010 22:01:49 -0000	1.6
++++ gdb/testsuite/gdb.mi/gdb669.exp	25 Jan 2011 18:19:07 -0000
+@@ -18,6 +18,9 @@
+ # command "info threads" and the MI command "-thread-list-ids"
+ # return different threads in the system.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ # This only works with native configurations
+ if {![isnative]} {
+   return
+Index: gdb/testsuite/gdb.mi/gdb680.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/gdb680.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 gdb680.exp
+--- gdb/testsuite/gdb.mi/gdb680.exp	29 Apr 2010 22:01:49 -0000	1.4
++++ gdb/testsuite/gdb.mi/gdb680.exp	25 Jan 2011 18:19:07 -0000
+@@ -17,6 +17,9 @@
+ # test gdb/680
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/gdb701.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/gdb701.exp,v
+retrieving revision 1.5
+diff -u -p -r1.5 gdb701.exp
+--- gdb/testsuite/gdb.mi/gdb701.exp	29 Apr 2010 22:01:49 -0000	1.5
++++ gdb/testsuite/gdb.mi/gdb701.exp	25 Jan 2011 18:19:07 -0000
+@@ -17,6 +17,9 @@
+ # test gdb/701
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/gdb792.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/gdb792.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 gdb792.exp
+--- gdb/testsuite/gdb.mi/gdb792.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/gdb792.exp	25 Jan 2011 18:19:07 -0000
+@@ -17,6 +17,9 @@
+ # test gdb/792
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ if { [skip_cplus_tests] } { continue }
+ 
+ load_lib mi-support.exp
+Index: gdb/testsuite/gdb.mi/mi-async.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-async.exp,v
+retrieving revision 1.2
+diff -u -p -r1.2 mi-async.exp
+--- gdb/testsuite/gdb.mi/mi-async.exp	29 Apr 2010 22:01:49 -0000	1.2
++++ gdb/testsuite/gdb.mi/mi-async.exp	25 Jan 2011 18:19:07 -0000
+@@ -17,6 +17,9 @@
+ # Test asynchronous Machine Interface (MI) responses.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ # Because of the way this test is written, using 'start' and not using
+ # mi_run_cmd, it ignores whatever target the rest of GDB testsuite is
+ # using, and always tries to run natively.  So, don't do anything unless
+Index: gdb/testsuite/gdb.mi/mi-basics.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-basics.exp,v
+retrieving revision 1.10
+diff -u -p -r1.10 mi-basics.exp
+--- gdb/testsuite/gdb.mi/mi-basics.exp	29 Apr 2010 22:01:49 -0000	1.10
++++ gdb/testsuite/gdb.mi/mi-basics.exp	25 Jan 2011 18:19:07 -0000
+@@ -26,6 +26,9 @@
+ # but the command syntax and correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-break.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-break.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi-break.exp
+--- gdb/testsuite/gdb.mi/mi-break.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi-break.exp	25 Jan 2011 18:19:07 -0000
+@@ -25,6 +25,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-cli.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-cli.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi-cli.exp
+--- gdb/testsuite/gdb.mi/mi-cli.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi-cli.exp	25 Jan 2011 18:19:07 -0000
+@@ -20,6 +20,9 @@
+ # Console commands executed via MI should use MI output wrappers, MI event
+ # handlers, etc.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-console.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-console.exp,v
+retrieving revision 1.8
+diff -u -p -r1.8 mi-console.exp
+--- gdb/testsuite/gdb.mi/mi-console.exp	29 Apr 2010 22:01:49 -0000	1.8
++++ gdb/testsuite/gdb.mi/mi-console.exp	25 Jan 2011 18:19:07 -0000
+@@ -29,6 +29,9 @@
+ # through GDB.  Check that we're either talking to a simulator or a
+ # remote target.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-disassemble.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-disassemble.exp,v
+retrieving revision 1.8
+diff -u -p -r1.8 mi-disassemble.exp
+--- gdb/testsuite/gdb.mi/mi-disassemble.exp	29 Apr 2010 22:01:49 -0000	1.8
++++ gdb/testsuite/gdb.mi/mi-disassemble.exp	25 Jan 2011 18:19:07 -0000
+@@ -21,6 +21,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-eval.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-eval.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi-eval.exp
+--- gdb/testsuite/gdb.mi/mi-eval.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi-eval.exp	25 Jan 2011 18:19:07 -0000
+@@ -23,6 +23,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-file-transfer.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-file-transfer.exp,v
+retrieving revision 1.3
+diff -u -p -r1.3 mi-file-transfer.exp
+--- gdb/testsuite/gdb.mi/mi-file-transfer.exp	29 Apr 2010 22:01:49 -0000	1.3
++++ gdb/testsuite/gdb.mi/mi-file-transfer.exp	25 Jan 2011 18:19:07 -0000
+@@ -16,6 +16,9 @@
+ 
+ # Test gdbserver monitor commands.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib gdbserver-support.exp
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+Index: gdb/testsuite/gdb.mi/mi-file.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-file.exp,v
+retrieving revision 1.8
+diff -u -p -r1.8 mi-file.exp
+--- gdb/testsuite/gdb.mi/mi-file.exp	29 Apr 2010 22:01:49 -0000	1.8
++++ gdb/testsuite/gdb.mi/mi-file.exp	25 Jan 2011 18:19:07 -0000
+@@ -25,6 +25,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-hack-cli.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-hack-cli.exp,v
+retrieving revision 1.5
+diff -u -p -r1.5 mi-hack-cli.exp
+--- gdb/testsuite/gdb.mi/mi-hack-cli.exp	29 Apr 2010 22:01:49 -0000	1.5
++++ gdb/testsuite/gdb.mi/mi-hack-cli.exp	25 Jan 2011 18:19:07 -0000
+@@ -16,6 +16,9 @@
+ 
+ # Some basic checks for the CLI.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-nonstop-exit.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-nonstop-exit.exp,v
+retrieving revision 1.2
+diff -u -p -r1.2 mi-nonstop-exit.exp
+--- gdb/testsuite/gdb.mi/mi-nonstop-exit.exp	29 Apr 2010 22:01:49 -0000	1.2
++++ gdb/testsuite/gdb.mi/mi-nonstop-exit.exp	25 Jan 2011 18:19:07 -0000
+@@ -13,6 +13,9 @@
+ # You should have received a copy of the GNU General Public License
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-nonstop.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-nonstop.exp,v
+retrieving revision 1.2
+diff -u -p -r1.2 mi-nonstop.exp
+--- gdb/testsuite/gdb.mi/mi-nonstop.exp	29 Apr 2010 22:01:49 -0000	1.2
++++ gdb/testsuite/gdb.mi/mi-nonstop.exp	25 Jan 2011 18:19:07 -0000
+@@ -14,6 +14,9 @@
+ # You should have received a copy of the GNU General Public License
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-nsintrall.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-nsintrall.exp,v
+retrieving revision 1.2
+diff -u -p -r1.2 mi-nsintrall.exp
+--- gdb/testsuite/gdb.mi/mi-nsintrall.exp	29 Apr 2010 22:01:49 -0000	1.2
++++ gdb/testsuite/gdb.mi/mi-nsintrall.exp	25 Jan 2011 18:19:07 -0000
+@@ -13,6 +13,9 @@
+ # You should have received a copy of the GNU General Public License
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-nsmoribund.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-nsmoribund.exp,v
+retrieving revision 1.2
+diff -u -p -r1.2 mi-nsmoribund.exp
+--- gdb/testsuite/gdb.mi/mi-nsmoribund.exp	29 Apr 2010 22:01:49 -0000	1.2
++++ gdb/testsuite/gdb.mi/mi-nsmoribund.exp	25 Jan 2011 18:19:07 -0000
+@@ -13,6 +13,9 @@
+ # You should have received a copy of the GNU General Public License
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-nsthrexec.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-nsthrexec.exp,v
+retrieving revision 1.2
+diff -u -p -r1.2 mi-nsthrexec.exp
+--- gdb/testsuite/gdb.mi/mi-nsthrexec.exp	29 Apr 2010 22:01:49 -0000	1.2
++++ gdb/testsuite/gdb.mi/mi-nsthrexec.exp	25 Jan 2011 18:19:07 -0000
+@@ -18,6 +18,9 @@
+ # the main thread doesn't just silently stop at the first internal
+ # breakpoint (usually the _dl_debug_state breakpoint).
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ # No exec event support in the remote protocol.
+ if { [is_remote target] } then {
+     continue
+Index: gdb/testsuite/gdb.mi/mi-pending.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-pending.exp,v
+retrieving revision 1.3
+diff -u -p -r1.3 mi-pending.exp
+--- gdb/testsuite/gdb.mi/mi-pending.exp	29 Apr 2010 22:01:49 -0000	1.3
++++ gdb/testsuite/gdb.mi/mi-pending.exp	25 Jan 2011 18:19:07 -0000
+@@ -13,6 +13,9 @@
+ # You should have received a copy of the GNU General Public License
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-pthreads.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-pthreads.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi-pthreads.exp
+--- gdb/testsuite/gdb.mi/mi-pthreads.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi-pthreads.exp	25 Jan 2011 18:19:07 -0000
+@@ -20,6 +20,9 @@
+ # via these command pathways are properly executed. Console commands
+ # executed via MI should use MI output wrappers, MI event handlers, etc.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ # This only works with native configurations
+ if {![isnative]} {
+   return
+Index: gdb/testsuite/gdb.mi/mi-read-memory.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-read-memory.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi-read-memory.exp
+--- gdb/testsuite/gdb.mi/mi-read-memory.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi-read-memory.exp	25 Jan 2011 18:19:07 -0000
+@@ -26,6 +26,9 @@
+ # but the command syntax and correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-regs.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-regs.exp,v
+retrieving revision 1.8
+diff -u -p -r1.8 mi-regs.exp
+--- gdb/testsuite/gdb.mi/mi-regs.exp	29 Apr 2010 22:01:49 -0000	1.8
++++ gdb/testsuite/gdb.mi/mi-regs.exp	25 Jan 2011 18:19:07 -0000
+@@ -22,6 +22,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ 
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+Index: gdb/testsuite/gdb.mi/mi-return.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-return.exp,v
+retrieving revision 1.8
+diff -u -p -r1.8 mi-return.exp
+--- gdb/testsuite/gdb.mi/mi-return.exp	29 Apr 2010 22:01:49 -0000	1.8
++++ gdb/testsuite/gdb.mi/mi-return.exp	25 Jan 2011 18:19:07 -0000
+@@ -23,6 +23,9 @@
+ # the correct output response to MI operations.  
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-reverse.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-reverse.exp,v
+retrieving revision 1.1
+diff -u -p -r1.1 mi-reverse.exp
+--- gdb/testsuite/gdb.mi/mi-reverse.exp	29 Apr 2010 22:01:49 -0000	1.1
++++ gdb/testsuite/gdb.mi/mi-reverse.exp	25 Jan 2011 18:19:07 -0000
+@@ -1,174 +1,177 @@
+-# Copyright 2009
+-# Free Software Foundation, Inc.
+-
+-# This program is free software; you can redistribute it and/or modify
+-# it under the terms of the GNU General Public License as published by
+-# the Free Software Foundation; either version 3 of the License, or
+-# (at your option) any later version.
+-#
+-# This program is distributed in the hope that it will be useful,
+-# but WITHOUT ANY WARRANTY; without even the implied warranty of
+-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+-# GNU General Public License for more details.
+-#
+-# You should have received a copy of the GNU General Public License
+-# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-
+-# Test Machine interface (MI) operations
+-# Verify that, using the MI, we can run a simple program in both forward
+-# and reverse directions with the following execution commands:
+-# - exec-continue
+-# - exec-finish
+-# - exec-next
+-# - exec-step
+-# - exec-next-instruction
+-# - exec-step-instruction
+-
+-# The goal is not to test gdb functionality, which is done by other tests,
+-# but to verify the correct output response to MI operations.
+-#
+-
+-if ![target_info exists gdb,can_reverse] {
+-    return
+-}
+-
+-load_lib mi-support.exp
+-set MIFLAGS "-i=mi"
+-
+-gdb_exit
+-if [mi_gdb_start] {
+-    continue
+-}
+-
+-set testfile "basics"
+-set srcfile ${testfile}.c
+-set binfile ${objdir}/${subdir}/mi2-reverse
+-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DFAKEARGV}] != "" } {
+-     untested mi2-reverse.exp
+-     return -1
+-}
+-
+-mi_run_to_main
+-
+-if [target_info exists gdb,use_precord] {
+-    # Activate process record/replay
+-    if [mi_gdb_test "-interpreter-exec console record" \
+-	{\^done} "Turn on process record"] {
+-	warning "Fail to activate process record/replay, tests in this group will not be performed.\n";
+-	return -1
+-    }
+-}
+-
+-# Locate line numbers in basics.c.
+-set line_callee4_head  [gdb_get_line_number "callee4 ("]
+-set line_callee4_body  [expr $line_callee4_head + 2]
+-set line_callee3_head  [gdb_get_line_number "callee3 ("]
+-set line_callee3_body  [expr $line_callee3_head + 2]
+-set line_callee3_close [expr $line_callee3_head + 3]
+-set line_callee2_head  [gdb_get_line_number "callee2 ("]
+-set line_callee2_body  [expr $line_callee2_head + 2]
+-set line_callee2_close [expr $line_callee2_head + 3]
+-set line_callee1_head  [gdb_get_line_number "callee1 ("]
+-set line_callee1_body  [expr $line_callee1_head + 2]
+-set line_callee1_close [expr $line_callee1_head + 3]
+-set line_callme_head   [gdb_get_line_number "callme"]
+-set line_callme_body   [expr $line_callme_head + 2]
+-set line_main_head     [gdb_get_line_number "main ("]
+-set line_main_body     [expr $line_main_head + 2]
+-set line_main_hello    [gdb_get_line_number "Hello, World!"]
+-set line_main_callme_1 [gdb_get_line_number "callme (1"]
+-
+-# Forward execute to the callme() function, so that we can
+-# execute backward from there.
+-mi_continue_to callme
+-mi_delete_breakpoints
+-
+-proc test_controlled_execution_reverse {} {
+-    global mi_gdb_prompt
+-    global srcfile
+-    global hex
+-
+-    global line_callee4_head line_callee4_body
+-    global line_callee3_head line_callee3_body line_callee3_close
+-    global line_callee2_head line_callee2_body line_callee2_close
+-    global line_callee1_head line_callee1_body line_callee1_close
+-    global line_main_head    line_main_body
+-    global line_main_hello   line_main_callme_1
+-
+-    # Test exec-reverse-finish
+-
+-    mi_execute_to "exec-finish --reverse" \
+-	"end-stepping-range" "main" "" \
+-	"basics.c" $line_main_callme_1 "" \
+-	"reverse finish from callme"
+-
+-    # Test exec-reverse-next
+-    #   It takes two steps to get back to the previous line,
+-    #   as the first step moves us to the start of the current line,
+-    #   and the one after that moves back to the previous line.
+-
+-    mi_execute_to "exec-next --reverse 2" \
+- 	"end-stepping-range" "main" "" \
+- 	"basics.c" $line_main_hello "" \
+- 	"reverse next to get over the call to do_nothing"
+-
+-    # Test exec-reverse-step
+-
+-    mi_execute_to "exec-step --reverse" \
+- 	"end-stepping-range" "callee1" \
+-	"\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument\.\\\\\"\"\},\{name=\"fltarg\",value=\"3.5\"\}" \
+- 	"basics.c" $line_callee1_close "" \
+- 	"reverse step to callee1"
+-
+-    mi_execute_to "exec-step --reverse" \
+- 	"end-stepping-range" "callee2" \
+-	"\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument\.\\\\\"\"\}" \
+- 	"basics.c" $line_callee2_close "" \
+- 	"reverse step to callee2"
+-
+-    mi_execute_to "exec-step --reverse" \
+- 	"end-stepping-range" "callee3" \
+-	"\{name=\"strarg\",value=\"$hex \\\\\"A string argument\.\\\\\"\"\}" \
+- 	"basics.c" $line_callee3_close "" \
+- 	"reverse step to callee3"
+-
+-    mi_execute_to "exec-step --reverse" \
+- 	"end-stepping-range" "callee4" "" \
+- 	"basics.c" "\[0-9\]+" "" \
+- 	"reverse step to callee4"
+-
+-    # Test exec-reverse-[step|next]-instruction
+-
+-    mi_execute_to "exec-step-instruction --reverse" \
+-        "end-stepping-range" "callee4" "" \
+-        "basics.c" "\[0-9\]+" "" \
+-        "reverse-step-instruction at callee4"
+-
+-    mi_execute_to "exec-next-instruction --reverse" \
+-        "end-stepping-range" "callee4" "" \
+-        "basics.c" "\[0-9\]+" "" \
+-        "reverse-next-instruction at callee4"
+-
+-    # Test exec-reverse-continue
+-
+-    mi_create_breakpoint "-t basics.c:$line_callee3_head" \
+-	3 del callee3 ".*basics.c" $line_callee3_head $hex \
+-	"insert temp breakpoint at basics.c:$line_callee3_head"
+-
+-    mi_execute_to "exec-continue --reverse" \
+-        "breakpoint-hit" "callee3" \
+-	"\{name=\"strarg\",value=\"$hex \\\\\"A string argument\.\\\\\"\"\}" \
+-        "basics.c" "\[0-9\]+" \
+-	{ "" "disp=\"del\""} \
+-        "reverse-continue at callee3"
+-
+-    mi_execute_to "exec-continue --reverse" \
+-        "" "main" "" \
+-        "basics.c" $line_main_body "" \
+-        "reverse-continue at main"
+-}
+-
+-test_controlled_execution_reverse
+-
+-mi_gdb_exit
+-return 0
++# Copyright 2009
++# Free Software Foundation, Inc.
++
++# This program is free software; you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 3 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <http://www.gnu.org/licenses/>.
++
++# Test Machine interface (MI) operations
++# Verify that, using the MI, we can run a simple program in both forward
++# and reverse directions with the following execution commands:
++# - exec-continue
++# - exec-finish
++# - exec-next
++# - exec-step
++# - exec-next-instruction
++# - exec-step-instruction
++
++# The goal is not to test gdb functionality, which is done by other tests,
++# but to verify the correct output response to MI operations.
++#
++
++gdb_suppress_entire_file "Tests disabled."
++return
++
++if ![target_info exists gdb,can_reverse] {
++    return
++}
++
++load_lib mi-support.exp
++set MIFLAGS "-i=mi"
++
++gdb_exit
++if [mi_gdb_start] {
++    continue
++}
++
++set testfile "basics"
++set srcfile ${testfile}.c
++set binfile ${objdir}/${subdir}/mi2-reverse
++if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DFAKEARGV}] != "" } {
++     untested mi2-reverse.exp
++     return -1
++}
++
++mi_run_to_main
++
++if [target_info exists gdb,use_precord] {
++    # Activate process record/replay
++    if [mi_gdb_test "-interpreter-exec console record" \
++	{\^done} "Turn on process record"] {
++	warning "Fail to activate process record/replay, tests in this group will not be performed.\n";
++	return -1
++    }
++}
++
++# Locate line numbers in basics.c.
++set line_callee4_head  [gdb_get_line_number "callee4 ("]
++set line_callee4_body  [expr $line_callee4_head + 2]
++set line_callee3_head  [gdb_get_line_number "callee3 ("]
++set line_callee3_body  [expr $line_callee3_head + 2]
++set line_callee3_close [expr $line_callee3_head + 3]
++set line_callee2_head  [gdb_get_line_number "callee2 ("]
++set line_callee2_body  [expr $line_callee2_head + 2]
++set line_callee2_close [expr $line_callee2_head + 3]
++set line_callee1_head  [gdb_get_line_number "callee1 ("]
++set line_callee1_body  [expr $line_callee1_head + 2]
++set line_callee1_close [expr $line_callee1_head + 3]
++set line_callme_head   [gdb_get_line_number "callme"]
++set line_callme_body   [expr $line_callme_head + 2]
++set line_main_head     [gdb_get_line_number "main ("]
++set line_main_body     [expr $line_main_head + 2]
++set line_main_hello    [gdb_get_line_number "Hello, World!"]
++set line_main_callme_1 [gdb_get_line_number "callme (1"]
++
++# Forward execute to the callme() function, so that we can
++# execute backward from there.
++mi_continue_to callme
++mi_delete_breakpoints
++
++proc test_controlled_execution_reverse {} {
++    global mi_gdb_prompt
++    global srcfile
++    global hex
++
++    global line_callee4_head line_callee4_body
++    global line_callee3_head line_callee3_body line_callee3_close
++    global line_callee2_head line_callee2_body line_callee2_close
++    global line_callee1_head line_callee1_body line_callee1_close
++    global line_main_head    line_main_body
++    global line_main_hello   line_main_callme_1
++
++    # Test exec-reverse-finish
++
++    mi_execute_to "exec-finish --reverse" \
++	"end-stepping-range" "main" "" \
++	"basics.c" $line_main_callme_1 "" \
++	"reverse finish from callme"
++
++    # Test exec-reverse-next
++    #   It takes two steps to get back to the previous line,
++    #   as the first step moves us to the start of the current line,
++    #   and the one after that moves back to the previous line.
++
++    mi_execute_to "exec-next --reverse 2" \
++ 	"end-stepping-range" "main" "" \
++ 	"basics.c" $line_main_hello "" \
++ 	"reverse next to get over the call to do_nothing"
++
++    # Test exec-reverse-step
++
++    mi_execute_to "exec-step --reverse" \
++ 	"end-stepping-range" "callee1" \
++	"\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument\.\\\\\"\"\},\{name=\"fltarg\",value=\"3.5\"\}" \
++ 	"basics.c" $line_callee1_close "" \
++ 	"reverse step to callee1"
++
++    mi_execute_to "exec-step --reverse" \
++ 	"end-stepping-range" "callee2" \
++	"\{name=\"intarg\",value=\"2\"\},\{name=\"strarg\",value=\"$hex \\\\\"A string argument\.\\\\\"\"\}" \
++ 	"basics.c" $line_callee2_close "" \
++ 	"reverse step to callee2"
++
++    mi_execute_to "exec-step --reverse" \
++ 	"end-stepping-range" "callee3" \
++	"\{name=\"strarg\",value=\"$hex \\\\\"A string argument\.\\\\\"\"\}" \
++ 	"basics.c" $line_callee3_close "" \
++ 	"reverse step to callee3"
++
++    mi_execute_to "exec-step --reverse" \
++ 	"end-stepping-range" "callee4" "" \
++ 	"basics.c" "\[0-9\]+" "" \
++ 	"reverse step to callee4"
++
++    # Test exec-reverse-[step|next]-instruction
++
++    mi_execute_to "exec-step-instruction --reverse" \
++        "end-stepping-range" "callee4" "" \
++        "basics.c" "\[0-9\]+" "" \
++        "reverse-step-instruction at callee4"
++
++    mi_execute_to "exec-next-instruction --reverse" \
++        "end-stepping-range" "callee4" "" \
++        "basics.c" "\[0-9\]+" "" \
++        "reverse-next-instruction at callee4"
++
++    # Test exec-reverse-continue
++
++    mi_create_breakpoint "-t basics.c:$line_callee3_head" \
++	3 del callee3 ".*basics.c" $line_callee3_head $hex \
++	"insert temp breakpoint at basics.c:$line_callee3_head"
++
++    mi_execute_to "exec-continue --reverse" \
++        "breakpoint-hit" "callee3" \
++	"\{name=\"strarg\",value=\"$hex \\\\\"A string argument\.\\\\\"\"\}" \
++        "basics.c" "\[0-9\]+" \
++	{ "" "disp=\"del\""} \
++        "reverse-continue at callee3"
++
++    mi_execute_to "exec-continue --reverse" \
++        "" "main" "" \
++        "basics.c" $line_main_body "" \
++        "reverse-continue at main"
++}
++
++test_controlled_execution_reverse
++
++mi_gdb_exit
++return 0
+Index: gdb/testsuite/gdb.mi/mi-simplerun.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-simplerun.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi-simplerun.exp
+--- gdb/testsuite/gdb.mi/mi-simplerun.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi-simplerun.exp	25 Jan 2011 18:19:07 -0000
+@@ -25,6 +25,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-stack.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-stack.exp,v
+retrieving revision 1.9
+diff -u -p -r1.9 mi-stack.exp
+--- gdb/testsuite/gdb.mi/mi-stack.exp	29 Apr 2010 22:01:49 -0000	1.9
++++ gdb/testsuite/gdb.mi/mi-stack.exp	25 Jan 2011 18:19:07 -0000
+@@ -23,6 +23,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-stepi.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-stepi.exp,v
+retrieving revision 1.8
+diff -u -p -r1.8 mi-stepi.exp
+--- gdb/testsuite/gdb.mi/mi-stepi.exp	29 Apr 2010 22:01:49 -0000	1.8
++++ gdb/testsuite/gdb.mi/mi-stepi.exp	25 Jan 2011 18:19:07 -0000
+@@ -23,6 +23,9 @@
+ # the correct output response to MI operations.  
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-syn-frame.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-syn-frame.exp,v
+retrieving revision 1.6
+diff -u -p -r1.6 mi-syn-frame.exp
+--- gdb/testsuite/gdb.mi/mi-syn-frame.exp	29 Apr 2010 22:01:49 -0000	1.6
++++ gdb/testsuite/gdb.mi/mi-syn-frame.exp	25 Jan 2011 18:19:07 -0000
+@@ -17,6 +17,9 @@
+ # Test MI output with synthetic frames on the stack (call dummies,
+ # signal handlers).
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ if [target_info exists gdb,nosignals] {
+     verbose "Skipping mi-syn-frame.exp because of nosignals."
+     continue
+Index: gdb/testsuite/gdb.mi/mi-until.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-until.exp,v
+retrieving revision 1.8
+diff -u -p -r1.8 mi-until.exp
+--- gdb/testsuite/gdb.mi/mi-until.exp	29 Apr 2010 22:01:49 -0000	1.8
++++ gdb/testsuite/gdb.mi/mi-until.exp	25 Jan 2011 18:19:07 -0000
+@@ -23,6 +23,9 @@
+ # the correct output response to MI operations.  
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-var-block.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-var-block.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi-var-block.exp
+--- gdb/testsuite/gdb.mi/mi-var-block.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi-var-block.exp	25 Jan 2011 18:19:07 -0000
+@@ -20,6 +20,9 @@
+ #
+ 
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-var-child-f.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-var-child-f.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 mi-var-child-f.exp
+--- gdb/testsuite/gdb.mi/mi-var-child-f.exp	29 Apr 2010 22:01:49 -0000	1.4
++++ gdb/testsuite/gdb.mi/mi-var-child-f.exp	25 Jan 2011 18:19:07 -0000
+@@ -15,6 +15,9 @@
+ 
+ # Test variable objects treat non-zero offsets in Fortran arrays correctly.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-var-child.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-var-child.exp,v
+retrieving revision 1.10
+diff -u -p -r1.10 mi-var-child.exp
+--- gdb/testsuite/gdb.mi/mi-var-child.exp	29 Apr 2010 22:01:49 -0000	1.10
++++ gdb/testsuite/gdb.mi/mi-var-child.exp	25 Jan 2011 18:19:07 -0000
+@@ -20,6 +20,9 @@
+ #
+ 
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi-var-cmd.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-var-cmd.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi-var-cmd.exp
+--- gdb/testsuite/gdb.mi/mi-var-cmd.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi-var-cmd.exp	25 Jan 2011 18:19:07 -0000
+@@ -19,6 +19,9 @@
+ # Verify that, using the MI, we can create, update, delete variables.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ 
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+Index: gdb/testsuite/gdb.mi/mi-var-cp.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-var-cp.exp,v
+retrieving revision 1.3
+diff -u -p -r1.3 mi-var-cp.exp
+--- gdb/testsuite/gdb.mi/mi-var-cp.exp	29 Apr 2010 22:01:49 -0000	1.3
++++ gdb/testsuite/gdb.mi/mi-var-cp.exp	25 Jan 2011 18:19:07 -0000
+@@ -13,6 +13,9 @@
+ # You should have received a copy of the GNU General Public License
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ if { [skip_cplus_tests] } { continue }
+ 
+ load_lib mi-support.exp
+Index: gdb/testsuite/gdb.mi/mi-var-display.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-var-display.exp,v
+retrieving revision 1.10
+diff -u -p -r1.10 mi-var-display.exp
+--- gdb/testsuite/gdb.mi/mi-var-display.exp	29 Apr 2010 22:01:49 -0000	1.10
++++ gdb/testsuite/gdb.mi/mi-var-display.exp	25 Jan 2011 18:19:07 -0000
+@@ -19,6 +19,9 @@
+ # Verify that, using the MI, we can create, update, delete variables.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ 
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+Index: gdb/testsuite/gdb.mi/mi-var-invalidate.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-var-invalidate.exp,v
+retrieving revision 1.3
+diff -u -p -r1.3 mi-var-invalidate.exp
+--- gdb/testsuite/gdb.mi/mi-var-invalidate.exp	29 Apr 2010 22:01:49 -0000	1.3
++++ gdb/testsuite/gdb.mi/mi-var-invalidate.exp	25 Jan 2011 18:19:07 -0000
+@@ -19,6 +19,8 @@
+ # previously defined MI variables.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
+ 
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+Index: gdb/testsuite/gdb.mi/mi-watch.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-watch.exp,v
+retrieving revision 1.8
+diff -u -p -r1.8 mi-watch.exp
+--- gdb/testsuite/gdb.mi/mi-watch.exp	29 Apr 2010 22:01:49 -0000	1.8
++++ gdb/testsuite/gdb.mi/mi-watch.exp	25 Jan 2011 18:19:07 -0000
+@@ -25,6 +25,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-basics.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-basics.exp,v
+retrieving revision 1.9
+diff -u -p -r1.9 mi2-basics.exp
+--- gdb/testsuite/gdb.mi/mi2-basics.exp	29 Apr 2010 22:01:49 -0000	1.9
++++ gdb/testsuite/gdb.mi/mi2-basics.exp	25 Jan 2011 18:19:07 -0000
+@@ -26,6 +26,9 @@
+ # but the command syntax and correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-break.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-break.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi2-break.exp
+--- gdb/testsuite/gdb.mi/mi2-break.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi2-break.exp	25 Jan 2011 18:19:07 -0000
+@@ -25,6 +25,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-cli.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-cli.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi2-cli.exp
+--- gdb/testsuite/gdb.mi/mi2-cli.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi2-cli.exp	25 Jan 2011 18:19:07 -0000
+@@ -20,6 +20,9 @@
+ # Console commands executed via MI should use MI output wrappers, MI event
+ # handlers, etc.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-console.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-console.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi2-console.exp
+--- gdb/testsuite/gdb.mi/mi2-console.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi2-console.exp	25 Jan 2011 18:19:07 -0000
+@@ -29,6 +29,9 @@
+ # through GDB.  Check that we're either talking to a simulator or a
+ # remote target.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-disassemble.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-disassemble.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi2-disassemble.exp
+--- gdb/testsuite/gdb.mi/mi2-disassemble.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi2-disassemble.exp	25 Jan 2011 18:19:07 -0000
+@@ -21,6 +21,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-eval.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-eval.exp,v
+retrieving revision 1.6
+diff -u -p -r1.6 mi2-eval.exp
+--- gdb/testsuite/gdb.mi/mi2-eval.exp	29 Apr 2010 22:01:49 -0000	1.6
++++ gdb/testsuite/gdb.mi/mi2-eval.exp	25 Jan 2011 18:19:07 -0000
+@@ -23,6 +23,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-file.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-file.exp,v
+retrieving revision 1.8
+diff -u -p -r1.8 mi2-file.exp
+--- gdb/testsuite/gdb.mi/mi2-file.exp	29 Apr 2010 22:01:49 -0000	1.8
++++ gdb/testsuite/gdb.mi/mi2-file.exp	25 Jan 2011 18:19:07 -0000
+@@ -25,6 +25,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-hack-cli.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-hack-cli.exp,v
+retrieving revision 1.5
+diff -u -p -r1.5 mi2-hack-cli.exp
+--- gdb/testsuite/gdb.mi/mi2-hack-cli.exp	29 Apr 2010 22:01:49 -0000	1.5
++++ gdb/testsuite/gdb.mi/mi2-hack-cli.exp	25 Jan 2011 18:19:07 -0000
+@@ -17,6 +17,9 @@
+ 
+ # Some basic checks for the CLI.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-pthreads.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-pthreads.exp,v
+retrieving revision 1.6
+diff -u -p -r1.6 mi2-pthreads.exp
+--- gdb/testsuite/gdb.mi/mi2-pthreads.exp	29 Apr 2010 22:01:49 -0000	1.6
++++ gdb/testsuite/gdb.mi/mi2-pthreads.exp	25 Jan 2011 18:19:07 -0000
+@@ -20,6 +20,9 @@
+ # via these command pathways are properly executed. Console commands
+ # executed via MI should use MI output wrappers, MI event handlers, etc.
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ # This only works with native configurations
+ if {![isnative]} {
+   return
+Index: gdb/testsuite/gdb.mi/mi2-read-memory.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-read-memory.exp,v
+retrieving revision 1.6
+diff -u -p -r1.6 mi2-read-memory.exp
+--- gdb/testsuite/gdb.mi/mi2-read-memory.exp	29 Apr 2010 22:01:49 -0000	1.6
++++ gdb/testsuite/gdb.mi/mi2-read-memory.exp	25 Jan 2011 18:19:07 -0000
+@@ -26,6 +26,9 @@
+ # but the command syntax and correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-regs.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-regs.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi2-regs.exp
+--- gdb/testsuite/gdb.mi/mi2-regs.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi2-regs.exp	25 Jan 2011 18:19:07 -0000
+@@ -22,6 +22,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ 
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+Index: gdb/testsuite/gdb.mi/mi2-return.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-return.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi2-return.exp
+--- gdb/testsuite/gdb.mi/mi2-return.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi2-return.exp	25 Jan 2011 18:19:07 -0000
+@@ -23,6 +23,9 @@
+ # the correct output response to MI operations.  
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-simplerun.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-simplerun.exp,v
+retrieving revision 1.6
+diff -u -p -r1.6 mi2-simplerun.exp
+--- gdb/testsuite/gdb.mi/mi2-simplerun.exp	29 Apr 2010 22:01:49 -0000	1.6
++++ gdb/testsuite/gdb.mi/mi2-simplerun.exp	25 Jan 2011 18:19:07 -0000
+@@ -25,6 +25,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-stack.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-stack.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi2-stack.exp
+--- gdb/testsuite/gdb.mi/mi2-stack.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi2-stack.exp	25 Jan 2011 18:19:07 -0000
+@@ -23,6 +23,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-stepi.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-stepi.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi2-stepi.exp
+--- gdb/testsuite/gdb.mi/mi2-stepi.exp	29 Apr 2010 22:01:49 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi2-stepi.exp	25 Jan 2011 18:19:07 -0000
+@@ -23,6 +23,9 @@
+ # the correct output response to MI operations.  
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-syn-frame.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-syn-frame.exp,v
+retrieving revision 1.6
+diff -u -p -r1.6 mi2-syn-frame.exp
+--- gdb/testsuite/gdb.mi/mi2-syn-frame.exp	29 Apr 2010 22:01:50 -0000	1.6
++++ gdb/testsuite/gdb.mi/mi2-syn-frame.exp	25 Jan 2011 18:19:07 -0000
+@@ -17,6 +17,9 @@
+ # Test MI output with synthetic frames on the stack (call dummies,
+ # signal handlers).
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ if [target_info exists gdb,nosignals] {
+     verbose "Skipping mi-syn-frame.exp because of nosignals."
+     continue
+Index: gdb/testsuite/gdb.mi/mi2-until.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-until.exp,v
+retrieving revision 1.8
+diff -u -p -r1.8 mi2-until.exp
+--- gdb/testsuite/gdb.mi/mi2-until.exp	29 Apr 2010 22:01:50 -0000	1.8
++++ gdb/testsuite/gdb.mi/mi2-until.exp	25 Jan 2011 18:19:07 -0000
+@@ -23,6 +23,9 @@
+ # the correct output response to MI operations.  
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-var-block.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-var-block.exp,v
+retrieving revision 1.6
+diff -u -p -r1.6 mi2-var-block.exp
+--- gdb/testsuite/gdb.mi/mi2-var-block.exp	29 Apr 2010 22:01:50 -0000	1.6
++++ gdb/testsuite/gdb.mi/mi2-var-block.exp	25 Jan 2011 18:19:07 -0000
+@@ -19,6 +19,9 @@
+ # Verify that, using the MI, we can create, update, delete variables.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ 
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+Index: gdb/testsuite/gdb.mi/mi2-var-child.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-var-child.exp,v
+retrieving revision 1.5
+diff -u -p -r1.5 mi2-var-child.exp
+--- gdb/testsuite/gdb.mi/mi2-var-child.exp	21 Jan 2010 20:53:42 -0000	1.5
++++ gdb/testsuite/gdb.mi/mi2-var-child.exp	25 Jan 2011 18:19:07 -0000
+@@ -18,6 +18,9 @@
+ # Verify that, using the MI, we can create, update, delete variables.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ 
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+Index: gdb/testsuite/gdb.mi/mi2-var-cmd.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-var-cmd.exp,v
+retrieving revision 1.6
+diff -u -p -r1.6 mi2-var-cmd.exp
+--- gdb/testsuite/gdb.mi/mi2-var-cmd.exp	29 Apr 2010 22:01:50 -0000	1.6
++++ gdb/testsuite/gdb.mi/mi2-var-cmd.exp	25 Jan 2011 18:19:07 -0000
+@@ -20,6 +20,9 @@
+ #
+ 
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-var-display.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-var-display.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi2-var-display.exp
+--- gdb/testsuite/gdb.mi/mi2-var-display.exp	29 Apr 2010 22:01:50 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi2-var-display.exp	25 Jan 2011 18:19:07 -0000
+@@ -20,6 +20,9 @@
+ #
+ 
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 
+Index: gdb/testsuite/gdb.mi/mi2-watch.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi2-watch.exp,v
+retrieving revision 1.6
+diff -u -p -r1.6 mi2-watch.exp
+--- gdb/testsuite/gdb.mi/mi2-watch.exp	29 Apr 2010 22:01:50 -0000	1.6
++++ gdb/testsuite/gdb.mi/mi2-watch.exp	25 Jan 2011 18:19:07 -0000
+@@ -25,6 +25,9 @@
+ # but to verify the correct output response to MI operations.
+ #
+ 
++gdb_suppress_entire_file "Tests disabled."
++return
++
+ load_lib mi-support.exp
+ set MIFLAGS "-i=mi2"
+ 

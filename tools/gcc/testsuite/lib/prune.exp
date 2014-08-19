@@ -1,4 +1,4 @@
-#   Copyright (C) 1997-2013 Free Software Foundation, Inc.
+#   Copyright (C) 1997-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 if ![info exists TEST_ALWAYS_FLAGS] {
     set TEST_ALWAYS_FLAGS ""
 }
-set TEST_ALWAYS_FLAGS "-fno-diagnostics-show-caret $TEST_ALWAYS_FLAGS"
+set TEST_ALWAYS_FLAGS "-fno-diagnostics-show-caret -fdiagnostics-color=never $TEST_ALWAYS_FLAGS"
 
 proc prune_gcc_output { text } {
     #send_user "Before:$text\n"
@@ -59,7 +59,7 @@ proc prune_gcc_output { text } {
 
     # Ignore harmless warnings from Xcode 3.2.x.
     regsub -all "(^|\n)\[^\n\]*ld: warning: can't add line info to anonymous symbol\[^\n\]*" $text "" text
-    regsub -all "(^|\n)\[^\n\]*warning: DWARFDebugInfoEntry::AppendDependants\[^\n\]*AT_\[^\n\]*_bound\[^\n\]*FORM_ref4\[^\n\]*" $text "" text
+    regsub -all "(^|\n)\[^\n\]*warning: DWARFDebugInfoEntry::AppendDependants\[^\n\]*AT_\[^\n\]*FORM_ref4\[^\n\]*" $text "" text
     regsub -all "(^|\n)\[^\n\]*warning:\[^\n\]*TAG_variable:  AT_location\[^\n\]*didn't have valid function low pc\[^\n\]*" $text "" text
 
     # Ignore harmless warnings from Xcode 4.0.

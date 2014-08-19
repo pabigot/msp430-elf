@@ -1,8 +1,8 @@
 /* Test that SRA replacement can deal with assignments that have
    sub-replacements on one side and a single scalar replacement on another.  */
 /* { dg-do run } */
-/* { dg-options "-O1" } */
 /* { dg-require-effective-target int32plus } */
+/* { dg-options "-O1" } */
 
 struct A
 {
@@ -96,7 +96,7 @@ main (void)
   b = 0;
   gu1.b.l = 20000000;
   s = bar ();
-  if (s != 20000000)
+  if (s != (int)20000000)
     __builtin_abort ();
   if (gu2.b.l != 20000000)
     __builtin_abort ();

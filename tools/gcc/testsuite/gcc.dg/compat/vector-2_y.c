@@ -1,5 +1,6 @@
 /* { dg-options "-w" } */
 /* { dg-options "-w -mno-mmx -Wno-psabi" { target { i?86-*-* x86_64-*-* } } } */
+/* { dg-options "-m64bit-doubles -w" { target rx-*-* } } */
 
 #ifndef SKIP_ATTRIBUTE
 

@@ -1,7 +1,7 @@
 ; CPU description file generator for the GNU Binutils.
 ; This is invoked to build: $arch-desc.[ch], $arch-opinst.c,
 ; $arch-opc.h, $arch-opc.c, $arch-asm.in, $arch-dis.in, and $arch-ibld.[ch].
-; Copyright (C) 2000, 2009 Red Hat, Inc.
+; Copyright (C) 2000 Red Hat, Inc.
 ; This file is part of CGEN.
 ;
 ; This is a standalone script, we don't load anything until we parse the
@@ -10,6 +10,9 @@
 ; Load the various support routines.
 
 (define (load-files srcdir)
+  ; Fix up Scheme to be what we use (guile is always in flux).
+  (primitive-load-path (string-append srcdir "/fixup.scm"))
+
   (load (string-append srcdir "/read.scm"))
   (load (string-append srcdir "/desc.scm"))
   (load (string-append srcdir "/desc-cpu.scm"))
@@ -20,10 +23,18 @@
   (load (string-append srcdir "/opc-opinst.scm"))
 )
 
+; Records the -OPC arg which specifies the path to the .opc file.
+(define -opc-file-path #f)
+(define (opc-file-path)
+  (if -opc-file-path
+      -opc-file-path
+      (error ".opc file unspecified, missing -OPC argument"))
+)
+
 (define opc-arguments
   (list
    (list "-OPC" "file" "specify path to .opc file"
-	 (lambda (arg) (set-opc-file-path! arg))
+	 (lambda (arg) (set! -opc-file-path arg))
 	 #f)
    (list "-H" "file" "generate $arch-desc.h in <file>"
 	 #f

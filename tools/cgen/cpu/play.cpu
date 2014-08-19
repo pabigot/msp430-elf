@@ -6,8 +6,6 @@
 ; This file is for experimental purposes.  Don't expect it to be correct
 ; or up to date.
 
-(define-rtl-version 0 7)
-
 (include "simplify.inc")
 
 (define-arch
@@ -116,45 +114,6 @@
 
 (dnh h-pc "program counter" (PC PROFILE) (pc) () () ())
 
-; get the real index of a gpr on the circular register queue.
-
-(define-pmacro (real-gpr-index index)
-  (if WI (lt index 20)
-    ; global reg
-    index
-    ; local reg
-    (sequence WI ((WI pr))
-      (set pr (add index (reg h-gr 0)))
-      (if WI (ge pr 256)
-    (sub pr 236)
-    pr
-      )
-    )
-  )
-)
-
-; All accesses to gprs in instructions use {get|set}-{gpr|vgpr}
-; functions.  These functions handle register 0 being 0.  This cannot
-; be handled without understanding the context of the get or set since
-; regs 1-3 are 0 for vector instructions but not for scalar
-; instructions.
-;
-; general purpose registers.
-
-;(define-hardware
-;  (name h-gpr)
-;  (comment "General Purpose Registers")
-;  (type register DI (256))
-;  (indices keyword "" (gen-register-names "r" 256 0 1))
-;  (get (index)
-;    (raw-reg DI h-gpr (real-gpr-index index))
-;  )
-;  (set (index newval)
-;    (set (raw-reg DI h-gpr (real-gpr-index index)) newval)
-;  )
-;)
-
-
 (define-hardware
   (name h-gr)
   (comment "general registers")
@@ -165,12 +124,6 @@
 	     (r0 0) (r1 1) (r2 2) (r3 3) (r4 4) (r5 5) (r6 6) (r7 7)
 	     (r8 8) (r9 9) (r10 10) (r11 11) (r12 12) (r13 13) (r14 14) (r15 15)
 	     ))
-  (get (index)
-    (raw-reg WI h-gr (real-gpr-index index))
-  )
-  (set (index newval)
-    (set (raw-reg WI h-gr (real-gpr-index index)) newval)
-  )
 )
 
 (define-hardware
@@ -181,25 +134,14 @@
   (set (newval) (nop))
 )
 
-; These bits are actually part of the PS register
+; These bits are actualy part of the PS register
 (dsh h-nbit "negative bit" () (register BI))
 (dsh h-zbit "zero     bit" () (register BI))
 (dsh h-vbit "overflow bit" () (register BI))
 (dsh h-cbit "carry    bit" () (register BI))
 
-(define-hardware
-  (name ps)
-  (type register QI)
-  (layout h-nbit h-zbit h-vbit h-cbit (0 4))
-)
-
 (dsh h-df "df test" () (register DF))
 (dsh h-tf "tf test" () (register TF))
-
-(define-hardware
-  (name accum)
-  (type register (INT 64))
-)
 
 ; Operand attributes.
 
@@ -233,8 +175,7 @@
 (dni add "add"
      ()
      "add $dr,$sr"
-     ; Use (f-op1 OP1_4) to exercise it.
-     (+ (f-op1 OP1_4) OP2_0 dr sr)
+     (+ OP1_4 OP2_0 dr sr)
      (sequence ()
 	       (set vbit (add-oflag dr sr (const 0)))
 	       (set cbit (add-cflag dr sr (const 0)))
@@ -250,7 +191,7 @@
      (+ OP1_4 OP2_1 dr sr)
      (sequence ((WI tmp1))
 	       (parallel ()
-			 (set (local DFLT tmp1) (add dr sr))
+			 (set tmp1 (add dr sr))
 			 (set vbit (add-oflag dr sr (const 0)))
 			 (set cbit (add-cflag dr sr (const 0))))
 	       (set zbit (zflag tmp1))
@@ -371,44 +312,6 @@
 			     (reg h-gr (add (regno sr) (const 2)))
 			     (reg h-gr (add (regno sr) (const 3))))
 		    (split TF SI temp))
-	       )
-     ()
-)
-
-;;(define-pmacro (no-ext-expr mode expr) expr)
-;;(define-pmacro (ext-expr mode expr) (ext mode expr))
-;;(define-pmacro (zext-expr mode expr) (zext mode expr))
-
-(define-pmacro (load-op suffix op2-op mode ext-op)
- (.let (
-	(no-ext-expr (.pmacro (mode expr) expr))
-	(ext-expr (.pmacro (mode expr) (ext mode expr)))
-	(zext-expr (.pmacro (mode expr) (zext mode expr)))
-	 )
-  (begin
-    (dni (.sym ld suffix) (.str "ld" suffix)
-	 ()
-	 (.str "ld" suffix " $dr,@@$sr")
-	 (+ OP1_2 op2-op dr sr)
-	 (set dr (ext-op WI (mem mode sr)))
-	 ())
-  )
- )
-)
-
-(load-op "" OP2_12 WI no-ext-expr)
-(load-op b OP2_8 QI ext-expr)
-(load-op h OP2_10 HI ext-expr)
-(load-op ub OP2_9 QI zext-expr)
-(load-op uh OP2_11 HI zext-expr)
-
-(dni do-count-test "do-count-test"
-     ()
-     "do-count-test $dr,$sr"
-     (+ OP1_7 OP2_0 dr sr)
-     (sequence ()
-	       (do-count VOID iter 4 (set dr (add sr iter)))
-	       (do-count iter (and sr 7) (set dr (add sr iter)))
 	       )
      ()
 )

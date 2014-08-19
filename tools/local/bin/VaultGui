@@ -1,0 +1,287 @@
+#!/bin/bash
+
+LANG=C; export LANG
+prefix="/opt/redhat"
+bindir="`dirname $0`"
+insttop="`dirname $bindir`"
+
+host="*"
+target="*"
+powerpcboards="noboard"
+armv5lboards="noboard"
+armv5bboards="noboard"
+skipman=0
+justman=0
+skipiso=0
+winsup=/opt/redhat/release-vault/cygwin-1.6.10-bins.zip
+
+while [ $# -ne 0 ]; do
+    option=$1
+    shift
+    
+    case $option in
+    --*=*)
+        optarg=`echo $option | sed -e 's/^[^=]*=//'`
+        ;;
+    esac
+    case $option in
+    --justman)
+        justman=1
+        ;;
+    --skipiso)
+        skipiso=1
+        ;;
+    --skipman)
+        skipman=1
+        ;;
+    --x)
+        set -x
+        ;;
+    --winsup*)
+	winsup="$optarg"
+	;;
+    --prefix*)
+	prefix="$optarg"
+	;;
+    --rele*)
+	release="$optarg"
+	;;
+    --host*)
+	host="$optarg"
+	;;
+    --armv5lb*)
+	armv5lboards="$optarg"
+	;;
+    --armv5lb*)
+	armv5lboards="$optarg"
+	;;
+    --armv5bb*)
+	armv5bboards="$optarg"
+	;;
+    --powerpcb*)
+	powerpcboards="$optarg"
+	;;
+    --vaulttop*)
+	vaulttop="$optarg"
+	;;
+    --targ*)
+	target="$optarg"
+	;;
+    *)
+        echo "${ProgName}: Invalid argument \"$option\""
+        exit 1
+        ;;
+    esac
+done
+
+if [ "X$release" = X ]; then
+  echo "Release not set.  Use --release=name"
+  exit 1
+fi
+
+s_top="$prefix/$release/sources/tools"
+if [ -f "$s_top/cross/REDHAT" ]; then
+  cd "$s_top/cross"
+elif [ -f "$s_top/native/REDHAT" ]; then
+  cd "$s_top/native"
+else
+  echo "Could not find toolchain sources under $s_top"
+  exit 1
+fi
+cp -f REDHAT COPYING* "$prefix/$release"
+
+if [ "X$vaulttop" = X ]; then
+  vaulttop="$prefix/release-vault/$release/new"
+fi
+mkdir -p "$vaulttop"
+cd "$vaulttop"
+
+if [ $skipman = 0 ]; then
+  echo "Generating manifests at `date`"
+  rm -rf manifest.old
+  if [ -d manifest ]; then
+    mv -f manifest manifest.old 2> /dev/null
+  fi
+  "$bindir/mkmanifest.sh" $release
+  if [ $justman = 1 ]; then
+    exit 0
+  fi
+else
+  echo "Skipping manifest generation"
+fi
+
+rm -rf templates.old 2> /dev/null
+if [ -d templates ]; then
+  mv -f templates templates.old 2> /dev/null
+fi
+cp -a "$insttop/installer-templates" templates
+
+suffix="`echo $release | sed 's/[a-z0-9]*-//'`"
+echo "Generating bom files from manifest at `date`"
+for i in `echo /opt/redhat/$release/H-$host`; do
+	for j in `ls -d $i/$target | grep -v '/lib$' | grep -v '/libexec$' | grep -v '/bin$' | \
+	grep -v '/etc$' | grep -v '/include'` ; do
+		i="`echo $i | sed s,/opt/redhat/$release/H-,,g`"
+		j="`basename $j`"
+		k=""
+		echo "Working on $i-x-$j at `date`"
+		if [ $i = i686-pc-cygwin ]; then
+			if [ $j = i686-pc-cygwin ]; then
+				if [ ! -f $prefix/$release/H-$i/bin/as.exe ]; then
+					continue
+				fi
+			fi
+			if [ ! -f winsup.zip ]; then
+				echo "Generating winsup archive for release"
+				rm -rf winsup
+				mkdir winsup
+				pushd winsup
+					mkdir -p "$release/H-i686-pc-cygwin/bin"
+					pushd "$release/H-i686-pc-cygwin/bin"
+						unzip -q "$winsup"
+					popd
+					zip -q -r ../winsup.zip `find "$release" -type f -print`
+				popd
+				rm -rf winsup
+			fi
+		fi
+		rm -f bom/$i-manifest*
+		case $j in
+			armv5-softvfp-linux-gnu)
+				bsp="$armv5lboards"
+				for k in $armv5lboards; do
+					rm -rf bom/$i/$j/$k
+					"$bindir/mkboms.sh" --host=$i --target=$j --board=$k --release=$release --title="Red Hat GNUPro $suffix"
+				done
+				;;
+			armv5b-linux-gnu)
+				bsp="$armv5bboards"
+				for k in $armv5bboards; do
+					rm -rf bom/$i/$j/$k
+					"$bindir/mkboms.sh" --host=$i --target=$j --board=$k --release=$release --title="Red Hat GNUPro $suffix"
+				done
+				;;
+			*)
+				bsp="noboard"
+				rm -rf bom/$i/$j
+				"$bindir/mkboms.sh" --host=$i --target=$j --release=$release --title="Red Hat GNUPro $suffix"
+				;;
+		esac
+		echo "Adding installer links and files at `date`"
+		for k in $bsp; do
+			echo "Adding installer bits for $i-x-$j (BSP:$k)"
+			if [ X$k = Xnoboard ]; then
+				padd="$i/$j"
+			else
+				padd="$i/$j/$k"
+			fi
+			case $i in
+				*cygwin*)
+					ln -s $insttop/installer/autorun.inf bom/$padd/autorun.inf
+					ln -s $insttop/installer/install-gui.bat bom/$padd/install-gui.bat
+					;;
+				*hpux*)
+					ln -s $insttop/installer/insthpux.sh bom/$padd/insthpux.sh
+					ln -s $insttop/installer/install-gui bom/$padd/install-gui
+					;;
+				*)
+					ln -s $insttop/installer/install-gui bom/$padd/install-gui
+					;;
+			esac
+			ln -s $insttop/installer/install.tcl bom/$padd/install.tcl
+			ln -s /es/cst/installer/utils bom/$padd/utils
+			ln -s $insttop/installer/customprocs.tcl bom/$padd/customprocs.tcl
+			sed < $insttop/installer/README \
+				s/RELEASE/$release/g > bom/$padd/README
+			if [ "${i}" = "${j}" ]; then
+				srcname="src-native"
+			elif [ "${j}" = i686-pc-linux-gnulibc2.2 ]; then
+				srcname="src-native"
+			elif [ "${j}" = i686-pc-linux-gnulibc2.3 ]; then
+				srcname="src-native"
+			else
+				srcname="src-cross"
+			fi
+			cat < $insttop/installer/packages/gnupro.pkg \
+				|sed "s/HOSTTRIPLET/$i/g" \
+				|sed "s/TARGETTRIPLET/$j/g" \
+				|sed "s/BOARDNAME/$k/g" \
+				|sed "s/RELEASE/$release/g" \
+				|sed "s/SOURCE/$srcname/g" \
+				 > bom/$padd/packages/gnupro.pkg
+			chmod 644 bom/$padd/packages/gnupro.pkg
+			mkdir -p bom/$padd/img 2> /dev/null
+			for k in $insttop/installer/img/*.gif $insttop/installer/img/*.ico;
+				do ln -s $k bom/$padd/img/`basename $k`
+			done
+			cat $insttop/installer/img/custom.cfg \
+				|sed "s/TITLE/GNUPro $suffix/g" \
+				|sed "s/HOSTTRIPLET/$i/g" \
+				|sed "s/TARGETTRIPLET/$j/g" \
+				|sed "s/GNUPROVN/$release/g" \
+				|sed "s/GCCVN/3.3-$release/g" \
+				> bom/$padd/img/custom.cfg
+			chmod 644 bom/$padd/img/custom.cfg
+		done
+
+		echo "Removing irrelevent boms at `date`"
+		rm -f `find bom/$i/*hpux*/packages -name \*sysroot\*.bom` 2> /dev/null
+		rm -f `find bom/$i/*solaris*/packages -name \*sysroot\*.bom` 2> /dev/null
+		rm -f `find bom/$i/*cygwin*/packages -name \*sysroot\*.bom` 2> /dev/null
+		rm -f `find bom/$i/i686-*linux*/packages -name src-sysroot.bom` 2> /dev/null
+		rm -f `find bom/$i/i686-*linux*/packages -name src-cross.bom` 2> /dev/null
+		rm -f `find bom/$i/*-elf/packages -name src-native.bom` 2> /dev/null
+		rm -f `find bom/$i/*-elf/packages -name src-sysroot.bom` 2> /dev/null
+		rm -f `find bom/$i/*-eabi*/packages -name src-native.bom` 2> /dev/null
+		rm -f `find bom/$i/*-eabi*/packages -name src-sysroot.bom` 2> /dev/null
+		rm -f `find bom/$i/arm*-linux*/packages -name src-native.bom` 2> /dev/null
+		rm -f `find bom/$i/am33*-linux*/packages -name src-native.bom` 2> /dev/null
+		rm -f `find bom/$i/mips*-linux*/packages -name src-native.bom` 2> /dev/null
+		rm -f `find bom/$i/powerpc*-linux*/packages -name src-native.bom` 2> /dev/null
+		rm -f `find bom/$i/*-solaris*/packages -name src-cross.bom` 2> /dev/null
+		rm -f `find bom/$i/*-cygwin/packages -name src-cross.bom` 2> /dev/null
+			
+		echo "Zipping up packages at `date`"
+		for k in $bsp; do
+			if [ X$k = Xnoboard ]; then
+				board=""
+			else
+				board="--board=$k"
+			fi
+        		"$bindir/mkvault.sh" --host=$i --target=$j --release=$release $board
+			if [ "$i" = i686-pc-cygwin ]; then
+				if [ ! -f "$vaulttop/bom/$i/$j/packages/native/gnupro/binaries/winsup.zip" ]; then
+					ln "$vaulttop/winsup.zip" "$vaulttop/bom/$i/$j/packages/native/gnupro/binaries/winsup.zip"
+				fi
+			fi
+		done
+
+		echo "Zipping entire installball at `date`"
+        	pushd bom/$i
+		if [ "X$bsp" = "Xnoboard" ]; then
+			zip -9 -q -r $j.zip $j
+			if [ $skipiso = 0 ]; then
+				mkisofs -v -l -f -P 'Red Hat Inc.' -A "$release" -V "$release" -R -T -J -o "$i-x-$j.iso" $j
+			fi
+		else
+			pushd $j
+			for k in $bsp; do
+				zip -9 -q -r $k.zip $k
+				if [ $skipiso = 0 ]; then
+					mkisofs -v -l -f -P 'Red Hat Inc.' -A "$release" -V "$release" -R -T -J -o "$i-x-$j:$k.iso" $k
+				fi
+			done
+			popd
+		fi
+		popd
+		echo "Done with $i-x-$j ($k) at `date`" 
+	done
+	if [ "X$j" = X ]; then
+		continue
+	fi
+	cat `find bom/$i -name \*.bom` | sort | uniq > bom/$i-manifest
+	diff manifests/gnupro/$i-manifest bom/$i-manifest > bom/$i-manifest-diff
+	echo "Diff report for $i:"
+	cat "bom/$i-manifest-diff"
+done
+ 

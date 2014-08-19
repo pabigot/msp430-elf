@@ -25,3 +25,5 @@ int main() {
   // *** glibc detected *** ./test: free(): invalid next size (fast)
   delete d;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

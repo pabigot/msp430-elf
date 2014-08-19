@@ -32,3 +32,5 @@ int main()
   new D();
   return A::a != B::a;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

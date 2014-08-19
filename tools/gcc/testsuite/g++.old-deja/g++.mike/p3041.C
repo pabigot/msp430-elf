@@ -32,3 +32,4 @@ int main()
   C c;
   return 0;
 }
+// { dg-require-effective-target size32plus }

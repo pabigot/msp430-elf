@@ -19,3 +19,4 @@ int main(void)
 	int k=(s->foo())->i;
 	return k;
 }
+// { dg-require-effective-target size32plus }

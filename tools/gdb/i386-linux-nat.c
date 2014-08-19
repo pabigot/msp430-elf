@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux i386.
 
-   Copyright (C) 1999-2012 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,9 +25,11 @@
 #include "regset.h"
 #include "target.h"
 #include "linux-nat.h"
+#include "linux-btrace.h"
+#include "btrace.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "elf/common.h"
 #include <sys/uio.h>
 #include <sys/ptrace.h>
@@ -100,7 +102,7 @@ static int have_ptrace_getregset = -1;
   (I386_ST0_REGNUM <= (regno) && (regno) < I386_SSE_NUM_REGS)
 
 #define GETXSTATEREGS_SUPPLIES(regno) \
-  (I386_ST0_REGNUM <= (regno) && (regno) < I386_AVX_NUM_REGS)
+  (I386_ST0_REGNUM <= (regno) && (regno) < I386_MPX_NUM_REGS)
 
 /* Does the current host support the GETREGS request?  */
 int have_ptrace_getregs =
@@ -146,9 +148,9 @@ fetch_register (struct regcache *regcache, int regno)
     }
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = TIDGET (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
 
   errno = 0;
   val = ptrace (PTRACE_PEEKUSER, tid,
@@ -174,9 +176,9 @@ store_register (const struct regcache *regcache, int regno)
     return;
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = TIDGET (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
 
   errno = 0;
   regcache_raw_collect (regcache, regno, &val);
@@ -512,9 +514,9 @@ i386_linux_fetch_inferior_registers (struct target_ops *ops,
     }
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = TIDGET (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
 
   /* Use the PTRACE_GETFPXREGS request whenever possible, since it
      transfers more registers in one system call, and we'll cache the
@@ -593,9 +595,9 @@ i386_linux_store_inferior_registers (struct target_ops *ops,
     }
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = TIDGET (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
 
   /* Use the PTRACE_SETFPXREGS requests whenever possible, since it
      transfers more registers in one system call.  But remember that
@@ -650,9 +652,9 @@ i386_linux_dr_get (ptid_t ptid, int regnum)
   int tid;
   unsigned long value;
 
-  tid = TIDGET (ptid);
+  tid = ptid_get_lwp (ptid);
   if (tid == 0)
-    tid = PIDGET (ptid);
+    tid = ptid_get_pid (ptid);
 
   errno = 0;
   value = ptrace (PTRACE_PEEKUSER, tid,
@@ -670,9 +672,9 @@ i386_linux_dr_set (ptid_t ptid, int regnum, unsigned long value)
 {
   int tid;
 
-  tid = TIDGET (ptid);
+  tid = ptid_get_lwp (ptid);
   if (tid == 0)
-    tid = PIDGET (ptid);
+    tid = ptid_get_pid (ptid);
 
   errno = 0;
   ptrace (PTRACE_POKEUSER, tid,
@@ -708,8 +710,8 @@ i386_linux_dr_get_status (void)
   return i386_linux_dr_get (inferior_ptid, DR_STATUS);
 }
 
-/* Callback for linux_nat_iterate_watchpoint_lwps.  Update the debug registers
-   of LWP.  */
+/* Callback for iterate_over_lwps.  Update the debug registers of
+   LWP.  */
 
 static int
 update_debug_registers_callback (struct lwp_info *lwp, void *arg)
@@ -735,7 +737,9 @@ update_debug_registers_callback (struct lwp_info *lwp, void *arg)
 static void
 i386_linux_dr_set_control (unsigned long control)
 {
-  linux_nat_iterate_watchpoint_lwps (update_debug_registers_callback, NULL);
+  ptid_t pid_ptid = pid_to_ptid (ptid_get_pid (inferior_ptid));
+
+  iterate_over_lwps (pid_ptid, update_debug_registers_callback, NULL);
 }
 
 /* Set address REGNUM (zero based) to ADDR in all LWPs of the current
@@ -748,7 +752,7 @@ i386_linux_dr_set_addr (int regnum, CORE_ADDR addr)
 
   gdb_assert (regnum >= 0 && regnum <= DR_LASTADDR - DR_FIRSTADDR);
 
-  linux_nat_iterate_watchpoint_lwps (update_debug_registers_callback, NULL);
+  iterate_over_lwps (pid_ptid, update_debug_registers_callback, NULL);
 }
 
 /* Called when resuming a thread.
@@ -767,7 +771,8 @@ i386_linux_prepare_to_resume (struct lwp_info *lwp)
 
   if (lwp->arch_private->debug_registers_changed)
     {
-      struct i386_debug_reg_state *state = i386_debug_reg_state ();
+      struct i386_debug_reg_state *state
+	= i386_debug_reg_state (ptid_get_pid (lwp->ptid));
       int i;
 
       /* See amd64_linux_prepare_to_resume for Linux kernel note on
@@ -803,6 +808,41 @@ i386_linux_new_thread (struct lwp_info *lp)
 
   lp->arch_private = info;
 }
+
+/* linux_nat_new_fork hook.   */
+
+static void
+i386_linux_new_fork (struct lwp_info *parent, pid_t child_pid)
+{
+  pid_t parent_pid;
+  struct i386_debug_reg_state *parent_state;
+  struct i386_debug_reg_state *child_state;
+
+  /* NULL means no watchpoint has ever been set in the parent.  In
+     that case, there's nothing to do.  */
+  if (parent->arch_private == NULL)
+    return;
+
+  /* Linux kernel before 2.6.33 commit
+     72f674d203cd230426437cdcf7dd6f681dad8b0d
+     will inherit hardware debug registers from parent
+     on fork/vfork/clone.  Newer Linux kernels create such tasks with
+     zeroed debug registers.
+
+     GDB core assumes the child inherits the watchpoints/hw
+     breakpoints of the parent, and will remove them all from the
+     forked off process.  Copy the debug registers mirrors into the
+     new process so that all breakpoints and watchpoints can be
+     removed together.  The debug registers mirror will become zeroed
+     in the end before detaching the forked off process, thus making
+     this compatible with older Linux kernels too.  */
+
+  parent_pid = ptid_get_pid (parent->ptid);
+  parent_state = i386_debug_reg_state (parent_pid);
+  child_state = i386_debug_reg_state (child_pid);
+  *child_state = *parent_state;
+}
+
 
 
 /* Called by libthread_db.  Returns a pointer to the thread local
@@ -877,7 +917,7 @@ static void
 i386_linux_resume (struct target_ops *ops,
 		   ptid_t ptid, int step, enum gdb_signal signal)
 {
-  int pid = PIDGET (ptid);
+  int pid = ptid_get_pid (ptid);
 
   int request;
 
@@ -960,9 +1000,9 @@ i386_linux_read_description (struct target_ops *ops)
   static uint64_t xcr0;
 
   /* GNU/Linux LWP ID's are process ID's.  */
-  tid = TIDGET (inferior_ptid);
+  tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid); /* Not a threaded program.  */
+    tid = ptid_get_pid (inferior_ptid); /* Not a threaded program.  */
 
 #ifdef HAVE_PTRACE_GETFPXREGS
   if (have_ptrace_getfpxregs == -1)
@@ -1001,11 +1041,62 @@ i386_linux_read_description (struct target_ops *ops)
     }
 
   /* Check the native XCR0 only if PTRACE_GETREGSET is available.  */
-  if (have_ptrace_getregset
-      && (xcr0 & I386_XSTATE_AVX_MASK) == I386_XSTATE_AVX_MASK)
-    return tdesc_i386_avx_linux;
+  if (have_ptrace_getregset)
+    {
+      switch ((xcr0 & I386_XSTATE_ALL_MASK))
+	{
+	case I386_XSTATE_MPX_MASK:
+	  return tdesc_i386_mpx_linux;
+	case I386_XSTATE_AVX_MASK:
+	  return tdesc_i386_avx_linux;
+	default:
+	  return tdesc_i386_linux;
+	}
+    }
   else
     return tdesc_i386_linux;
+}
+
+/* Enable branch tracing.  */
+
+static struct btrace_target_info *
+i386_linux_enable_btrace (ptid_t ptid)
+{
+  struct btrace_target_info *tinfo;
+  struct gdbarch *gdbarch;
+
+  errno = 0;
+  tinfo = linux_enable_btrace (ptid);
+
+  if (tinfo == NULL)
+    error (_("Could not enable branch tracing for %s: %s."),
+	   target_pid_to_str (ptid), safe_strerror (errno));
+
+  /* Fill in the size of a pointer in bits.  */
+  gdbarch = target_thread_architecture (ptid);
+  tinfo->ptr_bits = gdbarch_ptr_bit (gdbarch);
+
+  return tinfo;
+}
+
+/* Disable branch tracing.  */
+
+static void
+i386_linux_disable_btrace (struct btrace_target_info *tinfo)
+{
+  int errcode = linux_disable_btrace (tinfo);
+
+  if (errcode != 0)
+    error (_("Could not disable branch tracing: %s."), safe_strerror (errcode));
+}
+
+/* Teardown branch tracing.  */
+
+static void
+i386_linux_teardown_btrace (struct btrace_target_info *tinfo)
+{
+  /* Ignore errors.  */
+  linux_disable_btrace (tinfo);
 }
 
 /* -Wmissing-prototypes */
@@ -1041,8 +1132,17 @@ _initialize_i386_linux_nat (void)
 
   t->to_read_description = i386_linux_read_description;
 
+  /* Add btrace methods.  */
+  t->to_supports_btrace = linux_supports_btrace;
+  t->to_enable_btrace = i386_linux_enable_btrace;
+  t->to_disable_btrace = i386_linux_disable_btrace;
+  t->to_teardown_btrace = i386_linux_teardown_btrace;
+  t->to_read_btrace = linux_read_btrace;
+
   /* Register the target.  */
   linux_nat_add_target (t);
   linux_nat_set_new_thread (t, i386_linux_new_thread);
+  linux_nat_set_new_fork (t, i386_linux_new_fork);
+  linux_nat_set_forget_process (t, i386_forget_process);
   linux_nat_set_prepare_to_resume (t, i386_linux_prepare_to_resume);
 }

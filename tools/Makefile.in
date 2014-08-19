@@ -575,7 +575,7 @@ all:
 
 # This is the list of directories that may be needed in RPATH_ENVVAR
 # so that programs built for the target machine work.
-TARGET_LIB_PATH = $(TARGET_LIB_PATH_libstdc++-v3)$(TARGET_LIB_PATH_libmudflap)$(TARGET_LIB_PATH_libsanitizer)$(TARGET_LIB_PATH_libssp)$(TARGET_LIB_PATH_libgomp)$(TARGET_LIB_PATH_libitm)$(TARGET_LIB_PATH_libatomic)$(HOST_LIB_PATH_gcc)
+TARGET_LIB_PATH = $(TARGET_LIB_PATH_libstdc++-v3)$(TARGET_LIB_PATH_libmudflap)$(TARGET_LIB_PATH_libsanitizer)$(TARGET_LIB_PATH_libvtv)$(TARGET_LIB_PATH_libssp)$(TARGET_LIB_PATH_libgomp)$(TARGET_LIB_PATH_libitm)$(TARGET_LIB_PATH_libatomic)$(HOST_LIB_PATH_gcc)
 
 @if target-libstdc++-v3
 TARGET_LIB_PATH_libstdc++-v3 = $$r/$(TARGET_SUBDIR)/libstdc++-v3/src/.libs:
@@ -588,6 +588,10 @@ TARGET_LIB_PATH_libmudflap = $$r/$(TARGET_SUBDIR)/libmudflap/.libs:
 @if target-libsanitizer
 TARGET_LIB_PATH_libsanitizer = $$r/$(TARGET_SUBDIR)/libsanitizer/.libs:
 @endif target-libsanitizer
+
+@if target-libvtv
+TARGET_LIB_PATH_libvtv = $$r/$(TARGET_SUBDIR)/libvtv/.libs:
+@endif target-libvtv
 
 @if target-libssp
 TARGET_LIB_PATH_libssp = $$r/$(TARGET_SUBDIR)/libssp/.libs:
@@ -624,7 +628,7 @@ HOST_LIB_PATH_gmp = \
 
 @if mpfr
 HOST_LIB_PATH_mpfr = \
-  $$r/$(HOST_SUBDIR)/mpfr/src/.libs:$$r/$(HOST_SUBDIR)/prev-mpfr/src/.libs:
+  $$r/$(HOST_SUBDIR)/mpfr/.libs:$$r/$(HOST_SUBDIR)/prev-mpfr/.libs:
 @endif mpfr
 
 @if mpc
@@ -919,17 +923,13 @@ configure-host:  \
     maybe-configure-libtermcap \
     maybe-configure-utils \
     maybe-configure-gnattools \
-    maybe-configure-lto-plugin \
-    maybe-configure-ide \
-    maybe-configure-ecos-monitors \
-    maybe-configure-vim \
-    maybe-configure-acovea
+    maybe-configure-lto-plugin
 .PHONY: configure-target
 configure-target:  \
-    maybe-configure-target-libdsp \
     maybe-configure-target-libstdc++-v3 \
     maybe-configure-target-libmudflap \
     maybe-configure-target-libsanitizer \
+    maybe-configure-target-libvtv \
     maybe-configure-target-libssp \
     maybe-configure-target-newlib \
     maybe-configure-target-libgcc \
@@ -1071,14 +1071,9 @@ all-host: maybe-all-gnattools
 @if lto-plugin-no-bootstrap
 all-host: maybe-all-lto-plugin
 @endif lto-plugin-no-bootstrap
-all-host: maybe-all-ide
-all-host: maybe-all-ecos-monitors
-all-host: maybe-all-vim
-all-host: maybe-all-acovea
 
 .PHONY: all-target
 
-all-target: maybe-all-target-libdsp
 @if target-libstdc++-v3-no-bootstrap
 all-target: maybe-all-target-libstdc++-v3
 @endif target-libstdc++-v3-no-bootstrap
@@ -1086,6 +1081,9 @@ all-target: maybe-all-target-libmudflap
 @if target-libsanitizer-no-bootstrap
 all-target: maybe-all-target-libsanitizer
 @endif target-libsanitizer-no-bootstrap
+@if target-libvtv-no-bootstrap
+all-target: maybe-all-target-libvtv
+@endif target-libvtv-no-bootstrap
 all-target: maybe-all-target-libssp
 all-target: maybe-all-target-newlib
 @if target-libgcc-no-bootstrap
@@ -1171,17 +1169,13 @@ info-host: maybe-info-libtermcap
 info-host: maybe-info-utils
 info-host: maybe-info-gnattools
 info-host: maybe-info-lto-plugin
-info-host: maybe-info-ide
-info-host: maybe-info-ecos-monitors
-info-host: maybe-info-vim
-info-host: maybe-info-acovea
 
 .PHONY: info-target
 
-info-target: maybe-info-target-libdsp
 info-target: maybe-info-target-libstdc++-v3
 info-target: maybe-info-target-libmudflap
 info-target: maybe-info-target-libsanitizer
+info-target: maybe-info-target-libvtv
 info-target: maybe-info-target-libssp
 info-target: maybe-info-target-newlib
 info-target: maybe-info-target-libgcc
@@ -1258,17 +1252,13 @@ dvi-host: maybe-dvi-libtermcap
 dvi-host: maybe-dvi-utils
 dvi-host: maybe-dvi-gnattools
 dvi-host: maybe-dvi-lto-plugin
-dvi-host: maybe-dvi-ide
-dvi-host: maybe-dvi-ecos-monitors
-dvi-host: maybe-dvi-vim
-dvi-host: maybe-dvi-acovea
 
 .PHONY: dvi-target
 
-dvi-target: maybe-dvi-target-libdsp
 dvi-target: maybe-dvi-target-libstdc++-v3
 dvi-target: maybe-dvi-target-libmudflap
 dvi-target: maybe-dvi-target-libsanitizer
+dvi-target: maybe-dvi-target-libvtv
 dvi-target: maybe-dvi-target-libssp
 dvi-target: maybe-dvi-target-newlib
 dvi-target: maybe-dvi-target-libgcc
@@ -1345,17 +1335,13 @@ pdf-host: maybe-pdf-libtermcap
 pdf-host: maybe-pdf-utils
 pdf-host: maybe-pdf-gnattools
 pdf-host: maybe-pdf-lto-plugin
-pdf-host: maybe-pdf-ide
-pdf-host: maybe-pdf-ecos-monitors
-pdf-host: maybe-pdf-vim
-pdf-host: maybe-pdf-acovea
 
 .PHONY: pdf-target
 
-pdf-target: maybe-pdf-target-libdsp
 pdf-target: maybe-pdf-target-libstdc++-v3
 pdf-target: maybe-pdf-target-libmudflap
 pdf-target: maybe-pdf-target-libsanitizer
+pdf-target: maybe-pdf-target-libvtv
 pdf-target: maybe-pdf-target-libssp
 pdf-target: maybe-pdf-target-newlib
 pdf-target: maybe-pdf-target-libgcc
@@ -1432,17 +1418,13 @@ html-host: maybe-html-libtermcap
 html-host: maybe-html-utils
 html-host: maybe-html-gnattools
 html-host: maybe-html-lto-plugin
-html-host: maybe-html-ide
-html-host: maybe-html-ecos-monitors
-html-host: maybe-html-vim
-html-host: maybe-html-acovea
 
 .PHONY: html-target
 
-html-target: maybe-html-target-libdsp
 html-target: maybe-html-target-libstdc++-v3
 html-target: maybe-html-target-libmudflap
 html-target: maybe-html-target-libsanitizer
+html-target: maybe-html-target-libvtv
 html-target: maybe-html-target-libssp
 html-target: maybe-html-target-newlib
 html-target: maybe-html-target-libgcc
@@ -1519,17 +1501,13 @@ TAGS-host: maybe-TAGS-libtermcap
 TAGS-host: maybe-TAGS-utils
 TAGS-host: maybe-TAGS-gnattools
 TAGS-host: maybe-TAGS-lto-plugin
-TAGS-host: maybe-TAGS-ide
-TAGS-host: maybe-TAGS-ecos-monitors
-TAGS-host: maybe-TAGS-vim
-TAGS-host: maybe-TAGS-acovea
 
 .PHONY: TAGS-target
 
-TAGS-target: maybe-TAGS-target-libdsp
 TAGS-target: maybe-TAGS-target-libstdc++-v3
 TAGS-target: maybe-TAGS-target-libmudflap
 TAGS-target: maybe-TAGS-target-libsanitizer
+TAGS-target: maybe-TAGS-target-libvtv
 TAGS-target: maybe-TAGS-target-libssp
 TAGS-target: maybe-TAGS-target-newlib
 TAGS-target: maybe-TAGS-target-libgcc
@@ -1606,17 +1584,13 @@ install-info-host: maybe-install-info-libtermcap
 install-info-host: maybe-install-info-utils
 install-info-host: maybe-install-info-gnattools
 install-info-host: maybe-install-info-lto-plugin
-install-info-host: maybe-install-info-ide
-install-info-host: maybe-install-info-ecos-monitors
-install-info-host: maybe-install-info-vim
-install-info-host: maybe-install-info-acovea
 
 .PHONY: install-info-target
 
-install-info-target: maybe-install-info-target-libdsp
 install-info-target: maybe-install-info-target-libstdc++-v3
 install-info-target: maybe-install-info-target-libmudflap
 install-info-target: maybe-install-info-target-libsanitizer
+install-info-target: maybe-install-info-target-libvtv
 install-info-target: maybe-install-info-target-libssp
 install-info-target: maybe-install-info-target-newlib
 install-info-target: maybe-install-info-target-libgcc
@@ -1693,17 +1667,13 @@ install-pdf-host: maybe-install-pdf-libtermcap
 install-pdf-host: maybe-install-pdf-utils
 install-pdf-host: maybe-install-pdf-gnattools
 install-pdf-host: maybe-install-pdf-lto-plugin
-install-pdf-host: maybe-install-pdf-ide
-install-pdf-host: maybe-install-pdf-ecos-monitors
-install-pdf-host: maybe-install-pdf-vim
-install-pdf-host: maybe-install-pdf-acovea
 
 .PHONY: install-pdf-target
 
-install-pdf-target: maybe-install-pdf-target-libdsp
 install-pdf-target: maybe-install-pdf-target-libstdc++-v3
 install-pdf-target: maybe-install-pdf-target-libmudflap
 install-pdf-target: maybe-install-pdf-target-libsanitizer
+install-pdf-target: maybe-install-pdf-target-libvtv
 install-pdf-target: maybe-install-pdf-target-libssp
 install-pdf-target: maybe-install-pdf-target-newlib
 install-pdf-target: maybe-install-pdf-target-libgcc
@@ -1780,17 +1750,13 @@ install-html-host: maybe-install-html-libtermcap
 install-html-host: maybe-install-html-utils
 install-html-host: maybe-install-html-gnattools
 install-html-host: maybe-install-html-lto-plugin
-install-html-host: maybe-install-html-ide
-install-html-host: maybe-install-html-ecos-monitors
-install-html-host: maybe-install-html-vim
-install-html-host: maybe-install-html-acovea
 
 .PHONY: install-html-target
 
-install-html-target: maybe-install-html-target-libdsp
 install-html-target: maybe-install-html-target-libstdc++-v3
 install-html-target: maybe-install-html-target-libmudflap
 install-html-target: maybe-install-html-target-libsanitizer
+install-html-target: maybe-install-html-target-libvtv
 install-html-target: maybe-install-html-target-libssp
 install-html-target: maybe-install-html-target-newlib
 install-html-target: maybe-install-html-target-libgcc
@@ -1867,17 +1833,13 @@ installcheck-host: maybe-installcheck-libtermcap
 installcheck-host: maybe-installcheck-utils
 installcheck-host: maybe-installcheck-gnattools
 installcheck-host: maybe-installcheck-lto-plugin
-installcheck-host: maybe-installcheck-ide
-installcheck-host: maybe-installcheck-ecos-monitors
-installcheck-host: maybe-installcheck-vim
-installcheck-host: maybe-installcheck-acovea
 
 .PHONY: installcheck-target
 
-installcheck-target: maybe-installcheck-target-libdsp
 installcheck-target: maybe-installcheck-target-libstdc++-v3
 installcheck-target: maybe-installcheck-target-libmudflap
 installcheck-target: maybe-installcheck-target-libsanitizer
+installcheck-target: maybe-installcheck-target-libvtv
 installcheck-target: maybe-installcheck-target-libssp
 installcheck-target: maybe-installcheck-target-newlib
 installcheck-target: maybe-installcheck-target-libgcc
@@ -1954,17 +1916,13 @@ mostlyclean-host: maybe-mostlyclean-libtermcap
 mostlyclean-host: maybe-mostlyclean-utils
 mostlyclean-host: maybe-mostlyclean-gnattools
 mostlyclean-host: maybe-mostlyclean-lto-plugin
-mostlyclean-host: maybe-mostlyclean-ide
-mostlyclean-host: maybe-mostlyclean-ecos-monitors
-mostlyclean-host: maybe-mostlyclean-vim
-mostlyclean-host: maybe-mostlyclean-acovea
 
 .PHONY: mostlyclean-target
 
-mostlyclean-target: maybe-mostlyclean-target-libdsp
 mostlyclean-target: maybe-mostlyclean-target-libstdc++-v3
 mostlyclean-target: maybe-mostlyclean-target-libmudflap
 mostlyclean-target: maybe-mostlyclean-target-libsanitizer
+mostlyclean-target: maybe-mostlyclean-target-libvtv
 mostlyclean-target: maybe-mostlyclean-target-libssp
 mostlyclean-target: maybe-mostlyclean-target-newlib
 mostlyclean-target: maybe-mostlyclean-target-libgcc
@@ -2041,17 +1999,13 @@ clean-host: maybe-clean-libtermcap
 clean-host: maybe-clean-utils
 clean-host: maybe-clean-gnattools
 clean-host: maybe-clean-lto-plugin
-clean-host: maybe-clean-ide
-clean-host: maybe-clean-ecos-monitors
-clean-host: maybe-clean-vim
-clean-host: maybe-clean-acovea
 
 .PHONY: clean-target
 
-clean-target: maybe-clean-target-libdsp
 clean-target: maybe-clean-target-libstdc++-v3
 clean-target: maybe-clean-target-libmudflap
 clean-target: maybe-clean-target-libsanitizer
+clean-target: maybe-clean-target-libvtv
 clean-target: maybe-clean-target-libssp
 clean-target: maybe-clean-target-newlib
 clean-target: maybe-clean-target-libgcc
@@ -2128,17 +2082,13 @@ distclean-host: maybe-distclean-libtermcap
 distclean-host: maybe-distclean-utils
 distclean-host: maybe-distclean-gnattools
 distclean-host: maybe-distclean-lto-plugin
-distclean-host: maybe-distclean-ide
-distclean-host: maybe-distclean-ecos-monitors
-distclean-host: maybe-distclean-vim
-distclean-host: maybe-distclean-acovea
 
 .PHONY: distclean-target
 
-distclean-target: maybe-distclean-target-libdsp
 distclean-target: maybe-distclean-target-libstdc++-v3
 distclean-target: maybe-distclean-target-libmudflap
 distclean-target: maybe-distclean-target-libsanitizer
+distclean-target: maybe-distclean-target-libvtv
 distclean-target: maybe-distclean-target-libssp
 distclean-target: maybe-distclean-target-newlib
 distclean-target: maybe-distclean-target-libgcc
@@ -2215,17 +2165,13 @@ maintainer-clean-host: maybe-maintainer-clean-libtermcap
 maintainer-clean-host: maybe-maintainer-clean-utils
 maintainer-clean-host: maybe-maintainer-clean-gnattools
 maintainer-clean-host: maybe-maintainer-clean-lto-plugin
-maintainer-clean-host: maybe-maintainer-clean-ide
-maintainer-clean-host: maybe-maintainer-clean-ecos-monitors
-maintainer-clean-host: maybe-maintainer-clean-vim
-maintainer-clean-host: maybe-maintainer-clean-acovea
 
 .PHONY: maintainer-clean-target
 
-maintainer-clean-target: maybe-maintainer-clean-target-libdsp
 maintainer-clean-target: maybe-maintainer-clean-target-libstdc++-v3
 maintainer-clean-target: maybe-maintainer-clean-target-libmudflap
 maintainer-clean-target: maybe-maintainer-clean-target-libsanitizer
+maintainer-clean-target: maybe-maintainer-clean-target-libvtv
 maintainer-clean-target: maybe-maintainer-clean-target-libssp
 maintainer-clean-target: maybe-maintainer-clean-target-newlib
 maintainer-clean-target: maybe-maintainer-clean-target-libgcc
@@ -2356,18 +2302,14 @@ check-host:  \
     maybe-check-libtermcap \
     maybe-check-utils \
     maybe-check-gnattools \
-    maybe-check-lto-plugin \
-    maybe-check-ide \
-    maybe-check-ecos-monitors \
-    maybe-check-vim \
-    maybe-check-acovea
+    maybe-check-lto-plugin
 
 .PHONY: check-target
 check-target:  \
-    maybe-check-target-libdsp \
     maybe-check-target-libstdc++-v3 \
     maybe-check-target-libmudflap \
     maybe-check-target-libsanitizer \
+    maybe-check-target-libvtv \
     maybe-check-target-libssp \
     maybe-check-target-newlib \
     maybe-check-target-libgcc \
@@ -2469,11 +2411,7 @@ install-host-nogcc:  \
     maybe-install-libtermcap \
     maybe-install-utils \
     maybe-install-gnattools \
-    maybe-install-lto-plugin \
-    maybe-install-ide \
-    maybe-install-ecos-monitors \
-    maybe-install-vim \
-    maybe-install-acovea
+    maybe-install-lto-plugin
 
 .PHONY: install-host
 install-host:  \
@@ -2520,18 +2458,14 @@ install-host:  \
     maybe-install-libtermcap \
     maybe-install-utils \
     maybe-install-gnattools \
-    maybe-install-lto-plugin \
-    maybe-install-ide \
-    maybe-install-ecos-monitors \
-    maybe-install-vim \
-    maybe-install-acovea
+    maybe-install-lto-plugin
 
 .PHONY: install-target
 install-target:  \
-    maybe-install-target-libdsp \
     maybe-install-target-libstdc++-v3 \
     maybe-install-target-libmudflap \
     maybe-install-target-libsanitizer \
+    maybe-install-target-libvtv \
     maybe-install-target-libssp \
     maybe-install-target-newlib \
     maybe-install-target-libgcc \
@@ -2627,18 +2561,14 @@ install-strip-host:  \
     maybe-install-strip-libtermcap \
     maybe-install-strip-utils \
     maybe-install-strip-gnattools \
-    maybe-install-strip-lto-plugin \
-    maybe-install-strip-ide \
-    maybe-install-strip-ecos-monitors \
-    maybe-install-strip-vim \
-    maybe-install-strip-acovea
+    maybe-install-strip-lto-plugin
 
 .PHONY: install-strip-target
 install-strip-target:  \
-    maybe-install-strip-target-libdsp \
     maybe-install-strip-target-libstdc++-v3 \
     maybe-install-strip-target-libmudflap \
     maybe-install-strip-target-libsanitizer \
+    maybe-install-strip-target-libvtv \
     maybe-install-strip-target-libssp \
     maybe-install-strip-target-newlib \
     maybe-install-strip-target-libgcc \
@@ -2786,7 +2716,7 @@ configure-build-bison:
 	rm -f no-such-file || : ; \
 	CONFIG_SITE=no-such-file $(SHELL) $${libsrcdir}/configure \
 	  $(BUILD_CONFIGARGS) --build=${build_alias} --host=${build_alias} \
-	  --target=${target_alias} $${srcdiroption} LEX="flex" \
+	  --target=${target_alias} $${srcdiroption}  \
 	  || exit 1
 @endif build-bison
 
@@ -10502,7 +10432,7 @@ configure-gmp:
 	libsrcdir="$$s/gmp"; \
 	$(SHELL) $${libsrcdir}/configure \
 	  $(HOST_CONFIGARGS) --build=${build_alias} --host=none-${host_vendor}-${host_os} \
-	  --target=none-${host_vendor}-${host_os} $${srcdiroption} --disable-shared --enable-cxx \
+	  --target=none-${host_vendor}-${host_os} $${srcdiroption} --disable-shared \
 	  || exit 1
 @endif gmp
 
@@ -10537,7 +10467,7 @@ configure-stage1-gmp:
 	  $(HOST_CONFIGARGS) --build=${build_alias} --host=none-${host_vendor}-${host_os} \
 	  --target=none-${host_vendor}-${host_os} $${srcdiroption} \
 	  $(STAGE1_CONFIGURE_FLAGS) \
-	  --disable-shared --enable-cxx
+	  --disable-shared
 @endif gmp-bootstrap
 
 .PHONY: configure-stage2-gmp maybe-configure-stage2-gmp
@@ -10571,7 +10501,7 @@ configure-stage2-gmp:
 	  --target=none-${host_vendor}-${host_os} $${srcdiroption} \
 	  --with-build-libsubdir=$(HOST_SUBDIR) \
 	  $(STAGE2_CONFIGURE_FLAGS) \
-	  --disable-shared --enable-cxx
+	  --disable-shared
 @endif gmp-bootstrap
 
 .PHONY: configure-stage3-gmp maybe-configure-stage3-gmp
@@ -10605,7 +10535,7 @@ configure-stage3-gmp:
 	  --target=none-${host_vendor}-${host_os} $${srcdiroption} \
 	  --with-build-libsubdir=$(HOST_SUBDIR) \
 	  $(STAGE3_CONFIGURE_FLAGS) \
-	  --disable-shared --enable-cxx
+	  --disable-shared
 @endif gmp-bootstrap
 
 .PHONY: configure-stage4-gmp maybe-configure-stage4-gmp
@@ -10639,7 +10569,7 @@ configure-stage4-gmp:
 	  --target=none-${host_vendor}-${host_os} $${srcdiroption} \
 	  --with-build-libsubdir=$(HOST_SUBDIR) \
 	  $(STAGE4_CONFIGURE_FLAGS) \
-	  --disable-shared --enable-cxx
+	  --disable-shared
 @endif gmp-bootstrap
 
 .PHONY: configure-stageprofile-gmp maybe-configure-stageprofile-gmp
@@ -10673,7 +10603,7 @@ configure-stageprofile-gmp:
 	  --target=none-${host_vendor}-${host_os} $${srcdiroption} \
 	  --with-build-libsubdir=$(HOST_SUBDIR) \
 	  $(STAGEprofile_CONFIGURE_FLAGS) \
-	  --disable-shared --enable-cxx
+	  --disable-shared
 @endif gmp-bootstrap
 
 .PHONY: configure-stagefeedback-gmp maybe-configure-stagefeedback-gmp
@@ -10707,7 +10637,7 @@ configure-stagefeedback-gmp:
 	  --target=none-${host_vendor}-${host_os} $${srcdiroption} \
 	  --with-build-libsubdir=$(HOST_SUBDIR) \
 	  $(STAGEfeedback_CONFIGURE_FLAGS) \
-	  --disable-shared --enable-cxx
+	  --disable-shared
 @endif gmp-bootstrap
 
 
@@ -30834,2226 +30764,9 @@ maintainer-clean-lto-plugin:
 
 
 
-.PHONY: configure-ide maybe-configure-ide
-maybe-configure-ide:
-@if gcc-bootstrap
-configure-ide: stage_current
-@endif gcc-bootstrap
-@if ide
-maybe-configure-ide: configure-ide
-configure-ide: 
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	test ! -f $(HOST_SUBDIR)/ide/Makefile || exit 0; \
-	$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/ide ; \
-	$(HOST_EXPORTS)  \
-	echo Configuring in $(HOST_SUBDIR)/ide; \
-	cd "$(HOST_SUBDIR)/ide" || exit 1; \
-	case $(srcdir) in \
-	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
-	  *) topdir=`echo $(HOST_SUBDIR)/ide/ | \
-		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
-	esac; \
-	srcdiroption="--srcdir=$${topdir}/ide"; \
-	libsrcdir="$$s/ide"; \
-	$(SHELL) $${libsrcdir}/configure \
-	  $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
-	  --target=${target_alias} $${srcdiroption}  \
-	  || exit 1
-@endif ide
-
-
-
-
-
-.PHONY: all-ide maybe-all-ide
-maybe-all-ide:
-@if gcc-bootstrap
-all-ide: stage_current
-@endif gcc-bootstrap
-@if ide
-TARGET-ide=all
-maybe-all-ide: all-ide
-all-ide: configure-ide
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS)  \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) $(EXTRA_HOST_FLAGS) $(STAGE1_FLAGS_TO_PASS)  \
-		$(TARGET-ide))
-@endif ide
-
-
-
-
-.PHONY: check-ide maybe-check-ide
-maybe-check-ide:
-@if ide
-maybe-check-ide: check-ide
-
-check-ide:
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(FLAGS_TO_PASS)  check)
-
-@endif ide
-
-.PHONY: install-ide maybe-install-ide
-maybe-install-ide:
-@if ide
-maybe-install-ide: install-ide
-
-install-ide: installdirs
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(FLAGS_TO_PASS)  install)
-
-@endif ide
-
-.PHONY: install-strip-ide maybe-install-strip-ide
-maybe-install-strip-ide:
-@if ide
-maybe-install-strip-ide: install-strip-ide
-
-install-strip-ide: installdirs
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(FLAGS_TO_PASS)  install-strip)
-
-@endif ide
-
-# Other targets (info, dvi, pdf, etc.)
-
-.PHONY: maybe-info-ide info-ide
-maybe-info-ide:
-@if ide
-maybe-info-ide: info-ide
-
-info-ide: \
-    configure-ide 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ide/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing info in ide" ; \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          info) \
-	  || exit 1
-
-@endif ide
-
-.PHONY: maybe-dvi-ide dvi-ide
-maybe-dvi-ide:
-@if ide
-maybe-dvi-ide: dvi-ide
-
-dvi-ide: \
-    configure-ide 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ide/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing dvi in ide" ; \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          dvi) \
-	  || exit 1
-
-@endif ide
-
-.PHONY: maybe-pdf-ide pdf-ide
-maybe-pdf-ide:
-@if ide
-maybe-pdf-ide: pdf-ide
-
-pdf-ide: \
-    configure-ide 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ide/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing pdf in ide" ; \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          pdf) \
-	  || exit 1
-
-@endif ide
-
-.PHONY: maybe-html-ide html-ide
-maybe-html-ide:
-@if ide
-maybe-html-ide: html-ide
-
-html-ide: \
-    configure-ide 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ide/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing html in ide" ; \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          html) \
-	  || exit 1
-
-@endif ide
-
-.PHONY: maybe-TAGS-ide TAGS-ide
-maybe-TAGS-ide:
-@if ide
-maybe-TAGS-ide: TAGS-ide
-
-TAGS-ide: \
-    configure-ide 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ide/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing TAGS in ide" ; \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          TAGS) \
-	  || exit 1
-
-@endif ide
-
-.PHONY: maybe-install-info-ide install-info-ide
-maybe-install-info-ide:
-@if ide
-maybe-install-info-ide: install-info-ide
-
-install-info-ide: \
-    configure-ide \
-    info-ide 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ide/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing install-info in ide" ; \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          install-info) \
-	  || exit 1
-
-@endif ide
-
-.PHONY: maybe-install-pdf-ide install-pdf-ide
-maybe-install-pdf-ide:
-@if ide
-maybe-install-pdf-ide: install-pdf-ide
-
-install-pdf-ide: \
-    configure-ide \
-    pdf-ide 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ide/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing install-pdf in ide" ; \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          install-pdf) \
-	  || exit 1
-
-@endif ide
-
-.PHONY: maybe-install-html-ide install-html-ide
-maybe-install-html-ide:
-@if ide
-maybe-install-html-ide: install-html-ide
-
-install-html-ide: \
-    configure-ide \
-    html-ide 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ide/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing install-html in ide" ; \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          install-html) \
-	  || exit 1
-
-@endif ide
-
-.PHONY: maybe-installcheck-ide installcheck-ide
-maybe-installcheck-ide:
-@if ide
-maybe-installcheck-ide: installcheck-ide
-
-installcheck-ide: \
-    configure-ide 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ide/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing installcheck in ide" ; \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          installcheck) \
-	  || exit 1
-
-@endif ide
-
-.PHONY: maybe-mostlyclean-ide mostlyclean-ide
-maybe-mostlyclean-ide:
-@if ide
-maybe-mostlyclean-ide: mostlyclean-ide
-
-mostlyclean-ide: 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ide/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing mostlyclean in ide" ; \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          mostlyclean) \
-	  || exit 1
-
-@endif ide
-
-.PHONY: maybe-clean-ide clean-ide
-maybe-clean-ide:
-@if ide
-maybe-clean-ide: clean-ide
-
-clean-ide: 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ide/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing clean in ide" ; \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          clean) \
-	  || exit 1
-
-@endif ide
-
-.PHONY: maybe-distclean-ide distclean-ide
-maybe-distclean-ide:
-@if ide
-maybe-distclean-ide: distclean-ide
-
-distclean-ide: 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ide/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing distclean in ide" ; \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          distclean) \
-	  || exit 1
-
-@endif ide
-
-.PHONY: maybe-maintainer-clean-ide maintainer-clean-ide
-maybe-maintainer-clean-ide:
-@if ide
-maybe-maintainer-clean-ide: maintainer-clean-ide
-
-maintainer-clean-ide: 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ide/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing maintainer-clean in ide" ; \
-	(cd $(HOST_SUBDIR)/ide && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          maintainer-clean) \
-	  || exit 1
-
-@endif ide
-
-
-
-.PHONY: configure-ecos-monitors maybe-configure-ecos-monitors
-maybe-configure-ecos-monitors:
-@if gcc-bootstrap
-configure-ecos-monitors: stage_current
-@endif gcc-bootstrap
-@if ecos-monitors
-maybe-configure-ecos-monitors: configure-ecos-monitors
-configure-ecos-monitors: 
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	test ! -f $(HOST_SUBDIR)/ecos-monitors/Makefile || exit 0; \
-	$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/ecos-monitors ; \
-	$(HOST_EXPORTS)  \
-	echo Configuring in $(HOST_SUBDIR)/ecos-monitors; \
-	cd "$(HOST_SUBDIR)/ecos-monitors" || exit 1; \
-	case $(srcdir) in \
-	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
-	  *) topdir=`echo $(HOST_SUBDIR)/ecos-monitors/ | \
-		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
-	esac; \
-	srcdiroption="--srcdir=$${topdir}/ecos-monitors"; \
-	libsrcdir="$$s/ecos-monitors"; \
-	$(SHELL) $${libsrcdir}/configure \
-	  $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
-	  --target=${target_alias} $${srcdiroption}  \
-	  || exit 1
-@endif ecos-monitors
-
-
-
-
-
-.PHONY: all-ecos-monitors maybe-all-ecos-monitors
-maybe-all-ecos-monitors:
-@if gcc-bootstrap
-all-ecos-monitors: stage_current
-@endif gcc-bootstrap
-@if ecos-monitors
-TARGET-ecos-monitors=all
-maybe-all-ecos-monitors: all-ecos-monitors
-all-ecos-monitors: configure-ecos-monitors
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS)  \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) $(EXTRA_HOST_FLAGS) $(STAGE1_FLAGS_TO_PASS)  \
-		$(TARGET-ecos-monitors))
-@endif ecos-monitors
-
-
-
-
-.PHONY: check-ecos-monitors maybe-check-ecos-monitors
-maybe-check-ecos-monitors:
-@if ecos-monitors
-maybe-check-ecos-monitors: check-ecos-monitors
-
-check-ecos-monitors:
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(FLAGS_TO_PASS)  check)
-
-@endif ecos-monitors
-
-.PHONY: install-ecos-monitors maybe-install-ecos-monitors
-maybe-install-ecos-monitors:
-@if ecos-monitors
-maybe-install-ecos-monitors: install-ecos-monitors
-
-install-ecos-monitors: installdirs
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(FLAGS_TO_PASS)  install)
-
-@endif ecos-monitors
-
-.PHONY: install-strip-ecos-monitors maybe-install-strip-ecos-monitors
-maybe-install-strip-ecos-monitors:
-@if ecos-monitors
-maybe-install-strip-ecos-monitors: install-strip-ecos-monitors
-
-install-strip-ecos-monitors: installdirs
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(FLAGS_TO_PASS)  install-strip)
-
-@endif ecos-monitors
-
-# Other targets (info, dvi, pdf, etc.)
-
-.PHONY: maybe-info-ecos-monitors info-ecos-monitors
-maybe-info-ecos-monitors:
-@if ecos-monitors
-maybe-info-ecos-monitors: info-ecos-monitors
-
-info-ecos-monitors: \
-    configure-ecos-monitors 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ecos-monitors/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing info in ecos-monitors" ; \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          info) \
-	  || exit 1
-
-@endif ecos-monitors
-
-.PHONY: maybe-dvi-ecos-monitors dvi-ecos-monitors
-maybe-dvi-ecos-monitors:
-@if ecos-monitors
-maybe-dvi-ecos-monitors: dvi-ecos-monitors
-
-dvi-ecos-monitors: \
-    configure-ecos-monitors 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ecos-monitors/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing dvi in ecos-monitors" ; \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          dvi) \
-	  || exit 1
-
-@endif ecos-monitors
-
-.PHONY: maybe-pdf-ecos-monitors pdf-ecos-monitors
-maybe-pdf-ecos-monitors:
-@if ecos-monitors
-maybe-pdf-ecos-monitors: pdf-ecos-monitors
-
-pdf-ecos-monitors: \
-    configure-ecos-monitors 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ecos-monitors/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing pdf in ecos-monitors" ; \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          pdf) \
-	  || exit 1
-
-@endif ecos-monitors
-
-.PHONY: maybe-html-ecos-monitors html-ecos-monitors
-maybe-html-ecos-monitors:
-@if ecos-monitors
-maybe-html-ecos-monitors: html-ecos-monitors
-
-html-ecos-monitors: \
-    configure-ecos-monitors 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ecos-monitors/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing html in ecos-monitors" ; \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          html) \
-	  || exit 1
-
-@endif ecos-monitors
-
-.PHONY: maybe-TAGS-ecos-monitors TAGS-ecos-monitors
-maybe-TAGS-ecos-monitors:
-@if ecos-monitors
-maybe-TAGS-ecos-monitors: TAGS-ecos-monitors
-
-TAGS-ecos-monitors: \
-    configure-ecos-monitors 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ecos-monitors/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing TAGS in ecos-monitors" ; \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          TAGS) \
-	  || exit 1
-
-@endif ecos-monitors
-
-.PHONY: maybe-install-info-ecos-monitors install-info-ecos-monitors
-maybe-install-info-ecos-monitors:
-@if ecos-monitors
-maybe-install-info-ecos-monitors: install-info-ecos-monitors
-
-install-info-ecos-monitors: \
-    configure-ecos-monitors \
-    info-ecos-monitors 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ecos-monitors/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing install-info in ecos-monitors" ; \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          install-info) \
-	  || exit 1
-
-@endif ecos-monitors
-
-.PHONY: maybe-install-pdf-ecos-monitors install-pdf-ecos-monitors
-maybe-install-pdf-ecos-monitors:
-@if ecos-monitors
-maybe-install-pdf-ecos-monitors: install-pdf-ecos-monitors
-
-install-pdf-ecos-monitors: \
-    configure-ecos-monitors \
-    pdf-ecos-monitors 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ecos-monitors/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing install-pdf in ecos-monitors" ; \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          install-pdf) \
-	  || exit 1
-
-@endif ecos-monitors
-
-.PHONY: maybe-install-html-ecos-monitors install-html-ecos-monitors
-maybe-install-html-ecos-monitors:
-@if ecos-monitors
-maybe-install-html-ecos-monitors: install-html-ecos-monitors
-
-install-html-ecos-monitors: \
-    configure-ecos-monitors \
-    html-ecos-monitors 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ecos-monitors/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing install-html in ecos-monitors" ; \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          install-html) \
-	  || exit 1
-
-@endif ecos-monitors
-
-.PHONY: maybe-installcheck-ecos-monitors installcheck-ecos-monitors
-maybe-installcheck-ecos-monitors:
-@if ecos-monitors
-maybe-installcheck-ecos-monitors: installcheck-ecos-monitors
-
-installcheck-ecos-monitors: \
-    configure-ecos-monitors 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ecos-monitors/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing installcheck in ecos-monitors" ; \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          installcheck) \
-	  || exit 1
-
-@endif ecos-monitors
-
-.PHONY: maybe-mostlyclean-ecos-monitors mostlyclean-ecos-monitors
-maybe-mostlyclean-ecos-monitors:
-@if ecos-monitors
-maybe-mostlyclean-ecos-monitors: mostlyclean-ecos-monitors
-
-mostlyclean-ecos-monitors: 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ecos-monitors/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing mostlyclean in ecos-monitors" ; \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          mostlyclean) \
-	  || exit 1
-
-@endif ecos-monitors
-
-.PHONY: maybe-clean-ecos-monitors clean-ecos-monitors
-maybe-clean-ecos-monitors:
-@if ecos-monitors
-maybe-clean-ecos-monitors: clean-ecos-monitors
-
-clean-ecos-monitors: 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ecos-monitors/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing clean in ecos-monitors" ; \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          clean) \
-	  || exit 1
-
-@endif ecos-monitors
-
-.PHONY: maybe-distclean-ecos-monitors distclean-ecos-monitors
-maybe-distclean-ecos-monitors:
-@if ecos-monitors
-maybe-distclean-ecos-monitors: distclean-ecos-monitors
-
-distclean-ecos-monitors: 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ecos-monitors/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing distclean in ecos-monitors" ; \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          distclean) \
-	  || exit 1
-
-@endif ecos-monitors
-
-.PHONY: maybe-maintainer-clean-ecos-monitors maintainer-clean-ecos-monitors
-maybe-maintainer-clean-ecos-monitors:
-@if ecos-monitors
-maybe-maintainer-clean-ecos-monitors: maintainer-clean-ecos-monitors
-
-maintainer-clean-ecos-monitors: 
-	@: $(MAKE); $(unstage)
-	@[ -f ./ecos-monitors/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing maintainer-clean in ecos-monitors" ; \
-	(cd $(HOST_SUBDIR)/ecos-monitors && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          maintainer-clean) \
-	  || exit 1
-
-@endif ecos-monitors
-
-
-
-.PHONY: configure-vim maybe-configure-vim
-maybe-configure-vim:
-@if gcc-bootstrap
-configure-vim: stage_current
-@endif gcc-bootstrap
-@if vim
-maybe-configure-vim: configure-vim
-configure-vim: 
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	test ! -f $(HOST_SUBDIR)/vim/Makefile || exit 0; \
-	$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/vim ; \
-	$(HOST_EXPORTS)  \
-	echo Configuring in $(HOST_SUBDIR)/vim; \
-	cd "$(HOST_SUBDIR)/vim" || exit 1; \
-	case $(srcdir) in \
-	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
-	  *) topdir=`echo $(HOST_SUBDIR)/vim/ | \
-		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
-	esac; \
-	srcdiroption="--srcdir=$${topdir}/vim"; \
-	libsrcdir="$$s/vim"; \
-	$(SHELL) $${libsrcdir}/configure \
-	  $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
-	  --target=${target_alias} $${srcdiroption}  \
-	  || exit 1
-@endif vim
-
-
-
-
-
-.PHONY: all-vim maybe-all-vim
-maybe-all-vim:
-@if gcc-bootstrap
-all-vim: stage_current
-@endif gcc-bootstrap
-@if vim
-TARGET-vim=all
-maybe-all-vim: all-vim
-all-vim: configure-vim
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS)  \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) $(EXTRA_HOST_FLAGS) $(STAGE1_FLAGS_TO_PASS)  \
-		$(TARGET-vim))
-@endif vim
-
-
-
-
-.PHONY: check-vim maybe-check-vim
-maybe-check-vim:
-@if vim
-maybe-check-vim: check-vim
-
-check-vim:
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(FLAGS_TO_PASS)  check)
-
-@endif vim
-
-.PHONY: install-vim maybe-install-vim
-maybe-install-vim:
-@if vim
-maybe-install-vim: install-vim
-
-install-vim: installdirs
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(FLAGS_TO_PASS)  install)
-
-@endif vim
-
-.PHONY: install-strip-vim maybe-install-strip-vim
-maybe-install-strip-vim:
-@if vim
-maybe-install-strip-vim: install-strip-vim
-
-install-strip-vim: installdirs
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(FLAGS_TO_PASS)  install-strip)
-
-@endif vim
-
-# Other targets (info, dvi, pdf, etc.)
-
-.PHONY: maybe-info-vim info-vim
-maybe-info-vim:
-@if vim
-maybe-info-vim: info-vim
-
-info-vim: \
-    configure-vim 
-	@: $(MAKE); $(unstage)
-	@[ -f ./vim/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing info in vim" ; \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          info) \
-	  || exit 1
-
-@endif vim
-
-.PHONY: maybe-dvi-vim dvi-vim
-maybe-dvi-vim:
-@if vim
-maybe-dvi-vim: dvi-vim
-
-dvi-vim: \
-    configure-vim 
-	@: $(MAKE); $(unstage)
-	@[ -f ./vim/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing dvi in vim" ; \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          dvi) \
-	  || exit 1
-
-@endif vim
-
-.PHONY: maybe-pdf-vim pdf-vim
-maybe-pdf-vim:
-@if vim
-maybe-pdf-vim: pdf-vim
-
-pdf-vim: \
-    configure-vim 
-	@: $(MAKE); $(unstage)
-	@[ -f ./vim/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing pdf in vim" ; \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          pdf) \
-	  || exit 1
-
-@endif vim
-
-.PHONY: maybe-html-vim html-vim
-maybe-html-vim:
-@if vim
-maybe-html-vim: html-vim
-
-html-vim: \
-    configure-vim 
-	@: $(MAKE); $(unstage)
-	@[ -f ./vim/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing html in vim" ; \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          html) \
-	  || exit 1
-
-@endif vim
-
-.PHONY: maybe-TAGS-vim TAGS-vim
-maybe-TAGS-vim:
-@if vim
-maybe-TAGS-vim: TAGS-vim
-
-TAGS-vim: \
-    configure-vim 
-	@: $(MAKE); $(unstage)
-	@[ -f ./vim/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing TAGS in vim" ; \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          TAGS) \
-	  || exit 1
-
-@endif vim
-
-.PHONY: maybe-install-info-vim install-info-vim
-maybe-install-info-vim:
-@if vim
-maybe-install-info-vim: install-info-vim
-
-install-info-vim: \
-    configure-vim \
-    info-vim 
-	@: $(MAKE); $(unstage)
-	@[ -f ./vim/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing install-info in vim" ; \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          install-info) \
-	  || exit 1
-
-@endif vim
-
-.PHONY: maybe-install-pdf-vim install-pdf-vim
-maybe-install-pdf-vim:
-@if vim
-maybe-install-pdf-vim: install-pdf-vim
-
-install-pdf-vim: \
-    configure-vim \
-    pdf-vim 
-	@: $(MAKE); $(unstage)
-	@[ -f ./vim/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing install-pdf in vim" ; \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          install-pdf) \
-	  || exit 1
-
-@endif vim
-
-.PHONY: maybe-install-html-vim install-html-vim
-maybe-install-html-vim:
-@if vim
-maybe-install-html-vim: install-html-vim
-
-install-html-vim: \
-    configure-vim \
-    html-vim 
-	@: $(MAKE); $(unstage)
-	@[ -f ./vim/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing install-html in vim" ; \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          install-html) \
-	  || exit 1
-
-@endif vim
-
-.PHONY: maybe-installcheck-vim installcheck-vim
-maybe-installcheck-vim:
-@if vim
-maybe-installcheck-vim: installcheck-vim
-
-installcheck-vim: \
-    configure-vim 
-	@: $(MAKE); $(unstage)
-	@[ -f ./vim/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing installcheck in vim" ; \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          installcheck) \
-	  || exit 1
-
-@endif vim
-
-.PHONY: maybe-mostlyclean-vim mostlyclean-vim
-maybe-mostlyclean-vim:
-@if vim
-maybe-mostlyclean-vim: mostlyclean-vim
-
-mostlyclean-vim: 
-	@: $(MAKE); $(unstage)
-	@[ -f ./vim/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing mostlyclean in vim" ; \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          mostlyclean) \
-	  || exit 1
-
-@endif vim
-
-.PHONY: maybe-clean-vim clean-vim
-maybe-clean-vim:
-@if vim
-maybe-clean-vim: clean-vim
-
-clean-vim: 
-	@: $(MAKE); $(unstage)
-	@[ -f ./vim/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing clean in vim" ; \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          clean) \
-	  || exit 1
-
-@endif vim
-
-.PHONY: maybe-distclean-vim distclean-vim
-maybe-distclean-vim:
-@if vim
-maybe-distclean-vim: distclean-vim
-
-distclean-vim: 
-	@: $(MAKE); $(unstage)
-	@[ -f ./vim/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing distclean in vim" ; \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          distclean) \
-	  || exit 1
-
-@endif vim
-
-.PHONY: maybe-maintainer-clean-vim maintainer-clean-vim
-maybe-maintainer-clean-vim:
-@if vim
-maybe-maintainer-clean-vim: maintainer-clean-vim
-
-maintainer-clean-vim: 
-	@: $(MAKE); $(unstage)
-	@[ -f ./vim/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing maintainer-clean in vim" ; \
-	(cd $(HOST_SUBDIR)/vim && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          maintainer-clean) \
-	  || exit 1
-
-@endif vim
-
-
-
-.PHONY: configure-acovea maybe-configure-acovea
-maybe-configure-acovea:
-@if gcc-bootstrap
-configure-acovea: stage_current
-@endif gcc-bootstrap
-@if acovea
-maybe-configure-acovea: configure-acovea
-configure-acovea: 
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	test ! -f $(HOST_SUBDIR)/acovea/Makefile || exit 0; \
-	$(SHELL) $(srcdir)/mkinstalldirs $(HOST_SUBDIR)/acovea ; \
-	$(HOST_EXPORTS)  \
-	echo Configuring in $(HOST_SUBDIR)/acovea; \
-	cd "$(HOST_SUBDIR)/acovea" || exit 1; \
-	case $(srcdir) in \
-	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
-	  *) topdir=`echo $(HOST_SUBDIR)/acovea/ | \
-		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
-	esac; \
-	srcdiroption="--srcdir=$${topdir}/acovea"; \
-	libsrcdir="$$s/acovea"; \
-	$(SHELL) $${libsrcdir}/configure \
-	  $(HOST_CONFIGARGS) --build=${build_alias} --host=${host_alias} \
-	  --target=${target_alias} $${srcdiroption}  \
-	  || exit 1
-@endif acovea
-
-
-
-
-
-.PHONY: all-acovea maybe-all-acovea
-maybe-all-acovea:
-@if gcc-bootstrap
-all-acovea: stage_current
-@endif gcc-bootstrap
-@if acovea
-TARGET-acovea=all
-maybe-all-acovea: all-acovea
-all-acovea: configure-acovea
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS)  \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) $(EXTRA_HOST_FLAGS) $(STAGE1_FLAGS_TO_PASS)  \
-		$(TARGET-acovea))
-@endif acovea
-
-
-
-
-.PHONY: check-acovea maybe-check-acovea
-maybe-check-acovea:
-@if acovea
-maybe-check-acovea: check-acovea
-
-check-acovea:
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(FLAGS_TO_PASS)  check)
-
-@endif acovea
-
-.PHONY: install-acovea maybe-install-acovea
-maybe-install-acovea:
-@if acovea
-maybe-install-acovea: install-acovea
-
-install-acovea: installdirs
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(FLAGS_TO_PASS)  install)
-
-@endif acovea
-
-.PHONY: install-strip-acovea maybe-install-strip-acovea
-maybe-install-strip-acovea:
-@if acovea
-maybe-install-strip-acovea: install-strip-acovea
-
-install-strip-acovea: installdirs
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(FLAGS_TO_PASS)  install-strip)
-
-@endif acovea
-
-# Other targets (info, dvi, pdf, etc.)
-
-.PHONY: maybe-info-acovea info-acovea
-maybe-info-acovea:
-@if acovea
-maybe-info-acovea: info-acovea
-
-info-acovea: \
-    configure-acovea 
-	@: $(MAKE); $(unstage)
-	@[ -f ./acovea/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing info in acovea" ; \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          info) \
-	  || exit 1
-
-@endif acovea
-
-.PHONY: maybe-dvi-acovea dvi-acovea
-maybe-dvi-acovea:
-@if acovea
-maybe-dvi-acovea: dvi-acovea
-
-dvi-acovea: \
-    configure-acovea 
-	@: $(MAKE); $(unstage)
-	@[ -f ./acovea/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing dvi in acovea" ; \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          dvi) \
-	  || exit 1
-
-@endif acovea
-
-.PHONY: maybe-pdf-acovea pdf-acovea
-maybe-pdf-acovea:
-@if acovea
-maybe-pdf-acovea: pdf-acovea
-
-pdf-acovea: \
-    configure-acovea 
-	@: $(MAKE); $(unstage)
-	@[ -f ./acovea/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing pdf in acovea" ; \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          pdf) \
-	  || exit 1
-
-@endif acovea
-
-.PHONY: maybe-html-acovea html-acovea
-maybe-html-acovea:
-@if acovea
-maybe-html-acovea: html-acovea
-
-html-acovea: \
-    configure-acovea 
-	@: $(MAKE); $(unstage)
-	@[ -f ./acovea/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing html in acovea" ; \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          html) \
-	  || exit 1
-
-@endif acovea
-
-.PHONY: maybe-TAGS-acovea TAGS-acovea
-maybe-TAGS-acovea:
-@if acovea
-maybe-TAGS-acovea: TAGS-acovea
-
-TAGS-acovea: \
-    configure-acovea 
-	@: $(MAKE); $(unstage)
-	@[ -f ./acovea/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing TAGS in acovea" ; \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          TAGS) \
-	  || exit 1
-
-@endif acovea
-
-.PHONY: maybe-install-info-acovea install-info-acovea
-maybe-install-info-acovea:
-@if acovea
-maybe-install-info-acovea: install-info-acovea
-
-install-info-acovea: \
-    configure-acovea \
-    info-acovea 
-	@: $(MAKE); $(unstage)
-	@[ -f ./acovea/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing install-info in acovea" ; \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          install-info) \
-	  || exit 1
-
-@endif acovea
-
-.PHONY: maybe-install-pdf-acovea install-pdf-acovea
-maybe-install-pdf-acovea:
-@if acovea
-maybe-install-pdf-acovea: install-pdf-acovea
-
-install-pdf-acovea: \
-    configure-acovea \
-    pdf-acovea 
-	@: $(MAKE); $(unstage)
-	@[ -f ./acovea/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing install-pdf in acovea" ; \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          install-pdf) \
-	  || exit 1
-
-@endif acovea
-
-.PHONY: maybe-install-html-acovea install-html-acovea
-maybe-install-html-acovea:
-@if acovea
-maybe-install-html-acovea: install-html-acovea
-
-install-html-acovea: \
-    configure-acovea \
-    html-acovea 
-	@: $(MAKE); $(unstage)
-	@[ -f ./acovea/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing install-html in acovea" ; \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          install-html) \
-	  || exit 1
-
-@endif acovea
-
-.PHONY: maybe-installcheck-acovea installcheck-acovea
-maybe-installcheck-acovea:
-@if acovea
-maybe-installcheck-acovea: installcheck-acovea
-
-installcheck-acovea: \
-    configure-acovea 
-	@: $(MAKE); $(unstage)
-	@[ -f ./acovea/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing installcheck in acovea" ; \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          installcheck) \
-	  || exit 1
-
-@endif acovea
-
-.PHONY: maybe-mostlyclean-acovea mostlyclean-acovea
-maybe-mostlyclean-acovea:
-@if acovea
-maybe-mostlyclean-acovea: mostlyclean-acovea
-
-mostlyclean-acovea: 
-	@: $(MAKE); $(unstage)
-	@[ -f ./acovea/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing mostlyclean in acovea" ; \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          mostlyclean) \
-	  || exit 1
-
-@endif acovea
-
-.PHONY: maybe-clean-acovea clean-acovea
-maybe-clean-acovea:
-@if acovea
-maybe-clean-acovea: clean-acovea
-
-clean-acovea: 
-	@: $(MAKE); $(unstage)
-	@[ -f ./acovea/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing clean in acovea" ; \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          clean) \
-	  || exit 1
-
-@endif acovea
-
-.PHONY: maybe-distclean-acovea distclean-acovea
-maybe-distclean-acovea:
-@if acovea
-maybe-distclean-acovea: distclean-acovea
-
-distclean-acovea: 
-	@: $(MAKE); $(unstage)
-	@[ -f ./acovea/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing distclean in acovea" ; \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          distclean) \
-	  || exit 1
-
-@endif acovea
-
-.PHONY: maybe-maintainer-clean-acovea maintainer-clean-acovea
-maybe-maintainer-clean-acovea:
-@if acovea
-maybe-maintainer-clean-acovea: maintainer-clean-acovea
-
-maintainer-clean-acovea: 
-	@: $(MAKE); $(unstage)
-	@[ -f ./acovea/Makefile ] || exit 0; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(HOST_EXPORTS) \
-	for flag in $(EXTRA_HOST_FLAGS) ; do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	echo "Doing maintainer-clean in acovea" ; \
-	(cd $(HOST_SUBDIR)/acovea && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	          maintainer-clean) \
-	  || exit 1
-
-@endif acovea
-
-
-
 # ---------------------------------------
 # Modules which run on the target machine
 # ---------------------------------------
-
-
-
-
-.PHONY: configure-target-libdsp maybe-configure-target-libdsp
-maybe-configure-target-libdsp:
-@if gcc-bootstrap
-configure-target-libdsp: stage_current
-@endif gcc-bootstrap
-@if target-libdsp
-maybe-configure-target-libdsp: configure-target-libdsp
-configure-target-libdsp: 
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	echo "Checking multilib configuration for libdsp..."; \
-	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libdsp ; \
-	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libdsp/multilib.tmp 2> /dev/null ; \
-	if test -r $(TARGET_SUBDIR)/libdsp/multilib.out; then \
-	  if cmp -s $(TARGET_SUBDIR)/libdsp/multilib.tmp $(TARGET_SUBDIR)/libdsp/multilib.out; then \
-	    rm -f $(TARGET_SUBDIR)/libdsp/multilib.tmp; \
-	  else \
-	    rm -f $(TARGET_SUBDIR)/libdsp/Makefile; \
-	    mv $(TARGET_SUBDIR)/libdsp/multilib.tmp $(TARGET_SUBDIR)/libdsp/multilib.out; \
-	  fi; \
-	else \
-	  mv $(TARGET_SUBDIR)/libdsp/multilib.tmp $(TARGET_SUBDIR)/libdsp/multilib.out; \
-	fi; \
-	test ! -f $(TARGET_SUBDIR)/libdsp/Makefile || exit 0; \
-	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libdsp ; \
-	$(NORMAL_TARGET_EXPORTS)  \
-	echo Configuring in $(TARGET_SUBDIR)/libdsp; \
-	cd "$(TARGET_SUBDIR)/libdsp" || exit 1; \
-	case $(srcdir) in \
-	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
-	  *) topdir=`echo $(TARGET_SUBDIR)/libdsp/ | \
-		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
-	esac; \
-	srcdiroption="--srcdir=$${topdir}/libdsp"; \
-	libsrcdir="$$s/libdsp"; \
-	rm -f no-such-file || : ; \
-	CONFIG_SITE=no-such-file $(SHELL) $${libsrcdir}/configure \
-	  $(TARGET_CONFIGARGS) --build=${build_alias} --host=${target_alias} \
-	  --target=${target_alias} $${srcdiroption}  \
-	  || exit 1
-@endif target-libdsp
-
-
-
-
-
-.PHONY: all-target-libdsp maybe-all-target-libdsp
-maybe-all-target-libdsp:
-@if gcc-bootstrap
-all-target-libdsp: stage_current
-@endif gcc-bootstrap
-@if target-libdsp
-TARGET-target-libdsp=all
-maybe-all-target-libdsp: all-target-libdsp
-all-target-libdsp: configure-target-libdsp
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS)  \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) $(EXTRA_TARGET_FLAGS)   \
-		$(TARGET-target-libdsp))
-@endif target-libdsp
-
-
-
-
-
-.PHONY: check-target-libdsp maybe-check-target-libdsp
-maybe-check-target-libdsp:
-@if target-libdsp
-maybe-check-target-libdsp: check-target-libdsp
-
-check-target-libdsp:
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(TARGET_FLAGS_TO_PASS)   check)
-
-@endif target-libdsp
-
-.PHONY: install-target-libdsp maybe-install-target-libdsp
-maybe-install-target-libdsp:
-@if target-libdsp
-maybe-install-target-libdsp: install-target-libdsp
-
-install-target-libdsp: installdirs
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(TARGET_FLAGS_TO_PASS)  install)
-
-@endif target-libdsp
-
-.PHONY: install-strip-target-libdsp maybe-install-strip-target-libdsp
-maybe-install-strip-target-libdsp:
-@if target-libdsp
-maybe-install-strip-target-libdsp: install-strip-target-libdsp
-
-install-strip-target-libdsp: installdirs
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(TARGET_FLAGS_TO_PASS)  install-strip)
-
-@endif target-libdsp
-
-# Other targets (info, dvi, pdf, etc.)
-
-.PHONY: maybe-info-target-libdsp info-target-libdsp
-maybe-info-target-libdsp:
-@if target-libdsp
-maybe-info-target-libdsp: info-target-libdsp
-
-info-target-libdsp: \
-    configure-target-libdsp 
-	@: $(MAKE); $(unstage)
-	@[ -f $(TARGET_SUBDIR)/libdsp/Makefile ] || exit 0 ; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	echo "Doing info in $(TARGET_SUBDIR)/libdsp" ; \
-	for flag in $(EXTRA_TARGET_FLAGS); do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	           info) \
-	  || exit 1
-
-@endif target-libdsp
-
-.PHONY: maybe-dvi-target-libdsp dvi-target-libdsp
-maybe-dvi-target-libdsp:
-@if target-libdsp
-maybe-dvi-target-libdsp: dvi-target-libdsp
-
-dvi-target-libdsp: \
-    configure-target-libdsp 
-	@: $(MAKE); $(unstage)
-	@[ -f $(TARGET_SUBDIR)/libdsp/Makefile ] || exit 0 ; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	echo "Doing dvi in $(TARGET_SUBDIR)/libdsp" ; \
-	for flag in $(EXTRA_TARGET_FLAGS); do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	           dvi) \
-	  || exit 1
-
-@endif target-libdsp
-
-.PHONY: maybe-pdf-target-libdsp pdf-target-libdsp
-maybe-pdf-target-libdsp:
-@if target-libdsp
-maybe-pdf-target-libdsp: pdf-target-libdsp
-
-pdf-target-libdsp: \
-    configure-target-libdsp 
-	@: $(MAKE); $(unstage)
-	@[ -f $(TARGET_SUBDIR)/libdsp/Makefile ] || exit 0 ; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	echo "Doing pdf in $(TARGET_SUBDIR)/libdsp" ; \
-	for flag in $(EXTRA_TARGET_FLAGS); do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	           pdf) \
-	  || exit 1
-
-@endif target-libdsp
-
-.PHONY: maybe-html-target-libdsp html-target-libdsp
-maybe-html-target-libdsp:
-@if target-libdsp
-maybe-html-target-libdsp: html-target-libdsp
-
-html-target-libdsp: \
-    configure-target-libdsp 
-	@: $(MAKE); $(unstage)
-	@[ -f $(TARGET_SUBDIR)/libdsp/Makefile ] || exit 0 ; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	echo "Doing html in $(TARGET_SUBDIR)/libdsp" ; \
-	for flag in $(EXTRA_TARGET_FLAGS); do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	           html) \
-	  || exit 1
-
-@endif target-libdsp
-
-.PHONY: maybe-TAGS-target-libdsp TAGS-target-libdsp
-maybe-TAGS-target-libdsp:
-@if target-libdsp
-maybe-TAGS-target-libdsp: TAGS-target-libdsp
-
-TAGS-target-libdsp: \
-    configure-target-libdsp 
-	@: $(MAKE); $(unstage)
-	@[ -f $(TARGET_SUBDIR)/libdsp/Makefile ] || exit 0 ; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	echo "Doing TAGS in $(TARGET_SUBDIR)/libdsp" ; \
-	for flag in $(EXTRA_TARGET_FLAGS); do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	           TAGS) \
-	  || exit 1
-
-@endif target-libdsp
-
-.PHONY: maybe-install-info-target-libdsp install-info-target-libdsp
-maybe-install-info-target-libdsp:
-@if target-libdsp
-maybe-install-info-target-libdsp: install-info-target-libdsp
-
-install-info-target-libdsp: \
-    configure-target-libdsp \
-    info-target-libdsp 
-	@: $(MAKE); $(unstage)
-	@[ -f $(TARGET_SUBDIR)/libdsp/Makefile ] || exit 0 ; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	echo "Doing install-info in $(TARGET_SUBDIR)/libdsp" ; \
-	for flag in $(EXTRA_TARGET_FLAGS); do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	           install-info) \
-	  || exit 1
-
-@endif target-libdsp
-
-.PHONY: maybe-install-pdf-target-libdsp install-pdf-target-libdsp
-maybe-install-pdf-target-libdsp:
-@if target-libdsp
-maybe-install-pdf-target-libdsp: install-pdf-target-libdsp
-
-install-pdf-target-libdsp: \
-    configure-target-libdsp \
-    pdf-target-libdsp 
-	@: $(MAKE); $(unstage)
-	@[ -f $(TARGET_SUBDIR)/libdsp/Makefile ] || exit 0 ; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	echo "Doing install-pdf in $(TARGET_SUBDIR)/libdsp" ; \
-	for flag in $(EXTRA_TARGET_FLAGS); do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	           install-pdf) \
-	  || exit 1
-
-@endif target-libdsp
-
-.PHONY: maybe-install-html-target-libdsp install-html-target-libdsp
-maybe-install-html-target-libdsp:
-@if target-libdsp
-maybe-install-html-target-libdsp: install-html-target-libdsp
-
-install-html-target-libdsp: \
-    configure-target-libdsp \
-    html-target-libdsp 
-	@: $(MAKE); $(unstage)
-	@[ -f $(TARGET_SUBDIR)/libdsp/Makefile ] || exit 0 ; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	echo "Doing install-html in $(TARGET_SUBDIR)/libdsp" ; \
-	for flag in $(EXTRA_TARGET_FLAGS); do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	           install-html) \
-	  || exit 1
-
-@endif target-libdsp
-
-.PHONY: maybe-installcheck-target-libdsp installcheck-target-libdsp
-maybe-installcheck-target-libdsp:
-@if target-libdsp
-maybe-installcheck-target-libdsp: installcheck-target-libdsp
-
-installcheck-target-libdsp: \
-    configure-target-libdsp 
-	@: $(MAKE); $(unstage)
-	@[ -f $(TARGET_SUBDIR)/libdsp/Makefile ] || exit 0 ; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	echo "Doing installcheck in $(TARGET_SUBDIR)/libdsp" ; \
-	for flag in $(EXTRA_TARGET_FLAGS); do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	           installcheck) \
-	  || exit 1
-
-@endif target-libdsp
-
-.PHONY: maybe-mostlyclean-target-libdsp mostlyclean-target-libdsp
-maybe-mostlyclean-target-libdsp:
-@if target-libdsp
-maybe-mostlyclean-target-libdsp: mostlyclean-target-libdsp
-
-mostlyclean-target-libdsp: 
-	@: $(MAKE); $(unstage)
-	@[ -f $(TARGET_SUBDIR)/libdsp/Makefile ] || exit 0 ; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	echo "Doing mostlyclean in $(TARGET_SUBDIR)/libdsp" ; \
-	for flag in $(EXTRA_TARGET_FLAGS); do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	           mostlyclean) \
-	  || exit 1
-
-@endif target-libdsp
-
-.PHONY: maybe-clean-target-libdsp clean-target-libdsp
-maybe-clean-target-libdsp:
-@if target-libdsp
-maybe-clean-target-libdsp: clean-target-libdsp
-
-clean-target-libdsp: 
-	@: $(MAKE); $(unstage)
-	@[ -f $(TARGET_SUBDIR)/libdsp/Makefile ] || exit 0 ; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	echo "Doing clean in $(TARGET_SUBDIR)/libdsp" ; \
-	for flag in $(EXTRA_TARGET_FLAGS); do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	           clean) \
-	  || exit 1
-
-@endif target-libdsp
-
-.PHONY: maybe-distclean-target-libdsp distclean-target-libdsp
-maybe-distclean-target-libdsp:
-@if target-libdsp
-maybe-distclean-target-libdsp: distclean-target-libdsp
-
-distclean-target-libdsp: 
-	@: $(MAKE); $(unstage)
-	@[ -f $(TARGET_SUBDIR)/libdsp/Makefile ] || exit 0 ; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	echo "Doing distclean in $(TARGET_SUBDIR)/libdsp" ; \
-	for flag in $(EXTRA_TARGET_FLAGS); do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	           distclean) \
-	  || exit 1
-
-@endif target-libdsp
-
-.PHONY: maybe-maintainer-clean-target-libdsp maintainer-clean-target-libdsp
-maybe-maintainer-clean-target-libdsp:
-@if target-libdsp
-maybe-maintainer-clean-target-libdsp: maintainer-clean-target-libdsp
-
-maintainer-clean-target-libdsp: 
-	@: $(MAKE); $(unstage)
-	@[ -f $(TARGET_SUBDIR)/libdsp/Makefile ] || exit 0 ; \
-	r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	echo "Doing maintainer-clean in $(TARGET_SUBDIR)/libdsp" ; \
-	for flag in $(EXTRA_TARGET_FLAGS); do \
-	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
-	done; \
-	(cd $(TARGET_SUBDIR)/libdsp && \
-	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
-	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
-	          "RANLIB=$${RANLIB}" \
-	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
-	           maintainer-clean) \
-	  || exit 1
-
-@endif target-libdsp
-
 
 
 
@@ -35458,6 +33171,980 @@ maintainer-clean-target-libsanitizer:
 	  || exit 1
 
 @endif target-libsanitizer
+
+
+
+
+
+.PHONY: configure-target-libvtv maybe-configure-target-libvtv
+maybe-configure-target-libvtv:
+@if gcc-bootstrap
+configure-target-libvtv: stage_current
+@endif gcc-bootstrap
+@if target-libvtv
+maybe-configure-target-libvtv: configure-target-libvtv
+configure-target-libvtv: 
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	echo "Checking multilib configuration for libvtv..."; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libvtv ; \
+	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null ; \
+	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+	  else \
+	    rm -f $(TARGET_SUBDIR)/libvtv/Makefile; \
+	    mv $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; \
+	  fi; \
+	else \
+	  mv $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; \
+	fi; \
+	test ! -f $(TARGET_SUBDIR)/libvtv/Makefile || exit 0; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libvtv ; \
+	$(RAW_CXX_TARGET_EXPORTS)  \
+	echo Configuring in $(TARGET_SUBDIR)/libvtv; \
+	cd "$(TARGET_SUBDIR)/libvtv" || exit 1; \
+	case $(srcdir) in \
+	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
+	  *) topdir=`echo $(TARGET_SUBDIR)/libvtv/ | \
+		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
+	esac; \
+	srcdiroption="--srcdir=$${topdir}/libvtv"; \
+	libsrcdir="$$s/libvtv"; \
+	rm -f no-such-file || : ; \
+	CONFIG_SITE=no-such-file $(SHELL) $${libsrcdir}/configure \
+	  $(TARGET_CONFIGARGS) --build=${build_alias} --host=${target_alias} \
+	  --target=${target_alias} $${srcdiroption}  \
+	  || exit 1
+@endif target-libvtv
+
+
+
+.PHONY: configure-stage1-target-libvtv maybe-configure-stage1-target-libvtv
+maybe-configure-stage1-target-libvtv:
+@if target-libvtv-bootstrap
+maybe-configure-stage1-target-libvtv: configure-stage1-target-libvtv
+configure-stage1-target-libvtv:
+	@[ $(current_stage) = stage1 ] || $(MAKE) stage1-start
+	@$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libvtv
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGE1_TFLAGS)"; \
+	echo "Checking multilib configuration for libvtv..."; \
+	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null ; \
+	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+	  else \
+	    rm -f $(TARGET_SUBDIR)/libvtv/Makefile; \
+	    mv $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; \
+	  fi; \
+	else \
+	  mv $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; \
+	fi; \
+	test ! -f $(TARGET_SUBDIR)/libvtv/Makefile || exit 0; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	CFLAGS="$(CFLAGS_FOR_TARGET)"; export CFLAGS; \
+	CXXFLAGS="$(CXXFLAGS_FOR_TARGET)"; export CXXFLAGS; \
+	LIBCFLAGS="$(LIBCFLAGS_FOR_TARGET)"; export LIBCFLAGS;  \
+	echo Configuring stage 1 in $(TARGET_SUBDIR)/libvtv ; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libvtv ; \
+	cd $(TARGET_SUBDIR)/libvtv || exit 1; \
+	case $(srcdir) in \
+	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
+	  *) topdir=`echo $(TARGET_SUBDIR)/libvtv/ | \
+		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
+	esac; \
+	srcdiroption="--srcdir=$${topdir}/libvtv"; \
+	libsrcdir="$$s/libvtv"; \
+	$(SHELL) $${libsrcdir}/configure \
+	  $(TARGET_CONFIGARGS) --build=${build_alias} --host=${target_alias} \
+	  --target=${target_alias} $${srcdiroption} \
+	  $(STAGE1_CONFIGURE_FLAGS)
+@endif target-libvtv-bootstrap
+
+.PHONY: configure-stage2-target-libvtv maybe-configure-stage2-target-libvtv
+maybe-configure-stage2-target-libvtv:
+@if target-libvtv-bootstrap
+maybe-configure-stage2-target-libvtv: configure-stage2-target-libvtv
+configure-stage2-target-libvtv:
+	@[ $(current_stage) = stage2 ] || $(MAKE) stage2-start
+	@$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libvtv
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGE2_TFLAGS)"; \
+	echo "Checking multilib configuration for libvtv..."; \
+	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null ; \
+	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+	  else \
+	    rm -f $(TARGET_SUBDIR)/libvtv/Makefile; \
+	    mv $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; \
+	  fi; \
+	else \
+	  mv $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; \
+	fi; \
+	test ! -f $(TARGET_SUBDIR)/libvtv/Makefile || exit 0; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	 \
+	CFLAGS="$(CFLAGS_FOR_TARGET)"; export CFLAGS; \
+	CXXFLAGS="$(CXXFLAGS_FOR_TARGET)"; export CXXFLAGS; \
+	LIBCFLAGS="$(LIBCFLAGS_FOR_TARGET)"; export LIBCFLAGS;  \
+	echo Configuring stage 2 in $(TARGET_SUBDIR)/libvtv ; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libvtv ; \
+	cd $(TARGET_SUBDIR)/libvtv || exit 1; \
+	case $(srcdir) in \
+	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
+	  *) topdir=`echo $(TARGET_SUBDIR)/libvtv/ | \
+		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
+	esac; \
+	srcdiroption="--srcdir=$${topdir}/libvtv"; \
+	libsrcdir="$$s/libvtv"; \
+	$(SHELL) $${libsrcdir}/configure \
+	  $(TARGET_CONFIGARGS) --build=${build_alias} --host=${target_alias} \
+	  --target=${target_alias} $${srcdiroption} \
+	  --with-build-libsubdir=$(HOST_SUBDIR) \
+	  $(STAGE2_CONFIGURE_FLAGS)
+@endif target-libvtv-bootstrap
+
+.PHONY: configure-stage3-target-libvtv maybe-configure-stage3-target-libvtv
+maybe-configure-stage3-target-libvtv:
+@if target-libvtv-bootstrap
+maybe-configure-stage3-target-libvtv: configure-stage3-target-libvtv
+configure-stage3-target-libvtv:
+	@[ $(current_stage) = stage3 ] || $(MAKE) stage3-start
+	@$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libvtv
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGE3_TFLAGS)"; \
+	echo "Checking multilib configuration for libvtv..."; \
+	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null ; \
+	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+	  else \
+	    rm -f $(TARGET_SUBDIR)/libvtv/Makefile; \
+	    mv $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; \
+	  fi; \
+	else \
+	  mv $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; \
+	fi; \
+	test ! -f $(TARGET_SUBDIR)/libvtv/Makefile || exit 0; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	 \
+	CFLAGS="$(CFLAGS_FOR_TARGET)"; export CFLAGS; \
+	CXXFLAGS="$(CXXFLAGS_FOR_TARGET)"; export CXXFLAGS; \
+	LIBCFLAGS="$(LIBCFLAGS_FOR_TARGET)"; export LIBCFLAGS;  \
+	echo Configuring stage 3 in $(TARGET_SUBDIR)/libvtv ; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libvtv ; \
+	cd $(TARGET_SUBDIR)/libvtv || exit 1; \
+	case $(srcdir) in \
+	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
+	  *) topdir=`echo $(TARGET_SUBDIR)/libvtv/ | \
+		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
+	esac; \
+	srcdiroption="--srcdir=$${topdir}/libvtv"; \
+	libsrcdir="$$s/libvtv"; \
+	$(SHELL) $${libsrcdir}/configure \
+	  $(TARGET_CONFIGARGS) --build=${build_alias} --host=${target_alias} \
+	  --target=${target_alias} $${srcdiroption} \
+	  --with-build-libsubdir=$(HOST_SUBDIR) \
+	  $(STAGE3_CONFIGURE_FLAGS)
+@endif target-libvtv-bootstrap
+
+.PHONY: configure-stage4-target-libvtv maybe-configure-stage4-target-libvtv
+maybe-configure-stage4-target-libvtv:
+@if target-libvtv-bootstrap
+maybe-configure-stage4-target-libvtv: configure-stage4-target-libvtv
+configure-stage4-target-libvtv:
+	@[ $(current_stage) = stage4 ] || $(MAKE) stage4-start
+	@$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libvtv
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGE4_TFLAGS)"; \
+	echo "Checking multilib configuration for libvtv..."; \
+	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null ; \
+	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+	  else \
+	    rm -f $(TARGET_SUBDIR)/libvtv/Makefile; \
+	    mv $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; \
+	  fi; \
+	else \
+	  mv $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; \
+	fi; \
+	test ! -f $(TARGET_SUBDIR)/libvtv/Makefile || exit 0; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	 \
+	CFLAGS="$(CFLAGS_FOR_TARGET)"; export CFLAGS; \
+	CXXFLAGS="$(CXXFLAGS_FOR_TARGET)"; export CXXFLAGS; \
+	LIBCFLAGS="$(LIBCFLAGS_FOR_TARGET)"; export LIBCFLAGS;  \
+	echo Configuring stage 4 in $(TARGET_SUBDIR)/libvtv ; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libvtv ; \
+	cd $(TARGET_SUBDIR)/libvtv || exit 1; \
+	case $(srcdir) in \
+	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
+	  *) topdir=`echo $(TARGET_SUBDIR)/libvtv/ | \
+		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
+	esac; \
+	srcdiroption="--srcdir=$${topdir}/libvtv"; \
+	libsrcdir="$$s/libvtv"; \
+	$(SHELL) $${libsrcdir}/configure \
+	  $(TARGET_CONFIGARGS) --build=${build_alias} --host=${target_alias} \
+	  --target=${target_alias} $${srcdiroption} \
+	  --with-build-libsubdir=$(HOST_SUBDIR) \
+	  $(STAGE4_CONFIGURE_FLAGS)
+@endif target-libvtv-bootstrap
+
+.PHONY: configure-stageprofile-target-libvtv maybe-configure-stageprofile-target-libvtv
+maybe-configure-stageprofile-target-libvtv:
+@if target-libvtv-bootstrap
+maybe-configure-stageprofile-target-libvtv: configure-stageprofile-target-libvtv
+configure-stageprofile-target-libvtv:
+	@[ $(current_stage) = stageprofile ] || $(MAKE) stageprofile-start
+	@$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libvtv
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGEprofile_TFLAGS)"; \
+	echo "Checking multilib configuration for libvtv..."; \
+	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null ; \
+	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+	  else \
+	    rm -f $(TARGET_SUBDIR)/libvtv/Makefile; \
+	    mv $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; \
+	  fi; \
+	else \
+	  mv $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; \
+	fi; \
+	test ! -f $(TARGET_SUBDIR)/libvtv/Makefile || exit 0; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	 \
+	CFLAGS="$(CFLAGS_FOR_TARGET)"; export CFLAGS; \
+	CXXFLAGS="$(CXXFLAGS_FOR_TARGET)"; export CXXFLAGS; \
+	LIBCFLAGS="$(LIBCFLAGS_FOR_TARGET)"; export LIBCFLAGS;  \
+	echo Configuring stage profile in $(TARGET_SUBDIR)/libvtv ; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libvtv ; \
+	cd $(TARGET_SUBDIR)/libvtv || exit 1; \
+	case $(srcdir) in \
+	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
+	  *) topdir=`echo $(TARGET_SUBDIR)/libvtv/ | \
+		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
+	esac; \
+	srcdiroption="--srcdir=$${topdir}/libvtv"; \
+	libsrcdir="$$s/libvtv"; \
+	$(SHELL) $${libsrcdir}/configure \
+	  $(TARGET_CONFIGARGS) --build=${build_alias} --host=${target_alias} \
+	  --target=${target_alias} $${srcdiroption} \
+	  --with-build-libsubdir=$(HOST_SUBDIR) \
+	  $(STAGEprofile_CONFIGURE_FLAGS)
+@endif target-libvtv-bootstrap
+
+.PHONY: configure-stagefeedback-target-libvtv maybe-configure-stagefeedback-target-libvtv
+maybe-configure-stagefeedback-target-libvtv:
+@if target-libvtv-bootstrap
+maybe-configure-stagefeedback-target-libvtv: configure-stagefeedback-target-libvtv
+configure-stagefeedback-target-libvtv:
+	@[ $(current_stage) = stagefeedback ] || $(MAKE) stagefeedback-start
+	@$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libvtv
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGEfeedback_TFLAGS)"; \
+	echo "Checking multilib configuration for libvtv..."; \
+	$(CC_FOR_TARGET) --print-multi-lib > $(TARGET_SUBDIR)/libvtv/multilib.tmp 2> /dev/null ; \
+	if test -r $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+	  if cmp -s $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; then \
+	    rm -f $(TARGET_SUBDIR)/libvtv/multilib.tmp; \
+	  else \
+	    rm -f $(TARGET_SUBDIR)/libvtv/Makefile; \
+	    mv $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; \
+	  fi; \
+	else \
+	  mv $(TARGET_SUBDIR)/libvtv/multilib.tmp $(TARGET_SUBDIR)/libvtv/multilib.out; \
+	fi; \
+	test ! -f $(TARGET_SUBDIR)/libvtv/Makefile || exit 0; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	 \
+	CFLAGS="$(CFLAGS_FOR_TARGET)"; export CFLAGS; \
+	CXXFLAGS="$(CXXFLAGS_FOR_TARGET)"; export CXXFLAGS; \
+	LIBCFLAGS="$(LIBCFLAGS_FOR_TARGET)"; export LIBCFLAGS;  \
+	echo Configuring stage feedback in $(TARGET_SUBDIR)/libvtv ; \
+	$(SHELL) $(srcdir)/mkinstalldirs $(TARGET_SUBDIR)/libvtv ; \
+	cd $(TARGET_SUBDIR)/libvtv || exit 1; \
+	case $(srcdir) in \
+	  /* | [A-Za-z]:[\\/]*) topdir=$(srcdir) ;; \
+	  *) topdir=`echo $(TARGET_SUBDIR)/libvtv/ | \
+		sed -e 's,\./,,g' -e 's,[^/]*/,../,g' `$(srcdir) ;; \
+	esac; \
+	srcdiroption="--srcdir=$${topdir}/libvtv"; \
+	libsrcdir="$$s/libvtv"; \
+	$(SHELL) $${libsrcdir}/configure \
+	  $(TARGET_CONFIGARGS) --build=${build_alias} --host=${target_alias} \
+	  --target=${target_alias} $${srcdiroption} \
+	  --with-build-libsubdir=$(HOST_SUBDIR) \
+	  $(STAGEfeedback_CONFIGURE_FLAGS)
+@endif target-libvtv-bootstrap
+
+
+
+
+
+.PHONY: all-target-libvtv maybe-all-target-libvtv
+maybe-all-target-libvtv:
+@if gcc-bootstrap
+all-target-libvtv: stage_current
+@endif gcc-bootstrap
+@if target-libvtv
+TARGET-target-libvtv=all
+maybe-all-target-libvtv: all-target-libvtv
+all-target-libvtv: configure-target-libvtv
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS)  \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) $(EXTRA_TARGET_FLAGS) 'CXX=$$(RAW_CXX_FOR_TARGET)' 'CXX_FOR_TARGET=$$(RAW_CXX_FOR_TARGET)'   \
+		$(TARGET-target-libvtv))
+@endif target-libvtv
+
+
+
+.PHONY: all-stage1-target-libvtv maybe-all-stage1-target-libvtv
+.PHONY: clean-stage1-target-libvtv maybe-clean-stage1-target-libvtv
+maybe-all-stage1-target-libvtv:
+maybe-clean-stage1-target-libvtv:
+@if target-libvtv-bootstrap
+maybe-all-stage1-target-libvtv: all-stage1-target-libvtv
+all-stage1: all-stage1-target-libvtv
+TARGET-stage1-target-libvtv = $(TARGET-target-libvtv)
+all-stage1-target-libvtv: configure-stage1-target-libvtv
+	@[ $(current_stage) = stage1 ] || $(MAKE) stage1-start
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGE1_TFLAGS)"; \
+	$(RAW_CXX_TARGET_EXPORTS)  \
+	cd $(TARGET_SUBDIR)/libvtv && \
+	$(MAKE) $(BASE_FLAGS_TO_PASS) \
+		CFLAGS="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS="$(LIBCFLAGS_FOR_TARGET)" \
+		CFLAGS_FOR_TARGET="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS_FOR_TARGET="$(LIBCFLAGS_FOR_TARGET)" \
+		$(EXTRA_TARGET_FLAGS) 'CXX=$$(RAW_CXX_FOR_TARGET)' 'CXX_FOR_TARGET=$$(RAW_CXX_FOR_TARGET)'  \
+		  \
+		TFLAGS="$(STAGE1_TFLAGS)" \
+		$(TARGET-stage1-target-libvtv)
+
+maybe-clean-stage1-target-libvtv: clean-stage1-target-libvtv
+clean-stage1: clean-stage1-target-libvtv
+clean-stage1-target-libvtv:
+	@if [ $(current_stage) = stage1 ]; then \
+	  [ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0; \
+	else \
+	  [ -f $(TARGET_SUBDIR)/stage1-libvtv/Makefile ] || exit 0; \
+	  $(MAKE) stage1-start; \
+	fi; \
+	cd $(TARGET_SUBDIR)/libvtv && \
+	$(MAKE) $(EXTRA_TARGET_FLAGS) 'CXX=$$(RAW_CXX_FOR_TARGET)' 'CXX_FOR_TARGET=$$(RAW_CXX_FOR_TARGET)'  \
+	  clean
+@endif target-libvtv-bootstrap
+
+
+.PHONY: all-stage2-target-libvtv maybe-all-stage2-target-libvtv
+.PHONY: clean-stage2-target-libvtv maybe-clean-stage2-target-libvtv
+maybe-all-stage2-target-libvtv:
+maybe-clean-stage2-target-libvtv:
+@if target-libvtv-bootstrap
+maybe-all-stage2-target-libvtv: all-stage2-target-libvtv
+all-stage2: all-stage2-target-libvtv
+TARGET-stage2-target-libvtv = $(TARGET-target-libvtv)
+all-stage2-target-libvtv: configure-stage2-target-libvtv
+	@[ $(current_stage) = stage2 ] || $(MAKE) stage2-start
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGE2_TFLAGS)"; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	  \
+	cd $(TARGET_SUBDIR)/libvtv && \
+	$(MAKE) $(BASE_FLAGS_TO_PASS) \
+		CFLAGS="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS="$(LIBCFLAGS_FOR_TARGET)" \
+		CFLAGS_FOR_TARGET="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS_FOR_TARGET="$(LIBCFLAGS_FOR_TARGET)" \
+		$(EXTRA_TARGET_FLAGS) 'CXX=$$(RAW_CXX_FOR_TARGET)' 'CXX_FOR_TARGET=$$(RAW_CXX_FOR_TARGET)'   \
+		TFLAGS="$(STAGE2_TFLAGS)" \
+		$(TARGET-stage2-target-libvtv)
+
+maybe-clean-stage2-target-libvtv: clean-stage2-target-libvtv
+clean-stage2: clean-stage2-target-libvtv
+clean-stage2-target-libvtv:
+	@if [ $(current_stage) = stage2 ]; then \
+	  [ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0; \
+	else \
+	  [ -f $(TARGET_SUBDIR)/stage2-libvtv/Makefile ] || exit 0; \
+	  $(MAKE) stage2-start; \
+	fi; \
+	cd $(TARGET_SUBDIR)/libvtv && \
+	$(MAKE) $(EXTRA_TARGET_FLAGS) 'CXX=$$(RAW_CXX_FOR_TARGET)' 'CXX_FOR_TARGET=$$(RAW_CXX_FOR_TARGET)'   clean
+@endif target-libvtv-bootstrap
+
+
+.PHONY: all-stage3-target-libvtv maybe-all-stage3-target-libvtv
+.PHONY: clean-stage3-target-libvtv maybe-clean-stage3-target-libvtv
+maybe-all-stage3-target-libvtv:
+maybe-clean-stage3-target-libvtv:
+@if target-libvtv-bootstrap
+maybe-all-stage3-target-libvtv: all-stage3-target-libvtv
+all-stage3: all-stage3-target-libvtv
+TARGET-stage3-target-libvtv = $(TARGET-target-libvtv)
+all-stage3-target-libvtv: configure-stage3-target-libvtv
+	@[ $(current_stage) = stage3 ] || $(MAKE) stage3-start
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGE3_TFLAGS)"; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	  \
+	cd $(TARGET_SUBDIR)/libvtv && \
+	$(MAKE) $(BASE_FLAGS_TO_PASS) \
+		CFLAGS="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS="$(LIBCFLAGS_FOR_TARGET)" \
+		CFLAGS_FOR_TARGET="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS_FOR_TARGET="$(LIBCFLAGS_FOR_TARGET)" \
+		$(EXTRA_TARGET_FLAGS) 'CXX=$$(RAW_CXX_FOR_TARGET)' 'CXX_FOR_TARGET=$$(RAW_CXX_FOR_TARGET)'   \
+		TFLAGS="$(STAGE3_TFLAGS)" \
+		$(TARGET-stage3-target-libvtv)
+
+maybe-clean-stage3-target-libvtv: clean-stage3-target-libvtv
+clean-stage3: clean-stage3-target-libvtv
+clean-stage3-target-libvtv:
+	@if [ $(current_stage) = stage3 ]; then \
+	  [ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0; \
+	else \
+	  [ -f $(TARGET_SUBDIR)/stage3-libvtv/Makefile ] || exit 0; \
+	  $(MAKE) stage3-start; \
+	fi; \
+	cd $(TARGET_SUBDIR)/libvtv && \
+	$(MAKE) $(EXTRA_TARGET_FLAGS) 'CXX=$$(RAW_CXX_FOR_TARGET)' 'CXX_FOR_TARGET=$$(RAW_CXX_FOR_TARGET)'   clean
+@endif target-libvtv-bootstrap
+
+
+.PHONY: all-stage4-target-libvtv maybe-all-stage4-target-libvtv
+.PHONY: clean-stage4-target-libvtv maybe-clean-stage4-target-libvtv
+maybe-all-stage4-target-libvtv:
+maybe-clean-stage4-target-libvtv:
+@if target-libvtv-bootstrap
+maybe-all-stage4-target-libvtv: all-stage4-target-libvtv
+all-stage4: all-stage4-target-libvtv
+TARGET-stage4-target-libvtv = $(TARGET-target-libvtv)
+all-stage4-target-libvtv: configure-stage4-target-libvtv
+	@[ $(current_stage) = stage4 ] || $(MAKE) stage4-start
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGE4_TFLAGS)"; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	  \
+	cd $(TARGET_SUBDIR)/libvtv && \
+	$(MAKE) $(BASE_FLAGS_TO_PASS) \
+		CFLAGS="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS="$(LIBCFLAGS_FOR_TARGET)" \
+		CFLAGS_FOR_TARGET="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS_FOR_TARGET="$(LIBCFLAGS_FOR_TARGET)" \
+		$(EXTRA_TARGET_FLAGS) 'CXX=$$(RAW_CXX_FOR_TARGET)' 'CXX_FOR_TARGET=$$(RAW_CXX_FOR_TARGET)'   \
+		TFLAGS="$(STAGE4_TFLAGS)" \
+		$(TARGET-stage4-target-libvtv)
+
+maybe-clean-stage4-target-libvtv: clean-stage4-target-libvtv
+clean-stage4: clean-stage4-target-libvtv
+clean-stage4-target-libvtv:
+	@if [ $(current_stage) = stage4 ]; then \
+	  [ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0; \
+	else \
+	  [ -f $(TARGET_SUBDIR)/stage4-libvtv/Makefile ] || exit 0; \
+	  $(MAKE) stage4-start; \
+	fi; \
+	cd $(TARGET_SUBDIR)/libvtv && \
+	$(MAKE) $(EXTRA_TARGET_FLAGS) 'CXX=$$(RAW_CXX_FOR_TARGET)' 'CXX_FOR_TARGET=$$(RAW_CXX_FOR_TARGET)'   clean
+@endif target-libvtv-bootstrap
+
+
+.PHONY: all-stageprofile-target-libvtv maybe-all-stageprofile-target-libvtv
+.PHONY: clean-stageprofile-target-libvtv maybe-clean-stageprofile-target-libvtv
+maybe-all-stageprofile-target-libvtv:
+maybe-clean-stageprofile-target-libvtv:
+@if target-libvtv-bootstrap
+maybe-all-stageprofile-target-libvtv: all-stageprofile-target-libvtv
+all-stageprofile: all-stageprofile-target-libvtv
+TARGET-stageprofile-target-libvtv = $(TARGET-target-libvtv)
+all-stageprofile-target-libvtv: configure-stageprofile-target-libvtv
+	@[ $(current_stage) = stageprofile ] || $(MAKE) stageprofile-start
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGEprofile_TFLAGS)"; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	  \
+	cd $(TARGET_SUBDIR)/libvtv && \
+	$(MAKE) $(BASE_FLAGS_TO_PASS) \
+		CFLAGS="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS="$(LIBCFLAGS_FOR_TARGET)" \
+		CFLAGS_FOR_TARGET="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS_FOR_TARGET="$(LIBCFLAGS_FOR_TARGET)" \
+		$(EXTRA_TARGET_FLAGS) 'CXX=$$(RAW_CXX_FOR_TARGET)' 'CXX_FOR_TARGET=$$(RAW_CXX_FOR_TARGET)'   \
+		TFLAGS="$(STAGEprofile_TFLAGS)" \
+		$(TARGET-stageprofile-target-libvtv)
+
+maybe-clean-stageprofile-target-libvtv: clean-stageprofile-target-libvtv
+clean-stageprofile: clean-stageprofile-target-libvtv
+clean-stageprofile-target-libvtv:
+	@if [ $(current_stage) = stageprofile ]; then \
+	  [ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0; \
+	else \
+	  [ -f $(TARGET_SUBDIR)/stageprofile-libvtv/Makefile ] || exit 0; \
+	  $(MAKE) stageprofile-start; \
+	fi; \
+	cd $(TARGET_SUBDIR)/libvtv && \
+	$(MAKE) $(EXTRA_TARGET_FLAGS) 'CXX=$$(RAW_CXX_FOR_TARGET)' 'CXX_FOR_TARGET=$$(RAW_CXX_FOR_TARGET)'   clean
+@endif target-libvtv-bootstrap
+
+
+.PHONY: all-stagefeedback-target-libvtv maybe-all-stagefeedback-target-libvtv
+.PHONY: clean-stagefeedback-target-libvtv maybe-clean-stagefeedback-target-libvtv
+maybe-all-stagefeedback-target-libvtv:
+maybe-clean-stagefeedback-target-libvtv:
+@if target-libvtv-bootstrap
+maybe-all-stagefeedback-target-libvtv: all-stagefeedback-target-libvtv
+all-stagefeedback: all-stagefeedback-target-libvtv
+TARGET-stagefeedback-target-libvtv = $(TARGET-target-libvtv)
+all-stagefeedback-target-libvtv: configure-stagefeedback-target-libvtv
+	@[ $(current_stage) = stagefeedback ] || $(MAKE) stagefeedback-start
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	TFLAGS="$(STAGEfeedback_TFLAGS)"; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	  \
+	cd $(TARGET_SUBDIR)/libvtv && \
+	$(MAKE) $(BASE_FLAGS_TO_PASS) \
+		CFLAGS="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS="$(LIBCFLAGS_FOR_TARGET)" \
+		CFLAGS_FOR_TARGET="$(CFLAGS_FOR_TARGET)" \
+		CXXFLAGS_FOR_TARGET="$(CXXFLAGS_FOR_TARGET)" \
+		LIBCFLAGS_FOR_TARGET="$(LIBCFLAGS_FOR_TARGET)" \
+		$(EXTRA_TARGET_FLAGS) 'CXX=$$(RAW_CXX_FOR_TARGET)' 'CXX_FOR_TARGET=$$(RAW_CXX_FOR_TARGET)'   \
+		TFLAGS="$(STAGEfeedback_TFLAGS)" \
+		$(TARGET-stagefeedback-target-libvtv)
+
+maybe-clean-stagefeedback-target-libvtv: clean-stagefeedback-target-libvtv
+clean-stagefeedback: clean-stagefeedback-target-libvtv
+clean-stagefeedback-target-libvtv:
+	@if [ $(current_stage) = stagefeedback ]; then \
+	  [ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0; \
+	else \
+	  [ -f $(TARGET_SUBDIR)/stagefeedback-libvtv/Makefile ] || exit 0; \
+	  $(MAKE) stagefeedback-start; \
+	fi; \
+	cd $(TARGET_SUBDIR)/libvtv && \
+	$(MAKE) $(EXTRA_TARGET_FLAGS) 'CXX=$$(RAW_CXX_FOR_TARGET)' 'CXX_FOR_TARGET=$$(RAW_CXX_FOR_TARGET)'   clean
+@endif target-libvtv-bootstrap
+
+
+
+
+
+
+.PHONY: check-target-libvtv maybe-check-target-libvtv
+maybe-check-target-libvtv:
+@if target-libvtv
+maybe-check-target-libvtv: check-target-libvtv
+
+check-target-libvtv:
+	@: $(MAKE); $(unstage)
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(TARGET_FLAGS_TO_PASS)  'CXX=$$(RAW_CXX_FOR_TARGET)' 'CXX_FOR_TARGET=$$(RAW_CXX_FOR_TARGET)'   check)
+
+@endif target-libvtv
+
+.PHONY: install-target-libvtv maybe-install-target-libvtv
+maybe-install-target-libvtv:
+@if target-libvtv
+maybe-install-target-libvtv: install-target-libvtv
+
+install-target-libvtv: installdirs
+	@: $(MAKE); $(unstage)
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(TARGET_FLAGS_TO_PASS)  install)
+
+@endif target-libvtv
+
+.PHONY: install-strip-target-libvtv maybe-install-strip-target-libvtv
+maybe-install-strip-target-libvtv:
+@if target-libvtv
+maybe-install-strip-target-libvtv: install-strip-target-libvtv
+
+install-strip-target-libvtv: installdirs
+	@: $(MAKE); $(unstage)
+	@r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(TARGET_FLAGS_TO_PASS)  install-strip)
+
+@endif target-libvtv
+
+# Other targets (info, dvi, pdf, etc.)
+
+.PHONY: maybe-info-target-libvtv info-target-libvtv
+maybe-info-target-libvtv:
+@if target-libvtv
+maybe-info-target-libvtv: info-target-libvtv
+
+info-target-libvtv: \
+    configure-target-libvtv 
+	@: $(MAKE); $(unstage)
+	@[ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0 ; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	echo "Doing info in $(TARGET_SUBDIR)/libvtv" ; \
+	for flag in $(EXTRA_TARGET_FLAGS); do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	           info) \
+	  || exit 1
+
+@endif target-libvtv
+
+.PHONY: maybe-dvi-target-libvtv dvi-target-libvtv
+maybe-dvi-target-libvtv:
+@if target-libvtv
+maybe-dvi-target-libvtv: dvi-target-libvtv
+
+dvi-target-libvtv: \
+    configure-target-libvtv 
+	@: $(MAKE); $(unstage)
+	@[ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0 ; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	echo "Doing dvi in $(TARGET_SUBDIR)/libvtv" ; \
+	for flag in $(EXTRA_TARGET_FLAGS); do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	           dvi) \
+	  || exit 1
+
+@endif target-libvtv
+
+.PHONY: maybe-pdf-target-libvtv pdf-target-libvtv
+maybe-pdf-target-libvtv:
+@if target-libvtv
+maybe-pdf-target-libvtv: pdf-target-libvtv
+
+pdf-target-libvtv: \
+    configure-target-libvtv 
+	@: $(MAKE); $(unstage)
+	@[ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0 ; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	echo "Doing pdf in $(TARGET_SUBDIR)/libvtv" ; \
+	for flag in $(EXTRA_TARGET_FLAGS); do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	           pdf) \
+	  || exit 1
+
+@endif target-libvtv
+
+.PHONY: maybe-html-target-libvtv html-target-libvtv
+maybe-html-target-libvtv:
+@if target-libvtv
+maybe-html-target-libvtv: html-target-libvtv
+
+html-target-libvtv: \
+    configure-target-libvtv 
+	@: $(MAKE); $(unstage)
+	@[ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0 ; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	echo "Doing html in $(TARGET_SUBDIR)/libvtv" ; \
+	for flag in $(EXTRA_TARGET_FLAGS); do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	           html) \
+	  || exit 1
+
+@endif target-libvtv
+
+.PHONY: maybe-TAGS-target-libvtv TAGS-target-libvtv
+maybe-TAGS-target-libvtv:
+@if target-libvtv
+maybe-TAGS-target-libvtv: TAGS-target-libvtv
+
+TAGS-target-libvtv: \
+    configure-target-libvtv 
+	@: $(MAKE); $(unstage)
+	@[ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0 ; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	echo "Doing TAGS in $(TARGET_SUBDIR)/libvtv" ; \
+	for flag in $(EXTRA_TARGET_FLAGS); do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	           TAGS) \
+	  || exit 1
+
+@endif target-libvtv
+
+.PHONY: maybe-install-info-target-libvtv install-info-target-libvtv
+maybe-install-info-target-libvtv:
+@if target-libvtv
+maybe-install-info-target-libvtv: install-info-target-libvtv
+
+install-info-target-libvtv: \
+    configure-target-libvtv \
+    info-target-libvtv 
+	@: $(MAKE); $(unstage)
+	@[ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0 ; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	echo "Doing install-info in $(TARGET_SUBDIR)/libvtv" ; \
+	for flag in $(EXTRA_TARGET_FLAGS); do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	           install-info) \
+	  || exit 1
+
+@endif target-libvtv
+
+.PHONY: maybe-install-pdf-target-libvtv install-pdf-target-libvtv
+maybe-install-pdf-target-libvtv:
+@if target-libvtv
+maybe-install-pdf-target-libvtv: install-pdf-target-libvtv
+
+install-pdf-target-libvtv: \
+    configure-target-libvtv \
+    pdf-target-libvtv 
+	@: $(MAKE); $(unstage)
+	@[ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0 ; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	echo "Doing install-pdf in $(TARGET_SUBDIR)/libvtv" ; \
+	for flag in $(EXTRA_TARGET_FLAGS); do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	           install-pdf) \
+	  || exit 1
+
+@endif target-libvtv
+
+.PHONY: maybe-install-html-target-libvtv install-html-target-libvtv
+maybe-install-html-target-libvtv:
+@if target-libvtv
+maybe-install-html-target-libvtv: install-html-target-libvtv
+
+install-html-target-libvtv: \
+    configure-target-libvtv \
+    html-target-libvtv 
+	@: $(MAKE); $(unstage)
+	@[ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0 ; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	echo "Doing install-html in $(TARGET_SUBDIR)/libvtv" ; \
+	for flag in $(EXTRA_TARGET_FLAGS); do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	           install-html) \
+	  || exit 1
+
+@endif target-libvtv
+
+.PHONY: maybe-installcheck-target-libvtv installcheck-target-libvtv
+maybe-installcheck-target-libvtv:
+@if target-libvtv
+maybe-installcheck-target-libvtv: installcheck-target-libvtv
+
+installcheck-target-libvtv: \
+    configure-target-libvtv 
+	@: $(MAKE); $(unstage)
+	@[ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0 ; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	echo "Doing installcheck in $(TARGET_SUBDIR)/libvtv" ; \
+	for flag in $(EXTRA_TARGET_FLAGS); do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	           installcheck) \
+	  || exit 1
+
+@endif target-libvtv
+
+.PHONY: maybe-mostlyclean-target-libvtv mostlyclean-target-libvtv
+maybe-mostlyclean-target-libvtv:
+@if target-libvtv
+maybe-mostlyclean-target-libvtv: mostlyclean-target-libvtv
+
+mostlyclean-target-libvtv: 
+	@: $(MAKE); $(unstage)
+	@[ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0 ; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	echo "Doing mostlyclean in $(TARGET_SUBDIR)/libvtv" ; \
+	for flag in $(EXTRA_TARGET_FLAGS); do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	           mostlyclean) \
+	  || exit 1
+
+@endif target-libvtv
+
+.PHONY: maybe-clean-target-libvtv clean-target-libvtv
+maybe-clean-target-libvtv:
+@if target-libvtv
+maybe-clean-target-libvtv: clean-target-libvtv
+
+clean-target-libvtv: 
+	@: $(MAKE); $(unstage)
+	@[ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0 ; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	echo "Doing clean in $(TARGET_SUBDIR)/libvtv" ; \
+	for flag in $(EXTRA_TARGET_FLAGS); do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	           clean) \
+	  || exit 1
+
+@endif target-libvtv
+
+.PHONY: maybe-distclean-target-libvtv distclean-target-libvtv
+maybe-distclean-target-libvtv:
+@if target-libvtv
+maybe-distclean-target-libvtv: distclean-target-libvtv
+
+distclean-target-libvtv: 
+	@: $(MAKE); $(unstage)
+	@[ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0 ; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	echo "Doing distclean in $(TARGET_SUBDIR)/libvtv" ; \
+	for flag in $(EXTRA_TARGET_FLAGS); do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	           distclean) \
+	  || exit 1
+
+@endif target-libvtv
+
+.PHONY: maybe-maintainer-clean-target-libvtv maintainer-clean-target-libvtv
+maybe-maintainer-clean-target-libvtv:
+@if target-libvtv
+maybe-maintainer-clean-target-libvtv: maintainer-clean-target-libvtv
+
+maintainer-clean-target-libvtv: 
+	@: $(MAKE); $(unstage)
+	@[ -f $(TARGET_SUBDIR)/libvtv/Makefile ] || exit 0 ; \
+	r=`${PWD_COMMAND}`; export r; \
+	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
+	$(RAW_CXX_TARGET_EXPORTS) \
+	echo "Doing maintainer-clean in $(TARGET_SUBDIR)/libvtv" ; \
+	for flag in $(EXTRA_TARGET_FLAGS); do \
+	  eval `echo "$$flag" | sed -e "s|^\([^=]*\)=\(.*\)|\1='\2'; export \1|"`; \
+	done; \
+	(cd $(TARGET_SUBDIR)/libvtv && \
+	  $(MAKE) $(BASE_FLAGS_TO_PASS) "AR=$${AR}" "AS=$${AS}" \
+	          "CC=$${CC}" "CXX=$${CXX}" "LD=$${LD}" "NM=$${NM}" \
+	          "RANLIB=$${RANLIB}" \
+	          "DLLTOOL=$${DLLTOOL}" "WINDRES=$${WINDRES}" "WINDMC=$${WINDMC}" \
+	           maintainer-clean) \
+	  || exit 1
+
+@endif target-libvtv
 
 
 
@@ -41021,13 +39708,8 @@ maybe-install-target-libffi:
 @if target-libffi
 maybe-install-target-libffi: install-target-libffi
 
-install-target-libffi: installdirs
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	(cd $(TARGET_SUBDIR)/libffi && \
-	  $(MAKE) $(TARGET_FLAGS_TO_PASS)  install)
+# Dummy target for uninstallable.
+install-target-libffi:
 
 @endif target-libffi
 
@@ -41036,13 +39718,8 @@ maybe-install-strip-target-libffi:
 @if target-libffi
 maybe-install-strip-target-libffi: install-strip-target-libffi
 
-install-strip-target-libffi: installdirs
-	@: $(MAKE); $(unstage)
-	@r=`${PWD_COMMAND}`; export r; \
-	s=`cd $(srcdir); ${PWD_COMMAND}`; export s; \
-	$(NORMAL_TARGET_EXPORTS) \
-	(cd $(TARGET_SUBDIR)/libffi && \
-	  $(MAKE) $(TARGET_FLAGS_TO_PASS)  install-strip)
+# Dummy target for uninstallable.
+install-strip-target-libffi:
 
 @endif target-libffi
 
@@ -47692,7 +46369,6 @@ restrap:: all
 
 # Generic dependencies for target modules on host stuff, especially gcc
 @if gcc-bootstrap
-configure-target-libdsp: stage_last
 configure-stage1-target-libstdc++-v3: maybe-all-stage1-gcc
 configure-stage2-target-libstdc++-v3: maybe-all-stage2-gcc
 configure-stage3-target-libstdc++-v3: maybe-all-stage3-gcc
@@ -47706,6 +46382,12 @@ configure-stage3-target-libsanitizer: maybe-all-stage3-gcc
 configure-stage4-target-libsanitizer: maybe-all-stage4-gcc
 configure-stageprofile-target-libsanitizer: maybe-all-stageprofile-gcc
 configure-stagefeedback-target-libsanitizer: maybe-all-stagefeedback-gcc
+configure-stage1-target-libvtv: maybe-all-stage1-gcc
+configure-stage2-target-libvtv: maybe-all-stage2-gcc
+configure-stage3-target-libvtv: maybe-all-stage3-gcc
+configure-stage4-target-libvtv: maybe-all-stage4-gcc
+configure-stageprofile-target-libvtv: maybe-all-stageprofile-gcc
+configure-stagefeedback-target-libvtv: maybe-all-stagefeedback-gcc
 configure-target-libssp: stage_last
 configure-target-newlib: stage_last
 configure-stage1-target-libgcc: maybe-all-stage1-gcc
@@ -47739,10 +46421,10 @@ configure-target-libatomic: stage_last
 @endif gcc-bootstrap
 
 @if gcc-no-bootstrap
-configure-target-libdsp: maybe-all-gcc
 configure-target-libstdc++-v3: maybe-all-gcc
 configure-target-libmudflap: maybe-all-gcc
 configure-target-libsanitizer: maybe-all-gcc
+configure-target-libvtv: maybe-all-gcc
 configure-target-libssp: maybe-all-gcc
 configure-target-newlib: maybe-all-gcc
 configure-target-libgcc: maybe-all-gcc
@@ -47783,29 +46465,13 @@ configure-target-libatomic: maybe-all-gcc
 # to check for bootstrap/prebootstrap dependencies.  To resolve
 # prebootstrap dependencies, prebootstrap modules are gathered in
 # a hash table.
+all-build-bison: maybe-all-build-texinfo
 all-build-flex: maybe-all-build-texinfo
-all-build-flex: maybe-all-build-libiberty
 all-build-flex: maybe-all-build-bison
 all-build-flex: maybe-all-build-m4
 all-build-libiberty: maybe-all-build-texinfo
 all-build-m4: maybe-all-build-texinfo
 all-build-fixincludes: maybe-all-build-libiberty
-configure-gmp: maybe-all-build-flex
-
-configure-stage1-gmp: maybe-all-build-flex
-configure-stage2-gmp: maybe-all-build-flex
-configure-stage3-gmp: maybe-all-build-flex
-configure-stage4-gmp: maybe-all-build-flex
-configure-stageprofile-gmp: maybe-all-build-flex
-configure-stagefeedback-gmp: maybe-all-build-flex
-configure-gmp: maybe-all-build-bison
-
-configure-stage1-gmp: maybe-all-build-bison
-configure-stage2-gmp: maybe-all-build-bison
-configure-stage3-gmp: maybe-all-build-bison
-configure-stage4-gmp: maybe-all-build-bison
-configure-stageprofile-gmp: maybe-all-build-bison
-configure-stagefeedback-gmp: maybe-all-build-bison
 configure-gcc: maybe-configure-intl
 
 configure-stage1-gcc: maybe-configure-stage1-intl
@@ -48069,6 +46735,7 @@ all-stageprofile-libcpp: maybe-all-stageprofile-intl
 all-stagefeedback-libcpp: maybe-all-stagefeedback-intl
 all-fixincludes: maybe-all-libiberty
 all-gnattools: maybe-all-target-libada
+all-gnattools: maybe-all-target-libstdc++-v3
 all-lto-plugin: maybe-all-libiberty
 
 all-stage1-lto-plugin: maybe-all-stage1-libiberty
@@ -48121,14 +46788,6 @@ configure-stagefeedback-cloog: maybe-all-stagefeedback-gmp
 configure-gdb: maybe-all-intl
 configure-gdb: maybe-configure-sim
 configure-gdb: maybe-all-bfd
-configure-bfd: maybe-all-build-bison
-
-configure-stage1-bfd: maybe-all-build-bison
-configure-stage2-bfd: maybe-all-build-bison
-configure-stage3-bfd: maybe-all-build-bison
-configure-stage4-bfd: maybe-all-build-bison
-configure-stageprofile-bfd: maybe-all-build-bison
-configure-stagefeedback-bfd: maybe-all-build-bison
 configure-gdb: maybe-all-libiconv
 all-gdb: maybe-all-libiberty
 all-gdb: maybe-all-libiconv
@@ -48191,14 +46850,6 @@ all-stage3-opcodes: maybe-all-stage3-libiberty
 all-stage4-opcodes: maybe-all-stage4-libiberty
 all-stageprofile-opcodes: maybe-all-stageprofile-libiberty
 all-stagefeedback-opcodes: maybe-all-stagefeedback-libiberty
-all-bfd: maybe-all-build-texinfo
-
-all-stage1-bfd: maybe-all-build-texinfo
-all-stage2-bfd: maybe-all-build-texinfo
-all-stage3-bfd: maybe-all-build-texinfo
-all-stage4-bfd: maybe-all-build-texinfo
-all-stageprofile-bfd: maybe-all-build-texinfo
-all-stagefeedback-bfd: maybe-all-build-texinfo
 configure-binutils: maybe-configure-intl
 
 configure-stage1-binutils: maybe-configure-stage1-intl
@@ -48207,22 +46858,6 @@ configure-stage3-binutils: maybe-configure-stage3-intl
 configure-stage4-binutils: maybe-configure-stage4-intl
 configure-stageprofile-binutils: maybe-configure-stageprofile-intl
 configure-stagefeedback-binutils: maybe-configure-stagefeedback-intl
-configure-binutils: maybe-all-build-flex
-
-configure-stage1-binutils: maybe-all-build-flex
-configure-stage2-binutils: maybe-all-build-flex
-configure-stage3-binutils: maybe-all-build-flex
-configure-stage4-binutils: maybe-all-build-flex
-configure-stageprofile-binutils: maybe-all-build-flex
-configure-stagefeedback-binutils: maybe-all-build-flex
-configure-binutils: maybe-all-build-bison
-
-configure-stage1-binutils: maybe-all-build-bison
-configure-stage2-binutils: maybe-all-build-bison
-configure-stage3-binutils: maybe-all-build-bison
-configure-stage4-binutils: maybe-all-build-bison
-configure-stageprofile-binutils: maybe-all-build-bison
-configure-stagefeedback-binutils: maybe-all-build-bison
 all-binutils: maybe-all-libiberty
 
 all-stage1-binutils: maybe-all-stage1-libiberty
@@ -48291,38 +46926,6 @@ configure-stage3-gas: maybe-configure-stage3-intl
 configure-stage4-gas: maybe-configure-stage4-intl
 configure-stageprofile-gas: maybe-configure-stageprofile-intl
 configure-stagefeedback-gas: maybe-configure-stagefeedback-intl
-configure-gas: maybe-all-build-flex
-
-configure-stage1-gas: maybe-all-build-flex
-configure-stage2-gas: maybe-all-build-flex
-configure-stage3-gas: maybe-all-build-flex
-configure-stage4-gas: maybe-all-build-flex
-configure-stageprofile-gas: maybe-all-build-flex
-configure-stagefeedback-gas: maybe-all-build-flex
-configure-gas: maybe-all-build-bison
-
-configure-stage1-gas: maybe-all-build-bison
-configure-stage2-gas: maybe-all-build-bison
-configure-stage3-gas: maybe-all-build-bison
-configure-stage4-gas: maybe-all-build-bison
-configure-stageprofile-gas: maybe-all-build-bison
-configure-stagefeedback-gas: maybe-all-build-bison
-configure-ld: maybe-all-build-flex
-
-configure-stage1-ld: maybe-all-build-flex
-configure-stage2-ld: maybe-all-build-flex
-configure-stage3-ld: maybe-all-build-flex
-configure-stage4-ld: maybe-all-build-flex
-configure-stageprofile-ld: maybe-all-build-flex
-configure-stagefeedback-ld: maybe-all-build-flex
-configure-ld: maybe-all-build-bison
-
-configure-stage1-ld: maybe-all-build-bison
-configure-stage2-ld: maybe-all-build-bison
-configure-stage3-ld: maybe-all-build-bison
-configure-stage4-ld: maybe-all-build-bison
-configure-stageprofile-ld: maybe-all-build-bison
-configure-stagefeedback-ld: maybe-all-build-bison
 all-gas: maybe-all-libiberty
 
 all-stage1-gas: maybe-all-stage1-libiberty
@@ -48523,7 +47126,6 @@ all-stage3-opcodes: maybe-all-stage3-intl
 all-stage4-opcodes: maybe-all-stage4-intl
 all-stageprofile-opcodes: maybe-all-stageprofile-intl
 all-stagefeedback-opcodes: maybe-all-stagefeedback-intl
-configure-dejagnu: maybe-all-build-flex
 all-dejagnu: maybe-all-tcl
 all-dejagnu: maybe-all-expect
 all-dejagnu: maybe-all-tk
@@ -48558,11 +47160,8 @@ all-sim: maybe-configure-gdb
 all-fastjar: maybe-all-zlib
 all-fastjar: maybe-all-build-texinfo
 all-fastjar: maybe-all-libiberty
-configure-bison: maybe-all-build-flex
-configure-bison: maybe-all-build-bison
 all-bison: maybe-all-intl
 all-bison: maybe-all-build-texinfo
-configure-flex: maybe-all-build-bison
 all-flex: maybe-all-build-bison
 all-flex: maybe-all-intl
 all-flex: maybe-all-m4
@@ -48602,6 +47201,14 @@ configure-stage3-target-libsanitizer: maybe-all-stage3-target-libstdc++-v3
 configure-stage4-target-libsanitizer: maybe-all-stage4-target-libstdc++-v3
 configure-stageprofile-target-libsanitizer: maybe-all-stageprofile-target-libstdc++-v3
 configure-stagefeedback-target-libsanitizer: maybe-all-stagefeedback-target-libstdc++-v3
+configure-target-libvtv: maybe-all-target-libstdc++-v3
+
+configure-stage1-target-libvtv: maybe-all-stage1-target-libstdc++-v3
+configure-stage2-target-libvtv: maybe-all-stage2-target-libstdc++-v3
+configure-stage3-target-libvtv: maybe-all-stage3-target-libstdc++-v3
+configure-stage4-target-libvtv: maybe-all-stage4-target-libstdc++-v3
+configure-stageprofile-target-libvtv: maybe-all-stageprofile-target-libstdc++-v3
+configure-stagefeedback-target-libvtv: maybe-all-stagefeedback-target-libstdc++-v3
 all-target-libstdc++-v3: maybe-configure-target-libgomp
 
 all-stage1-target-libstdc++-v3: maybe-configure-stage1-target-libgomp
@@ -48615,6 +47222,8 @@ install-target-libgfortran: maybe-install-target-libquadmath
 install-target-libgfortran: maybe-install-target-libgcc
 install-target-libsanitizer: maybe-install-target-libstdc++-v3
 install-target-libsanitizer: maybe-install-target-libgcc
+install-target-libvtv: maybe-install-target-libstdc++-v3
+install-target-libvtv: maybe-install-target-libgcc
 install-target-libjava: maybe-install-target-libgcc
 install-target-libitm: maybe-install-target-libgcc
 install-target-libobjc: maybe-install-target-libgcc
@@ -48644,6 +47253,12 @@ configure-stage3-target-libsanitizer: maybe-all-stage3-target-libgcc
 configure-stage4-target-libsanitizer: maybe-all-stage4-target-libgcc
 configure-stageprofile-target-libsanitizer: maybe-all-stageprofile-target-libgcc
 configure-stagefeedback-target-libsanitizer: maybe-all-stagefeedback-target-libgcc
+configure-stage1-target-libvtv: maybe-all-stage1-target-libgcc
+configure-stage2-target-libvtv: maybe-all-stage2-target-libgcc
+configure-stage3-target-libvtv: maybe-all-stage3-target-libgcc
+configure-stage4-target-libvtv: maybe-all-stage4-target-libgcc
+configure-stageprofile-target-libvtv: maybe-all-stageprofile-target-libgcc
+configure-stagefeedback-target-libvtv: maybe-all-stagefeedback-target-libgcc
 configure-stage1-target-libgomp: maybe-all-stage1-target-libgcc
 configure-stage2-target-libgomp: maybe-all-stage2-target-libgcc
 configure-stage3-target-libgomp: maybe-all-stage3-target-libgcc
@@ -48653,10 +47268,10 @@ configure-stagefeedback-target-libgomp: maybe-all-stagefeedback-target-libgcc
 @endif gcc-bootstrap
 
 @if gcc-no-bootstrap
-configure-target-libdsp: maybe-all-target-libgcc
 configure-target-libstdc++-v3: maybe-all-target-libgcc
 configure-target-libmudflap: maybe-all-target-libgcc
 configure-target-libsanitizer: maybe-all-target-libgcc
+configure-target-libvtv: maybe-all-target-libgcc
 configure-target-libssp: maybe-all-target-libgcc
 configure-target-newlib: maybe-all-target-libgcc
 configure-target-libbacktrace: maybe-all-target-libgcc
@@ -48679,13 +47294,13 @@ configure-target-libatomic: maybe-all-target-libgcc
 @endif gcc-no-bootstrap
 
 
-configure-target-libdsp: maybe-all-target-newlib maybe-all-target-libgloss
-
 configure-target-libstdc++-v3: maybe-all-target-newlib maybe-all-target-libgloss
 
 configure-target-libmudflap: maybe-all-target-newlib maybe-all-target-libgloss
 
 configure-target-libsanitizer: maybe-all-target-newlib maybe-all-target-libgloss
+
+configure-target-libvtv: maybe-all-target-newlib maybe-all-target-libgloss
 
 configure-target-libssp: maybe-all-target-newlib maybe-all-target-libgloss
 
@@ -48770,6 +47385,3 @@ $(srcdir)/configure: @MAINT@ $(srcdir)/configure.ac $(srcdir)/config/acx.m4 \
 MAKEOVERRIDES=
 
 # end of Makefile.in
-# Local Variables:
-# mode: Makefile
-# End:

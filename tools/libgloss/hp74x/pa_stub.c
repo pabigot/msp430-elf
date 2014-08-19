@@ -2,7 +2,7 @@
 *******************************************************************************
 *
 * File:         pa_stub.c
-* RCS:          $Header: /cvs/src/src/libgloss/hp74x/pa_stub.c,v 1.1 2000/03/17 22:48:50 ranjith Exp $
+* RCS:          $Header: /cvs/cvsfiles/gnupro/libgloss/hp74x/pa_stub.c,v 1.8 2014/02/20 13:42:51 nickc Exp $
 * Description:  main routines for PA RISC monitor stub
 * Author:       Robert Quist
 * Created:      Mon Nov  1 10:00:36 1993

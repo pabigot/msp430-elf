@@ -1,6 +1,6 @@
 /* { dg-do compile } */
-/* { dg-options "-Wstrict-aliasing=2 -O2" } */
 // { dg-require-effective-target int32plus }
+/* { dg-options "-Wstrict-aliasing=2 -O2" } */
 
 float foo ()
 {

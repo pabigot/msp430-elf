@@ -5,7 +5,7 @@
 #   AUTHOR:  Michael J. McLennan       Phone: (610)712-2842
 #            AT&T Bell Laboratories   E-mail: michael.mclennan@att.com
 #
-#      RCS:  $Id: Appliance.tcl,v 1.4 2000/10/11 22:11:48 spolk Exp $
+#      RCS:  $Id: Appliance.tcl,v 1.2 2003/02/16 06:18:14 hunt Exp $
 # ----------------------------------------------------------------------
 #               Copyright (c) 1993  AT&T Bell Laboratories
 # ======================================================================

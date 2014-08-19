@@ -1,11 +1,11 @@
-/README/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/add_n.c/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/gmp-mparam.h/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/hamdist.c/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/lshift.c/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/mulww.f/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/popcount.c/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/rshift.c/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/sub_n.c/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
+/README/1.2/Wed Apr 14 09:00:32 2010//Tmsp430-14r1-branch
+/add_n.c/1.2/Wed Apr 14 09:00:32 2010//Tmsp430-14r1-branch
+/gmp-mparam.h/1.2/Wed Apr 14 09:00:33 2010//Tmsp430-14r1-branch
+/hamdist.c/1.2/Wed Apr 14 09:00:33 2010//Tmsp430-14r1-branch
+/lshift.c/1.2/Wed Apr 14 09:00:33 2010//Tmsp430-14r1-branch
+/mulww.f/1.2/Wed Apr 14 09:00:33 2010//Tmsp430-14r1-branch
+/popcount.c/1.2/Wed Apr 14 09:00:33 2010//Tmsp430-14r1-branch
+/rshift.c/1.2/Wed Apr 14 09:00:33 2010//Tmsp430-14r1-branch
+/sub_n.c/1.2/Wed Apr 14 09:00:33 2010//Tmsp430-14r1-branch
 D/cfp////
 D/ieee////

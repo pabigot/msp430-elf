@@ -1,6 +1,6 @@
 /* YACC parser for Go expressions, for GDB.
 
-   Copyright (C) 2012 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -52,7 +52,7 @@
 %{
 
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #include <ctype.h>
 #include "expression.h"
 #include "value.h"
@@ -158,7 +158,7 @@ void yyerror (char *);
 
 %{
 /* YYSTYPE gets defined by %union.  */
-static int parse_number (char *, int, int, YYSTYPE *);
+static int parse_number (const char *, int, int, YYSTYPE *);
 static int parse_go_float (struct gdbarch *gdbarch, const char *p, int len,
 			   DOUBLEST *d, struct type **t);
 %}
@@ -616,12 +616,12 @@ variable:	name_not_typename
 			    }
 			  else
 			    {
-			      struct minimal_symbol *msymbol;
+			      struct bound_minimal_symbol msymbol;
 			      char *arg = copy_name ($1.stoken);
 
 			      msymbol =
-				lookup_minimal_symbol (arg, NULL, NULL);
-			      if (msymbol != NULL)
+				lookup_bound_minimal_symbol (arg);
+			      if (msymbol.minsym != NULL)
 				write_exp_msymbol (msymbol);
 			      else if (!have_full_symbols ()
 				       && !have_partial_symbols ())
@@ -704,7 +704,7 @@ parse_go_float (struct gdbarch *gdbarch, const char *p, int len,
    as our YYSTYPE is different than c-exp.y's  */
 
 static int
-parse_number (char *p, int len, int parsed_float, YYSTYPE *putithere)
+parse_number (const char *p, int len, int parsed_float, YYSTYPE *putithere)
 {
   /* FIXME: Shouldn't these be unsigned?  We don't deal with negative values
      here, and we do kind of silly things like cast to unsigned.  */
@@ -908,8 +908,8 @@ static int tempbuf_init;
    number of host characters in the literal.  */
 
 static int
-parse_string_or_char (char *tokptr, char **outptr, struct typed_stoken *value,
-		      int *host_chars)
+parse_string_or_char (const char *tokptr, const char **outptr,
+		      struct typed_stoken *value, int *host_chars)
 {
   int quote;
 
@@ -1049,7 +1049,7 @@ lex_one_token (void)
   int c;
   int namelen;
   unsigned int i;
-  char *tokstart;
+  const char *tokstart;
   int saw_structop = last_was_structop;
   char *copy;
 
@@ -1124,7 +1124,7 @@ lex_one_token (void)
       /* Might be a floating point number.  */
       if (lexptr[1] < '0' || lexptr[1] > '9')
 	{
-	  if (in_parse_field)
+	  if (parse_completion)
 	    last_was_structop = 1;
 	  goto symbol;		/* Nope, must be a symbol. */
 	}
@@ -1143,7 +1143,7 @@ lex_one_token (void)
       {
 	/* It's a number.  */
 	int got_dot = 0, got_e = 0, toktype;
-	char *p = tokstart;
+	const char *p = tokstart;
 	int hex = input_radix > 10;
 
 	if (c == '0' && (p[1] == 'x' || p[1] == 'X'))
@@ -1190,7 +1190,7 @@ lex_one_token (void)
 
     case '@':
       {
-	char *p = &tokstart[1];
+	const char *p = &tokstart[1];
 	size_t len = strlen ("entry");
 
 	while (isspace (*p))
@@ -1283,7 +1283,8 @@ lex_one_token (void)
       && strncmp (tokstart, "thread", namelen) == 0
       && (tokstart[namelen] == ' ' || tokstart[namelen] == '\t'))
     {
-      char *p = tokstart + namelen + 1;
+      const char *p = tokstart + namelen + 1;
+
       while (*p == ' ' || *p == '\t')
 	p++;
       if (*p >= '0' && *p <= '9')
@@ -1311,7 +1312,7 @@ lex_one_token (void)
   if (*tokstart == '$')
     return DOLLAR_VARIABLE;
 
-  if (in_parse_field && *lexptr == '\0')
+  if (parse_completion && *lexptr == '\0')
     saw_name_at_eof = 1;
   return NAME;
 }
@@ -1362,10 +1363,10 @@ build_packaged_name (const char *package, int package_len,
    to mean the global scope.  */
 
 static int
-package_name_p (const char *name, struct block *block)
+package_name_p (const char *name, const struct block *block)
 {
   struct symbol *sym;
-  int is_a_field_of_this;
+  struct field_of_this_result is_a_field_of_this;
 
   sym = lookup_symbol (name, block, STRUCT_DOMAIN, &is_a_field_of_this);
 
@@ -1402,11 +1403,11 @@ classify_unsafe_function (struct stoken function_name)
    The result is one of NAME, NAME_OR_INT, or TYPENAME.  */
 
 static int
-classify_packaged_name (struct block *block)
+classify_packaged_name (const struct block *block)
 {
   char *copy;
   struct symbol *sym;
-  int is_a_field_of_this = 0;
+  struct field_of_this_result is_a_field_of_this;
 
   copy = copy_name (yylval.sval);
 
@@ -1415,7 +1416,7 @@ classify_packaged_name (struct block *block)
   if (sym)
     {
       yylval.ssym.sym = sym;
-      yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+      yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
     }
 
   return NAME;
@@ -1430,12 +1431,12 @@ classify_packaged_name (struct block *block)
    The result is one of NAME, NAME_OR_INT, or TYPENAME.  */
 
 static int
-classify_name (struct block *block)
+classify_name (const struct block *block)
 {
   struct type *type;
   struct symbol *sym;
   char *copy;
-  int is_a_field_of_this = 0;
+  struct field_of_this_result is_a_field_of_this;
 
   copy = copy_name (yylval.sval);
 
@@ -1458,7 +1459,7 @@ classify_name (struct block *block)
   if (sym)
     {
       yylval.ssym.sym = sym;
-      yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+      yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
       return NAME;
     }
 
@@ -1484,7 +1485,7 @@ classify_name (struct block *block)
 	  {
 	    yylval.ssym.stoken = sval;
 	    yylval.ssym.sym = sym;
-	    yylval.ssym.is_a_field_of_this = is_a_field_of_this;
+	    yylval.ssym.is_a_field_of_this = is_a_field_of_this.type != NULL;
 	    return NAME;
 	  }
       }

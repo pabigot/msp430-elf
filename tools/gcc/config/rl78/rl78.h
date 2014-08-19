@@ -1,5 +1,5 @@
 /* GCC backend definitions for the Renesas RL78 processor.
-   Copyright (C) 2011-2013 Free Software Foundation, Inc.
+   Copyright (C) 2011-2014 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
    This file is part of GCC.
@@ -32,6 +32,8 @@
 	builtin_define ("__RL78_MUL_RL78__"); 	\
       if (RL78_MUL_G13)				\
 	builtin_define ("__RL78_MUL_G13__"); 	\
+      if (TARGET_G10)				\
+	builtin_define ("__RL78_G10__"); 	\
     }                                           \
   while (0)
 
@@ -40,6 +42,18 @@
 
 #undef  ENDFILE_SPEC
 #define ENDFILE_SPEC "crtend.o%s crtn.o%s"
+
+#undef  ASM_SPEC
+#define ASM_SPEC "\
+%{mrelax:-relax} \
+%{mg10} \
+"
+
+#undef  LINK_SPEC
+#define LINK_SPEC "\
+%{mrelax:-relax} \
+%{!r:--gc-sections} \
+"
 
 #undef  LIB_SPEC
 #define LIB_SPEC "					\
@@ -149,11 +163,11 @@
 */
 #define REGISTER_NAMES						\
   {								\
-    "x",   "a",   "c",   "b",   "e",   "d",   "l",   "h", 	\
-    "r8",  "r9",  "r10", "r11", "r12", "r13", "r14", "r15",	\
-    "r16", "r17", "r18", "r19", "r20", "r21", "fp", "r23",	\
+    "x", "a", "c", "b", "e", "d", "l", "h", 			\
+    "r8", "r9", "r10", "r11", "r12", "r13", "r14", "r15",	\
+    "r16", "r17", "r18", "r19", "r20", "r21", "r22", "r23",	\
     "r24", "r25", "r26", "r27", "r28", "r29", "r30", "r31",	\
-    "sp",  "ap",  "psw", "es",  "cs"				\
+      "sp", "ap", "psw", "es", "cs"				\
   }
 
 #define ADDITIONAL_REGISTER_NAMES	\
@@ -252,7 +266,7 @@ enum reg_class
   { 0x00000300, 0x00000000 }, 	/* R8 - HImode */		\
   { 0x00000c00, 0x00000000 }, 	/* R10 - HImode */		\
   { 0xff000000, 0x00000000 }, 	/* INT - HImode */		\
-  { 0x007fff00, 0x00000000 },	/* Virtual registers.  */	\
+  { 0xff7fff00, 0x00000000 },	/* Virtual registers.  */	\
   { 0xff7fffff, 0x00000002 },	/* General registers.  */	\
   { 0x04000000, 0x00000004 },	/* PSW.  */	\
   { 0xff7fffff, 0x0000001f }	/* All registers.  */		\
@@ -339,7 +353,7 @@ enum reg_class
        && reg_renumber[(REGNO)] <= (MAX)))
 
 #ifdef REG_OK_STRICT
-#define REGNO_OK_FOR_BASE_P(regno)      REGNO_IN_RANGE (regno, 16, 23)
+#define REGNO_OK_FOR_BASE_P(regno)      REGNO_IN_RANGE (regno, 16, 31)
 #else
 #define REGNO_OK_FOR_BASE_P(regno)	1
 #endif
@@ -412,6 +426,7 @@ typedef unsigned int CUMULATIVE_ARGS;
 
 #define ASM_OUTPUT_ADDR_DIFF_ELT(FILE, BODY, VALUE, REL) \
   fprintf (FILE, "\t.long .L%d - 1b\n", VALUE)
+
 
 #define ASM_OUTPUT_ALIGN(STREAM, LOG)		\
   do						\

@@ -50,13 +50,6 @@ if {![info exists nm_output(alignof_text)] \
     return
 }
 
-# COFF and PE file formats do not support 64-bit alignment.
-setup_xfail *-*-coff
-setup_xfail *-*-pe
-setup_xfail *-*-cygwin
-setup_xfail *-*-mingw*
-# Similarly for AIX
-setup_xfail *-*-aix*
 if {$nm_output(alignof_text) != 64} {
     send_log "alignof_text != 64\n"
     verbose "alignof_text != 64"

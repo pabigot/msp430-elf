@@ -61,6 +61,25 @@ SECTIONS
     . = ALIGN(4);
     KEEP (*(.init))
     KEEP (*(.fini))
+    KEEP (*(.tm_clone_table))
+
+    /* NB: init_array and friends are marked as EXECUTABLE, so they
+       must be placed in the .text section not the .data section.  If
+       they are placed in the .data section then section will inherit
+       the EXECUTABLE attribute and so become subject to weird byte
+       swapping protocols in big-endian data mode.  */
+    PROVIDE (__preinit_array_start = .);
+    KEEP (*(.preinit_array))
+    PROVIDE (__preinit_array_end = .);
+    PROVIDE (__init_array_start = .);
+    KEEP (*(SORT(.init_array.*)))
+    KEEP (*(.init_array))
+    PROVIDE (__init_array_end = .);
+    PROVIDE (__fini_array_start = .);
+    KEEP (*(.fini_array))
+    KEEP (*(SORT(.fini_array.*)))
+    PROVIDE (__fini_array_end = .);
+    LONG(0); /* Sentinel.  */    
   } > RAM
 
   .rodata : {
@@ -78,19 +97,6 @@ SECTIONS
   .data : {
     . = ALIGN(4);
     PROVIDE (__datastart = .);
-    PROVIDE (__preinit_array_start = .);
-    KEEP (*(.preinit_array))
-    PROVIDE (__preinit_array_end = .);
-    PROVIDE (__init_array_start = .);
-    KEEP (*(SORT(.init_array.*)))
-    KEEP (*(.init_array))
-    PROVIDE (__init_array_end = .);
-    PROVIDE (__fini_array_start = .);
-    KEEP (*(.fini_array))
-    KEEP (*(SORT(.fini_array.*)))
-    PROVIDE (__fini_array_end = .);
-    LONG(0); /* Sentinel.  */
-
     /* gcc uses crtbegin.o to find the start of the constructors, so
        we make sure it is first.  Because this is a wildcard, it
        doesn't matter if the user does not actually link against
@@ -212,7 +218,7 @@ SECTIONS
   /* DWARF 2 */
   .debug_info     0 : { *(.debug_info .gnu.linkonce.wi.*) }
   .debug_abbrev   0 : { *(.debug_abbrev) }
-  .debug_line     0 : { *(.debug_line) }
+  .debug_line     0 : { *(.debug_line .debug_line.* .debug_line_end ) }
   .debug_frame    0 : { *(.debug_frame) }
   .debug_str      0 : { *(.debug_str) }
   .debug_loc      0 : { *(.debug_loc) }

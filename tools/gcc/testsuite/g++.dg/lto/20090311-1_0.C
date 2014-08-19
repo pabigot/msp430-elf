@@ -1,4 +1,5 @@
 /* { dg-lto-do run }  */
+// { dg-require-effective-target size32plus }
 #include "20090311-1.h"
 bool flag;
 

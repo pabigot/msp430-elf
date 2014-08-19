@@ -1,0 +1,46 @@
+This change is needed for GDB to work again.
+
+At some point between 11r1 and 12r1, something somewhere had changed
+which caused the machine id reported by bfd_get_mach() to change from 0
+to bfd_mach_arm_4T.  I was never able to figure out where this was
+occuring, but decided it didn't matter since the current behavior
+seems more correct than the old behavior.
+
+When sim_create_inferior() saw a 0 as the machine id, it would
+select a processor with the ARM v5, v5e, XScale, and v6 properties.
+This is important because the thumb breakpoint instruction is
+only defined to work from v5 onward.  It did not work in v4.
+
+However, TARGET_CPU_arm7tdmi is an ARM v4 processor which causes
+the simulator to (correctly) not understand the later THUMB
+breakpoints.
+
+This patch changes the default target cpu to arm10tdmi which is
+v5, providing us with the breakpoint instruction needed for the
+simulator to work with GDB.
+
+
+gcc/ChangeLog.RedHat:
+
+2013-07-23  Kevin Buettner  <kevinb@redhat.com>
+
+	* config/arm/unknown-elf.h (SUBTARGET_CPU_DEFAULT): Change
+	default from TARGET_CPU_arm7tdmi to TARGET_CPU_arm10tdmi.
+
+
+Index: gcc/config/arm/unknown-elf.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/config/arm/unknown-elf.h,v
+retrieving revision 1.13
+diff -u -p -r1.13 unknown-elf.h
+--- gcc/config/arm/unknown-elf.h	2 May 2013 21:34:50 -0000	1.13
++++ gcc/config/arm/unknown-elf.h	23 Jul 2013 14:40:48 -0000
+@@ -85,7 +85,7 @@
+   while (0)
+ 
+ #ifndef SUBTARGET_CPU_DEFAULT
+-#define SUBTARGET_CPU_DEFAULT 		TARGET_CPU_arm7tdmi
++#define SUBTARGET_CPU_DEFAULT 		TARGET_CPU_arm10tdmi
+ #endif
+ 
+ /* The libgcc udivmod functions may throw exceptions.  If newlib is

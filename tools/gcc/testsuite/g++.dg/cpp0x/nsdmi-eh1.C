@@ -1,6 +1,6 @@
 // Core issue 1351
 // { dg-do run { xfail *-*-* } }
-// { dg-options -std=c++0x }
+// { dg-require-effective-target c++11 }
 
 bool fail;
 struct A
@@ -16,3 +16,4 @@ int main()
   try { A a2; }
   catch (...) { }
 }
+// { dg-require-effective-target size32plus }

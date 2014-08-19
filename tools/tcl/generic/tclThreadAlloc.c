@@ -11,7 +11,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tclThreadAlloc.c,v 1.1 2003/03/19 23:01:16 cagney Exp $ */
+ * RCS: @(#) $Id: tclThreadAlloc.c,v 1.3 2003/01/21 19:40:06 hunt Exp $ */
 
 #if defined(TCL_THREADS) && defined(USE_THREAD_ALLOC)
 

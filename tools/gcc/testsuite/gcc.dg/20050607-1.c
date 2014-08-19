@@ -1,6 +1,7 @@
 /* { dg-do compile } */
 /* { dg-require-effective-target trampolines } */
-/* { dg-options "-Wpadded" }
+/* { dg-options "-Wpadded" } */
+/* { dg-skip-if "non standard bitfields" { "rx-*-*" } { "*" } { "" } } */
 /* The struct internally constructed for the nested function should
    not result in a warning from -Wpadded. */
 extern int baz(int (*) (int));

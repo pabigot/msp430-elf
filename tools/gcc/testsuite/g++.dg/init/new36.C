@@ -151,3 +151,5 @@ int main()
   throwAfter = -1;
   doit(5);
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

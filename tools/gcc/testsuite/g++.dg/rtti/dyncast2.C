@@ -29,3 +29,5 @@ main (void)
   B::C<int>::f (b);
   return b.c != 7;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

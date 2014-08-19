@@ -1,0 +1,35 @@
+This patch changes the v850 toolchains so that it uses the DWARF2
+debug format by default.  The default in the FSF sources is STABS.
+
+gcc/ChangeLog.RedHat
+2005-05-17  Nick Clifton  <nickc@redhat.com>
+
+	* config/v850/v850.h (PREFERRED_DEBUGGING_TYPE): Redefine to be
+	DWARF2_DEBUG.
+
+Index: gcc/config/v850/v850.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/config/v850/v850.h,v
+retrieving revision 1.7
+diff -c -3 -p -r1.7 v850.h
+*** gcc/config/v850/v850.h	8 Feb 2005 17:34:57 -0000	1.7
+--- gcc/config/v850/v850.h	17 May 2005 09:08:20 -0000
+*************** zbss_section ()								\
+*** 1230,1237 ****
+  #define DEFAULT_GDB_EXTENSIONS 1
+  
+  /* Use stabs debugging info by default.  */
+! #undef PREFERRED_DEBUGGING_TYPE
+! #define PREFERRED_DEBUGGING_TYPE DBX_DEBUG
+  
+  /* Specify the machine mode that this machine uses
+     for the index in the tablejump instruction.  */
+--- 1230,1237 ----
+  #define DEFAULT_GDB_EXTENSIONS 1
+  
+  /* Use stabs debugging info by default.  */
+! #undef  PREFERRED_DEBUGGING_TYPE
+! #define PREFERRED_DEBUGGING_TYPE DWARF2_DEBUG
+  
+  /* Specify the machine mode that this machine uses
+     for the index in the tablejump instruction.  */

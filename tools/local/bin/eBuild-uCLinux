@@ -1,0 +1,229 @@
+#!/bin/bash
+# $Id: eBuild-uCLinux,v 1.3 2007/06/18 13:00:20 nickc Exp $
+
+# Don't tweak these for each branch.  Instead, use command line arguements!
+RELEASE=uclinux-yymmdd
+REVISION=x
+HOST=i686-pc-linux-gnulibc2.3
+BUILD=$HOST
+TARGET=frv-uclinux
+ARCH=frv
+TOOLCONF=""
+LANGUAGES="c,c++" # ,java
+PREFIX=/opt/redhat/${RELEASE}-${REVISION}
+BUILDTOP=/es/build/${RELEASE}/${REVISION}/${HOST}/X-${TARGET}
+EXECPREFIX=$PREFIX/H-$HOST
+TOOLCHAIN=$BUILDTOP/X-tools-build
+UCLIBC=$BUILDTOP/X-uclibc-build
+SRCTOP=$PREFIX/sources
+DEVO=$SRCTOP/tools/cross
+ABIHEADERS=$SRCTOP/headers/${TARGET}
+UCLIBCSRC=$SRCTOP/uclibc/${TARGET}
+SYSROOT=$EXECPREFIX/${TARGET}/sys-root
+
+while [ $# -ne 0 ]; do
+    option=$1
+    shift
+
+    optarg=""
+    case $option in
+    --*=*)
+        optarg=`echo $option | sed -e 's/^[^=]*=//'`
+        ;;
+    esac
+
+    case $option in
+    --x|-x|--debug|-D)
+        set -x
+        ;;
+    --buildtop*)
+        BUILDTOP=$optarg
+	TOOLCHAIN=$BUILDTOP/X-tools-build
+	UCLIBC=$BUILDTOP/X-uclibc-build
+        ;;
+    --lang*)
+        LANGUAGES=$optarg
+        ;;
+    --sysroot*)
+        SYSROOT=$optarg
+        ;;
+    --prefix*)
+        PREFIX=$optarg
+	SRCTOP=$PREFIX/sources
+	DEVO=$SRCTOP/tools/cross
+	ABIHEADERS=$SRCTOP/headers/${TARGET}
+	UCLIBCSRC=$SRCTOP/uclibc/${TARGET}
+        ;;
+    --host*)
+        HOST=$optarg
+        ;;
+    --target*)
+        TARGET=$optarg
+	ABIHEADERS=$SRCTOP/headers/${TARGET}
+	UCLIBCSRC=$SRCTOP/uclibc/${TARGET}
+        ;;
+    --build*)
+        BUILD=$optarg
+        ;;
+    --arch*)
+        ARCH=$optarg
+        ;;
+    --toolconf*)
+        TOOLCONF="$optarg"
+        ;;
+    --rev*)
+        REVISION=$optarg
+	PREFIX=/opt/redhat/${RELEASE}-${REVISION}
+	BUILDTOP=/es/build/${RELEASE}/${REVISION}/${HOST}/X-${TARGET}
+	EXECPREFIX=$PREFIX/H-$HOST
+	TOOLCHAIN=$BUILDTOP/X-tools-build
+	UCLIBC=$BUILDTOP/X-uclibc-build
+	SRCTOP=$PREFIX/sources
+	DEVO=$SRCTOP/tools/cross
+	ABIHEADERS=$SRCTOP/headers/${TARGET}
+	UCLIBCSRC=$SRCTOP/uclibc/${TARGET}
+	SYSROOT=$EXECPREFIX/${TARGET}/sys-root
+        ;;
+    --rel*)
+        RELEASE=$optarg
+	PREFIX=/opt/redhat/${RELEASE}-${REVISION}
+	BUILDTOP=/es/build/${RELEASE}/${REVISION}/${HOST}/X-${TARGET}
+	EXECPREFIX=$PREFIX/H-$HOST
+	TOOLCHAIN=$BUILDTOP/X-tools-build
+	UCLIBC=$BUILDTOP/X-uclibc-build
+	SRCTOP=$PREFIX/sources
+	DEVO=$SRCTOP/tools/cross
+	ABIHEADERS=$SRCTOP/headers/${TARGET}
+	UCLIBCSRC=$SRCTOP/uclibc/${TARGET}
+	SYSROOT=$EXECPREFIX/${TARGET}/sys-root
+        ;;
+    --srctop*)
+	SRCTOP="$optarg"
+	DEVO=$SRCTOP/tools-src
+	ABIHEADERS=$SRCTOP/header-src
+	UCLIBCSRC=$SRCTOP/libc-src
+        ;;
+    --uclibcsrc*)
+        case "$optarg" in
+          /*) UCLIBCSRC="$optarg" ;;
+          *)  UCLIBCSRC="$SRCTOP/$optarg" ;;
+	esac
+        ;;
+    --abiheaders*)
+        case "$optarg" in
+          /*) ABIHEADERS="$optarg" ;;
+          *)  ABIHEADERS="$SRCTOP/$optarg" ;;
+	esac
+        ;;
+    --devo*)
+        case "$optarg" in
+          /*) DEVO="$optarg" ;;
+          *)  DEVO="$SRCTOP/$optarg" ;;
+	esac
+        ;;
+    esac
+done
+
+PATH="$EXECPREFIX/bin:$PATH"
+export PATH
+
+# Our UTF-8 support sucks hard. Make the build not take three years
+export LANG=C
+
+function xterm-title () {
+    if [ $TERM = xterm ]; then
+        echo -e "\033]2;$@\007"
+    fi
+}
+
+function check_make()
+{
+    mkdir -p $1
+
+    if [ ! -d $1 ]; then
+	echo "Cannot create $1. Abort."
+	exit 1
+    fi
+}
+
+check_make $PREFIX
+check_make $BUILDTOP
+check_make $SYSROOT
+check_make $UCLIBC
+
+# Configure uClibc so it builds its headers
+
+xterm-title "Building uClibc generated headers"
+
+mkdir -p $UCLIBC
+rsync -a --delete $UCLIBCSRC/ $UCLIBC/
+cd $UCLIBC
+cp extra/Configs/Config.${ARCH}.default .config
+make TARGET_ARCH=${ARCH} KERNEL_SOURCE=$ABIHEADERS/usr oldconfig
+make TARGET_ARCH=${ARCH} KERNEL_SOURCE=$ABIHEADERS/usr headers
+
+# Set up the sysroot
+xterm-title "Copying header files into sysroot $SYSROOT"
+
+mkdir -p $SYSROOT/usr
+make PREFIX=$SYSROOT TARGET_ARCH=${ARCH} KERNEL_SOURCE=$ABIHEADERS/usr install_dev
+
+# Build toolchain basics...
+
+xterm-title "Configuring toolchain"
+
+rm -rf $TOOLCHAIN
+mkdir -p $TOOLCHAIN
+cd $TOOLCHAIN
+$DEVO/configure --host=${HOST} --build=${BUILD} --target=${TARGET} --with-sysroot=${SYSROOT}  --prefix=${PREFIX} --exec-prefix=${EXECPREFIX} --enable-languages=${LANGUAGES} ${TOOLCONF}
+
+xterm-title "Building binutils"
+make all-binutils all-gas all-ld 
+
+xterm-title "Building GCC and static libgcc"
+make configure-gcc
+make -C gcc SHLIB_LINK= all
+
+xterm-title "Installing binutils and GCC into $PREFIX"
+
+make install-binutils install-gas install-ld
+make -C gcc SHLIB_LINK= install
+
+# Build uClibc
+
+xterm-title "Building uClibc"
+
+cd $UCLIBC
+make CROSS=$EXECPREFIX/bin/${TARGET}- CC="$EXECPREFIX/bin/${TARGET}-gcc" KERNEL_SOURCE=$ABIHEADERS/usr
+
+xterm-title "Installing uClibc into $SYSROOT"
+
+rm -rf $SYSROOT
+make PREFIX=$SYSROOT CROSS=$EXECPREFIX/bin/${TARGET}- KERNEL_SOURCE=$ABIHEADERS/usr install
+
+# Now the rest...
+
+xterm-title "Building shared libgcc and remainder of toolchain"
+
+cd $TOOLCHAIN
+rm -f gcc/libgcc.mk
+make -C gcc clean
+make
+
+xterm-title "Final install of toolchain"
+make install
+
+# Rebuild uClibc
+
+xterm-title "Building uClibc"
+
+cd $UCLIBC
+make clean
+cp extra/Configs/Config.${ARCH}.default .config
+make TARGET_ARCH=${ARCH} KERNEL_SOURCE=$ABIHEADERS/usr oldconfig
+make CROSS=$EXECPREFIX/bin/${TARGET}- CC="$EXECPREFIX/bin/${TARGET}-gcc" KERNEL_SOURCE=$ABIHEADERS/usr
+
+xterm-title "Installing final uClibc into $SYSROOT"
+
+rm -rf $SYSROOT
+make PREFIX=$SYSROOT CROSS=$EXECPREFIX/bin/${TARGET}- KERNEL_SOURCE=$ABIHEADERS/usr install

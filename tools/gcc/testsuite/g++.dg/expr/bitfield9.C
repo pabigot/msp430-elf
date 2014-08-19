@@ -7,6 +7,7 @@ extern "C" void abort();
 struct S {
   long long i : 32;
 };
+
 void f(long long int i, int j) {
   if (i != 0x7bcdef01)
     abort();

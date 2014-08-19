@@ -1,0 +1,13 @@
+# from dejagnu, expect
+file	${release}/H-${host}/bin/runtest
+file	${release}/H-${host}/bin/${targetPrefix}runtest
+file	${release}/H-${host}/bin/expect${EXEEXT}
+file	${release}/H-${host}/libexec/config.guess
+dir	${release}/share/dejagnu
+file	${release}/include/dejagnu.h
+dir	${release}/share/tcl8.4
+# some cygwin specific files
+file	${release}/H-${host}/bin/tcl84.dll cygwin
+file	${release}/H-${host}/bin/tclpip84.dll cygwin
+file	${release}/H-${host}/lib/reg1.1/pkgIndex.tcl cygwin
+file	${release}/H-${host}/lib/reg1.1/tclreg84.dll cygwin

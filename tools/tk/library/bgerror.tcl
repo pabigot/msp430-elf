@@ -9,8 +9,8 @@
 # Copyright (c) 1998-2000 by Ajuba Solutions.
 # All rights reserved.
 # 
-# RCS: @(#) $Id: bgerror.tcl,v 1.10 2003/03/19 23:02:04 cagney Exp $
-# $Id: bgerror.tcl,v 1.10 2003/03/19 23:02:04 cagney Exp $
+# RCS: @(#) $Id: bgerror.tcl,v 1.3 2012/04/18 00:36:56 kevinb Exp $
+# $Id: bgerror.tcl,v 1.3 2012/04/18 00:36:56 kevinb Exp $
 
 namespace eval ::tk {
     namespace eval dialog {

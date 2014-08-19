@@ -1,7 +1,6 @@
 #name: ARM .bundle_lock
 #as: -march=armv7-a
 #objdump: -drw
-#target: *-*-*eabi*
 
 .*: +file format .*arm.*
 

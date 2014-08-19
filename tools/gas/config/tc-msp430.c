@@ -272,22 +272,34 @@ target_is_430x (void)
   return selected_isa >= MSP_ISA_430X;
 }
 
+bfd_boolean
+msp430_target_is_430x (void)
+{
+  return selected_isa >= MSP_ISA_430X;
+}
+
 static inline bfd_boolean
 target_is_430xv2 (void)
 {
   return selected_isa == MSP_ISA_430Xv2;
 }
 
-/* Generate a 16-bit relocation.
-   For the 430X we generate a relocation without linkwer range checking
-   if the value is being used in an extended (ie 20-bit) instruction.
+/* Generate an absolute 16-bit relocation.
+   For the 430X we generate a relocation without linker range checking
+    if the value is being used in an extended (ie 20-bit) instruction,
+    otherwise if have a shifted expression we use a HI reloc.
    For the 430 we generate a relocation without assembler range checking
-   if we are handling an immediate value or a byte-width instruction.  */
+    if we are handling an immediate value or a byte-width instruction.  */
+
 #undef  CHECK_RELOC_MSP430
-#define CHECK_RELOC_MSP430				     \
-  (target_is_430x ()					     \
-   ? (extended_op ? BFD_RELOC_16 : BFD_RELOC_MSP430X_ABS16)  \
-   : ((imm_op || byte_op)				     \
+#define CHECK_RELOC_MSP430(OP)				\
+  (target_is_430x ()					\
+  ? (extended_op					\
+     ? BFD_RELOC_16					\
+     : ((OP).vshift == 1)				\
+     ? BFD_RELOC_MSP430_ABS_HI16			\
+     : BFD_RELOC_MSP430X_ABS16)				\
+   : ((imm_op || byte_op)				\
       ? BFD_RELOC_MSP430_16_BYTE : BFD_RELOC_MSP430_16))
 
 /* Generate a 16-bit pc-relative relocation.
@@ -913,7 +925,7 @@ const pseudo_typeS md_pseudo_table[] =
   {NULL, NULL, 0}
 };
 
-const char *md_shortopts = "";
+const char *md_shortopts = "mm:,mP,mQ,ml,mN,mn,my,mY";
 
 struct option md_longopts[] =
 {
@@ -1038,7 +1050,7 @@ static int
 msp430_srcoperand (struct msp430_operand_s * op,
 		   char * l,
 		   int bin,
-		   int * imm_op,
+		   bfd_boolean * imm_op,
 		   bfd_boolean allow_20bit_values,
 		   bfd_boolean constants_allowed)
 {
@@ -1058,7 +1070,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
 	 hhi(x) - x = (x >> 48) & 0xffff
 	 The value _MUST_ be constant expression: #hlo(1231231231).  */
 
-      *imm_op = 1;
+      *imm_op = TRUE;
 
       if (strncasecmp (h, "#llo(", 5) == 0)
 	{
@@ -1096,6 +1108,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
       op->ol = 1;		/* Immediate will follow an instruction.  */
       __tl = h + 1 + rval;
       op->mode = OP_EXP;
+      op->vshift = vshift;
 
       parse_exp (__tl, &(op->exp));
       if (op->exp.X_op == O_constant)
@@ -1111,6 +1124,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
 	    {
 	      x = (x >> 16) & 0xffff;
 	      op->exp.X_add_number = x;
+	      op->vshift = 0;
 	    }
 	  else if (vshift > 1)
 	    {
@@ -1119,11 +1133,12 @@ msp430_srcoperand (struct msp430_operand_s * op,
 	      else
 		op->exp.X_add_number = 0;	/* Nothing left.  */
 	      x = op->exp.X_add_number;
+	      op->vshift = 0;
 	    }
 
 	  if (allow_20bit_values)
 	    {
-	      if (op->exp.X_add_number > 0xfffff || op->exp.X_add_number < - (0x7ffff))
+	      if (op->exp.X_add_number > 0xfffff || op->exp.X_add_number < - (0x80000))
 		{
 		  as_bad (_("value 0x%x out of extended range."), x);
 		  return 1;
@@ -1208,6 +1223,8 @@ msp430_srcoperand (struct msp430_operand_s * op,
 	}
       else if (op->exp.X_op == O_symbol)
 	{
+	  if (vshift > 1)
+	    as_bad (_("error: unsupported #foo() directive used on symbol"));
 	  op->mode = OP_EXP;
 	}
       else if (op->exp.X_op == O_big)
@@ -1219,6 +1236,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
 	      op->exp.X_op = O_constant;
 	      op->exp.X_add_number = 0xffff & generic_bignum[vshift];
 	      x = op->exp.X_add_number;
+	      op->vshift = 0;
 	    }
 	  else
 	    {
@@ -1292,13 +1310,14 @@ msp430_srcoperand (struct msp430_operand_s * op,
       __tl = h + 1;
       parse_exp (__tl, &(op->exp));
       op->mode = OP_EXP;
+      op->vshift = 0;
       if (op->exp.X_op == O_constant)
 	{
 	  int x = op->exp.X_add_number;
 
 	  if (allow_20bit_values)
 	    {
-	      if (x > 0xfffff || x < -(0x7ffff))
+	      if (x > 0xfffff || x < -(0x80000))
 		{
 		  as_bad (_("value 0x%x out of extended range."), x);
 		  return 1;
@@ -1349,8 +1368,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
       op->am = m ? 3 : 2;
       op->ol = 0;
 
-      /* Issue 3831733:
-	 PC cannot be used in indirect addressing.  */
+      /* PC cannot be used in indirect addressing.  */
       if (target_is_430xv2 () && op->reg == 0)
 	{
 	  as_bad (_("cannot use indirect addressing with the PC"));
@@ -1367,7 +1385,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
       char *m = strrchr (l, ')');
       char *t;
 
-      *imm_op = 1;
+      *imm_op = TRUE;
 
       if (!h)
 	break;
@@ -1400,6 +1418,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
       __tl = l;
       *h = 0;
       op->mode = OP_EXP;
+      op->vshift = 0;
       parse_exp (__tl, &(op->exp));
       if (op->exp.X_op == O_constant)
 	{
@@ -1407,7 +1426,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
 
 	  if (allow_20bit_values)
 	    {
-	      if (x > 0xfffff || x < - (0x7ffff))
+	      if (x > 0xfffff || x < - (0x80000))
 		{
 		  as_bad (_("value 0x%x out of extended range."), x);
 		  return 1;
@@ -1461,6 +1480,7 @@ msp430_srcoperand (struct msp430_operand_s * op,
       /* An expression starting with a minus sign is a constant, not an address.  */
       op->am = (*l == '-' ? 3 : 1);
       op->ol = 1;
+      op->vshift = 0;
       __tl = l;
       parse_exp (__tl, &(op->exp));
       return 0;
@@ -1495,6 +1515,7 @@ msp430_dstoperand (struct msp430_operand_s * op,
       op->mode = OP_EXP;
       op->am = 1;
       op->ol = 1;
+      op->vshift = 0;
       parse_exp (__tl, &(op->exp));
 
       if (op->exp.X_op != O_constant || op->exp.X_add_number != 0)
@@ -1792,7 +1813,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
   struct msp430_operand_s op1, op2;
   int res = 0;
   static short ZEROS = 0;
-  int byte_op, imm_op;
+  bfd_boolean byte_op, imm_op;
   int op_length = 0;
   int fmt;
   int extended = 0x1800;
@@ -1809,7 +1830,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
      or
      .b @r2+, 5(R1).  */
 
-  byte_op = 0;
+  byte_op = FALSE;
   addr_op = FALSE;
   if (*line == '.')
     {
@@ -1821,7 +1842,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	case 'b':
 	  /* Byte operation.  */
 	  bin |= BYTE_OPERATION;
-	  byte_op = 1;
+	  byte_op = TRUE;
 	  check = TRUE;
 	  break;
 
@@ -1903,7 +1924,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
   memset (&op1, 0, sizeof (op1));
   memset (&op2, 0, sizeof (op2));
 
-  imm_op = 0;
+  imm_op = FALSE;
 
   if ((fmt = opcode->fmt) < 0)
     {
@@ -2074,7 +2095,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		    {
 		      if (op1.reg)
 			fix_new_exp (frag_now, where, 2,
-				     &(op1.exp), FALSE, CHECK_RELOC_MSP430);
+				     &(op1.exp), FALSE, CHECK_RELOC_MSP430 (op1));
 		      else
 			fix_new_exp (frag_now, where, 2,
 				     &(op1.exp), TRUE, CHECK_RELOC_MSP430_PCREL);
@@ -2090,7 +2111,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  line = extract_operand (line, l1, sizeof (l1));
 	  strncpy (l2, l1, sizeof (l2));
 	  l2[sizeof (l2) - 1] = '\0';
-	  res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, &imm_op, extended_op, TRUE);
+	  res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, & imm_op, extended_op, TRUE);
 	  res += msp430_dstoperand (&op2, l2, opcode->bin_opcode, extended_op, TRUE);
 
 	  if (res)
@@ -2100,7 +2121,6 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  frag = frag_more (insn_length);
 	  where = frag - frag_now->fr_literal;
 
-	  /* Issue 3831743.  */
 	  if (target_is_430xv2 ()
 	      && op1.mode == OP_REG
 	      && op1.reg == 0
@@ -2177,7 +2197,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		    {
 		      if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
 			fix_new_exp (frag_now, where, 2,
-				     &(op1.exp), FALSE, CHECK_RELOC_MSP430);
+				     &(op1.exp), FALSE, CHECK_RELOC_MSP430 (op1));
 		      else
 			fix_new_exp (frag_now, where, 2,
 				     &(op1.exp), TRUE, CHECK_RELOC_MSP430_PCREL);
@@ -2201,7 +2221,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		    {
 		      if (op2.reg)	/* Not PC relative.  */
 			fix_new_exp (frag_now, where, 2,
-				     &(op2.exp), FALSE, CHECK_RELOC_MSP430);
+				     &(op2.exp), FALSE, CHECK_RELOC_MSP430 (op2));
 		      else
 			fix_new_exp (frag_now, where, 2,
 				     &(op2.exp), TRUE, CHECK_RELOC_MSP430_PCREL);
@@ -2221,12 +2241,12 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    }
 
 	  line = extract_operand (line, l1, sizeof (l1));
-	  res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, &imm_op, extended_op, FALSE);
+	  res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, & imm_op, extended_op, FALSE);
 	  if (res)
 	    break;
 
-	  byte_op = 0;
-	  imm_op = 0;
+	  byte_op = FALSE;
+	  imm_op = FALSE;
 	  bin |= ((op1.reg << 8) | (op1.am << 4));
 	  op_length = 2 + 2 * op1.ol;
 	  frag = frag_more (op_length);
@@ -2247,7 +2267,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
 		  if (op1.reg || (op1.reg == 0 && op1.am == 3))
 		    fix_new_exp (frag_now, where, 2,
-				 &(op1.exp), FALSE, CHECK_RELOC_MSP430);
+				 &(op1.exp), FALSE, CHECK_RELOC_MSP430 (op1));
 		  else
 		    fix_new_exp (frag_now, where, 2,
 				 &(op1.exp), TRUE, CHECK_RELOC_MSP430_PCREL);
@@ -2262,14 +2282,14 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  fix_emitted = FALSE;
 
 	  line = extract_operand (line, l1, sizeof (l1));
-	  imm_op = 0;
+	  imm_op = FALSE;
 
-	  res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, &imm_op,
+	  res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, & imm_op,
 				   extended_op, FALSE);
 	  if (res)
 	    break;
 
-	  byte_op = 0;
+	  byte_op = FALSE;
 
 	  op_length = 2 + 2 * op1.ol;
 	  frag = frag_more (op_length);
@@ -2381,7 +2401,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		    break;
 		  }
 
-		/* Issue 3831713:  CPU21 errata: cannot use POPM to restore the SR register.  */
+		/* CPU21 errata: cannot use POPM to restore the SR register.  */
 		if (target_is_430xv2 ()
 		    && (reg - n + 1 < 3)
 		    && reg >= 2
@@ -2441,7 +2461,6 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		break;
 	      }
 
-	    /* Issue 3831743.  */
 	    if (target_is_430xv2 () && reg == 0)
 	      {
 		as_bad (_("%s: attempt to rotate the PC register"), opcode->name);
@@ -2482,7 +2501,6 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		break;
 	      }
 
-	    /* Issue 3831743.  */
 	    if (target_is_430xv2 () && reg == 0)
 	      {
 		as_bad (_("%s: attempt to rotate the PC register"), opcode->name);
@@ -2598,7 +2616,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  }
 
 	case 9: /* MOVA, BRA, RETA.  */
-	  imm_op = 0;
+	  imm_op = FALSE;
 	  bin = opcode->bin_opcode;
 
 	  if (is_opcode ("reta"))
@@ -2617,7 +2635,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    {
 	      line = extract_operand (line, l1, sizeof (l1));
 	      res = msp430_srcoperand (&op1, l1, opcode->bin_opcode,
-				       &imm_op, extended_op, FALSE);
+				       & imm_op, extended_op, FALSE);
 
 	      if (is_opcode ("bra"))
 		{
@@ -2698,7 +2716,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
     case 1:			/* Format 1, double operand.  */
       line = extract_operand (line, l1, sizeof (l1));
       line = extract_operand (line, l2, sizeof (l2));
-      res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, &imm_op, extended_op, TRUE);
+      res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, & imm_op, extended_op, TRUE);
       res += msp430_dstoperand (&op2, l2, opcode->bin_opcode, extended_op, TRUE);
 
       if (res)
@@ -2823,7 +2841,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		{
 		  if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
 		    fix_new_exp (frag_now, where, 2,
-				 &(op1.exp), FALSE, CHECK_RELOC_MSP430);
+				 &(op1.exp), FALSE, CHECK_RELOC_MSP430 (op1));
 		  else
 		    fix_new_exp (frag_now, where, 2,
 				 &(op1.exp), TRUE, CHECK_RELOC_MSP430_PCREL);
@@ -2848,7 +2866,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		{
 		  if (op2.reg)		/* Not PC relative.  */
 		    fix_new_exp (frag_now, where, 2,
-			     &(op2.exp), FALSE, CHECK_RELOC_MSP430);
+				 &(op2.exp), FALSE, CHECK_RELOC_MSP430 (op2));
 		  else
 		    fix_new_exp (frag_now, where, 2,
 				 &(op2.exp), TRUE, CHECK_RELOC_MSP430_PCREL);
@@ -2872,11 +2890,10 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
       line = extract_operand (line, l1, sizeof (l1));
       res = msp430_srcoperand (&op1, l1, opcode->bin_opcode,
-			       &imm_op, extended_op, TRUE);
+			       & imm_op, extended_op, TRUE);
       if (res)
 	break;		/* Error in operand.  */
 
-      /* Issue 3831743.  */
       if (target_is_430xv2 ()
 	  && op1.mode == OP_REG
 	  && op1.reg == 0
@@ -2957,7 +2974,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 		{
 		  if (op1.reg || (op1.reg == 0 && op1.am == 3))	/* Not PC relative.  */
 		    fix_new_exp (frag_now, where, 2,
-				 &(op1.exp), FALSE, CHECK_RELOC_MSP430);
+				 &(op1.exp), FALSE, CHECK_RELOC_MSP430 (op1));
 		  else
 		    fix_new_exp (frag_now, where, 2,
 				 &(op1.exp), TRUE, CHECK_RELOC_MSP430_PCREL);
@@ -3357,6 +3374,12 @@ md_apply_fix (fixS * fixp, valueT * valuep, segT seg)
 	  bfd_putl16 ((bfd_vma) value, where);
 	  break;
 
+	case BFD_RELOC_MSP430_ABS_HI16:
+	  value >>= 16;
+	  value &= 0xffff;	/* Get rid of extended sign.  */
+	  bfd_putl16 ((bfd_vma) value, where);
+	  break;
+	  
 	case BFD_RELOC_32:
 	  bfd_putl16 ((bfd_vma) value, where);
 	  break;

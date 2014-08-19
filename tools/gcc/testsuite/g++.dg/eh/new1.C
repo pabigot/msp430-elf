@@ -41,3 +41,5 @@ main ()
   catch (...) {}
   return ret;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

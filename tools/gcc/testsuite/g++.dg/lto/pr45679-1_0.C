@@ -1,6 +1,7 @@
 // { dg-lto-do link }
 // { dg-lto-options {{-O3 -Wno-multichar}} } 
 // { dg-extra-ld-options "-flto -flto-partition=1to1 -r -nostdlib" }
+// { dg-require-effective-target int32plus }
 
      extern "C" {
    typedef struct __locale_struct {
@@ -11,8 +12,8 @@
        struct POVMSData {
    };
         int POVMS_OpenContext (POVMSContext *contextrefptr);
-      enum {
-		 kPOVMsgIdent_InitInfo = 'InIn',  kPOVMsgIdent_RenderOptions = 'ROpt',  kPOVMsgIdent_RenderAll = 'RAll',  kPOVMsgIdent_RenderArea = 'RAre',  kPOVMsgIdent_RenderPause = 'RPau',  kPOVMsgIdent_RenderStop = 'RSto',  kPOVMsgIdent_RenderStarted = 'RRun',  kPOVMsgIdent_RenderDone = 'REnd',  kPOVMsgIdent_FrameStatistics = 'FSta',  kPOVMsgIdent_ParseStatistics = 'PSta',  kPOVMsgIdent_RenderStatistics = 'RSta',  kPOVMsgIdent_Progress = 'Prog',  kPOVMsgIdent_Warning = 'Warn',  kPOVMsgIdent_Error = 'ErrW',  kPOVMsgIdent_FatalError = 'ErrF',  kPOVMsgIdent_Debug = 'Dbug' };
+       enum {
+    kPOVMsgIdent_InitInfo = 'InIn',  kPOVMsgIdent_RenderOptions = 'ROpt',  kPOVMsgIdent_RenderAll = 'RAll',  kPOVMsgIdent_RenderArea = 'RAre',  kPOVMsgIdent_RenderPause = 'RPau',  kPOVMsgIdent_RenderStop = 'RSto',  kPOVMsgIdent_RenderStarted = 'RRun',  kPOVMsgIdent_RenderDone = 'REnd',  kPOVMsgIdent_FrameStatistics = 'FSta',  kPOVMsgIdent_ParseStatistics = 'PSta',  kPOVMsgIdent_RenderStatistics = 'RSta',  kPOVMsgIdent_Progress = 'Prog',  kPOVMsgIdent_Warning = 'Warn',  kPOVMsgIdent_Error = 'ErrW',  kPOVMsgIdent_FatalError = 'ErrF',  kPOVMsgIdent_Debug = 'Dbug' };
        namespace pov {
    }
        using namespace pov;

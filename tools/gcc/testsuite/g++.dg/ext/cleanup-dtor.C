@@ -26,3 +26,5 @@ int main () {
   if (i != 2)
     abort ();
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

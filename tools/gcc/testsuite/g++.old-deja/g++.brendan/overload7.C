@@ -36,7 +36,7 @@ int main()
         y = c;
 
 	if (x.first == 10 && x.second == 20 && y == 12.34)
-	  printf ("PASS\n");
+	  ; // printf ("PASS\n");
 	else
 	  { printf ("FAIL\n"); return 1; }
 }

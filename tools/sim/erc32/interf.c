@@ -235,9 +235,9 @@ sim_open (kind, callback, abfd, argv)
 		    freq = strtol(argv[++stat], (char **)NULL, 0);
 		}
 	    } else
-	      if (strncmp(argv[stat], "--sysroot=", sizeof("--sysroot=") - 1) == 0) {
+	    if (strncmp(argv[stat], "--sysroot=", sizeof("--sysroot=") - 1) == 0) {
 		/* Ignore until we start to support this.  */
-	      } else {
+	    } else {
 		(*sim_callback->printf_filtered) (sim_callback,
 						  "unknown option %s\n",
 						  argv[stat]);
@@ -485,7 +485,7 @@ sim_do_command(sd, cmd)
 }
 
 char **
-sim_complete_command (SIM_DESC sd, char *text, char *word)
+sim_complete_command (SIM_DESC sd, const char *text, const char *word)
 {
   return NULL;
 }
@@ -524,10 +524,3 @@ sim_remove_breakpoint(int addr)
 }
 
 #endif
-
-SIM_RC
-sim_hardware_watchpoint (SIM_DESC sd, SIM_WATCH_ACTION action,
-                         SIM_WATCH_TYPE type, SIM_ADDR addr, long length)
-{
-  return SIM_RC_FAIL;
-}

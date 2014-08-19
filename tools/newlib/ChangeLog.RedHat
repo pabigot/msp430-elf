@@ -1,144 +1,131 @@
-2013-03-06  Nick Clifton  <nickc@redhat.com>
+2014-06-09  DJ Delorie  <dj@redhat.com>
 
-	Issue 3575223
-	* configure.host: Add -mOs to RL78 and MSP430 command lines.
-
-2013-03-04  Nick Clifton  <nickc@redhat.com>
-
-	* libc/machine/msp430/setjmp.S (setjmp): Add store of stack
-	pointer in large mode.
-
-2013-02-22  Nick Clifton  <nickc@redhat.com>
-
-	* libc/include/machine/ieeefp.h: Do not define _DOUBLE_IS_32BITS
-	for the MSP430.
-
-2013-02-13  Nick Clifton  <nickc@redhat.com>
-
-	* libc/machine/msp430: New directory.
-	* libc/machine/msp430/setjmp.S: New file.
-	* configure.host: Enable msp430-specific machine dir.
-	* libc/machine/configure.in: Add msp430 subdir.
-	* libc/machine/confgure: Regenerate.
-	* libc/include/machine/setjmp.h: Add msp430x support.
-
-2013-01-21  Nick Clifton  <nickc@redhat.com>
-
-	* libc/include/sys/config.h (_POINTER_INT): Define for msp430.
-
-2013-01-03  Nick Clifton  <nickc@redhat.com>
-
-	* libc/include/sys/config.h (_REENT_SMALL): Define for msp430.
-	(_SMALL_BITFIELDS): Likewise.
-
-2012-12-21  Nick Clifton  <nickc@redhat.com>
-
-	* configure.host (NEWLIB_CFLAGS): New variable.
-	(newlib_cflags): Add -ffunction-sections for MSP430.
-	* configure.in: Substitue NEWLIB_CFLAGS.
-	* libc/configure.in: Likewise.
-	* Makefile.am (FLAGS_TO_PASS): Add NEWLIB_CFLAGS.
-	* libc/argz/Makefile.am: Add NEWLIB_CFLAGS to end of command line.
-	* libc/ctype/Makefile.am: Likewise.
-	* libc/stdio/Makefile.am: Likewise.
-	* libc/stdio64/Makefile.am: Likewise.
-	* libc/stdlib/Makefile.am: Likewise.
-	* libc/string/Makefile.am: Likewise.
-	* libc/time/Makefile.am: Likewise.
+	* configure.host (default_newlib_nano_malloc): New.
+	(msp430): Set it.
+	* configure.in (newlib_nano_malloc): Leave unset if not set by
+	the user.
 	* configure: Regenerate.
-	* Makefile.in: Regenerate.
+	* libc/configure.in (NEWLIB_NANO_MALLOC): Set after running
+	configure.host.
+	(newlib_nano_malloc): Leave unset if not set by	the user.
 	* libc/configure: Regenerate.
-	* libc/argz/Makefile.in: Regenerate.
-	* libc/ctype/Makefile.in: Regenerate.
-	* libc/stdio/Makefile.in: Regenerate.
-	* libc/stdio64/Makefile.in: Regenerate.
-	* libc/stdlib/Makefile.in: Regenerate.
-	* libc/string/Makefile.in: Regenerate.
-	* libc/time/Makefile.in: Regenerate.
-	* libc/xdr/Makefile.in: Regenerate.
 
-2012-10-02  DJ Delorie  <dj@redhat.com>
+2013-12-11  Nick Clifton  <nickc@redhat.com>
 
-	* configure.host: Add msp430 support.
-	* libc/include/machine/ieeefp.h: Add msp430 support.
-	* libc/include/machine/setjmp.h: Add msp430 support.
+	* libc/include/math.h: Add prototypes for nexttoward, nexttowardf
+	and nexttowardl.
+	* libc/include/stdlib.h: Enable lldiv_t type and functions for
+	C99.
+	* libc/include/wchar.h: Add prototype for wcstold.
+	* libc/machine/powerpc/vfscanf.c: Call _srefill_r instead of
+	__srefill.
+	* libc/stdlib/wcstod.c (wcstold): New stub function.
+	* libm/common/s_nextafter.c (nexttoward): Likewise.
+	(nexttowardf): Likewise.
+	(nexttowardl): Likewise.
 
-2012-08-31  Nick Clifton  <nickc@redhat.com>
+2013-08-23  Nick Clifton  <nickc@redhat.com>
 
-	* libc/sys/sysnecv850/crt0.S: Initialize the FPSR.
+	* libc/machine/arm/memchr-stub.c: Generate code for ARM7 in ARM mode.
+	* libc/machine/arm/strlen.c: Likewise.
+	* libc/machine/arm/memchr.S: Do not generate code for ARM7 in ARM mode.
+	* libc/machine/arm/strlen-armv7.S: Likewise.
 
-2012-08-29  Nick Clifton  <nickc@redhat.com>
+2010-08-31  Kevin Buettner  <kevinb@redhat.com>
 
-	* libc/sys/sysnecv850/crt0.S: Add support for v850e3v5
-	architecture.
+	* libc/sys/sysnecv850/trap.S (___trap0): Fix errno handling.
+	* libc/sys/sysnecv850/rename.c: New file.
+	* libc/sys/sysnecv850/Makefile.am (lib_a_SOURCES): Add rename.c
+	* libc/sys/sysnecv850/Makefile.in: Regenerate.
+	* libc/sys/sysnecv850/fstat.c (_fstat): Invoke trap for SYS_fstat.
+	* libc/sys/sysnecv850/unlink.c (_unlink): Invoke trap for SYS_unlink.
 
-2010-07-02  Nick Clifton  <nickc@redhat.com>
+2010-06-09  Nick Clifton  <nickc@redhat.com>
 
-	* libc/machine/xstormy16/setjmp.S: Improve code for 32-bit pointer
-	miltilib.
+        * libc/include/math.h (float_t, double_t): Always define in ISO C99 mode.
+	(nexttword, nexttowardf, nexttowarddl): Prototype.
+	* libc/include/stdlib.h (strtold, wcstold): Prototype even when long
+	double is not the same as double.
 
-2010-05-19  Nick Clifton  <nickc@redhat.com>
+2010-05-05  DJ Delorie  <dj@redhat.com>
 
-	* libc/include/sys/config.h (_POINTER_INT): Set to long for
-	xstormy16 port on 32-bit pointer mode.
+	* libc/Makefile.am (stmp-sigset, stmp-iconvset, stmp-extra,
+	stmp-stdio64, stmp-posix,stmp-targetdep): Use unique temporary
+	file names to allow for parallel installs.
+	(CLEANFILES): Add new temporary file names.
+	* libc/Makefile.in: Regenerate.
+
+2010-04-26  DJ Delorie  <dj@redhat.com>
+
+	* configure.host: Comment out LTO flag until we can put in a real
+	test for LTO support in gcc.
 
 2010-04-26  Nick Clifton  <nickc@redhat.com>
 
 	* configure.host: Do not build LTO enabled libraries for the
 	powerpc-eabispe target.
 
-2009-11-20  Nick Clifton  <nickc@redhat.com>
+2010-04-22  DJ Delorie  <dj@redhat.com>
 
-	* libc/machine/rx/strncat.S (_strncat): Replace use of r6
-	(call-saved) with r14 (call-used).
+        * libc/Makefile.am (SUBDEFS): Add LIBC_POSIX_DEF.
+        (libc.info): Add posix.texi.
+        (libc.dvi): Likewise.
+        (stmp-posix): New.
+        (posix.texi): New.
+        (libc_TEXINFOS): Add posix.texi.
+        * libc/configure.in (LIBC_POSIX_LIB, LIBC_POSIX_DEF): Add
+        tests.
+        * libc/libc.texinfo: Include posix.texi
+        * libc/locale/locale.c: Fix texinfo typo.
+        * libc/time/strftime.c: Fix texinfo typo.
 
-2009-08-25  DJ Delorie  <dj@redhat.com>
+        * libc/configure: Regenerate.
+        * libc/Makefile.in: Regenerate.
+        * libc/argz/Makefile.in: Regenerate.
+        * libc/ctype/Makefile.in: Regenerate.
+        * libc/errno/Makefile.in: Regenerate.
+        * libc/iconv/Makefile.in: Regenerate.
+        * libc/iconv/ccs/Makefile.in: Regenerate.
+        * libc/iconv/ccs/binary/Makefile.in: Regenerate.
+        * libc/iconv/ces/Makefile.in: Regenerate.
+        * libc/iconv/lib/Makefile.in: Regenerate.
+        * libc/locale/Makefile.in: Regenerate.
+        * libc/misc/Makefile.in: Regenerate.
+        * libc/posix/Makefile.in: Regenerate.
+        * libc/reent/Makefile.in: Regenerate.
+        * libc/search/Makefile.in: Regenerate.
+        * libc/signal/Makefile.in: Regenerate.
+        * libc/stdio/Makefile.in: Regenerate.
+        * libc/stdio64/Makefile.in: Regenerate.
+        * libc/stdlib/Makefile.in: Regenerate.
+        * libc/string/Makefile.in: Regenerate.
+        * libc/syscalls/Makefile.in: Regenerate.
+        * libc/time/Makefile.in: Regenerate.
+        * libc/unix/Makefile.in: Regenerate.
+        * libc/xdr/Makefile.in: Regenerate.
 
-	* libc/include/machine/setjmp.h: Bump jmp_buf size fo 0x44.
-	* libc/machine/rx/setjmp.S: Restore $pc.  Rewrite to be
-	interrupt-safe.
+2010-04-23  Nick Clifton  <nickc@redhat.com>
 
-2009-08-10  Nick Clifton  <nickc@redhat.com>
+	* configure.host: Fix typo in previous delta.
+	* libc/machine/aclocal.m4: Regenerate.
+	* libc/machine/configure: Regenerate.
 
-	* libc/machine/rx/memchr.S: Decrement r1 pointer after SUNTIL.B
-	completes.  Handle the case where memchr is called with a length
-	of zero.
-	* libc/machine/rx/memmove.S: Use shorter forms of ADD and SUB
-	instructions.
-	* libc/machine/rx/stejmp.S (_longjmp): Replace use of MAX
-	instruction with STZ and STNZ instructions, so that negative
-	values are handled correctly.
-	* libc/machine/rx/strcat.S: Decrement r1 pointer after SUNTIL.B
-	completes.
-	* libc/machine/rx/strlen.S: Likewise.  Use shorter form of ADD
-	instruction.
-	* libc/machine/rx/strncat.S: Ensure destination buffer is always
-	NUL terminated.
-	* libc/machine/rx/strncpy.S Likewise.
+2010-03-17  Nick Clifton  <nickc@redhat.com>
 
-2009-07-30  Nick Clifton  <nickc@redhat.com>
+	* configure.host (newlib_cflags): Add -flto for targets which
+	support the GOLD linker.
 
-	* configure.host: Enable -ffunction-sections and -fdata-sections
-	for RX builds.
+2008-08-13  Nick Clifton  <nickc@redhat.com>
 
-2009-07-29  Nick Clifton  <nickc@redhat.com>
+	* libc/sys/sysnecv850/isatty.c (_isatty): Define.
 
-	* libc/machine/rx/strncpy.S (_strncpy): Fix use of SSTR insn.
+2007-11-17  Nick Clifton  <nickc@redhat.com>
 
-2009-07-15  Nick Clifton  <nickc@redhat.com>
-
-	* libc/libc.texinfo: Remove old gmon node.
-
-2009-04-17  Nick Clifton  <nickc@redhat.com>
-
-	Issue 263731
-	* configure.host: Revert MN10300 builds to using -O2 rather than
-	-Os.
-
-2009-03-25  Nick Clifton  <nickc@redhat.com>
-
-	* libc/machine/mn10300/memcmp.S: Remove unnecessary register
-	pushes and avoid using a2 since it is the PIC base register.
+	* libc/machine/mn10300/Makefile.am (lib_a_CCASFLAGS): Enable
+	dwarf2 debug information generation by the assembler.
+	* libc/machine/mn10300/Makefile.in: Regenerate.
+	* libc/machine/mn10300/memchr.S: Add .debug_frame section.
+	* libc/machine/mn10300/memcmp.S: Likewise.
 	* libc/machine/mn10300/memcpy.S: Likewise.
 	* libc/machine/mn10300/memset.S: Likewise.
 	* libc/machine/mn10300/strchr.S: Likewise.
@@ -146,9 +133,10 @@
 	* libc/machine/mn10300/strcpy.S: Likewise.
 	* libc/machine/mn10300/strlen.S: Likewise.
 
-2008-08-13  Nick Clifton  <nickc@redhat.com>
+2007-10-30  DJ Delorie  <dj@redhat.com>
 
-	* libc/sys/sysnecv850/isatty.c (_isatty): New stub function.
+	* libc/sys/h8300hms/sbrk.c (_sbrk): Avoid recursion in case
+	abort() calls malloc().
 
 2007-09-06  Nick Clifton  <nickc@redhat.com>
 
@@ -162,30 +150,142 @@
 	(INTMAX_MAX, UINTMAX_MAX, INTPTR_MIN, INTPTR_MAX, UINTPTR_MAX):
 	Likewise.
 
+	* libc/include/stdlib.h: Define lldiv_t type and lldiv prototype
+	if compiling for ISO C99 (or higher).
+
 	* libc/include/fenv.h: New file.  ISO C99 defined header file.
 	* libc/include/complex.h: New file.  ISO C99 defined header file.
 	* libc/include/tgmath.h: New file.  ISO C99 defined header file.
 
-2005-10-03  Nick Clifton  <nickc@redhat.com>
+2007-08-28  Nick Clifton  <nickc@redhat.com>
 
-	* configure.host (mn10300): Add LONGLONG printf support
+	* libc/machine/powerpc/vfprintf.c (_vfprintf_r): Fix call to
+	__sbprintf_r.
 
-2004-03-16  Corinna Vinschen  <vinschen@redhat.com>
+2007-08-28  Nick Clifton  <nickc@redhat.com>
 
-	* libc/include/machine/ieeefp.h: Define _DOUBLE_IS_32BITS for
-	__SH2A_SINGLE_ONLY__, too.
-	* libc/machine/sh/asm.h: Define DELAYED_BRANCHES for __SH2A__, too.
+	* libc/sys/sysnecv850/crt0.S (___dso_handle): Define.
 
-2004-02-24  Corinna Vinschen  <vinschen@redhat.com>
+2007-07-19  Nick Clifton  <nickc@redhat.com>
 
-	* libc/sys/sh/crt0.S (start_l): Support sh2a-nofpu.  Fix comments.
+	* Import this patch from the mainline:
+	2007-07-18  Eric Blake  <ebb9@byu.net>
 
-2004-02-10  DJ Delorie  <dj@redhat.com>
+	Fix 'make info'.
+	* libc/stdio/stdio.tex: Add missing include.
+	* libc/stdio/vfprintf.c: Use expected node name.
+	* libc/stdio/vfscanf.c: Likewise.
+	* libc/stdio/sscanf.c: Likewise.
+	* libc/stdio/sprintf.c: Likewise.
+	* libc/stdio/siscanf.c: Likewise.
+	* libc/stdio/siprintf.c: Likewise.
+	* libc/stdio/fopencookie.c: Quote raw {}.
+	Reported by DJ Delorie.
 
-	* libc/sys/sh/crt0.S (start_l): Support sh2a.
+2007-03-20  Nick Clifton  <nickc@redhat.com>
 
-2003-07-02  Richard Sandiford  <rsandifo@redhat.com>
+	Import changes made to generic vfprintf.c:
+	* libc/machine/powerpc/vfprintf.c (__sprint): Rename to __sprint_r
+	and add a "struct reent *" argument.
+	(__sbprintf): Call _VFPRINTF_R instead of VFPRINTF.
+	(_VFPRINTF_R): Add data pointer to call to cantwrite().
+	Fix uses of __sprint() and __sbprintf.
 
+2007-01-31  Nick Clifton  <nickc@redhat.com>
+
+	* configure.host: Accept x86_64-elf as a target.
+	* libc/include/machine/ieeefp.h: Likewise.
+	* libc/include/machine/setjmp.h: Likewise.
+
+2006-08-06  Nick Clifton  <nickc@redhat.com>
+
+	* libc/machine/xstormy16/Makefile.am (lib_a_LIBADD): Add $(lpfx)
+	prefix to object file names.
+	* libc/machine/xstormy16/Makefile.in: Regenerate.
+
+2006-03-07  Nick Clifton  <nickc@redhat.com>
+
+	* Import this patch from mainline:
+	2004-09-09  Paul Brook  <paul@codesourcery.com>
+
+	* libc/include/sys/reent.h (struct _on_exit_args): Add _dso_handle
+	and _is_cxa.
+	(struct _atexit): Add _next when _REENT_SMALL.
+	(struct _reent): Add _atexit0 when _REENT_SMALL.
+	(_REENT_INIT_PTR): Adjust.
+	* libc/stdlib/Makefile.am (GENERAL_SOURCES): Add __atexit.c and
+	__call_exit.c.
+	(EXTENDED_SOURCES): Add cxa_atexit.c and cxa_finalize.c.
+	* libc/stdlib/Makefile.in: Regenerate.
+	* libc/stdlib/__atexit.c: New file.
+	* libc/stdlib/__call_atexit.c: New file.
+	* libc/stdlib/atexit.h: Remove old definitions.  Add new.
+	* libc/stdlib/atexit.c (atexit): Use __register_exitproc.
+	* libc/stdlib/cxa_atexit.c: New file.
+	* libc/stdlib/cxa_finalize.c: New file.
+	* libc/stdlib/exit.c (exit): Use __call_exitprocs.
+	* libc/stdlib/on_exit.c (on_exit): Use __register_exitproc.
+
+	2004-09-09  Jeff Johnston  <jjohnstn@redhat.com>
+	* libc/reent/reent.c [_REENT_SMALL]: Fix reference to
+	_on_exit_args_ptr.
+
+2006-01-25  Nick Clifton  <nickc@redhat.com>
+
+	* libc/ctype/ctype.tex: Add missing inclusion of iswblank.def.
+	* libc/stdio/Makefile.am (CHEWOUT_FILES): Add iprintf.def.
+	* libc/stdio/Makefile.in: Regenerate.
+
+2005-04-25  Nick Clifton  <nickc@redhat.com>
+
+	* Import this (unapproved) patch:
+	2005-04-23  Shaun Jackman  <sjackman@gmail.com>
+
+	* libc/sys/arm/syscalls.c (get_errno): Add an output register
+	constraint.
+
+2005-04-18  Nick Clifton  <nickc@redhat.com>
+
+	Import this patch from the mainline:
+
+	2005-03-28  Paul Brook  <paul@codesourcery.com>
+	* libc/sys/arm/crt0.S: Ensure doubleword stack alignment.
+
+2004-11-24  Nick Clifton  <nickc@redhat.com>
+
+	* configure.host: Add support for armv5-elf and armv6-elf targets.
+
+2004-10-15  Nick Clifton  <nickc@redhat.com>
+
+	* libc/include/sys/config.h: Set _NO_ON_EXIT_SUPPORT for
+	xstormy16.
+	* libc/include/sys/reent.h: Remove on_exit_args structure and
+	move its fields into the _atexit structure.  If
+	_NO_ON_EXIT_SUPPORT is defined then do not define these new
+	fields.
+	(REENT_INIT_PTR): Change initialisation of fields in the
+	_atexit structure.
+	* libc/include/stdlib.h: Do not prototype on_exit if it is not
+	supported.
+	* libc/reent/reent.c (_reclaim_reent): No need to free
+	_on_exit_args_ptr.
+	* libc/stdlib/atexit.c: Make on_exit support conditional.
+	* libc/stdlib/exit.c: Likewise.
+	* libc/stdlib/on_exit.c: Only define if on_exit is supported.
+
+2004-10-15  Nick Clifton  <nickc@redhat.com>
+
+	* configure.host (xstormy16): Set PREFER_SIZE_OVER_SPEED in
+	newlib_cfags.
+
+2004-06-22  Alexandre Oliva  <aoliva@redhat.com>
+
+	* libc/include/machine/setjmp.h [__H8300__] (_JBTYPE): Define,
+	instead of typedefing jmp_buf.
+
+2004-06-21  Alexandre Oliva  <aoliva@redhat.com>
+
+	2003-07-02  Richard Sandiford  <rsandifo@redhat.com>
 	* libc/machine/h8300/Makefile.am (lib_a_SOURCES): Add h8sx_strcpy.S.
 	* libc/machine/h8300/defines.h (LEN): New macro.
 	* libc/machine/h8300/memcpy.S: Add h8sx version.
@@ -193,9 +293,7 @@
 	* libc/machine/h8300/strcmp.S: Likewise.
 	* libc/machine/h8300/setjmp.S: Use h8sx move instructions.
 	* libc/machine/h8300/h8sx_strcpy.S: New file.
-
-2003-06-30  Richard Sandiford  <rsandifo@redhat.com>
-
+	2003-06-30  Richard Sandiford  <rsandifo@redhat.com>
 	* libc/include/machine/ieeefp.h: Extend __H8300S__ handling to
 	__H8300SX__.
 	* libc/include/machine/setjmp.h: Likewise.
@@ -212,321 +310,7 @@
 	* libc/machine/h8300/setarch.h: Use .h8300sx or .h8300sxn if
 	__H8300SX__ is defined.
 	* libc/sys/h8300hms/setarch.h: Likewise.
-
-2003-03-23  Nick Clifton  <nickc@redhat.com>
-
-	* libc/include/machine/ieeefp.h: Add defintions for Cris, IP4K and
-	s390.  Used to build gcov.o in libgcc when compiling for a cross
-	target.
-
-2002-04-29  Nick Clifton  <nickc@cambridge.redhat.com>
-
-	* libc/sys/arm/syscalls.c (_rename): Add parameter names.
-	(_sbrk): Add cast of return value.
-
-2002-04-22  Thomas Fitzsimmons  <fitzsim@redhat.com>
-
-	* acinclude.m4 (NEWLIB_CONFIGURE): Replace AC_CANONICAL_HOST
-	with AC_CANONICAL_SYSTEM.  Remove AC_CANONICAL_BUILD.
-	* testsuite/Makefile.am: Remove.
-	* testsuite/Makefile.in: Remove.
-	* testsuite/aclocal.m4: Remove.
-	* testsuite/configure.in: Remove.
-	* testsuite/configure: Remove.
-	* testsuite/config/unix-libm.exp: Remove.
-	* testsuite/config/unix.exp: Remove.
-	* testsuite/lib/libm.exp: Remove.
-	* testsuite/lib/newlib.exp (newlib_init): Add LD_LIBRARY_PATH
-	support when build == host == i686-pc-linux-gnu.
-	(newlib_finish): Likewise.
-	(newlib_target_compile): Add libs and ldflags options to support
-	compiling natively.
-
-2002-02-15  Nick Clifton  <nickc@cambridge.redhat.com>
-
-	* NEWLIB-HACK-RULES: Replace cygnus with redhat.
-
-2001-11-20  Stan Cox  <scox@redhat.com>
-
-	* libc/include/machine/setjmp.h: Add iq2000 support.
-
-2001-11-07  Richard Sandiford  <rsandifo@redhat.com>
-
-	* configure.host (frv-*-*): Define WANT_PRINTF_LONG_LONG.
-
-2001-10-10  Catherine Moore  <clm@redhat.com>
-
-	* libc/machine/xstormy16/setjmp.S (setjmp, longjmp):  Set up
-	correct return values.
-
-2001-10-09  Catherine Moore  <clm@redhat.com>
-
-	* libc/machine/xstormy16/setjmp.S:  Don't overwrite jump address.
-
-2001-10-08  Catherine Moore  <clm@redhat.com>
-
-	* libc/machine/xstormy16/setjmp.S: Use r8 and r9 for indirect jump.
-
-2001-10-05  Catherine Moore  <clm@redhat.com>
-
-	* configure.host:  Define HAVE_GETTIMEOFDAY.
-
-2001-10-02  Stan Cox  <scox@redhat.com>
-
-        * configure.host: Add iq2000.
-        * libc/include/sys/config.h: Ditto.
-
-2001-09-21  Richard Henderson  <rth@redhat.com>
-
-	* libc/machine/xstormy16/setjmp.S: Remove extraneous underscores;
-	set type and size of symbols.
-
-2001-09-20  Catherine Moore  <clm@redhat.com>
-
-	* libc/include/machine/setjmp.h: Fix bad #ifdef nesting.
-
-2001-08-16  Corinna Vinschen  <vinschen@redhat.com>
-
-	* libc/include/sys/config.h [xstormy16]: Set MALLOC_ALIGNMENT to 8.
-
-2001-08-14  Corinna Vinschen  <vinschen@redhat.com>
-
-	* libc/include/sys/config.h [xstormy16]: Set __BUFSIZ__ to 16.
-
-2001-08-12  Richard Henderson  <rth@redhat.com>
-
-	* libc/include/sys/config.h [xstormy16] (_POINTER_INT): New.
-
-2001-07-09  Geoffrey Keating  <geoffk@redhat.com>
-
-	* configure.host: Add xstormy16 port.
-	* libc/include/machine/ieeefp.h: Likewise.
-	* libc/include/machine/setjmp.h: Likewise.
-	* libc/include/sys/config.h: Likewise.
-	* libc/machine/xstormy16/Makefile.am: New file.
-	* libc/machine/xstormy16/Makefile.in: New file.
-	* libc/machine/xstormy16/aclocal.m4: New file.
-	* libc/machine/xstormy16/configure: New file.
-	* libc/machine/xstormy16/configure.in: New file.
-	* libc/machine/xstormy16/setjmp.S: New file.
-
-2001-03-13  Alexandre Oliva  <aoliva@redhat.com>
-
-	* configure.host (newlib_cflags) [sh*-*-*]: Enable long long
-	support in printf.
-
-2001-01-29  Alexandre Oliva  <aoliva@redhat.com>
-
-	* libc/machine/sh/setjmp.S [SH5]: Switch to SHmedia mode before
-	any labels.
-
-2001-01-24  Alexandre Oliva  <aoliva@redhat.com>
-
-	* libc/sys/sh/trap.S (___trap34) [SH5]: Don't trash r2.
-
-2000-12-16  Alexandre Oliva  <aoliva@redhat.com>
-
-	* libc/machine/sh/configure.in: Rework conditionals.
-	* libc/machine/sh/Makefile.am: Likewise.
-	* libc/machine/sh/configure, libc/machine/sh/Makefile.in: Rebuilt.
-
-2000-12-01  Alexandre Oliva  <aoliva@redhat.com>
-
-	* configure.host: Match `sh*'.
-	* libc/include/machine/setjmp.h: Define for SH5.
-	* libc/machine/sh/configure.in: Detect SH5.
-	* libc/machine/sh/configure: Rebuilt.
-	* libc/machine/sh/Makefile.am: Use only setjmp.S for SH5.
-	* libc/machine/sh/Makefile.in: Rebuilt.
-	* libc/machine/sh/asm.h: Adjust for SH5.
-	* libc/machine/sh/setjmp.S: Implement in SHmedia.
-	* libc/sys/sh/crt0.S: Likewise.
-	* libc/sys/sh/trap.S: Likewise.
-
-2000-08-17  Michael Meissner  <meissner@redhat.com>
-
-	* libc/machine/frv/setjmp.S (setjmp): Properly deal with no
-	leading underscores or leading underscores.
-	(longjmp): Ditto.  Also, use conditional execution to force return
-	value to be non-zero.
-
-2000-08-11  Michael Meissner  <meissner@redhat.com>
-
-	* configure.host (frv-*-*): Do not add -fpic to newlib cflags.
-
-2000-04-27  Alexandre Oliva  <aoliva@cygnus.com>
-
-	* libc/include/machine/setjmp.h (_JBLEN, AM33/2.0): Set to 26.
-	* libc/machine/mn10300/setjmp.S (setjmp, longjmp): Save and
-	restore callee-saved FP registers.
-
-2000-03-24  Jeff Johnston <jjohnstn@cygnus.com>
-
-	* libc/machine/frv/aclocal.m4: Ditto.
-	* libc/machine/frv/configure: Ditto.
-	* libc/machine/xscale/aclocal.m4: Ditto.
-	* libc/machine/xscale/configure: Ditto.
-	* libc/sys/idt/aclocal.m4: Ditto.
-	* libc/sys/idt/configure: Ditto.
-	* testsuite/aclocal.m4: Ditto.
-	* testsuite/configure: Ditto.
-2000-03-09  Nick Clifton  <nickc@cygnus.com>
-
-	* libc/machine/xscale/strchr.c (strchr): tell the compiler
-	that r5 and r6 are clobbered as well.
-
-2000-03-15  Jeff Johnston <jjohnstn@cygnus.com>
-
-	* NEWLIB-HACK-RULES: Changed to reflect sourceware information.
-
-2000-01-10  Jeff Johnston <jjohnstn@cygnus.com>
-
-	* acinclude.m4: Changed include directory for winsup headers.
-	* aclocal.m4 configure libc/aclocal.m4
-	* libc/machine/frv/aclocal.m4: Ditto.
-	* libc/machine/frv/configure: Ditto.
-1999-12-08  Bernd Schmidt  <bernds@cygnus.co.uk>
-
-	* libc/machine/xscale/Makefile.am (lib_a_SOURCES):
-	Replace assembler files with C versions.
-	* libc/machine/xscale/Makefile.in (lib_a_SOURCES): Likewise.
-	* libc/machine/xscale/sa2mach.h (PRELOADSTR): New macro
-	similar to PRELOAD, but for use in asm statements.
-	* libc/machine/xscale/memchr.S: Delete.
-	* libc/machine/xscale/memcmp.S: Likewise.
-	* libc/machine/xscale/memcpy.S: Likewise.
-	* libc/machine/xscale/memmove.S: Likewise.
-	* libc/machine/xscale/memset.S: Likewise.
-	* libc/machine/xscale/strchr.S: Likewise.
-	* libc/machine/xscale/strcmp.S: Likewise.
-	* libc/machine/xscale/strcpy.S: Likewise.
-	* libc/machine/xscale/strlen.S: Likewise.
-	* libc/machine/xscale/memchr.c: New file.
-	* libc/machine/xscale/memcmp.c: Likewise.
-	* libc/machine/xscale/memcpy.c: Likewise.
-	* libc/machine/xscale/memmove.c: Likewise.
-	* libc/machine/xscale/memset.c: Likewise.
-	* libc/machine/xscale/strchr.c: Likewise.
-	* libc/machine/xscale/strcmp.c: Likewise.
-	* libc/machine/xscale/strcpy.c: Likewise.
-	* libc/machine/xscale/strlen.c: Likewise.
-
-1999-12-03  Nick Clifton  <nickc@cygnus.com>
-
-	* libc/machine/xscale/strlen.S: Rename LDRL insns to LDRD.
-
-1999-12-03  Ranjith Kumaran <ranjith@cygnus.com>
-
-	* libc/machine/xscale/memchr.S: Added thumb support.
-	* libc/machine/xscale/memcmp.S: Added thumb support.
-	* libc/machine/xscale/memcpy.S: Added thumb support.
-	* libc/machine/xscale/memmove.S: Added thumb support.
-	* libc/machine/xscale/memset.S: Added thumb support.
-	* libc/machine/xscale/strchr.S: Added thumb support.
-	* libc/machine/xscale/strcmp.S: Added thumb support.
-	* libc/machine/xscale/strcpy.S: Added thumb support.
-	* libc/machine/xscale/strlen.S: Added thumb support.
-
-1999-12-01  Nick Clifton  <nickc@cygnus.com>
-
-	* libc/machine/xscale/sa2mach.h (PRELOAD): Define iff
-	__XSCALE__ is defined.
-
-	* libc/machine/xscale/strlen.S: Enable special case code for
-	all v5 architectures.
-
-1999-11-30  Ranjith Kumaran <ranjith@cygnus.com>
-
-	* libc/machine/xscale/strlen.S: Added preloads.
-
-1999-11-24  Ranjith Kumaran <ranjith@cygnus.com>
-
-	* libc/machine/xscale/sa2mach.S: New file.
-        * libc/machine/xscale/memchr.S: Added preloads; now uses SYM macro.
-        * libc/machine/xscale/memcmp.S: Ditto.
-        * libc/machine/xscale/memcpy.S: Ditto.
-        * libc/machine/xscale/memmove.S: Ditto.
-        * libc/machine/xscale/memset.S: Ditto.
-        * libc/machine/xscale/strchr.S: Ditto.
-        * libc/machine/xscale/strcmp.S: Ditto.
-        * libc/machine/xscale/strcpy.S: Ditto.
-        * libc/machine/xscale/strlen.S: Ditto.
-
-1999-11-19  Ranjith Kumaran <ranjith@cygnus.com>
-
-	* configure.host: Added libc/machine/xscale.
-	* libc/machine/xscale/Makefile.am: New file.
-	* libc/machine/xscale/Makefile.in: New file.
-	* libc/machine/xscale/aclocal.m4: New file.
-	* libc/machine/xscale/configure: New file.
-	* libc/machine/xscale/configure.in: New file.
-	* libc/machine/xscale/memchr.S: New file.
-	* libc/machine/xscale/memcmp.S: New file.
-	* libc/machine/xscale/memcpy.S: New file.
-	* libc/machine/xscale/memmove.S: New file.
-	* libc/machine/xscale/memset.S: New file.
-	* libc/machine/xscale/strchr.S: New file.
-	* libc/machine/xscale/strcmp.S: New file.
-	* libc/machine/xscale/strcpy.S: New file.
-	* libc/machine/xscale/strlen.S: New file.
-
-1999-11-02  Nick Clifton  <nickc@cygnus.com>
-
-	* configure.host: Add support for strongarm-pe target.
-
-1999-08-30  Michael Meissner  <meissner@cygnus.com>
-
-	* configure.host (frv-*-elf): Compile all of the libraries with
-	-fpic.
-
-1999-08-27  Mark Salter  <msalter@cygnus.com>
-
-	* libc/machine/frv/setjmp.S: Save and restore sp and fp, also.
-	* libc/include/machine/setjmp.h (_JBLEN): Lowered so that its just
-	big enough.
-
-1999-08-06  Michael Meissner  <meissner@cygnus.com>
-
-	* libc/machine/frv/setjmp.S (_longjmp): Don't save gprs > 32 if
-	-mgpr-32.  Likewise for fprs if -mfpr-32.
-
-1999-08-06  Mark Salter  <msalter@cygnus.com>
-
-	* configure.host: Define machine_dir for frv.
-
-	* libc/machine/frv/setjmp.S: Prepend underscore character to function
-	names. Don't save/restore FP regs if soft-float.
-
-1999-07-12  Nick Clifton  <nickc@cygnus.com>
-
-	* configure.host: Add xscale/coyanosa target.
-
-1999-07-26  Catherine Moore  <clm@cygnus.com>
-
-	* libc/include/sys/config.h (__ATTRIBUTE_IMPURE_PTR__): Define
-	for frv.
-
-1999-07-09  Michael Meissner  <meissner@cygnus.com>
-
-	* libc/include/sys/config.h (__IEEE_BIG_ENDIAN): Define if FR-V.
-
-1999-06-24  Catherine Moore  <clm@cygnus.com>
-
-	* configure.host: Support target frv.
-	* libc/include/machine/ieeefp.h: Handle frv.
-
-1999-06-24  Catherine Moore  <clm@cygnus.com>
-
-	* libc/include/machine/setjmp.h (_JBLEN): Define for frv.
-	(_JBTYPE): Define for frv.
-	* libc/machine/frv/Makefile.am: New.
-	* libc/machine/frv/Makefile.in: New.
-	* libc/machine/frv/aclocal.m4: New.
-	* libc/machine/frv/configure: New.
-	* libc/machine/frv/configure.in: New.
-	* libc/machine/frv/setjmp.S: New.
-
-
+
 Local Variables:
 mode: change-log
 left-margin: 8

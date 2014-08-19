@@ -11,7 +11,7 @@ extern int memcmp (const void *, const void *, size_t);
 
 #include "chk.h"
 
-const char s1[] = "123";
+const char s1[] = "123"; 
 char p[32] = "";
 volatile char *s2 = "defg"; /* prevent constant propagation to happen when whole program assumptions are made.  */
 volatile char *s3 = "FGH"; /* prevent constant propagation to happen when whole program assumptions are made.  */

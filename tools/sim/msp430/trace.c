@@ -1,6 +1,6 @@
-/* trace.c --- tracing output for the RL78 simulator.
+/* trace.c --- tracing output for the MSP430 simulator.
 
-   Copyright (C) 2005, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 2005-2014 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of the GNU simulators.
@@ -209,7 +209,7 @@ msp430_get_current_source_location (int mypc,
       info.arch = bfd_get_arch (current_bfd);
       info.mach = bfd_get_mach (current_bfd);
       if (info.mach == 0)
-	info.arch = bfd_arch_rl78;
+	info.arch = bfd_arch_msp430;
 
       disassemble_init_for_target (& info);
 

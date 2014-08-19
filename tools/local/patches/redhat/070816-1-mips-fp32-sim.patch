@@ -1,0 +1,30 @@
+Don't warn about type mismatches when loading a 64 bit value into a
+pair of 32 bit registers.
+
+Index: sim/mips/ChangeLog.RedHat
+2007-08-16  DJ Delorie  <dj@redhat.com>
+
+	* cp1.c (value_fpr): Don't warn about size mismatches when we're
+	using 32 bit FP registers.
+
+Index: sim/mips/cp1.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/mips/cp1.c,v
+retrieving revision 1.2
+diff -p -U3 -r1.2  sim/mips/cp1.c
+--- sim/mips/cp1.c	21 Oct 2003 23:37:57 -0000	1.2
++++ sim/mips/cp1.c	16 Aug 2007 19:23:21 -0000
+@@ -133,9 +133,10 @@ value_fpr (sim_cpu *cpu,
+     }
+   if (fmt != FPR_STATE[fpr])
+     {
+-      sim_io_eprintf (SD, "FPR %d (format %s) being accessed with format %s - setting to unknown (PC = 0x%s)\n",
+-		      fpr, fpu_format_name (FPR_STATE[fpr]),
+-		      fpu_format_name (fmt), pr_addr (cia));
++      if (SizeFGR () == 64)
++	sim_io_eprintf (SD, "FPR %d (format %s) being accessed with format %s - setting to unknown (PC = 0x%s)\n",
++			fpr, fpu_format_name (FPR_STATE[fpr]),
++			fpu_format_name (fmt), pr_addr (cia));
+       FPR_STATE[fpr] = fmt_unknown;
+     }
+ 

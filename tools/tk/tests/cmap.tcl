@@ -2,7 +2,7 @@
 # property.  It is part of the Tk visual test suite, which is invoked
 # via the "visual" script.
 #
-# RCS: @(#) $Id: cmap.tcl,v 1.9 2003/03/19 23:02:08 cagney Exp $
+# RCS: @(#) $Id: cmap.tcl,v 1.3 2012/04/18 00:37:04 kevinb Exp $
 
 catch {destroy .t}
 toplevel .t -colormap new

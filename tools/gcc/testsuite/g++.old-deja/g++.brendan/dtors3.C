@@ -65,3 +65,4 @@ middle::~middle ()
 {
 	middle_destructor_calls++;
 }
+// { dg-require-effective-target size32plus }

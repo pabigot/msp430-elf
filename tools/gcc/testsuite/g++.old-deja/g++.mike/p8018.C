@@ -84,3 +84,4 @@ main() {
   if (a1->nrefs() != 3)
     return 1;
 }
+// { dg-require-effective-target size32plus }

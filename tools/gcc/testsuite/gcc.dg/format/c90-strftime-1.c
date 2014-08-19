@@ -17,3 +17,4 @@ foo (char *s, size_t m, const struct tm *tp)
   strftime (s, m, "%c", tp); /* { dg-warning "some locales" "2-digit year" } */
   strftime (s, m, "%x", tp); /* { dg-warning "some locales" "2-digit year" } */
 }
+/* { dg-prune-output ".*__int20.*" } */

@@ -1,5 +1,5 @@
 /* Header file for fp-bit.c.  */
-/* Copyright (C) 2000-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -128,9 +128,6 @@ typedef unsigned int UTItype __attribute__ ((mode (TI)));
 #define NO_DI_MODE
 #endif
 
-#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
-#define FLOAT_BIT_ORDER_MISMATCH
-#endif
 /* Allow the target the chance to specify whether
    the bit order matches the byte order.  */
 #if defined LIBGCC2_FLOAT_BIT_ORDER_MISMATCH
@@ -204,7 +201,7 @@ typedef unsigned int UTItype __attribute__ ((mode (TI)));
 #	define EXPBIAS 127
 #	define FRACBITS 23
 #	define EXPMAX (0xff)
-#	define QUIET_NAN 0x100000L
+#	define QUIET_NAN 0x400000L
 #	define FRAC_NBITS 32
 #	define FRACHIGH  0x80000000L
 #	define FRACHIGH2 0xc0000000L
@@ -312,7 +309,7 @@ typedef unsigned int UTItype __attribute__ ((mode (TI)));
 /* numeric parameters */
 /* F_D_BITOFF is the number of bits offset between the MSB of the mantissa
    of a float and of a double. Assumes there are only two float types.
-   (double::FRAC_BITS+double::NGARDS-(float::FRAC_BITS-float::NGARDS))
+   (double::FRAC_BITS+double::NGARDS-(float::FRAC_BITS+float::NGARDS))
  */
 #define F_D_BITOFF (52+8-(23+7))
 

@@ -1,5 +1,5 @@
 ;; Constraint definitions for XSTORMY16.
-;; Copyright (C) 2011-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2011-2014 Free Software Foundation, Inc.
 ;;
 ;; This file is part of GCC.
 ;;
@@ -96,7 +96,7 @@
 (define_constraint "S"
   "An immediate memory address."
   (and (match_code "mem")
-(match_code "const_int" "0")
+       (match_code "const_int" "0")
        (match_test "xstormy16_legitimate_address_p (VOIDmode, XEXP (op, 0), false)")))
 
 (define_constraint "T"
@@ -112,7 +112,6 @@
 (define_constraint "W"
   "@internal"
   (match_operand 0 "xstormy16_below100_operand"))
-
 
 (define_constraint "Z"
   "Zero."

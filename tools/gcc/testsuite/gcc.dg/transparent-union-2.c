@@ -1,7 +1,7 @@
 /* PR c/20043 */
 /* { dg-do compile } */
-/* { dg-options "-std=gnu99" } */
 /* { dg-skip-if "pointers are not power-of-2 in size" { "msp430-*-*" } { "-mlarge" } { "" } } */
+/* { dg-options "-std=gnu99" } */
 
 typedef union { int *i; long *l; } U
   __attribute__((transparent_union));

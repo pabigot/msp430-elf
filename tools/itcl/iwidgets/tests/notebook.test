@@ -11,7 +11,7 @@
 # See the file "license.terms" for information on usage and redistribution
 # of this file, and for a DISCLAIMER OF ALL WARRANTIES.
 #
-# @(#) $Id: notebook.test,v 1.1 2003/03/19 23:00:56 cagney Exp $
+# @(#) $Id: notebook.test,v 1.4 2001/08/07 19:56:48 smithc Exp $
 
 package require tcltest
 namespace import -force ::tcltest::*

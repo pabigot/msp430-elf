@@ -1,7 +1,6 @@
 /* Support for printing Modula 2 values for GDB, the GNU debugger.
 
-   Copyright (C) 1986, 1988-1989, 1991-1992, 1996, 1998, 2000, 2005-2012
-   Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -269,16 +268,14 @@ m2_print_array_contents (struct type *type, const gdb_byte *valaddr,
 			 const struct value_print_options *options,
 			 int len)
 {
-  int eltlen;
   CHECK_TYPEDEF (type);
 
   if (TYPE_LENGTH (type) > 0)
     {
-      eltlen = TYPE_LENGTH (type);
-      if (options->prettyprint_arrays)
+      if (options->prettyformat_arrays)
 	print_spaces_filtered (2 + 2 * recurse, stream);
       /* For an array of chars, print with string syntax.  */
-      if (eltlen == 1 &&
+      if (TYPE_LENGTH (type) == 1 &&
 	  ((TYPE_CODE (type) == TYPE_CODE_INT)
 	   || ((current_language->la_language == language_m2)
 	       && (TYPE_CODE (type) == TYPE_CODE_CHAR)))
@@ -320,7 +317,6 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
   unsigned int i = 0;	/* Number of characters printed.  */
   unsigned len;
   struct type *elttype;
-  unsigned eltlen;
   CORE_ADDR addr;
 
   CHECK_TYPEDEF (type);
@@ -330,12 +326,11 @@ m2_val_print (struct type *type, const gdb_byte *valaddr, int embedded_offset,
       if (TYPE_LENGTH (type) > 0 && TYPE_LENGTH (TYPE_TARGET_TYPE (type)) > 0)
 	{
 	  elttype = check_typedef (TYPE_TARGET_TYPE (type));
-	  eltlen = TYPE_LENGTH (elttype);
-	  len = TYPE_LENGTH (type) / eltlen;
-	  if (options->prettyprint_arrays)
+	  len = TYPE_LENGTH (type) / TYPE_LENGTH (elttype);
+	  if (options->prettyformat_arrays)
 	    print_spaces_filtered (2 + 2 * recurse, stream);
 	  /* For an array of chars, print with string syntax.  */
-	  if (eltlen == 1 &&
+	  if (TYPE_LENGTH (elttype) == 1 &&
 	      ((TYPE_CODE (elttype) == TYPE_CODE_INT)
 	       || ((current_language->la_language == language_m2)
 		   && (TYPE_CODE (elttype) == TYPE_CODE_CHAR)))

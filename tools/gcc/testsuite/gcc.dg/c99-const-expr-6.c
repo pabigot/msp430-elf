@@ -60,3 +60,4 @@ f (int a)
       ;
     }
 }
+/* { dg-prune-output ".*__int20.*" } */

@@ -634,10 +634,8 @@ CFLAGS
 LDFLAGS
 LIBS
 CPPFLAGS'
-ac_subdirs_all='arm
-calmrisc32
-m68k
-z8k
+ac_subdirs_all='aarch64
+arm
 avr
 bfin
 cr16
@@ -3628,14 +3626,14 @@ sim_common=yes
 sim_igen=no
 sim_arch=
 case "${target}" in
-   m68k*-*-*)
+   aarch64-*-*)
 
-  sim_arch=m68k
-  subdirs="$subdirs m68k"
+  sim_arch=aarch64
 
 
-       sim_testsuite=yes
-       sim_common=yes
+subdirs="$subdirs aarch64"
+
+
        ;;
    arm*-*-*)
 
@@ -3763,6 +3761,7 @@ case "${target}" in
        sim_testsuite=yes
        sim_igen=yes
        ;;
+   am3*-*-* | \
    mn10300*-*-*)
 
   sim_arch=mn10300
@@ -3845,6 +3844,7 @@ case "${target}" in
        sim_common=no
        ;;
 esac
+
 
 # Local variables:
 # mode: autoconf

@@ -1,7 +1,6 @@
 	.file "memcmp.S"
 
 	.section .text
-#if 0
 	.global _memcmp
 	.type	 _memcmp,@function
 _memcmp:
@@ -48,80 +47,6 @@ _memcmp:
 	clr d0
 .Lepilogue:
 	ret [d2,d3,a2,a3],16
-#else
-	.global  _memcmp
-	.type	 _memcmp,@function
-_memcmp:
-	movm  [d2,d3,a3], (sp)
-.Lend_of_prologue:
-	mov   d0, a0
-	mov   d1, a1
-	mov   (24, sp), a3
-
-/*	Newlib for the MN10300 is compiled with -Os enabled all the time,
-	so normally the code below will not be triggered.  The test for
-	__LIW__ however enables us to build a speed optimized version when
-	building -mliw enabled multilibs.  -mliw allows long instruction
-	word generation which is faster but occupies more space.  LIW
-	instructions are not acutally used in the code below, but enabling
-	their generation implies that the user is more interested in code
-	performance than code size.  */
-#if ! defined __OPTIMIZE_SIZE__ || defined __LIW__
-	cmp   3, a3
-	bls   .L22
-	mov   a1, d2
-	or    d2, d0
-	btst  3, d0
-	bne   .L22
-#ifdef __NO_SETLB__
-.Loop1:
-#else
-	setlb
-#endif
-	mov   (a0), d1
-	mov   (a1), d0
-	cmp   d0, d1
-	bne   .L22
-	inc4  a0
-	inc4  a1
-	add   -4, a3
-	cmp   3, a3
-#ifdef __NO_SETLB__
-	bhi   .Loop1
-#else
-	lhi
-#endif
-.L22:
-#endif /* Optimize for speed.  */
-
-	cmp   0, a3
-	beq   .L24
-#ifdef __NO_SETLB__
-.Loop2:
-#else
-	setlb
-#endif
-	movbu (a0), d3
-	movbu (a1), d2
-	cmp   d2, d3
-	beq   .L23
-	mov   d3, d0
-	sub   d2, d0
-	jmp   .Lepilogue
-.L23:
-	inc   a0
-	inc   a1
-	sub   1, a3
-#ifdef __NO_SETLB__
-	bne   .Loop2
-#else
-	lne
-#endif
-.L24:
-	clr   d0
-.Lepilogue:
-	ret   [d2,d3,a3], 12
-#endif
 .Lend_of_func:
 	.size	 _memcmp, .Lend_of_func - _memcmp
 

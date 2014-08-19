@@ -16,6 +16,6 @@ inline int func(const int& x) { return x; }
 int main()
 { int x;
   func(x);
-  printf ("PASS\n");
+  // printf ("PASS\n");
  }
 

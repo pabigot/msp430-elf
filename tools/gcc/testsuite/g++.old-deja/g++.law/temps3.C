@@ -27,3 +27,4 @@ int main ()
         int x = foo ().a;
 }
 
+// { dg-require-effective-target size32plus }

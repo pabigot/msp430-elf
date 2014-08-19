@@ -1,0 +1,63 @@
+Missing MIPS patches applied to 06r1 by Michael Snyder.
+
+For 10r1, it was found that this patch fixed the following FAILs for
+mips-sim-idt64/-EB/-mips32:
+
+    FAIL: gdb.base/call-ar-st.exp: print print_small_structs (pattern 23)
+    FAIL: gdb.base/structs.exp: p/c L<n>; call 1 structs-tll
+    FAIL: gdb.base/structs.exp: p/c L<n>; call 1 structs-td
+    FAIL: gdb.base/structs.exp: p/c L<n>; call 1 structs-tld
+
+It introduced no regressions for that multilib.
+
+This patch should NOT go upstream; in fact, I do not think that it
+should even be applied internally.  It does fix some failures, but
+doing so is, IMO, just papering over the fact that gcc is not
+complying with the ABI for this case.
+
+See the following link for an analysis of what is wrong with this
+patch:
+
+http://post-office.corp.redhat.com/archives/gnupro-list/2010-December/msg00024.html
+
+And, FWIW, if for some reason we do end up submitting it, the ChangeLog
+entry needs to be fixed.  It doesn't accurately describe the patch.
+
+
+gdb/ChangeLog.RedHat:
+
+2007-04-17  Corinna Vinschen  <vinschen@redhat.com>
+
+	2006-05-31  Michael Snyder  <msnyder@redhat.com>
+	* mips-tdep.c (mips_eabi_push_dummy_call): Catch corner case,
+	structs with a single field of floating point type.
+	For 32 bit ABI, to decide how many registers it takes to pass a
+	floating point argument, what matters is the size of a floating
+	point register
+
+Index: gdb/mips-tdep.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/mips-tdep.c,v
+retrieving revision 1.38
+diff -u -p -r1.38 mips-tdep.c
+--- gdb/mips-tdep.c	21 Jan 2010 20:53:27 -0000	1.38
++++ gdb/mips-tdep.c	29 Jan 2010 20:45:27 -0000
+@@ -2769,8 +2769,15 @@ mips_eabi_push_dummy_call (struct gdbarc
+ 
+       /* The EABI passes structures that do not fit in a register by
+          reference.  */
+-      if (len > regsize
+-	  && (typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION))
++      /* MVS: unles the struct has only one field, and that field
++	 will fit into two registers.  */
++      if ((typecode == TYPE_CODE_STRUCT || typecode == TYPE_CODE_UNION)
++	  && TYPE_NFIELDS (arg_type) == 1
++	  && len == 2 * mips_abi_regsize (gdbarch))
++	val = value_contents (arg);
++      else if (len > mips_abi_regsize (gdbarch)
++	       && (typecode == TYPE_CODE_STRUCT 
++		   || typecode == TYPE_CODE_UNION))
+ 	{
+ 	  store_unsigned_integer (valbuf, regsize, byte_order,
+ 				  value_address (arg));
+

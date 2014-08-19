@@ -34,3 +34,5 @@ int main()
   try { pow (); } catch (int) {}
   return 0;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

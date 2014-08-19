@@ -1,6 +1,6 @@
 /* Native-dependent code for GNU/Linux TILE-Gx.
 
-   Copyright (C) 2012 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -26,18 +26,15 @@
 #include <sys/ptrace.h>
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include <sys/procfs.h>
 
+/* Defines ps_err_e, struct ps_prochandle.  */
 #include "gdb_proc_service.h"
-#include <sys/ptrace.h>
 
 /* Prototypes for supply_gregset etc.  */
 #include "gregset.h"
-
-/* Defines ps_err_e, struct ps_prochandle.  */
-#include "gdb_proc_service.h"
 
 /* The register sets used in GNU/Linux ELF core-dumps are identical to
    the register sets in `struct user' that is used for a.out
@@ -65,7 +62,7 @@ static const int regmap[] =
   40, 41, 42, 43, 44, 45, 46, 47,
   48, 49, 50, 51, 52, 53, 54, 55,
   -1, -1, -1, -1, -1, -1, -1, -1,
-  56
+  56, 58
 };
 
 /* Transfering the general-purpose registers between GDB, inferiors

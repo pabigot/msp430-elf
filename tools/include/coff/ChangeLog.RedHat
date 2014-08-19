@@ -1,55 +1,36 @@
-2000-01-24  Nick Clifton  <nickc@redhat.com>
+2003-08-09  Nick Clifton  <nickc@redhat.com>
 
-	* pe.h (IMPORT_CODE): Define.
-	(IMPORT_DATA): Define.
-	(IMPORT_CONST): Define.
-	(IMPORT_ORDINAL): Define.
-	(IMPORT_NAME): Define.
-	(IMPORT_NAME_NOPREFIX): Define.
-	(IMPORT_NAME_UNDECOARATE): Define.
+	* Import patches from 2.14 branch to:
 
-1999-12-15  Tim Wall <twall@cygnus.com>
+	  + Replace 'boolean' with 'bfd_boolean' and 'true/false' with
+	    'TRUE/FALSE'.
 
-	* ti.h: define COFF_ALIGN_IN_S_FLAGS for use by coffcode.h
-	don't use "isdigit"
+	Files affected:
 
-1999-12-30  Nick Clifton  <nickc@cygnus.com>
+	ecoff.h, xcoff.h
 
-	* arm.h: Fix defintion of ARMBADMAG.
-	Add arm-wince-pe specific reloc structure.
+2003-06-30  Nick Clifton  <nickc@redhat.com>
 
-1999-12-14  Nick Clifton  <nickc@cygnus.com>
+	* Import these patches from gcc 3.3 branch:
 
-	* arm.h (ARMPEMAGIC2): Rename to THUMBPEMAGIC.
+	2001-11-11  Timothy Wall  <twall@alum.mit.edu>
 
-1999-12-13  Nick Clifton  <nickc@cygnus.com>
+		* ti.h: Move arch-specific stuff from here...
+		(COFF_ADJUST_SYM_IN/OUT): Optionally put page flag into
+		symbol value. 
+		* tic54x.h: ...to here.
 
-	* arm.h (ARMPEMAGIC, ARMPEMAGIC2): Define.
-	(ARMBADMAGIC): Allow new PE magic values.
+	2003-04-24 Dhananjay Deshpande <dhananjayd@kpitcummins.com> 
 
-1999-09-10  Tim Wall <twall@cygnus.com>
+		* coff/h8300.h (H8300HNMAGIC, H8300SNMAGIC): New.
+		(H8300HNBADMAG, H8300SNBADMAG): New.
 
-        * ti.h: use power-of-two to define octets per byte; add
-          COFF_ALIGN_IN_SECTION_HEADER so that our alignments
-          encodings actually take place.  change conflicting _CONST
-          define. 
-        * tic54x.h: use power-of-two to define octets per byte
+	2003-04-15  Rohit Kumar Srivastava <rohits@kpitcummins.com>
 
-1999-07-31  Tim Wall <twall@cygnus.com>
+		* sh.h: Replace occurrances of 'Hitachi' with 'Renesas'.
+		* h8300.h: Likewise.
+		* h8500.h: Likewise.
 
-	* internal.h: added field for section load page
-	* ti.h: NEW generic TI COFF header
-	* tic54x.h: NEW tic54x-specific TI COFF stuff
-	
-1999-05-14  DJ Delorie  <dj@cygnus.com>
-
-	* sh.h (PUT_LINENO_LNNO): redefine {GET,PUT}_LINENO_LNNO for CE
-
-1999-05-11  DJ Delorie  <dj@cygnus.com>
-
-	* sh.h: add sh-pe (Windows CE) definitions
-	* mipspe.h: new
-	
 
 Local Variables:
 mode: change-log

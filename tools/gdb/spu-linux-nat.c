@@ -1,5 +1,5 @@
 /* SPU native-dependent code for GDB, the GNU debugger.
-   Copyright (C) 2006-2012 Free Software Foundation, Inc.
+   Copyright (C) 2006-2014 Free Software Foundation, Inc.
 
    Contributed by Ulrich Weigand <uweigand@de.ibm.com>.
 
@@ -20,7 +20,7 @@
 
 #include "defs.h"
 #include "gdbcore.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "target.h"
 #include "inferior.h"
 #include "inf-child.h"
@@ -29,11 +29,11 @@
 #include "symfile.h"
 #include "gdb_wait.h"
 #include "gdbthread.h"
+#include "gdb_bfd.h"
 
 #include <sys/ptrace.h>
 #include <asm/ptrace.h>
 #include <sys/types.h>
-#include <sys/param.h>
 
 #include "spu-tdep.h"
 
@@ -48,9 +48,9 @@ fetch_ppc_register (int regno)
 {
   PTRACE_TYPE_RET res;
 
-  int tid = TIDGET (inferior_ptid);
+  int tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid);
+    tid = ptid_get_pid (inferior_ptid);
 
 #ifndef __powerpc64__
   /* If running as a 32-bit process on a 64-bit system, we attempt
@@ -133,9 +133,9 @@ fetch_ppc_memory (ULONGEST memaddr, gdb_byte *myaddr, int len)
 	       / sizeof (PTRACE_TYPE_RET));
   PTRACE_TYPE_RET *buffer;
 
-  int tid = TIDGET (inferior_ptid);
+  int tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid);
+    tid = ptid_get_pid (inferior_ptid);
 
   buffer = (PTRACE_TYPE_RET *) alloca (count * sizeof (PTRACE_TYPE_RET));
   for (i = 0; i < count; i++, addr += sizeof (PTRACE_TYPE_RET))
@@ -163,9 +163,9 @@ store_ppc_memory (ULONGEST memaddr, const gdb_byte *myaddr, int len)
 	       / sizeof (PTRACE_TYPE_RET));
   PTRACE_TYPE_RET *buffer;
 
-  int tid = TIDGET (inferior_ptid);
+  int tid = ptid_get_lwp (inferior_ptid);
   if (tid == 0)
-    tid = PIDGET (inferior_ptid);
+    tid = ptid_get_pid (inferior_ptid);
 
   buffer = (PTRACE_TYPE_RET *) alloca (count * sizeof (PTRACE_TYPE_RET));
 
@@ -205,7 +205,7 @@ store_ppc_memory (ULONGEST memaddr, const gdb_byte *myaddr, int len)
 static int 
 parse_spufs_run (int *fd, ULONGEST *addr)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   gdb_byte buf[4];
   ULONGEST pc = fetch_ppc_register (32);  /* nip */
 
@@ -236,7 +236,7 @@ spu_proc_xfer_spu (const char *annex, gdb_byte *readbuf,
   char buf[128];
   int fd = 0;
   int ret = -1;
-  int pid = PIDGET (inferior_ptid);
+  int pid = ptid_get_pid (inferior_ptid);
 
   if (!annex)
     return 0;
@@ -276,7 +276,9 @@ static int
 spu_bfd_iovec_close (struct bfd *nbfd, void *stream)
 {
   xfree (stream);
-  return 1;
+
+  /* Zero means success.  */
+  return 0;
 }
 
 static file_ptr
@@ -357,7 +359,7 @@ spu_symbol_file_add_from_memory (int inferior_fd)
   ULONGEST addr;
   struct bfd *nbfd;
 
-  char id[128];
+  gdb_byte id[128];
   char annex[32];
   int len;
 
@@ -367,7 +369,7 @@ spu_symbol_file_add_from_memory (int inferior_fd)
   if (len <= 0 || len >= sizeof id)
     return;
   id[len] = 0;
-  addr = strtoulst (id, NULL, 16);
+  addr = strtoulst ((const char *) id, NULL, 16);
   if (!addr)
     return;
 
@@ -377,7 +379,8 @@ spu_symbol_file_add_from_memory (int inferior_fd)
     {
       struct cleanup *cleanup = make_cleanup_bfd_unref (nbfd);
 
-      symbol_file_add_from_bfd (nbfd, SYMFILE_VERBOSE | SYMFILE_MAINLINE,
+      symbol_file_add_from_bfd (nbfd, bfd_get_filename (nbfd),
+				SYMFILE_VERBOSE | SYMFILE_MAINLINE,
 				NULL, 0, NULL);
       do_cleanups (cleanup);
     }
@@ -392,9 +395,9 @@ spu_child_post_startup_inferior (ptid_t ptid)
   int fd;
   ULONGEST addr;
 
-  int tid = TIDGET (ptid);
+  int tid = ptid_get_lwp (ptid);
   if (tid == 0)
-    tid = PIDGET (ptid);
+    tid = ptid_get_pid (ptid);
   
   while (!parse_spufs_run (&fd, &addr))
     {
@@ -441,16 +444,17 @@ spu_child_wait (struct target_ops *ops,
       set_sigint_trap ();	/* Causes SIGINT to be passed on to the
 				   attached process.  */
 
-      pid = waitpid (PIDGET (ptid), &status, 0);
+      pid = waitpid (ptid_get_pid (ptid), &status, 0);
       if (pid == -1 && errno == ECHILD)
 	/* Try again with __WCLONE to check cloned processes.  */
-	pid = waitpid (PIDGET (ptid), &status, __WCLONE);
+	pid = waitpid (ptid_get_pid (ptid), &status, __WCLONE);
 
       save_errno = errno;
 
       /* Make sure we don't report an event for the exit of the
          original program, if we've detached from it.  */
-      if (pid != -1 && !WIFSTOPPED (status) && pid != PIDGET (inferior_ptid))
+      if (pid != -1 && !WIFSTOPPED (status)
+	  && pid != ptid_get_pid (inferior_ptid))
 	{
 	  pid = -1;
 	  save_errno = EINTR;
@@ -492,7 +496,7 @@ spu_fetch_inferior_registers (struct target_ops *ops,
     {
       struct gdbarch *gdbarch = get_regcache_arch (regcache);
       enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-      char buf[4];
+      gdb_byte buf[4];
       store_unsigned_integer (buf, 4, byte_order, fd);
       regcache_raw_supply (regcache, SPU_ID_REGNUM, buf);
     }
@@ -592,7 +596,7 @@ spu_xfer_partial (struct target_ops *ops,
       if (spu_proc_xfer_spu (lslr_annex, buf, NULL, 0, sizeof buf) <= 0)
 	return ret;
 
-      lslr = strtoulst (buf, NULL, 16);
+      lslr = strtoulst ((const char *) buf, NULL, 16);
       return spu_proc_xfer_spu (mem_annex, readbuf, writebuf,
 				offset & lslr, len);
     }
@@ -607,6 +611,8 @@ spu_can_use_hw_breakpoint (int type, int cnt, int othertype)
   return 0;
 }
 
+/* -Wmissing-prototypes */
+extern initialize_file_ftype _initialize_spu_nat;
 
 /* Initialize SPU native target.  */
 void 

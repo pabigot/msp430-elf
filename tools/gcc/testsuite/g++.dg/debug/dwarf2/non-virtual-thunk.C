@@ -3,7 +3,7 @@
 
 // Verify that line number info is output for the non-virtual
 // thunks for C::~C().
-// { dg-final { scan-assembler "thunk.C:30" } }
+// { dg-final { scan-assembler "thunk.C:3" } }
 
 class A
 {

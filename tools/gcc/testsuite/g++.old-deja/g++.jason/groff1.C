@@ -4,7 +4,7 @@
 // result, so expand_expr ignores it.
 
 extern "C" {
-  int printf(const char *,...);
+  // int printf(const char *,...);
   void exit(int);
 }
 
@@ -25,7 +25,7 @@ struct S {
 void S::foo(const A &pos)
 {
   A a = flags ? from : pos;
-  printf("%d %d\n", a.x, a.y);
+  // printf("%d %d\n", a.x, a.y);
   if (a.x != 17 || a.y != 12)
     exit (1);
 }

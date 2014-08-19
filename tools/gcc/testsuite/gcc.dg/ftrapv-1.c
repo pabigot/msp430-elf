@@ -6,8 +6,9 @@
    Written by Falk Hueffner, 20th May 2004.  */
 
 /* { dg-do run } */
-/* { dg-options "-ftrapv" } */
 /* { dg-skip-if "trapping arithmetic not supported" { msp430-*-* rl78-*-* } "*" "" } */
+/* { dg-options "-ftrapv" } */
+/* { dg-require-effective-target trapping } */
 
 __attribute__((noinline)) int
 mulv(int a, int b)

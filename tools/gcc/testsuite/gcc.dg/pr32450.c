@@ -2,10 +2,10 @@
 
 /* { dg-do run } */
 /* { dg-require-profiling "-pg" } */
+/* { dg-skip-if "no profiling support" { "msp430-*-*" } { "*" } { "" } } */
 /* { dg-options "-O2 -pg" } */
 /* { dg-options "-O2 -pg -mtune=core2" { target { i?86-*-* x86_64-*-* } } } */
 /* { dg-options "-O2 -pg -static" { target hppa*-*-hpux* } } */
-/* { dg-skip-if "no profiling support" { "msp430-*-*" } { "*" } { "" } } */
 
 extern void abort (void);
 

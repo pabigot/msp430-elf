@@ -60,4 +60,3 @@ _start:
 	.weak __dso_handle
 __dso_handle:
 	.long	0
-

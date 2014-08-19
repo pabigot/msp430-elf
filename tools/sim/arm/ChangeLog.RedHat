@@ -1,3 +1,70 @@
+2014-07-07  Nick Clifton  <nickc@redhat.com>
+
+	* armsupp.c (handle_VFP_op): Fix implementation of VABS.
+
+2014-07-07  Nick Clifton  <nickc@redhat.com>
+
+	* armvirt.c (ARMul_StoreHalfWord): Fix off by one error masking
+	destination address.
+
+2014-06-27  Nick Clifton  <nickc@redhat.com>
+
+	* armemu.c (ARMul_Emulate26): Trace the flags transferred by the
+	VMRS instruction.
+	* armsupp.c (handle_VFP_op): Fix VCMP instruction's handling of
+	unordered compares.
+
+2014-06-25  Nick Clifton  <nickc@redhat.com>
+
+	* armvirt.c (ARMul_LoadHalfWord): Fix thinko.
+	(ARMul_StoreHalfWord): Likewise.
+
+2014-05-15  Nick Clifton  <nickc@redhat.com>
+
+	* armsupp.c: Add supprot for VFP instructions.
+	* armemu.c: Likewise.
+	* armdefs.h: Likewise.
+
+2014-04-01  Nick Clifton  <nickc@redhat.com>
+
+	* armvirt.c (ARMul_ReLoadInstr): Read from an aligned address.
+
+2013-11-13  Nick Clifton  <nickc@redhat.com>
+
+	* armvirt.c (ARMul_LoadHalfWord): Read from an aligned address.
+	(ARMul_ReadByte): Likewise.
+	(ARMul_SafeReadByte): Likewise.
+	(ARMul_StoreHalfWord): Read and write from an aligned address.
+	(ARMul_WriteByte): Likewise.
+	(ARMul_SafeWriteByte): Likewise.
+
+2013-10-15  Nick Clifton  <nickc@redhat.com>
+
+	* Makefile.in (SIM_EXTRA_CFLAGS): Add -Wall and -Werror.
+	* armcopro.c (XScale_cp15_init): Return true.
+	(XScale_cp15_LDC): Delete unused function.
+	(XScale_cp15_STC): Delete unused function.
+	(XScale_cp13_init): Return true.
+	(XScale_cp14_init): Return true.
+	* armemu.c (handle_v6_insn): Fix typo in implementation of SBFX.
+	* armemu.h: Add prototype of print_insn.
+	* armvirt.c (GetWord): Support unaligned access.
+	(PutWord): Likewise.
+	* maverick.c (DSPInit): Delete unused function.
+	(DSPMRC5): Fix parentheses.
+	* thumbemu.c (ThumbExpandImm): Fix typo.
+	(handle_T2_insn): Fix typo.
+	* wrapper.c: Include iwmmxt.h.
+
+2013-08-23  Nick Clifton  <nickc@redhat.com>
+
+	* armemu.c: Add support for REV, QADD8, QSUB8, QADD16, QSUB16,
+	QSAX, QASX.
+
+2013-08-02  Nick Clifton  <nickc@redhat.com>
+
+	* thumbemu.c: Add support for Thimb-32 instructions.
+
 2011-05-16  Kevin Buettner  <kevinb@redhat.com
 
 	* wrapper.c (sim_hardware_watchpoint): New function.
@@ -18,7 +85,7 @@
 	emulation instructions then it cannot be valid.
 	(TANDC, TBCST, TEXTRC, TEXTRM, TINSR, TMCR, TMCRR, TMIA, TMIAPH,
 	TMIAxy, TMOVMSK, TMRC, TMRRC, TORC, WACC, WADD, WALIGNI, WALIGNR,
-	WAND, WANDN, WAVG2, WCMPEQ, WCMPGT, WLDR, WMAC, WMADD, WMAX, WMIN, 
+	WAND, WANDN, WAVG2, WCMPEQ, WCMPGT, WLDR, WMAC, WMADD, WMAX, WMIN,
 	WMUL, WOR, WPACK, WROR, WSAD, WSHUFH, WSLL, WSRA, WSRL, WSTR,
 	WSUB, WUNPCKEH, WUNPCKEL, WUNPCKIH, WUNPCKIL, WXOR): Test for
 	coprocessor enablement before evaluating. Test for invalid bits in

@@ -1,5 +1,5 @@
 @echo off
-rem RCS: @(#) $Id: mkd.bat,v 1.4 2003/03/19 23:02:11 cagney Exp $
+rem RCS: @(#) $Id: mkd.bat,v 1.3 2012/04/18 00:37:11 kevinb Exp $
 
 if exist %1\nul goto end
 

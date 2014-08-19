@@ -1,7 +1,6 @@
 /* Ada language support definitions for GDB, the GNU debugger.
 
-   Copyright (C) 1992, 1997-2005, 2007-2012 Free Software Foundation,
-   Inc.
+   Copyright (C) 1992-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -23,10 +22,12 @@
 
 struct frame_info;
 struct inferior;
+struct type_print_options;
 
 #include "value.h"
 #include "gdbtypes.h"
 #include "breakpoint.h"
+#include "vec.h"
 
 /* Names of specific files known to be part of the runtime
    system and that might consider (confusing) debugging information.
@@ -45,6 +46,7 @@ struct inferior;
 
 #if !defined (ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS)
 #define ADA_KNOWN_RUNTIME_FILE_NAME_PATTERNS \
+   "^unwind-seh.c$", \
    "^[agis]-.*\\.ad[bs]$",
 #endif
 
@@ -88,7 +90,7 @@ struct ada_symbol_info
   struct symbol *sym;
 
   /* The block where the symbol was found.  */
-  struct block *block;
+  const struct block *block;
 };
 
 /* Denotes a type of renaming symbol (see ada_parse_renaming).  */
@@ -112,6 +114,16 @@ enum ada_renaming_category
        (Currently not used).  */
     ADA_SUBPROGRAM_RENAMING
   };
+
+/* The different types of catchpoints that we introduced for catching
+   Ada exceptions.  */
+
+enum ada_exception_catchpoint_kind
+{
+  ada_catch_exception,
+  ada_catch_exception_unhandled,
+  ada_catch_assert
+};
 
 /* Ada task structures.  */
 
@@ -163,7 +175,7 @@ extern void ada_error (char *); /* Defined in ada-exp.y */
 
                         /* Defined in ada-typeprint.c */
 extern void ada_print_type (struct type *, const char *, struct ui_file *, int,
-                            int);
+                            int, const struct type_print_options *);
 
 extern void ada_print_typedef (struct type *type, struct symbol *new_symbol,
 			       struct ui_file *stream);
@@ -218,7 +230,7 @@ extern struct value *ada_get_decoded_value (struct value *value);
 
 extern struct type *ada_get_decoded_type (struct type *type);
 
-extern char *ada_decode_symbol (const struct general_symbol_info*);
+extern const char *ada_decode_symbol (const struct general_symbol_info *);
 
 extern const char *ada_decode (const char*);
 
@@ -227,8 +239,7 @@ extern enum language ada_update_initial_language (enum language);
 extern void clear_ada_sym_cache (void);
 
 extern int ada_lookup_symbol_list (const char *, const struct block *,
-                                   domain_enum, struct ada_symbol_info**,
-				   int);
+                                   domain_enum, struct ada_symbol_info**);
 
 extern char *ada_fold_name (const char *);
 
@@ -239,7 +250,7 @@ extern void ada_lookup_encoded_symbol
   (const char *name, const struct block *block, domain_enum namespace,
    struct ada_symbol_info *symbol_info);
 
-extern struct minimal_symbol *ada_lookup_simple_minsym (const char *);
+extern struct bound_minimal_symbol ada_lookup_simple_minsym (const char *);
 
 extern void ada_fill_in_ada_prototype (struct symbol *);
 
@@ -275,6 +286,8 @@ extern struct type *ada_tag_type (struct value *);
 extern struct value *ada_value_tag (struct value *);
 
 extern const char *ada_tag_name (struct value *);
+
+extern struct value *ada_tag_value_at_base_address (struct value *obj);
 
 extern int ada_is_parent_field (struct type *, int);
 
@@ -338,7 +351,7 @@ extern struct type *ada_find_parallel_type (struct type *,
 extern LONGEST get_int_var_value (char *, int *);
 
 extern struct symbol *ada_find_renaming_symbol (struct symbol *name_sym,
-                                                struct block *block);
+                                                const struct block *block);
 
 extern int ada_prefer_type (struct type *, struct type *);
 
@@ -371,6 +384,26 @@ extern char *ada_breakpoint_rewrite (char *, int *);
 extern char *ada_main_name (void);
 
 extern char *ada_name_for_lookup (const char *name);
+
+extern void create_ada_exception_catchpoint
+  (struct gdbarch *gdbarch, enum ada_exception_catchpoint_kind ex_kind,
+   char *excep_string, char *cond_string, int tempflag, int disabled,
+   int from_tty);
+
+/* Some information about a given Ada exception.  */
+
+typedef struct ada_exc_info
+{
+  /* The name of the exception.  */
+  const char *name;
+
+  /* The address of the symbol corresponding to that exception.  */
+  CORE_ADDR addr;
+} ada_exc_info;
+
+DEF_VEC_O(ada_exc_info);
+
+extern VEC(ada_exc_info) *ada_exceptions_list (const char *regexp);
 
 /* Tasking-related: ada-tasks.c */
 

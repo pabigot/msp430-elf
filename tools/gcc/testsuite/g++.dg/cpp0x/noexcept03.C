@@ -1,6 +1,7 @@
 // Runtime test for noexcept-specification.
-// { dg-options "-std=c++0x -Wnoexcept" }
-// { dg-do run }
+// { dg-options "-Wnoexcept" }
+// { dg-do run { target nonpic } }
+// { dg-require-effective-target c++11 }
 
 #include <exception>
 #include <cstdlib>
@@ -49,3 +50,5 @@ int main()
   try { f2(1); } catch (...) { }
   return 1;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

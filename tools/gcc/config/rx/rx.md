@@ -1,5 +1,5 @@
 ;;  Machine Description for Renesas RX processors
-;;  Copyright (C) 2008-2013 Free Software Foundation, Inc.
+;;  Copyright (C) 2008-2014 Free Software Foundation, Inc.
 ;;  Contributed by Red Hat.
 
 ;; This file is part of GCC.
@@ -30,7 +30,7 @@
 ;; then all operations on doubles have to be handled by
 ;; library functions.
 (define_mode_iterator register_modes
-  [(SF "ALLOW_RX_FPU_INSNS") (SI "") (HI "") (QI "")])
+  [(SF "") (SI "") (HI "") (QI "")])
 
 (define_constants
   [

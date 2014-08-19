@@ -1,4 +1,4 @@
-/* Copyright (C) 1997-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2014 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
 This file is part of GCC.
@@ -23,6 +23,9 @@ along with GCC; see the file COPYING3.  If not see
 #include "tm.h"
 #include "rtl.h"
 #include "tree.h"
+#include "varasm.h"
+#include "stor-layout.h"
+#include "stringpool.h"
 #include "regs.h"
 #include "hard-reg-set.h"
 #include "insn-config.h"
@@ -1408,10 +1411,7 @@ frv_function_contains_far_jump (void)
 {
   rtx insn = get_insns ();
   while (insn != NULL
-	 && !(GET_CODE (insn) == JUMP_INSN
-	      /* Ignore tablejump patterns.  */
-	      && GET_CODE (PATTERN (insn)) != ADDR_VEC
-	      && GET_CODE (PATTERN (insn)) != ADDR_DIFF_VEC
+	 && !(JUMP_P (insn)
 	      && get_attr_far_jump (insn) == FAR_JUMP_YES))
     insn = NEXT_INSN (insn);
   return (insn != NULL);
@@ -1446,7 +1446,7 @@ frv_function_prologue (FILE *file, HOST_WIDE_INT size ATTRIBUTE_UNUSED)
 	 simply emit a different assembly directive because bralr and jmpl
 	 execute in different units.  */
       for (insn = get_insns(); insn != NULL; insn = NEXT_INSN (insn))
-	if (GET_CODE (insn) == JUMP_INSN)
+	if (JUMP_P (insn))
 	  {
 	    rtx pattern = PATTERN (insn);
 	    if (GET_CODE (pattern) == PARALLEL
@@ -2646,10 +2646,10 @@ frv_print_operand_jump_hint (rtx insn)
   rtx note;
   rtx labelref;
   int ret;
-  HOST_WIDE_INT prob = -1;
+  int prob = -1;
   enum { UNKNOWN, BACKWARD, FORWARD } jump_type = UNKNOWN;
 
-  gcc_assert (GET_CODE (insn) == JUMP_INSN);
+  gcc_assert (JUMP_P (insn));
 
   /* Assume any non-conditional jump is likely.  */
   if (! any_condjump_p (insn))
@@ -2672,7 +2672,7 @@ frv_print_operand_jump_hint (rtx insn)
 
       else
 	{
-	  prob = INTVAL (XEXP (note, 0));
+	  prob = XINT (note, 0);
 	  ret = ((prob >= (REG_BR_PROB_BASE / 2))
 		 ? FRV_JUMP_LIKELY
 		 : FRV_JUMP_NOT_LIKELY);
@@ -2693,10 +2693,10 @@ frv_print_operand_jump_hint (rtx insn)
 	}
 
       fprintf (stderr,
-	       "%s: uid %ld, %s, probability = %ld, max prob. = %ld, hint = %d\n",
+	       "%s: uid %ld, %s, probability = %d, max prob. = %d, hint = %d\n",
 	       IDENTIFIER_POINTER (DECL_NAME (current_function_decl)),
-	       (long)INSN_UID (insn), direction, (long)prob,
-	       (long)REG_BR_PROB_BASE, ret);
+	       (long)INSN_UID (insn), direction, prob,
+	       REG_BR_PROB_BASE, ret);
     }
 #endif
 
@@ -3097,7 +3097,7 @@ frv_init_cumulative_args (CUMULATIVE_ARGS *cum,
 	{
 	  tree ret_type = TREE_TYPE (fntype);
 	  fprintf (stderr, " return=%s,",
-		   tree_code_name[ (int)TREE_CODE (ret_type) ]);
+		   get_tree_code_name (TREE_CODE (ret_type)));
 	}
 
       if (libname && GET_CODE (libname) == SYMBOL_REF)
@@ -5272,7 +5272,7 @@ frv_ifcvt_add_insn (rtx pattern, rtx insn, int before_p)
    tests cannot be converted.  */
 
 void
-frv_ifcvt_modify_tests (ce_if_block_t *ce_info, rtx *p_true, rtx *p_false)
+frv_ifcvt_modify_tests (ce_if_block *ce_info, rtx *p_true, rtx *p_false)
 {
   basic_block test_bb = ce_info->test_bb;	/* test basic block */
   basic_block then_bb = ce_info->then_bb;	/* THEN */
@@ -5629,7 +5629,7 @@ frv_ifcvt_modify_tests (ce_if_block_t *ce_info, rtx *p_true, rtx *p_false)
 		    (const_int 0))) */
 
 void
-frv_ifcvt_modify_multiple_tests (ce_if_block_t *ce_info,
+frv_ifcvt_modify_multiple_tests (ce_if_block *ce_info,
                                  basic_block bb,
                                  rtx *p_true,
                                  rtx *p_false)
@@ -5923,7 +5923,7 @@ single_set_pattern (rtx pattern)
    insn cannot be converted to be executed conditionally.  */
 
 rtx
-frv_ifcvt_modify_insn (ce_if_block_t *ce_info,
+frv_ifcvt_modify_insn (ce_if_block *ce_info,
                        rtx pattern,
                        rtx insn)
 {
@@ -6188,7 +6188,7 @@ frv_ifcvt_modify_insn (ce_if_block_t *ce_info,
    conditional if information CE_INFO.  */
 
 void
-frv_ifcvt_modify_final (ce_if_block_t *ce_info ATTRIBUTE_UNUSED)
+frv_ifcvt_modify_final (ce_if_block *ce_info ATTRIBUTE_UNUSED)
 {
   rtx existing_insn;
   rtx check_insn;
@@ -6243,7 +6243,7 @@ frv_ifcvt_modify_final (ce_if_block_t *ce_info ATTRIBUTE_UNUSED)
    information CE_INFO.  */
 
 void
-frv_ifcvt_modify_cancel (ce_if_block_t *ce_info ATTRIBUTE_UNUSED)
+frv_ifcvt_modify_cancel (ce_if_block *ce_info ATTRIBUTE_UNUSED)
 {
   int i;
   rtx p = frv_ifcvt.added_insns_list;
@@ -7387,7 +7387,7 @@ frv_pack_insn_p (rtx insn)
        - There's no point putting a call in its own packet unless
 	 we have to.  */
   if (frv_packet.num_insns > 0
-      && GET_CODE (insn) == INSN
+      && NONJUMP_INSN_P (insn)
       && GET_MODE (insn) == TImode
       && GET_CODE (PATTERN (insn)) != COND_EXEC)
     return false;
@@ -7430,7 +7430,7 @@ frv_insert_nop_in_packet (rtx insn)
 
   packet_group = &frv_packet.groups[frv_unit_groups[frv_insn_unit (insn)]];
   last = frv_packet.insns[frv_packet.num_insns - 1];
-  if (GET_CODE (last) != INSN)
+  if (! NONJUMP_INSN_P (last))
     {
       insn = emit_insn_before (PATTERN (insn), last);
       frv_packet.insns[frv_packet.num_insns - 1] = insn;
@@ -7486,13 +7486,11 @@ frv_for_each_packet (void (*handle_packet) (void))
 	  {
 	  case USE:
 	  case CLOBBER:
-	  case ADDR_VEC:
-	  case ADDR_DIFF_VEC:
 	    break;
 
 	  default:
 	    /* Calls mustn't be packed on a TOMCAT.  */
-	    if (GET_CODE (insn) == CALL_INSN && frv_cpu_type == FRV_CPU_TOMCAT)
+	    if (CALL_P (insn) && frv_cpu_type == FRV_CPU_TOMCAT)
 	      frv_finish_packet (handle_packet);
 
 	    /* Since the last instruction in a packet determines the EH
@@ -7913,7 +7911,7 @@ frv_optimize_membar_local (basic_block bb, struct frv_io *next_io,
   CLEAR_HARD_REG_SET (used_regs);
 
   for (insn = BB_END (bb); insn != BB_HEAD (bb); insn = PREV_INSN (insn))
-    if (GET_CODE (insn) == CALL_INSN)
+    if (CALL_P (insn))
       {
 	/* We can't predict what a call will do to volatile memory.  */
 	memset (next_io, 0, sizeof (struct frv_io));
@@ -8029,7 +8027,7 @@ frv_optimize_membar_global (basic_block bb, struct frv_io *first_io,
   /* We need to keep the membar if there is an edge to the exit block.  */
   FOR_EACH_EDGE (succ, ei, bb->succs)
   /* for (succ = bb->succ; succ != 0; succ = succ->succ_next) */
-    if (succ->dest == EXIT_BLOCK_PTR)
+    if (succ->dest == EXIT_BLOCK_PTR_FOR_FN (cfun))
       return;
 
   /* Work out the union of all successor blocks.  */
@@ -8069,14 +8067,14 @@ frv_optimize_membar (void)
   rtx *last_membar;
 
   compute_bb_for_insn ();
-  first_io = XCNEWVEC (struct frv_io, last_basic_block);
-  last_membar = XCNEWVEC (rtx, last_basic_block);
+  first_io = XCNEWVEC (struct frv_io, last_basic_block_for_fn (cfun));
+  last_membar = XCNEWVEC (rtx, last_basic_block_for_fn (cfun));
 
-  FOR_EACH_BB (bb)
+  FOR_EACH_BB_FN (bb, cfun)
     frv_optimize_membar_local (bb, &first_io[bb->index],
 			       &last_membar[bb->index]);
 
-  FOR_EACH_BB (bb)
+  FOR_EACH_BB_FN (bb, cfun)
     if (last_membar[bb->index] != 0)
       frv_optimize_membar_global (bb, first_io, last_membar[bb->index]);
 

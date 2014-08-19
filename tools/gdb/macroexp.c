@@ -1,5 +1,5 @@
 /* C preprocessor macro expansion for GDB.
-   Copyright (C) 2002, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of GDB.
@@ -337,7 +337,6 @@ get_character_constant (struct macro_buffer *tok, char *p, char *end)
 	  && p[1] == '\''))
     {
       char *tok_start = p;
-      char *body_start;
       int char_count = 0;
 
       if (*p == '\'')
@@ -347,7 +346,6 @@ get_character_constant (struct macro_buffer *tok, char *p, char *end)
       else
         gdb_assert_not_reached ("unexpected character constant");
 
-      body_start = p;
       for (;;)
         {
           if (p >= end)
@@ -362,8 +360,11 @@ get_character_constant (struct macro_buffer *tok, char *p, char *end)
             }
           else if (*p == '\\')
             {
-              p++;
-	      char_count += c_parse_escape (&p, NULL);
+	      const char *s, *o;
+
+	      s = o = ++p;
+	      char_count += c_parse_escape (&s, NULL);
+	      p += s - o;
             }
           else
 	    {
@@ -416,8 +417,11 @@ get_string_literal (struct macro_buffer *tok, char *p, char *end)
                    "constants."));
           else if (*p == '\\')
             {
-              p++;
-              c_parse_escape (&p, NULL);
+	      const char *s, *o;
+
+	      s = o = ++p;
+	      c_parse_escape (&s, NULL);
+	      p += s - o;
             }
           else
             p++;
@@ -700,7 +704,6 @@ macro_stringify (const char *str)
 {
   struct macro_buffer buffer;
   int len = strlen (str);
-  char *result;
 
   init_buffer (&buffer, len);
   stringify (&buffer, str, len);
@@ -1437,7 +1440,7 @@ macro_expand_once (const char *source,
 
 
 char *
-macro_expand_next (char **lexptr,
+macro_expand_next (const char **lexptr,
                    macro_lookup_ftype *lookup_func,
                    void *lookup_baton)
 {
@@ -1445,7 +1448,7 @@ macro_expand_next (char **lexptr,
   struct cleanup *back_to;
 
   /* Set up SRC to refer to the input text, pointed to by *lexptr.  */
-  init_shared_buffer (&src, *lexptr, strlen (*lexptr));
+  init_shared_buffer (&src, (char *) *lexptr, strlen (*lexptr));
 
   /* Set up DEST to receive the expansion, if there is one.  */
   init_buffer (&dest, 0);

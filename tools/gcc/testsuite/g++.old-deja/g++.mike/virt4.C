@@ -26,3 +26,4 @@ main() {
   D1_2 h;
   h.foo();
 }
+// { dg-require-effective-target size32plus }

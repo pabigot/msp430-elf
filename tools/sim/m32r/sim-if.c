@@ -1,5 +1,5 @@
 /* Main simulator entry points specific to the M32R.
-   Copyright (C) 1996-2013 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of GDB, the GNU debugger.
@@ -254,11 +254,4 @@ print_m32r_misc_cpu (SIM_CPU *cpu, int verbose)
 		       sim_add_commas (buf, sizeof (buf),
 				       CPU_M32R_MISC_PROFILE (cpu)->parallel_count));
     }
-}
-
-SIM_RC
-sim_hardware_watchpoint (SIM_DESC sd, SIM_WATCH_ACTION action,
-                         SIM_WATCH_TYPE type, SIM_ADDR addr, long length)
-{
-  return SIM_RC_FAIL;
 }

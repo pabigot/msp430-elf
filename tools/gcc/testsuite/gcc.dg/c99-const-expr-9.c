@@ -24,3 +24,4 @@ enum e {
   E5 = __builtin_offsetof (struct t, a.a),
   E6 = __builtin_offsetof (struct t, b[1])
 };
+/* { dg-prune-output ".*__int20.*" } */

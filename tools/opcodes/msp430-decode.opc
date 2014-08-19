@@ -1,4 +1,25 @@
 /* -*- c -*- */
+/* Copyright 2013 Free Software Foundation, Inc.
+   Contributed by Red Hat.
+   Written by DJ Delorie.
+
+   This file is part of the GNU opcodes library.
+
+   This library is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 3, or (at your option)
+   any later version.
+
+   It is distributed in the hope that it will be useful, but WITHOUT
+   ANY WARRANTY; without even the implied warranty of MERCHANTABILITY
+   or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public
+   License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston,
+   MA 02110-1301, USA.  */
+
 #include "sysdep.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -10,79 +31,83 @@ static int trace = 0;
 
 typedef struct
 {
-  MSP430_Opcode_Decoded * msp430;
-  int (* getbyte)(void *);
-  void * ptr;
-  unsigned char * op;
+  MSP430_Opcode_Decoded *msp430;
+  int (*getbyte)(void *);
+  void *ptr;
+  unsigned char *op;
   int op_ptr;
   int pc;
 } LocalData;
 
 #define AU ATTRIBUTE_UNUSED
 #define GETBYTE() getbyte_swapped (ld)
-#define B ((unsigned long) GETBYTE())
+#define B ((unsigned long) GETBYTE ())
 
 static int
 getbyte_swapped (LocalData *ld)
 {
   int b;
+
   if (ld->op_ptr == ld->msp430->n_bytes)
     {
-      do {
-	b = ld->getbyte (ld->ptr);
-	/*fprintf(stderr, "[\033[32m%02x\033[0m]", b & 0xff);*/
-	ld->op [(ld->msp430->n_bytes++)^1] = b;
-      } while (ld->msp430->n_bytes & 1);
+      do
+	{
+	  b = ld->getbyte (ld->ptr);
+	  ld->op [(ld->msp430->n_bytes++)^1] = b;
+	}
+      while (ld->msp430->n_bytes & 1);
     }
   return ld->op[ld->op_ptr++];
 }
 
 #define ID(x)		msp430->id = x
-#define OP(n,t,r,a) (msp430->op[n].type = t, \
-		     msp430->op[n].reg = r,	     \
-		     msp430->op[n].addend = a )
-#define OPX(n,t,r1,r2,a) \
-	(msp430->op[n].type = t, \
-	msp430->op[n].reg = r1, \
-	msp430->op[n].reg2 = r2, \
-	msp430->op[n].addend = a )
+
+#define OP(n, t, r, a) (msp430->op[n].type = t,	     \
+		        msp430->op[n].reg = r,	     \
+		        msp430->op[n].addend = a)
+
+#define OPX(n, t, r1, r2, a)	 \
+  (msp430->op[n].type = t,	 \
+   msp430->op[n].reg = r1,	 \
+   msp430->op[n].reg2 = r2,	 \
+   msp430->op[n].addend = a)
 
 #define SYNTAX(x)	msp430->syntax = x
-#define UNSUPPORTED() \
-  msp430->syntax = "*unknown*"
+#define UNSUPPORTED()	msp430->syntax = "*unknown*"
 
 #define DC(c)		OP (0, MSP430_Operand_Immediate, 0, c)
 #define DR(r)		OP (0, MSP430_Operand_Register, r, 0)
-#define DM(r,a)		OP (0, MSP430_Operand_Indirect, r, a)
+#define DM(r, a)	OP (0, MSP430_Operand_Indirect, r, a)
 #define DA(a)		OP (0, MSP430_Operand_Indirect, MSR_None, a)
-#define AD(r,ad)	encode_ad (r, ad, ld, 0)
-#define ADX(r,ad,x)	encode_ad (r, ad, ld, x)
+#define AD(r, ad)	encode_ad (r, ad, ld, 0)
+#define ADX(r, ad, x)	encode_ad (r, ad, ld, x)
 
 #define SC(c)		OP (1, MSP430_Operand_Immediate, 0, c)
 #define SR(r)		OP (1, MSP430_Operand_Register, r, 0)
-#define SM(r,a)		OP (1, MSP430_Operand_Indirect, r, a)
+#define SM(r, a)	OP (1, MSP430_Operand_Indirect, r, a)
 #define SA(a)		OP (1, MSP430_Operand_Indirect, MSR_None, a)
 #define SI(r)		OP (1, MSP430_Operand_Indirect_Postinc, r, 0)
-#define AS(r,as)	encode_as (r, as, ld, 0)
-#define ASX(r,as,x)	encode_as (r, as, ld, x)
+#define AS(r, as)	encode_as (r, as, ld, 0)
+#define ASX(r, as, x)	encode_as (r, as, ld, x)
 
 #define BW(x)		msp430->size = (x ? 8 : 16)
-/* The last 20 is for SWPBX.Z and SXTX.A */
+/* The last 20 is for SWPBX.Z and SXTX.A.  */
 #define ABW(a,x)	msp430->size = (a ? ((x ? 8 : 16)) : (x ? 20 : 20))
 
-#define IMMU(bytes)   immediate (bytes, 0, ld)
-#define IMMS(bytes)   immediate (bytes, 1, ld)
+#define IMMU(bytes)	immediate (bytes, 0, ld)
+#define IMMS(bytes)	immediate (bytes, 1, ld)
 
-/* Helper macros for known status bits settings */
-#define	F_____ msp430->flags_1 = msp430->flags_0 = 0; msp430->flags_set = 0
-#define	F_VNZC msp430->flags_1 = msp430->flags_0 = 0; msp430->flags_set = 0x87
-#define	F_0NZC msp430->flags_1 = 0; msp430->flags_0 = 0x80; msp430->flags_set = 0x07
+/* Helper macros for known status bits settings.  */
+#define	F_____		msp430->flags_1 = msp430->flags_0 = 0; msp430->flags_set = 0
+#define	F_VNZC		msp430->flags_1 = msp430->flags_0 = 0; msp430->flags_set = 0x87
+#define	F_0NZC		msp430->flags_1 = 0; msp430->flags_0 = 0x80; msp430->flags_set = 0x07
 
 
 /* The chip is little-endian, but GETBYTE byte-swaps words because the
    decoder is based on 16-bit "words" so *this* logic is big-endian.  */
+
 static int
-immediate (int bytes, int sign_extend, LocalData * ld)
+immediate (int bytes, int sign_extend, LocalData *ld)
 {
   unsigned long i = 0;
 
@@ -115,10 +140,11 @@ immediate (int bytes, int sign_extend, LocalData * ld)
 	i -= 0x100000000ULL;
       break;
     default:
-      fprintf (stderr, "Programmer error: immediate() called with invalid byte count %d\n", bytes);
-      abort();
+      fprintf (stderr,
+	       "Programmer error: immediate() called with invalid byte count %d\n",
+	       bytes);
+      abort ();
     }
-  /*fprintf(stderr, "\033[35mIMM(%d,%d,%#lx)\033[0m", bytes, sign_extend, i);*/
   return i;
 }
 
@@ -132,24 +158,22 @@ immediate (int bytes, int sign_extend, LocalData * ld)
 
   Ad
   0	Rn	-	-	-	-
-  1	X(Rn)	Sym	-	X(abs)	-
- */
+  1	X(Rn)	Sym	-	X(abs)	-   */
 
 static void
 encode_ad (int reg, int ad, LocalData *ld, int ext)
 {
-  MSP430_Opcode_Decoded * msp430 = ld->msp430;
+  MSP430_Opcode_Decoded *msp430 = ld->msp430;
 
-  /*fprintf(stderr, "[\033[31mAD %d R%d\033[0m]", ad, reg);*/
   if (ad)
     {
       int x = IMMU(2) | (ext << 16);
       switch (reg)
 	{
-	case 0: /* (PC) -> Symbolic */
+	case 0: /* (PC) -> Symbolic.  */
 	  DA (x + ld->pc + ld->op_ptr - 2);
 	  break;
-	case 2: /* (SR) -> Absolute */
+	case 2: /* (SR) -> Absolute.  */
 	  DA (x);
 	  break;
 	default:
@@ -166,10 +190,9 @@ encode_ad (int reg, int ad, LocalData *ld, int ext)
 static void
 encode_as (int reg, int as, LocalData *ld, int ext)
 {
-  MSP430_Opcode_Decoded * msp430 = ld->msp430;
+  MSP430_Opcode_Decoded *msp430 = ld->msp430;
   int x;
 
-  /*fprintf(stderr, "[\033[31mAS %d R%d\033[0m]", as, reg);*/
   switch (as)
     {
     case 0:
@@ -186,11 +209,11 @@ encode_as (int reg, int as, LocalData *ld, int ext)
     case 1:
       switch (reg)
 	{
-	case 0: /* PC -> Symbolic */
+	case 0: /* PC -> Symbolic.  */
 	  x = IMMU(2) | (ext << 16);
 	  SA (x + ld->pc + ld->op_ptr - 2);
 	  break;
-	case 2: /* SR -> Absolute */
+	case 2: /* SR -> Absolute.  */
 	  x = IMMU(2) | (ext << 16);
 	  SA (x);
 	  break;
@@ -246,7 +269,7 @@ encode_as (int reg, int as, LocalData *ld, int ext)
 static void
 encode_rep_zc (int srxt, int dsxt, LocalData *ld)
 {
-  MSP430_Opcode_Decoded * msp430 = ld->msp430;
+  MSP430_Opcode_Decoded *msp430 = ld->msp430;
 
   msp430->repeat_reg = srxt & 1;
   msp430->repeats = dsxt;
@@ -272,15 +295,14 @@ dopc_to_id (int dopc)
     case 13: return MSO_bis;
     case 14: return MSO_xor;
     case 15: return MSO_and;
-    default:
-      return MSO_unknown;
+    default: return MSO_unknown;
     }
 }
 
 static int
-sopc_to_id (int sop,int c)
+sopc_to_id (int sop, int c)
 {
-  switch (sop*2+c)
+  switch (sop * 2 + c)
     {
     case 0: return MSO_rrc;
     case 1: return MSO_swpb;
@@ -289,18 +311,17 @@ sopc_to_id (int sop,int c)
     case 4: return MSO_push;
     case 5: return MSO_call;
     case 6: return MSO_reti;
-    default:
-      return MSO_unknown;
+    default: return MSO_unknown;
     }
 }
 
 int
 msp430_decode_opcode (unsigned long pc,
-		      MSP430_Opcode_Decoded * msp430,
-		      int (* getbyte)(void *),
-		      void * ptr)
+		      MSP430_Opcode_Decoded *msp430,
+		      int (*getbyte)(void *),
+		      void *ptr)
 {
-  LocalData lds, * ld = &lds;
+  LocalData lds, *ld = &lds;
   unsigned char op_buf[20] = {0};
   unsigned char *op = op_buf;
   int raddr;
@@ -331,6 +352,7 @@ msp430_decode_opcode (unsigned long pc,
   srxt_bits = srx * 2 + t;
   dsxt_bits = dsxt;
   op = op_buf + lds.op_ptr;
+  msp430->ofs_430x = 1;
   goto post_extension_word;
 
 /* double-op insns:
@@ -340,11 +362,9 @@ msp430_decode_opcode (unsigned long pc,
    opcode:9 BW:1 Ad:2 DSreg:4
 
    jumps:
-   opcode:3 Cond:3  pcrel:10
+   opcode:3 Cond:3  pcrel:10. */
 
-   */
-
-/* Double-Operand "opcode" fields  */
+/* Double-Operand "opcode" fields.  */
 /** VARY dopc 0100 0101 0110 0111 1000 1001 1010 1011 1100 1101 1110 1111 */
 
 /** dopc sreg a b as dreg	%D%b	%1,%0				*/
@@ -377,11 +397,11 @@ msp430_decode_opcode (unsigned long pc,
   if (ad == 0)
     REPZC (srxt_bits, dsxt_bits);
 
-  /* the helper functions encode for source, but it's both source and
-     dest, with a few documented exceptions.  */
+  /* The helper functions encode for source, but it's
+     both source and dest, with a few documented exceptions.  */
   msp430->op[0] = msp430->op[1];
 
-  /* RETI ignores the operand */
+  /* RETI ignores the operand.  */
   if (msp430->id == MSO_reti)
     msp430->syntax = "%S";
 
@@ -396,10 +416,10 @@ msp430_decode_opcode (unsigned long pc,
     case MSO_reti:	F_VNZC; break;
     default: break;
     }
-  
+
   /* 20xx 0010 0000 ---- ----
      3cxx 0011 1100 ---- ----
-          001j mp-- ---- ---- */
+          001j mp-- ---- ----.  */
 /** 001jmp aa addrlsbs		%J	%1				*/
 
   raddr = (aa << 9) | (addrlsbs << 1);
@@ -412,110 +432,132 @@ msp430_decode_opcode (unsigned long pc,
   ID (MSO_jmp); SC (pc + raddr + msp430->n_bytes);
   msp430->cond = jmp;
 
-/* Extended instructions */
+  /* Extended instructions.  */
 
 /** 0000 srcr 0000 dstr		MOVA @%1, %0 */
   ID (MSO_mov); SM (srcr, 0); DR (dstr);
   msp430->size = 20;
+  msp430->ofs_430x = 1;
 
 /** 0000 srcr 0001 dstr		MOVA @%1+, %0 */
   ID (MSO_mov); SI (srcr); DR (dstr);
   msp430->size = 20;
+  msp430->ofs_430x = 1;
 
 /** 0000 srcr 0010 dstr		MOVA &%1, %0 */
   ID (MSO_mov); SA ((srcr << 16) + IMMU(2)); DR (dstr);
   msp430->size = 20;
+  msp430->ofs_430x = 1;
 
 /** 0000 srcr 0011 dstr		MOVA %1, %0 */
   ID (MSO_mov); SM (srcr, IMMS(2)); DR (dstr);
   msp430->size = 20;
+  msp430->ofs_430x = 1;
 
 /** 0000 srcr 0110 dstr		MOVA %1, &%0 */
   ID (MSO_mov); SR (srcr); DA ((dstr << 16) + IMMU(2));
   msp430->size = 20;
+  msp430->ofs_430x = 1;
 
 /** 0000 srcr 0111 dstr		MOVA %1, &%0 */
   ID (MSO_mov); SR (srcr); DM (dstr, IMMS(2));
   msp430->size = 20;
+  msp430->ofs_430x = 1;
 
 /** 0000 srcr 1000 dstr		MOVA %1, %0 */
   ID (MSO_mov); SC ((srcr << 16) + IMMU(2)); DR (dstr);
   msp430->size = 20;
+  msp430->ofs_430x = 1;
 
 /** 0000 srcr 1001 dstr		CMPA %1, %0 */
   ID (MSO_cmp); SC ((srcr << 16) + IMMU(2)); DR (dstr);
   msp430->size = 20;
+  msp430->ofs_430x = 1;
   F_VNZC;
 
 /** 0000 srcr 1010 dstr		ADDA %1, %0 */
   ID (MSO_add); SC ((srcr << 16) + IMMU(2)); DR (dstr);
   msp430->size = 20;
+  msp430->ofs_430x = 1;
   F_VNZC;
 
 /** 0000 srcr 1011 dstr		SUBA %1, %0 */
   ID (MSO_sub); SC ((srcr << 16) + IMMU(2)); DR (dstr);
   msp430->size = 20;
+  msp430->ofs_430x = 1;
   F_VNZC;
 
 /** 0000 srcr 1011 dstr		SUBA %1, %0 */
   ID (MSO_sub); SC ((srcr << 16) + IMMU(2)); DR (dstr);
   msp430->size = 20;
+  msp430->ofs_430x = 1;
   F_VNZC;
 
 /** 0000 srcr 1100 dstr		MOVA %1, %0 */
   ID (MSO_mov); SR (srcr); DR (dstr);
   msp430->size = 20;
+  msp430->ofs_430x = 1;
 
 /** 0000 srcr 1101 dstr		CMPA %1, %0 */
   ID (MSO_cmp); SR (srcr); DR (dstr);
   msp430->size = 20;
+  msp430->ofs_430x = 1;
   F_VNZC;
 
 /** 0000 srcr 1110 dstr		ADDA %1, %0 */
   ID (MSO_add); SR (srcr); DR (dstr);
   msp430->size = 20;
+  msp430->ofs_430x = 1;
   F_VNZC;
 
 /** 0000 srcr 1111 dstr		SUBA %1, %0 */
   ID (MSO_sub); SR (srcr); DR (dstr);
   msp430->size = 20;
+  msp430->ofs_430x = 1;
   F_VNZC;
 
 /** 0000 bt00 010w dstr		RRCM.A %c, %0 */
   ID (MSO_rrc); DR (dstr); SR (dstr);
   msp430->repeats = bt;
   msp430->size = w ? 16 : 20;
+  msp430->ofs_430x = 1;
   F_0NZC;
 
 /** 0000 bt01 010w dstr		RRAM.A %c, %0 */
   ID (MSO_rra); DR (dstr); SR (dstr);
   msp430->repeats = bt;
   msp430->size = w ? 16 : 20;
+  msp430->ofs_430x = 1;
   F_0NZC;
 
 /** 0000 bt10 010w dstr		RLAM.A %c, %0 */
   ID (MSO_add); DR (dstr); SR (dstr);
   msp430->repeats = bt;
   msp430->size = w ? 16 : 20;
+  msp430->ofs_430x = 1;
   F_0NZC;
 
 /** 0000 bt11 010w dstr		RRUM.A %c, %0 */
   ID (MSO_rru); DR (dstr); SR (dstr);
   msp430->repeats = bt;
   msp430->size = w ? 16 : 20;
+  msp430->ofs_430x = 1;
   F_0NZC;
 
 /** 0001 0011 0000 0000		RETI */
   ID (MSO_reti);
   msp430->size = 20;
+  msp430->ofs_430x = 1;
 
 /** 0001 0011 01as dstr		CALLA %0 */
   ID (MSO_call); AS (dstr, as);
   msp430->size = 20;
+  msp430->ofs_430x = 1;
 
 /** 0001 0011 1000 extb		CALLA %0 */
   ID (MSO_call); SA (IMMU(2) | (extb << 16));
   msp430->size = 20;
+  msp430->ofs_430x = 1;
 
 /** 0001 0011 1001 extb		CALLA %0 */
   raddr = IMMU(2) | (extb << 16);
@@ -523,23 +565,26 @@ msp430_decode_opcode (unsigned long pc,
     raddr -= 0x100000;
   ID (MSO_call); SA (pc + raddr + msp430->n_bytes);
   msp430->size = 20;
+  msp430->ofs_430x = 1;
 
 /** 0001 0011 1011 extb		CALLA %0 */
   ID (MSO_call); SC (IMMU(2) | (extb << 16));
   msp430->size = 20;
-  
+  msp430->ofs_430x = 1;
+
 /** 0001 010w bits srcr		PUSHM.A %0 */
   ID (MSO_push); SR (srcr);
   msp430->size = w ? 16 : 20;
   msp430->repeats = bits;
-  
+  msp430->ofs_430x = 1;
+
 /** 0001 011w bits dstr		POPM.A %0 */
   ID (MSO_pop); DR (dstr);
   msp430->size = w ? 16 : 20;
   msp430->repeats = bits;
+  msp430->ofs_430x = 1;
 
 /** */
 
-  /*printf("<\033[34m%d\033[0m>", msp430->n_bytes);*/
   return msp430->n_bytes;
 }

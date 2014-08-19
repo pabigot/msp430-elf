@@ -1,42 +1,347 @@
-2000-10-13  Nick Clifton  <nickc@redhat.com>
+2014-03-31  Nick Clifton  <nickc@redhat.com>
 
-	* cp-demangle.c: Remove CYGNUS LOCAL which no longer appears to be
-	necessary.
-	* dyn-string.c: Remove CYGNUS LOCAL which no longer appears to be
-	necessary.
+	* Import this patch from the mainline:
+	2014-01-21  Tom Tromey  <tromey@redhat.com>
 
-2000-10-12  Hans-Peter Nilsson  <hp@axis.com>
+	* _doprint.c (checkit): Use stdarg, not VA_* macros.
+	* asprintf.c (asprintf): Use stdarg, not VA_* macros.
+	* concat.c (concat_length, concat_copy, concat_copy2, concat)
+	(reconcat): Use stdarg, not VA_* macros.
+	* snprintf.c (snprintf): Use stdarg, not VA_* macros.
+	* vasprintf.c (checkit): Use stdarg, not VA_* macros.
+	* vsnprintf.c (checkit): Use stdarg, not VA_* macros.
 
-	* cplus-dem.c (work_stuff_copy_to_from): New.
-	(delete_non_B_K_work_stuff): New.
-	(delete_work_stuff): New.
-	(mop_up): Break out work_stuff partly destruction to
-	delete_non_B_K_work_stuff.
-	(iterate_demangle_function): New.
-	(demangle_prefix): Call iterate_demangle_function instead of
-	demangle_function_name.  Leave handling of name-signature
-	__-delimiters to iterate_demangle_function.
-	(demangle_integral_value): Strip an optional
-	following underscore cautiously.  Handle negative numbers.
-	
-2000-08-31  DJ Delorie  <dj@redhat.com>
+2013-08-06  Kevin Buettner  <kevinb@redhat.com>
 
-	* configure.in (Cygwin): special case cygwin only when we're
-	building cygwin, not when we're hosting cygwin.
+	* pex-unix.c (func): Make static.
 
-2000-04-26  Ian Lance Taylor  <ian@zembu.com>
+2011-03-23  Nick Clifton  <nickc@redhat.com>
 
-	* floatformat.c: Add casts to avoid signed/unsigned warnings.
-	* pexecute.c: Add ATTRIBUTE_UNUSED as needed on Unix.
+	Import this patch from the mainline:
 
-2000-04-26  Alex Samuel  <samuel@codesourcery.com>
+	* 2011-02-28  Kai Tietz  <kai.tietz@onevision.com>
 
-	* Makefile.in (CFILES): Add partition.c.
-	(REQUIRED_OFILES): Add partition.o.
-	(partition.o): New rule.
-	* partition.c: New file.
-	
-2000-04-05  Richard Henderson  <rth@cygnus.com>
+	* filename_cmp.c (filename_ncmp): New function.
 
-	* splay-tree.c (splay_tree_remove): New.
+2011-03-23  Nick Clifton  <nickc@redhat.com>
 
+	Import this patch from the mainline:
+
+	2010-11-16  Ian Lance Taylor  <iant@google.com>
+
+	* simple-object.c (simple_object_attributes_merge): Rename from
+	simple_object_attributes_compare.  Call merge field.
+	* simple-object-common.h (struct simple_object_functions): Rename
+	attributes_compare field to attribute_merge.
+	* simple-object-elf.c (EM_SPARC): Define.
+	(EM_SPARC32PLUS): Define.
+	(simple_object_elf_attributes_merge): Renamed from
+	simple_object_elf_attributes_compare.  Permit EM_SPARC and
+	EM_SPARC32PLUS objects to be merged.
+	(simple_object_elf_functions): Update function name.
+	* simple-object-coff.c (simple_object_coff_attributes_merge):
+	Rename from simple_object_coff_attributes_compare.
+	(simple_object_coff_functions): Update function name.
+	* simple-object-mach-o.c (simple_object_mach_o_attributes_merge):
+	Renamed from simple_object_mach_o_attributes_compare.
+	(simple_object_mach_o_functions): Update function name.
+
+2003-06-30  Nick Clifton  <nickc@redhat.com>
+
+	* Import these patches from the gcc 3.3 branch:
+
+	2003-04-22  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+		* vsnprintf.c (vsnprintf): Don't pad string with extra nulls.
+		(main): Test that we don't write too much data.
+
+	2003-04-15  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+		* argv.c: Fix comments.
+		* calloc.c: Don't unnecessarily include "libiberty.h".
+		(bzero): Add prototype.
+		* floatformat.c: Include "ansidecl.h", rely on ANSI_PROTOTYPES.
+		* getcwd.c (getcwd): Use standard definition to avoid conflicts
+		with system headers.
+		* hashtab.c (htab_traverse): Delete unused variables.
+		* rename.c: Include "ansidecl.h".
+		(rename): Use standard definition to avoid conflicts with system
+		headers.
+		* strsignal.c: Rely on ANSI_PROTOTYPES.
+		* strstr.c: Check GNUC >= 2, not GNUC == 2.
+		* vfprintf.c: Include "ansidecl.h", rely on ANSI_PROTOTYPES.
+		* vprintf.c: Include "ansidecl.h" earlier, rely on
+		ANSI_PROTOTYPES.
+		* vsprintf.c: Include "ansidecl.h" earlier, rely on
+		ANSI_PROTOTYPES and possibly include <stdarg.h>.
+
+		* Makefile.in: Regenerate dependencies.
+
+	2003-04-15  DJ Delorie  <dj@redhat.com>
+
+		* maint-tool (deps): Scan for headers in $srcdir also.
+
+	2003-04-14  Roger Sayle  <roger@eyesopen.com>
+
+		* argv.c: Use ANSI_PROTOTYPES instead of __STDC__.
+		* memchr.c: Likewise.
+		* strcasecmp.c: Likewise.
+		* strncasecmp.c: Likewise.
+		* strncmp.c: Likewise.
+		* xatexit.c: Likewise.
+		* xmalloc.c: Likewise.
+
+		* copysign.c: Use traditional function declaration instead of DEFUN.
+		* sigsetmask.c: Likewise.
+
+		* memcmp.c: Both of the above, ANSI_PROTOTYPES and DEFUN.
+		* memset.c: Likewise.
+
+		* memcpy.c: ANSI_PROTOTYPES, DEFUN and prototype bcopy.
+		* memmove.c: Likewise.
+
+	2003-04-14  Roger Sayle  <roger@eyesopen.com>
+
+		* strdup.c (strdup): Tweak implementation to use memcpy.
+
+	2003-04-14  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+		* configure.in (HAVE_UINTPTR_T): Always define.
+		* configure: Regenerated.
+
+	2003-03-23  Alexandre Oliva  <aoliva@redhat.com>
+
+		* Makefile.in (MULTIOSDIR): New macro.  Use $(CC) $(LIBCFLAGS)
+		instead of $$CC alone.
+		(install_to_tooldir): Use it.
+
+	2003-17-03  Jan Hubicka  <jh@suse.cz>
+
+		* hashtab.c (htab_traverse_noresize): Break out from ...
+		* hashtab.c (htab_traverse): ... here.
+
+	2003-03-03  Mark Mitchell  <mark@codesourcery.com>
+
+		* cplus-dem.c: Add license exception to copyright notice.
+
+	2003-02-27  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+		* physmem.c: Formatting changes from upstream.
+
+	2003-02-24  Danny Smith  <dannysmith@users.source.forge.net>
+
+		* physmem.c (physmem_total): Add _WIN32 support.
+		(physmem_available): Likewise.
+
+	2003-02-24  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
+
+		* physmem.c (physmem_total) [HAVE_GETSYSINFO]: Test for
+		GSI_PHYSMEM.
+		(physmem_available) [HAVE_TABLE]: Test for TBL_VMSTATS.
+
+	2003-02-22  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+		* configure.in: Check for sys/systemcfg.h and
+		_system_configuration.
+		* physmem.c: Add support for AIX.  Tweek formatting as per
+		upstream coreutils beta.
+
+	2003-02-22  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+		    Richard Earnshaw  <rearnsha@arm.com>
+		    Geoffrey Keating  <geoffk@apple.com>
+
+		* configure.in: Check for sys/sysctl.h and sysctl.
+		* physmem.c: Add support for *bsd and darwin.
+		* Makefile.in: Generate depedency for physmem.o.
+
+	2003-02-21  Rainer Orth  <ro@TechFak.Uni-Bielefeld.DE>
+
+		* physmem.c (physmem_total) [HAVE_GETSYSINFO]: Use getsysinfo on
+		Tru64 UNIX.
+		(physmem_available) [HAVE_TABLE && HAVE_SYS_TABLE_H]: Use table on
+		Tru64 UNIX.
+
+		* configure.in (AC_CHECK_HEADERS): Check for sys/sysinfo.h,
+		machine/hal_sysinfo.h, sys/table.h.
+		(checkfuncs, AC_CHECKFUNCS): Check for getsysinfo, table.
+		* configure, config.in: Regenerate.
+
+	2003-02-21  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+		* configure.in: Check for sys/sysmp.h and sysmp.
+		* physmem.c: Pull upstream copy, add support for irix6.
+
+		* config.in, configure: Regenerated.
+
+	2003-02-21  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+		* physmem.c (physmem_total, physmem_available): De-ANSI-fy.
+		* configure.in (AC_CHECK_FUNCS): Add pstat_getstatic and
+		pstat_getdynamic.
+
+	2003-02-20  jmc  <jmc@prioris.mini.pw.edu.pl>
+
+		* cplus_dem.c: Fix typo: intializes -> initializes.
+
+	2003-02-13  Daniel Jacobowitz  <drow@mvista.com>
+
+		Fix PR c++/7612.
+		* cplus-dem.c (demangle_signature): Call string_delete.
+		Remove extra string_init.
+		(demangle_arm_hp_template): Call string_delete instead of
+		string_clear.  Add missing string_delete call.
+		(demangle_qualified): Add missing string_delete call.
+		(do_type): Remove unused variable btype.  Add missing string_delete
+		call.  Call string_delete instead of string_clear.
+		(demangle_fund_type): Move variable btype inside of the switch
+		statement.  Add missing string_delete call.
+		(do_arg): Call string_delete instead of string_clear.  Remove extra
+		string_init.
+		(demangle_nested_args): Free work->previous_argument.
+
+	2003-02-04  Joseph S. Myers  <jsm@polyomino.org.uk>
+
+		* libiberty.texi: Update to GFDL 1.2.
+
+	2003-01-30  Christian Cornelssen  <ccorn@cs.tu-berlin.de>
+
+		* Makefile.in (libiberty_topdir): New subst.
+		(mkinstalldirs): Redefine in terms of the above.
+		* configure.in: AC_SUBST it.
+		* configure: Regenerate.
+
+	2003-01-28  Christian Cornelssen  <ccorn@cs.tu-berlin.de>
+
+		* Makefile.in (all-subdir, check-subdir, installcheck-subdir)
+		(info-subdir, install-info-subdir, clean-info-subdir)
+		(dvi-subdir, install-subdir, etags-subdir, mostlyclean-subdir)
+		(clean-subdir, distclean-subdir, maintainer-clean-subdir):
+		Pass $(FLAGS_TO_PASS).
+
+	2003-01-27  Alexandre Oliva  <aoliva@redhat.com>
+
+		* Makefile.in (install_to_tooldir): Instead of $(MULTISUBDIR), use
+		/`$$CC -print-multi-os-directory`.
+
+	2003-01-26  Daniel Jacobowitz  <drow@mvista.com>
+
+		* hashtab.c (htab_create_alloc_ex): New function.
+		(hatab_set_functions_ex): New function.
+		(htab_delete, htab_expand): Support alternate allocation functions.
+
+	2003-01-20  Josef Zlomek  <zlomekj@suse.cz>
+
+		* hashtab.c (htab_expand): Fix allocation of new entries.
+
+	2003-01-09  Christian Cornelssen  <ccorn@cs.tu-berlin.de>
+
+		* Makefile.in (FLAGS_TO_PASS): Also pass DESTDIR.
+
+		* Makefile.in (install_to_libdir, install_to_tooldir): Add a
+		mkinstalldirs command.	
+
+2003-06-30  Nick Clifton  <nickc@redhat.com>
+
+	* Import these patches from the gcc 3.3 branch:
+
+	2003-02-12  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+		* acconfig.h: New file.  Add uintptr_t.
+		* config.in: Regenerated.
+
+	2003-04-15  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+		* mempcpy.c, stpcpy.c, stpncpy.c: New files.
+		* configure.in (funcs, AC_CHECK_FUNCS): Add mempcpy,
+		stpcpy and stpncpy.
+		* Makefile.in (CFILES): Add mempcpy.c, stpcpy.c and
+		stpncpy.c.
+		(CONFIGURED_OFILES): Add mempcpy.o, stpcpy.o and
+		stpncpy.o.
+		Regenerate dependencies.
+		* functions.texi, configure, config.in: Regenerated.
+
+	2003-01-24  Christopher Faylor  <cgf@redhat.com>
+
+		* configure.in: Remove special pex-cygwin consideration.
+		* configure: Regenerate.
+		* pex-cygwin.c: Remove.
+		* Makefile.in: Remove pex-cygwin.[co] lines.
+
+	2003-01-24  Zack Weinberg  <zack@codesourcery.com>
+
+		* Makefile.in (CFILES): Add pex-*.c.
+		(REQUIRED_OFILES): Change pexecute.o to @pexecute@
+		(CONFIGURED_OFILES): Add pex-*.o.
+		(TEXIFILES): Add pexecute.txh.
+		(pexecute.o): Delete rule.
+		(pex-cygwin.o, pex-djgpp.o, pex-mpw.o, pex-msdos.o,
+		pex-os2.o, pex-unix.o, pex-win32.o): New rules.
+		* configure.in: Change AC_INIT argument to xmalloc.c.
+		Compute appropriate pexecute implementation and substitute
+		it as @pexecute@.
+
+		* pexecute.c: Split up into...
+		* pex-cygwin.c, pex-djgpp.c, pex-mpw.c, pex-msdos.c,
+		pex-os2.c, pex-unix.c, pex-win32.c, pex-common.h,
+		pexecute.txh: ... these new files.
+
+		* functions.texi: Regenerate.
+		* configure: Regenerate.
+
+	2003-02-20  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+		* Makefile.in (CFILES): Add physmem.c.
+		(REQUIRED_OFILES): Add physmem.o.
+		* configure.in: Check for sys/pstat.h.
+		(checkfuncs): Add pstat_getstatic and pstat_getdynamic.
+		* physmem.c: New file, copied from textutils.
+
+		* config.in, configure: Regenerated.
+
+	2003-04-16  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
+
+		* configure.in (funcs, AC_CHECK_FUNCS): Add snprintf and
+		vsnprintf.
+		* snprintf.c, vsnprintf.c: New files.
+		* Makefile.in (CFILES): Add snprintf.c and vsnprintf.c.
+		(CONFIGURED_OFILES): Add snprintf.o and vsnprintf.o.
+		Regenerate dependencies.
+
+		* functions.texi, configure, config.in: Regenerated.
+
+	2002-09-11  Zack Weinberg  <zack@codesourcery.com>
+
+		* cplus-dem.c: Code under #ifdef MAIN moved to gcc/cp/cxxfilt.c.
+		* testsuite/Makefile.in: Adjust for test-demangle.
+		* testsuite/regress-demangle: Deleted.
+		* testsuite/test-demangle.c: New file.
+		* testsuite/demangle-expected: Change \$ to $ throughout,
+		now that this file is not being read by a shell script.
+
+2003-06-23  Nick Clifton  <nickc@redhat.com>
+
+	* Import these patches from the gcc 3.3 branch:
+
+	2003-12-03  Jan Hubicka  <jh@suse.cz>
+
+		* hashtab.c (htab_expand): Fix warning.
+
+		* hashtab.c (htab_expand): Compute the size of hashtable
+		based on the number of elements actually used.
+		(htab_traverse):  Call htab_expand when table is too empty.
+
+	2003-03-11  Carlo Wood  <carlo@gnu.org>
+
+		* cplus-dem.c (demangle_integral_value): Correction to
+		reflect patch of 2002-01-10 in order to also make negative
+		multi-digits without leading underscore work.
+
+
+Local Variables:
+mode: change-log
+left-margin: 8
+fill-column: 74
+version-control: never
+change-log-default-name: "ChangeLog.RedHat"
+End:

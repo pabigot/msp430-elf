@@ -4,7 +4,6 @@
 #source: orphane.s
 #ld: --file-align 1 --section-align 1  --no-leading-underscore
 #objdump: -h --wide
-#xfail: mcore-*-pe arm-epoc-pe
 
 #...
  +0 +\.text .*

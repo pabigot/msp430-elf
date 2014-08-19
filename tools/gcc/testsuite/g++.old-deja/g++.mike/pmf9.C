@@ -22,3 +22,4 @@ int main () {
   if (q.g() != 42)
     return 1;
 }
+// { dg-require-effective-target size32plus }

@@ -9,7 +9,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: winMain.c,v 1.11 2003/03/19 23:02:12 cagney Exp $
+ * RCS: @(#) $Id: winMain.c,v 1.3 2012/04/18 00:37:12 kevinb Exp $
  */
 
 #include <tk.h>

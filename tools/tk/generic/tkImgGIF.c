@@ -29,7 +29,7 @@
  * |   provided "as is" without express or implied warranty.		|
  * +-------------------------------------------------------------------+
  *
- * RCS: @(#) $Id: tkImgGIF.c,v 1.14 2003/03/19 23:02:02 cagney Exp $
+ * RCS: @(#) $Id: tkImgGIF.c,v 1.3 2012/04/18 00:36:53 kevinb Exp $
  */
 
 /*

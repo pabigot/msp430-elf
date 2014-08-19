@@ -3,7 +3,7 @@
 # This file defines the procedure tk_dialog, which creates a dialog
 # box containing a bitmap, a message, and one or more buttons.
 #
-# RCS: @(#) $Id: dialog.tcl,v 1.16 2003/03/19 23:02:04 cagney Exp $
+# RCS: @(#) $Id: dialog.tcl,v 1.3 2012/04/18 00:36:56 kevinb Exp $
 #
 # Copyright (c) 1992-1993 The Regents of the University of California.
 # Copyright (c) 1994-1997 Sun Microsystems, Inc.

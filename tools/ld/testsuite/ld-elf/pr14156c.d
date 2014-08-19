@@ -4,7 +4,6 @@
 #source: foo3.s
 #source: foon.s
 #ld: --sort-section=alignment -T pr14156c.t
-#ld_after_inputfiles: --discard-none
 #nm: -n
 
 #...

@@ -46,3 +46,5 @@ int main ()
   Foo ((A<1> (), A<2> ()));
   Check (0, 0, 0, "end");
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

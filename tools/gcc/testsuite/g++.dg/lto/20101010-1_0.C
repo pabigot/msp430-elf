@@ -1,4 +1,5 @@
 // { dg-lto-do link }
+// { dg-require-effective-target size32plus }
 
 typedef long size_t;
 template < class, class > struct pair

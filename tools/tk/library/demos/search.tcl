@@ -4,7 +4,7 @@
 # allow you to load a file into a text widget, then perform searches
 # on that file.
 #
-# RCS: @(#) $Id: search.tcl,v 1.9 2003/03/19 23:02:05 cagney Exp $
+# RCS: @(#) $Id: search.tcl,v 1.3 2012/04/18 00:36:59 kevinb Exp $
 
 if {![info exists widgetDemo]} {
     error "This script should be run from the \"widget\" demo."

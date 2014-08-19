@@ -36,9 +36,6 @@ This file is part of the GNU Binutils and/or GDB, the GNU debugger.
 
 #define CGEN_INSN_LSB0_P 1
 
-/* Size of a word (in bytes).  */
-#define CGEN_CPU_WORD_SIZE 4
-
 /* Minimum size of any insn (in bytes).  */
 #define CGEN_MIN_INSN_SIZE 4
 

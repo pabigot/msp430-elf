@@ -1,6 +1,5 @@
 // PR c++/46626
-// { dg-do run }
-// { dg-options "-std=c++0x" }
+// { dg-do run { target c++11 } }
 
 struct A
 {
@@ -26,3 +25,5 @@ main ()
   foo (&b);
   return 0;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

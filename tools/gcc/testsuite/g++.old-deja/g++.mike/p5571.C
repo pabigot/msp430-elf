@@ -69,3 +69,4 @@ int main() {
   pX->PrintThis();
   return e;
 }
+// { dg-require-effective-target size32plus }

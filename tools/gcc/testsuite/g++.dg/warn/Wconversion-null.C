@@ -1,5 +1,6 @@
 // { dg-do link  }
 // { dg-options "-Wconversion -Wno-conversion-null -Wno-pointer-arith" }
+// { dg-skip-if "non-power-of-two pointer size" { msp430-*-* } { "-mlarge" } { "" } }
 
 #include <cstddef>
 

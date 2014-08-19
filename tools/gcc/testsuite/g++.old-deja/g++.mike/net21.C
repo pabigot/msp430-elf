@@ -58,3 +58,4 @@ int main(int argc, char* argv[])
     tmp->f();
     return 0;
 }
+// { dg-require-effective-target size32plus }

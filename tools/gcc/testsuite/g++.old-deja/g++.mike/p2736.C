@@ -31,3 +31,4 @@ A a(2);
 int main() {
   foo();
 }
+// { dg-require-effective-target size32plus }

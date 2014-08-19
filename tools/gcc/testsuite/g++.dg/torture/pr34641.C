@@ -152,6 +152,7 @@ public:
   {
   }
 };
+
 UChar *
 plainTextToMallocAllocatedBuffer (const Range * r, unsigned &bufferLength)
 {

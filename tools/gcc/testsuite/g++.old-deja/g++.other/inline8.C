@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // { dg-options "-O1" }
 // Origin: Gerald Pfeifer <pfeifer@dbai.tuwien.ac.at>
 

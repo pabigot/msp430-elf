@@ -1,5 +1,5 @@
 /* FR30 specific functions.
-   Copyright (C) 1998-2013 Free Software Foundation, Inc.
+   Copyright (C) 1998-2014 Free Software Foundation, Inc.
    Contributed by Cygnus Solutions.
 
    This file is part of GCC.
@@ -33,6 +33,8 @@
 #include "flags.h"
 #include "recog.h"
 #include "tree.h"
+#include "stor-layout.h"
+#include "varasm.h"
 #include "output.h"
 #include "expr.h"
 #include "obstack.h"
@@ -162,17 +164,16 @@ static int fr30_num_arg_regs (enum machine_mode, const_tree);
 #define TARGET_PASS_BY_REFERENCE hook_pass_by_reference_must_pass_in_stack
 #undef  TARGET_ARG_PARTIAL_BYTES
 #define TARGET_ARG_PARTIAL_BYTES fr30_arg_partial_bytes
-
 #undef  TARGET_FUNCTION_ARG
 #define TARGET_FUNCTION_ARG fr30_function_arg
 #undef  TARGET_FUNCTION_ARG_ADVANCE
 #define TARGET_FUNCTION_ARG_ADVANCE fr30_function_arg_advance
 
-#undef  TARGET_FUNCTION_VALUE
+#undef TARGET_FUNCTION_VALUE
 #define TARGET_FUNCTION_VALUE fr30_function_value
-#undef  TARGET_LIBCALL_VALUE
+#undef TARGET_LIBCALL_VALUE
 #define TARGET_LIBCALL_VALUE fr30_libcall_value
-#undef  TARGET_FUNCTION_VALUE_REGNO_P
+#undef TARGET_FUNCTION_VALUE_REGNO_P
 #define TARGET_FUNCTION_VALUE_REGNO_P fr30_function_value_regno_p
 
 #undef  TARGET_SETUP_INCOMING_VARARGS
@@ -180,20 +181,17 @@ static int fr30_num_arg_regs (enum machine_mode, const_tree);
 #undef  TARGET_MUST_PASS_IN_STACK
 #define TARGET_MUST_PASS_IN_STACK fr30_must_pass_in_stack
 
-#undef  TARGET_FRAME_POINTER_REQUIRED
+#undef TARGET_FRAME_POINTER_REQUIRED
 #define TARGET_FRAME_POINTER_REQUIRED fr30_frame_pointer_required
 
-#undef  TARGET_CAN_ELIMINATE
+#undef TARGET_CAN_ELIMINATE
 #define TARGET_CAN_ELIMINATE fr30_can_eliminate
 
-#undef  TARGET_ASM_TRAMPOLINE_TEMPLATE
+#undef TARGET_ASM_TRAMPOLINE_TEMPLATE
 #define TARGET_ASM_TRAMPOLINE_TEMPLATE fr30_asm_trampoline_template
-#undef  TARGET_TRAMPOLINE_INIT
+#undef TARGET_TRAMPOLINE_INIT
 #define TARGET_TRAMPOLINE_INIT fr30_trampoline_init
 
-#undef  TARGET_OPTION_OVERRIDE
-#define TARGET_OPTION_OVERRIDE	fr30_override_options
-static void fr30_override_options (void);
 struct gcc_target targetm = TARGET_INITIALIZER;
 
 
@@ -706,6 +704,7 @@ fr30_print_operand (FILE *file, rtx x, int code)
 }
 
 /*}}}*/
+
 /* Implements TARGET_FUNCTION_VALUE.  */
 
 static rtx
@@ -1058,13 +1057,6 @@ fr30_trampoline_init (rtx m_tramp, tree fndecl, rtx chain_value)
 }
 
 /*}}}*/
-static void
-fr30_override_options (void)
-{
-  /* As of April 2010 the variable tracking pass is
-     triggering ICEs building libstdc++-v3 for the fr30.  */
-  flag_var_tracking = 0;
-}
 /* Local Variables: */
 /* folded-file: t   */
 /* End:		    */

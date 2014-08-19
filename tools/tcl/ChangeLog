@@ -1,20 +1,3 @@
-2009-02-04  Kevin Buettner  <kevinb@redhat.com>
-
-	Merged / backported upstream changes:
-
-	2002-11-27  David Gravereaux  <davygrvy@pobox.com>
-
-	* win/tclWinChan.c (Tcl_MakeFileChannel): return of DuplicateHandle()
-	incorrectly used. [Bug 618852]
-
-	2005-06-23  Kevin Kenny  <kennykb@acm.org>
-	[It appears that others contributed to this work too, but there
-	are no ChangeLog entries for it.]
-
-	* win/tclWinChan.c: More rewriting of __asm__ blocks that implement
-	SEH in GCC, because mingw's gcc 3.4.2 is not as forgiving of
-	violations committed by the old code and caused panics.  [Bug 1225957]
-
 2008-04-23  Keith Seitz  <keiths@redhat.com>
 
 	Based on patch from Masaki Muranaka  <monaka@monami-software.com>:

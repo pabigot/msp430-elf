@@ -1,5 +1,10 @@
-/52931.cc/1.2/Sun Feb 24 19:21:15 2013//Tmsp430-130322-branch
-/chi2_quality.cc/1.5/Sun Feb 24 19:21:15 2013//Tmsp430-130322-branch
-/quality.cc/1.4/Sun Feb 24 19:21:15 2013//Tmsp430-130322-branch
+/52931.cc/1.2/Thu Feb 20 13:47:00 2014//Tmsp430-14r1-branch
+/chi2_q_bit_flip_set.cc/1.1/Thu Feb 20 16:43:30 2014//Tmsp430-14r1-branch
+/chi2_q_bit_string_set.cc/1.1/Thu Feb 20 16:43:30 2014//Tmsp430-14r1-branch
+/chi2_q_document_words.cc/1.1/Thu Feb 20 16:43:30 2014//Tmsp430-14r1-branch
+/chi2_q_numeric_pattern_set.cc/1.1/Thu Feb 20 16:43:30 2014//Tmsp430-14r1-branch
+/chi2_q_uniform_random.cc/1.1/Thu Feb 20 16:43:30 2014//Tmsp430-14r1-branch
+/chi2_quality.h/1.1/Thu Feb 20 16:43:30 2014//Tmsp430-14r1-branch
+/quality.cc/1.3/Thu Feb 20 13:47:00 2014//Tmsp430-14r1-branch
 D/operators////
 D/requirements////

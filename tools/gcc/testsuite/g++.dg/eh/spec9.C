@@ -17,3 +17,5 @@ int main ()
     }
   catch (IntArray) {}
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

@@ -1,0 +1,74 @@
+This patch replaces host specific signal names used in rx_signal_to_host()
+with names defined in include/gdb/signals.h. 
+
+It should go upstream.
+
+Note: 2014-02-17: This patch is upstream now, but I'm retaining this patch
+in our patch repository because it is not yet in the release that we'll be
+using for 14r1.
+
+sim/rx/ChangeLog.RedHat:
+
+	* gdb-if.c (rx_signal_to_host): Use signal names from
+	include/gdb/signals.h.
+
+Index: sim/rx/gdb-if.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/rx/gdb-if.c,v
+retrieving revision 1.10
+diff -u -p -r1.10 gdb-if.c
+--- sim/rx/gdb-if.c	25 May 2013 03:54:39 -0000	1.10
++++ sim/rx/gdb-if.c	20 Dec 2013 00:39:27 -0000
+@@ -658,44 +658,28 @@ rx_signal_to_host (int rx)
+   switch (rx)
+     {
+     case 4:
+-#ifdef SIGILL
+-      return SIGILL;
+-#else
+-      return SIGSEGV;
+-#endif
++      return GDB_SIGNAL_ILL;
+ 
+     case 5:
+-      return SIGTRAP;
++      return GDB_SIGNAL_TRAP;
+ 
+     case 10:
+-#ifdef SIGBUS
+-      return SIGBUS;
+-#else
+-      return SIGSEGV;
+-#endif
++      return GDB_SIGNAL_BUS;
+ 
+     case 11:
+-      return SIGSEGV;
++      return GDB_SIGNAL_SEGV;
+ 
+     case 24:
+-#ifdef SIGXCPU
+-      return SIGXCPU;
+-#else
+-      break;
+-#endif
++      return GDB_SIGNAL_XCPU;
+ 
+     case 2:
+-      return SIGINT;
++      return GDB_SIGNAL_INT;
+ 
+     case 8:
+-#ifdef SIGFPE
+-      return SIGFPE;
+-#else
+-      break;
+-#endif
++      return GDB_SIGNAL_FPE;
+ 
+     case 6:
+-      return SIGABRT;
++      return GDB_SIGNAL_ABRT;
+     }
+ 
+   return 0;

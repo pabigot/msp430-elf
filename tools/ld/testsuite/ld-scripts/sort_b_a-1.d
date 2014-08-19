@@ -1,6 +1,5 @@
 #source: sort_b_a-1.s
 #ld: -T sort.t --sort-section alignment
-#ld_after_inputfiles: -X
 #name: --sort-section alignment
 #nm: -n
 

@@ -1,7 +1,5 @@
 \input texinfo @c                               -*-Texinfo-*-
-@c  Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-@c  2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
-@c  Free Software Foundation, Inc.
+@c  Copyright 1991-2013 Free Software Foundation, Inc.
 @c UPDATE!!  On future updates--
 @c   (1)   check for new machine-dep cmdline options in
 @c         md_parse_option definitions in config/tc-*.c
@@ -102,9 +100,7 @@
 This file documents the GNU Assembler "@value{AS}".
 
 @c man begin COPYRIGHT
-Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-2000, 2001, 2002, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation,
-Inc.
+Copyright @copyright{} 1991-2013 Free Software Foundation, Inc.
 
 Permission is granted to copy, distribute and/or modify this document
 under the terms of the GNU Free Documentation License, Version 1.3
@@ -153,9 +149,7 @@ done.
 @end tex
 
 @vskip 0pt plus 1filll
-Copyright @copyright{} 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-2000, 2001, 2002, 2006, 2007, 2008, 2009, 2010, 2011 Free Software Foundation,
-Inc.
+Copyright @copyright{} 1991-2013 Free Software Foundation, Inc.
 
       Permission is granted to copy, distribute and/or modify this document
       under the terms of the GNU Free Documentation License, Version 1.3
@@ -236,7 +230,8 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
  [@b{--compress-debug-sections}]  [@b{--nocompress-debug-sections}]
  [@b{--debug-prefix-map} @var{old}=@var{new}]
  [@b{--defsym} @var{sym}=@var{val}] [@b{-f}] [@b{-g}] [@b{--gstabs}]
- [@b{--gstabs+}] [@b{--gdwarf-2}] [@b{--help}] [@b{-I} @var{dir}] [@b{-J}]
+ [@b{--gstabs+}] [@b{--gdwarf-2}] [@b{--gdwarf-sections}]
+ [@b{--help}] [@b{-I} @var{dir}] [@b{-J}]
  [@b{-K}] [@b{-L}] [@b{--listing-lhs-width}=@var{NUM}]
  [@b{--listing-lhs-width2}=@var{NUM}] [@b{--listing-rhs-width}=@var{NUM}]
  [@b{--listing-cont-lines}=@var{NUM}] [@b{--keep-locals}] [@b{-o}
@@ -253,6 +248,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 
 @emph{Target AArch64 options:}
    [@b{-EB}|@b{-EL}]
+   [@b{-mabi}=@var{ABI}]
 @end ifset
 @ifset ALPHA
 
@@ -407,6 +403,7 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mips3}] [@b{-mips4}] [@b{-mips5}] [@b{-mips32}] [@b{-mips32r2}]
    [@b{-mips64}] [@b{-mips64r2}]
    [@b{-construct-floats}] [@b{-no-construct-floats}]
+   [@b{-mnan=@var{encoding}}]
    [@b{-trap}] [@b{-no-break}] [@b{-break}] [@b{-no-trap}]
    [@b{-mips16}] [@b{-no-mips16}]
    [@b{-mmicromips}] [@b{-mno-micromips}]
@@ -415,9 +412,12 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
    [@b{-mdmx}] [@b{-no-mdmx}]
    [@b{-mdsp}] [@b{-mno-dsp}]
    [@b{-mdspr2}] [@b{-mno-dspr2}]
+   [@b{-mmsa}] [@b{-mno-msa}]
    [@b{-mmt}] [@b{-mno-mt}]
    [@b{-mmcu}] [@b{-mno-mcu}]
+   [@b{-minsn32}] [@b{-mno-insn32}]
    [@b{-mfix7000}] [@b{-mno-fix7000}]
+   [@b{-mfix-rm7000}] [@b{-mno-fix-rm7000}]
    [@b{-mfix-vr4120}] [@b{-mno-fix-vr4120}]
    [@b{-mfix-vr4130}] [@b{-mno-fix-vr4130}]
    [@b{-mdebug}] [@b{-no-mdebug}]
@@ -436,6 +436,18 @@ gcc(1), ld(1), and the Info entries for @file{binutils} and @file{ld}.
 @emph{Target Nios II options:}
    [@b{-relax-all}] [@b{-relax-section}] [@b{-no-relax}]
    [@b{-EB}] [@b{-EL}]
+@end ifset
+@ifset NDS32
+
+@emph{Target NDS32 options:}
+    [@b{-EL}] [@b{-EB}] [@b{-O}] [@b{-Os}] [@b{-mcpu=@var{cpu}}]
+    [@b{-misa=@var{isa}}] [@b{-mabi=@var{abi}}] [@b{-mall-ext}]
+    [@b{-m[no-]16-bit}]  [@b{-m[no-]perf-ext}] [@b{-m[no-]perf2-ext}]
+    [@b{-m[no-]string-ext}] [@b{-m[no-]dsp-ext}] [@b{-m[no-]mac}] [@b{-m[no-]div}]
+    [@b{-m[no-]audio-isa-ext}] [@b{-m[no-]fpu-sp-ext}] [@b{-m[no-]fpu-dp-ext}]
+    [@b{-m[no-]fpu-fma}] [@b{-mfpu-freg=@var{FREG}}] [@b{-mreduced-regs}]
+    [@b{-mfull-regs}] [@b{-m[no-]dx-regs}] [@b{-mpic}] [@b{-mno-relax}]
+    [@b{-mb2bb}]
 @end ifset
 @ifset PDP11
 
@@ -647,6 +659,15 @@ the location of the current working directory at assembling time.
 Generate DWARF2 debugging information for each assembler line.  This
 may help debugging assembler code, if the debugger can handle it.  Note---this
 option is only supported by some targets, not all of them.
+
+@item --gdwarf-sections
+Instead of creating a .debug_line section, create a series of
+.debug_line.@var{foo} sections where @var{foo} is the name of the
+corresponding code section.  For example a code section called @var{.text.func}
+will have its dwarf line number information placed into a section called
+@var{.debug_line.text.func}.  If the code section is just called @var{.text}
+then debug line section will still be called just @var{.debug_line} without any
+suffix.
 
 @item --size-check=error
 @itemx --size-check=warning
@@ -904,6 +925,25 @@ an Epiphany processor.
 @c man end
 @c man begin INCLUDE
 @include c-epiphany.texi
+@c ended inside the included file
+@end ifset
+
+@end ifset
+
+@ifset H8300
+
+@ifclear man
+@xref{H8/300 Options}, for the options available when @value{AS} is configured
+for an H8/300 processor.
+@end ifclear
+
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for an H8/300
+processor.
+@c man end
+@c man begin INCLUDE
+@include c-h8300.texi
 @c ended inside the included file
 @end ifset
 
@@ -1196,7 +1236,7 @@ behaviour in the shell.
 
 @ifset MIPS
 The following options are available when @value{AS} is configured for
-a @sc{mips} processor.
+a MIPS processor.
 
 @table @gcctabopt
 @item -G @var{num}
@@ -1224,27 +1264,29 @@ Generate ``little endian'' format output.
 @itemx -mips32r2
 @itemx -mips64
 @itemx -mips64r2
-Generate code for a particular @sc{mips} Instruction Set Architecture level.
+Generate code for a particular MIPS Instruction Set Architecture level.
 @samp{-mips1} is an alias for @samp{-march=r3000}, @samp{-mips2} is an
 alias for @samp{-march=r6000}, @samp{-mips3} is an alias for
 @samp{-march=r4000} and @samp{-mips4} is an alias for @samp{-march=r8000}.
 @samp{-mips5}, @samp{-mips32}, @samp{-mips32r2}, @samp{-mips64}, and
-@samp{-mips64r2}
-correspond to generic
-@samp{MIPS V}, @samp{MIPS32}, @samp{MIPS32 Release 2}, @samp{MIPS64},
-and @samp{MIPS64 Release 2}
-ISA processors, respectively.
+@samp{-mips64r2} correspond to generic MIPS V, MIPS32, MIPS32 Release 2,
+MIPS64, and MIPS64 Release 2 ISA processors, respectively.
 
-@item -march=@var{CPU}
-Generate code for a particular @sc{mips} cpu.
+@item -march=@var{cpu}
+Generate code for a particular MIPS CPU.
 
 @item -mtune=@var{cpu}
-Schedule and tune for a particular @sc{mips} cpu.
+Schedule and tune for a particular MIPS CPU.
 
 @item -mfix7000
 @itemx -mno-fix7000
 Cause nops to be inserted if the read of the destination register
 of an mfhi or mflo instruction occurs in the following two instructions.
+
+@item -mfix-rm7000
+@itemx -mno-fix-rm7000
+Cause nops to be inserted if a dmult or dmultu instruction is
+followed by a load instruction.
 
 @item -mdebug
 @itemx -no-mdebug
@@ -1306,6 +1348,12 @@ This option implies -mdsp.
 This tells the assembler to accept DSP Release 2 instructions.
 @samp{-mno-dspr2} turns off this option.
 
+@item -mmsa
+@itemx -mno-msa
+Generate code for the MIPS SIMD Architecture Extension.
+This tells the assembler to accept MSA instructions.
+@samp{-mno-msa} turns off this option.
+
 @item -mmt
 @itemx -mno-mt
 Generate code for the MT Application Specific Extension.
@@ -1318,6 +1366,16 @@ Generate code for the MCU Application Specific Extension.
 This tells the assembler to accept MCU instructions.
 @samp{-mno-mcu} turns off this option.
 
+@item -minsn32
+@itemx -mno-insn32
+Only use 32-bit instruction encodings when generating code for the
+microMIPS processor.  This option inhibits the use of any 16-bit
+instructions.  This is equivalent to putting @code{.set insn32} at
+the start of the assembly file.  @samp{-mno-insn32} turns off this
+option.  This is equivalent to putting @code{.set noinsn32} at the
+start of the assembly file.  By default @samp{-mno-insn32} is
+selected, allowing all instructions to be used.
+
 @item --construct-floats
 @itemx --no-construct-floats
 The @samp{--no-construct-floats} option disables the construction of
@@ -1326,30 +1384,28 @@ value into the two single width floating point registers that make up
 the double width register.  By default @samp{--construct-floats} is
 selected, allowing construction of these floating point constants.
 
+@item --relax-branch
+@itemx --no-relax-branch
+The @samp{--relax-branch} option enables the relaxation of out-of-range
+branches.  By default @samp{--no-relax-branch} is selected, causing any
+out-of-range branches to produce an error.
+
+@item -mnan=@var{encoding}
+Select between the IEEE 754-2008 (@option{-mnan=2008}) or the legacy
+(@option{-mnan=legacy}) NaN encoding format.  The latter is the default.
+
 @cindex emulation
 @item --emulation=@var{name}
-This option causes @command{@value{AS}} to emulate @command{@value{AS}} configured
-for some other target, in all respects, including output format (choosing
-between ELF and ECOFF only), handling of pseudo-opcodes which may generate
-debugging information or store symbol table information, and default
-endianness.  The available configuration names are: @samp{mipsecoff},
-@samp{mipself}, @samp{mipslecoff}, @samp{mipsbecoff}, @samp{mipslelf},
-@samp{mipsbelf}.  The first two do not alter the default endianness from that
-of the primary target for which the assembler was configured; the others change
-the default to little- or big-endian as indicated by the @samp{b} or @samp{l}
-in the name.  Using @samp{-EB} or @samp{-EL} will override the endianness
-selection in any case.
+This option was formerly used to switch between ELF and ECOFF output
+on targets like IRIX 5 that supported both.  MIPS ECOFF support was
+removed in GAS 2.24, so the option now serves little purpose.
+It is retained for backwards compatibility.
 
-This option is currently supported only when the primary target
-@command{@value{AS}} is configured for is a @sc{mips} ELF or ECOFF target.
-Furthermore, the primary target or others specified with
-@samp{--enable-targets=@dots{}} at configuration time must include support for
-the other format, if both are to be available.  For example, the Irix 5
-configuration includes support for both.
-
-Eventually, this option will support more configurations, with more
-fine-grained control over the assembler's behavior, and will be supported for
-more processors.
+The available configuration names are: @samp{mipself}, @samp{mipslelf} and
+@samp{mipsbelf}.  Choosing @samp{mipself} now has no effect, since the output
+is always ELF.  @samp{mipslelf} and @samp{mipsbelf} select little- and
+big-endian output respectively, but @samp{-EL} and @samp{-EB} are now the
+preferred options instead.
 
 @item -nocpp
 @command{@value{AS}} ignores this option.  It is accepted for compatibility with
@@ -1425,6 +1481,25 @@ Meta processor.
 @c man begin OPTIONS
 @ifset MMIX
 See the info pages for documentation of the MMIX-specific options.
+@end ifset
+
+@ifset NDS32
+
+@ifclear man
+@xref{NDS32 Options}, for the options available when @value{AS} is configured
+for a NDS32 processor.
+@end ifclear
+@c ended inside the included file
+@end ifset
+
+@ifset man
+@c man begin OPTIONS
+The following options are available when @value{AS} is configured for a
+NDS32 processor.
+@c man end
+@c man begin INCLUDE
+@include c-nds32.texi
+@c ended inside the included file
 @end ifset
 
 @c man end
@@ -7083,6 +7158,9 @@ subject, see the hardware manufacturer's manual.
 @ifset MSP430
 * MSP430-Dependent::		MSP430 Dependent Features
 @end ifset
+@ifset NDS32
+* NDS32-Dependent::             Andes NDS32 Dependent Features
+@end ifset
 @ifset NIOSII
 * NiosII-Dependent::            Altera Nios II Dependent Features
 @end ifset
@@ -7295,6 +7373,10 @@ family.
 
 @ifset MSP430
 @include c-msp430.texi
+@end ifset
+
+@ifset NDS32
+@include c-nds32.texi
 @end ifset
 
 @ifset NIOSII

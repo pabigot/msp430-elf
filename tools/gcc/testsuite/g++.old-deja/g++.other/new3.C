@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 typedef __SIZE_TYPE__ size_t;
 
 template <class T>

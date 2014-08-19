@@ -15,6 +15,3 @@ void bic (int *__restrict__ c, int *__restrict__ a, int *__restrict__ b)
   for (i = 0; i < 9; i++)
     c[i] = b[i] & (~a[i]);
 }
-
-/* { dg-final { scan-assembler "vorn\\t" } } */
-/* { dg-final { scan-assembler "vbic\\t" } } */

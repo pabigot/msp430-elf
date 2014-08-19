@@ -1,4 +1,4 @@
-#   Copyright 2011-2012 Free Software Foundation, Inc.
+#   Copyright 2011-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -27,10 +27,10 @@ if { ![isnative] || [is_remote host] || ![istarget *-linux*] || [skip_shlib_test
 set test "skip-solib"
 set srcfile_main "${test}-main.c"
 set executable_main ${test}-test
-set binfile_main ${objdir}/${subdir}/${executable_main}
+set binfile_main [standard_output_file ${executable_main}]
 set srcfile_lib "${test}-lib.c"
 set libname "lib${test}"
-set binfile_lib ${objdir}/${subdir}/${libname}.so
+set binfile_lib [standard_output_file ${libname}.so]
 
 #
 # Compile our program under test.  The main program references a shared library
@@ -47,9 +47,10 @@ if {[gdb_compile "${srcdir}/${subdir}/${srcfile_main}" "${binfile_main}.o" objec
     return -1
 }
 
+set testobjdir [standard_output_file {}]
 if {[gdb_compile "${binfile_main}.o" "${binfile_main}" executable \
-                 [list debug "additional_flags=-L${objdir}/${subdir} -l${test} \
-                                               -Wl,-rpath=${objdir}/${subdir}"]] != ""} {
+                 [list debug "additional_flags=-L$testobjdir -l${test} \
+                                               -Wl,-rpath=$testobjdir"]] != ""} {
     return -1
 }
 
@@ -69,11 +70,11 @@ Ignore file pending future shared library load.*" \
   "y"
 
 #
-# Does info skip list this entry as pending?
+# Checkinfo skip list.
 #
 gdb_test "info skip" \
-  "Num\\s+Type\\s+Enb\\s+Address\\s+What\\s*
-1\\s+file\\s+y\\s+\\s+${srcfile_lib} \\(PENDING\\)\\s*" \
+  "Num\\s+Type\\s+Enb\\s+What\\s*
+1\\s+file\\s+y\\s+${srcfile_lib}\\s*" \
   "info skip with pending file"
 
 if ![runto_main] { fail "skip tests suppressed" }
@@ -85,21 +86,12 @@ gdb_test "step" ""
 gdb_test "bt" "#0\\s+main.*" "step after ignoring solib file."
 
 #
-# Our entry should no longer be pending.  Note that we unfortunately need to do
-# at least one step before the entry will be unmarked as pending.
-#
-gdb_test "info skip" \
-  "Num\\s+Type\\s+Enb\\s+Address\\s+What\\s*
-1\\s+file\\s+y\\s+\\s+.*${srcfile_lib}\\s*" \
-  "info skip with pending file"
-
-#
 # Now restart gdb and testing ignoring of a function inside a solib.
 #
 clean_restart ${executable_main}
 
 gdb_test "skip function multiply" \
-  "Function multiply will be skipped when stepping, pending shared library load." \
+  "Function multiply will be skipped when stepping\\." \
   "ignoring function in solib" \
 "No function found named multiply..*
 Ignore function pending future shared library load.*" \
@@ -116,9 +108,9 @@ gdb_test "step" "square.*"
 # Now our entry should no longer be pending.
 #
 gdb_test "info skip" \
-  "Num\\s+Type\\s+Enb\\s+Address\\s+What\\s*
-1\\s+function\\s+y\\s+0x\[0-9a-f\]+\\s+multiply at .*${srcfile_lib}:.*\\s*" \
-  "skip should no longer be pending."
+  "Num\\s+Type\\s+Enb\\s+What\\s*
+1\\s+function\\s+y\\s+multiply\\s*" \
+  "info skip for function multiply"
 
 #
 # This step shouldn't go into multiply -- we should skip it and go on to the

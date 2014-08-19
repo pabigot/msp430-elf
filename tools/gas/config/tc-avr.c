@@ -1,7 +1,6 @@
 /* tc-avr.c -- Assembler code for the ATMEL AVR
 
-   Copyright 1999, 2000, 2001, 2002, 2004, 2005, 2006, 2007, 2008, 2009,
-   2010, 2012, 2013  Free Software Foundation, Inc.
+   Copyright 1999-2013 Free Software Foundation, Inc.
    Contributed by Denis Chertykov <denisc@overta.ru>
 
    This file is part of GAS, the GNU Assembler.
@@ -132,7 +131,6 @@ static struct mcu_type_s mcu_types[] =
   {"attiny48",   AVR_ISA_AVR25,   bfd_mach_avr25},
   {"attiny88",   AVR_ISA_AVR25,   bfd_mach_avr25},
   {"at86rf401",  AVR_ISA_RF401,   bfd_mach_avr25},
-  {"ata6289",    AVR_ISA_AVR25,   bfd_mach_avr25},
   {"at43usb355", AVR_ISA_AVR3,    bfd_mach_avr3},
   {"at76c711",   AVR_ISA_AVR3,    bfd_mach_avr3},
   {"atmega103",  AVR_ISA_AVR31,   bfd_mach_avr31},
@@ -144,6 +142,7 @@ static struct mcu_type_s mcu_types[] =
   {"atmega16u2", AVR_ISA_AVR35,   bfd_mach_avr35},
   {"atmega32u2", AVR_ISA_AVR35,   bfd_mach_avr35},
   {"atmega8",    AVR_ISA_M8,      bfd_mach_avr4},
+  {"ata6289",    AVR_ISA_AVR4,    bfd_mach_avr4},
   {"atmega48",   AVR_ISA_AVR4,    bfd_mach_avr4},
   {"atmega48a",  AVR_ISA_AVR4,    bfd_mach_avr4},
   {"atmega48p",  AVR_ISA_AVR4,    bfd_mach_avr4},
@@ -219,6 +218,8 @@ static struct mcu_type_s mcu_types[] =
   {"atmega6490", AVR_ISA_AVR5,    bfd_mach_avr5},
   {"atmega6490a",AVR_ISA_AVR5,    bfd_mach_avr5},
   {"atmega6490p",AVR_ISA_AVR5,    bfd_mach_avr5},
+  {"atmega64rfr2",AVR_ISA_AVR5,   bfd_mach_avr5},
+  {"atmega644rfr2",AVR_ISA_AVR5,  bfd_mach_avr5},
   {"atmega16hva",AVR_ISA_AVR5,    bfd_mach_avr5},
   {"atmega16hva2",AVR_ISA_AVR5,    bfd_mach_avr5},
   {"atmega16hvb",AVR_ISA_AVR5,    bfd_mach_avr5},
@@ -249,11 +250,15 @@ static struct mcu_type_s mcu_types[] =
   {"atmega1281", AVR_ISA_AVR51,   bfd_mach_avr51},
   {"atmega1284p",AVR_ISA_AVR51,   bfd_mach_avr51},
   {"atmega128rfa1",AVR_ISA_AVR51, bfd_mach_avr51},
+  {"atmega128rfr2",AVR_ISA_AVR51, bfd_mach_avr51},
+  {"atmega1284rfr2",AVR_ISA_AVR51, bfd_mach_avr51},
   {"at90can128", AVR_ISA_AVR51,   bfd_mach_avr51},
   {"at90usb1286",AVR_ISA_AVR51,   bfd_mach_avr51},
   {"at90usb1287",AVR_ISA_AVR51,   bfd_mach_avr51},
   {"atmega2560", AVR_ISA_AVR6,    bfd_mach_avr6},
   {"atmega2561", AVR_ISA_AVR6,    bfd_mach_avr6},
+  {"atmega256rfr2", AVR_ISA_AVR6, bfd_mach_avr6},
+  {"atmega2564rfr2", AVR_ISA_AVR6, bfd_mach_avr6},
   {"atxmega16a4", AVR_ISA_XMEGA,  bfd_mach_avrxmega2},
   {"atxmega16d4", AVR_ISA_XMEGA,  bfd_mach_avrxmega2},
   {"atxmega16x1", AVR_ISA_XMEGA,  bfd_mach_avrxmega2},
@@ -263,18 +268,18 @@ static struct mcu_type_s mcu_types[] =
   {"atxmega64a3", AVR_ISA_XMEGA,  bfd_mach_avrxmega4},
   {"atxmega64d3", AVR_ISA_XMEGA,  bfd_mach_avrxmega4},
   {"atxmega64a1", AVR_ISA_XMEGA,  bfd_mach_avrxmega5},
-  {"atxmega64a1u",AVR_ISA_XMEGA,  bfd_mach_avrxmega5},
+  {"atxmega64a1u",AVR_ISA_XMEGAU, bfd_mach_avrxmega5},
   {"atxmega128a3", AVR_ISA_XMEGA, bfd_mach_avrxmega6},
-  {"atxmega128b1", AVR_ISA_XMEGA, bfd_mach_avrxmega6},
+  {"atxmega128b1", AVR_ISA_XMEGAU, bfd_mach_avrxmega6},
   {"atxmega128d3", AVR_ISA_XMEGA, bfd_mach_avrxmega6},
   {"atxmega192a3", AVR_ISA_XMEGA, bfd_mach_avrxmega6},
   {"atxmega192d3", AVR_ISA_XMEGA, bfd_mach_avrxmega6},
   {"atxmega256a3", AVR_ISA_XMEGA, bfd_mach_avrxmega6},
   {"atxmega256a3b",AVR_ISA_XMEGA, bfd_mach_avrxmega6},
-  {"atxmega256a3bu",AVR_ISA_XMEGA,bfd_mach_avrxmega6},
+  {"atxmega256a3bu",AVR_ISA_XMEGAU, bfd_mach_avrxmega6},
   {"atxmega256d3", AVR_ISA_XMEGA, bfd_mach_avrxmega6},
   {"atxmega128a1", AVR_ISA_XMEGA, bfd_mach_avrxmega7},
-  {"atxmega128a1u", AVR_ISA_XMEGA, bfd_mach_avrxmega7},
+  {"atxmega128a1u", AVR_ISA_XMEGAU, bfd_mach_avrxmega7},
   {NULL, 0, 0}
 };
 
@@ -451,6 +456,7 @@ md_show_usage (FILE *stream)
 	"                   avr5  - enhanced AVR core with up to 64K program memory\n"
 	"                   avr51 - enhanced AVR core with up to 128K program memory\n"
 	"                   avr6  - enhanced AVR core with up to 256K program memory\n"
+	"                   avrxmega2 - XMEGA, > 8K, < 64K FLASH, < 64K RAM\n"
 	"                   avrxmega3 - XMEGA, > 8K, <= 64K FLASH, > 64K RAM\n"
 	"                   avrxmega4 - XMEGA, > 64K, <= 128K FLASH, <= 64K RAM\n"
 	"                   avrxmega5 - XMEGA, > 64K, <= 128K FLASH, > 64K RAM\n"
@@ -1587,11 +1593,21 @@ avr_cons_fix_new (fragS *frag,
   pexp_mod_data = &exp_mod_data[0];
 }
 
+static bfd_boolean
+mcu_has_3_byte_pc (void)
+{
+  int mach = avr_mcu->mach; 
+
+  return mach == bfd_mach_avr6 
+    || mach == bfd_mach_avrxmega6 
+    || mach == bfd_mach_avrxmega7;
+}
+
 void
 tc_cfi_frame_initial_instructions (void)
 {
   /* AVR6 pushes 3 bytes for calls.  */
-  int return_size = (avr_mcu->mach == bfd_mach_avr6 ? 3 : 2);
+  int return_size = (mcu_has_3_byte_pc () ? 3 : 2);
 
   /* The CFA is the caller's stack location before the call insn.  */
   /* Note that the stack pointer is dwarf register number 32.  */

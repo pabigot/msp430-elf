@@ -1,5 +1,5 @@
 /* Store motion via Lazy Code Motion on the reverse CFG.
-   Copyright (C) 1997-2013 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -39,7 +39,7 @@ along with GCC; see the file COPYING3.  If not see
 #include "ggc.h"
 #include "intl.h"
 #include "tree-pass.h"
-#include "hashtab.h"
+#include "hash-table.h"
 #include "df.h"
 #include "dbgcnt.h"
 
@@ -90,9 +90,6 @@ struct st_expr
 /* Head of the list of load/store memory refs.  */
 static struct st_expr * store_motion_mems = NULL;
 
-/* Hashtable for the load/store memory refs.  */
-static htab_t store_motion_mems_table = NULL;
-
 /* These bitmaps will hold the local dataflow properties per basic block.  */
 static sbitmap *st_kill, *st_avloc, *st_antloc, *st_transp;
 
@@ -108,21 +105,31 @@ static int num_stores;
 /* Contains the edge_list returned by pre_edge_lcm.  */
 static struct edge_list *edge_list;
 
-static hashval_t
-pre_st_expr_hash (const void *p)
+/* Hashtable helpers.  */
+
+struct st_expr_hasher : typed_noop_remove <st_expr>
+{
+  typedef st_expr value_type;
+  typedef st_expr compare_type;
+  static inline hashval_t hash (const value_type *);
+  static inline bool equal (const value_type *, const compare_type *);
+};
+
+inline hashval_t
+st_expr_hasher::hash (const value_type *x)
 {
   int do_not_record_p = 0;
-  const struct st_expr *const x = (const struct st_expr *) p;
   return hash_rtx (x->pattern, GET_MODE (x->pattern), &do_not_record_p, NULL, false);
 }
 
-static int
-pre_st_expr_eq (const void *p1, const void *p2)
+inline bool
+st_expr_hasher::equal (const value_type *ptr1, const compare_type *ptr2)
 {
-  const struct st_expr *const ptr1 = (const struct st_expr *) p1,
-    *const ptr2 = (const struct st_expr *) p2;
   return exp_equiv_p (ptr1->pattern, ptr2->pattern, 0, true);
 }
+
+/* Hashtable for the load/store memory refs.  */
+static hash_table <st_expr_hasher> store_motion_mems_table;
 
 /* This will search the st_expr list for a matching expression. If it
    doesn't find one, we create one and initialize it.  */
@@ -133,16 +140,16 @@ st_expr_entry (rtx x)
   int do_not_record_p = 0;
   struct st_expr * ptr;
   unsigned int hash;
-  void **slot;
+  st_expr **slot;
   struct st_expr e;
 
   hash = hash_rtx (x, GET_MODE (x), &do_not_record_p,
 		   NULL,  /*have_reg_qty=*/false);
 
   e.pattern = x;
-  slot = htab_find_slot_with_hash (store_motion_mems_table, &e, hash, INSERT);
+  slot = store_motion_mems_table.find_slot_with_hash (&e, hash, INSERT);
   if (*slot)
-    return (struct st_expr *)*slot;
+    return *slot;
 
   ptr = XNEW (struct st_expr);
 
@@ -176,9 +183,8 @@ free_st_expr_entry (struct st_expr * ptr)
 static void
 free_store_motion_mems (void)
 {
-  if (store_motion_mems_table)
-    htab_delete (store_motion_mems_table);
-  store_motion_mems_table = NULL;
+  if (store_motion_mems_table.is_created ())
+    store_motion_mems_table.dispose ();
 
   while (store_motion_mems)
     {
@@ -265,7 +271,7 @@ store_ops_ok (const_rtx x, int *regs_set)
   for (; x; x = XEXP (x, 1))
     {
       reg = XEXP (x, 0);
-      if (regs_set[REGNO(reg)])
+      if (regs_set[REGNO (reg)])
 	return false;
     }
 
@@ -551,7 +557,7 @@ find_moveable_store (rtx insn, int *regs_set_before, int *regs_set_after)
     return;
 
   /* If we are handling exceptions, we must be careful with memory references
-     that may trap. If we are not, the behavior is undefined, so we may just
+     that may trap.  If we are not, the behavior is undefined, so we may just
      continue.  */
   if (cfun->can_throw_non_call_exceptions && may_trap_p (dest))
     return;
@@ -645,13 +651,12 @@ compute_store_table (void)
   unsigned int max_gcse_regno = max_reg_num ();
 
   store_motion_mems = NULL;
-  store_motion_mems_table = htab_create (13, pre_st_expr_hash,
-					 pre_st_expr_eq, NULL);
+  store_motion_mems_table.create (13);
   last_set_in = XCNEWVEC (int, max_gcse_regno);
   already_set = XNEWVEC (int, max_gcse_regno);
 
   /* Find all the stores we care about.  */
-  FOR_EACH_BB (bb)
+  FOR_EACH_BB_FN (bb, cfun)
     {
       /* First compute the registers set in this block.  */
       FOR_BB_INSNS (bb, insn)
@@ -708,8 +713,7 @@ compute_store_table (void)
       if (! ptr->avail_stores)
 	{
 	  *prev_next_ptr_ptr = ptr->next;
-	  htab_remove_elt_with_hash (store_motion_mems_table,
-				     ptr, ptr->hash_index);
+	  store_motion_mems_table.remove_elt_with_hash (ptr, ptr->hash_index);
 	  free_st_expr_entry (ptr);
 	}
       else
@@ -801,7 +805,7 @@ insert_store (struct st_expr * expr, edge e)
 
   /* If tmp is NULL, we found an insertion on every edge, blank the
      insertion vector for these edges, and insert at the start of the BB.  */
-  if (!tmp && bb != EXIT_BLOCK_PTR)
+  if (!tmp && bb != EXIT_BLOCK_PTR_FOR_FN (cfun))
     {
       FOR_EACH_EDGE (tmp, ei, e->dest->preds)
 	{
@@ -840,11 +844,11 @@ remove_reachable_equiv_notes (basic_block bb, struct st_expr *smexpr)
   edge_iterator *stack, ei;
   int sp;
   edge act;
-  sbitmap visited = sbitmap_alloc (last_basic_block);
+  sbitmap visited = sbitmap_alloc (last_basic_block_for_fn (cfun));
   rtx last, insn, note;
   rtx mem = smexpr->pattern;
 
-  stack = XNEWVEC (edge_iterator, n_basic_blocks);
+  stack = XNEWVEC (edge_iterator, n_basic_blocks_for_fn (cfun));
   sp = 0;
   ei = ei_start (bb->succs);
 
@@ -865,7 +869,7 @@ remove_reachable_equiv_notes (basic_block bb, struct st_expr *smexpr)
 	}
       bb = act->dest;
 
-      if (bb == EXIT_BLOCK_PTR
+      if (bb == EXIT_BLOCK_PTR_FOR_FN (cfun)
 	  || bitmap_bit_p (visited, bb->index))
 	{
 	  if (!ei_end_p (ei))
@@ -1012,11 +1016,13 @@ build_store_vectors (void)
 
   /* Build the gen_vector. This is any store in the table which is not killed
      by aliasing later in its block.  */
-  st_avloc = sbitmap_vector_alloc (last_basic_block, num_stores);
-  bitmap_vector_clear (st_avloc, last_basic_block);
+  st_avloc = sbitmap_vector_alloc (last_basic_block_for_fn (cfun),
+				   num_stores);
+  bitmap_vector_clear (st_avloc, last_basic_block_for_fn (cfun));
 
-  st_antloc = sbitmap_vector_alloc (last_basic_block, num_stores);
-  bitmap_vector_clear (st_antloc, last_basic_block);
+  st_antloc = sbitmap_vector_alloc (last_basic_block_for_fn (cfun),
+				    num_stores);
+  bitmap_vector_clear (st_antloc, last_basic_block_for_fn (cfun));
 
   for (ptr = first_st_expr (); ptr != NULL; ptr = next_st_expr (ptr))
     {
@@ -1048,14 +1054,14 @@ build_store_vectors (void)
 	}
     }
 
-  st_kill = sbitmap_vector_alloc (last_basic_block, num_stores);
-  bitmap_vector_clear (st_kill, last_basic_block);
+  st_kill = sbitmap_vector_alloc (last_basic_block_for_fn (cfun), num_stores);
+  bitmap_vector_clear (st_kill, last_basic_block_for_fn (cfun));
 
-  st_transp = sbitmap_vector_alloc (last_basic_block, num_stores);
-  bitmap_vector_clear (st_transp, last_basic_block);
+  st_transp = sbitmap_vector_alloc (last_basic_block_for_fn (cfun), num_stores);
+  bitmap_vector_clear (st_transp, last_basic_block_for_fn (cfun));
   regs_set_in_block = XNEWVEC (int, max_gcse_regno);
 
-  FOR_EACH_BB (bb)
+  FOR_EACH_BB_FN (bb, cfun)
     {
       memset (regs_set_in_block, 0, sizeof (int) * max_gcse_regno);
 
@@ -1091,10 +1097,14 @@ build_store_vectors (void)
 
   if (dump_file)
     {
-      dump_bitmap_vector (dump_file, "st_antloc", "", st_antloc, last_basic_block);
-      dump_bitmap_vector (dump_file, "st_kill", "", st_kill, last_basic_block);
-      dump_bitmap_vector (dump_file, "st_transp", "", st_transp, last_basic_block);
-      dump_bitmap_vector (dump_file, "st_avloc", "", st_avloc, last_basic_block);
+      dump_bitmap_vector (dump_file, "st_antloc", "", st_antloc,
+			  last_basic_block_for_fn (cfun));
+      dump_bitmap_vector (dump_file, "st_kill", "", st_kill,
+			  last_basic_block_for_fn (cfun));
+      dump_bitmap_vector (dump_file, "st_transp", "", st_transp,
+			  last_basic_block_for_fn (cfun));
+      dump_bitmap_vector (dump_file, "st_avloc", "", st_avloc,
+			  last_basic_block_for_fn (cfun));
     }
 }
 
@@ -1142,8 +1152,7 @@ one_store_motion_pass (void)
   num_stores = compute_store_table ();
   if (num_stores == 0)
     {
-      htab_delete (store_motion_mems_table);
-      store_motion_mems_table = NULL;
+      store_motion_mems_table.dispose ();
       end_alias_analysis ();
       return 0;
     }
@@ -1179,7 +1188,7 @@ one_store_motion_pass (void)
 
       /* Now we want to insert the new stores which are going to be needed.  */
 
-      FOR_EACH_BB (bb)
+      FOR_EACH_BB_FN (bb, cfun)
 	if (bitmap_bit_p (st_delete_map[bb->index], ptr->index))
 	  {
 	    delete_store (ptr, bb);
@@ -1205,7 +1214,7 @@ one_store_motion_pass (void)
   if (dump_file)
     {
       fprintf (dump_file, "STORE_MOTION of %s, %d basic blocks, ",
-	       current_function_name (), n_basic_blocks);
+	       current_function_name (), n_basic_blocks_for_fn (cfun));
       fprintf (dump_file, "%d insns deleted, %d insns created\n",
 	       n_stores_deleted, n_stores_created);
     }
@@ -1232,23 +1241,41 @@ execute_rtl_store_motion (void)
   return 0;
 }
 
-struct rtl_opt_pass pass_rtl_store_motion =
+namespace {
+
+const pass_data pass_data_rtl_store_motion =
 {
- {
-  RTL_PASS,
-  "store_motion",                       /* name */
-  OPTGROUP_NONE,                        /* optinfo_flags */
-  gate_rtl_store_motion,                /* gate */
-  execute_rtl_store_motion,		/* execute */
-  NULL,                                 /* sub */
-  NULL,                                 /* next */
-  0,                                    /* static_pass_number */
-  TV_LSM,                               /* tv_id */
-  PROP_cfglayout,                       /* properties_required */
-  0,                                    /* properties_provided */
-  0,                                    /* properties_destroyed */
-  0,                                    /* todo_flags_start */
-  TODO_df_finish | TODO_verify_rtl_sharing |
-  TODO_verify_flow | TODO_ggc_collect   /* todo_flags_finish */
- }
+  RTL_PASS, /* type */
+  "store_motion", /* name */
+  OPTGROUP_NONE, /* optinfo_flags */
+  true, /* has_gate */
+  true, /* has_execute */
+  TV_LSM, /* tv_id */
+  PROP_cfglayout, /* properties_required */
+  0, /* properties_provided */
+  0, /* properties_destroyed */
+  0, /* todo_flags_start */
+  ( TODO_df_finish | TODO_verify_rtl_sharing
+    | TODO_verify_flow ), /* todo_flags_finish */
 };
+
+class pass_rtl_store_motion : public rtl_opt_pass
+{
+public:
+  pass_rtl_store_motion (gcc::context *ctxt)
+    : rtl_opt_pass (pass_data_rtl_store_motion, ctxt)
+  {}
+
+  /* opt_pass methods: */
+  bool gate () { return gate_rtl_store_motion (); }
+  unsigned int execute () { return execute_rtl_store_motion (); }
+
+}; // class pass_rtl_store_motion
+
+} // anon namespace
+
+rtl_opt_pass *
+make_pass_rtl_store_motion (gcc::context *ctxt)
+{
+  return new pass_rtl_store_motion (ctxt);
+}

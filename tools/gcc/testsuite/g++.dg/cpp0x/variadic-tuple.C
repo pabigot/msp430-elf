@@ -1,5 +1,4 @@
-// { dg-do run }
-// { dg-options "-std=gnu++0x" }
+// { dg-do run { target c++11 } }
 // An implementation of TR1's <tuple> using variadic teplates
 // Contributed by Douglas Gregor <doug.gregor@gmail.com>
 
@@ -292,3 +291,4 @@ int main()
   assert(t3a <= t3b && t3b <= t3a);
   assert(t3a >= t3b && t3b >= t3a);
 }
+// { dg-require-effective-target size32plus }

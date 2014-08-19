@@ -1,39 +1,6 @@
-Aug 12, 2013  Brendan Conoboy (blc@redhat.com)
+Fri Jan 16 00:12:10 UTC 2004  Brendan Conoboy  <blc@redhat.com>
 
-	* ChVer: Updates for new gcc version string fields.
-
-Thu Feb 20 16:35:49 2003  Alexandre Oliva  <aoliva@redhat.com>
-
-	* Install.in: Auto-detect *.tar.gz, *.tgz and *.tar.bz2.
-
-Wed Feb  5 21:58:32 UTC 2003  Brendan Conoboy (blc@redhat.com)
-
-	* MkTestDir,HMkTestDir: Add to repository.
-
-Fri Jan 31 01:15:45 UTC 2003  Brendan Conoboy  (blc@redhat.com)
-
-	* ChVer: Add new version of ChVer for general use
-
-2002-02-21  Nick Clifton  <nickc@cambridge.redhat.com>
-
-	* Install.in: Replace references to Cygnus with References to
-	Red Hat.
-
-2001-10-29  Tom Rix (trix@redhat.com)
-
-        * comp-tools-verify: remove -static for powerpc-ibm-aix5.1*
-
-Mon Feb 19 12:31:05 PST 2001  Brendan Conoboy (blc@redhat.com)
-
-        * comp-tools-verify: remove -static for powerpc-ibm-aix4.3*
-
-Tue Apr  1 16:19:31 1997  Jason Molenda  (crash@godzilla.cygnus.co.jp)
-
-	* Install.in (show_exec_prefix_msg): GDBTK_FILENAME to
-	GDBTK_LIBRARY, also update TCL_LIBRARY and TK_LIBRARY.
-
-Thu Sep 14 17:19:58 1995  Jason Molenda  (crash@phydeaux.cygnus.com)
-
-	* Install.in (show_exec_prefix_msg): print out paths for
-	TCL_LIBRARY, TK_LIBRARY and GDBTK_FILENAME.
-
+	* Specter: Sourceware->RPM spec file generator.
+	* MakePrune: Removes unwanted files from source RPM.
+	* Specter-templates: Spec file template repository.
+	* Specter-configs: Working configs for use with Specter.

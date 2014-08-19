@@ -1,3 +1,37 @@
+2013-12-03  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb-if.c (sim_open): Add "target sim" options, "g13" and "-Mg13",
+	for turning on G13 multiplier.
+
+2013-10-16  DJ Delorie  <dj@redhat.com>
+
+	* cpu.c (g13_multiply): New.
+	* cpu.h (g13_multiply): Declare.
+	* load.c (rl78_load): If a .modelinfo section is found, load
+	rom/ram/mirror sizes from it.
+	* main.c (main): Add "-M g13" option to select G13-style
+	multiplier.
+	* mem.c (mem_set_mirror): New.
+	(address_mapping): Use dynamic mirror information.
+	(mem_put_byte): Only use G13 multiplier when in G13 mode.
+	* mem.h (mem_set_mirror): Declare.
+	* rl78.c (process_clock_tick): Don't update SFRs if the mirror
+	area overlaps them.  Be more robust about detecting uninitialized
+	interrupt vectors.
+
+2012-11-26  DJ Delorie  <dj@redhat.com>
+
+	* rl78.c (decode_opcode): Handle G10-specific return registers.
+	* syscalls.c (RET): Likewise.
+
+2012-10-27  DJ Delorie  <dj@redhat.com>
+
+	* cpu.h: Add rl78_g10_mode.
+	* cpu.c: Add rl78_g10_mode.
+	* load.c: Set it based on the ELF flags.
+	* mem.c: If G10, trap any accessess to missing register banks.
+	* rl78.c: If G10, trap any use of the SEL opcode.
+
 2012-03-20  Kevin Buettner  <kevinb@redhat.com>
 
 	* syscalls.c (rl78_syscall): Don't close file descriptors 0,
@@ -11,111 +45,3 @@
 	* cpu.h (get_c, put_c): Fix prototypes to match.
 	* mem.c (mem_put_byte): Handle syscalls.
 
-	* cpu.c, cpu.h, load.c, load.h, main.c, mem.c, mem.h, rl78.c,
-	trace.c, trace.h: Sync with FSF sources.
-	* configure.ac, configure.in, configure, gdb-if.c: Likewise.
-
-2011-09-06  Kevin Buettner  <kevinb@redhat.com>
-
-	* load.h (gdb/callback.h): Include.
-	(rl78_load): Add `callbacks' parameter to function prototype.
-	* load.c (load.h): Include.
-	(xprintf, find_section_name_by_offset): New functions.
-	(rl78_load): Add `callbacks' parameter.  Add code for printing
-	out section loaded using GDB's printf facilities.
-	* gdb-if.c (sim_load, sim_create_inferior): Update calls to
-	rl78_load().
-	* main.c (main): Update call to rl78_load().
-
-2011-08-11  Nick Clifton  <nickc@redhat.com>
-
-	* trace.c (sim_disasm_one): Fix printing of pc when not using
-	a cycle accurate build.
-	(sim_dis_read): Remove unused local variable.
-
-2011-07-29  Kevin Buettner  <kevinb@redhat.com>
-
-	* gdb-if.c (sim_complete_command): New function.
-
-2011-07-29  DJ Delorie  <dj@redhat.com>
-
-	* cpu.h: Remove cruft.  Add timer support.
-	* cpu.c: Add timer support.
-	(init_cpu): Initialize all registers to 0x11.
-	(set_reg): Make sure SP has the LSB cleared.  Warn if the app
-	tries to set it.
-	(trace_register_changes): Trace all registers, not just the active
-	ones.
-	* main.c (done): Print total cycles and per-insn cycle dump.
-	(main): Unbuffer stdout.
-	* mem.c (initted): New.  Keep track of uninitialized memory.
-	(init_mem): Initizlied memory to unusual values.
-	(address_mapping): Note mirrored addresses.
-	(mem_put_byte): Note write.  Emulate timer 0.  Check for SP lsb
-	being set.
-	(mem_get_byte): Emulate timer 0.  Emulate UART 0.
-	(mem_put_hi): Enforce alignment.
-	(mem_put_si): Enforce alignment.
-	(mem_get_qi): Note additional clocks for mirror access.
-	(mem_get_hi): Note additional clocks for mirror access.  Enforce
-	alignment.
-	(mem_get_si): Enforce alignment.
-	* rl78.c (init_stack_tty): New, for debugging.
-	(put_op): grow stack *before* writing to it.
-	(process_clock_tick): Simulate TM00.
-	(dump_counts_per_insn): New.
-	(CLOCKS): New.
-	(decode_opcode): Note clocks used.
-	(RETI): Fix psw read.
-	(SHL): Fix carry logic.
-	(STOP): Make this an exit().
-	* trace.c: Add clock count column.
-
-2011-05-26  DJ Delorie  <dj@redhat.com>
-
-	* mem.c (ram_base): Default to 32k ram.
-	(mem_get_byte): Add SSR00 simulation.
-	* rl78.c (CALL): add newline.
-
-2011-05-25  Kevin Buettner  <kevinb@redhat.com>
-
-	* gdb-if (get_be, put_be): Delete.
-	(rl78_signal_to_host): Rename to rl78_signal_to_target.
-	(rl78_signal_to_target): Don't use host signal numbers.  Use
-	TARGET_SIGNAL_<name> instead.
-	(handle_step): Change rl78_signal_to_host to rl78_signal_to_target.
-
-2011-05-23  Kevin Buettner  <kevinb@redhat.com>
-
-	* gdb-if.c (sim_do_command): Handle NULL argument.
-
-2011-05-16  Kevin Buettner  <kevinb@redhat.com>
-
-	* gdb-if.c: New file.
-	* Makefile.in (SIM_OBJS): Add gdb-if.o.
-	(gdb-if.o): Update dependencies.
-	* cpu.c (init_cpu): Correct order of register banks in memory.
-	* load.h (default_machine, rx_set_mach, rx_load): Delete.
-	(rl78_load): Add declaration.
-	* mem.h (MEM_SIZE): New define.
-	(mem_put_blk): Adjust prototype by adding a 'const'.
-	* mem.c (memory): Use MEM_SIZE to say how big it is.
-	(mem_put_blk): Adjust declaration.
-	* rl78.c (decode_opcode): Return RL78_MAKE_STEPPED(), rather than 0.
-
-2011-03-29  DJ Delorie  <dj@redhat.com>
-
-	* Makefile.in: New.
-	* config.in: New.
-	* configure: New.
-	* configure.in: New.
-	* cpu.c: New.
-	* cpu.h: New.
-	* load.c: New.
-	* load.h: New.
-	* main.c: New.
-	* mem.c: New.
-	* mem.h: New.
-	* rl78.c: New.
-	* trace.c: New.
-	* trace.h: New.

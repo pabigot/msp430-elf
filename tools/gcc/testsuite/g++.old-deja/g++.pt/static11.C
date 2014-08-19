@@ -3,6 +3,7 @@
 // final when exit is entered (or main returns), and not "overruled" by a
 // destructor calling _exit.  It's not really worth it to handle that.
 // { dg-do run { target unwrapped } }
+// { dg-skip-if "status not changeable after main exits" { msp430-*-* } { "*" } { "" } }
 
 // Bug: g++ was failing to destroy C<int>::a because it was using two
 // different sentry variables for construction and destruction.

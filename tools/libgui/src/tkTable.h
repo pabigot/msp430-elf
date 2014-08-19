@@ -9,7 +9,7 @@
  * See the file "license.txt" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkTable.h,v 1.3 2001/10/24 20:09:50 keiths Exp $
+ * RCS: @(#) $Id: tkTable.h,v 1.3 2012/04/18 00:37:22 kevinb Exp $
  */
 
 #ifndef _TKTABLE_H_

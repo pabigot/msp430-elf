@@ -1,6 +1,6 @@
 // { dg-do run  }
-// { dg-options "" }
 // { dg-require-effective-target int32plus }
+// { dg-options "" }
 # 1 "SetLS.cc"
 // GROUPS passed templates nested-classes
 //

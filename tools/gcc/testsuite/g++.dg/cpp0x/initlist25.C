@@ -1,7 +1,5 @@
 // PR c++/41754
-// { dg-options -std=c++0x }
-// { dg-do run }
-// { dg-require-effective-target int32plus }
+// { dg-do run { target c++11 } }
 
 #include <map>
 #include <string>
@@ -16,3 +14,5 @@ int main()
 
         return 0;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

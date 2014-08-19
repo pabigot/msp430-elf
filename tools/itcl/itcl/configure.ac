@@ -110,7 +110,6 @@ if test "${TEA_PLATFORM}" = "windows" ; then
 else
     CLEANFILES=
     #TEA_ADD_SOURCES([])
-    PKG_CFLAGS=-fPIC
 fi
 
 AC_SUBST(CLEANFILES)

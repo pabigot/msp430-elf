@@ -1,4 +1,5 @@
 /* { dg-do compile } */
+/* { dg-skip-if "No NaN support" { "rx-*-*" } { "*" } { "" } } */
 /* { dg-skip-if "No NaN support" { spu-*-* } } */
 /* SH4 without -mieee defaults to -ffinite-math-only.  */
 /* { dg-options "-fdump-tree-gimple -fno-finite-math-only" } */

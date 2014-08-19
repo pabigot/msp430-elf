@@ -58,10 +58,11 @@ if { ![istarget cris-*-*] && ![istarget crisv32-*-*]
 # undefined at assembly time.  Hence this test will not pass for the
 # MN10300.  The same thing is true for the RX port as well.
 if { ![istarget hppa*-*-*]
-     && ![istarget msp430*-*-*]
      && ![istarget alpha*-*-*vms*]
      && ![istarget rx-*-*]
+     && ![istarget rl78-*-*]
      && ![istarget mn10300-*-*]
+     && ![istarget msp430*-*-*]
      && ![istarget am3*-*-*] } then {
     gas_test_error "diff1.s" "" "difference of two undefined symbols"
 }
@@ -90,7 +91,6 @@ gas_test_error "assign-bad.s" "" "== assignment for symbol already set"
 # .equ works differently on some targets.
 # linkrelax-ing prevents most forward references from working.
 case $target_triplet in {
-    { am3*-*-* } { }
     { *c54x*-*-* } { }
     { cr16*-*-* } { }
     { crx*-*-* } { }
@@ -101,13 +101,13 @@ case $target_triplet in {
     default {
 	# Some targets don't manage to resolve BFD_RELOC_8 for constants.
 	setup_xfail "alpha*-*-*" "*c30*-*-*" "*c4x*-*-*" \
-	    "d\[13\]0v*-*-*" "i860-*-*" "mips*-*-*" "msp430-*-*" \
-	    "pdp11-*-*" "xtensa*-*-*"
+	    "d\[13\]0v*-*-*" "i860-*-*" "mips*-*-*" \
+	    "nds32*-*-*" "pdp11-*-*" "xtensa*-*-*"
 	run_dump_test forward
     }
 }
 
-# aout relocs are often weird, so is mep and mips-ecoff. don't bother testing
+# aout relocs are often weird, so is mep. don't bother testing
 # som doesn't use a .text section
 # mmix doesn't like .L1:
 # ti addresses aren't octets.
@@ -118,8 +118,8 @@ if { ![is_aout_format] } {
 	}
 	{ hppa*-*-hpux* } { }
 	{ mep-*-* } { }
-	{ mips*-*-ecoff* } { }
 	{ mmix-*-* } { }
+	{ nds32*-*-* } { }
 	{ tic30*-*-* } { }
 	{ tic4x*-*-* } { }
 	{ tic54x*-*-* } { }
@@ -141,8 +141,8 @@ case $target_triplet in {
     { mips*-*-* } { }
     { mn10200-*-* } { }
     { mn10300-*-* } { }
-    { am3*-*-* } { }
     { msp430*-*-* } { }
+    { nds32*-*-* } { }
     { pdp11-*-* } { }
     { tic30*-*-* } { }
     { tic4x*-*-* } { }
@@ -153,10 +153,10 @@ case $target_triplet in {
 	run_dump_test redef
 	# These targets fail redef2 because they disallow redefined
 	# symbols on relocs.
-	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*"
+	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*" "rl78-*-*"
 	setup_xfail "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
 	run_dump_test redef2
-	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*"
+	setup_xfail "m68hc1*-*-*" "m6811-*-*" "m6812-*-*" "rl78-*-*"
 	setup_xfail "rx-*-*" "vax*-*-*" "xgate*-*-*" "z8k-*-*"
 	# rs6000-aix disallows redefinition via .comm.
 	setup_xfail "*-*-aix*"
@@ -270,11 +270,8 @@ if { ![istarget hppa*-*-*] &&
      ![istarget *c54x*-*-*] } then {
     # the vax fails because VMS can apparently actually handle this
     # case in relocs, so gas doesn't handle it itself.
-    # mn10300 emits two relocs to handle the difference of two symbols.
-    setup_xfail "mn10300*-*-*" "vax*-*-vms*"
-    setup_xfail "h8300*-*-elf*" "mn10200*-*-*"
-    setup_xfail "am3*-*-*"
-    setup_xfail "msp430*-*-*"
+    # msp430 and mn10300 emit two relocs to handle the difference of two symbols.
+    setup_xfail "mn10300*-*-*" "msp430*-*-*" "vax*-*-vms*"
     do_930509a
 }
 
@@ -358,6 +355,7 @@ case $target_triplet in {
     { hppa*-*-* } { }
     { *c4x*-*-* } { }
     { *c54x*-*-* } { }
+    { rl78-*-* } { }
     { rx-*-* } { }
     default {
         test_cond
@@ -372,10 +370,19 @@ if {  ([istarget "i*86-*-*pe*"] && ![istarget "i*86-*-openbsd*"]) \
   gas_test "fastcall.s" ""   "" "fastcall labels"
 }
 
-if { ![istarget "bfin-*-*"] } then {
+if { ![istarget "bfin-*-*"] && ![istarget "nds32*-*-*"] } then {
     run_dump_test assign
 }
 run_dump_test sleb128
+run_dump_test sleb128-2
+run_dump_test sleb128-3
+setup_xfail "nds32*-*-*"
+run_dump_test sleb128-4
+run_dump_test sleb128-5
+# .byte is not 8 bits on either tic4x or tic54x
+if { ![istarget "tic4x*-*-*"] && ![istarget "tic54x*-*-*"] } {
+    run_dump_test sleb128-7
+}
 
 # .byte is 32 bits on tic4x, and .p2align isn't supported on tic54x
 # .space is different on hppa*-hpux.
@@ -412,6 +419,7 @@ case $target_triplet in {
     { *c54x*-*-* } { }
     { z80-*-* } { }
     default {
+	setup_xfail "nds32*-*-*"
 	run_dump_test weakref1
 	run_dump_test weakref1g
 	run_dump_test weakref1l

@@ -1,59 +1,93 @@
-2013-03-22  Nick Clifton  <nickc@redhat.com>
+2014-06-27  Nick Clifton  <nickc@redhat.com>
 
-	* ld-undefined/undefined.exp (undefined line): Expect this test to
-	fail for the MSP430.
-
-2013-03-05  Nick Clifton  <nickc@redhat.com>
-
-	* ld-elf/init-fini-arrays.d: Expected test to fail on the MSP430.
-	* ld-elf/flags1.d: Expect test to pass for the MSP430.
-	* ld-undefined/undefined.exp: Likewise.
-
-2013-02-06  Nick Clifton  <nickc@redhat.com>
-
-	* ld-elf/extract-symbol-1sec.d: Fail for V850.
-
-	* ld-elf/sec64k.exp: Skip for MSP430.
-	* ld-gc/pr13683.d: Likewise.
+	* ld-elf/group10.d: Skip for MSP430.
 	* ld-gc/pr14265.d: Likewise.
-	* ld-srec/srec.exp: Likewise.
+	* ld-scripts/crossref.exp: Likewise.
+	* ld-scripts/empty-orphan.d: Likewise.
+
+2014-03-17  Nick Clifton  <nickc@redhat.com>
+
+	* config/default.exp (ASFLAGS): For the RX target add:
+	-muse-conventional-section-names
+	* ld-checks/checks.exp: Likewise.
+	* ld-elfcomm/elfcomm.exp: Add -nostdlib to link command line.
+	Use gcc instead of ld to perform final link.
+	* ld-gc/gc.exp: Likewise.
+	* ld-gc/pr13683.d: Skip for all mips64 targets.
+	* ld-gc/pr14265.d: Likewise.
+	* ld-plugin/lto.exp: Only run C++ tests if a C++ compiler is
+	available.
+	* ld-scripts/crossref.exp: Use gcc instead of ld to perform final
+	link.
 	* ld-undefined/undefined.exp: Likewise.
+	* lib/ld-lib.exp (proc default_ld_link): Do not add ldflags.
+	(proc default_ld_simple_link): Only add target flags if using gcc.
+	(proc ld_simple_link_defsyms): Add optional parameter of the
+	defsym command line option to use.
+	(proc check_gc_sections_available): Add more exceptions.
+	(proc check_shared_lib_support): Likewise.
+	(proc check_plugin_api_available): Skip for non-natives.
+	(proc check_lto_shared_available): New function.
 
-2012-08-29  Nick Clifton  <nickc@redhat.com>
+2012-09-10  Nick Clifton  <nickc@redhat.com>
 
-	* ld-elf/frame.exp: Skip for all v850 targets.
-	* ld-scripts/size-2.d: Likewise.
-	* ld-scripts/crossref.exp: Set special symbols needed by v850
-	toolchains.
+	* ld-elf/init0.s: Add section attributes.
+	* ld-elf/fini0.s: Likewise.
 
-2012-03-30  Nick Clifton  <nickc@redhat.com>
+2011-08-09  Nick Clifton  <nickc@redhat.com>
 
-	* ld-elf/sec64k.exp: Add -X to linker command line to ensure
-	expected default local symbol stripping behaviour.
-	* ld-elf/empty2.d: Likewise.
-	* ld-scripts/sort_b_a-1.d: Likewise.
-	* ld-scripts/sort_b_a.d: Likewise.
-	* ld-scripts/sort_b_a_a-1.d: Likewise.
-	* ld-scripts/sort_b_a_a-2.d: Likewise.
-	* ld-scripts/sort_b_a_a-3.d: Likewise.
-	* ld-scripts/sort_b_a_n-1.d: Likewise.
-	* ld-scripts/sort_b_a_n-2.d: Likewise.
-	* ld-scripts/sort_b_a_n-3.d: Likewise.
-	* ld-scripts/sort_b_n-1.d: Likewise.
-	* ld-scripts/sort_b_n.d: Likewise.
-	* ld-scripts/sort_b_n_a-1.d: Likewise.
-	* ld-scripts/sort_b_n_a-2.d: Likewise.
-	* ld-scripts/sort_b_n_a-3.d: Likewise.
-	* ld-scripts/sort_b_n_n-1.d: Likewise.
-	* ld-scripts/sort_b_n_n-2.d: Likewise.
-	* ld-scripts/sort_b_n_n-3.d: Likewise.
-	* ld-scripts/sort_no-1.d: Likewise.
-	* ld-scripts/sort_no-2.d: Likewise.
+	* ld-scripts/phdrs.exp: Expect test to fail for the RX.
 
-2008-10-28  Nick Clifton  <nickc@redhat.com>
+2009-07-16  Nick Clifton  <nickc@redhat.com>
 
-	* ld-gc/gc.c: Add aliases for symbol names to be used when the
-	target compiler prepends an underscore to function names.
+	* ld-mips-elf/mips-elf.exp: Do not run gnu attr tests on non-linux
+	targets.
+
+2009-07-08  Nick Clifton  <nickc@redhat.com>
+
+	* ld-cdtest/cdtest.exp: Test for build ld.
+	* ld-elf/dwarf.exp: Likewise.
+	* ld-elf/elf.exp: Likewise.
+	* ld-elf/shared.exp: Likewise.
+	* ld-elf/wrap.exp: Likewise.
+
+2009-05-07  Nick Clifton  <nickc@redhat.com>
+
+	* lib/ld-lib.exp (check_gc_sections_available): Do not run gc
+	section tests for cygwin.
+	* ld-elf/eh-group.exp: Do not run these tests for non-ELF based
+	targets.
+
+2008-04-23  Nick Clifton  <nickc@redhat.com>
+
+	* ld-mips-elf/mips-elf.exp: Only run attribute tests for Linux and
+	NetBSD targets.
+
+2008-04-09  Nick Clifton  <nickc@redhat.com>
+
+	Install Red Hat local patches:
+
+	* ld-selective/selective.exp: For V850e targets, link with
+	v850e version of libgcc.a and force definition of __ctbp.
+
+2007-10-30  Nick Clifton  <nickc@redhat.com>
+
+	Issues 112405 and 135409
+	* am33.exp: Allow some tests to be run for mn10300.
+	Run new tests.
+	* ld-am33/i112045-3.s: New test.
+	* ld-am33/i112045-3.d: Expected disassembly.
+	* ld-am33/i135409.s: Rename to i135409-1.s.
+	* ld-am33/i135409.d: Rename to i135409-2.s
+	* ld-am33/i135409-2.s: New test.
+	* ld-am33/i135409-2.d: Expected symbol table.
+
+2007-10-18  Nick Clifton  <nickc@redhat.com>
+
+	Issue 135409
+	* ld-am33/i135409.s: New test source file.
+	* ld-am33/i135409.d: Expected symbol table dump.
+	* ld-am33/am33.exp: Assemble and link the new test.
 
 2007-10-15  Nick Clifton  <nickc@redhat.com>
 
@@ -65,6 +99,10 @@
 	* ld-am33/i112045-2.s: New test case.
 	* ld-am33/i112045-2.d: Expected dump.
 
+2007-07-24  Nick Clifton  <nickc@redhat.com>
+
+	* ld-srec/srec.exp: Expect tests to fail for the h8300 target.
+
 2007-07-12  Nick Clifton  <nickc@redhat.com>
 
 	* ld-am33: New test directory.
@@ -75,343 +113,86 @@
 	* ld-am33/i36434.d: New test file.
 	* ld-am33/i36434.s: New test file.
 
-2006-12-08  Dave Brolley  <brolley@redhat.com>
+2007-04-17  Nick Clifton  <nickc@redhat.com>
 
-	* ld-undefined/undefined.exp: XFAIL the undefined test
-	for mep-*-*.
+	* ld-mips-elf/eh-frame4.d: Fix expected output.
 
-2004-01-23  Richard Sandiford  <rsandifo@redhat.com>
+2007-02-14  Nick Clifton  <nickc@redhat.com>
 
-	* ld-frv/fr450-link[abc].s, fr450-link.d: New test.
-	* ld-frv/frv.exp: New harness.
+	* ld-sh/arch/arch.exp (test_arch): Include little endian emulation
+	selector on linker command line for little endian multilibs.
 
-2003-12-02  Alexandre Oliva  <aoliva@redhat.com>
+2007-02-14  Nick Clifton  <nickc@redhat.com>
 
-	* ld-frv/fdpic1.s (.D0): Move to separate data section.
+	* ld-elf/sec64k.exp: Add more start symbols.
 
-2003-11-28  Alexandre Oliva  <aoliva@redhat.com>
+2005-02-18  Nick Clifton  <nickc@redhat.com>
 
-	* ld-frv/fdpic-static-1.d, ld-frv/fdpic-static-2.d,
-	* ld-frv/fdpic-static-7.d, ld-frv/fdpic-static-8.d: Update to
-	reflect EMBEDDED= change in linker script.
-
-2003-11-27  Alexandre Oliva  <aoliva@redhat.com>
-
-	* ld-frv: Update .d files to reflect changes in the page size, the
-	addition of a stack segment, the use of a NULL function descriptor
-	for weakundef functions and the change in the lazy funcdesc_value
-	in-place addend value.
-
-2003-11-05  Alexandre Oliva  <aoliva@redhat.com>
-
-	* lib/ld-lib.exp (is_elf_format): Match frv-uclinux.
-
-2003-10-06  Alexandre Oliva  <aoliva@redhat.com>
-
-	* ld-frv/fdpic-static-1.d, ld-frv/fdpic-static-2.d,
-	ld-frv/fdpic-static-7.d, ld-frv/fdpic-static-8.d: Addresses are
-	now _gp-based, not \.rofixup-based.
-	* ld-frv/fdpic-static-6.d: Likewise.  Match warning about
-	relocation to different section.
-
-2003-09-30  Alexandre Oliva  <aoliva@redhat.com>
-
-	* ld-frv/fdpic.exp: Add -melf32frvfd to LDFLAGS.
-
-2003-09-19  Alexandre Oliva  <aoliva@redhat.com>
-
-	* ld-frv/fdpic7.s, ld-frv/fdpic-static-7.d, ld-frv/fdpic-pie-7.d,
-	ld-frv/fdpic-shared-7.d: New.
-	* ld-frv/fdpic8.s, ld-frv/fdpic-static-8.d, ld-frv/fdpic-pie-8.d,
-	ld-frv/fdpic-shared-8.d: New.
-	* ld-frv/fdpic-pie-8-fail.d, ld-frv/fdpic-shared-8-fail.d: New.
-	* ld-frv/fdpic.exp: Run them.
-	* ld-frv/fdpic8.ldv, ld-frv/fdpic8min.ldv: New.
-
-2003-09-18  Alexandre Oliva  <aoliva@redhat.com>
-
-	* ld-frv/fdpic5.s, ld-frv/fdpic-static-5.d, ld-frv/fdpic-pie-5.d,
-	ld-frv/fdpic-shared-5.d: New.
-	* ld-frv/fdpic6.s, ld-frv/fdpic-static-6.d, ld-frv/fdpic-pie-6.d,
-	ld-frv/fdpic-shared-6.d: New.
-	* ld-frv/fdpic.exp: Run them.
-
-	* ld-frv/fdpic*.d: Add -mfdpic to assembler flags.  Updated.
-	* ld-frv/fdpic2min.ldv: New, used by fdpic-shared-2.d.
-	* ld-frv/fdpic-shared-2-fail.d: New.
-	* ld-frv/fdpic.exp: Run it.
-
-	* ld-frv/fdpic4.s, ld-frv/fdpic-shared-4.d: New.
-	* ld-frv/fdpic.exp: Add new test.
-	* ld-frv/fdpic-pie-2.d: Remove unnecessary function descriptors.
-
-	* ld-frv/fdpic-shared-local-2.d, ld-frv/fdpic2.ldv: New.
-	* ld-frv/fdpic3.s, ld-frv/fdpic-shared-3.d: New.
-	* ld-frv/fdpic.exp: Add new tests.
-
-	* ld-frv/fdpic.exp, ld-frv/fdpic1.s, ld-frv/fdpic2.s,
-	* ld-frv/fdpic-static-1.d, ld-frv/fdpic-static-2.d,
-	* ld-frv/fdpic-pie-1.d, ld-frv/fdpic-pie-2.d,
-	* ld-frv/fdpic-shared-1.d, ld-frv/fdpic-shared-2.d: Renamed from
-	ucpic.
-
-2003-09-15  Alexandre Oliva  <aoliva@redhat.com>
-
-	* ld-frv/ucpic.exp, ld-frv/ucpic1.s, ld-frv/ucpic2.s: New.
-	* ld-frv/ucpic-static-1.d, ld-frv/ucpic-static-2.d: New.
-	* ld-frv/ucpic-pie-1.d, ld-frv/ucpic-pie-2.d: New.
-	* ld-frv/ucpic-shared-1.d, ld-frv/ucpic-shared-2.d: New.
-
-2003-05-29  Alexandre Oliva  <aoliva@redhat.com>
-
-	* ld-h8300/relax.d: Fix typo.  Adjust for disassembler changes.
-
-2002-04-29  Nick Clifton  <nickc@cambridge.redhat.com>
-
-	* ld-selective/selective.exp: Disable profiling flag because it is
-	incompatible with -ffunction-sections.
-
-2002-04-09  DJ Delorie  <dj@redhat.com>
-
-	* ld-mep: New, with content.
-
-2002-02-02  Alexandre Oliva  <aoliva@redhat.com>
-
-	* ld-sh/sh64/crange3-cmpct.rd: Adjust offsets.
-	* ld-sh/sh64/crange3-media.rd: Likewise.
-	* ld-sh/sh64/crange3.rd: Likewise.
-	* ld-sh/sh64/crangerel1.rd: Likewise.
-	* ld-sh/sh64/crangerel2.rd: Likewise.
-	* ld-sh/sh64/reldl32.rd: Likewise.
-	* ld-sh/sh64/reldl64.rd: Likewise.
-
-2002-01-28  Alexandre Oliva  <aoliva@redhat.com>
-
-	* ld-sh/sh64/abi32.xd: Formatting changes to match the current
-	output of objdump.
-	* ld-sh/sh64/cmpct1.xd: Likewise.
-	* ld-sh/sh64/crange1.rd: Likewise.
-	* ld-sh/sh64/crange2.rd: Likewise.
-	* ld-sh/sh64/crange3-cmpct.rd: Likewise.
-	* ld-sh/sh64/crange3-media.rd: Likewise.
-	* ld-sh/sh64/crange3.rd: Likewise.
-	* ld-sh/sh64/crangerel1.rd: Likewise.
-	* ld-sh/sh64/crangerel2.rd: Likewise.
-	* ld-sh/sh64/mix1.xd: Likewise.
-	* ld-sh/sh64/mix2.xd: Likewise.
-	* ld-sh/sh64/rel32.xd: Likewise.
-	* ld-sh/sh64/reldl32.rd: Likewise.
-	* ld-sh/sh64/reldl64.rd: Likewise.
-	* ld-sh/sh64/sh64.exp: Likewise.  Reordered cranges and stack
-	sessions, to match changes in the linker script.
-
-2002-01-14  Nick Clifton  <nickc@cambridge.redhat.com>
-
+	GNUPro/local/040527-1-ld_selective_v850_arm_additions.patch
 	* ld-selective/selective.exp: For V850e targets, link with
 	v850e version of libgcc.a and force definition of __ctbp.
 
-2001-06-14  Alexandre Oliva  <aoliva@redhat.com>
+2004-12-16  Richard Sandiford  <rsandifo@redhat.com>
 
-	* ld-sh/sh64/reldl32.rd, ld-sh/sh64/reldl64.rd: Adjust relocation
-	info to reflect renumbering of relocation types.
+	* ld-v850: New directory.
 
-2001-03-14  DJ Delorie  <dj@redhat.com>
+2004-09-29  Nick Clifton  <nickc@redhat.com>
 
-	* ld-sh/sh64/endian.dbd: New file, endian tests.
-	* ld-sh/sh64/endian.dld: Ditto.
-	* ld-sh/sh64/endian.ld:  Ditto.
-	* ld-sh/sh64/endian.s:  Ditto.
-	* ld-sh/sh64/endian.sbd:  Ditto.
-	* ld-sh/sh64/endian.sld:  Ditto.
-	* ld-sh/sh64/sh64.exp: Add above tests.  Add -L option to ld.
+	* ld-selective/selective.exp: Expect selective4 and selective5 to
+	fail for the xstormy16 port.
 
-2001-03-12  DJ Delorie  <dj@redhat.com>
+	* ld-elf/merge.d: Expect test to fail for xstormy16 port.
 
-	* ld-sh/sh64/relax.exp: New file, test disabling relaxing.
-	* ld-sh/sh64/relax1.s: Ditto.
-	* ld-sh/sh64/relax2.s: Ditto.
-	* ld-sh/sh64/relax3.s: Ditto.
-	* ld-sh/sh64/relax4.s: Ditto.
-	* ld-sh/sh64/relfail.exp: New file, test for bogus relocs.
-	* ld-sh/sh64/relfail.s: Ditto.
+2004-07-14  Nick Clifton  <nickc@redhat.com>
 
-2001-03-12  DJ Delorie  <dj@redhat.com>
+	* Import this patch from mainline:
 
-	* ld-sh/sh.exp: This test isn't appropriate for SH64 since it
-	uses SH32 assembler files.
+	2004-04-08  Alan Modra  <amodra@bigpond.net.au>
 
-2001-03-07  DJ Delorie  <dj@redhat.com>
+	PR 47.
+	* ld-cdtest/cdtest.exp: Remove -fgnu-linker.
 
-	* ld-selective/selective.exp: Pass "-e _start" for sh64 to
-	accomodate expected start symbol in test.
+2004-07-14  Nick Clifton  <nickc@redhat.com>
 
-2001-03-06  DJ Delorie  <dj@redhat.com>
+	* Re-import this patch which appears to have been mysteriously
+	removed:
 
-	* ld-scripts/crossref.exp: Pass -mshelf32 to the linker for sh64,
-	to match what gcc passes to the linker by default.
-	* ld-selective/selective.exp: Ditto.
-	* ld-srec/srec.exp: Ditto, plus XFAIL for sh64.
-	* ld-undefined/undefined.exp: Add XFAIL for sh64 (it's dwarf2).
+	2003-05-30  H.J. Lu <hongjiu.lu@intel.com>
 
-2001-03-06  DJ Delorie  <dj@redhat.com>
+	* config/default.exp: Load tmpdir/libpath.exp.
+	(gcc_ld_flag): Set from $libpath.
 
-	* ld-sh/sh64/abi32.xd (stack): Adjust for new default stack layout.
-	* ld-sh/sh64/abi64.xd (stack): Ditto.
-	* ld-sh/sh64/cmpct1.xd (stack): Ditto.
-	* ld-sh/sh64/crange1.rd (stack): Ditto.
-	* ld-sh/sh64/crange2.rd (stack): Ditto.
-	* ld-sh/sh64/crange3-cmpct.rd (stack): Ditto.
-	* ld-sh/sh64/crange3-media.rd (stack): Ditto.
-	* ld-sh/sh64/crange3.rd (stack): Ditto.
-	* ld-sh/sh64/mix1.xd (stack): Ditto.
-	* ld-sh/sh64/mix2.xd (stack): Ditto.
-	* ld-sh/sh64/shdl32.xd (stack): Ditto.
-	* ld-sh/sh64/shdl64.xd (stack): Ditto.
+2004-07-12  Richard Sandiford  <rsandifo@redhat.com>
 
-2001-01-14  Hans-Peter Nilsson  <hpn@cygnus.com>
+	Backport from mainline:
 
-	* ld-sh/sh.exp: Use --oformat srec, not -oformat srec.
+	2004-07-08  Maciej W. Rozycki  <macro@linux-mips.org>
+	* ld-mips-elf/reloc-merge-lo16.{s,d,ld}: New test.
+	* ld-mips-elf/mips-elf.exp: Run it.
 
-	* ld-sh/sh64/mix1.xd: Add SORT_ENTRIES for .cranges section.
-	* ld-sh/sh64/mix2.xd: Ditto.
+2004-05-27  Nick Clifton  <nickc@redhat.com>
 
-2001-01-08  Hans-Peter Nilsson  <hpn@cygnus.com>
+	* Import this patch:
 
-	* ld-sh/sh64/abi32.xd: Adjust for bit 0 set on an entry address
-	being SHmedia.
-	* ld-sh/sh64/shdl64.xd: Ditto.
-	* ld-sh/sh64/shdl32.xd: Ditto.
-	* ld-sh/sh64/mix2.xd: Ditto.
-	* ld-sh/sh64/crange3-media.rd: Ditto.
-	* ld-sh/sh64/abi64.xd: Ditto.
+	2003-12-30  Mark Mitchell  <mark@codesourcery.com>
 
-2001-01-06  Hans-Peter Nilsson  <hpn@cygnus.com>
+	* ld-srec/srec.exp (run_srec_test): Remove -fgnu-linker, since GCC
+	3.4 does not support it.
 
-	* ld-sh/sh64/crange-2a.s (diversion2): New global symbol.
-	* ld-sh/sh64/crange1.rd: Adjust to presence of new symbol.
-	Adjust section type for .cranges; expect sorted contents.
-	* ld-sh/sh64/crange2.rd: Ditto.
-	* ld-sh/sh64/crange3.dd, ld-sh/sh64/crange3.rd: Ditto.
-	* ld-sh/sh64/crangerel1.rd: Adjust to presence of new symbol.
-	* ld-sh/sh64/crangerel2.rd: Ditto.
-	* ld-sh/sh64/mix1.xd: Adjust to DEBUGGING being set for .cranges.
-	* ld-sh/sh64/mix2.xd: Ditto.
+2004-05-27  Nick Clifton  <nickc@redhat.com>
 
-	* ld-sh/sh64/crange3-cmpct.rd, ld-sh/sh64/crange3-media.rd: New
-	tests.
-	* ld-sh/sh64/sh64.exp: Tweak test message.  Run new tests.
+	* Import this patch:
 
-2001-01-05  Hans-Peter Nilsson  <hpn@cygnus.com>
+	2002-01-14  Nick Clifton  <nickc@cambridge.redhat.com>
 
-	* ld-sh/sh64/shmix-1.s (start2): Add a NOP to provide a valid
-	target for (unexpanded) PTB.  Add an .align 2 to SHmedia code to
-	keep properly aligned.
-	* ld-sh/sh64/mix1.sd, ld-sh/sh64/mix1.xd: Adjust accordingly.
+	* ld-selective/selective.exp: For V850e targets, link with
+	v850e version of libgcc.a and force definition of __ctbp.
+	
+2003-11-03  Nick Clifton  <nickc@redhat.com>
 
-	* ld-sh/sh64/mix1-noexp.sd, ld-sh/sh64/mix2-noexp.sd,
-	ld-sh/sh64/abixx-noexp.sd: New tests for GAS -no-expand and
-	R_SH_PT_16 relocation.
-	* ld-sh/sh64/sh64.exp: Run new tests.
+	* ld-elfcomm/elfcomm.exp (dump_common1): Fix typo in expecetd
+	readelf output.
 
-2000-12-30  Hans-Peter Nilsson  <hpn@cygnus.com>
-
-	* ld-sh/sh64/crange-2f.s, ld-sh/sh64/crange-2g.s,
-	ld-sh/sh64/crange-2h.s, ld-sh/sh64/crange-2i.s,
-	ld-sh/sh64/crange3.dd, ld-sh/sh64/crange3.rd: New tests.
-	* ld-sh/sh64/sh64.exp: Run new tests.
-
-	* ld-sh/sh64/crange1.rd: Correct section flags.
-	* ld-sh/sh64/crange2.rd: Ditto.
-	* ld-sh/sh64/crangerel1.rd: Ditto.
-
-2000-12-18  Hans-Peter Nilsson  <hpn@cygnus.com>
-
-	* ld-sh/sh64/crange-1.s, ld-sh/sh64/crange-2a.s,
-	ld-sh/sh64/crange-2b.s, ld-sh/sh64/crange-2c.s,
-	ld-sh/sh64/crange-2d.s, ld-sh/sh64/crange-2e.s,
-	ld-sh/sh64/crange1.rd, ld-sh/sh64/crange2.rd,
-	ld-sh/sh64/crangerel1.rd, ld-sh/sh64/crangerel2.rd: New tests for
-	handling .cranges section.
-	* ld-sh/sh64/sh64.exp: Run new tests.
-	* ld-sh/sh64/mix1.sd, ld-sh/sh64/mix1.xd, ld-sh/sh64/mix2.sd,
-	ld-sh/sh64/mix2.xd: Adjust for .cranges section.
-
-2000-12-15  Hans-Peter Nilsson  <hpn@cygnus.com>
-
-	* ld-sh/sh64/abi32.sd, ld-sh/sh64/abi32.xd, ld-sh/sh64/abi64.sd,
-	ld-sh/sh64/abi64.xd, ld-sh/sh64/cmpct1.xd, ld-sh/sh64/mix1.sd,
-	ld-sh/sh64/mix1.xd, ld-sh/sh64/mix2.sd, ld-sh/sh64/mix2.xd,
-	ld-sh/sh64/shdl32.xd, ld-sh/sh64/shdl64.xd: Adjust to .bss and
-	.data individually 8-byte aligned.
-
-2000-12-09  Hans-Peter Nilsson  <hpn@cygnus.com>
-
-	* ld-sh/sh64/rel-1.s, ld-sh/sh64/rel-2.s, ld-sh/sh64/rel32.xd,
-	ld-sh/sh64/rel64.xd, ld-sh/sh64/reldl-1.s, ld-sh/sh64/reldl-2.s,
-	ld-sh/sh64/reldl32.rd, ld-sh/sh64/reldl64.rd: New tests.
-	* ld-sh/sh64/sh64.exp: Make it possible to use readelf as
-	inspection tool.  Run new tests.
-
-2000-12-07  Hans-Peter Nilsson  <hpn@cygnus.com>
-
-	* ld-sh/sh64/abi64.sd, ld-sh/sh64/abi32.sd, ld-sh/sh64/mix1.sd,
-	ld-sh/sh64/mix2.sd: Correct offsets in PT/PTA/PTB expansions.
-
-	* ld-sh/sh64/shdl-1.s, ld-sh/sh64/shdl-2.s, ld-sh/sh64/shdl64.sd,
-	ld-sh/sh64/shdl64.xd, ld-sh/sh64/shdl32.xd: New tests.
-	* ld-sh/sh64/sh64.exp: Run new tests.
-
-2000-12-01  Hans-Peter Nilsson  <hpn@cygnus.com>
-
-	* ld-sh/sh64/cmpct1.sd, ld-sh/sh64/cmpct1.xd,
-	ld-sh/sh64/shcmp-1.s: New test.
-	* ld-sh/sh64/sh64.exp: Add new test to sh64tests.  Reformat.
-
-2000-11-30  Hans-Peter Nilsson  <hpn@cygnus.com>
-
-	* ld-sh/sh64/sh64.exp: Use linker option -mshelf64 for 64-bit ABI
-	test.
-	* ld-sh/sh64/abi64.xd: Tweak for 64-bit ELF.
-
-2000-11-29  Hans-Peter Nilsson  <hpn@cygnus.com>
-
-	* ld-sh/sh64/sh64.exp (sh64tests): Use linker option -mshelf32 for
-	tests.
-
-2000-11-27  Hans-Peter Nilsson  <hpn@cygnus.com>
-
-	* ld-sh/sh64/abi32.sd, ld-sh/sh64/abi64.sd: Correct MOVI
-	registers.
-
-	* ld-sh/sh64/mix1.sd, ld-sh/sh64/mix1.xd, ld-sh/sh64/shmix-1.s:
-	New test.
-	* ld-sh/sh64/mix2.sd, ld-sh/sh64/mix2.xd, ld-sh/sh64/shmix-2.s,
-	ld-sh/sh64/shmix-3.s: New test.
-	* ld-sh/sh64/sh64.exp: Add new tests to sh64tests.
-
-2000-11-26  Hans-Peter Nilsson  <hpn@cygnus.com>
-
-	* ld-sh/sh64: New testsuite.
-
-2000-08-26  Alexandre Oliva  <aoliva@redhat.com>
-
-	* ld-undefined/undefined.exp (mn10300-*-elf): With dwarf-2,
-	`undefined function' can't pass.
-
-1999-12-17  Timothy Wall <twall@cygnus.com>
-
-       * ld-scripts/script.exp: adjust sizes for c54x output
-       * ld-checks/asm.s: move .text/.data out of column zero
-
-1999-08-11  Diego Novillo <dnovillo@cygnus.com>
-
-	* ld-selective/selective.exp: Changed selective5 to also test for
-	the presence of bar__1A in the final binary. Modified selective6 
-	to check for the absence of bar__1A and presence of foo__1B.
-
-1999-07-29  Richard Henderson  <rth@cygnus.com>
-
-	* testsuite/ld-scripts/phdrs.exp: IA-64 is 64-bit ELF too.
 
 Local Variables:
 mode: change-log

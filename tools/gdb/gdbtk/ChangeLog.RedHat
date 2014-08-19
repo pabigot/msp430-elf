@@ -1,46 +1,4 @@
-2012-02-21  Kevin Buettner  <kevinb@redhat.com>
+2014-03-08  Kevin Buettner  <kevinb@redhat.com>
 
-	* generic/gdbtk-cmds.h (pc_function_name): Make return type
-	const.
-	* generic/gdbtk-bp.c (gdb_get_breakpoint_info)
-	(gdb_get_tracepoint_info): Make char * variables const to match
-	recent GDB API changes.
-	* generic/gdbtk-stack.c (get_frame_name): Likewise.
-	* generic/gdbtk-cmds.c (gdb_get_function_command, gdb_listfuncs)
-	(gdb_loc, perror_with_name_wrapper): Likewise.
-	(pc_function_name): Likewise, plus change return type to be const.
-
-2009-01-30  Kevin Buettner  <kevinb@redhat.com>
-
-	* generic/gdbtk-stack.c (gdb_get_vars_command): Add cast to
-	avoid 64-bit to 32-bit pointer to integer warning/error.
-
-2008-03-17  Kevin Buettner  <kevinb@redhat.com>
-
-	* generic/gdbtk-interp.c (gdbtk_interpreter_init): Add argument
-	`top_level' to match changes to the rest of GDB.
-
-2002-12-17  Martin M. Hunt  <hunt@redhat.com>
-	
-	* generic/gdbtk-hooks.c (gdbtk_fileopen): set_ui_file_read to
-	gdbtk_console_read.
-	(gdbtk_fputs): Handle gdb_stdtargerr.
-	(gdbtk_console_read): New function.
-
-	* generic/gdbtk.c (gdbtk_init): Create gdb_stdtargin and 
-	gdb_stdtargerr.
-	
-Wed Jun 19 13:25:27 2002  Andrew Cagney  <cagney@redhat.com>
-
-	* generic/gdbtk-register.c (get_register_name): Uncast const
-	from register_name return type.
-
-
-Local Variables:
-mode: change-log
-left-margin: 8
-fill-column: 74
-version-control: never
-End:
-
-
+ 	* generic/gdbtk-interp.c (_initialize_gdbtk_interp): Use non-NULL
+	parameter for `command_loop_proc argument.

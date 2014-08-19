@@ -1,6 +1,6 @@
 ; Options for the Matsushita MN10300 port of the compiler.
 
-; Copyright (C) 2005-2013 Free Software Foundation, Inc.
+; Copyright (C) 2005-2014 Free Software Foundation, Inc.
 ;
 ; This file is part of GCC.
 ;
@@ -65,23 +65,3 @@ Allow gcc to generate LIW instructions
 msetlb
 Target Report Mask(ALLOW_SETLB)
 Allow gcc to generate the SETLB and Lcc instructions
-
-mmem-funcs
-Target Report Mask(MEM_FUNCS)
-Allow gcc to generate calls to memset/cpy
-
-mforce-fpu
-Target Report Mask(ENABLE_FPU)
-Force the use of the FPU for floating point arithmetic
-
-mfdiv
-Target Report Mask(FDIV)
-Allow gcc to generate the FDIV instruction
-
-minline-denormal-checks
-Target Report Mask(INLINE_DENORMAL_CHECK)
-Generate inline code to check for denormal values.
-
-; Local Variables:
-; mode: autoconf
-; End:

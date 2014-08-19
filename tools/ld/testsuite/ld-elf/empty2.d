@@ -1,6 +1,5 @@
 #source: empty2.s
 #ld:
-#ld: -X
 #readelf: -s
 
 #...

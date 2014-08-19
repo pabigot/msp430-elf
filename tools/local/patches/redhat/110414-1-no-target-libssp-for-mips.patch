@@ -1,0 +1,30 @@
+The mips64vrel-elf target (and other non-linux based mips targets)
+cannot build the libssp library because they support multilibs that
+do not support PIC:
+
+  libssp/ssp-local.c: In function '__stack_chk_fail_local':
+  libssp/ssp-local.c:47:1: sorry, unimplemented: MIPS16 PIC for ABIs other than o32 and o64
+
+2011-04-14  Nick Clifton  <nickc@redhat.com>
+
+	* configure.ac: Do not build the target libssp for general mips
+	targets.
+	* configure: Regenerate.
+
+
+Index: configure.ac
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/configure.ac,v
+retrieving revision 1.32
+diff -u -3 -p -r1.32 configure.ac
+--- configure.ac	29 Mar 2011 16:59:18 -0000	1.32
++++ configure.ac	14 Apr 2011 07:46:12 -0000
+@@ -967,7 +967,7 @@ case "${target}" in
+     noconfigdirs="$noconfigdirs target-newlib target-libgloss"
+     ;;
+   mips*-*-*)
+-    noconfigdirs="$noconfigdirs gprof ${libgcj}"
++    noconfigdirs="$noconfigdirs gprof ${libgcj} target-libssp"
+     libgloss_dir=mips
+     ;;
+   romp-*-*)

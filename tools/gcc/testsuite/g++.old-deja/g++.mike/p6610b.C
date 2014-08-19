@@ -13,3 +13,4 @@ C::C() { if (g(this)) fail = 0; }
 struct D : virtual B, virtual A, C { };
 
 int main() { D d; return fail; }
+// { dg-require-effective-target size32plus }

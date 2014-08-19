@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 #define INC_FUNCTIONAL  1
 #define USE_STATIC_CAST 1
 

@@ -30,3 +30,4 @@ foo (int *ip, char *s, va_list v0, va_list v1, va_list v2, va_list v3,
   scanf (dcgettext ("", "%d", 0), ip);
   scanf (dcgettext ("", "%ld", 0), ip);
 }
+/* { dg-prune-output ".*__int20.*" } */

@@ -32,7 +32,8 @@
 #include "solib.h"
 #include "msp430-cio.h"
 #include "inferior.h"
-#include "time.h"
+
+#include <time.h>
 
 
 /* Key for accessing per-inferior cio-related data.  */

@@ -1,4 +1,4 @@
-@c Copyright (C) 2000, 2009 Red Hat, Inc.
+@c Copyright (C) 2000 Red Hat, Inc.
 @c This file is part of the CGEN manual.
 @c For copying conditions, see the file cgen.texi.
 
@@ -7,7 +7,7 @@
 @cindex Porting
 
 This chapter describes how to do a CGEN port.
-It focuses on doing binutils and simulator ports, but the
+It focuses on doing binutils and simulator ports, but the general
 procedure should be generally applicable.
 
 @menu
@@ -15,7 +15,6 @@ procedure should be generally applicable.
 * Supported Guile versions::
 * Running configure::
 * Writing a CPU description file::
-* Interactive development::
 * Doing an opcodes port::
 * Doing a GAS port::
 * Building a GAS test suite::
@@ -76,20 +75,26 @@ to be written.  @xref{Doing a simulator port}.
 
 In order to avoid suffering from the bug of the day when using
 snapshots, CGEN development has been confined to Guile releases only.
-CGEN has been tested with and supports Guile versions @code{1.6.8}
-and @code{1.8.5}.
-As time passes older versions of Guile will no longer be supported.
+As of this writing (1999-04-26) only Guile 1.2 and 1.3 are supported.
+At some point in the future older versions of Guile will no longer be
+supported.
+
+If using Guile 1.2, configure it with @code{--enable-guile-debug
+--enable-dynamic-linking} to work around an unknown bug in this version
+of Guile.  I ran into this on Solaris 2.6.
 
 @node Running configure
 @section Running @code{configure}
 
-When doing porting or maintenance activity with CGEN, it's a good idea
-to configure the build tree with the @code{--enable-cgen-maint} option.
-This adds the necessary dependencies to the @file{toplevel/opcodes} and
-@file{toplevel/sim} directories so that when the @file{.cpu} file is
-changed the makefiles will regenerated the corresponding sources.
+When doing porting or maintenance activity with CGEN, the build tree
+must be configured with the @code{--enable-cgen-maint} option.  This
+adds the necessary dependencies to the @file{toplevel/opcodes} and
+@file{toplevel/sim} directories.
 
-CGEN uses Guile so it must be installed.
+CGEN uses Guile so it must be installed.  At present the CGEN configury
+requires that if Guile isn't installed in @file{/usr/local} then the 
+@code{--with-guile=/guile/install/dir} option must be passed to
+@file{configure} to specify where Guile is installed.
 
 @node Writing a CPU description file
 @section Writing a CPU description file
@@ -103,9 +108,7 @@ following types of entries, in order.  @xref{RTL}, for detailed
 descriptions of each type of entry that appears in the description file.
 
 @menu
-* Conventions::                      Programming style conventions
-* simplify.inc::                     Simplifying writing @file{.cpu} files
-* Names and comments::               Special note on names and comments
+* Conventions::                      Programming style conventions 
 * Writing define-arch::              Architecture wide specs
 * Writing define-isa::               Instruction set characteristics
 * Writing define-cpu::               CPU families
@@ -119,6 +122,7 @@ descriptions of each type of entry that appears in the description file.
 * Writing define-macro-insn::        Macro instructions
 * Using define-pmacro::              Preprocessor macros
 * Splicing list arguments::          List arguments in macros
+* Interactive development::          Useful things to do in a Guile shell
 @end menu
 
 @node Conventions
@@ -126,8 +130,7 @@ descriptions of each type of entry that appears in the description file.
 
 First a digression on conventions and programming style.
 
-@itemize @bullet
-
+@enumerate 1
 @item @code{define-foo} vs. @code{define-normal-foo}
 
 Each CPU description @code{define-} entry generally provides two forms:
@@ -164,150 +167,7 @@ The convention is to have most things lowercase with words separated by
 values and mode names.
 @c FIXME: Seems to me there's a few others.
 This convention must be followed.
-
-@item Integers
-
-There are two things to keep in mind regarding integers in CGEN.
-
-@enumerate
-
-@item Unspecified width
-
-Integers in CGEN generally don't specify a width.
-The width is imposed by context.
-
-@item RTL canonicalization
-
-Integers in RTL may simply be written as a number,
-or in the full canonical form as
-@samp{(const [<option-list>] [<mode>] <value>)}.
-
-The ``option list'', if specified, must be @samp{()}
-as there are currently no options for constants.
-It is optional and is generally elided when written.
-
-The ``mode'' of the number specifies the precision.
-The default mode is @samp{INT} meaning arbitrary precision.
-
-In RTL, whether to write just the number, e.g. @samp{24},
-or the full canonical form, e.g., @samp{(const () INT 24)},
-or anything in between is a matter of style.
-
 @end enumerate
-
-@end itemize
-
-@node simplify.inc
-@subsection simplify.inc
-@cindex simplify.inc
-
-The file @file{simplify.inc} provides several pmacros that help simplify
-writing @file{.cpu} files.
-
-To use it add the following to your @file{.cpu} file.
-
-@smallexample
-(include "simplify.inc")
-@end smallexample
-
-@file{simplify.inc} provides the following pmacros:
-
-@itemize @bullet
-
-@item define-normal-enum
-(@pxref{a-define-normal-enum, define-normal-enum})
-
-@item define-normal-insn-enum
-(@pxref{a-define-normal-insn-enum, define-normal-insn-enum})
-
-@c ??? Would have been nice to have called this define-simple-ifield.
-@item define-normal-ifield
-(@pxref{a-define-normal-ifield, define-normal-ifield})
-
-@item df
-(@pxref{a-df, df})
-
-@item dnf
-(@pxref{a-dnf, dnf})
-
-@item define-normal-multi-ifield
-(@pxref{a-define-normal-multi-ifield, define-normal-multi-ifield})
-
-@item dnmf
-(@pxref{a-dnmf, dnmf})
-
-@item dsmf
-(@pxref{a-dsmf, dsmf})
-
-@item define-normal-hardware
-(@pxref{a-define-normal-hardware, define-normal-hardware})
-
-@item dnh
-(@pxref{a-dnh, dnh})
-
-@item define-simple-hardware
-(@pxref{a-define-simple-hardware, define-simple-hardware})
-
-@item dsh
-(@pxref{a-dsh, dsh})
-
-@item define-normal-operand
-(@pxref{a-define-normal-operand, define-normal-operand})
-
-@item dno
-(@pxref{a-dno, dno})
-
-@item dnop
-(@pxref{a-dnop, dnop})
-
-@item dndo
-@c (@pxref{a-dndo, dndo})
-
-@item define-normal-insn
-(@pxref{a-define-normal-insn, define-normal-insn})
-
-@item dni
-(@pxref{a-dni, dni})
-
-@item define-normal-macro-insn
-(@pxref{a-define-normal-macro-insn, define-normal-macro-insn})
-
-@item dnmi
-(@pxref{a-dnmi, dnmi})
-
-@end itemize
-
-@node Names and comments
-@subsection Names and comments
-
-Most description entries have a few fields in common: name, comment,
-and attrs (for attributes).
-
-The @samp{name} and @samp{comment} fields have a special property to
-help simplify writing description files.
-
-The proper type for a name is a @code{symbol} and the proper type for a
-comment is @code{string}.  It is sometimes useful, however, to construct
-names and comments from a list of values.  To support this without
-forcing the description file writer to have to explicitly construct a name
-or comment from pieces, CGEN accepts a list as a valid @samp{name} or
-@samp{comment} field, and will (recursively) append each element
-automagically.  Each list must consist of symbols, strings, and numbers,
-or lists.
-CGEN will automagically convert the value to a symbol for a name field,
-and a string for a comment field.
-
-Example:
-
-@smallexample
-(define-insn (name (add 3))
-             (comment (("This is a" " comment")
-                       " constructed as a list."))
-             ...)
-@end smallexample
-
-The name of this instruction is ``add3'' and the comment is
-"This is a comment constructed as a list.".
 
 @node Writing define-arch
 @subsection Writing define-arch
@@ -318,21 +178,6 @@ processor must be defined somewhere, so all of this stuff is put under
 
 This must be the first entry in the description file.
 
-@xref{Architecture variants}, for details.
-
-Here's an example from @file{m32r.cpu}:
-
-@example
-(define-arch
-  (name m32r) ; name of cpu family
-  (comment "Renesas M32R")
-  (default-alignment aligned)
-  (insn-lsb0? #f)
-  (machs m32r m32rx m32r2)
-  (isas m32r)
-)
-@end example
-
 @node Writing define-isa
 @subsection Writing define-isa
 
@@ -342,20 +187,6 @@ The first is to specify parameters needed to decode instructions.
 The second is to give the instruction set a name.  This is important for
 architectures like the ARM where one CPU can execute multiple
 instruction sets.
-
-@xref{Architecture variants}, for details.
-
-Here's an example from @file{arm.cpu}:
-
-@example
-(define-isa
-  (name thumb)
-  (comment "ARM Thumb instruction set (16 bit insns)")
-  (base-insn-bitsize 16)
-  (decode-assist (15 14 13 12 11 10 9 8))
-  (setup-semantics (set-quiet (reg h-gr 15) (add pc 4)))
-)
-@end example
 
 @node Writing define-cpu
 @subsection Writing define-cpu
@@ -375,48 +206,21 @@ fuzzy for now, but basically the simulator engine has a collection of
 structures defining internal state, and ``CPU families'' minimize the
 number of copies of generated code that manipulate this state.
 
-@xref{Architecture variants}, for details.
-
-Here's an example from @file{openrisc.cpu}:
-
-@example
-(define-cpu
-  ; CPU names must be distinct from the architecture name and machine names.
-  ; The "b" suffix stands for "base" and is the convention.
-  ; The "f" suffix stands for "family" and is the convention.
-  (name openriscbf)
-  (comment "OpenRISC base family")
-  (endian big)
-  (word-bitsize 32)
-)
-@end example
-
 @node Writing define-mach
 @subsection Writing define-mach
 
 CGEN uses ``mach'' in the same sense that BFD uses ``mach''.
 ``Mach'', which is short for `machine', defines a variant of
 the architecture. 
+
 @c There may be a need for a many-to-one correspondence between CGEN
 @c machs and BFD machs.
-
-@xref{Architecture variants}, for details.
-
-Here's an example from @file{m32r.cpu}:
-
-@example
-(define-mach
-  (name m32rx)
-  (comment "M32RX cpu")
-  (cpu m32rxf)
-)
-@end example
 
 @node Writing define-model
 @subsection Writing define-model
 
 When describing a CPU, in any context, there is ``architecture'' and
-there is ``implementation''.  In CGEN parlance, a ``model'' is an
+there is ``implementation''.  In CGEN parlance a ``model'' is an
 implementation of a ``mach''.  Models specify pipeline and other
 performance related characteristics of the implementation.
 
@@ -425,22 +229,6 @@ Some architectures bring pipeline details up into the architecture
 yet how to handle all the various possibilities so at present this is
 done on a case-by-case basis.  Maybe a straightforward solution will
 emerge.
-
-@xref{Model variants}, for details.
-
-Here's an example from @file{arm.cpu}:
-@c A poor example.  Later.
-
-@example
-(define-model
-  (name arm710)
-  (comment "ARM 710 microprocessor")
-  (mach arm7tdmi)
-  (unit u-exec "Execution Unit" ()
-	1 1 ; issue done
-	() () () ())
-)
-@end example
 
 @node Writing define-hardware
 @subsection Writing define-hardware
@@ -473,20 +261,6 @@ The program counter is named @samp{h-pc} and must be specified.
 It is not a builtin element as sometimes architectures need to
 modify its behaviour (in the get/set specs).
 
-@xref{Hardware elements}, for details.
-
-Here's an example from @file{arm.cpu}:
-
-@example
-(define-hardware
-  (name h-gr)
-  (comment "general registers")
-  (attrs PROFILE CACHE-ADDR)
-  (type register WI (16))
-  (indices extern-keyword gr-names)
-)
-@end example
-
 @node Writing define-ifield
 @subsection Writing define-ifield
 
@@ -508,19 +282,14 @@ specification: the default insn word size (in bits), and whether bit number
 
 In the general case, fields are described with 4 numbers: word-offset,
 word-length, start, and length.
-All instruction fields live in exactly one word and must
-be contiguous.@footnote{This doesn't include fields like multi-ifields.}
+All instruction fields (*) live in exactly one word and must be contiguous.
 Non-contiguous fields are specified with ``multi-ifields'' which are fields
 built up out of several smaller typically disjoint fields.
 The size of the word depends on the context.  @samp{word-offset} specifies
-the offset in bits from the start of the insn to the word containing the field,
-it must be a multiple of 8.
-@samp{word-length} specifies the size in bits of the word containing the field,
-it also must be a multiple of 8.
+the offset in bits from the start of the insn to the word containing the field.
+@samp{word-length} specifies the size in bits of the word containing the field.
 @samp{start} specifies the position of the MSB of the field in the word.
 @samp{length} specifies the size in bits of the field.
-
-@xref{Instruction fields}, for details.
 
 Example.
 
@@ -531,8 +300,7 @@ Also suppose the ISA numbers the bits starting from the LSB.
 
 default-insn-word-bitsize = 16, lsb0? = #t
 
-An instruction with four 4 bit fields, one 32 bit immediate
-and one 16 bit immediate might be:
+An instruction with four 4 bit fields and one 32 bit immediate might be:
 
 @example
 
@@ -568,7 +336,7 @@ Endianness for the purposes of this example is irrelevant.
 In the word containing op1,op2,r1,r2, op1 is in the most significant nibble
 and r2 is in the least significant nibble.
 
-For a large number of cases specifying all four numbers is excessive.
+For a large number of cases specifying all 4 numbers is excessive.
 With careful redefinition of the starting bit number, one can get away with
 only specifying start,length.
 Imagine several words of the default insn word size laid out from the start of
@@ -666,13 +434,15 @@ One would then write f-op1 as:
 
 @end example
 
+(*) This doesn't include fields like multi-ifields.
+
 @node Writing define-normal-insn-enum
 @subsection Writing define-normal-insn-enum
 
 Writing instruction enum entries involves analyzing the instruction set
 and attaching names to the opcode fields.  For example, if a field named
 @samp{op1} is used to select which of add, addc, sub, subc, and, or,
-xor, and inv instructions, one could write something like the following:
+xor, and inv instructions, one would write something like the following:
 
 @example
 (define-normal-insn-enum
@@ -686,31 +456,26 @@ These entries simplify instruction definitions by giving a name to a
 particular value for a particular instruction field.  By convention,
 enum names are uppercase.  This convention must be followed.
 
-@xref{Enumerated constants}, for details.
-
 @node Writing define-operand
 @subsection Writing define-operand
 
 Operands are what instruction semantics use to refer to hardware
 elements.  The typical use of an operand is to map instruction fields to
 hardware.  For example, if field @samp{f-r2} is used to specify one of
-the registers defined by the @code{h-gr} hardware entry, one could write
-something like the following:
+the registers defined by the @code{h-gr} hardware entry, one would
+write:
 
 @code{(dnop sr "source register" () h-gr f-r2)}
 
 @code{dnop} is short for ``define normal operand'' @footnote{A profound
 aversion to typing causes me to often provide brief names of things that
-get typed a lot.}.
-
-@xref{Instruction operands}, for more information.
+get typed a lot.}.  @xref{RTL}, for more information.
 
 @node Writing define-insn
 @subsection Writing define-insn
 
-A large part of writing a @file{.cpu} file is going through the CPU manual
-and writing an entry for each instruction.
-Instructions specific to a particular machine variant are
+This involves going through the CPU manual and writing an entry for each
+instruction.  Instructions specific to a particular machine variant are
 indicated so with the `MACH' attribute.  Example:
 
 @example
@@ -725,9 +490,6 @@ The `base' machine is a predefined machine variant that includes
 instructions available to all variants, and is the default if no
 `MACH' attribute is specified.
 
-@xref{Instructions}, for details.
-
-@c Seems like this part belongs elsewhere.
 When the @file{.cpu} file is processed, CGEN will analyze the semantics
 to determine:
 
@@ -757,11 +519,11 @@ The instruction conditionally sets pc.
 
 @item SKIP-CTI
 
-NB. This is an experimental attribute.  Its usage needs to evolve.
+NB. This is an expermental attribute.  Its usage needs to evolve.
 
 @item DELAY-SLOT
 
-NB. This is an experimental attribute.  Its usage needs to evolve.
+NB. This is an expermental attribute.  Its usage needs to evolve.
 @end itemize
 
 @end itemize
@@ -782,46 +544,17 @@ Some instructions are really aliases for other instructions, maybe even
 a sequence of them.  For example, an architecture that has a general
 decrement-then-store instruction might have a specialized version of
 this instruction called @code{push} supported by the assembler.  These
-are handled with ``macro instructions''.
-
-@xref{Macro-instructions}, for details.
-
-Macro instructions are used by the assembler/disassembler only.
-They are not used by the simulator.
-
-For example, if this was the real instruction:
-
-@example
-(dni st-minus "st-" ()
-     "st $src1,@-$src2"
-     (+ OP1_2 OP2_7 src1 src2)
-     (sequence ((WI new-src2))
-	       (set new-src2 (sub src2 (const 4)))
-	       (set (mem WI new-src2) src1)
-	       (set src2 new-src2))
-     ()
-)
-@end example
-
-One could write a @code{push} variant with:
-
-@example
-(dnmi push "push" ()
-  "push $src1"
-  (emit st-minus src1 (src2 15)) ; "st %0,@-sp"
-)
-@end example
+are handled with ``macro instructions''.  Macro instructions are used by
+the assembler/disassembler only.  They are not used by the simulator.
 
 @node Using define-pmacro
 @subsection Using define-pmacro
 
 When a group of entries, say instructions, share similar information, a
 macro (in the C preprocessor sense) can be used to simplify the
-description.  This can be used to save a lot of typing, which can also
-improve readability since often one page of code is easier to understand
-than four.
-
-@xref{Preprocessor macros}, for details.
+description.  This can be used to save a lot of typing, which also
+improves readability since often 1 page of code is easier to understand
+than 4.
 
 Here is an example from the M32R port.
 
@@ -860,8 +593,8 @@ concatenation}, and @xref{String concatenation}, for details.
 @node Splicing list arguments
 @subsection Splicing arguments
 
-Several cpu description elements take multiple arguments, as opposed
-to a single argument (even if that single argument is a list).
+Several cpu description elements take a list as an argument (as opposed
+to a scalar).
 When constructing a call to define-* in a pmacro, these elements must have
 their arguments spliced in to achieve the proper syntax.
 
@@ -869,11 +602,9 @@ This is best explained with an example.
 Here's a simplifying macro for writing ifield definitions with every
 element specified.
 
-@xref{List splicing}, for details.
-
 @example
 
-; dwf: define-word-field
+; dwf: define-word-field (??? pick a better name)
 
 (define-pmacro (dwf x-name x-comment x-attrs
                     x-word-offset x-word-length x-start x-length
@@ -896,87 +627,28 @@ element specified.
 @end example
 
 The @samp{.splice} is necessary because @samp{attrs}, @samp{encode},
-and @samp{decode} take (potentially) multiple arguments.
+and @samp{decode} take a list as an argument.
 
-One would then write f-disp16 as:
-
-@example
-(dwf f-disp16 "f-disp16" (PCREL-ADDR RELOC) 16 16 15 16 INT
-    ((value pc) (sra WI (sub WI value pc) (const 2)))
-    ((value pc) (add WI (sll WI value (const 2)) pc)))
-@end example
-
-It will get expanded as:
+One would then write f-op1 as:
 
 @example
-(define-ifield
-  (name f-disp16)
-  (comment "f-disp16")
-  (attrs PCREL-ADDR RELOC)
-  (word-offset 16)
-  (word-length 16)
-  (start 15)
-  (length 16)
-  (mode INT)
-  (encode (value pc) (sra WI (sub WI value pc) (const 2)))
-  (decode (value pc) (add WI (sll WI value (const 2)) pc))
-)
+
+(dwf f-op1 "f-op1" () 0 16 15 4 UINT #f #f)
+
 @end example
-
-If we didn't use @samp{.splice}, and instead just wrote:
-
-@example
-(define-pmacro (bad-dwf x-name x-comment x-attrs
-                        x-word-offset x-word-length x-start x-length
-                        x-mode x-encode x-decode)
-  "Define a field including its containing word."
-  (define-ifield
-    (name x-name)
-    (comment x-comment)
-    (attrs x-attrs)
-    (word-offset x-word-offset)
-    (word-length x-word-length)
-    (start x-start)
-    (length x-length)
-    (mode x-mode)
-    (encode x-encode)
-    (decode x-decode)
-    )
-)
-@end example
-
-Then that would expand to the following, which is incorrect:
-
-@example
-(define-ifield
-  (name f-disp16)
-  (comment "f-disp16")
-  (attrs (PCREL-ADDR RELOC))
-  (word-offset 16)
-  (word-length 16)
-  (start 15)
-  (length 16)
-  (mode INT)
-  (encode ((value pc) (sra WI (sub WI value pc) (const 2))))
-  (decode ((value pc) (add WI (sll WI value (const 2)) pc)))
-)
-@end example
-
-Note the extra level of parentheses in the @samp{attrs},
-@samp{encode}, and @samp{decode} fields.
 
 @node Interactive development
-@section Interactive development
+@subsection Interactive development
 
-The normal way@footnote{Normal for some anyway, certainly each person will have
-their own preference.} of writing a CPU description file involves starting Guile
-and developing the .CPU file interactively.  The basic steps are:
+The normal way@footnote{Normal for me anyway, certainly each person will have
+their own preference} of writing a CPU description file involves starting Guile
+and developing the .CPU file interactively.  The basic steps are
 
-@enumerate
+@enumerate 1
 @item Run @code{guile}.
 @item @code{(load "dev.scm")}
 @item Load application, e.g. @code{(load-opc)} or @code{(load-sim)}
-@item Load CPU description file, e.g. @code{(cload #:arch "cpu/m32r.cpu")}
+@item Load CPU description file, e.g. @code{(cload #:arch "m32r")}
 @item Run generators until output looks reasonable, e.g. @code{(cgen-opc.c)}
 @end enumerate
 
@@ -990,19 +662,19 @@ Example:
 @example
 (define (m32r-opc)
   (load-opc)
-  (cload #:arch "cpu/m32r.cpu")
+  (cload #:arch "m32r")
 )
 (define (m32r-sim)
   (load-sim)
-  (cload #:arch "cpu/m32r.cpu" #:options "with-scache with-profile=fn")
+  (cload #:arch "m32r" #:options "with-scache with-profile=fn")
 )
 (define (m32rbf-sim)
   (load-sim)
-  (cload #:arch "cpu/m32r.cpu" #:machs "m32r" #:options "with-scache with-profile=fn")
+  (cload #:arch "m32r" #:machs "m32r" #:options "with-scache with-profile=fn")
 )
 (define (m32rxf-sim)
   (load-sim)
-  (cload #:arch "cpu/m32r.cpu" #:machs "m32rx" #:options "with-scache with-profile=fn")
+  (cload #:arch "m32r" #:machs "m32rx" #:options "with-scache with-profile=fn")
 )
 @end example
 
@@ -1010,30 +682,19 @@ CPU description files are loaded into an interactive guile session with
 @code{cload}.  The syntax is:
 
 @example
-(cload #:arch "cpu-file-path"
+(cload #:arch arch
        [#:machs "mach-list"]
        [#:isas "isa-list"]
-       [#:options "option-list"]
-       [#:trace "trace-list"]
-       [#:diag "diagnostic-list"])
+       [#:options "option-list"])
 @end example
 
 Only the @code{#:arch} argument is mandatory.
-
-@samp{cpu-file} is the path to the @file{.cpu} file.
 
 @samp{mach-list} is a comma separated string of machines to keep.
 
 @samp{isa-list} is a comma separated string of isas to keep.
 
 @samp{options} is a space separated string of options for the application.
-What the acceptable values are depends on the application.
-
-@samp{trace} is a comma separated string of tracing options.
-@xref{t}.
-
-@samp{diag} is a comma separated string of diagnostic options.
-@xref{w}.
 
 @node Doing an opcodes port
 @section Doing an opcodes port
@@ -1041,20 +702,17 @@ What the acceptable values are depends on the application.
 The best way to begin a port is to take an existing one (preferably one
 that is similar to the new port) and use it as a template.
 
-@enumerate
+@enumerate 1
 @item Run @code{guile}.
 @item @code{(load "dev.scm")}. This loads in a set of interactive
 development routines.
 @item @code{(load-opc)}. Load the opcodes support.
-@item Edit your @file{cpu/$arch.cpu} and @file{cpu/$arch.opc} files.
+@item Edit your @file{cpu/<arch>.cpu} and @file{cpu/<arch>.opc} files.
         @itemize @bullet
         @item The @file{.cpu} file is the main description file.
 	@item The @file{.opc} file provides additional C support code.
         @end itemize
-@c We use $arch instead of <arch> here because texi2html doesn't
-@c properly escape <> instead double-quotes (with or without @code).
-@item @code{(cload #:arch "cpu/$arch.cpu")}
-@item @code{(set-opc-file-path! "cpu/$arch.opc")}
+@item @code{(cload #:arch "cpu/<arch>")}
 @item Run each of:
         @itemize @bullet
         @item @code{(cgen-desc.h)}
@@ -1072,6 +730,11 @@ eight opcodes files (use the M32R port as an example).
 @item Run @code{make dep} from the @file{opcodes} build directory.
 @item Run @code{make all-opcodes} from the top level build directory.
 @end enumerate
+
+Note that Guile is not currently shipped with Binutils, etc.  Until
+Guile is shipped with Binutils, etc. or a C implementation of CGEN is
+done, the generated files are installed in the source directory and
+checked into CVS.
 
 @node Doing a GAS port
 @section Doing a GAS port
@@ -1190,7 +853,7 @@ then assembled, disassembled, verified, and checked into CVS.  Further
 changes are usually done by hand as it's easier.  The goal here is to
 save the enormous amount of initial typing that is required.
 
-@enumerate
+@enumerate 1
 @item @code{cd} to the CGEN build directory
 @item @code{make gas-test}
 
@@ -1217,45 +880,36 @@ At this point further additions/modifications are usually done by hand.
 @node Doing a simulator port
 @section Doing a simulator port
 
-@emph{NOTE:} This section applies to GDB simulators, not SID simulators
-(@pxref{SID Simulator}).
-
 The same basic procedure for opcodes porting applies here.
 
-Simulator ports consist of four pieces:
-
-@itemize @bullet
-
-@item configury
-
-You'll have to write @file{Makefile.in} and @file{configure.ac}.
-It's easiest to simply take an existing one as boilerplate and hack it.
-
-@item things common to all simulators
-
-Directory @file{sim/common} in the simulator tree consists of various
-things the simulators use.  You probably won't have to hack on these
-files, but you might if your target has needs something new.
-
-@item main loop
-
-CGEN simulators generate source code for their main loop from a
-shell script, named by convention @file{mloop.in}.
-It's easiest to take an existing one as boilerplate and hack it.
-
-@item generated files
-
-The CGEN generated files.
-
-@end itemize
-
-@menu
-* Simulator files::                   Notes on the various files
-* Interactive simulator development:: Testing the generated files
-@end menu
-
-@node Simulator files
-@subsection Simulator files
+@enumerate 1
+@item Run @code{guile}.
+@item @code{(load "dev.scm")}
+@item @code{(load-sim)}
+@item Edit your @file{cpu/<arch>.cpu} file.
+@item @code{(cload #:arch "cpu/<arch>")}
+@item Run each of:
+        @itemize @bullet
+	@item @code{(cgen-arch.h)}
+	@item @code{(cgen-arch.c)}
+	@item @code{(cgen-cpuall.h)}
+        @end itemize
+@item Repeat steps 4,5,6 until the output looks reasonable.
+@item Edit your cpu/<arch>.cpu file.
+@item @code{(cload #:arch "cpu/<arch>" #:machs "mach1[,mach2[,...]]")}
+@item Run each of:
+        @itemize @bullet
+	@item @code{(cgen-cpu.h)}
+	@item @code{(cgen-cpu.c)}
+	@item @code{(cgen-decode.h)}
+	@item @code{(cgen-decode.c)}
+	@item @code{(cgen-semantics.c)}
+	@item @code{(cgen-sem-switch.c)} -- only if using a switch()
+                version of semantics.
+	@item @code{(cgen-model.c)}
+        @end itemize
+@item Repeat steps 8, 9 and 10 until the output looks reasonable.
+@end enumerate
 
 The following additional files are also needed. These live in the
 @file{sim/<arch>} directory. Administrivia files like
@@ -1341,7 +995,7 @@ are various ways to do this, and several are supported.  Which one to
 choose depends on the environment in which the CPU will be used.  For
 example when executing a program in a single-CPU environment without
 devices, most or all available cycles can be devoted to simulation of the
-target CPU.  However, in an environment with devices or multiple cpus, one
+atarget CPU.  However, in an environment with devices or multiple cpus, one
 may wish the CPU to execute one instruction then relinquish control so a
 device operation may be done or an instruction can be simulated on a
 second cpu.  Efficient techniques for the former aren't necessarily the best
@@ -1349,7 +1003,7 @@ for the latter.
 
 Three versions are currently supported:
 
-@enumerate
+@enumerate 1
 @item simple -- fetch/decode/execute one insn
 @item scache -- same as simple but results of decoding are cached 
 @item pbb -- same as scache but several insns are handled each iteration
@@ -1384,44 +1038,6 @@ The M32R port has two other handwritten files: @file{devices.c} and
 @file{traps.c}.  How you wish to organize this is up to you.
 @end itemize
 
-@node Interactive simulator development
-@subsection Interactive simulator development
-
-When ready to generate the simulator files,
-
-@enumerate
-@item Run @code{guile}.
-@item @code{(load "dev.scm")}
-@item @code{(load-sim)}
-@item Edit your @file{cpu/$arch.cpu} file.
-@c We use $arch instead of <arch> here because texi2html doesn't
-@c properly escape <> instead double-quotes (with or without @code).
-@item @code{(cload #:arch "cpu/$arch.cpu")}
-@item Run each of:
-        @itemize @bullet
-	@item @code{(cgen-arch.h)}
-	@item @code{(cgen-arch.c)}
-	@item @code{(cgen-cpuall.h)}
-        @end itemize
-@item Repeat steps 4,5,6 until the output looks reasonable.
-@item Edit your @file{cpu/<arch>.cpu} file.
-@c We use $arch instead of <arch> here because texi2html doesn't
-@c properly escape <> instead double-quotes (with or without @code).
-@item @code{(cload #:arch "cpu/$arch.cpu" #:machs "mach1[,mach2[,...]]")}
-@item Run each of:
-        @itemize @bullet
-	@item @code{(cgen-cpu.h)}
-	@item @code{(cgen-cpu.c)}
-	@item @code{(cgen-decode.h)}
-	@item @code{(cgen-decode.c)}
-	@item @code{(cgen-semantics.c)}
-	@item @code{(cgen-sem-switch.c)} -- only if using a switch()
-                version of semantics.
-	@item @code{(cgen-model.c)}
-        @end itemize
-@item Repeat steps 8, 9 and 10 until the output looks reasonable.
-@end enumerate
-
 @node Building a simulator test suite
 @section Building a simulator test suite
 
@@ -1432,7 +1048,7 @@ then verified and checked into CVS.  Further changes are usually done by
 hand as it's easier.  The goal here is to save the enormous amount of
 initial typing that is required.
 
-@enumerate
+@enumerate 1
 @item @code{cd} to the CGEN build directory
 @item @code{make sim-test ISA=<arch>}
 

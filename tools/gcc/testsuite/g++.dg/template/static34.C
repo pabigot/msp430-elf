@@ -19,3 +19,5 @@ int main()
 {
   A<int>::test();
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

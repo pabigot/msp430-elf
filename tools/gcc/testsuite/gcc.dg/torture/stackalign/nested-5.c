@@ -1,4 +1,5 @@
 /* { dg-do run } */
+/* { dg-skip-if "No recursive trampolines" { rl78-*-* } "*" "" } */
 
 extern void abort (void);
 extern void exit (int);

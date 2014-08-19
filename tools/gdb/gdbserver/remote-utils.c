@@ -1,5 +1,5 @@
 /* Remote utility routines for the remote server for GDB.
-   Copyright (C) 1986, 1989, 1993-2012 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -20,6 +20,9 @@
 #include "terminal.h"
 #include "target.h"
 #include "gdbthread.h"
+#include "tdesc.h"
+#include "dll.h"
+
 #include <stdio.h>
 #include <string.h>
 #if HAVE_SYS_IOCTL_H
@@ -50,9 +53,7 @@
 #include <fcntl.h>
 #endif
 #include <sys/time.h>
-#if HAVE_UNISTD_H
 #include <unistd.h>
-#endif
 #if HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -761,7 +762,7 @@ read_ptid (char *buf, char **obuf)
 
   /* Since the stub is not sending a process id, then default to
      what's in the current inferior.  */
-  pid = ptid_get_pid (((struct inferior_list_entry *) current_inferior)->id);
+  pid = ptid_get_pid (current_ptid);
 
   if (obuf)
     *obuf = pp;
@@ -1270,7 +1271,7 @@ outreg (struct regcache *regcache, int regno, char *buf)
   *buf++ = tohex (regno & 0xf);
   *buf++ = ':';
   collect_register_as_string (regcache, regno, buf);
-  buf += 2 * register_size (regno);
+  buf += 2 * register_size (regcache->tdesc, regno);
   *buf++ = ';';
 
   return buf;
@@ -1328,11 +1329,11 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 	sprintf (buf, "T%02x", status->value.sig);
 	buf += strlen (buf);
 
-	regp = gdbserver_expedite_regs;
-
 	saved_inferior = current_inferior;
 
 	current_inferior = find_thread_ptid (ptid);
+
+	regp = current_target_desc ()->expedite_regs;
 
 	regcache = get_thread_regcache (current_inferior, 1);
 
@@ -1358,7 +1359,7 @@ prepare_resume_reply (char *buf, ptid_t ptid,
 
 	while (*regp)
 	  {
-	    buf = outreg (regcache, find_regno (*regp), buf);
+	    buf = outreg (regcache, find_regno (regcache->tdesc, *regp), buf);
 	    regp ++;
 	  }
 	*buf = '\0';

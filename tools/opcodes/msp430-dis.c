@@ -1,6 +1,6 @@
 /* Disassemble MSP430 instructions.
    Copyright (C) 2002-2013 Free Software Foundation, Inc.
-   
+
    Contributed by Dmitry Diky <diwil@mail.ru>
         
    This file is part of the GNU opcodes library.
@@ -204,7 +204,7 @@ msp430_singleoperand (disassemble_info *info,
 		  dst |= extended_dst << 16;
 		  sprintf (op, "0x%05x", dst);
 		  sprintf (comm, "PC rel. abs addr 0x%05lx",
-			   (addr + 2 + dst) & 0xfffff);
+			   (long)((addr + 2 + dst) & 0xfffff));
 		}
 	    }
 	  else if (regd == 2)
@@ -268,7 +268,7 @@ msp430_singleoperand (disassemble_info *info,
 	      cmd_len += 2;
 	      sprintf (op, "#%d", dst);
 	      if (dst > 9 || dst < 0)
-	      sprintf (comm, "#0x%04x", PS (dst));
+		sprintf (comm, "#0x%04x", PS (dst));
 	      if (extended_dst)
 		{
 		  dst |= extended_dst << 16;
@@ -298,7 +298,7 @@ msp430_singleoperand (disassemble_info *info,
 		  dst |= extended_dst << 16;
 		  sprintf (op, "0x%05x", dst & 0xffff);
 		  sprintf (comm, "PC rel. 0x%05lx",
-			   (addr + 2 + dst) & 0xfffff);
+			   (long)((addr + 2 + dst) & 0xfffff));
 		}
 	    }
 	  else if (regd == 2)
@@ -348,7 +348,7 @@ msp430_singleoperand (disassemble_info *info,
 
       where *= 2;
       sprintf (op, "$%+-8d", where + 2);
-      sprintf (comm, "abs 0x%lx", addr + 2 + where);
+      sprintf (comm, "abs 0x%lx", (long) (addr + 2 + where));
       *cycles = 2;
       return 2;
       break;
@@ -427,13 +427,14 @@ msp430_doubleoperand (disassemble_info *info,
 	      sprintf (op1, "0x%04x", PS (dst));
 	      sprintf (comm1, "PC rel. 0x%04x",
 		       PS ((short) addr + 2 + dst));
-	      if (extended_dst)
+	      if (extension_word)
 		{
 		  dst |= extended_dst << 16;
 		  if (dst & 0x80000)
 		    dst |= -1 << 20;
 		  sprintf (op1, "0x%05x", dst & 0xfffff);
-		  sprintf (comm1, "PC rel. 0x%05lx", (addr + 2 + dst) & 0xfffff);
+		  sprintf (comm1, "PC rel. 0x%05lx",
+			   (long)((addr + 2 + dst) & 0xfffff));
 		}
 	    }
 	  else if (regd == 2)
@@ -447,7 +448,7 @@ msp430_doubleoperand (disassemble_info *info,
 	      cmd_len += 4;
 	      *cycles = 6;
 	      sprintf (op1, "&0x%04x", PS (dst));
-	      if (extended_dst)
+	      if (extension_word)
 		{
 		  dst |= extended_dst << 16;
 		  sprintf (op1, "&0x%05x", dst & 0xfffff);
@@ -457,7 +458,7 @@ msp430_doubleoperand (disassemble_info *info,
 	    {
 	      /* Indexed.  */
 	      dst = msp430dis_opcode (addr + 2, info);
-	      if (extended_dst)
+	      if (extension_word)
 		{
 		  dst |= extended_dst << 16;
 		  if (dst & 0x80000)
@@ -517,8 +518,8 @@ msp430_doubleoperand (disassemble_info *info,
 	  cmd_len += 2;
 	  sprintf (op1, "#%d", dst);
 	  if (dst > 9 || dst < 0)
-	  sprintf (comm1, "#0x%04x", PS (dst));
-	  if (extended_src)
+	    sprintf (comm1, "#0x%04x", PS (dst));
+	  if (extension_word)
 	    {
 	      dst |= extended_src << 16;
 	      if (dst & 0x80000)
@@ -542,14 +543,14 @@ msp430_doubleoperand (disassemble_info *info,
 	  sprintf (op1, "0x%04x", PS (dst));
 	  sprintf (comm1, "PC rel. 0x%04x",
 		   PS ((short) addr + 2 + dst));
-	  if (extended_src)
+	  if (extension_word)
 	    {
 	      dst |= extended_src << 16;
 	      if (dst & 0x80000)
 		dst |= -1 << 20;
 	      sprintf (op1, "0x%05x", dst & 0xfffff);
 	      sprintf (comm1, "PC rel. 0x%05lx",
-		       (addr + 2 + dst) & 0xfffff);
+		       (long) ((addr + 2 + dst) & 0xfffff));
 	    }
 	}
       else if (regs == 2)
@@ -560,7 +561,7 @@ msp430_doubleoperand (disassemble_info *info,
 	  cmd_len += 2;
 	  sprintf (op1, "&0x%04x", PS (dst));
 	  sprintf (comm1, "0x%04x", PS (dst));
-	  if (extended_src)
+	  if (extension_word)
 	    {
 	      dst |= extended_src << 16;
 	      sprintf (op1, "&0x%05x", dst & 0xfffff);
@@ -579,7 +580,7 @@ msp430_doubleoperand (disassemble_info *info,
 	  /* Indexed.  */
 	  dst = msp430dis_opcode (addr + 2, info);
 	  cmd_len += 2;
-	  if (extended_src)
+	  if (extension_word)
 	    {
 	      dst |= extended_src << 16;
 	      if (dst & 0x80000)
@@ -624,14 +625,14 @@ msp430_doubleoperand (disassemble_info *info,
 	  sprintf (op2, "0x%04x", PS (dst));
 	  sprintf (comm2, "PC rel. 0x%04x",
 		   PS ((short) addr + cmd_len + dst));
-	  if (extended_dst)
+	  if (extension_word)
 	    {
 	      dst |= extended_dst << 16;
 	      if (dst & 0x80000)
 		dst |= -1 << 20;
 	      sprintf (op2, "0x%05x", dst & 0xfffff);
 	      sprintf (comm2, "PC rel. 0x%05lx",
-		       (addr + cmd_len + dst) & 0xfffff);
+		       (long)((addr + cmd_len + dst) & 0xfffff));
 	    }
 	  cmd_len += 2;
 	}
@@ -641,7 +642,7 @@ msp430_doubleoperand (disassemble_info *info,
 	  dst = msp430dis_opcode (addr + cmd_len, info);
 	  cmd_len += 2;
 	  sprintf (op2, "&0x%04x", PS (dst));
-	  if (extended_dst)
+	  if (extension_word)
 	    {
 	      dst |= extended_dst << 16;
 	      sprintf (op2, "&0x%05x", dst & 0xfffff);
@@ -655,7 +656,7 @@ msp430_doubleoperand (disassemble_info *info,
 	    dst |= -1 << 16;
 	  if (dst > 9 || dst < 0)
 	    sprintf (comm2, "0x%04x", PS (dst));
-	  if (extended_dst)
+	  if (extension_word)
 	    {
 	      dst |= extended_dst << 16;
 	      if (dst & 0x80000)
@@ -794,7 +795,7 @@ msp430x_calla_instr (disassemble_info * info,
       cmd_len += 2;
       sprintf (op1, "%d(r%d)", dst, reg);
       if (reg == 0)
-	sprintf (comm1, "PC rel. 0x%05lx", addr + 2 + dst);
+	sprintf (comm1, "PC rel. 0x%05lx", (long) (addr + 2 + dst));
       else
 	sprintf (comm1, "0x%05x", dst);
       break;
@@ -822,7 +823,8 @@ msp430x_calla_instr (disassemble_info * info,
       cmd_len += 2;
       *cycles = 4;
       sprintf (op1, "%d(PC)", (reg << 16) + dst);
-      sprintf (comm1, "PC rel. 0x%05lx", addr + 2 + dst + (reg << 16));
+      sprintf (comm1, "PC rel. 0x%05lx",
+	       (long) (addr + 2 + dst + (reg << 16)));
       break;
 
     case 11: /* CALLA #imm20 */
@@ -834,14 +836,12 @@ msp430x_calla_instr (disassemble_info * info,
       break;
 
     default:
-      strcpy (comm1, _("unercognised CALLA addressing mode"));
+      strcpy (comm1, _("unrecognised CALLA addressing mode"));
       return -1;
     }
 
   return cmd_len;
 }
-
-
 
 int
 print_insn_msp430 (bfd_vma addr, disassemble_info *info)
@@ -862,11 +862,8 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
       prin (stream, ".word	0xffff;	????");
       return 2;
     }
-  if (insn == (unsigned short) -1)
-    return 0;
 
-  if (   ((int) addr & 0xfffff) > 0x0ffbf
-      && ((int) addr & 0xfffff) < 0x10000)
+  if (((int) addr & 0xffff) > 0xffdf)
     {
       (*prin) (stream, "interrupt service routine at 0x%04x", 0xffff & insn);
       return 2;
@@ -888,6 +885,7 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 	  return 4;
 	}
    }
+
   for (opcode = msp430_opcodes; opcode->name; opcode++)
     {
       if ((insn & opcode->bin_mask) == opcode->bin_opcode
@@ -1020,7 +1018,8 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 		  if (n > 9 || n < 0)
 		    {
 		      if (reg == 0)
-			sprintf (comm1, "PC rel. 0x%05lx", addr + 2 + n);
+			sprintf (comm1, "PC rel. 0x%05lx",
+				 (long) (addr + 2 + n));
 		      else
 			sprintf (comm1, "0x%05x", n);
 		    }
@@ -1046,7 +1045,8 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 		  if (n > 9 || n < 0)
 		    {
 		      if (reg == 0)
-			sprintf (comm2, "PC rel. 0x%05lx", addr + 2 + n);
+			sprintf (comm2, "PC rel. 0x%05lx",
+				 (long) (addr + 2 + n));
 		      else
 			sprintf (comm2, "0x%05x", n);
 		    }
@@ -1131,8 +1131,7 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 		  else
 		    bc = ".a";
 		}
-	      else
-	      if (insn & BYTE_OPERATION && opcode->fmt != 3)
+	      else if (insn & BYTE_OPERATION && opcode->fmt != 3)
 		{
 		  if (extension_word != 0 && ((extension_word & BYTE_OPERATION) == 0))
 		    bc = ".a";
@@ -1185,7 +1184,7 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
   if (extension_word && opcode->name[strlen (opcode->name) - 1] != 'x')
     (*prin) (stream, "%sx%s", opcode->name, bc);
   else
-  (*prin) (stream, "%s%s", opcode->name, bc);
+    (*prin) (stream, "%s%s", opcode->name, bc);
 
   if (*op1)
     (*prin) (stream, "\t%s", op1);
@@ -1225,5 +1224,6 @@ print_insn_msp430 (bfd_vma addr, disassemble_info *info)
 
   if (extension_word)
     cmd_len += 2;
+
   return cmd_len;
 }

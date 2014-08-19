@@ -1,0 +1,141 @@
+This patch is needed for EABI64 and probably N64 targets too.  It's
+definitely needed for --target_board=mips-sim-idt64/-EB/-mips64 .
+
+If GDB's `file' command is used with no arguments for these 64-bit
+ABI targets, mips_pseudo_register_read() will abort due to an
+internal error.  This error is due to the fact that the raw register
+number is based on the ISA register size of 4 and the cooked register
+size is based on the ABI size of 8.  mips_pseudo_register_read does
+not want to handle this case (nor should it!) and generates an internal
+error as a result.
+
+The register sizes are computed by calling mips_register_type().  For
+the raw registers, the function mips_isa_regsize() is consulted to
+learn the ISA size.  If the register size has been "declared known"
+when the gdbarch is created, it'll use that value.  Otherwise it'll
+fall back to some old behavior which generates the wrong answer for
+this case.
+
+My solution is to assert that we know that the ISA register size is 8
+for 64-bit ABIs.  We do this in mips_gdbarch_init().  I looked at
+adjusting mips_register_type(), but that ended up being quite messy. 
+This seems like a much cleaner solution.  I only set
+tdep->register_size_valid_p and tdep->register_size if code earlier on
+had not alread determined values.  (If the code earlier on gets the
+answer wrong, I'd prefer that we'll have a indication that something
+is broken elsewhere.
+
+The bug can be easily demonstrated:
+
+[kev@mesquite gdb]$ ./gdb testsuite/gdb.python/py-block
+GNU gdb (GDB) 7.6.0.20130522-cvs
+Copyright (C) 2013 Free Software Foundation, Inc.
+License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+This is free software: you are free to change and redistribute it.
+There is NO WARRANTY, to the extent permitted by law.  Type "show copying"
+and "show warranty" for details.
+This GDB was configured as "--host=x86_64-unknown-linux-gnu --target=mipsisa64-elf".
+For bug reporting instructions, please see:
+<http://www.gnu.org/software/gdb/bugs/>...
+Reading symbols from /mesquite2/.ironwood2/gnupro-cross/mipsisa64-elf/bld/gdb/testsuite/gdb.python/py-block...done.
+(gdb) tar sim
+Connected to the simulator.
+(gdb) load
+Loading section .text, size 0x854 vma 0xffffffff80020000
+Loading section .init, size 0x24 vma 0xffffffff80020854
+Loading section .fini, size 0x1c vma 0xffffffff80020878
+Loading section .eh_frame, size 0x4 vma 0xffffffff80020894
+Loading section .jcr, size 0x8 vma 0xffffffff80020898
+Loading section .ctors, size 0x10 vma 0xffffffff800208a0
+Loading section .dtors, size 0x10 vma 0xffffffff800208b0
+Loading section .rodata, size 0x20 vma 0xffffffff800208c0
+Loading section .data, size 0x748 vma 0xffffffff800208e0
+Loading section .sdata, size 0x28 vma 0xffffffff80021028
+Start address 0xffffffff80020004
+Transfer rate: 33408 bits in <1 sec.
+(gdb) b main
+Breakpoint 1 at 0xffffffff800203e4: file /ironwood2/gnupro-cross/mipsisa64-elf/bld/../../gnupro/gdb/testsuite/gdb.python/py-block.c, line 39.
+(gdb) run
+Starting program: /mesquite2/.ironwood2/gnupro-cross/mipsisa64-elf/bld/gdb/testsuite/gdb.python/py-block 
+
+Breakpoint 1, main (argc=0, argv=0xffffffff807fffe0)
+    at /ironwood2/gnupro-cross/mipsisa64-elf/bld/../../gnupro/gdb/testsuite/gdb.python/py-block.c:39
+39        block_func ();
+(gdb) file
+A program is being debugged already.
+Are you sure you want to change the file? (y or n) y
+No executable file now.
+
+Discard symbol table from `/mesquite2/.ironwood2/gnupro-cross/mipsisa64-elf/bld/gdb/testsuite/gdb.python/py-block'? (y or n) y
+
+/ironwood2/gnupro-cross/mipsisa64-elf/bld/../../gnupro/gdb/mips-tdep.c:709: internal-error: bad register size
+A problem internal to GDB has been detected,
+further debugging may prove unreliable.
+Quit this debugging session? (y or n) y
+
+/ironwood2/gnupro-cross/mipsisa64-elf/bld/../../gnupro/gdb/mips-tdep.c:709: internal-error: bad register size
+A problem internal to GDB has been detected,
+further debugging may prove unreliable.
+Create a core file of GDB? (y or n) y
+Aborted (core dumped)
+
+These log file messages associated with gdb.python/py-block.exp also
+demonstrate this problem:
+
+file
+A program is being debugged already.
+Are you sure you want to change the file? (y or n) y
+No executable file now.
+Discard symbol table from `/mesquite2/.ironwood2/gnupro-cross/mipsisa64-elf/bld/gdb/testsuite/gdb.python/py-block'? (y or n) y
+No symbol file now.
+/ironwood2/gnupro-cross/mipsisa64-elf/bld/../../gnupro/gdb/mips-tdep.c:709: internal-error: bad register size
+A problem internal to GDB has been detected,
+further debugging may prove unreliable.
+Quit this debugging session? (y or n) ERROR: couldn't unload file in /mesquite2/.ironwood2/gnupro-cross/mipsisa64-elf/bld/gdb/testsuite/../../gdb/gdb (timeout).
+UNRESOLVED: gdb.python/py-block.exp: Check block validity (GDB internal error)
+Resyncing due to internal error.
+
+This patch should go upstream.
+
+
+
+gdb/ChangeLog.RedHat:
+
+2013-12-16  Kevin Buettner  <kevinb@redhat.com>
+
+	* mips-tdep.c (mips_gdbarch_init): True 64-bit ABIs require 64-bit
+	ISA registers: adjust MIPS_ABI_N64 and MIP_ABI_EABI64 cases 
+	accordingly.
+
+
+Index: gdb/mips-tdep.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/mips-tdep.c,v
+retrieving revision 1.56
+diff -u -p -r1.56 mips-tdep.c
+--- gdb/mips-tdep.c	3 Dec 2013 12:46:52 -0000	1.56
++++ gdb/mips-tdep.c	17 Dec 2013 06:21:29 -0000
+@@ -8409,6 +8409,11 @@ mips_gdbarch_init (struct gdbarch_info i
+       set_gdbarch_long_long_bit (gdbarch, 64);
+       break;
+     case MIPS_ABI_EABI64:
++      if (!tdep->register_size_valid_p)
++	{
++	  tdep->register_size_valid_p = 1;
++	  tdep->register_size = 8;
++	}
+       set_gdbarch_push_dummy_call (gdbarch, mips_eabi_push_dummy_call);
+       set_gdbarch_return_value (gdbarch, mips_eabi_return_value);
+       tdep->mips_last_arg_regnum = MIPS_A0_REGNUM + 8 - 1;
+@@ -8431,6 +8436,11 @@ mips_gdbarch_init (struct gdbarch_info i
+       set_gdbarch_long_double_format (gdbarch, floatformats_ibm_long_double);
+       break;
+     case MIPS_ABI_N64:
++      if (!tdep->register_size_valid_p)
++	{
++	  tdep->register_size_valid_p = 1;
++	  tdep->register_size = 8;
++	}
+       set_gdbarch_push_dummy_call (gdbarch, mips_n32n64_push_dummy_call);
+       set_gdbarch_return_value (gdbarch, mips_n32n64_return_value);
+       tdep->mips_last_arg_regnum = MIPS_A0_REGNUM + 8 - 1;

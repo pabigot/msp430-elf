@@ -6,11 +6,11 @@ public:
   int i;
 };
 
-extern "C" int printf(const char *, ...);
+// extern "C" int printf(const char *, ...);
 
 int main () {
   A a;
   a.i = 1;
   A b (a);
-  printf("%d\n",b.i);
+  // printf("%d\n",b.i);
 }

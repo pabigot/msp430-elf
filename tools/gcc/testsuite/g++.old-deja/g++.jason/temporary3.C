@@ -2,7 +2,7 @@
 // Bug: the temporary returned from f is elided, causing a to be constructed
 // twice but only destroyed once.
 
-extern "C" int printf (const char *, ...);
+// extern "C" int printf (const char *, ...);
 
 int c,d;
 
@@ -22,6 +22,6 @@ int main ()
     A a (1);
     a = f ();
   }
-  printf ("%d %d\n", c, d);
+  // printf ("%d %d\n", c, d);
   return c != d;
 }

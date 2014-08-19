@@ -5,14 +5,14 @@ extern "C" int printf (const char *, ...);
 struct foo
 {
   static int count;
-  virtual void print (int i, int j) { printf ("foo[%d][%d] = %d\n", i, j, x); }
+  virtual void print (int i, int j) { /*printf ("foo[%d][%d] = %d\n", i, j, x)*/; }
   int x;
   foo () { x = count++; }
 };
 int foo::count;
 struct bar : virtual public foo
 {
-  virtual void print (int i, int j) { printf ("bar[%d][%d] = %d\n", i, j, x); }
+  virtual void print (int i, int j) { /*printf ("bar[%d][%d] = %d\n", i, j, x)*/; }
 };
 
 // bar array[3][3];

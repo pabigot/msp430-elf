@@ -1,7 +1,7 @@
 /*******************************************************************************
- * $Revision: 1.2 $
- * $Date: 2011/07/30 03:10:03 $
- * $Author: kevinb $
+ * $Revision: 1.13 $
+ * $Date: 2014/03/06 15:48:29 $
+ * $Author: nickc $
  *
  * Contents: A streambuf which uses the GNU readline library for line I/O
  * (c) 2001 by Dimitris Vyzovitis [vyzo@media.mit.edu]

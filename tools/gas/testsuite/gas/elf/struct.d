@@ -1,7 +1,9 @@
 #nm: --extern-only
 #name: ELF struct
+#skip: rx-*-*
 
 # Test the .struct pseudo-op.
+
 #...
 0+0 D l1
 0+4 D l2

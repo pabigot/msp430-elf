@@ -1,5 +1,7 @@
 /* { dg-skip-if "asm construct does not work with target" { msp430-*-* rl78-*-* } { "*" } { "" } } */
-struct A {
+
+struct A
+{
   long a;
 };
 
@@ -20,10 +22,12 @@ int baz(void)
 {
   int i;
   struct B *j;
+
   for (i = 1; i < 32; i++)
     {
       j = &b[i];
       bar(&j->a);
     }
+
   return 0;
 }

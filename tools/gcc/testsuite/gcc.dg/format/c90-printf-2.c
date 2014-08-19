@@ -22,3 +22,4 @@ foo (int i, double d, llong ll, intmax_t j, size_t z, ptrdiff_t t)
   printf ("%a", d); /* { dg-warning "C" "%a in C90" } */
   printf ("%A", d); /* { dg-warning "C" "%A in C90" } */
 }
+/* { dg-prune-output ".*__int20.*" } */

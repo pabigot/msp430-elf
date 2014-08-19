@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // { dg-options "-w -fpermissive" }
 // Test for g++ array init extension 
 

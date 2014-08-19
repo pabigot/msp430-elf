@@ -53,3 +53,5 @@ int main (void)
 void f1 ( D* p) { ::delete p; }
 void f2 (B2* p) { ::delete p; }  
 void f3 (B1* p) { ::delete p; }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

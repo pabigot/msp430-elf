@@ -66,5 +66,5 @@ int main() {
       || strcmp (Sig::sigTable[5].Magic, "COMP"))
     { printf ("FAIL\n"); return 1; }
   else
-    printf ("PASS\n");
+    ; // printf ("PASS\n");
 }

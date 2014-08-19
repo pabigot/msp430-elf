@@ -1,6 +1,5 @@
 // PR c++/49216
-// { dg-options -std=c++0x }
-// { dg-do run }
+// { dg-do run { target c++11 } }
 
 #include <initializer_list>
 extern "C" void abort();
@@ -20,3 +19,5 @@ int main() {
   if (p[0] != 0 || !constructed)
     abort();
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

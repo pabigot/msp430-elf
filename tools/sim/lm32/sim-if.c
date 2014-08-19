@@ -1,7 +1,7 @@
 /* Main simulator entry points specific to Lattice Mico32.
    Contributed by Jon Beniston <jon@beniston.com>
    
-   Copyright (C) 2009-2013 Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -278,11 +278,4 @@ sim_create_inferior (sd, abfd, argv, envp)
 #endif
 
   return SIM_RC_OK;
-}
-
-SIM_RC
-sim_hardware_watchpoint (SIM_DESC sd, SIM_WATCH_ACTION action,
-                         SIM_WATCH_TYPE type, SIM_ADDR addr, long length)
-{
-  return SIM_RC_FAIL;
 }

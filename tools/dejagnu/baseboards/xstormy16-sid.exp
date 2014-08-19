@@ -3,7 +3,6 @@ set_board_info target_install {xstormy16-elf}
 
 # Load a baseboard description for SID simulators.
 load_base_board_description "basic-sid"
-process_multilib_options ""
 
 verbose "Using simulator [board_info $board sim]\n"
 set_board_info sim [find_rawsid]

@@ -26,3 +26,4 @@ h2 (void)
 {
   g2 (0, (__SIZE_TYPE__)(void *)0); /* { dg-error "without a cast" } */
 }
+/* { dg-prune-output ".*__int20.*" } */

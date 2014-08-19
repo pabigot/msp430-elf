@@ -3,7 +3,7 @@
 
 int c = 0;
 int d = 0;
-extern "C" int printf(const char *,...);
+//extern "C" int printf(const char *,...);
 
 class Foo {
 public:
@@ -17,7 +17,7 @@ int main()
     continue;
     Foo bar;
   }
-  printf ("%d %d\n", c, d);
+  //printf ("%d %d\n", c, d);
   if (c == d && d == 0)
     return 0;
   return 1;

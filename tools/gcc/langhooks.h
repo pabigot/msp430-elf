@@ -1,5 +1,5 @@
 /* The lang_hooks data structure.
-   Copyright (C) 2001-2013 Free Software Foundation, Inc.
+   Copyright (C) 2001-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -111,6 +111,9 @@ struct lang_hooks_for_types
      firstprivate variables.  */
   void (*omp_firstprivatize_type_sizes) (struct gimplify_omp_ctx *, tree);
 
+  /* Return true if TYPE is a mappable type.  */
+  bool (*omp_mappable_type) (tree type);
+
   /* Return TRUE if TYPE1 and TYPE2 are identical for type hashing purposes.
      Called only after doing all language independent checks.
      At present, this function is only called when both TYPE1 and TYPE2 are
@@ -216,12 +219,16 @@ struct lang_hooks_for_decls
   /* Similarly, except use an assignment operator instead.  */
   tree (*omp_clause_assign_op) (tree clause, tree dst, tree src);
 
+  /* Build and return code for a constructor of DST that sets it to
+     SRC + ADD.  */
+  tree (*omp_clause_linear_ctor) (tree clause, tree dst, tree src, tree add);
+
   /* Build and return code destructing DECL.  Return NULL if nothing
      to be done.  */
   tree (*omp_clause_dtor) (tree clause, tree decl);
 
   /* Do language specific checking on an implicitly determined clause.  */
-  void (*omp_finish_clause) (tree clause);
+  void (*omp_finish_clause) (tree clause, gimple_seq *pre_p);
 };
 
 /* Language hooks related to LTO serialization.  */
@@ -404,11 +411,13 @@ struct lang_hooks
   struct lang_hooks_for_decls decls;
 
   struct lang_hooks_for_types types;
-
+  
   struct lang_hooks_for_lto lto;
 
-  /* Returns the generic parameters of an instantiation of
-     a generic type or decl, e.g. C++ template instantiation.  */
+  /* Returns a TREE_VEC of the generic parameters of an instantiation of
+     a generic type or decl, e.g. C++ template instantiation.  If
+     TREE_CHAIN of the return value is set, it is an INTEGER_CST
+     indicating how many of the elements are non-default.  */
   tree (*get_innermost_generic_parms) (const_tree);
 
   /* Returns the TREE_VEC of arguments of an instantiation

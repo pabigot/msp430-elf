@@ -1,5 +1,5 @@
 /* Xstormy16 target functions.
-   Copyright (C) 1997-2013 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of GCC.
@@ -35,6 +35,10 @@
 #include "diagnostic-core.h"
 #include "obstack.h"
 #include "tree.h"
+#include "stringpool.h"
+#include "stor-layout.h"
+#include "varasm.h"
+#include "calls.h"
 #include "expr.h"
 #include "optabs.h"
 #include "except.h"
@@ -43,11 +47,21 @@
 #include "target-def.h"
 #include "tm_p.h"
 #include "langhooks.h"
+#include "pointer-set.h"
+#include "hash-table.h"
+#include "vec.h"
+#include "ggc.h"
+#include "basic-block.h"
+#include "tree-ssa-alias.h"
+#include "internal-fn.h"
+#include "gimple-fold.h"
+#include "tree-eh.h"
+#include "gimple-expr.h"
+#include "is-a.h"
 #include "gimple.h"
+#include "gimplify.h"
 #include "df.h"
 #include "reload.h"
-#include "ggc.h"
-#include "dumpfile.h"
 
 static rtx emit_addhi3_postreload (rtx, rtx, rtx);
 static void xstormy16_asm_out_constructor (rtx, int);
@@ -236,11 +250,7 @@ xstormy16_emit_cbranch (enum rtx_code code, rtx op0, rtx op1, rtx loc)
       vec = gen_rtvec (3, branch, sub, cy_clobber);
     }
 
-  { rtx insn =
   emit_jump_insn (gen_rtx_PARALLEL (VOIDmode, vec));
-    JUMP_LABEL (insn) = loc;
-    LABEL_NUSES (loc) ++;
-  }
 }
 
 /* Take a SImode conditional branch, one of GT/LE/GTU/LEU, and split
@@ -927,73 +937,6 @@ struct xstormy16_stack_layout
        && (df_regs_ever_live_p (REGNUM) || ! crtl->is_leaf)))
 
 /* Compute the stack layout.  */
-/*    The typical stack layout should looks like this after the
-   function's prologue:
-
-   
-           stack pointer -> |    |                      
-                              --                           ---
-                            |    | \                        |
-                            |    |   locals_size            |
-      hard frame pointer -> |    | /                        |
-                              --                            |
-                            |    | \                        | frame_size
-                            |    |   register_save_size     |
-			    |    | /                        |
-                              --                            | 
-                            |    | \                        |
-                            |    |   stdarg_save_size       |
-			    |    | /                        |
-			      --                           ---
-                            |ret |   return                ---
-                            |urn |   address                |  
-			    |    |                          |  INCOMING_FRAME_
-                            |psw |   processor status word  |  SP_OFFSET (negative)
-    CHILD    arg pointer -> |    |   (interrupts only)     ---
-  -------------------------- ---- ----------------------------------
-    PARENT                  |    | \                        |
-                            |    |   arguments saved        | Decreasing
-                            |    |   on the stack           |  addresses
-                            |    | /                        |
-                             ----                           v
-                            |    |
-
-  If the the frame is too big for offsets from the frame pointer to be
-  valid memory addresses then:
-
-           stack pointer -> |    |
-                              -- 
-                            |    |
-                            |    |
-     hard frame pointer ->  |    |
-                            |    |
-                            |    |
-                              --                           ---
-                            |    | \                        |
-                            |    |   locals_size            |
-                            |    | /                        |
-                              --                            |
-                            |    | \                        |
-                            |    |   register_save_size     | frame_size
-			    |    | /                        |
-                              --                            | 
-                            |    | \                        |
-                            |    |   stdarg_save_size       |
-			    |    | /                        |
-			      --                           ---
-                            |ret |   return                ---
-                            |urn |   address                |  
-			    |    |                          |  INCOMING_FRAME_
-                            |psw |   processor status word  |  SP_OFFSET (negative)
-    CHILD    arg pointer -> |    |   (interrupts only)     ---
-  -------------------------- ---- ----------------------------------
-    PARENT                  |    | \                        |
-                            |    |   arguments saved        | Decreasing
-                            |    |   on the stack           |  addresses
-                            |    | /                        |
-                             ----                           v
-                            |    |                             */
-
 
 struct xstormy16_stack_layout
 xstormy16_compute_stack_layout (void)
@@ -1022,7 +965,7 @@ xstormy16_compute_stack_layout (void)
     {
       if (layout.frame_size - INCOMING_FRAME_SP_OFFSET
 	  + crtl->args.size <= 2048)
-	layout.fp_minus_ap = layout.frame_size - INCOMING_FRAME_SP_OFFSET - layout.locals_size;
+	layout.fp_minus_ap = layout.frame_size - INCOMING_FRAME_SP_OFFSET;
       else
 	layout.fp_minus_ap = 2048 - crtl->args.size;
     }
@@ -1033,7 +976,6 @@ xstormy16_compute_stack_layout (void)
   layout.sp_minus_fp = (layout.frame_size - INCOMING_FRAME_SP_OFFSET
 			- layout.fp_minus_ap);
   layout.first_local_minus_ap = layout.sp_minus_fp - layout.locals_size;
-  gcc_assert (crtl->args.pretend_args_size == 0);
   return layout;
 }
 
@@ -1102,7 +1044,7 @@ xstormy16_expand_prologue (void)
   rtx mem_push_rtx;
   const int ifun = xstormy16_interrupt_function_p ();
 
-  mem_push_rtx = gen_rtx_POST_INC (HImode, stack_pointer_rtx);
+  mem_push_rtx = gen_rtx_POST_INC (Pmode, stack_pointer_rtx);
   mem_push_rtx = gen_rtx_MEM (HImode, mem_push_rtx);
 
   layout = xstormy16_compute_stack_layout ();
@@ -1130,10 +1072,10 @@ xstormy16_expand_prologue (void)
 	XVECEXP (dwarf, 0, 0) = gen_rtx_SET (VOIDmode,
 					     gen_rtx_MEM (Pmode, stack_pointer_rtx),
 					     reg);
-	XVECEXP (dwarf, 0, 1) = gen_rtx_SET (HImode, stack_pointer_rtx,
+	XVECEXP (dwarf, 0, 1) = gen_rtx_SET (Pmode, stack_pointer_rtx,
 					     plus_constant (Pmode,
 							    stack_pointer_rtx,
-							    GET_MODE_SIZE (HImode)));
+							    GET_MODE_SIZE (Pmode)));
 	add_reg_note (insn, REG_FRAME_RELATED_EXPR, dwarf);
 	RTX_FRAME_RELATED_P (XVECEXP (dwarf, 0, 0)) = 1;
 	RTX_FRAME_RELATED_P (XVECEXP (dwarf, 0, 1)) = 1;
@@ -1154,10 +1096,10 @@ xstormy16_expand_prologue (void)
 	XVECEXP (dwarf, 0, 0) = gen_rtx_SET (VOIDmode,
 					     gen_rtx_MEM (Pmode, stack_pointer_rtx),
 					     reg);
-	XVECEXP (dwarf, 0, 1) = gen_rtx_SET (HImode, stack_pointer_rtx,
+	XVECEXP (dwarf, 0, 1) = gen_rtx_SET (Pmode, stack_pointer_rtx,
 					     plus_constant (Pmode,
 							    stack_pointer_rtx,
-							    GET_MODE_SIZE (HImode)));
+							    GET_MODE_SIZE (Pmode)));
 	add_reg_note (insn, REG_FRAME_RELATED_EXPR, dwarf);
 	RTX_FRAME_RELATED_P (XVECEXP (dwarf, 0, 0)) = 1;
 	RTX_FRAME_RELATED_P (XVECEXP (dwarf, 0, 1)) = 1;
@@ -1221,7 +1163,7 @@ xstormy16_expand_epilogue (void)
   int regno;
   const int ifun = xstormy16_interrupt_function_p ();
 
-  mem_pop_rtx = gen_rtx_PRE_DEC (HImode, stack_pointer_rtx);
+  mem_pop_rtx = gen_rtx_PRE_DEC (Pmode, stack_pointer_rtx);
   mem_pop_rtx = gen_rtx_MEM (HImode, mem_pop_rtx);
 
   layout = xstormy16_compute_stack_layout ();
@@ -1287,9 +1229,6 @@ xstormy16_function_arg_advance (cumulative_args_t cum_v, enum machine_mode mode,
 {
   CUMULATIVE_ARGS *cum = get_cumulative_args (cum_v);
 
-  if (targetm.calls.must_pass_in_stack (mode, type))
-    *cum = NUM_ARGUMENT_REGISTERS;
-  else
   /* If an argument would otherwise be passed partially in registers,
      and partially on the stack, the whole of it is passed on the
      stack.  */
@@ -1410,10 +1349,6 @@ xstormy16_gimplify_va_arg_expr (tree valist, tree type, gimple_seq *pre_p,
   count = build3 (COMPONENT_REF, TREE_TYPE (f_count), valist, f_count,
 		  NULL_TREE);
 
-  /* gcc.c-torture/compile/pr48767.c  */
-  if (TYPE_MODE (type) == VOIDmode)
-    must_stack = 1;
-  else
   must_stack = targetm.calls.must_pass_in_stack (TYPE_MODE (type), type);
   size_tree = round_up (size_in_bytes (type), UNITS_PER_WORD);
   gimplify_expr (&size_tree, pre_p, NULL, is_gimple_val, fb_rvalue);
@@ -1492,12 +1427,12 @@ xstormy16_gimplify_va_arg_expr (tree valist, tree type, gimple_seq *pre_p,
 static void
 xstormy16_trampoline_init (rtx m_tramp, tree fndecl, rtx static_chain)
 {
-  rtx temp = gen_reg_rtx (Pmode);
-  rtx reg_fnaddr = gen_reg_rtx (Pmode);
+  rtx temp = gen_reg_rtx (HImode);
+  rtx reg_fnaddr = gen_reg_rtx (HImode);
   rtx reg_addr, reg_addr_mem;
 
   reg_addr = copy_to_reg (XEXP (m_tramp, 0));
-  reg_addr_mem = adjust_automodify_address (m_tramp, Pmode, reg_addr, 0);
+  reg_addr_mem = adjust_automodify_address (m_tramp, HImode, reg_addr, 0);
 
   emit_move_insn (temp, GEN_INT (0x3130 | STATIC_CHAIN_REGNUM));
   emit_move_insn (reg_addr_mem, temp);
@@ -1530,9 +1465,7 @@ xstormy16_function_value (const_tree valtype,
 {
   enum machine_mode mode;
   mode = TYPE_MODE (valtype);
-#if 0
   PROMOTE_MODE (mode, 0, valtype);
-#endif
   return gen_rtx_REG (mode, RETURN_VALUE_REGNUM);
 }
 
@@ -1736,15 +1669,6 @@ xstormy16_asm_out_constructor (rtx symbol, int priority)
   assemble_integer (symbol, POINTER_SIZE / BITS_PER_UNIT, POINTER_SIZE, 1);
 }
 
-#define PRINT_CONST(file, prefix, VAL)				\
-  do								\
-    {								\
-      if (((VAL) > 31 && (VAL) < 0xFFD0) || (VAL) < -32)	\
-	fprintf (file, prefix HOST_WIDE_INT_PRINT_HEX, (VAL));	\
-      else							\
-	fprintf (file, prefix HOST_WIDE_INT_PRINT_DEC, (VAL));	\
-    }								\
-  while (0)
 /* Worker function for TARGET_PRINT_OPERAND_ADDRESS.
 
    Print a memory address as an operand to reference that memory location.  */
@@ -1758,9 +1682,6 @@ xstormy16_print_operand_address (FILE *file, rtx address)
   /* There are a few easy cases.  */
   if (CONST_INT_P (address))
     {
-      if (INTVAL (address) > 100)
-	fprintf (file, HOST_WIDE_INT_PRINT_HEX, INTVAL (address) & 0xFFFF);
-      else
       fprintf (file, HOST_WIDE_INT_PRINT_DEC, INTVAL (address) & 0xFFFF);
       return;
     }
@@ -1790,7 +1711,6 @@ xstormy16_print_operand_address (FILE *file, rtx address)
   gcc_assert (REG_P (address));
 
   fputc ('(', file);
-
   if (pre_dec)
     fputs ("--", file);
   fputs (reg_names [REGNO (address)], file);
@@ -1800,7 +1720,6 @@ xstormy16_print_operand_address (FILE *file, rtx address)
     fprintf (file, "," HOST_WIDE_INT_PRINT_DEC, offset);
   fputc (')', file);
 }
-
 
 /* Worker function for TARGET_PRINT_OPERAND.
 
@@ -1851,8 +1770,6 @@ xstormy16_print_operand (FILE *file, rtx x, int code)
 	if (l == -1)
 	  output_operand_lossage ("'B' operand has multiple bits set");
 
-	PRINT_CONST (file, IMMEDIATE_PREFIX, l);
-	if (0)
 	fprintf (file, IMMEDIATE_PREFIX HOST_WIDE_INT_PRINT_DEC, l);
 	return;
       }
@@ -1882,8 +1799,6 @@ xstormy16_print_operand (FILE *file, rtx x, int code)
 	if (code == 'O')
 	  xx = -xx;
 
-	PRINT_CONST (file, IMMEDIATE_PREFIX, xx - 1);
-	if (0)
 	fprintf (file, IMMEDIATE_PREFIX HOST_WIDE_INT_PRINT_DEC, xx - 1);
 	return;
       }
@@ -1901,12 +1816,8 @@ xstormy16_print_operand (FILE *file, rtx x, int code)
 
 	l = 7 - xx;
 
-	PRINT_CONST (file, IMMEDIATE_PREFIX, l);
-	if (0)
-	  {
 	fputs (IMMEDIATE_PREFIX, file);
 	fprintf (file, HOST_WIDE_INT_PRINT_DEC, l);
-	  }
 	return;
       }
 
@@ -2055,16 +1966,15 @@ xstormy16_expand_arith (enum machine_mode mode, enum rtx_code code,
   if (code == NEG)
     emit_move_insn (src0, const0_rtx);
 
-
   for (i = 0; i < num_words; i++)
     {
       rtx w_src0, w_src1, w_dest;
       rtx insn;
 
-      w_src0 = simplify_gen_subreg (word_mode, src0, mode, i * UNITS_PER_WORD);
+      w_src0 = simplify_gen_subreg (word_mode, src0, mode,
+				    i * UNITS_PER_WORD);
       w_src1 = simplify_gen_subreg (word_mode, src1, mode, i * UNITS_PER_WORD);
       w_dest = simplify_gen_subreg (word_mode, dest, mode, i * UNITS_PER_WORD);
-      
 
       switch (code)
 	{
@@ -2401,7 +2311,6 @@ xstormy16_init_builtins (void)
 	  else
 	    args[a-1] = arg;
 	}
-
       ftype = build_function_type_list (ret_type, args[0], args[1], NULL_TREE);
       add_builtin_function (s16builtins[i].name, ftype,
 			    i, BUILT_IN_MD, NULL, NULL_TREE);
@@ -2547,8 +2456,7 @@ combine_bnp (rtx insn)
 	  if (reg_mentioned_p (reg, and_insn))
 	    return;
 
-	  if (GET_CODE (and_insn) != NOTE
-	      && GET_CODE (and_insn) != INSN)
+	  if (! NOTE_P (and_insn) && ! NONJUMP_INSN_P (and_insn))
 	    return;
 	}
     }
@@ -2567,8 +2475,7 @@ combine_bnp (rtx insn)
 	  if (reg_mentioned_p (reg, and_insn))
 	    return;
 
-	  if (GET_CODE (and_insn) != NOTE
-	      && GET_CODE (and_insn) != INSN)
+	  if (! NOTE_P (and_insn) && ! NONJUMP_INSN_P (and_insn))
 	    return;
 	}
 
@@ -2583,7 +2490,8 @@ combine_bnp (rtx insn)
                (set (reg:HI r7) (and:HI (reg:HI r7) (const_int 1)))
 
 	     Attempt to detect this here.  */
-	  for (shift = prev_real_insn (and_insn); shift; shift = prev_real_insn (shift))
+	  for (shift = prev_real_insn (and_insn); shift;
+	       shift = prev_real_insn (shift))
 	    {
 	      if (recog_memoized (shift) == CODE_FOR_lshrhi3
 		  && rtx_equal_p (SET_DEST (XVECEXP (PATTERN (shift), 0, 0)), reg)
@@ -2591,8 +2499,7 @@ combine_bnp (rtx insn)
 		break;
 
 	      if (reg_mentioned_p (reg, shift)
-		  || (GET_CODE (shift) != NOTE
-		      && GET_CODE (shift) != INSN))
+		  || (! NOTE_P (shift) && ! NONJUMP_INSN_P (shift)))
 		{
 		  shift = NULL_RTX;
 		  break;
@@ -2600,6 +2507,7 @@ combine_bnp (rtx insn)
 	    }
 	}
     }
+
   if (and_insn == NULL_RTX)
     return;
 
@@ -2638,8 +2546,7 @@ combine_bnp (rtx insn)
       if (reg_mentioned_p (reg, load))
 	return;
 
-      if (GET_CODE (load) != NOTE
-	  && GET_CODE (load) != INSN)
+      if (! NOTE_P (load) && ! NONJUMP_INSN_P (load))
 	return;
     }
   if (!load)
@@ -2659,7 +2566,8 @@ combine_bnp (rtx insn)
     }
   else
     {
-      if (!xstormy16_onebit_set_operand (XEXP (SET_SRC (PATTERN (and_insn)), 1), load_mode))
+      if (!xstormy16_onebit_set_operand (XEXP (SET_SRC (PATTERN (and_insn)), 1),
+					 load_mode))
 	return;
 
       mask = (int) INTVAL (XEXP (SET_SRC (PATTERN (and_insn)), 1));
@@ -2695,90 +2603,6 @@ combine_bnp (rtx insn)
     delete_insn (shift);
 }
 
-/* Possibly convert INSN and its neighbours from LOAD/BITOP/STORE
-   into BITOP-ON-MEMORY.  There are splits that handle most of this
-   for us, but there are a few cases, especially when not optimizing,
-   where they do not work.  */
-
-static void
-maybe_convert_bitop (rtx bitop)
-{
-  rtx  get_addr, load, store, mem;
-  enum machine_mode mode;
-
-  /* Look for:
-       (set (reg1) (const_int1))
-       (set (reg2) (mem (reg1))) or (set (reg2) (zero_extend (mem (reg1))))
-       (set (reg2) (bitop) ((reg2) (const_int2)))
-       (set (mem (reg1)) (reg2)).  */
-
-  load     = prev_nonnote_insn (bitop);
-  get_addr = prev_nonnote_insn (load);
-  store    = next_nonnote_insn (bitop);
-  if (get_addr == NULL_RTX || load == NULL_RTX || store == NULL_RTX)
-    return;
-
-  if (! INSN_P (get_addr)
-      || GET_CODE (PATTERN (get_addr)) != SET
-      || ! REG_P (SET_DEST (PATTERN (get_addr)))
-      || ! LEGITIMATE_ADDRESS_CONST_INT_P (SET_SRC (PATTERN (get_addr)), 0))
-    return;
-
-  if (! INSN_P (load)
-      || GET_CODE (PATTERN (load)) != SET
-      || ! REG_P (SET_DEST (PATTERN (load))))
-    return;
-  if (! MEM_P (SET_SRC (PATTERN (load)))
-      || ! REG_P (XEXP (SET_SRC (PATTERN (load)), 0))
-      || REGNO (SET_DEST (PATTERN (get_addr))) != REGNO (XEXP (SET_SRC (PATTERN (load)), 0)))
-    {
-      if (GET_CODE (SET_SRC (PATTERN (load))) != ZERO_EXTEND
-	  || ! MEM_P (XEXP (SET_SRC (PATTERN (load)), 0))
-	  || ! REG_P (XEXP (XEXP (SET_SRC (PATTERN (load)), 0), 0))
-	  || REGNO (SET_DEST (PATTERN (get_addr))) != REGNO (XEXP (XEXP (SET_SRC (PATTERN (load)), 0), 0)))
-	return;
-      else
-	mode = QImode;
-    }
-  else
-    mode = GET_MODE (SET_DEST (PATTERN (load)));
-
-  if (! REG_P (SET_DEST (PATTERN (bitop)))
-      || REGNO (SET_DEST (PATTERN (bitop))) != REGNO (SET_DEST (PATTERN (load)))
-      || ! REG_P (XEXP (SET_SRC (PATTERN (bitop)), 0))
-      || REGNO (XEXP (SET_SRC (PATTERN (bitop)), 0)) != REGNO (SET_DEST (PATTERN (load)))
-      || ! CONST_INT_P (XEXP (SET_SRC (PATTERN (bitop)), 1))
-      || ! (GET_CODE (SET_SRC (PATTERN (bitop))) == IOR
-	    ? xstormy16_onebit_set_operand (XEXP (SET_SRC (PATTERN (bitop)), 1), QImode)
-	    : xstormy16_onebit_clr_operand (XEXP (SET_SRC (PATTERN (bitop)), 1), QImode)))
-    return;
-
-  if (! INSN_P (store)
-      || GET_CODE (PATTERN (store)) != SET
-      || ! REG_P (SET_SRC (PATTERN (store)))
-      || ! MEM_P (SET_DEST (PATTERN (store)))
-      || ! REG_P (XEXP (SET_DEST (PATTERN (store)), 0))
-      || REGNO (SET_DEST (PATTERN (get_addr))) != REGNO (XEXP (SET_DEST (PATTERN (store)), 0)))
-    return;
-
-  /* Found it.  Replace with:
-
-       (set (reg1) (const_int1))
-       (set (mem (const_int1)) (bitop (mem (const_int1)) (const_int2)))
-
-     Eliminating the first set if it is not needed.  */
-  mem = gen_rtx_MEM (mode, SET_SRC (PATTERN (get_addr)));
-  SET_DEST (PATTERN (bitop)) = mem;
-  XEXP (SET_SRC (PATTERN (bitop)), 0) = mem;
-  PUT_MODE (SET_SRC (PATTERN (bitop)), mode);
-  /* Force the bitop instruction to be re-recognized, incase its mode has changed.  */
-  INSN_CODE (bitop) = -1;
-  if (find_regno_note (store, REG_DEAD, REGNO (SET_DEST (PATTERN (get_addr)))))
-    delete_insn (get_addr);
-  delete_insn (load);
-  delete_insn (store);
-}
-
 static void
 xstormy16_reorg (void)
 {
@@ -2786,17 +2610,8 @@ xstormy16_reorg (void)
 
   for (insn = get_insns (); insn; insn = NEXT_INSN (insn))
     {
-      if (INSN_P (insn)
-	  && GET_CODE (PATTERN (insn)) == SET)
-	{
-	  if (GET_CODE (SET_SRC (PATTERN (insn))) == IOR 
-	      || GET_CODE (SET_SRC (PATTERN (insn))) == AND)
-	    maybe_convert_bitop (insn);
-
-	}
       if (! JUMP_P (insn))
 	continue;
-
       combine_bnp (insn);
     }
 }
@@ -2809,7 +2624,6 @@ xstormy16_return_in_memory (const_tree type, const_tree fntype ATTRIBUTE_UNUSED)
   const HOST_WIDE_INT size = int_size_in_bytes (type);
   return (size == -1 || size > UNITS_PER_WORD * NUM_ARGUMENT_REGISTERS);
 }
-
 
 #undef  TARGET_ASM_ALIGNED_HI_OP
 #define TARGET_ASM_ALIGNED_HI_OP "\t.hword\t"
@@ -2858,12 +2672,11 @@ xstormy16_return_in_memory (const_tree type, const_tree fntype ATTRIBUTE_UNUSED)
 
 #undef  TARGET_RETURN_IN_MEMORY
 #define TARGET_RETURN_IN_MEMORY xstormy16_return_in_memory
-
-#undef  TARGET_FUNCTION_VALUE
+#undef TARGET_FUNCTION_VALUE
 #define TARGET_FUNCTION_VALUE xstormy16_function_value
-#undef  TARGET_LIBCALL_VALUE
+#undef TARGET_LIBCALL_VALUE
 #define TARGET_LIBCALL_VALUE xstormy16_libcall_value
-#undef  TARGET_FUNCTION_VALUE_REGNO_P
+#undef TARGET_FUNCTION_VALUE_REGNO_P
 #define TARGET_FUNCTION_VALUE_REGNO_P xstormy16_function_value_regno_p
 
 #undef  TARGET_MACHINE_DEPENDENT_REORG
@@ -2874,17 +2687,16 @@ xstormy16_return_in_memory (const_tree type, const_tree fntype ATTRIBUTE_UNUSED)
 #undef  TARGET_PREFERRED_OUTPUT_RELOAD_CLASS
 #define TARGET_PREFERRED_OUTPUT_RELOAD_CLASS xstormy16_preferred_reload_class
 
-#undef  TARGET_LEGITIMATE_ADDRESS_P
+#undef TARGET_LEGITIMATE_ADDRESS_P
 #define TARGET_LEGITIMATE_ADDRESS_P	xstormy16_legitimate_address_p
-#undef  TARGET_MODE_DEPENDENT_ADDRESS_P
+#undef TARGET_MODE_DEPENDENT_ADDRESS_P
 #define TARGET_MODE_DEPENDENT_ADDRESS_P xstormy16_mode_dependent_address_p
 
-#undef  TARGET_CAN_ELIMINATE
+#undef TARGET_CAN_ELIMINATE
 #define TARGET_CAN_ELIMINATE xstormy16_can_eliminate
 
-#undef  TARGET_TRAMPOLINE_INIT
+#undef TARGET_TRAMPOLINE_INIT
 #define TARGET_TRAMPOLINE_INIT xstormy16_trampoline_init
-
 
 struct gcc_target targetm = TARGET_INITIALIZER;
 

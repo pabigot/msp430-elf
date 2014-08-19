@@ -1,0 +1,41 @@
+This patch adds another instruction pattern to frv_skip_main_prologue().
+This pattern appears in main() when using the -mfdpic multilib.  Without
+this patch, gdb.base/break.exp shows some FAILs.  With this patch in place,
+that test passes without any failures.
+
+This patch should be submitted upstream.  (I intend to submit it after
+further testing.)
+
+gdb/ChangeLog.RedHat:
+
+	* frv-tdep.c (frv_skip_main_prologue): Add check for a register-to-
+	register move to GR15.
+
+Index: gdb/frv-tdep.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/frv-tdep.c,v
+retrieving revision 1.17
+diff -u -p -r1.17 frv-tdep.c
+--- gdb/frv-tdep.c	19 May 2010 23:56:15 -0000	1.17
++++ gdb/frv-tdep.c	21 May 2010 02:17:37 -0000
+@@ -1048,6 +1048,20 @@ frv_skip_main_prologue (struct gdbarch *
+       op = extract_unsigned_integer (buf, 4, byte_order);
+     }
+ 
++  /* GR15 may also be set via a register move instruction:
++
++	ori GRi, 0, GR15
++     P 001111 0100010 IIIIII 000000000000 = 0x1e880000
++     0 111111 1111111 000000 111111111111 = 0x7ffc0fff
++	 .    .   .    .   .    .   .   .               */
++  else if ((op & 0x7ffc0fff) == 0x1e880000)
++    {
++      pc += 4;
++      if (target_read_memory (pc, buf, 4))
++	return orig_pc;
++      op = extract_unsigned_integer (buf, 4, byte_order);
++    }
++
+   /* The format of an FRV CALL instruction is as follows:
+ 
+      call label24

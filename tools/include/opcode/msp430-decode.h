@@ -1,6 +1,5 @@
 /* Opcode decoder for the TI MSP430
-   Copyright 2012
-   Free Software Foundation, Inc.
+   Copyright 2012-2013 Free Software Foundation, Inc.
    Written by DJ Delorie <dj@redhat.com>
 
    This file is part of GDB, the GNU Debugger.
@@ -20,9 +19,10 @@
    Foundation, Inc., 51 Franklin Street - Fifth Floor, Boston, MA
    02110-1301, USA.  */
 
-typedef enum {
+typedef enum
+{
   MSO_unknown,
-  /* double-operand instructions - all repeat .REPEATS times. */
+  /* Double-operand instructions - all repeat .REPEATS times. */
   MSO_mov,	/* dest = src */
   MSO_add,	/* dest += src */
   MSO_addc,	/* dest += src + carry */
@@ -36,25 +36,26 @@ typedef enum {
   MSO_xor,	/* dest ^= src */
   MSO_and,	/* dest &= src */
 
-  /* single-operand instructions */
-  MSO_rrc,	/* rotate through carry, dest >>= .REPEATS */
-  MSO_swpb,	/* swap lower bytes of operand */
-  MSO_rra,	/* signed shift dest >>= .REPEATS */
-  MSO_sxt,	/* sign extend lower byte */
-  MSO_push,	/* push .REPEATS registers (or other op) starting at SRC going towards R0 */
-  MSO_pop,	/* pop .REPEATS registers starting at DEST going towards R15 */
+  /* Single-operand instructions.  */
+  MSO_rrc,	/* Rotate through carry, dest >>= .REPEATS.  */
+  MSO_swpb,	/* Swap lower bytes of operand.  */
+  MSO_rra,	/* Signed shift dest >>= .REPEATS.  */
+  MSO_sxt,	/* Sign extend lower byte.  */
+  MSO_push,	/* Push .REPEATS registers (or other op) starting at SRC going towards R0.  */
+  MSO_pop,	/* Pop .REPEATS registers starting at DEST going towards R15.  */
   MSO_call,
   MSO_reti,
 
-  /* jumps */
-  MSO_jmp,	/* pc = SRC if .COND true.  */
+  /* Jumps.  */
+  MSO_jmp,	/* PC = SRC if .COND true.  */
 
-  /* Extended single-operand instructions */
-  MSO_rru,	/* unsigned shift right, dest >>= .REPEATS */
+  /* Extended single-operand instructions.  */
+  MSO_rru,	/* Unsigned shift right, dest >>= .REPEATS.  */
 
 } MSP430_Opcode_ID;
 
-typedef enum {
+typedef enum
+{
   MSP430_Operand_None,
   MSP430_Operand_Immediate,
   MSP430_Operand_Register,
@@ -62,7 +63,8 @@ typedef enum {
   MSP430_Operand_Indirect_Postinc
 } MSP430_Operand_Type;
 
-typedef enum {
+typedef enum
+{
   MSR_0 = 0,
   MSR_PC = 0,
   MSR_SP = 1,
@@ -71,13 +73,14 @@ typedef enum {
   MSR_None = 16,
 } MSP430_Register;
 
-typedef struct {
+typedef struct
+{
   MSP430_Operand_Type  type;
-  int              addend;
-  MSP430_Register  reg : 8;
-  MSP430_Register  reg2 : 8;
-  unsigned char	   bit_number : 4;
-  unsigned char	   condition : 3;
+  int                  addend;
+  MSP430_Register      reg : 8;
+  MSP430_Register      reg2 : 8;
+  unsigned char	       bit_number : 4;
+  unsigned char	       condition : 3;
 } MSP430_Opcode_Operand;
 
 typedef enum
@@ -87,8 +90,9 @@ typedef enum
   MSP430_Addr
 } MSP430_Size;
 
-/* These numerically match the bit encoding */
-typedef enum {
+/* These numerically match the bit encoding.  */
+typedef enum
+{
   MSC_nz = 0,
   MSC_z,
   MSC_nc,
@@ -111,12 +115,13 @@ typedef struct
   unsigned		flags_1:8;	/* These flags are set to '1' by the insn.  */
   unsigned		flags_0:8;	/* These flags are set to '0' by the insn.  */
   unsigned		flags_set:8;	/* These flags are set appropriately by the insn.  */
-  unsigned		zc:1;		/* if set, pretend the carry bit is zero */
-  unsigned		repeat_reg:1;	/* if set, count is in REG[repeats] */
-  unsigned		repeats:6;	/* contains COUNT-1, or register number.  */
-  int			n_bytes;	/* opcode size in BYTES */
+  unsigned		zc:1;		/* If set, pretend the carry bit is zero.  */
+  unsigned		repeat_reg:1;	/* If set, count is in REG[repeats].  */
+  unsigned		ofs_430x:1;	/* If set, the offset in any operand is 430x (else use 430 compatibility mode).  */
+  unsigned		repeats:5;	/* Contains COUNT-1, or register number.  */
+  int			n_bytes;	/* Opcode size in BYTES.  */
   char *		syntax;
-  MSP430_Size		size;		/* operand size in BITS */
+  MSP430_Size		size;		/* Operand size in BITS.  */
   MSP430_Condition	cond;
   /* By convention, these are [0]destination, [1]source.  */
   MSP430_Opcode_Operand	op[2];

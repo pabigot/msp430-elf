@@ -1,7 +1,6 @@
 /* Pascal language support routines for GDB, the GNU debugger.
 
-   Copyright (C) 2000, 2002-2005, 2007-2012 Free Software Foundation,
-   Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -21,12 +20,13 @@
 /* This file is derived from c-lang.c */
 
 #include "defs.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "symtab.h"
 #include "gdbtypes.h"
 #include "expression.h"
 #include "parser-defs.h"
 #include "language.h"
+#include "varobj.h"
 #include "p-lang.h"
 #include "valprint.h"
 #include "value.h"
@@ -280,10 +280,7 @@ pascal_printstr (struct ui_file *stream, struct type *type,
 	{
 	  if (in_quotes)
 	    {
-	      if (options->inspect_it)
-		fputs_filtered ("\\', ", stream);
-	      else
-		fputs_filtered ("', ", stream);
+	      fputs_filtered ("', ", stream);
 	      in_quotes = 0;
 	    }
 	  pascal_printchar (current_char, type, stream);
@@ -296,10 +293,7 @@ pascal_printstr (struct ui_file *stream, struct type *type,
 	{
 	  if ((!in_quotes) && (PRINT_LITERAL_FORM (current_char)))
 	    {
-	      if (options->inspect_it)
-		fputs_filtered ("\\'", stream);
-	      else
-		fputs_filtered ("'", stream);
+	      fputs_filtered ("'", stream);
 	      in_quotes = 1;
 	    }
 	  pascal_one_char (current_char, stream, &in_quotes);
@@ -309,12 +303,7 @@ pascal_printstr (struct ui_file *stream, struct type *type,
 
   /* Terminate the quotes if necessary.  */
   if (in_quotes)
-    {
-      if (options->inspect_it)
-	fputs_filtered ("\\'", stream);
-      else
-	fputs_filtered ("'", stream);
-    }
+    fputs_filtered ("'", stream);
 
   if (force_ellipses || i < length)
     fputs_filtered ("...", stream);
@@ -427,6 +416,7 @@ pascal_language_arch_info (struct gdbarch *gdbarch,
 const struct language_defn pascal_language_defn =
 {
   "pascal",			/* Language name */
+  "Pascal",
   language_pascal,
   range_check_on,
   case_sensitive_on,
@@ -461,6 +451,7 @@ const struct language_defn pascal_language_defn =
   default_get_string,
   NULL,				/* la_get_symbol_name_cmp */
   iterate_over_symbols,
+  &default_varobj_ops,
   LANG_MAGIC
 };
 

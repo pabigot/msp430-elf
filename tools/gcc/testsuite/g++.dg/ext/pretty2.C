@@ -59,3 +59,5 @@ __assert_fail (const char *cond, const char *file, unsigned int line,
 {
   abort ();
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

@@ -1,8 +1,7 @@
 /* Variables that describe the inferior process running under GDB:
    Where it is, why it stopped, and how to step it.
 
-   Copyright (C) 1986, 1988-1996, 1998-2001, 2003-2012 Free Software
-   Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -30,6 +29,7 @@ struct gdbarch;
 struct regcache;
 struct ui_out;
 struct terminal_info;
+struct target_desc_info;
 
 #include "ptid.h"
 
@@ -90,7 +90,7 @@ extern void set_inferior_io_terminal (const char *terminal_name);
 extern const char *get_inferior_io_terminal (void);
 
 /* Collected pid, tid, etc. of the debugged inferior.  When there's
-   no inferior, PIDGET (inferior_ptid) will be 0.  */
+   no inferior, ptid_get_pid (inferior_ptid) will be 0.  */
 
 extern ptid_t inferior_ptid;
 
@@ -118,11 +118,6 @@ extern int step_stop_if_no_debug;
    events stop only the thread that had the event -- the other threads
    are kept running freely.  */
 extern int non_stop;
-
-/* If set (default), when following a fork, GDB will detach from one
-   the fork branches, child or parent.  Exactly which branch is
-   detached depends on 'set follow-fork-mode' setting.  */
-extern int detach_fork;
 
 /* When set (default), the target should attempt to disable the operating
    system's address space randomization feature when starting an inferior.  */
@@ -175,7 +170,7 @@ extern void default_print_registers_info (struct gdbarch *gdbarch,
 					  struct frame_info *frame,
 					  int regnum, int all);
 
-extern void child_terminal_info (char *, int);
+extern void child_terminal_info (const char *, int);
 
 extern void term_info (char *, int);
 
@@ -227,13 +222,13 @@ extern void get_last_target_status(ptid_t *ptid,
 
 extern void follow_inferior_reset_breakpoints (void);
 
-/* Throw an error indicating the current thread is running.  */
-extern void error_is_running (void);
-
-/* Calls error_is_running if the current thread is running.  */
-extern void ensure_not_running (void);
-
 void set_step_info (struct frame_info *frame, struct symtab_and_line sal);
+
+/* Clear the convenience variables associated with the exit of the
+   inferior.  Currently, those variables are $_exitcode and
+   $_exitsignal.  */
+
+extern void clear_exit_convenience_vars (void);
 
 /* From infcmd.c */
 
@@ -247,19 +242,9 @@ extern void set_inferior_args (char *);
 
 extern void set_inferior_args_vector (int, char **);
 
-extern void all_registers_info (char *, int);
-
 extern void registers_info (char *, int);
 
-extern void nexti_command (char *, int);
-
-extern void stepi_command (char *, int);
-
 extern void continue_1 (int all_threads);
-
-extern void continue_command (char *, int);
-
-extern void interrupt_target_command (char *args, int from_tty);
 
 extern void interrupt_target_1 (int all_threads);
 
@@ -271,6 +256,25 @@ extern void notice_new_inferior (ptid_t, int, int);
 
 extern struct value *get_return_value (struct value *function,
                                        struct type *value_type);
+
+/* Whether to start up the debuggee under a shell.
+
+   If startup-with-shell is set, GDB's "run" will attempt to start up
+   the debuggee under a shell.
+
+   This is in order for argument-expansion to occur.  E.g.,
+
+   (gdb) run *
+
+   The "*" gets expanded by the shell into a list of files.
+
+   While this is a nice feature, it may be handy to bypass the shell
+   in some cases.  To disable this feature, do "set startup-with-shell
+   false".
+
+   The catch-exec traps expected during start-up will be one more if
+   the target is started up with a shell.  */
+extern int startup_with_shell;
 
 /* Address at which inferior stopped.  */
 
@@ -361,25 +365,12 @@ struct displaced_step_closure *get_displaced_step_closure_by_addr (CORE_ADDR add
 #define ON_STACK 1
 #define AT_ENTRY_POINT 4
 
-/* If STARTUP_WITH_SHELL is set, GDB's "run"
-   will attempts to start up the debugee under a shell.
-   This is in order for argument-expansion to occur.  E.g.,
-   (gdb) run *
-   The "*" gets expanded by the shell into a list of files.
-   While this is a nice feature, it turns out to interact badly
-   with some of the catch-fork/catch-exec features we have added.
-   In particular, if the shell does any fork/exec's before
-   the exec of the target program, that can confuse GDB.
-   To disable this feature, set STARTUP_WITH_SHELL to 0.
-   To enable this feature, set STARTUP_WITH_SHELL to 1.
-   The catch-exec traps expected during start-up will
-   be 1 if target is not started up with a shell, 2 if it is.
-   - RT
-   If you disable this, you need to decrement
-   START_INFERIOR_TRAPS_EXPECTED in tm.h.  */
-#define STARTUP_WITH_SHELL 1
+/* Number of traps that happen between exec'ing the shell to run an
+   inferior and when we finally get to the inferior code, not counting
+   the exec for the shell.  This is 1 on most implementations.
+   Overridden in nm.h files.  */
 #if !defined(START_INFERIOR_TRAPS_EXPECTED)
-#define START_INFERIOR_TRAPS_EXPECTED	2
+#define START_INFERIOR_TRAPS_EXPECTED	1
 #endif
 
 struct private_inferior;
@@ -513,6 +504,23 @@ struct inferior
      from enum symfile_add_flags.  */
   int symfile_flags;
 
+  /* Info about an inferior's target description (if it's fetched; the
+     user supplied description's filename, if any; etc.).  */
+  struct target_desc_info *tdesc_info;
+
+  /* The architecture associated with the inferior through the
+     connection to the target.
+
+     The architecture vector provides some information that is really
+     a property of the inferior, accessed through a particular target:
+     ptrace operations; the layout of certain RSP packets; the
+     solib_ops vector; etc.  To differentiate architecture accesses to
+     per-inferior/target properties from
+     per-thread/per-frame/per-objfile properties, accesses to
+     per-inferior/target properties should be made through
+     this gdbarch.  */
+  struct gdbarch *gdbarch;
+
   /* Per inferior data-pointers required by other GDB modules.  */
   REGISTRY_FIELDS;
 };
@@ -630,6 +638,8 @@ extern struct inferior *add_inferior_with_spaces (void);
 extern void update_observer_mode (void);
 
 extern void update_signals_program_target (void);
+
+extern void signal_catch_update (const unsigned int *);
 
 /* In some circumstances we allow a command to specify a numeric
    signal.  The idea is to keep these circumstances limited so that

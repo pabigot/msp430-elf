@@ -23,6 +23,8 @@
 #include "coretypes.h"
 #include "tm.h"
 #include "tree.h"
+#include "stor-layout.h"
+#include "calls.h"
 #include "rtl.h"
 #include "regs.h"
 #include "hard-reg-set.h"
@@ -169,6 +171,9 @@ msp430_mcu_name (void)
       snprintf (mcu_name, sizeof (mcu_name) - 1, "__%s__", target_mcu);
       for (i = strlen (mcu_name); i--;)
 	mcu_name[i] = TOUPPER (mcu_name[i]);
+      /* As a special exception, the MSP430i family uses a lower case 'i'.  */
+      if (memcmp (mcu_name, "__MSP430I", 9) == 0)
+	mcu_name[8] = 'i';
       return mcu_name;
     }
 
@@ -211,6 +216,11 @@ msp430_option_override (void)
   if (TARGET_LARGE && !msp430x)
     error ("-mlarge requires a 430X-compatible -mmcu=");
 
+  if (msp430_code_region == UPPER && ! msp430x)
+    error ("-mcode-region=upper requires 430X-compatible cpu");
+  if (msp430_data_region == UPPER && ! msp430x)
+    error ("-mdata-region=upper requires 430X-compatible cpu");
+
   if (flag_exceptions || flag_non_call_exceptions
       || flag_unwind_tables || flag_asynchronous_unwind_tables)
     flag_omit_frame_pointer = false;
@@ -223,6 +233,21 @@ msp430_option_override (void)
      possible to build newlib with -Os enabled.  Until now...  */
   if (TARGET_OPT_SPACE && optimize < 3)
     optimize_size = 1;
+}
+
+#undef  TARGET_SCALAR_MODE_SUPPORTED_P
+#define TARGET_SCALAR_MODE_SUPPORTED_P msp430_scalar_mode_supported_p
+
+static bool
+msp430_scalar_mode_supported_p (enum machine_mode m)
+{
+  if (m == PSImode && msp430x)
+    return true;
+#if 0
+  if (m == TImode)
+    return true;
+#endif
+  return default_scalar_mode_supported_p (m);
 }
 
 
@@ -254,12 +279,47 @@ msp430_hard_regno_nregs (int regno ATTRIBUTE_UNUSED,
 	  / UNITS_PER_WORD);
 }
 
+/* Implements HARD_REGNO_NREGS_HAS_PADDING.  */
+int
+msp430_hard_regno_nregs_has_padding (int regno ATTRIBUTE_UNUSED,
+				     enum machine_mode mode)
+{
+  if (mode == PSImode && msp430x)
+    return 1;
+  return ((GET_MODE_SIZE (mode) + UNITS_PER_WORD - 1)
+	  / UNITS_PER_WORD);
+}
+
+/* Implements HARD_REGNO_NREGS_WITH_PADDING.  */
+int
+msp430_hard_regno_nregs_with_padding (int regno ATTRIBUTE_UNUSED,
+				     enum machine_mode mode)
+{
+  if (mode == PSImode)
+    return 2;
+  return msp430_hard_regno_nregs (regno, mode);
+}
+
 /* Implements HARD_REGNO_MODE_OK.  */
 int
 msp430_hard_regno_mode_ok (int regno ATTRIBUTE_UNUSED,
 			   enum machine_mode mode)
 {
   return regno <= (ARG_POINTER_REGNUM - msp430_hard_regno_nregs (regno, mode));
+}
+
+/* Implements MODES_TIEABLE_P.  */
+bool
+msp430_modes_tieable_p (enum machine_mode mode1, enum machine_mode mode2)
+{
+  if ((mode1 == PSImode || mode2 == SImode)
+      || (mode1 == SImode || mode2 == PSImode))
+    return false;
+
+  return ((GET_MODE_CLASS (mode1) == MODE_FLOAT
+	   || GET_MODE_CLASS (mode1) == MODE_COMPLEX_FLOAT)
+	  == (GET_MODE_CLASS (mode2) == MODE_FLOAT
+	      || GET_MODE_CLASS (mode2) == MODE_COMPLEX_FLOAT));
 }
 
 #undef  TARGET_FRAME_POINTER_REQUIRED
@@ -353,7 +413,7 @@ msp430_addr_space_pointer_mode (addr_space_t addrspace)
 static enum machine_mode
 msp430_unwind_word_mode (void)
 {
-  return TARGET_LARGE ? SImode : HImode;
+  return TARGET_LARGE ? PSImode : HImode;
 }
 
 /* Determine if one named address space is a subset of another.  */
@@ -714,6 +774,97 @@ msp430_get_raw_result_mode (int regno ATTRIBUTE_UNUSED)
 {
   return Pmode;
 }
+
+#undef  TARGET_GIMPLIFY_VA_ARG_EXPR
+#define TARGET_GIMPLIFY_VA_ARG_EXPR msp430_gimplify_va_arg_expr
+
+#include "gimplify.h"
+#include "gimple-expr.h"
+
+static tree
+msp430_gimplify_va_arg_expr (tree valist, tree type, gimple_seq *pre_p,
+			  gimple_seq *post_p)
+{
+  tree addr, t, type_size, rounded_size, valist_tmp;
+  unsigned HOST_WIDE_INT align, boundary;
+  bool indirect;
+
+  indirect = pass_by_reference (NULL, TYPE_MODE (type), type, false);
+  if (indirect)
+    type = build_pointer_type (type);
+
+  align = PARM_BOUNDARY / BITS_PER_UNIT;
+  boundary = targetm.calls.function_arg_boundary (TYPE_MODE (type), type);
+
+  /* When we align parameter on stack for caller, if the parameter
+     alignment is beyond MAX_SUPPORTED_STACK_ALIGNMENT, it will be
+     aligned at MAX_SUPPORTED_STACK_ALIGNMENT.  We will match callee
+     here with caller.  */
+  if (boundary > MAX_SUPPORTED_STACK_ALIGNMENT)
+    boundary = MAX_SUPPORTED_STACK_ALIGNMENT;
+
+  boundary /= BITS_PER_UNIT;
+
+  /* Hoist the valist value into a temporary for the moment.  */
+  valist_tmp = get_initialized_tmp_var (valist, pre_p, NULL);
+
+  /* va_list pointer is aligned to PARM_BOUNDARY.  If argument actually
+     requires greater alignment, we must perform dynamic alignment.  */
+  if (boundary > align
+      && !integer_zerop (TYPE_SIZE (type)))
+    {
+      /* FIXME: This is where this function diverts from targhooks.c:
+	 std_gimplify_va_arg_expr().  It works, but I do not know why...  */
+      if (! POINTER_TYPE_P (type))
+	{
+	  t = build2 (MODIFY_EXPR, TREE_TYPE (valist), valist_tmp,
+		      fold_build_pointer_plus_hwi (valist_tmp, boundary - 1));
+	  gimplify_and_add (t, pre_p);
+
+	  t = build2 (MODIFY_EXPR, TREE_TYPE (valist), valist_tmp,
+		      fold_build2 (BIT_AND_EXPR, TREE_TYPE (valist),
+				   valist_tmp,
+				   build_int_cst (TREE_TYPE (valist), -boundary)));
+	  gimplify_and_add (t, pre_p);
+	}
+    }
+  else
+    boundary = align;
+
+  /* If the actual alignment is less than the alignment of the type,
+     adjust the type accordingly so that we don't assume strict alignment
+     when dereferencing the pointer.  */
+  boundary *= BITS_PER_UNIT;
+  if (boundary < TYPE_ALIGN (type))
+    {
+      type = build_variant_type_copy (type);
+      TYPE_ALIGN (type) = boundary;
+    }
+
+  /* Compute the rounded size of the type.  */
+  type_size = size_in_bytes (type);
+  rounded_size = round_up (type_size, align);
+
+  /* Reduce rounded_size so it's sharable with the postqueue.  */
+  gimplify_expr (&rounded_size, pre_p, post_p, is_gimple_val, fb_rvalue);
+
+  /* Get AP.  */
+  addr = valist_tmp;
+
+  /* Compute new value for AP.  */
+  t = fold_build_pointer_plus (valist_tmp, rounded_size);
+  t = build2 (MODIFY_EXPR, TREE_TYPE (valist), valist, t);
+  gimplify_and_add (t, pre_p);
+
+  addr = fold_convert (build_pointer_type (type), addr);
+
+  if (indirect)
+    addr = build_va_arg_indirect_ref (addr);
+
+  addr = build_va_arg_indirect_ref (addr);
+
+  return addr;
+}
 
 /* Addressing Modes */
 
@@ -777,6 +928,57 @@ msp430_legitimate_address_p (enum machine_mode mode ATTRIBUTE_UNUSED,
     }
 }
 
+#undef  TARGET_ADDR_SPACE_LEGITIMATE_ADDRESS_P
+#define TARGET_ADDR_SPACE_LEGITIMATE_ADDRESS_P msp430_addr_space_legitimate_address_p
+
+bool
+msp430_addr_space_legitimate_address_p (enum machine_mode mode,
+					rtx x,
+					bool strict,
+					addr_space_t as ATTRIBUTE_UNUSED)
+{
+  return msp430_legitimate_address_p (mode, x, strict);
+}
+
+#undef  TARGET_ASM_INTEGER
+#define TARGET_ASM_INTEGER msp430_asm_integer
+static bool
+msp430_asm_integer (rtx x, unsigned int size, int aligned_p)
+{
+  int c = GET_CODE (x);
+
+  if (size == 3 && GET_MODE (x) == PSImode)
+    size = 4;
+
+  switch (size)
+    {
+    case 4:
+      if (c == SYMBOL_REF || c == CONST || c == LABEL_REF || c == CONST_INT)
+	{
+	  fprintf (asm_out_file, "\t.long\t");
+	  output_addr_const (asm_out_file, x);
+	  fputc ('\n', asm_out_file);
+	  return true;
+	}
+
+      if (GET_CODE (x) == MINUS
+	  && GET_CODE (XEXP (x,0)) == LABEL_REF
+	  && GET_CODE (XEXP (x,1)) == LABEL_REF)
+	{
+	  fprintf (asm_out_file, "\t.long\t");
+	  output_addr_const (asm_out_file, XEXP (x, 0));
+	  fputs (" - ", asm_out_file);
+	  output_addr_const (asm_out_file, XEXP (x, 1));
+	  fputc ('\n', asm_out_file);
+	  return true;
+	}
+
+      break;
+    }
+
+  return default_assemble_integer (x, size, aligned_p);
+}
+
 #undef  TARGET_LEGITIMATE_CONSTANT_P
 #define TARGET_LEGITIMATE_CONSTANT_P msp430_legitimate_constant
 
@@ -790,7 +992,6 @@ msp430_legitimate_constant (enum machine_mode mode, rtx x)
        is out of range.  */
     || (INTVAL (x) < (1 << 20) && INTVAL (x) >= (-1 << 20));
 }
-
 
 #undef  TARGET_RTX_COSTS
 #define TARGET_RTX_COSTS msp430_rtx_costs
@@ -807,7 +1008,7 @@ static bool msp430_rtx_costs (rtx   x ATTRIBUTE_UNUSED,
     case SIGN_EXTEND:
       if (GET_MODE (x) == SImode && outer_code == SET)
 	{
-	  *total = COSTS_N_INSNS (100);
+	  *total = COSTS_N_INSNS (4);
 	  return true;
 	}
       break;
@@ -925,11 +1126,29 @@ msp430_compute_frame_info (void)
 			      + cfun->machine->framesize_locals
 			      + cfun->machine->framesize_outgoing);
 }
+/* Attribute Handling.  */
+
+const char * const  ATTR_INTR   = "interrupt";
+const char * const  ATTR_WAKEUP = "wakeup";
+const char * const  ATTR_NAKED  = "naked";
+const char * const  ATTR_REENT  = "reentrant";
+const char * const  ATTR_CRIT   = "critical";
+const char * const  ATTR_LOWER  = "lower";
+const char * const  ATTR_UPPER  = "upper";
+const char * const  ATTR_EITHER = "either";
 
 static inline bool
-is_attr_func (const char * attr)
+has_attr (const char * attr, tree decl)
 {
-  return lookup_attribute (attr, DECL_ATTRIBUTES (current_function_decl)) != NULL_TREE;
+  if (decl == NULL_TREE)
+    return false;
+  return lookup_attribute (attr, DECL_ATTRIBUTES (decl)) != NULL_TREE;
+}
+
+static bool
+is_interrupt_func (tree decl = current_function_decl)
+{
+  return has_attr (ATTR_INTR, decl);
 }
 
 /* Returns true if the current function has the "interrupt" attribute.  */
@@ -937,40 +1156,198 @@ is_attr_func (const char * attr)
 bool
 msp430_is_interrupt_func (void)
 {
-  if (current_function_decl == NULL)
-    return false;
-  return is_attr_func ("interrupt");
+  return is_interrupt_func (current_function_decl);
 }
 
 static bool
-is_wakeup_func (void)
+is_wakeup_func (tree decl = current_function_decl)
 {
-  return msp430_is_interrupt_func () && is_attr_func ("wakeup");
+  return is_interrupt_func (decl) && has_attr (ATTR_WAKEUP, decl);
 }
 
 static inline bool
-is_naked_func (void)
+is_naked_func (tree decl = current_function_decl)
 {
-  return is_attr_func ("naked");
+  return has_attr (ATTR_NAKED, decl);
 }
 
 static inline bool
-is_reentrant_func (void)
+is_reentrant_func (tree decl = current_function_decl)
 {
-  return is_attr_func ("reentrant");
+  return has_attr (ATTR_REENT, decl);
 }
 
 static inline bool
-is_critical_func (void)
+is_critical_func (tree decl = current_function_decl)
 {
-  return is_attr_func ("critical");
+  return has_attr (ATTR_CRIT, decl);
 }
+
+/* Verify MSP430 specific attributes.  */
+#define TREE_NAME_EQ(NAME, STR) (strcmp (IDENTIFIER_POINTER (NAME), (STR)) == 0)
+
+static tree
+msp430_attr (tree * node,
+	     tree   name,
+	     tree   args,
+	     int    flags ATTRIBUTE_UNUSED,
+	     bool * no_add_attrs)
+{
+  gcc_assert (DECL_P (* node));
+
+  if (args != NULL)
+    {
+      gcc_assert (TREE_NAME_EQ (name, ATTR_INTR));
+
+      tree value = TREE_VALUE (args);
+
+      switch (TREE_CODE (value))
+	{
+	case STRING_CST:
+	  if (   strcmp (TREE_STRING_POINTER (value), "reset")
+	      && strcmp (TREE_STRING_POINTER (value), "nmi")
+	      && strcmp (TREE_STRING_POINTER (value), "watchdog"))
+	    /* Allow the attribute to be added - the linker script
+	       being used may still recognise this name.  */
+	    warning (OPT_Wattributes,
+		     "unrecognised interrupt vector argument of %qE attribute",
+		     name);
+	  break;
+
+	case INTEGER_CST:
+	  if (TREE_INT_CST_LOW (value) > 63)
+	    /* Allow the attribute to be added - the linker script
+	       being used may still recognise this value.  */
+	    warning (OPT_Wattributes,
+		     "numeric argument of %qE attribute must be in range 0..63",
+		     name);
+	  break;
+
+	default:
+	  warning (OPT_Wattributes,
+		   "argument of %qE attribute is not a string constant or number",
+		   name);
+	  *no_add_attrs = true;
+	  break;
+	}
+    }
+
+  const char * message = NULL;
+
+  if (TREE_CODE (* node) != FUNCTION_DECL)
+    {
+      message = "%qE attribute only applies to functions";
+    }
+  else if (TREE_NAME_EQ (name, ATTR_INTR))
+    {
+      if (TREE_CODE (TREE_TYPE (* node)) == FUNCTION_TYPE
+	  && ! VOID_TYPE_P (TREE_TYPE (TREE_TYPE (* node))))
+	message = "interrupt handlers must be void";
+    }
+  else if (TREE_NAME_EQ (name, ATTR_REENT))
+    {
+      if (is_naked_func (* node))
+	message = "naked functions cannot be reentrant";
+      else if (is_critical_func (* node))
+	message = "critical functions cannot be reentrant";
+    }
+  else if (TREE_NAME_EQ (name, ATTR_CRIT))
+    {
+      if (is_naked_func (* node))
+	message = "naked functions cannot be critical";
+      else if (is_reentrant_func (* node))
+	message = "reentranct functions cannot be critical";
+    }
+  else if (TREE_NAME_EQ (name, ATTR_NAKED))
+    {
+      if (is_critical_func (* node))
+	message = "critical functions cannot be naked";
+      else if (is_reentrant_func (* node))
+	message = "reentrant functions cannot be naked";
+    }
+
+  if (message)
+    {
+      warning (OPT_Wattributes, message, name);
+      * no_add_attrs = true;
+    }
+    
+  return NULL_TREE;
+}
+
+static tree
+msp430_section_attr (tree * node,
+		     tree   name,
+		     tree   args,
+		     int    flags ATTRIBUTE_UNUSED,
+		     bool * no_add_attrs ATTRIBUTE_UNUSED)
+{
+  gcc_assert (DECL_P (* node));
+  gcc_assert (args == NULL);
+
+  const char * message = NULL;
+
+  if (TREE_NAME_EQ (name, ATTR_UPPER))
+    {
+      if (has_attr (ATTR_LOWER, * node))
+	message = "already marked with 'lower' attribute";
+      else if (has_attr (ATTR_EITHER, * node))
+	message = "already marked with 'either' attribute";
+      else if (! msp430x)
+	message = "upper attribute needs a 430X cpu";
+    }
+  else if (TREE_NAME_EQ (name, ATTR_LOWER))
+    {
+      if (has_attr (ATTR_UPPER, * node))
+	message = "already marked with 'upper' attribute";
+      else if (has_attr (ATTR_EITHER, * node))
+	message = "already marked with 'either' attribute";
+    }
+  else
+    {
+      gcc_assert (TREE_NAME_EQ (name, ATTR_EITHER));
+
+      if (has_attr (ATTR_LOWER, * node))
+	message = "already marked with 'lower' attribute";
+      else if (has_attr (ATTR_UPPER, * node))
+	message = "already marked with 'upper' attribute";
+    }
+
+  if (message)
+    {
+      warning (OPT_Wattributes, message, name);
+      * no_add_attrs = true;
+    }
+    
+  return NULL_TREE;
+}
+
+#undef  TARGET_ATTRIBUTE_TABLE
+#define TARGET_ATTRIBUTE_TABLE		msp430_attribute_table
+
+/* Table of MSP430-specific attributes.  */
+const struct attribute_spec msp430_attribute_table[] =
+{
+  /* Name        min_num_args     type_req,             affects_type_identity
+                      max_num_args,     fn_type_req
+                          decl_req               handler.  */
+  { ATTR_INTR,        0, 1, true,  false, false, msp430_attr, false },
+  { ATTR_NAKED,       0, 0, true,  false, false, msp430_attr, false },
+  { ATTR_REENT,       0, 0, true,  false, false, msp430_attr, false },
+  { ATTR_CRIT,        0, 0, true,  false, false, msp430_attr, false },
+  { ATTR_WAKEUP,      0, 0, true,  false, false, msp430_attr, false },
+
+  { ATTR_LOWER,       0, 0, true,  false, false, msp430_section_attr, false },
+  { ATTR_UPPER,       0, 0, true,  false, false, msp430_section_attr, false },
+  { ATTR_EITHER,      0, 0, true,  false, false, msp430_section_attr, false },
+  { NULL,             0, 0, false, false, false, NULL,        false }
+};
 
 #undef  TARGET_ASM_FUNCTION_PROLOGUE
-#define TARGET_ASM_FUNCTION_PROLOGUE	msp430_start_function
+#define TARGET_ASM_FUNCTION_PROLOGUE	msp430_function_prologue
 
 static void
-msp430_start_function (FILE *outfile, HOST_WIDE_INT hwi_local ATTRIBUTE_UNUSED)
+msp430_function_prologue (FILE *outfile, HOST_WIDE_INT hwi_local ATTRIBUTE_UNUSED)
 {
   int r, n;
 
@@ -1040,85 +1417,6 @@ increment_stack (HOST_WIDE_INT amount)
     }
 }
 
-/* Verify MSP430 specific attributes.  */
-
-static tree
-msp430_attr (tree * node,
-	     tree   name,
-	     tree   args,
-	     int    flags ATTRIBUTE_UNUSED,
-	     bool * no_add_attrs)
-{
-  gcc_assert (DECL_P (* node));
-
-  if (args != NULL)
-    {
-      tree value = TREE_VALUE (args);
-
-      switch (TREE_CODE (value))
-	{
-	case STRING_CST:
-	  if (   strcmp (TREE_STRING_POINTER (value), "reset")
-	      && strcmp (TREE_STRING_POINTER (value), "nmi")
-	      && strcmp (TREE_STRING_POINTER (value), "watchdog"))
-	    /* Allow the attribute to be added - the linker script
-	       being used may still recognise this name.  */
-	    warning (OPT_Wattributes,
-		     "unrecognised interrupt vector argument of %qE attribute",
-		     name);
-	  break;
-
-	case INTEGER_CST:
-	  if (TREE_INT_CST_LOW (value) > 63)
-	    /* Allow the attribute to be added - the linker script
-	       being used may still recognise this value.  */
-	    warning (OPT_Wattributes,
-		     "numeric argument of %qE attribute must be in range 0..63",
-		     name);
-	  break;
-
-	default:
-	  warning (OPT_Wattributes,
-		   "argument of %qE attribute is not a string constant or number",
-		   name);
-	  *no_add_attrs = true;
-	  break;
-	}
-    }
-
-  if (TREE_CODE (* node) != FUNCTION_DECL)
-    {
-      warning (OPT_Wattributes,
-	       "%qE attribute only applies to functions",
-	       name);
-      * no_add_attrs = true;
-    }
-
-  /* FIXME: We ought to check that the interrupt handler
-     attribute has been applied to a void function.  */
-  /* FIXME: We should check that reentrant and critical
-     functions are not naked and that critical functions
-     are not reentrant.  */
-
-  return NULL_TREE;
-}
-
-#undef  TARGET_ATTRIBUTE_TABLE
-#define TARGET_ATTRIBUTE_TABLE		msp430_attribute_table
-
-/* Table of MSP430-specific attributes.  */
-const struct attribute_spec msp430_attribute_table[] =
-{
-  /* Name          min_len  decl_req,    fn_type_req,    affects_type_identity
-                       max_len,  type_req,        handler.  */
-  { "interrupt",      0, 1, true,  false, false, msp430_attr, false },
-  { "naked",          0, 0, true,  false, false, msp430_attr, false },
-  { "reentrant",      0, 0, true,  false, false, msp430_attr, false },
-  { "critical",       0, 0, true,  false, false, msp430_attr, false },
-  { "wakeup",         0, 0, true,  false, false, msp430_attr, false },
-  { NULL,             0, 0, false, false, false, NULL,        false }
-};
-
 void
 msp430_start_function (FILE *file, const char *name, tree decl)
 {
@@ -1158,21 +1456,196 @@ msp430_start_function (FILE *file, const char *name, tree decl)
   ASM_OUTPUT_FUNCTION_LABEL (file, name, decl);
 }
 
-static section *
-msp430_function_section (tree decl, enum node_frequency freq, bool startup, bool exit)
+static const char * const lower_prefix = ".lower";
+static const char * const upper_prefix = ".upper";
+static const char * const either_prefix = ".either";
+
+/* Generate a prefix for a section name, based upon
+   the region into which the object should be placed.  */
+
+static const char *
+gen_prefix (tree decl)
 {
+  if (DECL_ONE_ONLY (decl))
+    return NULL;
+
+  /* If the user has specified a particular section then do not use any prefix.  */
+  if (has_attr ("section", decl))
+    return NULL;
+
+  /* If the object has __attribute__((lower)) then use the ".lower." prefix.  */
+  if (has_attr (ATTR_LOWER, decl))
+    return lower_prefix;
+
+  /* If we are compiling for the MSP430 then we do not support the upper region.  */
+  if (! msp430x)
+    return NULL;
+
+  if (has_attr (ATTR_UPPER, decl))
+    return upper_prefix;
+
+  if (has_attr (ATTR_EITHER, decl))
+    return either_prefix;
+
+  if (msp430_code_region == LOWER)
+    return lower_prefix;
+
+  if (msp430_code_region == UPPER)
+    return upper_prefix;
+
+  if (msp430_code_region == EITHER)
+    return either_prefix;
+
+  return NULL;
+}
+
+#undef  TARGET_ASM_SELECT_SECTION
+#define TARGET_ASM_SELECT_SECTION msp430_select_section
+
+static section *
+msp430_select_section (tree decl, int reloc, unsigned HOST_WIDE_INT align)
+{
+  gcc_assert (decl != NULL_TREE);
+
+  if (TREE_CODE (decl) == STRING_CST
+      || TREE_CODE (decl) == CONSTRUCTOR
+      || TREE_CODE (decl) == INTEGER_CST
+      || TREE_CODE (decl) == VECTOR_CST
+      || TREE_CODE (decl) == COMPLEX_CST)
+    return default_select_section (decl, reloc, align);
+  
   /* In large mode we must make sure that interrupt handlers are put into
      low memory as the vector table only accepts 16-bit addresses.  */
-  if (TARGET_LARGE
-      && lookup_attribute ("interrupt", DECL_ATTRIBUTES (decl)))
+  if (TARGET_LARGE && TREE_CODE (decl) == FUNCTION_DECL && is_interrupt_func (decl))
     return get_section (".lowtext", SECTION_CODE | SECTION_WRITE , decl);
 
-  /* Otherwise, use the default function section.  */
-  return default_function_section (decl, freq, startup, exit);
+  const char * prefix = gen_prefix (decl);
+  if (prefix == NULL)
+    {
+      if (TREE_CODE (decl) == FUNCTION_DECL)
+	return text_section;
+      else
+	return default_select_section (decl, reloc, align);
+    }
+  
+  const char * sec;
+  switch (categorize_decl_for_section (decl, reloc))
+    {
+    case SECCAT_TEXT:   sec = ".text";   break;
+    case SECCAT_DATA:   sec = ".data";   break;
+    case SECCAT_BSS:    sec = ".bss";    break;
+    case SECCAT_RODATA: sec = ".rodata"; break;
+
+    case SECCAT_RODATA_MERGE_STR:
+    case SECCAT_RODATA_MERGE_STR_INIT:
+    case SECCAT_RODATA_MERGE_CONST:
+    case SECCAT_SRODATA:
+    case SECCAT_DATA_REL:
+    case SECCAT_DATA_REL_LOCAL:
+    case SECCAT_DATA_REL_RO:
+    case SECCAT_DATA_REL_RO_LOCAL:
+    case SECCAT_SDATA:
+    case SECCAT_SBSS:
+    case SECCAT_TDATA:
+    case SECCAT_TBSS:
+      return default_select_section (decl, reloc, align);
+
+    default:
+      gcc_unreachable ();
+    }
+  
+  const char * dec_name = NULL;
+  if (DECL_SECTION_NAME (decl))
+    dec_name = TREE_STRING_POINTER (DECL_SECTION_NAME (decl));
+
+  char * name = ACONCAT ((prefix, sec, dec_name, NULL));
+  return get_named_section (decl, name, 0);
 }
 
 #undef  TARGET_ASM_FUNCTION_SECTION
 #define TARGET_ASM_FUNCTION_SECTION msp430_function_section
+
+static section *
+msp430_function_section (tree decl, enum node_frequency freq, bool startup, bool exit)
+{
+  const char * name;
+
+  gcc_assert (DECL_SECTION_NAME (decl) != NULL_TREE);
+  name = TREE_STRING_POINTER (DECL_SECTION_NAME (decl));
+
+  const char * prefix = gen_prefix (decl);
+  if (prefix == NULL
+      || strncmp (name, prefix, strlen (prefix)) == 0)
+    return default_function_section (decl, freq, startup, exit);
+
+  name = ACONCAT ((prefix, name, NULL));
+  return get_named_section (decl, name, 0);
+}
+
+#undef  TARGET_SECTION_TYPE_FLAGS
+#define TARGET_SECTION_TYPE_FLAGS msp430_section_type_flags
+
+unsigned int
+msp430_section_type_flags (tree decl, const char * name, int reloc)
+{
+  if (strncmp (name, lower_prefix, strlen (lower_prefix)) == 0)
+    name += strlen (lower_prefix);
+  else if (strncmp (name, upper_prefix, strlen (upper_prefix)) == 0)
+    name += strlen (upper_prefix);
+  else if (strncmp (name, either_prefix, strlen (either_prefix)) == 0)
+    name += strlen (either_prefix);
+
+  return default_section_type_flags (decl, name, reloc);
+}
+
+#undef  TARGET_ASM_UNIQUE_SECTION
+#define TARGET_ASM_UNIQUE_SECTION msp430_unique_section
+
+static void
+msp430_unique_section (tree decl, int reloc)
+{
+  gcc_assert (decl != NULL_TREE);
+
+  /* In large mode we must make sure that interrupt handlers are put into
+     low memory as the vector table only accepts 16-bit addresses.  */
+  if (TARGET_LARGE && TREE_CODE (decl) == FUNCTION_DECL && is_interrupt_func (decl))
+    {
+      DECL_SECTION_NAME (decl) = build_string (strlen (".lowtext"), ".lowtext");
+      return;
+    }
+
+  default_unique_section (decl, reloc);
+
+  const char * prefix;
+
+  if (   TREE_CODE (decl) == STRING_CST
+      || TREE_CODE (decl) == CONSTRUCTOR
+      || TREE_CODE (decl) == INTEGER_CST
+      || TREE_CODE (decl) == VECTOR_CST
+      || TREE_CODE (decl) == COMPLEX_CST
+      || (prefix = gen_prefix (decl)) == NULL
+      )
+    return;
+
+  const char * dec_name = TREE_STRING_POINTER (DECL_SECTION_NAME (decl));
+  char * name = ACONCAT ((prefix, dec_name, NULL));
+  DECL_SECTION_NAME (decl) = build_string (strlen (name), name);
+}
+
+bool
+msp430_do_not_relax_short_jumps (void)
+{
+  /* When placing code into "either" low or high memory we do not want the linker
+     to grow the size of sections, which it can do if it is encounters a branch to
+     a label that is too far away.  So we tell the cbranch patterns to avoid using
+     short jumps when there is a chance that the instructions will end up in a low
+     section.  */
+  return
+    msp430_code_region == EITHER
+    || msp430_code_region == LOWER
+    || has_attr (ATTR_EITHER, current_function_decl)
+    || has_attr (ATTR_LOWER, current_function_decl);
+}
 
 enum msp430_builtin
 {
@@ -1633,6 +2106,33 @@ msp430_expand_eh_return (rtx eh_handler)
   tmp = plus_constant (Pmode, tmp, TARGET_LARGE ? -4 : -2);
   tmp = gen_rtx_MEM (Pmode, tmp);
   emit_move_insn (tmp, ra);
+}
+
+#undef  TARGET_INIT_DWARF_REG_SIZES_EXTRA
+#define TARGET_INIT_DWARF_REG_SIZES_EXTRA msp430_init_dwarf_reg_sizes_extra
+void
+msp430_init_dwarf_reg_sizes_extra (tree address)
+{
+  int i;
+  rtx addr = expand_normal (address);
+  rtx mem = gen_rtx_MEM (BLKmode, addr);
+
+  if (!msp430x)
+    return;
+
+  for (i = 0; i < FIRST_PSEUDO_REGISTER; i++)
+    {
+      unsigned int dnum = DWARF_FRAME_REGNUM (i);
+      unsigned int rnum = DWARF2_FRAME_REG_OUT (dnum, 1);
+
+      if (rnum < DWARF_FRAME_REGISTERS)
+	{
+	  HOST_WIDE_INT offset = rnum * GET_MODE_SIZE (QImode);
+
+	  emit_move_insn (adjust_address (mem, QImode, offset),
+			  gen_int_mode (4, QImode));
+	}
+    }
 }
 
 /* This is a list of MD patterns that implement fixed-count shifts.  */
@@ -2245,7 +2745,7 @@ msp430_print_operand (FILE * file, rtx op, int letter)
     case 'X':
       /* This is used to turn, for example, an ADD opcode into an ADDX
 	 opcode when we're using 20-bit addresses.  */
-      if (TARGET_LARGE)
+      if (TARGET_LARGE || GET_MODE (op) == PSImode)
 	fprintf (file, "X");
       /* We don't care which operand we use, but we want 'X' in the MD
 	 file, so we do it this way.  */
@@ -2269,7 +2769,7 @@ msp430_print_operand (FILE * file, rtx op, int letter)
 	 because builtins are expanded before the frame layout is determined.  */
       fprintf (file, "%d",
 	       msp430_initial_elimination_offset (ARG_POINTER_REGNUM, STACK_POINTER_REGNUM)
-	        - 2);
+	       - (TARGET_LARGE ? 4 : 2));
       return;
 
     case 'J':
@@ -2292,8 +2792,32 @@ msp430_print_operand (FILE * file, rtx op, int letter)
       msp430_print_operand_addr (file, addr);
       break;
 
-    case CONST_INT:
     case CONST:
+      if (GET_CODE (XEXP (op, 0)) == ZERO_EXTRACT)
+	{
+	  op = XEXP (op, 0);
+	  switch (INTVAL (XEXP (op, 2)))
+	    {
+	    case 0:
+	      fprintf (file, "#lo (");
+	      msp430_print_operand_raw (file, XEXP (op, 0));
+	      fprintf (file, ")");
+	      break;
+	  
+	    case 16:
+	      fprintf (file, "#hi (");
+	      msp430_print_operand_raw (file, XEXP (op, 0));
+	      fprintf (file, ")");
+	      break;
+
+	    default:
+	      output_operand_lossage ("invalid zero extract");
+	      break;
+	    }
+	  break;
+	}
+      /* Fall through.  */
+    case CONST_INT:
     case SYMBOL_REF:
     case LABEL_REF:
       if (letter == 0)

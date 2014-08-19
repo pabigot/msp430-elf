@@ -1,6 +1,6 @@
 /* Private partial symbol table definitions.
 
-   Copyright (C) 2009-2012 Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -45,7 +45,9 @@ struct partial_symbol
 
   ENUM_BITFIELD(domain_enum_tag) domain : 6;
 
-  /* Address class (for info_symbols).  */
+  /* Address class (for info_symbols).  Note that we don't allow
+     synthetic "aclass" values here at present, simply because there's
+     no need.  */
 
   ENUM_BITFIELD(address_class) aclass : 6;
 
@@ -96,11 +98,9 @@ struct partial_symtab
 
   const char *dirname;
 
-  /* Information about the object file from which symbols should be read.  */
-
-  struct objfile *objfile;
-
-  /* Set of relocation offsets to apply to each section.  */
+  /* Set of relocation offsets to apply to each section.
+     This is typically objfile->section_offsets, but in some cases
+     it's different.  See, e.g., elfstab_offset_sections.  */
 
   struct section_offsets *section_offsets;
 
@@ -110,19 +110,6 @@ struct partial_symtab
 
   CORE_ADDR textlow;
   CORE_ADDR texthigh;
-
-  /* Array of pointers to all of the partial_symtab's which this one
-     depends on.  Since this array can only be set to previous or
-     the current (?) psymtab, this dependency tree is guaranteed not
-     to have any loops.  "depends on" means that symbols must be read
-     for the dependencies before being read for this psymtab; this is
-     for type references in stabs, where if foo.c includes foo.h, declarations
-     in foo.h may use type numbers defined in foo.c.  For other debugging
-     formats there may be no need to use dependencies.  */
-
-  struct partial_symtab **dependencies;
-
-  int number_of_dependencies;
 
   /* If NULL, this is an ordinary partial symbol table.
 
@@ -152,6 +139,19 @@ struct partial_symtab
      debuginfo reader; it can be arbitrary.  */
 
   struct partial_symtab *user;
+
+  /* Array of pointers to all of the partial_symtab's which this one
+     depends on.  Since this array can only be set to previous or
+     the current (?) psymtab, this dependency tree is guaranteed not
+     to have any loops.  "depends on" means that symbols must be read
+     for the dependencies before being read for this psymtab; this is
+     for type references in stabs, where if foo.c includes foo.h, declarations
+     in foo.h may use type numbers defined in foo.c.  For other debugging
+     formats there may be no need to use dependencies.  */
+
+  struct partial_symtab **dependencies;
+
+  int number_of_dependencies;
 
   /* Global symbol list.  This list will be sorted after readin to
      improve access.  Binary search will be the usual method of
@@ -200,7 +200,7 @@ struct partial_symtab
   /* Pointer to function which will read in the symtab corresponding to
      this psymtab.  */
 
-  void (*read_symtab) (struct partial_symtab *);
+  void (*read_symtab) (struct partial_symtab *, struct objfile *);
 
   /* Information that lets read_symtab() locate the part of the symbol table
      that this psymtab corresponds to.  This information is private to the
@@ -210,7 +210,7 @@ struct partial_symtab
   void *read_symtab_private;
 };
 
-extern void sort_pst_symbols (struct partial_symtab *);
+extern void sort_pst_symbols (struct objfile *, struct partial_symtab *);
 
 /* Add any kind of symbol to a psymbol_allocation_list.  */
 
@@ -230,9 +230,12 @@ extern struct partial_symtab *start_psymtab_common (struct objfile *,
 						    struct partial_symbol **);
 
 extern struct partial_symtab *allocate_psymtab (const char *,
-						struct objfile *);
+						struct objfile *)
+  ATTRIBUTE_NONNULL (1);
 
-extern void discard_psymtab (struct partial_symtab *);
+extern void discard_psymtab (struct objfile *, struct partial_symtab *);
+
+extern struct cleanup *make_cleanup_discard_psymtabs (struct objfile *);
 
 /* Traverse all psymtabs in one objfile.  */
 

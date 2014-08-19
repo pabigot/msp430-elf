@@ -37,3 +37,4 @@ main()
   if (i == 7)
     return 1;
 }
+// { dg-require-effective-target size32plus }

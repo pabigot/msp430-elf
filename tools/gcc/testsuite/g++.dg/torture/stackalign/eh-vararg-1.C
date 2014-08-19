@@ -71,3 +71,4 @@ main()
   catch (A& a) { }
   return 0;
 }
+// { dg-require-effective-target size32plus }

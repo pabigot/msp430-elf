@@ -1,6 +1,6 @@
 /* Alpha specific support for 64-bit ELF
    Copyright 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
-   2006, 2007, 2008, 2009, 2010, 2011, 2012
+   2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013
    Free Software Foundation, Inc.
    Contributed by Richard Henderson <rth@tamu.edu>.
 
@@ -31,7 +31,6 @@
 #include "elf-bfd.h"
 
 #include "elf/alpha.h"
-#include "libiberty.h"
 
 #define ALPHAECOFF
 
@@ -1813,6 +1812,9 @@ elf64_alpha_check_relocs (bfd *abfd, struct bfd_link_info *info,
 		 || h->root.root.type == bfd_link_hash_warning)
 	    h = (struct alpha_elf_link_hash_entry *)h->root.root.u.i.link;
 
+	  /* PR15323, ref flags aren't set for references in the same
+	     object.  */
+	  h->root.root.non_ir_ref = 1;
 	  h->root.ref_regular = 1;
 	}
 
@@ -3588,7 +3590,9 @@ elf64_alpha_relax_tls_get_addr (struct alpha_relax_info *info, bfd_vma symval,
   use_gottprel = FALSE;
   new_symndx = is_gd ? ELF64_R_SYM (irel->r_info) : STN_UNDEF;
 
-  switch (!dynamic && !info->link_info->shared)
+  /* Some compilers warn about a Boolean-looking expression being
+     used in a switch.  The explicit cast silences them.  */
+  switch ((int) (!dynamic && !info->link_info->shared))
     {
     case 1:
       {
@@ -4035,8 +4039,6 @@ elf64_alpha_emit_dynrel (bfd *abfd, struct bfd_link_info *info,
     memset (&outrel, 0, sizeof (outrel));
 
   loc = srel->contents;
-  if (loc == NULL)
-    return;
   loc += srel->reloc_count++ * sizeof (Elf64_External_Rela);
   bfd_elf64_swap_reloca_out (abfd, &outrel, loc);
   BFD_ASSERT (sizeof (Elf64_External_Rela) * srel->reloc_count <= srel->size);
@@ -4301,14 +4303,14 @@ elf64_alpha_relocate_section (bfd *output_bfd, struct bfd_link_info *info,
 	}
       else
 	{
-	  bfd_boolean warned;
+	  bfd_boolean warned, ignored;
 	  struct elf_link_hash_entry *hh;
 	  struct elf_link_hash_entry **sym_hashes = elf_sym_hashes (input_bfd);
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   hh, sec, value,
-				   unresolved_reloc, warned);
+				   unresolved_reloc, warned, ignored);
 
 	  if (warned)
 	    continue;
@@ -5318,7 +5320,9 @@ elf64_alpha_final_link (bfd *abfd, struct bfd_link_info *info)
 }
 
 static enum elf_reloc_type_class
-elf64_alpha_reloc_type_class (const Elf_Internal_Rela *rela)
+elf64_alpha_reloc_type_class (const struct bfd_link_info *info ATTRIBUTE_UNUSED,
+			      const asection *rel_sec ATTRIBUTE_UNUSED,
+			      const Elf_Internal_Rela *rela)
 {
   switch ((int) ELF64_R_TYPE (rela->r_info))
     {
@@ -5331,41 +5335,6 @@ elf64_alpha_reloc_type_class (const Elf_Internal_Rela *rela)
     default:
       return reloc_class_normal;
     }
-}
-/* ELF and ECOFF are incompatible and can't be mapped to each
-   other, so give an error if we encounter an ECOFF file.  */
-
-static bfd_boolean
-elf64_alpha_copy_private_bfd_data (bfd * ibfd, bfd * obfd)
-{
-  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    {
-      bfd_set_error (bfd_error_wrong_format);
-      _bfd_error_handler ("%s: Non ELF object file format found",
-			  bfd_get_filename (ibfd));
-      xexit (1);
-    }
-
-  return TRUE;
-}
-
-/* Merge backend specific data from an object
-   file to the output object file when linking.  */
-
-static bfd_boolean
-elf64_alpha_merge_private_bfd_data (bfd * ibfd, bfd * obfd)
-{
-  if (   bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    {
-      bfd_set_error (bfd_error_wrong_format);
-      _bfd_error_handler ("%s: Non ELF object file format found",
-			  bfd_get_filename (ibfd));
-      xexit (1);
-    }
-
-  return TRUE;
 }
 
 static const struct bfd_elf_special_section elf64_alpha_special_sections[] =
@@ -5460,10 +5429,6 @@ static const struct elf_size_info alpha_elf_size_info =
 #define ELF_MAXPAGESIZE	0x10000
 #define ELF_COMMONPAGESIZE	0x2000
 
-#define bfd_elf64_bfd_copy_private_bfd_data \
-  elf64_alpha_copy_private_bfd_data
-#define bfd_elf64_bfd_merge_private_bfd_data \
-  elf64_alpha_merge_private_bfd_data
 #define bfd_elf64_bfd_link_hash_table_create \
   elf64_alpha_bfd_link_hash_table_create
 

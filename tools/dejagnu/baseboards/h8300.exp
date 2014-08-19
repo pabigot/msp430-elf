@@ -1,3 +1,22 @@
+# Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004 Free Software
+# Foundation, Inc.
+#
+# This file is part of DejaGnu.
+#
+# DejaGnu is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# DejaGnu is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with DejaGnu; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+
 # Load the tool-specific configuration for this board, as well as the
 # generic configuration. This will define any routines needed by the
 # tool to communicate with the board.
@@ -17,7 +36,7 @@ set_board_info ldflags "[newlib_link_flags]"
 # The GDB protocol used with this board.
 set_board_info gdb_protocol "remote"
 # It's running a GDB stub in ROM.
-set_board_info use_gdb_stub 1;
+set_board_info use_gdb_stub 1
 
 # There's no support for argument-passing.
 set_board_info noargs 1
@@ -45,16 +64,15 @@ set_board_info gdb,short_int 1
 set linker_script "h8300.ld"
 
 foreach x $board_variant_list {
-    regsub -all "^\[ \t\]*" "$x" "" x;
-    regsub -all "\[ \t\]*$" "$x" "" x;
+    regsub -all "^\[ \t\]*" "$x" "" x
+    regsub -all "\[ \t\]*$" "$x" "" x
 
-    case $x in {
-	{ h -mh } {
-	    set linker_script "h8300h.ld"
-	}
-	{ s -ms } {
-	    set linker_script "h8300s.ld"
-	}
+    switch $x {
+	"h" -
+	"-mh" { set linker_script "h8300h.ld" }
+
+	"s" -
+	"-ms" { set linker_script "h8300s.ld" }
     }
 }
 
@@ -63,6 +81,9 @@ foreach x $board_variant_list {
 # This one's dependent on the multilib options in use, sadly. And we
 # *need* a linker script. Really. Otherwise the code gets linked at
 # the wrong address and it won't run on the board.
-set_board_info ldscript "-Wl,-T${prefix_dir}/h8300-hms/${linker_script}"
+set_board_info ldscript "-T${prefix_dir}/h8300-hms/${linker_script}"
+
+# Used by a few gcc.c-torture testcases when trampolines are used.
+set_board_info gcc,no_trampolines  1
 
 unset linker_script

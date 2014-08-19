@@ -296,6 +296,11 @@
 #define EM_TILEGX	191	/* Tilera TILE-Gx multicore architecture family */
 #define EM_RL78		197	/* Renesas RL78 family.  */
 #define EM_78K0R	199	/* Renesas 78K0R.  */
+#define EM_INTEL205	205	/* Reserved by Intel */
+#define EM_INTEL206	206	/* Reserved by Intel */
+#define EM_INTEL207	207	/* Reserved by Intel */
+#define EM_INTEL208	208	/* Reserved by Intel */
+#define EM_INTEL209	209	/* Reserved by Intel */
 
 /* If it is necessary to assign new unofficial EM_* values, please pick large
    random numbers (0x8523, 0xa7f2, etc.) to minimize the chances of collision
@@ -327,9 +332,6 @@
 
 /* MSP430 magic number.  Written in the absense of everything.  */
 #define EM_MSP430_OLD		0x1059
-
-#define EM_M16C_OLD		0x1c20		/* Renesas M16C (obsolete).  */
-#define EM_M32C_OLD2		0x1c80		/* Renesas M32C (obsolete).  */
 
 /* Morpho MT.   Written in the absense of an ABI.  */
 #define EM_MT			0x2530

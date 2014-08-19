@@ -1,7 +1,6 @@
 /* Perform arithmetic and other operations on values, for GDB.
 
-   Copyright (C) 1986, 1988-2005, 2007-2012 Free Software Foundation,
-   Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -25,7 +24,7 @@
 #include "expression.h"
 #include "target.h"
 #include "language.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "doublest.h"
 #include "dfp.h"
 #include <math.h>
@@ -295,7 +294,7 @@ value_user_defined_cpp_op (struct value **args, int nargs, char *operator,
   struct value *valp = NULL;
 
   find_overload_match (args, nargs, operator, BOTH /* could be method */,
-                       0 /* strict match */, &args[0], /* objp */
+                       &args[0] /* objp */,
                        NULL /* pass NULL symbol since symbol is unknown */,
                        &valp, &symp, static_memfuncp, 0);
 
@@ -511,7 +510,7 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
 {
   struct gdbarch *gdbarch = get_type_arch (value_type (arg1));
   struct value **argvec;
-  char *ptr, *mangle_ptr;
+  char *ptr;
   char tstr[13], mangle_tstr[13];
   int static_memfuncp, nargs;
 
@@ -533,7 +532,6 @@ value_x_unop (struct value *arg1, enum exp_opcode op, enum noside noside)
   strcpy (tstr, "operator__");
   ptr = tstr + 8;
   strcpy (mangle_tstr, "__");
-  mangle_ptr = mangle_tstr + 2;
   switch (op)
     {
     case UNOP_PREINCREMENT:
@@ -668,9 +666,12 @@ value_concat (struct value *arg1, struct value *arg2)
       if (TYPE_CODE (type2) == TYPE_CODE_STRING
 	  || TYPE_CODE (type2) == TYPE_CODE_CHAR)
 	{
+	  struct cleanup *back_to;
+
 	  count = longest_to_int (value_as_long (inval1));
 	  inval2len = TYPE_LENGTH (type2);
-	  ptr = (char *) alloca (count * inval2len);
+	  ptr = (char *) xmalloc (count * inval2len);
+	  back_to = make_cleanup (xfree, ptr);
 	  if (TYPE_CODE (type2) == TYPE_CODE_CHAR)
 	    {
 	      char_type = type2;
@@ -693,6 +694,7 @@ value_concat (struct value *arg1, struct value *arg2)
 		}
 	    }
 	  outval = value_string (ptr, count * inval2len, char_type);
+	  do_cleanups (back_to);
 	}
       else if (TYPE_CODE (type2) == TYPE_CODE_BOOL)
 	{
@@ -706,6 +708,8 @@ value_concat (struct value *arg1, struct value *arg2)
   else if (TYPE_CODE (type1) == TYPE_CODE_STRING
 	   || TYPE_CODE (type1) == TYPE_CODE_CHAR)
     {
+      struct cleanup *back_to;
+
       /* We have two character strings to concatenate.  */
       if (TYPE_CODE (type2) != TYPE_CODE_STRING
 	  && TYPE_CODE (type2) != TYPE_CODE_CHAR)
@@ -714,7 +718,8 @@ value_concat (struct value *arg1, struct value *arg2)
 	}
       inval1len = TYPE_LENGTH (type1);
       inval2len = TYPE_LENGTH (type2);
-      ptr = (char *) alloca (inval1len + inval2len);
+      ptr = (char *) xmalloc (inval1len + inval2len);
+      back_to = make_cleanup (xfree, ptr);
       if (TYPE_CODE (type1) == TYPE_CODE_CHAR)
 	{
 	  char_type = type1;
@@ -737,6 +742,7 @@ value_concat (struct value *arg1, struct value *arg2)
 	  memcpy (ptr + inval1len, value_contents (inval2), inval2len);
 	}
       outval = value_string (ptr, inval1len + inval2len, char_type);
+      do_cleanups (back_to);
     }
   else if (TYPE_CODE (type1) == TYPE_CODE_BOOL)
     {
@@ -1339,6 +1345,49 @@ scalar_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
   return val;
 }
 
+/* Widen a scalar value SCALAR_VALUE to vector type VECTOR_TYPE by
+   replicating SCALAR_VALUE for each element of the vector.  Only scalar
+   types that can be cast to the type of one element of the vector are
+   acceptable.  The newly created vector value is returned upon success,
+   otherwise an error is thrown.  */
+
+struct value *
+value_vector_widen (struct value *scalar_value, struct type *vector_type)
+{
+  /* Widen the scalar to a vector.  */
+  struct type *eltype, *scalar_type;
+  struct value *val, *elval;
+  LONGEST low_bound, high_bound;
+  int i;
+
+  CHECK_TYPEDEF (vector_type);
+
+  gdb_assert (TYPE_CODE (vector_type) == TYPE_CODE_ARRAY
+	      && TYPE_VECTOR (vector_type));
+
+  if (!get_array_bounds (vector_type, &low_bound, &high_bound))
+    error (_("Could not determine the vector bounds"));
+
+  eltype = check_typedef (TYPE_TARGET_TYPE (vector_type));
+  elval = value_cast (eltype, scalar_value);
+
+  scalar_type = check_typedef (value_type (scalar_value));
+
+  /* If we reduced the length of the scalar then check we didn't loose any
+     important bits.  */
+  if (TYPE_LENGTH (eltype) < TYPE_LENGTH (scalar_type)
+      && !value_equal (elval, scalar_value))
+    error (_("conversion of scalar to vector involves truncation"));
+
+  val = allocate_value (vector_type);
+  for (i = 0; i < high_bound - low_bound + 1; i++)
+    /* Duplicate the contents of elval into the destination vector.  */
+    memcpy (value_contents_writeable (val) + (i * TYPE_LENGTH (eltype)),
+	    value_contents_all (elval), TYPE_LENGTH (eltype));
+
+  return val;
+}
+
 /* Performs a binary operation on two vector operands by calling scalar_binop
    for each pair of vector components.  */
 
@@ -1418,7 +1467,9 @@ value_binop (struct value *arg1, struct value *arg2, enum exp_opcode op)
 	  && !is_integral_type (t))
 	error (_("Argument to operation not a number or boolean."));
 
-      *v = value_cast (t1_is_vec ? type1 : type2, *v);
+      /* Replicate the scalar value to make a vector value.  */
+      *v = value_vector_widen (*v, t1_is_vec ? type1 : type2);
+
       val = vector_binop (arg1, arg2, op);
     }
 

@@ -15,3 +15,4 @@ foo (wchar_t *ls)
   */
   scanf ("%lc%ls%l[abc]", ls, ls, ls);
 }
+/* { dg-prune-output ".*__int20.*" } */

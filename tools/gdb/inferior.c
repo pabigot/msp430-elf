@@ -1,6 +1,6 @@
 /* Multi-process control for GDB, the GNU debugger.
 
-   Copyright (C) 2008-2012 Free Software Foundation, Inc.
+   Copyright (C) 2008-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -27,12 +27,14 @@
 #include "gdbthread.h"
 #include "ui-out.h"
 #include "observer.h"
-#include "gdbthread.h"
 #include "gdbcore.h"
 #include "symfile.h"
 #include "environ.h"
 #include "cli/cli-utils.h"
 #include "continuations.h"
+#include "arch-utils.h"
+#include "target-descriptions.h"
+#include "readline/tilde.h"
 
 void _initialize_inferiors (void);
 
@@ -98,6 +100,7 @@ free_inferior (struct inferior *inf)
   xfree (inf->args);
   xfree (inf->terminal);
   free_environ (inf->environment);
+  target_desc_info_free (inf->tdesc_info);
   xfree (inf->private);
   xfree (inf);
 }
@@ -266,9 +269,15 @@ exit_inferior_1 (struct inferior *inftoex, int silent)
       inf->vfork_parent->vfork_child = NULL;
       inf->vfork_parent = NULL;
     }
+  if (inf->vfork_child != NULL)
+    {
+      inf->vfork_child->vfork_parent = NULL;
+      inf->vfork_child = NULL;
+    }
 
   inf->has_exit_code = 0;
   inf->exit_code = 0;
+  inf->pending_detach = 0;
 }
 
 void
@@ -578,9 +587,8 @@ print_inferior (struct ui_out *uiout, char *requested_inferiors)
       ui_out_field_string (uiout, "target-id",
 			   inferior_pid_to_str (inf->pid));
 
-      if (inf->pspace->ebfd)
-	ui_out_field_string (uiout, "exec",
-			     bfd_get_filename (inf->pspace->ebfd));
+      if (inf->pspace->pspace_exec_filename != NULL)
+	ui_out_field_string (uiout, "exec", inf->pspace->pspace_exec_filename);
       else
 	ui_out_field_skip (uiout, "exec");
 
@@ -694,8 +702,8 @@ inferior_command (char *args, int from_tty)
   printf_filtered (_("[Switching to inferior %d [%s] (%s)]\n"),
 		   inf->num,
 		   inferior_pid_to_str (inf->pid),
-		   (inf->pspace->ebfd
-		    ? bfd_get_filename (inf->pspace->ebfd)
+		   (inf->pspace->pspace_exec_filename != NULL
+		    ? inf->pspace->pspace_exec_filename
 		    : _("<noexec>")));
 
   if (inf->pid != 0)
@@ -730,7 +738,7 @@ inferior_command (char *args, int from_tty)
   else if (inf->pid != 0)
     {
       ui_out_text (current_uiout, "\n");
-      print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC);
+      print_stack_frame (get_selected_frame (NULL), 1, SRC_AND_LOC, 1);
     }
 }
 
@@ -788,6 +796,7 @@ add_inferior_with_spaces (void)
   struct address_space *aspace;
   struct program_space *pspace;
   struct inferior *inf;
+  struct gdbarch_info info;
 
   /* If all inferiors share an address space on this system, this
      doesn't really return a new address space; otherwise, it
@@ -797,6 +806,14 @@ add_inferior_with_spaces (void)
   inf = add_inferior (0);
   inf->pspace = pspace;
   inf->aspace = pspace->aspace;
+
+  /* Setup the inferior's initial arch, based on information obtained
+     from the global "set ..." options.  */
+  gdbarch_info_init (&info);
+  inf->gdbarch = gdbarch_find_by_info (info);
+  /* The "set ..." options reject invalid settings, so we should
+     always have a valid arch by now.  */
+  gdb_assert (inf->gdbarch != NULL);
 
   return inf;
 }
@@ -832,7 +849,8 @@ add_inferior_command (char *args, int from_tty)
 		  ++argv;
 		  if (!*argv)
 		    error (_("No argument to -exec"));
-		  exec = *argv;
+		  exec = tilde_expand (*argv);
+		  make_cleanup (xfree, exec);
 		}
 	    }
 	  else
@@ -936,6 +954,12 @@ clone_inferior_command (char *args, int from_tty)
       inf = add_inferior (0);
       inf->pspace = pspace;
       inf->aspace = pspace->aspace;
+      inf->gdbarch = orginf->gdbarch;
+
+      /* If the original inferior had a user specified target
+	 description, make the clone use it too.  */
+      if (target_desc_info_from_user_p (inf->tdesc_info))
+	copy_inferior_target_desc_info (inf, orginf);
 
       printf_filtered (_("Added inferior %d.\n"), inf->num);
 
@@ -971,6 +995,8 @@ initialize_inferiors (void)
   current_inferior_ = add_inferior (0);
   current_inferior_->pspace = current_program_space;
   current_inferior_->aspace = current_program_space->aspace;
+  /* The architecture will be initialized shortly, by
+     initialize_current_architecture.  */
 
   add_info ("inferiors", info_inferiors_command, 
 	    _("IDs of specified inferiors (all inferiors if no argument)."));

@@ -1,32 +1,15 @@
-/* Copyright (c) 2012-2013 Red Hat Incorporated.
-   All rights reserved.
+/* Copyright (c) 2012-2013 Red Hat, Inc. All rights reserved.
 
-   Redistribution and use in source and binary forms, with or without
-   modification, are permitted provided that the following conditions
-   are met: 
-
-     Redistributions of source code must retain the above copyright 
-     notice, this list of conditions and the following disclaimer.
-
-     Redistributions in binary form must reproduce the above copyright
-     notice, this list of conditions and the following disclaimer in the
-     documentation and/or other materials provided with the distribution.
-
-     The name of Red Hat Incorporated may not be used to endorse 
-     or promote products derived from this software without specific 
-     prior written permission.
-
-   This software is provided by the copyright holders and contributors
-   "AS IS" and any express or implied warranties, including, but not
-   limited to, the implied warranties of merchantability and fitness for
-   a particular purpose are disclaimed.  In no event shall Red Hat
-   incorporated be liable for any direct, indirect, incidental, special,
-   exemplary, or consequential damages (including, but not limited to,
-   procurement of substitute goods or services; loss of use, data, or
-   profits; or business interruption) however caused and on any theory of
-   liability, whether in contract, strict liability, or tort (including
-   negligence or otherwise) arising in any way out of the use of this
-   software, even if advised of the possibility of such damage.  */
+   This copyrighted material is made available to anyone wishing to use, modify,
+   copy, or redistribute it subject to the terms and conditions of the BSD
+   License.   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY expressed or implied, including the implied warranties
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  A copy of this license
+   is available at http://www.opensource.org/licenses. Any Red Hat trademarks that
+   are incorporated in the source code or documentation are not subject to the BSD
+   License and may only be used or replicated with the express permission of
+   Red Hat, Inc.
+*/
 
 #include "memmodel.h"
 

@@ -8,3 +8,4 @@ void f(__SIZE_TYPE__ d)
   t *g = (__typeof (g)) d;
   (void) g;
 }
+/* { dg-prune-output ".*__int20.*" } */

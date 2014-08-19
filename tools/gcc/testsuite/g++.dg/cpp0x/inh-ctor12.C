@@ -1,5 +1,4 @@
-// { dg-options "-std=c++11" }
-// { dg-do run }
+// { dg-do run { target c++11 } }
 
 struct A
 {
@@ -24,3 +23,5 @@ int main()
   catch (int) { return 0; }
   __builtin_abort();
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

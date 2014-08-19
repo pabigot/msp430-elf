@@ -10,8 +10,10 @@ int f()
   struct A {}; struct B {};
   const std::type_info &ti = typeid(A);
   const std::type_info &ti2 = typeid(B);
+#if 0
   puts (ti.name());
   puts (ti2.name());
+#endif
   return strcmp (ti.name(), "Z1fvE1A") || strcmp (ti2.name(), "Z1fvE1B");
 }
 

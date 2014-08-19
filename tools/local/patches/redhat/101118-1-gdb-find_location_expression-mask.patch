@@ -1,0 +1,55 @@
+This patch fixes the "Could not find the frame base for..." messages that
+show up in the log file and are sometimes responsible for many failures therein.
+Here's an example using the vr4300-sim/-march=vr4130/-EB/-mabi=eabi/-mlong32/-mgp32
+multilib:
+
+print i_
+Could not find the frame base for "C1::foo()".
+(gdb) FAIL: gdb.cp/breakpoint.exp: check the member variable
+continue
+Continuing.
+Error in testing breakpoint condition:
+Could not find the frame base for "C1::bar()".
+
+Breakpoint 4, C1::bar (this=Could not find the frame base for "C1::bar()".
+) at /ironwood2/gnupro-cross/mips64vrel-elf/bld64/../../gnupro/gdb/testsuite/gdb.cp/breakpoint.cc:36
+36		g += t; // conditional breakpoint in method 2
+(gdb) PASS: gdb.cp/breakpoint.exp: continue to breakpoint
+print i_
+Could not find the frame base for "C1::bar()".
+(gdb) FAIL: gdb.cp/breakpoint.exp: check the member variable
+
+Note that, in this particular test, there were some PASSes even in the presence
+of that message.
+
+Note: As of 2011-01-17, this problem has been fixed in the upstream
+sources.  (According to cvs annotate it was fixed 21-Jun-10.) The fix
+employed extracts `high' and `low' as signed addresses for
+architectures (such as MIPS) where that makes sense.  Therefore, this
+patch should _not_ go upstream.
+
+
+gdb/ChangeLog.RedHat:
+
+2010-11-18  Kevin Buettner  <kevinb@redhat.com>
+
+	* dwarf2loc.c (find_location_expression): Mask `pc', `low', and
+	`high' against `base_mask' when doing comparison to see if `pc'
+	is between `low' and `high'.
+
+Index: gdb/dwarf2loc.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/dwarf2loc.c,v
+retrieving revision 1.16
+diff -u -p -r1.16 dwarf2loc.c
+--- gdb/dwarf2loc.c	29 Apr 2010 22:01:05 -0000	1.16
++++ gdb/dwarf2loc.c	19 Nov 2010 00:15:34 -0000
+@@ -105,7 +105,7 @@ find_location_expression (struct dwarf2_
+       length = extract_unsigned_integer (loc_ptr, 2, byte_order);
+       loc_ptr += 2;
+ 
+-      if (pc >= low && pc < high)
++      if ((pc & base_mask) >= (low & base_mask) && (pc & base_mask) < (high & base_mask))
+ 	{
+ 	  *locexpr_length = length;
+ 	  return loc_ptr;

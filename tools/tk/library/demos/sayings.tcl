@@ -4,7 +4,7 @@
 # both horizontally and vertically.  It displays a collection of
 # well-known sayings.
 #
-# RCS: @(#) $Id: sayings.tcl,v 1.10 2003/03/19 23:02:05 cagney Exp $
+# RCS: @(#) $Id: sayings.tcl,v 1.3 2012/04/18 00:36:59 kevinb Exp $
 
 if {![info exists widgetDemo]} {
     error "This script should be run from the \"widget\" demo."

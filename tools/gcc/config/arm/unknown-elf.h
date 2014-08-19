@@ -1,5 +1,5 @@
 /* Definitions for non-Linux based ARM systems using ELF
-   Copyright (C) 1998-2013 Free Software Foundation, Inc.
+   Copyright (C) 1998-2014 Free Software Foundation, Inc.
    Contributed by Catherine Moore <clm@cygnus.com>
 
    This file is part of GCC.
@@ -85,7 +85,7 @@
   while (0)
 
 #ifndef SUBTARGET_CPU_DEFAULT
-#define SUBTARGET_CPU_DEFAULT 		TARGET_CPU_arm7tdmi
+#define SUBTARGET_CPU_DEFAULT 		TARGET_CPU_arm10tdmi
 #endif
 
 /* The libgcc udivmod functions may throw exceptions.  If newlib is

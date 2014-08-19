@@ -1,36 +1,37 @@
 // PR c++/37146
 // { dg-do run }
+// { dg-require-effective-target int32plus }
 
 extern "C" void abort ();
-long int a, b;
-struct A { long int i:8; long int j:8; long int k:16; long int l:32; } c;
+int a, b;
+struct A { int i:8; int j:8; int k:16; int l:32; } c;
 
 void
-f1 (int x, long int y)
+f1 (int x, int y)
 {
   (x ? a : b) = y;
 }
 
 void
-f2 (int x, long int y)
+f2 (int x, int y)
 {
   (x ? c.i : c.j) = y;
 }
 
 void
-f3 (int x, long int y)
+f3 (int x, int y)
 {
   (x ? c.i : a) = y;
 }
 
 void
-f4 (int x, long int y)
+f4 (int x, int y)
 {
   (x ? c.i : c.k) = y;
 }
 
 void
-f5 (int x, long int y)
+f5 (int x, int y)
 {
   (x ? c.l : b) = y;
 }

@@ -17,7 +17,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: tkUnixXId.c,v 1.9 2003/03/19 23:02:11 cagney Exp $
+ * RCS: @(#) $Id: tkUnixXId.c,v 1.3 2012/04/18 00:37:10 kevinb Exp $
  */
 
 /*

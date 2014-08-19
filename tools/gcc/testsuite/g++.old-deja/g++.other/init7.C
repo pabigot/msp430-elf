@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // simplified from testcase in Windows Developer Journal,
 // submitted by eyal.ben-david@aks.com
 

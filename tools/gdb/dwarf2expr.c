@@ -1,7 +1,6 @@
 /* DWARF 2 Expression Evaluator.
 
-   Copyright (C) 2001-2003, 2005, 2007-2012 Free Software Foundation,
-   Inc.
+   Copyright (C) 2001-2014 Free Software Foundation, Inc.
 
    Contributed by Daniel Berlin (dan@dberlin.org)
 
@@ -342,7 +341,7 @@ add_piece (struct dwarf_expr_context *ctx, ULONGEST size, ULONGEST offset)
     }
   else if (p->location == DWARF_VALUE_IMPLICIT_POINTER)
     {
-      p->v.ptr.die.cu_off = ctx->len;
+      p->v.ptr.die.sect_off = ctx->len;
       p->v.ptr.offset = value_as_long (dwarf_expr_fetch (ctx, 0));
     }
   else if (p->location == DWARF_VALUE_REGISTER)
@@ -872,7 +871,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	      error (_("DWARF-2 expression error: DW_OP_GNU_implicit_pointer "
 		       "is not allowed in frame context"));
 
-	    /* The referred-to DIE of cu_offset kind.  */
+	    /* The referred-to DIE of sect_offset kind.  */
 	    ctx->len = extract_unsigned_integer (op_ptr, ctx->ref_addr_size,
 						 byte_order);
 	    op_ptr += ctx->ref_addr_size;
@@ -922,7 +921,8 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	case DW_OP_breg31:
 	  {
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
-	    result = (ctx->funcs->read_reg) (ctx->baton, op - DW_OP_breg0);
+	    result = (ctx->funcs->read_addr_from_reg) (ctx->baton,
+						       op - DW_OP_breg0);
 	    result += offset;
 	    result_val = value_from_ulongest (address_type, result);
 	  }
@@ -931,7 +931,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	  {
 	    op_ptr = safe_read_uleb128 (op_ptr, op_end, &reg);
 	    op_ptr = safe_read_sleb128 (op_ptr, op_end, &offset);
-	    result = (ctx->funcs->read_reg) (ctx->baton, reg);
+	    result = (ctx->funcs->read_addr_from_reg) (ctx->baton, reg);
 	    result += offset;
 	    result_val = value_from_ulongest (address_type, result);
 	  }
@@ -956,8 +956,9 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    if (ctx->location == DWARF_VALUE_MEMORY)
 	      result = dwarf_expr_fetch_address (ctx, 0);
 	    else if (ctx->location == DWARF_VALUE_REGISTER)
-	      result = (ctx->funcs->read_reg) (ctx->baton,
-				     value_as_long (dwarf_expr_fetch (ctx, 0)));
+	      result = (ctx->funcs->read_addr_from_reg)
+			  (ctx->baton,
+			   value_as_long (dwarf_expr_fetch (ctx, 0)));
 	    else
 	      error (_("Not implemented: computing frame "
 		       "base using explicit value operator"));
@@ -1440,10 +1441,7 @@ execute_stack_op (struct dwarf_expr_context *ctx,
 	    type_die.cu_off = uoffset;
 
 	    type = dwarf_get_base_type (ctx, type_die, 0);
-	    result = (ctx->funcs->read_reg) (ctx->baton, reg);
-	    result_val = value_from_ulongest (address_type, result);
-	    result_val = value_from_contents (type,
-					      value_contents_all (result_val));
+	    result_val = ctx->funcs->get_reg_value (ctx->baton, type, reg);
 	  }
 	  break;
 

@@ -25,3 +25,4 @@ int main (void)
   catch (A) {}
   return 1;
 }
+// { dg-require-effective-target size32plus }

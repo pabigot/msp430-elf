@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // Author: Alfred Miniarik <a8601248@unet.univie.ac.at>
 // test of dynamic_cast
 // runtime detecting of valid 

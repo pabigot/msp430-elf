@@ -1,6 +1,6 @@
 ; Options for the SH port of the compiler.
 
-; Copyright (C) 2005-2013 Free Software Foundation, Inc.
+; Copyright (C) 2005-2014 Free Software Foundation, Inc.
 ;
 ; This file is part of GCC.
 ;
@@ -21,7 +21,7 @@
 ;; Used for various architecture options.
 Mask(SH_E)
 
-;; Set if the default precision of th FPU is single.
+;; Set if the default precision of the FPU is single.
 Mask(FPU_SINGLE)
 
 ;; Set if the a double-precision FPU is present but is restricted to
@@ -205,7 +205,7 @@ Target RejectNegative Condition(SUPPORT_SH5_32MEDIA_NOFPU)
 Generate FPU-less SHcompact code
 
 maccumulate-outgoing-args
-Target Report Var(TARGET_ACCUMULATE_OUTGOING_ARGS) Init(1) Optimization
+Target Report Var(TARGET_ACCUMULATE_OUTGOING_ARGS) Init(1)
 Reserve space for outgoing arguments in the function prologue
 
 madjust-unroll
@@ -217,11 +217,11 @@ Target Report RejectNegative InverseMask(LITTLE_ENDIAN)
 Generate code in big endian mode
 
 mbigtable
-Target Report RejectNegative Mask(BIGTABLE) Optimization
+Target Report RejectNegative Mask(BIGTABLE)
 Generate 32-bit offsets in switch tables
 
 mbitops
-Target Report RejectNegative Mask(BITOPS) Optimization
+Target Report RejectNegative Mask(BITOPS)
 Generate bit instructions
 
 mbranch-cost=
@@ -233,11 +233,11 @@ Target Var(TARGET_ZDCBRANCH)
 Assume that zero displacement conditional branches are fast
 
 mcbranchdi
-Target Var(TARGET_CBRANCHDI4)
+Target Undocumented Var(TARGET_CBRANCHDI4) Warn(%qs is deprecated and has no effect)
 Enable cbranchdi4 pattern
 
 mcmpeqdi
-Target Var(TARGET_CMPEQDI_T)
+Target Undocumented Var(TARGET_CMPEQDI_T) Warn(%qs is deprecated and has no effect)
 Emit cmpeqdi_t pattern even when -mcbranchdi is in effect.
 
 mcut2-workaround
@@ -311,7 +311,7 @@ Target Report RejectNegative Mask(PREFERGOT)
 Emit function-calls using global offset table when generating PIC
 
 mpt-fixed
-Target Report Mask(PT_FIXED) Condition(SUPPORT_ANY_SH5) Optimization
+Target Report Mask(PT_FIXED) Condition(SUPPORT_ANY_SH5)
 Assume pt* instructions won't trap
 
 mrelax
@@ -349,7 +349,7 @@ Don't generate privileged-mode only code; implies -mno-inline-ic_invalidate if t
 ;; We might want to enable this by default for TARGET_HARD_SH4, because
 ;; zero-offset branches have zero latency.  Needs some benchmarking.
 mpretend-cmove
-Target Var(TARGET_PRETEND_CMOVE) Optimization
+Target Var(TARGET_PRETEND_CMOVE)
 Pretend a branch-around-a-move is a conditional move.
 
 mfsca
@@ -359,3 +359,4 @@ Enable the use of the fsca instruction
 mfsrra
 Target Var(TARGET_FSRRA)
 Enable the use of the fsrra instruction
+

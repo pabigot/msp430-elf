@@ -1,0 +1,31 @@
+This patch causes the expat library (which implements XML parsing) to
+be linked statically with GDB.  TI requested this so that GDB binaries
+can be used on other linux distributions with less hassle.
+
+On my Fedora 20 machine, I needed to do the following to install
+the static expat library:
+
+yum install expat-static
+
+This patch should NOT be submitted upstream.
+
+gdb/ChangeLog.RedHat:
+
+	* Makefile.in: (LIBEXPAT): Link libexpat statically.
+
+Index: gdb/Makefile.in
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/Makefile.in,v
+retrieving revision 1.38
+diff -u -p -r1.38 Makefile.in
+--- gdb/Makefile.in	20 Feb 2014 13:38:38 -0000	1.38
++++ gdb/Makefile.in	24 Jul 2014 23:56:41 -0000
+@@ -154,7 +154,7 @@ READLINE_DEPS = @READLINE_DEPS@
+ READLINE_CFLAGS = @READLINE_CFLAGS@
+ 
+ # Where is expat?  This will be empty if expat was not available.
+-LIBEXPAT = @LIBEXPAT@
++LIBEXPAT = -Wl,-Bstatic @LIBEXPAT@ -Wl,-Bdynamic
+ 
+ # Where is lzma?  This will be empty if lzma was not available.
+ LIBLZMA = @LIBLZMA@

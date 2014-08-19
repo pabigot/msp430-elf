@@ -18,7 +18,7 @@
 #	its .o file placed before all others in the command; then
 #	"ld" is executed to bind the objects together.
 #
-# RCS: @(#) $Id: ldAout.tcl,v 1.11 2003/03/19 23:01:19 cagney Exp $
+# RCS: @(#) $Id: ldAout.tcl,v 1.3 2012/04/18 00:36:27 kevinb Exp $
 #
 # Copyright (c) 1995, by General Electric Company. All rights reserved.
 #

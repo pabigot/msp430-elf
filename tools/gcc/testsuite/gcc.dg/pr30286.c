@@ -1,7 +1,8 @@
 /* PR middle-end/30286 */
 /* { dg-do run } */
-/* { dg-options "-O2 -ftrapv" } */
 /* { dg-skip-if "trapping arithmetic not supported" { msp430-*-* rl78-*-* } "*" "" } */
+/* { dg-options "-O2 -ftrapv" } */
+/* { dg-require-effective-target trapping } */
 
 extern void abort (void);
 struct S { struct S *s; };

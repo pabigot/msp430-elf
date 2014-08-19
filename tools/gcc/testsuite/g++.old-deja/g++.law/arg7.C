@@ -10,7 +10,7 @@
 
 // Given the following overloaded function definitions
 
-int ovf(unsigned long, short,         short) { printf ("PASS\n"); return 0; }
+int ovf(unsigned long, short,         short) { /* printf ("PASS\n"); */ return 0; }
 int ovf(          int, short, unsigned long) { printf ("FAIL\n"); return 1; }
 
 // and the call

@@ -26,3 +26,5 @@ int main()
 {
   (void)new A;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

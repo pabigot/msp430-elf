@@ -974,20 +974,6 @@ frvfdpic_elf_link_hash_table_create (bfd *abfd)
 #define FRVFDPIC_SYM_LOCAL(INFO, H) \
   (_bfd_elf_symbol_refs_local_p ((H), (INFO), 1) \
    || ! elf_hash_table (INFO)->dynamic_sections_created)
-#undef  FRVFDPIC_SYM_LOCAL
-#define FRVFDPIC_SYM_LOCAL(INFO, H) \
-  (_bfd_elf_symbol_refs_local_p ((H), (INFO), 1) \
-   || ! elf_hash_table (INFO)->dynamic_sections_created \
-   || (/* The condition below is an ugly hack to get .scommon data to
-	  be regarded as local.  For some reason the
-	  ELF_LINK_HASH_DEF_REGULAR bit is not set on such common
-	  symbols, and the SEC_IS_COMMON bit is not set any longer
-	  when we need to perform this test.  Hopefully this
-	  approximation is good enough.  */ \
-       (   (H)->root.type == bfd_link_hash_defined \
-	|| (H)->root.type == bfd_link_hash_defweak) \
-       && (H)->root.u.def.section->output_section \
-       && ((H)->root.u.def.section->flags & SEC_LINKER_CREATED)))
 #define FRVFDPIC_FUNCDESC_LOCAL(INFO, H) \
   ((H)->dynindx == -1 || ! elf_hash_table (INFO)->dynamic_sections_created)
 
@@ -2153,8 +2139,6 @@ elf32_frv_relocate_gprel12 (struct bfd_link_info *info,
   struct bfd_link_hash_entry *h;
 
   h = bfd_link_hash_lookup (info->hash, "_gp", FALSE, FALSE, TRUE);
-  if (h == NULL)
-    return bfd_reloc_dangerous;
 
   gp = (h->u.def.value
 	+ h->u.def.section->output_section->vma
@@ -2751,13 +2735,13 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	}
       else
 	{
-	  bfd_boolean warned;
+	  bfd_boolean warned, ignored;
 	  bfd_boolean unresolved_reloc;
 
 	  RELOC_FOR_GLOBAL_SYMBOL (info, input_bfd, input_section, rel,
 				   r_symndx, symtab_hdr, sym_hashes,
 				   h, sec, relocation,
-				   unresolved_reloc, warned);
+				   unresolved_reloc, warned, ignored);
 	  osec = sec;
 	  name = h->root.root.string;
 	}
@@ -2816,9 +2800,6 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	case R_FRV_GETTLSOFF_RELAX:
 	case R_FRV_TLSOFF_RELAX:
 	case R_FRV_TLSMOFF:
-	  if (frvfdpic_hash_table (info) == NULL)
-	    continue;
-
 	  if (h != NULL)
 	    picrel = frvfdpic_relocs_info_for_global (frvfdpic_relocs_info
 						      (info), input_bfd, h,
@@ -3914,7 +3895,7 @@ elf32_frv_relocate_section (bfd *output_bfd ATTRIBUTE_UNUSED,
 	       && filename_cmp (input_bfd->filename, "crt0.o") == 0)
 	      || (strlen (input_bfd->filename) > 6
 		  && filename_cmp (input_bfd->filename
-			     + strlen (input_bfd->filename) - 7,
+				   + strlen (input_bfd->filename) - 7,
 			     "/crt0.o") == 0)
 	      ? -1 : 0;
 	  if (!silence_segment_error
@@ -5517,6 +5498,7 @@ elf32_frvfdpic_always_size_sections (bfd *output_bfd,
       && !bfd_elf_stack_segment_size (output_bfd, info,
 				      "__stacksize", DEFAULT_STACK_SIZE))
     return FALSE;
+
   return TRUE;
 }
 
@@ -5525,7 +5507,7 @@ elf32_frvfdpic_always_size_sections (bfd *output_bfd,
 static bfd_boolean
 _frvfdpic_check_discarded_relocs (bfd *abfd, asection *sec,
 				  struct bfd_link_info *info,
-				  
+
 				  bfd_boolean *changed)
 {
   Elf_Internal_Shdr *symtab_hdr;
@@ -6064,6 +6046,10 @@ elf32_frv_check_relocs (bfd *abfd,
 	  while (h->root.type == bfd_link_hash_indirect
 		 || h->root.type == bfd_link_hash_warning)
 	    h = (struct elf_link_hash_entry *) h->root.u.i.link;
+
+	  /* PR15323, ref flags aren't set for references in the same
+	     object.  */
+	  h->root.non_ir_ref = 1;
 	}
 
       switch (ELF32_R_TYPE (rel->r_info))
@@ -6327,27 +6313,6 @@ frv_elf_set_private_flags (bfd *abfd, flagword flags)
   return TRUE;
 }
 
-/* Copy backend specific data from one object module to another.  */
-
-static bfd_boolean
-frv_elf_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
-{
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return TRUE;
-
-  BFD_ASSERT (!elf_flags_init (obfd)
-	      || elf_elfheader (obfd)->e_flags == elf_elfheader (ibfd)->e_flags);
-
-  elf_elfheader (obfd)->e_flags = elf_elfheader (ibfd)->e_flags;
-  elf_flags_init (obfd) = TRUE;
-
-  /* Copy object attributes.  */
-  _bfd_elf_copy_obj_attributes (ibfd, obfd);
-
-  return TRUE;
-}
-
 /* Return true if the architecture described by elf header flag
    EXTENSION is an extension of the architecture described by BASE.  */
 
@@ -6373,23 +6338,6 @@ frv_elf_arch_extension_p (flagword base, flagword extension)
       return TRUE;
 
   return FALSE;
-}
-
-static bfd_boolean
-elf32_frvfdpic_copy_private_bfd_data (bfd *ibfd, bfd *obfd)
-{
-  if (bfd_get_flavour (ibfd) != bfd_target_elf_flavour
-      || bfd_get_flavour (obfd) != bfd_target_elf_flavour)
-    return TRUE;
-
-  if (! frv_elf_copy_private_bfd_data (ibfd, obfd))
-    return FALSE;
-
-  if (! elf_tdata (ibfd) || ! elf_tdata (ibfd)->phdr
-      || ! elf_tdata (obfd) || ! elf_tdata (obfd)->phdr)
-    return TRUE;
-
-  return TRUE;
 }
 
 /* Merge backend specific data from an object file to the output
@@ -6762,7 +6710,7 @@ elf32_frv_grok_prstatus (bfd *abfd, Elf_Internal_Note *note)
          hardcoded offsets and sizes listed below (and contained within
 	 this lexical block) refer to fields in the target's elf_prstatus
 	 struct.  */
-      case 268:	
+      case 268:
 	/* `pr_cursig' is at offset 12.  */
 	elf_tdata (abfd)->core->signal = bfd_get_16 (abfd, note->descdata + 12);
 
@@ -6847,7 +6795,6 @@ elf32_frv_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 #define bfd_elf32_bfd_reloc_type_lookup		frv_reloc_type_lookup
 #define bfd_elf32_bfd_reloc_name_lookup	frv_reloc_name_lookup
 #define bfd_elf32_bfd_set_private_flags		frv_elf_set_private_flags
-#define bfd_elf32_bfd_copy_private_bfd_data	frv_elf_copy_private_bfd_data
 #define bfd_elf32_bfd_merge_private_bfd_data	frv_elf_merge_private_bfd_data
 #define bfd_elf32_bfd_print_private_bfd_data	frv_elf_print_private_bfd_data
 
@@ -6885,9 +6832,6 @@ elf32_frv_grok_psinfo (bfd *abfd, Elf_Internal_Note *note)
 #undef elf_backend_always_size_sections
 #define elf_backend_always_size_sections \
 		elf32_frvfdpic_always_size_sections
-#undef bfd_elf32_bfd_copy_private_bfd_data
-#define bfd_elf32_bfd_copy_private_bfd_data \
-		elf32_frvfdpic_copy_private_bfd_data
 
 #undef elf_backend_create_dynamic_sections
 #define elf_backend_create_dynamic_sections \

@@ -1,0 +1,46 @@
+The msp430 test results had a large number of apparent failures due
+to this test.  But, upon examination, it appeared that the output
+was correct.  The patterns specified in the tests that I've changed
+did not allow for the possibility of stopping at the first line of
+the function.  My changes allow this to happen.
+
+gdb/testsuite/ChangeLog.RedHat:
+
+2014-06-18  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb.dwarf2/dw2-dir-file-name.exp (proc test): Make patterns
+	more permissive, allowing stoppage at the beginning of a function
+	as well as being strictly within the midst of a function.
+
+
+Index: gdb/testsuite/gdb.dwarf2/dw2-dir-file-name.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/dw2-dir-file-name.exp,v
+retrieving revision 1.2
+diff -u -p -r1.2 dw2-dir-file-name.exp
+--- gdb/testsuite/gdb.dwarf2/dw2-dir-file-name.exp	20 Feb 2014 13:38:51 -0000	1.2
++++ gdb/testsuite/gdb.dwarf2/dw2-dir-file-name.exp	18 Jun 2014 21:29:28 -0000
+@@ -375,19 +375,19 @@ proc test { func compdir filename } {
+ 	}
+ 
+ 	gdb_breakpoint $func
+-	gdb_continue_to_breakpoint $func "$func \\(\\) at .*"
++	gdb_continue_to_breakpoint $func
+ 
+ 	gdb_test_no_output "set filename-display absolute"
+ 	verbose -log "expect: ${absolute}"
+-	gdb_test "frame" " in $func \\(\\) at [string_to_regexp ${absolute}]:999" "absolute"
++	gdb_test "frame" "$func \\(\\) at [string_to_regexp ${absolute}]:999" "absolute"
+ 
+ 	gdb_test_no_output "set filename-display basename"
+ 	verbose -log "expect: [file tail $filename]"
+-	gdb_test "frame" " in $func \\(\\) at [string_to_regexp [file tail $filename]]:999" "basename"
++	gdb_test "frame" "$func \\(\\) at [string_to_regexp [file tail $filename]]:999" "basename"
+ 
+ 	gdb_test_no_output "set filename-display relative"
+ 	verbose -log "expect: $filename"
+-	gdb_test "frame" " in $func \\(\\) at [string_to_regexp $filename]:999" "relative"
++	gdb_test "frame" "$func \\(\\) at [string_to_regexp $filename]:999" "relative"
+     }
+ }
+ 

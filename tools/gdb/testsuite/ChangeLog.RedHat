@@ -1,155 +1,144 @@
-2014-03-10  Nick Clifton  <nickc@redhat.com>
+2014-06-18  Kevin Buettner  <kevinb@redhat.com>
 
-	* gdb.cp/static-print-quit.cc: Add an initialised varaible so that
-	the simulator does not complain about not finding any loadable
-	sections.
+	* gdb.dwarf2/dw2-dir-file-name.exp (proc test): Make patterns
+	more permissive, allowing stoppage at the beginning of a function
+	as well as being strictly within the midst of a function.
 
-2008-02-14  Kevin Buettner  <kevinb@redhat.com>
+2013-09-26  Kevin Buettner  <kevinb@redhat.com>
 
-	* gdb.base/gdb1555.exp: Remove sanitized code which skips test
-	if non-native.  The upstream version now contains a similar
-	test.
+	* gdb/testsuite/gdb.base/debug-expr.exp,
+	gdb/testsuite/gdb.base/disasm-end-cu.exp,
+	gdb/testsuite/gdb.base/dup-sect.exp,
+	gdb/testsuite/gdb.base/exprs.exp,
+	gdb/testsuite/gdb.base/gdb11530.exp,
+	gdb/testsuite/gdb.base/gnu_vector.exp,
+	gdb/testsuite/gdb.base/memattr.exp,
+	gdb/testsuite/gdb.cp/classes.exp,
+	gdb/testsuite/gdb.cp/koenig.exp,
+	gdb/testsuite/gdb.cp/m-static.exp,
+	gdb/testsuite/gdb.cp/namespace-enum.exp,
+	gdb/testsuite/gdb.cp/namespace.exp,
+	gdb/testsuite/gdb.cp/nsimport.exp,
+	gdb/testsuite/gdb.cp/nsnested.exp,
+	gdb/testsuite/gdb.cp/nsnoimports.exp,
+	gdb/testsuite/gdb.cp/operator.exp,
+	gdb/testsuite/gdb.cp/overload.exp,
+	gdb/testsuite/gdb.cp/ovsrch.exp,
+	gdb/testsuite/gdb.cp/pr9067.exp,
+	gdb/testsuite/gdb.cp/ptype-cv-cp.exp,
+	gdb/testsuite/gdb.cp/ptype-flags.exp,
+	gdb/testsuite/gdb.cp/shadow.exp,
+	gdb/testsuite/gdb.cp/temargs.exp,
+	gdb/testsuite/gdb.cp/templates.exp,
+	gdb/testsuite/gdb.cp/typedef-operator.exp,
+	gdb/testsuite/gdb.dwarf2/dup-psym.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-anonymous-func.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-basic.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-const.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-cp-infcall-ref-static.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-cu-size.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-inline-param.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-intercu.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-linkage-name-trust.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-noloc.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-op-call.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-param-error.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-producer.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-skip-prologue.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-strp.exp,
+	gdb/testsuite/gdb.dwarf2/mac-fileno.exp,
+	gdb/testsuite/gdb.mi/mi-var-cmd.exp,
+	gdb/testsuite/gdb.mi/mi-var-invalidate.exp,
+	gdb/testsuite/gdb.opt/inline-break.exp,
+	gdb/testsuite/gdb.python/lib-types.exp,
+	gdb/testsuite/gdb.python/py-mi.exp,
+	gdb/testsuite/gdb.python/py-symbol.exp,
+	gdb/testsuite/gdb.python/py-symtab.exp,
+	gdb/testsuite/gdb.python/py-type.exp,
+	gdb/testsuite/gdb.python/py-typeprint.exp,
+	gdb/testsuite/gdb.python/py-value.exp,
+	gdb/testsuite/gdb.stabs/exclfwd.exp: Use -Wl,--no-gc-sections to
+	build the test case for rl78.
 
-2005-05-23  Nick Clifton  <nickc@redhat.com>
+2011-11-11  Kevin Buettner  <kevinb@redhat.com>
 
-	* Makefile.in: Provide default defintions of host_alias and
-	target_alias if they have not been set.
+	* gdb.python/py-evthreads.exp: Don't run test when compilation
+	fails.
 
-2004-03-03  Fred Fish  <fnf@redhat.com>
+2011-11-11  Kevin Buettner  <kevinb@redhat.com>
 
-	* gdb.asm/asm-source.exp: Use untested for missing multilib
-	support.
+	* gdb.python/py-value.c (main): Don't dereference argv when
+	argv is NULL or argc is 0.
 
-2004-02-27  Fred Fish  <fnf@redhat.com>
+2010-11-22  Kevin Buettner  <kevinb@redhat.com>
 
-	* gdb.base/chng-syms.exp: Add expect condition to match failing
-	case that isn't a timeout.
+	* gdb.base/store.exp (proc up_set): Set, and check, the variable
+	`r' rather than `l' due to the fact that the lifetime for the
+	pre-call value for `l' does not extend beyond the call of
+	add_<type>.
 
-2004-02-25  Fred Fish  <fnf@redhat.com>
+2007-05-14  Kevin Buettner  <kevinb@redhat.com>
 
-	* gdb.base/gdb1555.exp: Skip test if not a native target.
+	* gdb.gdbtk/c_variable.c (unistd.h, stdlib.h): Include these
+	headers.
+	* gdb.gdbtk/stack1.c: Likewise.
 
-2004-02-04  Fred Fish  <fnf@redhat.com>
+2005-05-09  Corinna Vinschen  <vinschen@redhat.com>
 
-	* gdb.arch/gdb1431.c: Add underbar prefixed version of global
-	function symbols and update copyright years.
-	* gdb.arch/gdb1291.c: Ditto.
+	Merge from mainline:
 
-2003-02-05  Andrew Cagney  <ac131313@redhat.com>
+	2005-03-08  Corinna Vinschen  <vinschen@redhat.com>
 
-	* gdb.base/gcov.exp: Rewrite to work with v2 gcov.
+	* gdb.asm/asm-source.exp: Add iq2000 case.
+	* gdb.asm/iq2000.inc: New file.
 
-2003-01-20  Kevin Buettner  <kevinb@redhat.com>
+2005-05-09  Corinna Vinschen  <vinschen@redhat.com>
 
-	* config/libremote_server.exp (gdbserver_download): Fix typo which
-	prevented RSH from getting set when an ``rsh_prog'' exists.
+	Merge from mainline:
 
-2002-06-07  Corinna Vinschen  <vinschen@redhat.com>
+	2005-03-07  Daniel Jacobowitz  <dan@codesourcery.com>
 
-	* gdb.base/charset.c (main): Add call to malloc() to accomodate targets
-	which don't link with it by default.
+	* gdb.asm/alpha.inc, gdb.asm/frv.inc, gdb.asm/i386.inc,
+	gdb.asm/ia64.inc, gdb.asm/m68hc11.inc, gdb.asm/m68k.inc,
+	gdb.asm/mips.inc, gdb.asm/pa.inc, gdb.asm/powerpc.inc,
+	gdb.asm/s390.inc, gdb.asm/s390x.inc, gdb.asm/sh.inc,
+	gdb.asm/x86_64.inc: Use .purgem before redefining macros.
 
-2002-04-17  Jim Blandy  <jimb@redhat.com>
+2005-04-28  Corinna Vinschen  <vinschen@redhat.com>
 
-	* gdb.base/charset.exp (all_charset_names, charset_exists): New
-        functions.  Use them instead of accessing the `charsets' array
-        directly.
+	* gdb.asm/asm-source.exp: Add h8300 to supported targets.
+	* gdb.asm/h8300.inc: New file.
 
-2002-02-25  Jackie Smith Cashion  <jsmith@redhat.com>
+2004-08-11  Corinna Vinschen  <vinschen@redhat.com>
 
-	* config/libremote_server.exp: Add rsh_prog, rcp_prog, nfsdir comments.
-	(gdb_load): Change $gdbserver redirection from ">& /dev/null" to
-	"/dev/null 2>&1".
-	(gdbserver_download): Add support for "cp" as download utility.
+	* gdb.base/annota1.exp: Skip test on Cygwin.
+	* gdb.base/annota3.exp: Ditto.
 
-2002-01-02  Jim Blandy  <jimb@redhat.com>
+2004-08-04  Corinna Vinschen  <vinschen@redhat.com>
 
-	* gdb.base/charset.exp: Check that we don't use the ISO 8859-1
-        `print_literally' function for ASCII.
-        
-Mon Dec 31 17:02:13 2001  Jeffrey A Law  (law@redhat.com)
+	Revert this patch:
 
-	* gdb.disasm/hppa2.exp: Update to account for various
-	assembler fixes over the last year.
-	* gdb.disasm/hppa2.s: Likewise.
+	2004-01-30  Mark Kettenis  <kettenis@gnu.org>
 
-2001-12-19  Jim Blandy  <jimb@redhat.com>
+	* gdb.asm/asm-source.exp: Strip -Wl, from link-flags.  Don't
+	append -static to link-flags for *-*-freebsd*, *-*netbsd* and
+	*-*solaris2*.  Remove commented out default settings for
+	asm-flags.  Replace gdb_compile with target_link.
 
-        * gdb.base/charset.exp, gdb.base/charset.c: New files.
-        
-2001-12-07  Kevin Buettner  <kevinb@redhat.com>
+2004-07-23  Nick Clifton  <nickc@redhat.com>
 
-	From Elena Zannoni  <ezannoni@redhat.com>:
-	* config/libremote_server.exp (gdb_load): Use ``hostname'' instead of
-	``address'' to get the target to connect to.  Also, add code
-	for setting ``solib-absolute-prefix''.
+	* gdb.asm/asm-source.exp: Use -gdwarf2 with Sparc64 targets
+          not -gstabs.  GAS does not generate correct relocs for STABS.
 
-	* config/libremote_server.exp (gdb_load): Get the username to
-	connect as via ``username''.
-	(gdbserver_spawn, gdbserver_download): New procs.
-	(gdb_load): Call new procs gdbserver_download and gdbserver_spawn
-	instead of standard_download and standard_spawn.
+2002-02-06  Jackie Smith Cashion  <jsmith@redhat.com>
 
-	From Brendan Conoboy  <bld@redhat.com>:
-	* config/libremote_server.exp: Use rcp_prog/rsh_prog if defined.
+	* config/libremote_server.exp: New file.
 
-2001-09-21  Elena Zannoni  <ezannoni@redhat.com>
+2004-06-07  Martin Hunt  <hunt@redhat.com>
 
-        2001-08-31  Michael Chastain  (chastain@redhat.com)
-        * config/libremote_server.exp: Increase libremote server loading
-        time from 2 seconds to 5 seconds.
-        Fix DOS ^J^M end-of-line markers.
+	* gdb.base/float.exp: Add correct checking for mips result.
 
-        2001-08-27  Michael Chastain  (chastain@redhat.com)
-        * config/libremote_server.exp: New file.
-
-Sat Sep 18 11:16:16 1999  Jeffrey A Law  (law@cygnus.com)
-
-	* gdb.disasm/hppa2.exp: Fix expect strings for depd, depdi tests.
-
-	* gdb.disasm/hppa2.exp: Expect new syntax for fmemLR tests.
-
-	* gdb.disasm/hppa2.exp: Do not expect ",*" for a completer for PA2.0
-	instructions.
-
-	* gdb.disasm/hppa2.exp: Expect new syntax for indexed FP load/store
-	test and short FP load/store test.
-
-	* gdb.disasm/hppa2.s: Use .code instead of space/subspace
-	for sectioning.  Fix add instructions to be valid PA2.0 syntax.
-	* gdb.disasm/hppa2.exp: Update "add" and "sub" expected strings per
-	recent changes to the new syntax opcodes.
-
-Tue Jun  1 10:28:00 1999  Jeffrey A Law  (law@cygnus.com)
-
-	* gdb.disasm/hppa2.s: Add PA2.0 "depd" and "depdi" tests.
-	* gdb.disasm/hppa2.exp: Corresponding changes.
-
-Fri May 28 11:59:46 1999  Jeffrey A Law  (law@cygnus.com)
-
-	* gdb.disasm/hppa2.exp: Add PA2.0 "cmpb" and "cmpib" tests.
-	* gdb.disasm/hppa2.s: Corresponding changes.
-
-	* gdb.disasm/hppa2.s: Add some tests for PA2.0 instructions and
-	completers.
-	* gdb.disasm/hppa2.exp: Corresponding changes.
-
-	* gdb.disasm/hppa2.s: New testfile.
-	* gdb.disasm/hppa2.exp: New disassembler testsuite.
-	* gdb.disasm/hppa.exp: Do not run this test anymore.
-
-1999-05-17  Keith Seitz  <keiths@cygnus.com>
-
-	* config/mcore.exp: New file
-
-1999-03-03  James Ingham  <jingham@cygnus.com>
-
-	* browser.test: Fixed up to match the new function browser.
-	This is not done yet...
-
-	* srcwin.test: Check for errors when the bbox is called for a text 
-	item that is not on screen (so bbox is "").  Return something more 
-	useful.
+	* gdb.base/dump.exp: Only do 64-bit compatible tests for mips.
 
 
 Local Variables:

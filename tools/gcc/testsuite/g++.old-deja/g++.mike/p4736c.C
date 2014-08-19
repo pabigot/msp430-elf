@@ -61,3 +61,4 @@ int main() {
   if (did_fail)
     return 6;
 }
+// { dg-require-effective-target size32plus }

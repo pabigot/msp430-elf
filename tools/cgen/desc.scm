@@ -1,5 +1,5 @@
 ; General cpu info generator support.
-; Copyright (C) 2000, 2003, 2009 Red Hat, Inc.
+; Copyright (C) 2000, 2003 Red Hat, Inc.
 ; This file is part of CGEN.
 ;
 ; This file generates C versions of the more salient parts of the description
@@ -122,7 +122,7 @@ static const CGEN_ATTR_ENTRY bool_attr[] =
 		 (string-map (lambda (e)
 			       (string-append
 				"  { \""
-				(->string (elm-get self 'name-prefix))
+				(->string (elm-get self 'prefix))
 				(->string (car e)) ; operand name
 				"\", "
 				(if (string? (cadr e))

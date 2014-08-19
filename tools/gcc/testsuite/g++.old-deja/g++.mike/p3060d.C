@@ -20,7 +20,7 @@ public:
   void        Feedback(Object*, void*);
 };
 void Clipper::Feedback(Object *tracker, void *ap) {
-  printf("Doing feedback\n");
+  ; // printf("Doing feedback\n");
 }
 
 void vfunc(VoidObjMemberFunc of, Object *op, void *v1) {

@@ -1,8 +1,9 @@
 /* Test complex arithmetic with signed zeros.  Pure complex
    subtraction.  */
 /* { dg-do run } */
-/* { dg-options "-std=gnu99" { target c } } */
+/* { dg-skip-if "test too big" { rl78-*-* } "*" "" } */
 /* { dg-skip-if "test too big for small mode" { msp430*-*-* } "*" "" } */
+/* { dg-options "-std=gnu99" { target c } } */
 
 #include "complex-sign.h"
 

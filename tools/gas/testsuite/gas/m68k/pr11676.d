@@ -1,6 +1,5 @@
 #objdump: -d --prefix-addresses
 #name: PR 11676
-#skip: fido-*-*
 
 # Test disassembling of floating point constants.
 

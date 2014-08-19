@@ -1,4 +1,1143 @@
-2013-03-15  Sebastian Huber <sebastian.huber@embedded-brains.de>
+2013-12-23  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* NEWS: Update with 2.1.0 info.
+	* README: Ditto.
+	* acinclude.m4: Change version number to 2.1.0.
+	* aclocal.m4: Regenerated.
+	* configure: Ditto.
+	* Makefile.in: Regenerated.
+	* doc/aclocal.m4: Ditto.
+	* doc/configure: Ditto.
+	* libc/*/aclocal.m4: Ditto.
+	* libc/*/configure: Ditto.
+	* libc/libc.texinfo: Ditto.
+	* libm/*/aclocal.m4: Ditto.
+	* libm/*/configure: Ditto.
+	* libm/libm.texinfo: Ditto.
+	* libc/sys/linux/shared.ld: Add VERS_2.1
+
+2013-12-22  JF Bastien  <jfb@chromium.org>
+
+	* libc/include/limits.h: Define LLONG_MIN, LLONG_MAX and ULLONG_MAX 
+	for C++11 too.
+	* libc/include/stdlib.h: Define struct lldiv_t, _Exit, atoll, llabs 
+	and lldiv for C99 and C++11.  Move wcstold to wchar.h.
+	* libc/include/wchar.h: Define WCHAR_MIN and WCHAR_MAX according to
+	__WCHAR_UNSIGNED__ if it is provided, and correct the limit when
+	unsigned (to 32 all-1 bits, not 31).  Define FILE as in stdio.h.
+	Move wcstold from stdlib.h here.
+
+2013-12-20  Nick Clifton  <nickc@redhat.com>
+
+	* configure.host (newlib_cflags): Use -Os, -ffunction-sections and
+	-fdata-sections for RL78.
+
+2013-12-19  Corinna Vinschen  <vinschen@redhat.com>
+
+	* libc/stdio/vfwscanf.c (__SVFWSCANF_R): Fix fetching decimal_point in
+	!_MB_CAPABLE as well as in !__HAVE_LOCALE_INFO_EXTENDED__ case.
+
+2013-12-18  Corinna Vinschen  <vinschen@redhat.com>
+
+	* libc/stdio/vfscanf.c (BUF): Change definition to take multibyte
+	decimal point into account.
+	(__SVFSCANF_R): Handle radix char language-dependent
+	per POSIX.
+	* libc/stdio/vfwscanf.c (__SVFWSCANF_R): Ditto.
+
+2013-12-10  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* acconfig.h: Add _HAVE_CC_INHIBIT_LOOP_TO_LIBCALL.
+	* newlib.hin: Ditto.
+	* configure: Regenerate.
+	* configure.in: Add setting of _HAVE_CC_INHIBIT_LOOP_TO_LIBCALL.
+	* libc/string/local.h: Add check for _HAVE_CC_INHIBIT_LOOP_TO_LIBCALL
+	and set __inhibit_loop_to_libcall macro appropriately.
+	* libc/string/memmove.c: Use __inhibit_loop_to_libcall macro in
+	function declaration.
+	* libc/string/memset.c: Ditto.
+
+2013-12-10  Chirayu Desai  <chirayudesai1@gmail.com>
+
+	* libc/sys/rtems/include/limits.h: Update page size to match
+	libc/sys/rtems/machine/param.h.
+
+2013-12-03  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/sys/rtems/sys/cpuset.h: Use __inline instead of inline.
+
+2013-12-03  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/include/machine/_default_types.h: Move extern "C" after
+	header includes.  Include <sys/features.h> for
+	__GNUC_PREREQ__().
+	(__u?int.*_t): Define via GCC provided __U?INT.*_TYPE__ if
+	available.
+	(__intptr_t): Define.
+	(__uintptr_t): Likewise.
+	* libc/include/stdint.h: Include <machine/_default_types.h>
+	instead of <_ansi.h>.
+	(u?int.*_t): Define via __u?int.*_t provided by
+	<machine/_default_types.h>.
+	(u?int_fast.*_t): Define via GCC provided
+	__U?INT_FAST.*_TYPE__ if available.
+	(U?INT.*(MIN|MAX)): Define via GCC provided __U?INT.*(MIN|MAX)__
+	if available.
+	(U?INT.*_C): Define via GCC provided __U?INT.*_C if available.
+	* libc/include/sys/cdefs.h: Use <machine/_default_types.h>
+	instead of <stdint.h>.
+	* libc/sys/rtems/sys/cpuset.h: Likewise.
+	* libc/sys/rtems/machine/_types.h: Include <stdint.h> for
+	FreeBSD compatibility.
+
+2013-11-29  Sebastian Huber <sebastian.huber@embedded-brains.de>
+
+	* libc/include/pthread.h (pthread_cleanup_push): Delete prototype
+	and add macro of the same name.
+	(pthread_cleanup_pop): Likewise.
+	(_pthread_cleanup_context): Define.
+	(_pthread_cleanup_push): Likewise.
+	(_pthread_cleanup_pop): Likewise.
+	(pthread_cleanup_push_defer_np): Define if _GNU_SOURCE is defined.
+	(pthread_cleanup_pop_restore_np): Likewise.
+	(_pthread_cleanup_push_defer): Likewise.
+	(_pthread_cleanup_pop_restore): Likewise.
+
+2013-11-29  Jennifer Averett <jennifer.averett@oarcorp.com>
+
+	* libc/include/pthread.h (pthread_attr_setaffinity_np):
+	Add pthread SMP affinity attributes to methods to RTEMS for
+	compatibility with GNU/Linux.
+	(pthread_attr_getaffinity_np): Likewise.
+	(pthread_setaffinity_np): Likewise.
+	(pthread_getaffinity_np): Likewise.
+	(pthread_getattr_np): Add for GNU/Linux compatibility.
+	* libc/include/sys/types.h: Add cpuset to pthread_attr_t for RTEMS.
+	* libc/include/sys/cdefs.h (_GNU_SOURCE): Defining _GNU_SOURCE
+	turns on all _XXX_VISBLE feature flags.
+
+2013-11-27  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/sys/rtems/cpusetalloc.c: New file.
+	* libc/sys/rtems/cpusetfree.c: Likewise.
+	* libc/sys/rtems/Makefile.am (lib_a_SOURCES): Add new files.
+	* libc/sys/rtems/Makefile.in: Regenerate.
+	* libc/sys/rtems/sys/cpuset.h: Delete #if 0 block.  Include
+	<stddef.h> for size_t.
+	(_NCPUBITS): Avoid NBBY and assume 8 bits per char.
+	(__cpuset_mask): Use int instead of size_t parameter for Linux
+	compatibility.
+	(__cpuset_index): Likewise.
+	(__cpuset_alloc): Declare.
+	(__cpuset_free): Likewise.
+	(CPU_ALLOC_SIZE): Likewise.
+	(CPU_ALLOC): Define.
+	(CPU_FREE): Likewise.
+	(CPU_ZERO_S): Likewise.
+	(CPU_FILL_S): Likewise.
+	(CPU_SET_S): Likewise.
+	(CPU_CLR_S): Likewise.
+	(CPU_ISSET_S): Likewise.
+	(CPU_COUNT_S): Likewise.
+	(CPU_AND_S): Likewise.
+	(CPU_OR_S): Likewise.
+	(CPU_XOR_S): Likewise.
+	(CPU_NAND_S): Likewise.
+	(CPU_EQUAL_S): Likewise.
+	(CPU_ZERO): Use CPU_ZERO_S().
+	(CPU_FILL): Use CPU_FILL_S().
+	(CPU_SET): Use CPU_SET_S().
+	(CPU_CLR): Use CPU_CLR_S().
+	(CPU_ISSET): Use CPU_ISSET_S().
+	(CPU_COUNT): Use CPU_COUNT_S().
+	(CPU_AND): Use CPU_AND_S().
+	(CPU_OR): Use CPU_OR_S().
+	(CPU_XOR): Use CPU_XOR_S().
+	(CPU_NAND): Use CPU_NAND_S().
+	(CPU_EQUAL): Use CPU_EQUAL_S().
+	(CPU_CMP): Delete superfluous const qualifier.
+	(CPU_EMPTY): Likewise.
+
+2013-11-27  Matheus Almeida  <Matheus.Almeida@imgtec.com>
+
+	* libc/machine/mips/setjmp.S: Fix definition of macro FPR_LAYOUT
+	for ABI == N32.
+
+2013-11-26  Matheus Almeida  <Matheus.Almeida@imgtec.com>
+
+	* libc/include/machine/setjmp.h: Add support for __mips_fpr being
+	64 and treat it the same as if __mips64 is set.
+	* libc/machine/mips/setjmp.S: Ditto, plus add checks for _MIPS_SIM
+	being _ABIN32 and _ABI64.
+
+2013-11-26  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* libc/machine/powerpc/vfscanf.c, libc/stdio/fgetpos.c,
+	libc/stdio/fgets.c, libc/stdio/fputs.c, libc/stdio/fread.c,
+	libc/stdio/freopen.c, libc/stdio/fwrite.c, libc/stdio/sscanf.c,
+	libc/stdlib/mbstowcs.c, libc/stdlib/mbtowc.c,
+	libc/stdlib/strtod.c, libc/stdlib/strtol.c, libc/stdlib/strtoll.c,
+	libc/stdlib/strtoul.c, libc/stdlib/strtoull.c,
+	libc/stdlib/wcstombs.c: Fix documentation prototypes which were
+	over eighty columns.
+
+2013-11-26  Julio Gutierrez <jgutleyva@gmail.com>
+
+	*libc/include/wchar.h: Add restrict keyword.
+	*libc/stdio/fgetws.c (fgetws): ditto.
+	*libc/stdio/fputws.c (fputws): ditto.
+	*libc/stdio/fwprintf.c (fwprintf): ditto.
+	*libc/stdio/fwscanf.c (fwscanf): ditto.
+	*libc/stdio/swprintf.c (swprintf): ditto.
+	*libc/stdio/swscanf.c (swscanf): ditto.
+	*libc/stdio/vfwprintf.c (vfwprintf): ditto.
+	*libc/stdio/vfwscanf.c (vfwscanf): ditto.
+	*libc/stdio/vswprintf.c (vswprintf): ditto.
+	*libc/stdio/vswscanf.c (vswscanf): ditto.
+	*libc/stdio/vwprintf.c (vwprintf): ditto.
+	*libc/stdio/vwscanf.c (vwscanf): ditto.
+	*libc/stdio/wprintf.c (wprintf): ditto.
+	*libc/stdio/wscanf.c (wscanf): ditto.
+	*libc/stdlib/mbrlen.c (mbrlen): ditto.
+	*libc/stdlib/mbrtowc.c (mbrtowc): ditto.
+	*libc/stdlib/mbsnrtowcs.c (mbsnrtowcs): ditto.
+	*libc/stdlib/mbsrtowcs.c (mbsrtowcs): ditto.
+	*libc/stdlib/wcrtomb.c (wcrtomb): ditto.
+	*libc/stdlib/wcsnrtombs.c (wcsnrtombs): ditto.
+	*libc/stdlib/wcsrtombs.c (wcsrtombs): ditto.
+	*libc/stdlib/wcstod.c (wcstod): ditto.
+	*libc/stdlib/wcstol.c (wcstol): ditto.
+	*libc/stdlib/wcstold.c (wcstold): ditto.
+	*libc/stdlib/wcstoll.c (wcstoll): ditto.
+	*libc/stdlib/wcstoul.c (wcstoul): ditto.
+	*libc/stdlib/wcstoull.c (cstoull): ditto.
+	*libc/string/wcpcpy.c (wcpcpy): ditto.
+	*libc/string/wcpncpy.c (wcpncpy): ditto.
+	*libc/string/wcscat.c (wcscat): ditto.
+	*libc/string/wcscpy.c (wcscpy): ditto.
+	*libc/string/wcsncat.c (wcsncat): ditto.
+	*libc/string/wcsncpy.c (wcsncpy): ditto.
+	*libc/string/wcsstr.c (wcsstr): ditto.
+	*libc/string/wcstok.c (wcstok): ditto.
+	*libc/string/wcsxfrm.c (wcsxfrm): ditto.
+	*libc/string/wmemcpy.c (wmemcpy): ditto.
+
+2013-11-26  Corinna Vinschen  <vinschen@redhat.com>
+
+	* libc/posix/posix_spawn.c: Drop using namespace.h.
+
+2013-11-26  Corinna Vinschen  <vinschen@redhat.com>
+
+	* libc/posix/posix_spawn.c: Eliminate OS function calls not present
+	in newlib or Cygwin.
+	(process_spawnattr): Use sigprocmask rather than _sigprocmask.  Use
+	sigaction rather than _sigaction.
+	(process_file_actions_entry): Use dup2 rather than _dup2.
+	(do_posix_spawn): Use execvpe rather than _execvpe.  Use waitpid
+	rather than _waitpid.
+
+2013-11-25  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* libc/iconv/lib/iconv.c, libc/time/strftime.c: Change "restrict<" to
+	"restrict <" to fix formatting.
+
+2013-11-25  Corinna Vinschen  <vinschen@redhat.com>
+
+	* libc/include/spawn.h (posix_spawn_file_actions_destroy): Fix typo
+	in function name.
+	* libc/posix/posix_spawn.c (posix_spawn_file_actions_destroy): Ditto.
+
+2013-11-25  Sahil Patnayakuni <sahil.patnayakuni@gmail.com>
+
+	* libc/include/time.h (time): Add restrict keyword.
+	* libc/include/wchar.h (wcsftime): Add restrict keyword.
+	* libc/time/asctime_r.c (asctime_r): Same.
+	* libc/time/gmtime_r.c (gmtime_r): Same.  
+	* libc/time/lcltime_r.c (lcltime_r): Same.     
+	* libc/time/strftime.c (strftime): Same.   
+	* libc/time/strptime.c (strptime): Same.  
+	* libc/sys/linux/linuxthreads/timer_create.c (timer_create): Same.   
+	* libc/sys/linux/linuxthreads/timer_settime.c (timer_settime): Same.                            
+2013-11-23 Bryan Dunsmore <dunsmoreb@gmail.com>
+
+	* libc/include/wordexp.h (wordexp): Add restrict keyword.
+	* libc/posix/wordexp.c (wordexp): Ditto.
+
+2013-11-22  Bryan Dunsmore <dunsmoreb@gmail.com>
+
+	* libc/include/sys/time.h (gettimeofday): Add restrict keyword.
+	(setitimer): Likewise.
+	* libc/sys/rdos/gettod.c (gettimeofday): Likewise.
+	* libc/sys/rtems/crt0.c (gettimeofday): Likewise.
+
+2013-11-22  Chirayu Desai  <chirayudesai1@gmail.com>
+
+	* libc/include/sys/unistd.h (readlink): Add restrict keyword.
+	(readlinkat): Ditto.
+	(swab): Ditto.
+	* libc/sys/rdos/readlink.c (readlink): Ditto.
+	* libc/string/swab.c (swab): Ditto.
+
+2013-11-21  Daniel Ramirez <javamonn@gmail.com>
+
+	* libc/sys/linux/statvfs.c (statvfs): Added restrict keyword.
+
+2013-11-21  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* libc/sys/rdos/chown.c, libc/sys/rdos/close.c, libc/sys/rdos/execve.c,
+	libc/sys/rdos/fork.c, libc/sys/rdos/fstat.c, libc/sys/rdos/getpid.c,
+	libc/sys/rdos/gettod.c, libc/sys/rdos/isatty.c, libc/sys/rdos/kill.c,
+	libc/sys/rdos/link.c, libc/sys/rdos/lseek.c, libc/sys/rdos/open.c,
+	libc/sys/rdos/rdos.h, libc/sys/rdos/read.c, libc/sys/rdos/readlink.c,
+	libc/sys/rdos/sbrk.c, libc/sys/rdos/stat.c, libc/sys/rdos/symlink.c,
+	libc/sys/rdos/times.c, libc/sys/rdos/unlink.c, libc/sys/rdos/wait.c,
+	libc/sys/rdos/write.c: Convert from DOS to UNIX CRLF.
+
+2013-11-21  Julio Gutierrez <jgutleyva@gmail.com>
+
+	* libc/include/glob.h (glob): Add restrict keyword.
+	* libc/posix/glob.c (glob): Ditto.
+
+2013-11-21  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* libc/posix/readdir_r.c: Add restrict keyword.
+	* libc/machine/spu/sys/dirent.h, libc/sys/decstation/sys/dirent.h,
+	libc/sys/linux/sys/dirent.h, libc/sys/rtems/sys/dirent.h,
+	libc/sys/sparc64/sys/dirent.h, libc/sys/sun4/sys/dirent.h,
+	libc/sys/sysvi386/sys/dirent.h: Add readdir_r() prototype.
+
+2013-11-21  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* libc/sys/rdos/stat.c: Remove stray +.
+
+2013-11-21  Daniel Ramirez <javamonn@gmail.com>
+
+	* libc/include/sys/stat.h, libc/sys/linux/sys/stat.h, 
+	libc/sys/m88kbug/syscalls.c, libc/sys/rdos/stat.c, 
+	libc/sys/sparc64/sys/stat.h: Add restrict keyword.
+
+2013-11-20  Daniel Ramirez <javamonn@gmail.com>
+
+	* libc/include/search.h, libc/search/tdelete.c: Add restrict keyword.
+
+2013-11-20  Chirayu Desai  <chirayudesai1@gmail.com>
+
+	* libc/include/regex.h, libc/posix/regcomp.c,
+	libc/posix/regerror.c, libc/posix/regex.3
+	libc/posix/regexec.c: Add restrict keyword.
+
+2013-11-20  Daniel Ramirez <javamonn@gmail.com>
+
+	* libc/iconv/lib/iconv.c, libc/include/iconv.h, 
+	libc/sys/linux/iconv/iconv.c: Add restrict keyword.
+
+2013-11-20  Corinna Vinschen  <vinschen@redhat.com>
+
+	* libc/include/stdlib.h: Declare realpath only if !__STRICT_ANSI__.
+
+2013-11-19  Jennifer Averett <jennifer.averett@oarcorp.com>
+
+	* libc/sys/rtems/sys/cpuset.h: New file.
+
+2013-11-19  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* libc/include/stdlib.h: Add prototype of realpath().
+	* libc/sys/linux/realpath.c: Add restrict keyword.
+
+2013-11-19  Joel Sherrill <joel.sherrill@oarcorp.com>
+
+	* libm/common/modfl.c: Add cast to remove compiler warning.
+
+2013-11-19  Terraneo Federico  <fede.tft@hotmail.it>
+
+	* libc/posix/closedir.c: Fix use after free.
+	Remove useless test dd_fd != -1
+	* libc/posix/readdir.c: Remove useless test dd_fd == -1
+	* libc/posix/readdir_r.c: Ditto.
+
+2013-11-18  Sahil Patnayakuni  <sahilp@oarcorp.com>
+
+	* libc/include/stdio.h, libc/machine/powerpc/vfscanf.c,
+	libc/machine/spu/fgetpos.c, libc/machine/spu/fgets.c,
+	libc/machine/spu/fopen.c, libc/machine/spu/fputs.c,
+	libc/machine/spu/fread.c, libc/machine/spu/freopen.c,
+	libc/machine/spu/fwrite.c, libc/machine/spu/setbuf.c,
+	libc/machine/spu/vfprintf.c, libc/machine/spu/vfscanf.c,
+	libc/machine/spu/vsnprintf.c, libc/machine/spu/vsprintf.c,
+	libc/machine/spu/vsscanf.c, libc/stdio/asnprintf.c,
+	libc/stdio/asprintf.c, libc/stdio/dprintf.c,
+	libc/stdio/fgetpos.c, libc/stdio/fgets.c,
+	libc/stdio/fmemopen.c, libc/stdio/fopen.c,
+	libc/stdio/fprintf.c, libc/stdio/fputs.c,
+	libc/stdio/fread.c, libc/stdio/freopen.c,
+	libc/stdio/fscanf.c, libc/stdio/fwrite.c,
+	libc/stdio/printf.c, libc/stdio/scanf.c,
+	libc/stdio/setbuf.c, libc/stdio/snprintf.c,
+	libc/stdio/sprintf.c, libc/stdio/sscanf.c,
+	libc/stdio/vdprintf.c, libc/stdio/vprintf.c,
+	libc/stdio/vscanf.c, libc/stdio/vsnprintf.c,
+	libc/stdio/vsprintf.c, libc/stdio/vsscanf.c: Add restrict keyword.
+
+2013-11-18  Sahil Patnayakuni  <sahilp@oarcorp.com>
+
+	* libc/include/stdlib.h, libc/stdlib/mbstowcs.c,
+	libc/stdlib/mbstowcs_r.c, libc/stdlib/mbtowc.c,
+	libc/stdlib/mbtowc_r.c, libc/stdlib/strtod.c,
+	libc/stdlib/strtol.c, libc/stdlib/strtold.c,
+	libc/stdlib/strtoll.c, libc/stdlib/strtoll_r.c,
+	libc/stdlib/strtoul.c, libc/stdlib/strtoull.c,
+	libc/stdlib/strtoull_r.c, libc/stdlib/wcstombs.c,
+	libc/stdlib/wcstombs_r.c: Add restrict keyword.
+
+2013-11-18  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* libc/include/sys/unistd.h (ftruncate, truncate): Define
+	for __arm__.
+
+2013-11-13  Gregory Pietsch <gpietsch@comcast.net>
+
+	* newlib/libc/stdlib/getopt.c (getopt_internal): Add missing braces.
+
+2013-11-13  Freddie Chopin  <freddie_chopin@op.pl>
+
+	* newlib/libc/include/getopt.h (struct option): name field should be
+	"const char *".
+	* newlib/libc/stdlib/getopt.c (getopt_internal): Use fputs()/fputc()
+	instead of fprintf() to save code space.  Fix signed/unsigned
+	comparison.
+
+2013-11-12  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/libc/stdlib/getopt.c (getopt_internal): Fix NULL pointer access.
+
+2013-11-08  Terry Guo  <terry.guo@arm.com>
+
+	* libm/libm.texinfo: Rename node Index to Document Index.
+
+2013-11-08  Corinna Vinschen  <vinschen@redhat.com>
+
+	* libc/libc.texinfo: Rename node Library Index to Document Index.
+
+2013-11-04  Terraneo Federico  <fede.tft@hotmail.it>
+
+	* libc/stdio/fvwrite.c: Allow writing in larger chunks for fully
+	buffered and unbuffered files, to improve write performance.
+
+2013-10-31  Terraneo Federico  <fede.tft@hotmail.it>
+
+	* libc/stdio/fvwrite.h: change type of uio_resid from int to size_t to
+	fix fwrite() of > 2GByte buffers.
+
+2013-10-30  Joey Ye  <joey.ye@arm.com>
+
+	Implement malloc_stats for nano.
+	* libc/stdlib/nano-mallocr.c (RONECALL): New parameter macro.
+	(sbrk_start): New variable.
+	(current_mallinfo, free_list): Forward declaration of data.
+	(chunk): Define size as long type.
+	(mallinfo): Synchronize with latest malloc.h.
+	(nano_*): Forward declaration of functions.
+	(get_chunk_from_ptr): Defined to static inline.
+	(nano_mallinfo): Implement this function.
+	(nano_malloc_stats): Implement this function.
+
+2013-10-30  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/include/machine/_default_types.h: Revert change from 2013-10-10.
+
+2013-10-24  Hans-Peter Nilsson  <hp@axis.com>
+
+	* libc/include/stdio.h [!__LARGE64_FILES] (funopen): Fix typo
+	in last change.
+
+2013-10-23  Corinna Vinschen  <vinschen@redhat.com>
+
+	* libc/include/stdio.h (funopen): Change prototype of
+	__readfn and __writefn parameter to match new definition of
+	FILE's _read and _write methods.
+	(_funopen_r): Ditto.
+	(funopen): Ditto.
+	(_funopen_r): Ditto.
+	* libc/include/sys/config.h (_READ_WRITE_BUFSIZE_TYPE) Define
+	as type int if not already defined.  Add comment to explain.
+	* libc/include/sys/reent.h: Include stddef.h.
+	(struct __sFILE): Change type of last parameter in declaration
+	of _read and _write methods to _READ_WRITE_BUFSIZE_TYPE.
+	(struct __sFILE64): Ditto.
+	* libc/stdio/local.h (__sread): Declare with last parameter set
+	to _READ_WRITE_BUFSIZE_TYPE.
+	(__seofread): Ditto.
+	(__swrite): Ditto.
+	(__swrite64): Ditto.
+	* libc/stdio/fvwrite.c (__sfvwrite_r): Change type of local
+	variables w and s to _READ_WRITE_RETURN_TYPE.
+	* libc/stdio/fflush.c (__sflush_r): Change type of local variables
+	n and t to _READ_WRITE_BUFSIZE_TYPE and _READ_WRITE_RETURN_TYPE.
+	Add local variables flags to keep _flags value.
+	* libc/stdio/fmemopen.c (fmemreader): Align to above change.
+	(fmemwriter): Ditto.
+	* libc/stdio/fopencookie.c (fcreader): Ditto.
+	(fcwriter): Ditto.
+	* libc/stdio/funopen.c (funread): Ditto.
+	(funwrite): Ditto.
+	(funreader): Ditto.
+	(funwriter): Ditto.
+	* libc/stdio/open_memstream.c (memwriter): Ditto.
+	* libc/stdio/stdio.c (__sread): Ditto.
+	(__seofread): Ditto.
+	(__swrite): Ditto.
+	* libc/stdio64/stdio64.c (__swrite64): Ditto.
+
+2013-10-18  Joey Ye  <joey.ye@arm.com>
+
+	* configure.in (enable-newlib-global-atexit): New option.
+	* configure: Regenerated.
+	* newlib.hin (_REENT_GLOBAL_ATEXIT): Place-holder.
+	* README (enable-newlib-global-atexit): Description for
+	new option.
+
+2013-10-18  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/include/sys/unistd.h (MAXPATHLEN): Delete.
+	* libc/include/sys/param.h (MAXPATHLEN): Define.
+	* libc/sys/rtems/sys/param.h (MAXPATHLEN): Likewise.
+	* libc/unix/getcwd.c: Include <sys/param.h> for MAXPATHLEN.
+
+2013-10-10  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/libc/sys/rtems/sys/param.h: Update some parameters to
+	the latest FreeBSD values.
+
+2013-10-10  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/sys/rtems/machine/_types.h (_HAVE_SYSTYPES): Define.
+
+2013-10-10  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/sys/rtems/include/limits.h (_POSIX_HOST_NAME_MAX):
+	Define.
+
+2013-10-10  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/sys/rtems/machine/_types.h (__dev_t): Define.
+	(__dev_t_defined) Likewise.
+	* libc/include/sys/_types.h (__dev_t): Delete RTEMS specific
+	definition.
+
+2013-10-10  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/sys/rtems/machine/_types.h (_ssize_t): Delete.
+	(__ssize_t_defined) Likewise.
+
+2013-10-30  Sebastian Huber <sebastian.huber@embedded-brains.de>
+
+	* libc/include/machine/_default_types.h: Revert change from 2013-10-10.
+
+2013-10-10  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/include/machine/_default_types.h (__int8_t): Define via
+	<stdint.h> provided type.
+	(__uint8_t): Likewise.
+	(__int8_least_t): Likewise.
+	(__uint8_least_t): Likewise.
+	(__int16_t): Likewise.
+	(__uint16_t): Likewise.
+	(__int16_least_t): Likewise.
+	(__uint16_least_t): Likewise.
+	(__int32_t): Likewise.
+	(__uint32_t): Likewise.
+	(__int32_least_t): Likewise.
+	(__uint32_least_t): Likewise.
+	(__int64_t): Likewise.
+	(__uint64_t): Likewise.
+
+2013-10-10  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/include/paths.h (_PATH_DEVNULL): Define.
+	(_PATH_DEVZERO): Likewise.
+
+2013-10-09  Marcus Shawcroft  <marcus.shawcroft@arm.com>
+
+	* testsuite/newlib.wctype/twctype.c (main): Update
+	iswprint(0xce2) test case.
+
+2013-10-03  Steve Ellcey  <sellcey@mips.com>
+
+	* libc/machine/mips/memset.c: Remove.
+	* libc/machine/mips/memset.S: New.
+	* libc/machine/mips/Makefile.am: Change memset.c to memset.S
+	* libc/machine/mips/Makefile.in: Regenerate.
+
+2013-10-01  Petr Hosek  <phosek@chromium.org>
+
+	* configure.host: Disable new posix_spawn function for all
+	users of posix dir except Cygwin.
+	* libc/posix/Makefile.am: Add support for new posix_spawn function.
+	* libc/posix/Makefile.in: Regenerate.
+	* libc/posix/posix_spawn.c: New file.
+	* libc/include/spawn.h: Ditto.
+
+2013-09-13  Joey Ye  <joey.ye@arm.com>
+
+	* libc/stdlib/nano-mallocr.c (nano_allopt): Typo fixed to ...
+	(nano_mallopt): ... this.
+
+2013-09-12  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/include/sys/cdefs.h: Synchronize with latest FreeBSD
+	version.
+	* libc/include/stdatomic.h: Likewise.
+
+2013-09-08  Yaakov Selkowitz  <yselkowitz@users.sourceforge.net>
+
+	* libc/include/search.h (__compar_fn_t): Add typedef.
+	(tdelete, tfind, tsearch): Use it.
+	* libc/include/stdlib.h (__compar_fn_t): Add typedef.
+	(bsearch, qsort): Use it.
+
+2013-08-19  Meador Inge  <meadori@codesourcery.com>
+
+	* libc/stdlib/__atexit.c (__register_exitproc): NULL-ify
+	_on_exit_args_ptr when creating a new _atexit structure while
+	_REENT_SMALL is defined.
+
+2013-08-12  Bin Cheng  <bin.cheng@arm.com>
+
+	* libc/configure.in (--enable-newlib-wchar-orient): Remove.
+	* libc/configure: Regenerated.
+	* libc/stdio/Makefile.am (NEWLIB_WIDE_ORIENT): Remove.
+	* libc/stdio/Makefile.in: Regenerated.
+
+2013-08-12  Yufeng Zhang  <Yufeng.Zhang@arm.com>
+
+	* libc/sys/arm/crt0.S: Remove 'start'.
+
+2013-08-08  Freddie Chopin  <freddie_chopin@op.pl>
+
+	* libc/string/strncat.c: Fix typo in documentation.
+
+2013-08-01  Corinna Vinschen  <vinschen@redhat.com>
+
+	* libc/include/stdio_ext.h (__fbufsize): Define as inline function for
+	gcc, as macro otherwise.
+	(__freading): Ditto.
+	(__fwriting): Ditto.
+	(__freadable): Ditto.
+	(__fwriteable): Ditto.
+	(__flbf): Ditto.
+	(__fpending): Ditto.
+
+2013-07-23  Sahil Patnayakuni  <sahilp@rtems.org>
+
+	* libc/sys/linux/include/netdb.h, libc/sys/linux/net/getaddrinfo.c,
+	libc/sys/linux/net/getnameinfo.c: Add restrict keyword to getnameinfo()
+	and getaddrinfo() to increase standards compliance and match glibc.
+
+2013-07-23  Sahil Patnayakuni  <sahilp@rtems.org>
+
+	* libc/include/string.h, libc/string/memccpy.c, libc/string/memcpy.c,
+	libc/string/stpcpy.c, libc/string/stpncpy.c, libc/string/strcat.c,
+	libc/string/strncat.c, libc/string/strncpy.c, libc/string/strtok.c,
+	libc/string/strtok_r.c, libc/string/strxfrm.c
+	libc/machine/microblaze/strcpy.c, libc/machine/xscale/memcpy.c,
+	libc/machine/cris/memcpy.c: Add __restrict to prototype to
+	increase standards compliance.
+
+2013-07-18  Ramana Radhakrishnan  <ramana.radhakrishnan@arm.com>
+
+	* libc/sys/arm/syscalls.c (do_AngelSWI): Delete.
+	* libc/sys/arm/libcfuncs.c (do_AngelSWI): Delete.
+	* libc/sys/arm/swi.h: Copy over from libgloss.
+
+2013-07-17  Janis Johnson  <janisjo@codesourcery.com>
+
+	* libc/machine/powerpc/configure.in: Remove extra_sources; fix
+	extra_objs for powerpc*-*altivec.
+	* libc/machine/powerpc/Makefile.am: Define EXTRA_lib_a_SOURCES.
+	* libc/machine/powerpc/configure: Regenerated.
+	* libc/machine/powerpc/Makefile.in: Regenerated.
+
+2013-07-16  David Holsgrove <david.holsgrove@xilinx.com>
+
+	* configure.host: Change to microblaze*.
+	* libc/include/machine/ieeefp.h: Add __MICROBLAZEEL__.
+	* libc/machine/microblaze/mb_endian.h: New file.
+	* newlib/libc/machine/microblaze/strcmp.c: Add little endian support.
+	* newlib/libc/machine/microblaze/strcpy.c: Likewise.
+	* newlib/libc/machine/microblaze/strlen.c: Likewise.
+
+2013-07-09  Sabrina Ni  <sabrina@andestech.com>
+
+	* libc/machine/nds32/Makefile.am (lib_a_SOURCES): Add abort.c, memcpy.S,
+	memset.S, strcmp.S, and strcpy.S.
+	* libc/machine/nds32/Makefile.in: Regenerated.
+	* libc/machine/nds32/{abort.c, memcpy.S, memset.S, strcmp.S, strcpy.S}:
+	New.
+
+2013-07-09  Sabrina Ni  <sabrina@andestech.com>
+
+	* configure.host (machine_dir, syscall_dir, newlib_cflags):
+	Add settings for nds32*.
+	* libc/include/machine/ieeefp.h (IEEE_BIG_ENDIAN, IEEE_LITTLE_ENDIAN):
+	Ditto.
+	* libc/include/machine/setjmp.h (JBLEN): Ditto.
+	* libc/machine/configure.in: Add nds32 subdir.
+	* libc/machine/configure: Regenerated.
+	* libc/machine/nds32/Makefile.am: New.
+	* libc/machine/nds32/Makefile.in: New (autogenerated).
+	* libc/machine/nds32/aclocal.m4: New (autogenerated).
+	* libc/machine/nds32/configure.in: New.
+	* libc/machine/nds32/configure: New (autogenerated).
+	* libc/machine/nds32/setjmp.S: New.
+
+2013-07-09  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/include/sys/config.h (__DYNAMIC_REENT__): Define for RTEMS.
+
+2013-07-09  Bin Cheng  <bin.cheng@arm.com>
+
+	* libc/stdio/fwalk.c (_fwalk): Remove redundant test.
+
+2013-07-05  Yaakov Selkowitz  <yselkowitz@users.sourceforge.net>
+
+	* libc/include/sys/types.h (u_char): Add redefinition guard.
+	(u_short, u_int, u_long, caddr_t, daddr_t): Ditto.
+
+2013-07-02  Joey Ye  <joey.ye@arm.com>
+
+	Lite exit support.
+	* README: Add information about lite-exit.
+	* acconfig.h (_LITE_EXIT): New macro.
+	* configure.in (enable-lite-exit): New option.
+	(_LITE_EXIT): Define new macro.
+	* configure: Regenerated.
+	* newlib.hin (_LITE_EXIT): New macro.
+	* libc/stdlib/__atexit.c [_LITE_EXIT]: Add dummy explicit 
+	reference to __call_exitprocs.
+	* libc/stdlib/cxa_atexit.c [_LITE_EXIT]: Make __register_exitproc a
+	weak reference.
+	* libc/stdlib/exit.c (exit)[_LITE_EXIT]: Remove TWS and weakly reference
+	__call_exitprocs.
+
+2013-07-02  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* libc/include/sys/reent.h: Fix typo in comment.
+
+2013-07-01  Will Newton  <will.newton@linaro.org>
+
+	* libc/machine/arm/memcpy-armv7a.S: Adjust entry to
+	 aligned loop to improve misaligned copy performance.
+
+2013-06-26  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* libc/include/stdio.h: Specify std streams always in terms
+	of _REENT.
+	* libc/include/wchar.h: Ditto.
+	* libc/include/sys/reent.h: Remove _RENT_ONLY check around
+	setting of _REENT macro.
+
+2013-06-24  Yaakov Selkowitz  <yselkowitz@users.sourceforge.net>
+
+	* libc/include/string.h (rawmemchr): Declare.
+	* libc/string/Makefile.am (ELIX_4_SOURCES): Add rawmemchr.c.
+	(CHEWOUT_FILES): Add rawmemchr.def.
+	* libc/string/Makefile.in: Regenerate.
+	* libc/string/rawmemchr.c: New file.
+
+2013-06-24  Terraneo Federico  <fede.tft@hotmail.it>
+
+	* libc/reent/reent.c (_reclaim_reent): Free also _misc and
+	_signal_buf.
+
+2013-06-24  Terraneo Federico  <fede.tft@hotmail.it>
+
+	* libc/include/sys/reent.h (_ATEXIT_INIT_PTR): Remove.
+	(_REENT_INIT_ATEXIT_PTR): Remove.
+	(_REENT_INIT_PTR): Reduce code size if _REENT_SMALL.
+
+2013-06-21  Will Newton  <will.newton@linaro.org>
+
+	* libc/machine/arm/strlen-armv7.S: Import latest strlen
+	code from Linaro cortex-strings.
+
+2013-06-21  Will Newton  <will.newton@linaro.org>
+
+	* MAINTAINERS: Add Will Newton to Write After Approval.
+
+2013-06-19  Bin Cheng  <bin.cheng@arm.com>
+
+	* acconfig.h (_UNBUF_STREAM_OPT): Undefine.
+	* newlib.hin (_UNBUF_STREAM_OPT): Undefine.
+	* configure.in (--enable-newlib-unbuf-stream-opt): New option.
+	* configure: Regenerate.
+	* libc/stdio/vfprintf.c (_VFPRINTF_R): Don't do optimization on
+	unbuffered stream files.
+	* libc/stdio/vfwprintf.c (_VFWPRINTF_R): Likewise.
+	* README: Add description about the option.
+
+2013-06-19  Terraneo Federico  <fede.tft@hotmail.it>
+
+	* libc/posix/readdir_r.c: Fix potential read past dirp->dd_buf.
+
+2013-06-13  Bir Cheng  <bin.cheng@arm.com>
+
+	* README: Add description for NEWLIB's feature customizing
+	configuration options.
+
+2013-06-10  Terraneo Federico  <fede.tft@hotmail.it>
+
+	* libc/stdlib/gdtoa-gethex.c (__hexdig): Constify.
+	(hexdig_init): Remove.
+	(__hexdig_fun): New function.
+	hexdig_init, added __hexdig_fun
+	(gethex): Call __get_hexdig macro rather than hexdig.
+	* libc/stdlib/gdtoa-hexnan.c (hexnan): Constify fpi argument.
+	Call __get_hexdig macro rather than hexdig.
+	* libc/stdlib/ldtoa.c: Throughout constify functions arguments where
+	required by constifying the following arrays.
+	(ezero): Constify.
+	(eone): Constify.
+	(ermsg): Constify.
+	(etens): Constify.
+	(emtens): Constify.
+	(nan113): Constify.
+	(nan64): Constify.
+	(nan53): Constify.
+	(nan24): Constify.
+	* libc/stdlib/mprec.h (__get_hexdig): Define.
+	(gethex): Constify args in declaration where appropriate.
+	(hexnan): Ditto.
+	(hexdig_init): Remove declaration.
+	(__hexdig_fun): Declare.
+	* libc/stdlib/strtod.c (fpi): Constify.
+	(fpinan): Constify.
+
+2013-06-07  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/include/sys/cdefs.h (__has_extension): New define.
+	(__has_feature): Likewise.
+	(__has_include): Likewise.
+	(__has_builtin): Likewise.
+	* libc/include/stdatomic.h: New.
+
+2013-06-05  Joey Ye  <joey.ye@arm.com>
+
+	* libc/machine/arm/strcmp.S: Use local labels.
+
+2013-06-03  Joey Ye  <joey.ye@arm.com>
+
+	* libc/machine/arm/Makefile.am (MEMCPY_DEP): New define.
+	($(lpfx)memcpy.o, $(lpfx)memcpy.obj): Depend on MEMCPY_DEP.
+	* libc/machine/arm/Makefile.in: Regenerated.
+	* newlib/libc/machine/arm/memcpy-stub.c: Exclude armv7-m/armv7e-m.
+	* newlib/libc/machine/arm/memcpy-armv7m.S: New.
+	* newlib/libc/machine/arm/memcpy.S: Replace with wrapper code.  Old
+	code moved to ...
+	* newlib/libc/machine/arm/memcpy-armv7a.S: ... here.  Remove 
+	redundant architecture check.
+
+2013-05-30  Jeff Johnston  <jjohnstn@redhat.com>
+
+	* libc/machine/powerpc/times.c: Moved to libgloss/rs6000.
+	* libc/machine/powerpc/Makefile.am: Remove times.c.
+	* libc/machine/powerpc/Makefile.in: Regenerated.
+
+2013-05-29  Joey Ye  <joey.ye@arm.com>
+            Bin Cheng  <bin.cheng@arm.com>
+
+	* configure.in (--enable-newlib-nano-malloc): New option.
+	* configure: Regenerated.
+	* libc/configure.in (--enable-newlib-nano-malloc): New option.
+	* libc/configure: Regenerated.
+	* libc/stdlib/Makefile.am (NEWLIB_NANO_MALLOC): Use.
+	* libc/stdlib/Makefile.in: Regenerated.
+	* libc/stdlib/nano-mallocr.c: New file, implementing nano
+	version malloc family functions.
+
+2013-05-28  Richard Earnshaw  <rearnsha@arm.com>
+
+	* libc/machine/arm/strcpy.S: Explicitly set build attributes when
+	building for thumb1 targets.
+
+2013-05-22  Corinna Vinschen  <vinschen@redhat.com>
+
+	* libc/ctype/isalnum.c: Correct domain of definition to SUSv4 wording.
+	* libc/ctype/isalpha.c: Ditto.
+	* libc/ctype/isblank.c: Ditto.
+	* libc/ctype/iscntrl.c: Ditto.
+	* libc/ctype/isdigit.c: Ditto.
+	* libc/ctype/islower.c: Ditto.
+	* libc/ctype/isprint.c: Ditto.
+	* libc/ctype/ispunct.c: Ditto.
+	* libc/ctype/isxdigit.c: Ditto.
+
+2013-05-22  Corinna Vinschen  <vinschen@redhat.com>
+
+	* libc/include/sys/cdefs.h (_Static_assert): Accommodate gcc >= 4.6.
+
+2013-05-16  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/reent/reent.c (_wrapup_reent): Remove.
+
+2013-05-13  DJ Delorie  <dj@delorie.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* MAINTAINERS (msp430): Add.
+	* configure.host (msp430): Add.
+	* libc/include/machine/ieeefp.h: Add MSP430 support.
+	* libc/include/machine/setjmp.h: Likewise.
+	* libc/include/sys/config.h: Likewise.
+	* libc/machine/configure.in (msp430): Add.
+	* libc/machine/configure: Regenerate.
+	* libc/machine/msp430: New directory.
+
+2013-05-10  Freddie Chopin  <freddie_chopin@op.pl>
+
+	* configure.in: Fix help text for disable-newlib-atexit-dynamic-alloc option.
+	* configure: Regenerated.
+
+2013-05-07  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/include/sys/config.h (_REENT_GLOBAL_ATEXIT): Define for
+	RTEMS.
+	* libc/include/sys/reent.h (_reent): Use _REENT_GLOBAL_ATEXIT.
+	(_global_atexit): Declare if _REENT_GLOBAL_ATEXIT is defined.
+	* libc/reent/reent.c (_reclaim_reent): Remove atexit cleanup if
+	_REENT_GLOBAL_ATEXIT is defined.
+	(_wrapup_reent): Remove atexit handling if _REENT_GLOBAL_ATEXIT
+	is defined.
+	* libc/stdlib/__atexit.c (_global_atexit0): Define if
+	_REENT_GLOBAL_ATEXIT is defined.
+	* libc/stdlib/__call_atexit.c (_global_atexit): Define if
+	_REENT_GLOBAL_ATEXIT is defined.
+
+2013-05-07  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/include/sys/reent.h (_ATEXIT_INIT): Define.
+	(_ATEXIT_INIT_PTR): Likewise.
+	(_REENT_INIT_ATEXIT): Likewise.
+	(_REENT_INIT_ATEXIT_PTR): Likewise.
+	(_GLOBAL_ATEXIT): Likewise.
+	* libc/stdlib/__atexit.c (_GLOBAL_ATEXIT0): Define.
+	(__register_exitproc): Use _GLOBAL_ATEXIT and _GLOBAL_ATEXIT0.
+	* libc/stdlib/__call_atexit.c (__call_exitprocs): Likewise.
+
+2013-05-07  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/stdlib/__atexit.c (__atexit_lock): Declare.
+	* libc/stdlib/__call_atexit.c (__atexit_lock): Define.
+
+2013-05-06  Sandra Loosemore  <sandra@codesourcery.com>
+
+	* configure.host (machine_dir, sys_dir, syscall_dir, newlib_cflags):
+	Add settings for nios2*.
+	* libc/include/machine/ieeefp.h (IEEE_BIG_ENDIAN, IEEE_LITTLE_ENDIAN):
+	Likewise.
+	* libc/include/machine/setjmp.h (JBLEN, JBTYPE): Likewise.
+	* libc/machine/configure.in: Add nios2 subdir.
+	* libc/machine/configure: Regenerated.
+	* libc/machine/nios2/Makefile.am: New.
+	* libc/machine/nios2/Makefile.in: New (autogenerated).
+	* libc/machine/nios2/aclocal.m4: New (copied from mips version).
+	* libc/machine/nios2/configure.in: New.
+	* libc/machine/nios2/configure: New (autogenerated).
+	* libc/machine/nios2/setjmp.s: New.
+
+2013-04-29  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/stdio/local.h (CHECK_INIT): Evaluate argument only once.
+	(CHECK_STD_INIT): Likewise.
+	* libc/stdio/fgetc.c (fgetc): Use local variable for _REENT.
+	* libc/stdio/fgetwc.c (fwgetc): Likewise.
+	* libc/stdio/fgetws.c (fgetws): Likewise.
+	* libc/stdio/fputc.c (fputc): Likewise.
+	* libc/stdio/fputwc.c (fputwc): Likewise.
+	* libc/stdio/fputws.c (fputws): Likewise.
+	* libc/stdio/getc.c (getc): Likewise.
+	* libc/stdio/getchar.c (_getchar_r): Likewise.
+	* libc/stdio/putc.c (putc): Likewise.
+	* libc/stdio/putchar.c (putchar): Likewise.
+	* libc/stdio/scanf.c (scanf): Likewise.
+	* libc/stdio/setvbuf.c (setvbuf): Likewise.
+	* libc/stdio/ungetwc.c (ungetwc): Likewise.
+	* libc/stdio/vfscanf.c (VFSCANF): Likewise.
+	* libc/stdio/vfwscanf.c (VFWSCANF): Likewise.
+	* libc/stdio/viprintf.c (viprintf): Likewise.
+	* libc/stdio/viscanf.c (viscanf): Likewise.
+	* libc/stdio/vprintf.c (vprintf): Likewise.
+	* libc/stdio/vscanf.c (vscanf): Likewise.
+	* libc/stdio/vwprintf.c (vwprintf): Likewise.
+	* libc/stdio/vwscanf.c (vwscanf): Likewise.
+	* libc/stdio/wscanf.c (wscanf): Likewise.
+	* libc/stdlib/ecvtbuf.c (fcvtbuf): Likewise.
+	(fcvtbuf): Likewise.
+	(ecvtbuf): Likewise.
+	(ecvtbuf): Likewise.
+	* libc/stdlib/mblen.c (mblen): Likewise.
+	* libc/stdlib/mbrlen.c (mbrlen): Likewise.
+	* libc/stdlib/mbrtowc.c (mbrtowc): Likewise.
+	* libc/stdlib/mbtowc.c (mbtowc): Likewise.
+	* libc/stdlib/rand.c (srand): Likewise.
+	(rand): Likewise.
+	* libc/stdlib/wcrtomb.c (wcrtomb): Likewise.
+	* libc/stdlib/wctob.c (wctob): Likewise.
+	* libc/stdlib/wctomb.c (wctomb): Likewise.
+	* libc/string/strtok.c (strtok): Likewise.
+	* libc/time/asctime.c (asctime): Likewise.
+	* libc/time/gmtime.c (gmtime): Likewise.
+	* libc/time/lcltime.c (lcltime): Likewise.
+
+2013-04-29  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/include/sys/reent.h (_REENT_INIT_PTR): Reduce code size.
+
+2013-04-29  Freddie Chopin  <freddie_chopin@op.pl>
+
+	* libc/libc.texinfo: Fix @ references and change ifinfo to be
+	ifnottexinfo.
+	* libm/libm.texinfo: Ditto.
+
+2013-04-25  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/stdio/local.h (_STDIO_CLOSE_PER_REENT_STD_STREAMS): New define.
+	* libc/stdio/findfp.c (_STDIO_CLOSE_PER_REENT_STD_STREAMS): Use define.
+
+2013-04-24  Corinna Vinschen  <vinschen@redhat.com>
+	    Nick Clifton  <nickc@redhat.com>
+
+	* libc/stdlib/strtod.c: Manual update to latest algorithm from NetBSD.
+
+2013-04-23  Corinna Vinschen  <vinschen@redhat.com>
+
+	Port newlib to x86_64-pc-cygwin.
+	* libc/include/sys/features.h: Redefine compilation environment
+	definitions for Cygwin to cover 64 bit Cygwin.
+	* libc/ctype/ctype_.c (_ctype_): Fix definition for 64 bit Cygwin.
+	* libc/include/machine/setjmp.h: Change definition of _JBLEN to allow
+	different values for 32 bit and 64 bit Cygwin.
+	* libc/include/reent.h (stat64): Define as stat under Cygwin, instead
+	of as __stat64.  Undef stat64 if not building Newlib.
+	* libc/include/sys/stat.h (stat64): Define as stat under Cygwin.
+
+2013-04-22  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/include/sys/cdefs.h: Align with latest FreeBSD file header.
+	* libc/include/sys/features.h (__GNUC_PREREQ__): Define.
+
+2013-04-19  Corinna Vinschen  <vinschen@redhat.com>
+
+	* newlib/libc/search/hash.c: Revert patch from 2012-08-08.
+
+2013-04-16  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/sys/rtems/sys/queue.h: Delete file.
+	* libc/include/sys/cdefs.h (__containerof): New define.
+	(__DEQUALIFY): Likewise.
+	* libc/include/sys/queue.h (TRACEBUF_INITIALIZER): Likewise.
+	(TRACEBUF): Likewise.
+	(LIST_FOREACH_SAFE): Likewise.
+	(LIST_PREV): Likewise.
+	(LIST_SWAP): Likewise.
+	(QMD_LIST_CHECK_HEAD): Likewise.
+	(QMD_LIST_CHECK_NEXT): Likewise.
+	(QMD_LIST_CHECK_PREV): Likewise.
+	(QMD_SAVELINK): Likewise.
+	(QMD_TAILQ_CHECK_HEAD): Likewise.
+	(QMD_TAILQ_CHECK_NEXT): Likewise.
+	(QMD_TAILQ_CHECK_PREV): Likewise.
+	(QMD_TAILQ_CHECK_TAIL): Likewise.
+	(QMD_TRACE_ELEM): Likewise.
+	(QMD_TRACE_HEAD): Likewise.
+	(SLIST_FOREACH_PREVPTR): Likewise.
+	(SLIST_FOREACH_SAFE): Likewise.
+	(SLIST_REMOVE_AFTER): Likewise.
+	(SLIST_SWAP): Likewise.
+	(STAILQ_FOREACH_SAFE): Likewise.
+	(STAILQ_REMOVE_AFTER): Likewise.
+	(STAILQ_SWAP): Likewise.
+	(TAILQ_FOREACH_REVERSE_SAFE): Likewise.
+	(TAILQ_FOREACH_SAFE): Likewise.
+	(TAILQ_SWAP): Likewise.
+	(TRASHIT): Likewise.
+	(SLIST_REMOVE): Use SLIST_REMOVE_AFTER().
+	(STAILQ_LAST): Use __containerof().
+	(STAILQ_REMOVE): Use STAILQ_REMOVE_AFTER().
+
+2013-04-12  Will Newton  <will.newton@linaro.org>
+
+	* libc/machine/arm/memcpy-stub.c: Use generic memcpy if unaligned
+	access is not enabled.
+	* libc/machine/arm/memcpy.S: Faster memcpy implementation for
+	Cortex A15 cores using NEON and VFP if available.
+
+2013-04-12  Bin Cheng  <bin.cheng@arm.com>
+
+	* acconfig.h (_WCHAR_ORIENT): Undef
+	* newlib.hin (_WCHAR_ORIENT): Undef
+	* configure.in (--enable-newlib-wchar-orient): New option.
+	* configure: Regenerated.
+	* libc/configure.in (--enable-newlib-wchar-orient): New option.
+	* libc/configure: Regenerated.
+	* libc/stdio/Makefile.am (NEWLIB_WIDE_ORIENT): Use.
+	* libc/stdio/Makefile.in: Regenerated.
+	* libc/stdio/local.h (ORIENT): Use _WCHAR_ORIENT to control
+	the definition. Add alternative definition.
+	* libc/stdio/vfprintf.c (__sfputs_r, __sprint_r): Use _WCHAR_ORIENT
+	to control the wide char output.
+
+2012-04-11  Jon TURNEY  <jon.turney@dronecode.org.uk>
+
+	* libc/include/stdlib.h (strtof, strtoll, strtoull, strtold): Also
+	prototype if C++11 or later.
+
+2013-04-10  Bin Cheng  <bin.cheng@arm.com>
+
+	* acconfig.h (_FSEEK_OPTIMIZATION): Undef
+	* newlib.hin (_FSEEK_OPTIMIZATION): Undef
+	* configure.in (--disable-newlib-fseek-optimization): New option.
+	* configure: Regenerated.
+	* libc/stdio/fflush.c (__sflush_r): Use _FSEEK_OPTIMIZATION to
+	control fseek optimization.
+	* libc/stdio/fseeko.c (_fseeko_r): Ditto.
+	* libc/stdio/makebuf.c (__smakebuf_r): Ditto.
+	* libc/stdio64/fseeko64.c (_fseeko64_r): Ditto.
+
+2013-04-08  Matthew Gretton-Dann  <matthew.gretton-dann@linaro.org>
+
+	* libc/stdio/vfieeefp.h (ldieee): Fix typo.
+
+2013-04-02  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/posix/scandir.c (DIRSIZ): Use offsetof instead of magic
+	number.
+
+2013-03-27  Bin Cheng  <bin.cheng@arm.com>
+
+	* acconfig.h (_FVWRITE_IN_STREAMIO): Undefine.
+	* newlib.hin (_FVWRITE_IN_STREAMIO): Undefine.
+	* configure.in (--disable-newlib-fvwrite-in-streamio): New option.
+	* configure: Regenerated.
+	* libc/stdio/fputs.c (_fputs_r): Use _FVWRITE_IN_STREAMIO to
+	control __sfvwrite_r.  Add alternative implementation.
+	* libc/stdio/fputws.c (_fputws_r): Ditto.
+	* libc/stdio/fwrite.c (_fwrite_r): Ditto.
+	* libc/stdio/puts.c (_puts_r): Ditto.
+	* libc/stdio/vfprintf.c (__ssputs_r, __sfputs_r): New function.
+	(_VFPRINTF_R): Use _FVWRITE_IN_STREAMIO to control vector buffer.
+	(__SPRINT): Use _FVWRITE_IN_STREAMIO to control macro definition.
+	* libc/stdio/vfwprintf.c (_VFWPRINTF_R): Use _FVWRITE_IN_STREAMIO
+	to control vector buffer.
+
+2013-03-26  Sebastian Huber  <sebastian.huber@embedded-brains.de>
+
+	* libc/stdio/local.h (_STDIO_WITH_THREAD_CANCELLATION_SUPPORT):
+	New define.
+	* libc/stdio/fclose.c: Use
+	_STDIO_WITH_THREAD_CANCELLATION_SUPPORT.
+	* libc/stdio/freopen.c: Likewise.
+	* libc/stdio64/freopen64.c: Likewise.
+
+2013-03-15  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* newlib/libc/stdio/findfp.c (glue_with_file): New.
 	(__sfmoreglue): Use glue_with_file to avoid alignment problems.
@@ -205,7 +1344,7 @@
 	* libc/machine/arm/strcmp.S (compute_return_value): Fix return value.
 	* testsuite/newlib.string/strcmp-1.c (main): Add new test cases.
 
-2012-11-29  Sebastian Huber <sebastian.huber@embedded-brains.de>
+2012-11-29  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* libc/include/sys/reent.h (__sFILE): Change type of _offset
 	from int to _off_t.
@@ -216,7 +1355,7 @@
 	* libc/stdio/fseeko.c: Copy implementation from previous
 	_fseek_r().
 
-2012-11-26  Sebastian Huber <sebastian.huber@embedded-brains.de>
+2012-11-26  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* libc/include/inttypes.h: Add and use __INTTYPES_EXP().
 
@@ -680,7 +1819,7 @@
 
 	* libc/include/_ansi.h (_ELIDABLE_INLINE): Fix C99 mode.
 
-2012-02-09  Sebastian Huber <sebastian.huber@embedded-brains.de>
+2012-02-09  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* libc/sys/rtems/sys/utime.h: Include <sys/types.h> to provide a
 	definition of time_t.
@@ -912,7 +2051,7 @@
 	being given as negative.
 	(mktime): Set tm_isdst=0 when !daylight.
 
-2011-08-01  Sebastian Huber <sebastian.huber@embedded-brains.de>
+2011-08-01  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* libc/include/sys/types.h: XML and RTEMS define
 	_UNIX98_THREAD_MUTEX_ATTRIBUTES and can use the standard
@@ -2278,7 +3417,7 @@
 	* libc/stdio/vfprintf.c (_VFPRINTF_R): Just wave bytes invalid in
 	the current charset through.
 
-2010-01-11  Sebastian Huber <sebastian.huber@embedded-brains.de>
+2010-01-11  Sebastian Huber  <sebastian.huber@embedded-brains.de>
 
 	* libc/posix/telldir.c (_cleanupdir): Fixed usage of freed memory.
 

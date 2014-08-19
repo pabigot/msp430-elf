@@ -1,0 +1,24 @@
+TPF targets do not have a normal C library, so the target SSP library
+cannot be built.
+
+2011-06-02  Nick Clifton  <nickc@redhat.com>
+
+	* configure.ac: Do not build libssp for the s390x-ibm-tpf target.
+	* configure: Regenerate.
+
+Index: configure.ac
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/configure.ac,v
+retrieving revision 1.34
+diff -u -3 -p -r1.34 configure.ac
+--- configure.ac	2 Jun 2011 07:42:46 -0000	1.34
++++ configure.ac	3 Jun 2011 11:00:52 -0000
+@@ -606,7 +606,7 @@ case "${target}" in
+     ;;
+     # The tpf target doesn't support gdb yet.
+   *-*-tpf*)
+-    noconfigdirs="$noconfigdirs target-newlib target-libgloss target-libiberty ${libgcj} target-libmudflap gdb tcl tk libgui itcl"
++    noconfigdirs="$noconfigdirs target-newlib target-libgloss target-libiberty ${libgcj} target-libmudflap gdb tcl tk libgui itcl target-libssp"
+     ;;
+   *-*-uclinux*)
+     noconfigdirs="$noconfigdirs target-newlib target-libgloss target-rda ${libgcj}"

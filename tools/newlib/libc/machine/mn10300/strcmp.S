@@ -1,7 +1,6 @@
 	.file	"strcmp.S"
 
 	.section .text
-#if 0
 	.global _strcmp
 	.type	 _strcmp,@function
 _strcmp:
@@ -51,83 +50,6 @@ _strcmp:
 	sub d2,d0
 .Lepilogue:
 	ret [d2,d3,a2,a3],16
-#else
-	.global _strcmp
-	.type	 _strcmp,@function
-_strcmp:
-	movm	[d2,d3], (sp)
-.Lend_of_prologue:
-	mov	d0, a0
-	mov	d1, a1
-
-/*	Newlib for the MN10300 is compiled with -Os enabled all the time,
-	so normally the code below will not be triggered.  The test for
-	__LIW__ however enables us to build a speed optimized version when
-	building -mliw enabled multilibs.  -mliw allows long instruction
-	word generation which is faster but occupies more space.  LIW
-	instructions are not acutally used in the code below, but enabling
-	their generation implies that the user is more interested in code
-	performance than code size.  */
-#if ! defined __OPTIMIZE_SIZE__ || defined __LIW__
-	or	d1, d0
-	btst	3, d0
-	bne	.L11
-	mov	(a0), d1
-	mov	(a1), d0
-	cmp	d0, d1
-	bne	.L11
-	mov	-16843009, d3
-#ifdef __NO_SETLB__
-.Loop1:
-#else
-	setlb
-#endif
-	mov	(a0), d0
-	mov	d3, d1
-	add	d0, d1
-	not	d0
-	and	d0, d1
-	and	-2139062144, d1
-	beq	.L6
-	clr	d0
-	jmp	.Lepilogue
-.L6:
-	inc4	a0
-	inc4	a1
-	mov	(a0), d1
-	mov	(a1), d0
-	cmp	d0, d1
-#ifdef __NO_SETLB__
-	beq    .Loop1
-#else
-	leq
-#endif
-.L11:
-#endif /* Optimize for speed.  */
-
-#ifdef __NO_SETLB__
-.Loop2:
-#else
-	setlb
-#endif
-	movbu	(a1), d2
-	movbu	(a0), d0
-	cmp	0, d0
-	beq	.L9
-	cmp	d2, d0
-	bne	.L9
-	inc	a0
-	inc	a1
-#ifdef __NO_SETLB__
-	bra	.Loop2
-#else
-	lra
-#endif
-.L9:
-	sub	d2,d0
-.Lepilogue:
-	ret	[d2,d3], 8
-#endif
 .Lend_of_strcmp:
 	.size	 _strcmp, .Lend_of_strcmp - _strcmp
 

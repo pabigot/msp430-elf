@@ -1,7 +1,7 @@
 // { dg-do run  }
 // Test for proper handling of temporaries in ?: exprs.
 
-extern "C" int printf (const char *, ...);
+// extern "C" int printf (const char *, ...);
 int c = 0, d = 0;
 
 class A {
@@ -21,6 +21,6 @@ int main()
   {
     f (c ? A() : A());
   }
-  printf ("%d %d\n", c, d);
+  // printf ("%d %d\n", c, d);
   return c != d || c != 2;
 }

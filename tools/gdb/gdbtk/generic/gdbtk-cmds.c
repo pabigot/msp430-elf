@@ -45,6 +45,7 @@
 #include "regcache.h"
 #include "arch-utils.h"
 #include "psymtab.h"
+#include <ctype.h>
 
 /* tcl header files includes varargs.h unless HAS_STDARG is defined,
    but gdb uses stdarg.h, so make sure HAS_STDARG is defined.  */
@@ -86,10 +87,6 @@
          cygwin_conv_to_win32_path (from, to)
 #   define CW_SET_DOS_FILE_WARNING -1	/* no-op this for older Cygwin */
 # endif
-#endif
-
-#ifdef HAVE_CTYPE_H
-#include <ctype.h>		/* for isprint() */
 #endif
 
 #ifdef _WIN32
@@ -490,9 +487,6 @@ gdb_clear_file (ClientData clientData, Tcl_Interp *interp,
 	target_kill ();
     }
 
-  if (target_has_execution)
-    pop_target ();
-
   delete_command (NULL, 0);
   exec_file_clear (0);
   symbol_file_clear (0);
@@ -598,7 +592,7 @@ gdb_stop (ClientData clientData, Tcl_Interp *interp,
       if (target_ignore != (void (*) (void)) current_target.to_stop)
 	target_stop (gdbtk_get_ptid ());
       else
-	set_quit_flag ();	/* hope something sees this */
+	set_quit_flag ();		/* hope something sees this */
     }
 
   return TCL_OK;
@@ -1466,7 +1460,7 @@ gdb_search (ClientData clientData, Tcl_Interp *interp,
 
   search_symbols (regexp, space, nfiles, files, &ss);
   if (ss != NULL)
-    old_chain = make_cleanup_free_search_symbols (ss);
+    old_chain = make_cleanup_free_search_symbols (&ss);
 
   Tcl_SetListObj (result_ptr->obj_ptr, 0, NULL);
 
@@ -1482,16 +1476,16 @@ gdb_search (ClientData clientData, Tcl_Interp *interp,
       if ((p->symbol != NULL
 	   && strncmp (SYMBOL_LINKAGE_NAME (p->symbol), "__tf", 4) != 0
 	   && strncmp (SYMBOL_LINKAGE_NAME (p->symbol), "_GLOBAL_", 8) != 0)
-	  || p->msymbol != NULL)
+	  || p->msymbol.minsym != NULL)
 	{
 	  elem = Tcl_NewListObj (0, NULL);
 
-	  if (p->msymbol == NULL)
+	  if (p->msymbol.minsym == NULL)
 	    Tcl_ListObjAppendElement (interp, elem,
 				      Tcl_NewStringObj (SYMBOL_PRINT_NAME (p->symbol), -1));
 	  else
 	    Tcl_ListObjAppendElement (interp, elem,
-				      Tcl_NewStringObj (SYMBOL_PRINT_NAME (p->msymbol), -1));
+				      Tcl_NewStringObj (SYMBOL_PRINT_NAME (p->msymbol.minsym), -1));
 
 	  if (show_files)
 	    {
@@ -1530,11 +1524,10 @@ gdb_search (ClientData clientData, Tcl_Interp *interp,
 */
 
 static int
-gdb_listfuncs (clientData, interp, objc, objv)
-     ClientData clientData;
-     Tcl_Interp *interp;
-     int objc;
-     Tcl_Obj *CONST objv[];
+gdb_listfuncs (ClientData clientData,
+	       Tcl_Interp *interp,
+	       int objc,
+	       Tcl_Obj *CONST objv[])
 {
   struct symtab *symtab;
   struct blockvector *bv;
@@ -2998,7 +2991,7 @@ pc_function_name (CORE_ADDR pc)
       /* ... if that fails, look it up in the minimal symbols. */
       struct minimal_symbol *msym = NULL;
 
-      msym = lookup_minimal_symbol_by_pc (pc);
+      msym = lookup_minimal_symbol_by_pc (pc).minsym;
       if (msym != NULL)
 	funcname = GDBTK_SYMBOL_SOURCE_NAME (msym);
     }

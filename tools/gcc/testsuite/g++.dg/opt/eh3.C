@@ -31,3 +31,5 @@ int main()
   if (r != 1 + 2 + 3 + 4 + 5)
     abort ();
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

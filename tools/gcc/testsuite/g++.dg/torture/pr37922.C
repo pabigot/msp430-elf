@@ -1,5 +1,6 @@
 // { dg-do run }
 // { dg-options "-fpic" { target fpic } }
+// { dg-skip-if "non-power-of-two pointer size" { msp430-*-* } { "-mlarge" } { "" } }
 
 typedef __SIZE_TYPE__ size_t;
 

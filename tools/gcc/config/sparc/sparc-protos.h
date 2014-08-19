@@ -1,5 +1,5 @@
 /* Prototypes of target machine for SPARC.
-   Copyright (C) 1999-2013 Free Software Foundation, Inc.
+   Copyright (C) 1999-2014 Free Software Foundation, Inc.
    Contributed by Michael Tiemann (tiemann@cygnus.com).
    64-bit SPARC-V9 support by Michael Tiemann, Jim Wilson, and Doug Evans,
    at Cygnus Support.
@@ -69,7 +69,6 @@ extern bool sparc_expand_move (enum machine_mode, rtx *);
 extern void sparc_emit_set_symbolic_const64 (rtx, rtx, rtx);
 extern int sparc_splitdi_legitimate (rtx, rtx);
 extern int sparc_split_regreg_legitimate (rtx, rtx);
-extern int sparc_absnegfloat_split_legitimate (rtx, rtx);
 extern const char *output_ubranch (rtx, rtx);
 extern const char *output_cbranch (rtx, rtx, int, int, int, rtx);
 extern const char *output_return (rtx);
@@ -81,12 +80,14 @@ extern const char *output_probe_stack_range (rtx, rtx);
 extern const char *output_cbcond (rtx, rtx, rtx);
 extern bool emit_scc_insn (rtx []);
 extern void emit_conditional_branch_insn (rtx []);
+extern int registers_ok_for_ldd_peep (rtx, rtx);
 extern int mems_ok_for_ldd_peep (rtx, rtx, rtx);
+extern rtx widen_mem_for_ldd_peep (rtx, rtx, enum machine_mode);
 extern int empty_delay_slot (rtx);
 extern int emit_cbcond_nop (rtx);
+extern int eligible_for_call_delay (rtx);
 extern int eligible_for_return_delay (rtx);
 extern int eligible_for_sibcall_delay (rtx);
-extern int tls_call_delay (rtx);
 extern int emit_move_sequence (rtx, enum machine_mode);
 extern int fp_sethi_p (rtx);
 extern int fp_mov_p (rtx);
@@ -95,7 +96,6 @@ extern int mem_min_alignment (rtx, int);
 extern int pic_address_needs_scratch (rtx);
 extern int register_ok_for_ldd (rtx);
 extern int memory_ok_for_ldd (rtx);
-extern int registers_ok_for_ldd_peep (rtx, rtx);
 extern int v9_regcmp_p (enum rtx_code);
 /* Function used for V8+ code generation.  Returns 1 if the high
    32 bits of REG are 0 before INSN.  */   

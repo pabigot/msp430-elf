@@ -50,3 +50,4 @@ int main(void)
 {
   Class1 *class1 = new Class1((char*) "Hi!");
 }
+// { dg-require-effective-target size32plus }

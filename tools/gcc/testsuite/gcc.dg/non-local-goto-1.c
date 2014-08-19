@@ -1,6 +1,6 @@
 /* { dg-do run } */
-/* { dg-options "-O2" } */
 /* { dg-require-effective-target trampolines } */
+/* { dg-options "-O2" } */
 
 extern void abort (void);
 

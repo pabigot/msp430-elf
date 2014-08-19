@@ -1,6 +1,7 @@
-/moveable.cc/1.4/Sun Feb 24 19:23:03 2013//Tmsp430-130322-branch
+/moveable.cc/1.4/Thu Feb 20 13:47:15 2014//Tmsp430-14r1-branch
 D/emplace////
 D/erase////
+D/insert////
 D/push_back////
 D/push_front////
 D/swap////

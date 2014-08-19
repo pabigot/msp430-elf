@@ -47,7 +47,7 @@ int main ()
 	if (k.i != 610)
 	  { printf ("FAIL\n"); return 1; }
 	else
-	  printf ("PASS\n");
+	  ; // printf ("PASS\n");
 
 	return 0;
 }

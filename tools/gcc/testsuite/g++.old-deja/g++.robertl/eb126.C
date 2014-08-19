@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 #include <string.h>
 
 class SomeClass_t {

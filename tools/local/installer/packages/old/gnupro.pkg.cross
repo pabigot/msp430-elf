@@ -1,0 +1,336 @@
+#
+# Package file for Red Hat GES Releases
+#
+# This file contains information on all the packages installed for a
+# Red Hat GES release.  This file is host independent providing the
+# hosts are all using the same archive file format.  All the custom
+# procedures including the custom archive extraction routine are in
+# customproc.tcl in order to keep this file more tidy.
+#
+# The format of a package description is:
+#
+#    package Product_Package {
+#        title "Package Title"
+#        version $product_version
+#        category Product/Type
+#        installcmd redhat_install_package
+#        description {Package Description}
+#        icon $product_icon
+#        parameters {
+#            directory
+#            {Installation Directory}
+#            {Please select the installation directory prefix.  All files will be installed in a subdirectory named RELEASE.}
+#            installdir redhat_get_default_installdir
+#    
+#            form {} {} {files-PackageName}
+#            {-force {path/to/archive/file.zip}}
+#        }
+#
+# "Product" is typically "GNUPro"
+# "Package" is something like "Compiler" or "Debugger" or "Source"
+# "Type" is something like "Binaries", "Source" or "Docs"
+# 
+# The version and icon strings are stored in variables for easy modification
+#    
+# If there is something which is only appropriate for a particular platform,
+# use a test to keep the file host independent:
+#
+#        if {$tcl_platform(platform) == "windows"} {
+#            requires GNUPro_Winsup
+#        }
+#
+# NOTE: You can't use variables or conditionals in the "parameters" list.
+#
+
+# customprocs.tcl includes extraction routines
+source customprocs.tcl
+
+# commonly used variables
+set gnupro_version {RELEASE}
+# this avoids calling create_photo for every package
+set intro_icon [create_photo shadowman_icon.gif]
+set gnupro_icon [create_photo gnupro_icon.gif]
+set unsupported_icon [create_photo unsupported_icon.gif]
+
+# Package information
+package *intro {
+    title Introduction
+    category Overview
+    description {
+In the list on left, click on the name of a package to obtain a description of that package.
+For more information on Red Hat, check out http://www.redhat.com/
+For more information on Open Source, check out http://sources.redhat.com/
+This installer is powered by Tclish.
+For more information about Tclish http://tclish.sourceforge.org/}
+    icon $intro_icon
+}
+
+package GNUPro_Compiler {
+    title "Compilers (HOST-x-TARGET)"
+    version $gnupro_version
+    category GNUPro/Binaries
+    installcmd redhat_install_package
+    description {The compilers that produce assembly language code from the processed C and C++ files.  Also includes the assembler, linker and binary utilities such as objdump and objcopy.  This package includes HOST-x-TARGET compilers.}
+    icon $gnupro_icon
+    parameters {
+        directory
+        {Installation Directory}
+        {Please select the installation directory prefix.  All files will be installed in a subdirectory named RELEASE.}
+        installdir redhat_get_default_installdir
+
+        form {} {} {files-GNUPro_Compiler}
+	{-force {TARGET/gnupro/binaries/compiler.zip}}
+    }
+
+    if {$tcl_platform(platform) == "windows"} {
+        requires GNUPro_Winsup
+    }
+}
+
+package GNUPro_Debugger {
+    title "Debuggers"
+    version $gnupro_version
+    category GNUPro/Binaries
+    installcmd redhat_install_package
+    description {GNUPro provides effective, efficient debugging sessions with the standard command-line based debugger, gdb.  Also available is Red Hat Insight, a visual debugger with a graphical user interface supporting a range of host systems and target microprocessors.  This package includes HOST-x-TARGET debuggers.}
+    icon $gnupro_icon
+    parameters {
+        directory 
+        {Installation Directory} 
+        {Please select the installation directory prefix.  All files will be installed in a subdirectory named RELEASE.}
+        installdir redhat_get_default_installdir
+
+        form {} {} {files-GNUPro_Debugger}
+	{-force {TARGET/gnupro/binaries/debugger.zip}}
+    }
+
+    if {$tcl_platform(platform) == "windows"} {
+        requires GNUPro_Winsup
+    }
+}
+
+package GNUPro_DejaGNU {
+    title "DejaGNU test framework"
+    version $gnupro_version
+    category GNUPro/Binaries
+    installcmd redhat_install_package
+    description {DejaGNU is the regression testing framework used at Red Hat. It is based on Tcl and expect.}
+    icon $gnupro_icon
+    }
+    parameters {
+        directory 
+        {Installation Directory} 
+        {Please select the installation directory prefix.  All files will be installed in a subdirectory named RELEASE.}
+        installdir redhat_get_default_installdir
+
+        form {} {} {files-GNUPro_DejaGNU}
+	{-force {native/gnupro/binaries/dejagnu.zip}}
+    }
+    if {$tcl_platform(platform) == "windows"} {
+        requires GNUPro_Winsup
+}
+
+package GNUPro_Misc {
+    title "Miscellaneous support files"
+    version $gnupro_version
+    category GNUPro/Binaries
+    installcmd redhat_install_package
+    description {Includes Red Hat contact information as well as licensing files.}
+    icon $gnupro_icon
+    parameters {
+        directory 
+        {Installation Directory} 
+        {Please select the installation directory prefix.  All files will be installed in a subdirectory named RELEASE.}
+        installdir redhat_get_default_installdir
+
+        form {} {} {files-GNUPro_Misc}
+	{-force {native/gnupro/binaries/misc.zip}}
+    }
+}
+
+package GNUPro_Utils {
+    title "Utilities for rebuilding from source"
+    version $gnupro_version
+    category GNUPro/Binaries
+    installcmd redhat_install_package
+    description {Additional utilities needed to rebuild the GNUPro Toolkit from source.}
+    icon $gnupro_icon
+    parameters {
+        directory 
+        {Installation Directory} 
+        {Please select the installation directory prefix.  All files will be installed in a subdirectory named RELEASE.}
+        installdir redhat_get_default_installdir
+
+        form {} {} {files-GNUPro_Utils}
+	{-force {native/gnupro/binaries/utils.zip}}
+    }
+
+    if {$tcl_platform(platform) == "windows"} {
+        requires GNUPro_Winsup
+    }
+}
+
+package GNUPro_InfoFiles {
+    title {Info Documentation}
+    version $gnupro_version
+    category GNUPro/Docs
+    installcmd redhat_install_package
+    description {Info files for some of the tools provided.}
+    icon $gnupro_icon
+    parameters {
+        directory 
+        {Installation Directory} 
+        {Please select the installation directory prefix.  All files will be installed in a subdirectory named RELEASE/info.}
+        installdir redhat_get_default_installdir
+
+        form {} {} {files-GNUPro_InfoFiles}
+	{-force {shared/gnupro/docs/infofiles.zip}}
+    }
+}
+
+package GNUPro_ManPages {
+    title {Man Documentation}
+    version $gnupro_version
+    category GNUPro/Docs
+    installcmd redhat_install_package
+    description {Info files for some of the tools provided.}
+    icon $gnupro_icon
+    parameters {
+        directory 
+        {Installation Directory} 
+        {Please select the installation directory prefix.  All files will be installed in a subdirectory named RELEASE/man.}
+        installdir redhat_get_default_installdir
+
+        form {} {} {files-GNUPro_ManPages}
+	{-force {shared/gnupro/docs/manpages.zip}}
+    }
+}
+
+package GNUPro_PDFFiles {
+    title {GNUPro PDF Documentation}
+    version $gnupro_version
+    category GNUPro/Docs
+    installcmd redhat_install_package
+    description {PDF version of the GNUPro Getting Started Guide.  410KB.}
+    icon $gnupro_icon
+    parameters {
+        directory 
+        {Installation Directory} 
+        {Please select the installation directory prefix.  All files will be installed in a subdirectory named RELEASE/pdf.}
+        installdir redhat_get_default_installdir
+
+        form {} {} {files-GNUPro_PDFFiles}
+	{-force {shared/gnupro/docs/pdffiles.zip}}
+    }
+}
+
+package GNUPro_Sources {
+    title Sources
+    version $gnupro_version
+    category GNUPro/Sources
+    installcmd redhat_install_package
+    description {Sources for the GNUPro compiler tools. Want to make changes?  Here's the source!}
+    icon $gnupro_icon
+    parameters {
+        directory 
+        {Installation Directory} 
+        {Please select the installation directory prefix.  All files will be installed in a subdirectory named RELEASE/src.}
+        installdir redhat_get_default_installdir
+
+        form {} {} {files-GNUPro_Sources}
+	{-force {shared/gnupro/source/src.zip}}
+    }
+}
+
+# Following are Windows only packages including the magic Windows PATH
+# addition package.
+
+if {$tcl_platform(platform) == "windows"} {
+  package Windows_PATH {
+      title {Update Windows PATH}
+      version $gnupro_version
+      category Windows/Setup
+      installcmd redhat_set_PATH
+      description {Set the PATH environment variable on Windows. (Will require a reboot before taking effect.)}
+      icon $gnupro_icon
+      parameters {
+          directory 
+          {Installation Directory}
+          {Please select the installation directory prefix.  All files will be installed in a subdirectory named RELEASE.}
+          installdir redhat_get_default_installdir
+
+	  form {} {} {setpath} {-force {yes}}
+    }
+  }
+
+  package GNUPro_Winsup {
+      title Winsup
+      version $gnupro_version
+      category GNUPro/Binaries
+      installcmd redhat_install_package
+      description {Cygwin DLL and support tools required for all Cygwin-based programs.}
+      icon $gnupro_icon
+      parameters {
+          directory 
+          {Installation Directory}
+          {Please select the installation directory prefix.  All files will be installed in a subdirectory named RELEASE.}
+          installdir redhat_get_default_installdir
+
+          form {} {} {files-GNUPro_Winsup}
+	  {-force {native/gnupro/binaries/winsup.zip}}
+      }
+  }
+
+# Cypress CY16
+#  package USB_Drivers {
+#      title {USB Drivers}
+#      version {RELEASE}
+#      category Unsupported
+#      installcmd redhat_install_package
+#      description {Unsupported USB drivers.}
+#      icon $unsupported_icon
+#      parameters {
+#          directory 
+#          {Installation Directory}
+#          {Please select the installation directory prefix.  All files will be installed in a subdirectory named RELEASE/unsup.}
+#          installdir redhat_get_default_installdir
+#
+#          form {} {} {files-USB_Drivers}
+#	  {-force {native/gnupro/binaries/unsup.zip}}
+#      }
+#  }
+
+} else {
+  # UNIX only packages
+#  package GNUPro_FixIncludes {
+#      title {Run fixincludes}
+#      version $gnupro_version
+#      category UNIX/FixIncludes
+#      installcmd redhat_fixincludes
+#      description {Run fixincludes after installing compiler.}
+#      icon $gnupro_icon
+#      parameters {
+#          directory 
+#          {Installation Directory}
+#          {Please select the installation directory prefix.  All files will be installed in a subdirectory named RELEASE.}
+#          installdir redhat_get_default_installdir
+#    }
+#  }
+#}
+
+# Installation Types (typical and full)
+installoption typical "Typical Installation.\nInstall binaries and documentation only."
+installoption_add typical GNUPro/Binaries GNUPro_Compiler
+installoption_add typical GNUPro/Binaries GNUPro_Debugger
+installoption_add typical GNUPro/Binaries GNUPro_DejaGNU
+installoption_add typical GNUPro/Binaries GNUPro_Misc
+installoption_add typical GNUPro/Binaries GNUPro_Utils
+installoption_add typical GNUPro/Docs GNUPro_InfoFiles
+installoption_add typical GNUPro/Docs GNUPro_PDFFiles
+if {$tcl_platform(platform) == "windows"} {
+   installoption_add typical GNUPro/Binaries GNUPro_Winsup
+   installoption_add typical Windows/Setup Windows_PATH
+}
+
+installoption full "Full Installation.\nInstall all packages and sources."
+

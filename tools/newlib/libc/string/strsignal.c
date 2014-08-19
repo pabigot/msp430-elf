@@ -50,7 +50,7 @@ QUICKREF
  *  OR WARRANTY OF ANY KIND CONCERNING THE MERCHANTABILITY OF THIS
  *  SOFTWARE OR ITS FITNESS FOR ANY PARTICULAR PURPOSE.
  *
- *  $Id: strsignal.c,v 1.33 2013/03/17 22:15:09 nickc Exp $
+ *  $Id: strsignal.c,v 1.4 2014/02/20 13:50:15 nickc Exp $
  */
 
 #include <string.h>

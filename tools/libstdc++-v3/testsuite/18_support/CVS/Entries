@@ -1,7 +1,10 @@
-/50594.cc/1.3/Sun Feb 24 19:20:59 2013//Tmsp430-130322-branch
-/cxa_vec.cc/1.2/Sun Feb 24 19:20:59 2013//Tmsp430-130322-branch
-/new_delete_placement.cc/1.6/Sun Feb 24 19:21:00 2013//Tmsp430-130322-branch
-/pthread_guard.cc/1.5/Sun Feb 24 19:21:00 2013//Tmsp430-130322-branch
+/50594.cc/1.3/Thu Feb 20 13:46:57 2014//Tmsp430-14r1-branch
+/cxa_vec.cc/1.2/Thu Feb 20 13:46:57 2014//Tmsp430-14r1-branch
+/new_delete_placement.cc/1.7/Thu Feb 20 13:46:57 2014//Tmsp430-14r1-branch
+/new_handler.cc/1.1/Thu Feb 20 16:43:29 2014//Tmsp430-14r1-branch
+/pthread_guard.cc/1.5/Thu Feb 20 13:46:57 2014//Tmsp430-14r1-branch
+/terminate_handler.cc/1.1/Thu Feb 20 16:43:29 2014//Tmsp430-14r1-branch
+/unexpected_handler.cc/1.1/Thu Feb 20 16:43:29 2014//Tmsp430-14r1-branch
 D/bad_alloc////
 D/bad_cast////
 D/bad_exception////
@@ -10,6 +13,7 @@ D/exception////
 D/exception_ptr////
 D/headers////
 D/initializer_list////
+D/max_align_t////
 D/nested_exception////
 D/numeric_limits////
 D/quick_exit////

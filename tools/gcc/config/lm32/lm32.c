@@ -1,7 +1,7 @@
 /* Subroutines used for code generation on the Lattice Mico32 architecture.
    Contributed by Jon Beniston <jon@beniston.com>
 
-   Copyright (C) 2009-2013 Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    This file is part of GCC.
 
@@ -35,6 +35,7 @@
 #include "recog.h"
 #include "output.h"
 #include "tree.h"
+#include "calls.h"
 #include "expr.h"
 #include "flags.h"
 #include "reload.h"
@@ -81,25 +82,24 @@ static rtx lm32_function_arg (cumulative_args_t cum,
 static void lm32_function_arg_advance (cumulative_args_t cum,
 				       enum machine_mode mode,
 				       const_tree type, bool named);
-static bool lm32_legitimate_constant_p (enum machine_mode, rtx);
 
-#undef  TARGET_OPTION_OVERRIDE
+#undef TARGET_OPTION_OVERRIDE
 #define TARGET_OPTION_OVERRIDE lm32_option_override
-#undef  TARGET_ADDRESS_COST
+#undef TARGET_ADDRESS_COST
 #define TARGET_ADDRESS_COST hook_int_rtx_mode_as_bool_0
-#undef  TARGET_RTX_COSTS
+#undef TARGET_RTX_COSTS
 #define TARGET_RTX_COSTS lm32_rtx_costs
-#undef  TARGET_IN_SMALL_DATA_P
+#undef TARGET_IN_SMALL_DATA_P
 #define TARGET_IN_SMALL_DATA_P lm32_in_small_data_p
-#undef  TARGET_PROMOTE_FUNCTION_MODE
+#undef TARGET_PROMOTE_FUNCTION_MODE
 #define TARGET_PROMOTE_FUNCTION_MODE default_promote_function_mode_always_promote
-#undef  TARGET_SETUP_INCOMING_VARARGS
+#undef TARGET_SETUP_INCOMING_VARARGS
 #define TARGET_SETUP_INCOMING_VARARGS lm32_setup_incoming_varargs
-#undef  TARGET_FUNCTION_ARG
+#undef TARGET_FUNCTION_ARG
 #define TARGET_FUNCTION_ARG lm32_function_arg
-#undef  TARGET_FUNCTION_ARG_ADVANCE
+#undef TARGET_FUNCTION_ARG_ADVANCE
 #define TARGET_FUNCTION_ARG_ADVANCE lm32_function_arg_advance
-#undef  TARGET_PROMOTE_PROTOTYPES
+#undef TARGET_PROMOTE_PROTOTYPES
 #define TARGET_PROMOTE_PROTOTYPES hook_bool_const_tree_true
 #undef TARGET_MIN_ANCHOR_OFFSET
 #define TARGET_MIN_ANCHOR_OFFSET -0x8000
@@ -109,17 +109,6 @@ static bool lm32_legitimate_constant_p (enum machine_mode, rtx);
 #define TARGET_CAN_ELIMINATE lm32_can_eliminate
 #undef TARGET_LEGITIMATE_ADDRESS_P
 #define TARGET_LEGITIMATE_ADDRESS_P lm32_legitimate_address_p
-#undef TARGET_LEGITIMATE_CONSTANT_P
-#define TARGET_LEGITIMATE_CONSTANT_P lm32_legitimate_constant_p
-
-static enum unwind_info_type
-lm32_debug_unwind_info (void)
-{
-  return UI_NONE;
-}
-
-#undef  TARGET_DEBUG_UNWIND_INFO
-#define TARGET_DEBUG_UNWIND_INFO	lm32_debug_unwind_info
 
 struct gcc_target targetm = TARGET_INITIALIZER;
 
@@ -415,9 +404,7 @@ lm32_expand_prologue (void)
 void
 lm32_expand_epilogue (void)
 {
-#if 0
   rtx ra_rtx = gen_rtx_REG (Pmode, RA_REGNUM);
-#endif
 
   lm32_compute_frame_size (get_frame_size ());
 
@@ -434,12 +421,12 @@ lm32_expand_epilogue (void)
       stack_adjust (current_frame_info.total_size);
 
       /* Return to calling function.  */
-      emit_jump_insn (gen_return ());
+      emit_jump_insn (gen_return_internal (ra_rtx));
     }
   else
     {
       /* Return to calling function.  */
-      emit_jump_insn (gen_return ());
+      emit_jump_insn (gen_return_internal (ra_rtx));
     }
 }
 
@@ -653,7 +640,7 @@ static void
 lm32_function_arg_advance (cumulative_args_t cum, enum machine_mode mode,
 			   const_tree type, bool named ATTRIBUTE_UNUSED)
 {
-  * get_cumulative_args (cum) += LM32_NUM_REGS2 (mode, type);
+  *get_cumulative_args (cum) += LM32_NUM_REGS2 (mode, type);
 }
 
 HOST_WIDE_INT
@@ -689,7 +676,7 @@ static void
 lm32_setup_incoming_varargs (cumulative_args_t cum_v, enum machine_mode mode,
 			     tree type, int *pretend_size, int no_rtl)
 {
-  CUMULATIVE_ARGS * cum = get_cumulative_args (cum_v);
+  CUMULATIVE_ARGS *cum = get_cumulative_args (cum_v);
   int first_anon_arg;
   tree fntype;
 
@@ -1223,10 +1210,8 @@ lm32_legitimate_address_p (enum machine_mode mode ATTRIBUTE_UNUSED, rtx x, bool 
      && satisfies_constraint_K (XEXP ((x), 1)))
     return true;
               
-  /* gp(sym)  */
-  if (GET_CODE (x) == SYMBOL_REF)
-    SYMBOL_REF_FLAGS (x) |= SYMBOL_FLAG_SMALL;
-  if (GET_CODE (x) == SYMBOL_REF && SYMBOL_REF_SMALL_P (x))
+  /* gp(sym)  */   
+  if (GET_CODE (x) == SYMBOL_REF && SYMBOL_REF_SMALL_P (x)) 
     return true;
     
   return false;                                
@@ -1235,21 +1220,8 @@ lm32_legitimate_address_p (enum machine_mode mode ATTRIBUTE_UNUSED, rtx x, bool 
 /* Check a move is not memory to memory.  */ 
 
 bool 
-lm32_move_ok (enum machine_mode mode, rtx operands[2])
-{
+lm32_move_ok (enum machine_mode mode, rtx operands[2]) {
   if (memory_operand (operands[0], mode))
     return register_or_zero_operand (operands[1], mode);
-  return true;
-}
-
-/* Implement TARGET_LEGITIMATE_CONSTANT_P.  */
-
-static bool
-lm32_legitimate_constant_p (enum machine_mode mode, rtx x)
-{
-  /* 32-bit addresses require multiple instructions.  */  
-  if (!flag_pic && reloc_operand (x, mode))
-    return false; 
-  
   return true;
 }

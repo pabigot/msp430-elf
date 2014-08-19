@@ -205,7 +205,6 @@ if [istarget sh*-*-elf] then {
     close $outfile
 }
 
-# The expect expression that follows is too complex for the version of ex[ect shipped with Fedora 14.
 return
 
 #########################################################################
@@ -227,9 +226,7 @@ set insncount 0
 # Pull all the insns out of the sh-opc.h file.
 send_log "Reading sh-opc.h\n"
 send_log "========================================================\n"
-
 spawn -noecho cat "$srcdir/../../opcodes/sh-opc.h"   ;# -open doesn't seem to be reliable
-
 expect {
     -re {#define\s+arch_([^ ]*)_up\s*\(([^)]*)\)} {
 	set arches($archcount) [string map {_ -} $expect_out(1,string)]
@@ -317,7 +314,6 @@ expect {
     # No match so move to next (possible) comment
     -re {^.+?((?=/\*)|(?=\#\s*define))} exp_continue
 }
-
 send_log "--------------------------------------------------------\n"
 
 if {$archcount == 0} then {

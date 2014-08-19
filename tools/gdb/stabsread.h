@@ -1,6 +1,5 @@
 /* Include file for stabs debugging format support functions.
-   Copyright (C) 1986-1997, 1999-2003, 2007-2012 Free Software
-   Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -161,7 +160,8 @@ struct stab_section_list
 /* Functions exported by dbxread.c.  These are not in stabsread.c because
    they are only used by some stabs readers.  */
 
-extern struct partial_symtab *end_psymtab (struct partial_symtab *pst,
+extern struct partial_symtab *end_psymtab (struct objfile *objfile,
+					   struct partial_symtab *pst,
 					   const char **include_list,
 					   int num_includes,
 					   int capping_symbol_offset,
@@ -172,7 +172,8 @@ extern struct partial_symtab *end_psymtab (struct partial_symtab *pst,
 					   int textlow_not_set);
 
 extern void process_one_symbol (int, int, CORE_ADDR, char *,
-				struct section_offsets *, struct objfile *);
+				const struct section_offsets *,
+				struct objfile *);
 
 extern void elfstab_build_psymtabs (struct objfile *objfile,
 				    asection *stabsect,

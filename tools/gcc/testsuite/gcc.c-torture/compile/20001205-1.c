@@ -2,7 +2,7 @@
 
 static inline unsigned long rdfpcr(void)
 {
-        unsigned long tmp, ret;
+        unsigned int tmp, ret;
         __asm__ ("" : "=r"(tmp), "=r"(ret));
         return ret;
 }

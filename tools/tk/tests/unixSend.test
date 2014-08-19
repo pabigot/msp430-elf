@@ -7,7 +7,7 @@
 # Copyright (c) 1998-1999 by Scriptics Corporation.
 # All rights reserved.
 #
-# RCS: @(#) $Id: unixSend.test,v 1.3 2003/03/19 23:02:09 cagney Exp $
+# RCS: @(#) $Id: unixSend.test,v 1.3 2012/04/18 00:37:07 kevinb Exp $
 
 if {[lsearch [namespace children] ::tcltest] == -1} {
     source [file join [pwd] [file dirname [info script]] defs.tcl]

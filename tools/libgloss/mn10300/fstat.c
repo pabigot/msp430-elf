@@ -3,7 +3,6 @@
 #include <sys/stat.h>
 #include "trap.h"
 
-int fstat (int, struct stat *) __attribute__ ((weak, alias ("_fstat")));
 
 int
 _fstat (int file,

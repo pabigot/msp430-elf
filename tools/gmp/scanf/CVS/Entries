@@ -1,12 +1,12 @@
-/Makefile.am/1.2/Wed Apr 14 09:40:51 2010//Tmsp430-130322-branch
-/Makefile.in/1.3/Wed Apr 14 09:40:51 2010//Tmsp430-130322-branch
-/doscan.c/1.2/Wed Apr 14 09:40:51 2010//Tmsp430-130322-branch
-/fscanf.c/1.2/Wed Apr 14 09:40:51 2010//Tmsp430-130322-branch
-/fscanffuns.c/1.2/Wed Apr 14 09:40:51 2010//Tmsp430-130322-branch
-/scanf.c/1.2/Wed Apr 14 09:40:51 2010//Tmsp430-130322-branch
-/sscanf.c/1.2/Wed Apr 14 09:40:51 2010//Tmsp430-130322-branch
-/sscanffuns.c/1.2/Wed Apr 14 09:40:51 2010//Tmsp430-130322-branch
-/vfscanf.c/1.2/Wed Apr 14 09:40:51 2010//Tmsp430-130322-branch
-/vscanf.c/1.2/Wed Apr 14 09:40:51 2010//Tmsp430-130322-branch
-/vsscanf.c/1.2/Wed Apr 14 09:40:51 2010//Tmsp430-130322-branch
+/Makefile.am/1.2/Wed Apr 14 09:01:51 2010//Tmsp430-14r1-branch
+/Makefile.in/1.2/Wed Apr 14 09:01:51 2010//Tmsp430-14r1-branch
+/doscan.c/1.2/Wed Apr 14 09:01:51 2010//Tmsp430-14r1-branch
+/fscanf.c/1.2/Wed Apr 14 09:01:51 2010//Tmsp430-14r1-branch
+/fscanffuns.c/1.2/Wed Apr 14 09:01:51 2010//Tmsp430-14r1-branch
+/scanf.c/1.2/Wed Apr 14 09:01:51 2010//Tmsp430-14r1-branch
+/sscanf.c/1.2/Wed Apr 14 09:01:51 2010//Tmsp430-14r1-branch
+/sscanffuns.c/1.2/Wed Apr 14 09:01:51 2010//Tmsp430-14r1-branch
+/vfscanf.c/1.2/Wed Apr 14 09:01:51 2010//Tmsp430-14r1-branch
+/vscanf.c/1.2/Wed Apr 14 09:01:51 2010//Tmsp430-14r1-branch
+/vsscanf.c/1.2/Wed Apr 14 09:01:51 2010//Tmsp430-14r1-branch
 D

@@ -93,16 +93,3 @@ test_c0\@:
 	test_h_gr r1, \lo
 	.endm
 
-	.macro mvi_h_accum1 hi, lo
-	mvi_h_gr r0, \hi
-	mvtachi r0, a1
-	mvi_h_gr r0, \lo
-	mvtaclo r0, a1
-	.endm
-
-	.macro test_h_accum1 hi, lo
-	mvfachi r1, a1
-	test_h_gr r1, \hi
-	mvfaclo r1, a1
-	test_h_gr r1, \lo
-	.endm

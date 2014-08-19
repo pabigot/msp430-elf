@@ -42,7 +42,6 @@ main ()
 
   temp.begin = malloc (100 * sizeof (unsigned int));
   temp.count = malloc (100 * sizeof (unsigned int));
-
   if (temp.begin == NULL || temp.count == NULL)
     return 0;
 

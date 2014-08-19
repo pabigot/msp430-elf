@@ -1,6 +1,6 @@
 /* This file defines the interface between the simulator and gdb.
 
-   Copyright 1993-2013 Free Software Foundation, Inc.
+   Copyright 1993-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -57,10 +57,6 @@ typedef enum {
 typedef enum {
   SIM_RC_FAIL = 0,
   SIM_RC_OK = 1
-  ,
-  SIM_RC_UNKNOWN_BREAKPOINT = 2,
-  SIM_RC_INSUFFICIENT_RESOURCES = 3,
-  SIM_RC_DUPLICATE_BREAKPOINT = 4
 } SIM_RC;
 
 
@@ -282,50 +278,8 @@ void sim_do_command (SIM_DESC sd, char *cmd);
 /* Complete a command based on the available sim commands.  Returns an
    array of possible matches.  */
 
-char **sim_complete_command (SIM_DESC sd, char *text, char *word);
+char **sim_complete_command (SIM_DESC sd, const char *text, const char *word);
 
-/* Call these functions to set and clear breakpoints at ADDR.  */
-
-SIM_RC sim_set_breakpoint          (SIM_DESC, SIM_ADDR);
-SIM_RC sim_clear_breakpoint        (SIM_DESC, SIM_ADDR);
-SIM_RC sim_clear_all_breakpoints   (SIM_DESC);
-
-/* These functions are used to enable and disable breakpoints.  */
-
-SIM_RC sim_enable_breakpoint       (SIM_DESC, SIM_ADDR);
-SIM_RC sim_disable_breakpoint      (SIM_DESC, SIM_ADDR);
-SIM_RC sim_enable_all_breakpoints  (SIM_DESC);
-SIM_RC sim_disable_all_breakpoints (SIM_DESC);
-
-#ifdef SIM_TARGET_SWITCHES
-/* Parse the command line, extracting any target specific switches
-   before the generic simulator code gets a chance to complain
-   about them.  Returns the adjusted value of argc.  */
-int sim_target_parse_command_line (int, char **);
-
-/* Display a list of target specific switches supported by this
-   target.  */
-void sim_target_display_usage (int);
-#endif
-typedef enum
-{
-  SIM_WATCH_INSERT,
-  SIM_WATCH_DELETE,
-  SIM_WATCH_QUERY
-} SIM_WATCH_ACTION;
-
-typedef enum
-{
-  SIM_WATCH_READ,
-  SIM_WATCH_WRITE,
-  SIM_WATCH_READ_WRITE,
-  SIM_WATCH_EXEC
-} SIM_WATCH_TYPE;
-
-/* Set, remove, or query a "hardware" watchpoint or breakpoint in the
-   simulator.  */
-SIM_RC sim_hardware_watchpoint
-  (SIM_DESC, SIM_WATCH_ACTION, SIM_WATCH_TYPE, SIM_ADDR, long);
 #ifdef __cplusplus
 }
 #endif

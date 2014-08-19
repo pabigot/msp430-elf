@@ -71,31 +71,17 @@ default_newlib_io_long_long=no
 default_newlib_io_long_double=no
 default_newlib_io_pos_args=no
 default_newlib_atexit_dynamic_alloc=yes
+default_newlib_nano_malloc=no
 aext=a
 oext=o
 lpfx="lib_a-"
-
-NEWLIB_CFLAGS="-g -O2"
 
 case "${target_optspace}:${host}" in
   yes:*)
     newlib_cflags="${newlib_cflags} -Os"
     ;;
-  :m32r-* | :d10v-* | :d30v-* | :avr-* | :m32c-*)
+  :m32r-* | :d10v-* | :d30v-* | :avr-* | :m32c-* | :msp430*-* | :nds32* | :rl78-* )
     newlib_cflags="${newlib_cflags} -Os"
-    ;;
-  :msp430-*)
-    newlib_cflags="${newlib_cflags} -Os"
-    # Note - defining newlib_cflags does not work.  It can only *add* switches
-    # to the gcc command line.  Configure will automatically place CFLAGS as the
-    # *last* set of compiler options on the command line, and the default CFLAGS
-    # contains -O2.
-    # Setting CFLAGS also does not work as configure constructs its own version
-    # of this variable.
-    # Instead we define NEWLIB_CFLAGS and then fix the Makefile.am files in the
-    # various subdirectories to place this variable as the last one on the
-    # command line.
-    NEWLIB_CFLAGS="-g -Os"
     ;;
   no:* | :*)
     ;;
@@ -218,7 +204,7 @@ case "${host_cpu}" in
 	;;
   mcore)
 	;;
-  microblaze)
+  microblaze*)
 	machine_dir=microblaze
 	;;
   mep)
@@ -244,9 +230,19 @@ case "${host_cpu}" in
 	newlib_cflags="${newlib_cflags} -ffunction-sections -fdata-sections "
 	newlib_cflags="${newlib_cflags} -mOs "
 	machine_dir=msp430
+	default_newlib_nano_malloc="yes"
 	;;
   mt*)
 	machine_dir=mt
+	;;
+  nds32*)
+	machine_dir=nds32
+	newlib_cflags="${newlib_cflags} -DPREFER_SIZE_OVER_SPEED "
+	newlib_cflags="${newlib_cflags} -DSMALL_MEMORY "
+	newlib_cflags="${newlib_cflags} -ffunction-sections -fdata-sections"
+	;;
+  nios2*)
+	machine_dir=nios2
 	;;
   or16)
 	;;
@@ -258,6 +254,7 @@ case "${host_cpu}" in
   rl78)
 	machine_dir=rl78
 	newlib_cflags="${newlib_cflags} -DPREFER_SIZE_OVER_SPEED -DSMALL_MEMORY"
+	newlib_cflags="${newlib_cflags} -ffunction-sections -fdata-sections "
 	;;
   rx)
 	machine_dir=rx
@@ -296,8 +293,8 @@ case "${host_cpu}" in
 	machine_dir=x86_64
 	;;
   xc16x*)
-    machine_dir=xc16x
-    ;;
+        machine_dir=xc16x
+        ;;
   xstormy16)
 	machine_dir=xstormy16
 	newlib_cflags="${newlib_cflags} -DMALLOC_PROVIDED"
@@ -464,6 +461,7 @@ case "${host}" in
 	newlib_cflags="${newlib_cflags} -D_I386MACH_ALLOW_HW_INTERRUPTS"
 	newlib_cflags="${newlib_cflags} -DHAVE_FCNTL"
 	newlib_cflags="${newlib_cflags} -DHAVE_GETOPT"
+	newlib_cflags="${newlib_cflags} -D_NO_POSIX_SPAWN"
 	# --- Required when building a shared library ------------------------
 	newlib_cflags="${newlib_cflags} -fPIC -D_I386MACH_NEED_SOTYPE_FUNCTION"
 	# --- The three lines below are optional ------------------------------
@@ -485,7 +483,7 @@ case "${host}" in
 	default_newlib_io_long_long="yes"
 	newlib_cflags="${newlib_cflags} -DMISSING_SYSCALL_NAMES"
 	;;
-  microblaze-*-*)
+  microblaze*-*-*)
 	machine_dir=microblaze
 	;;
   mips*-dec-*)
@@ -497,6 +495,9 @@ case "${host}" in
   moxie*)
         sys_dir=
         ;;
+  nios2*)
+	sys_dir=
+	;;
   powerpcle-*-pe)
 	posix_dir=posix
 	;;
@@ -571,7 +572,7 @@ case "${host}" in
 	newlib_cflags="${newlib_cflags} -D_COMPILING_NEWLIB"
 	newlib_cflags="${newlib_cflags} -DMALLOC_PROVIDED -DEXIT_PROVIDED -DSIGNAL_PROVIDED -DREENTRANT_SYSCALLS_PROVIDED -DHAVE_NANOSLEEP -DHAVE_BLKSIZE -DHAVE_FCNTL -DHAVE_ASSERT_FUNC"
         # turn off unsupported items in posix directory 
-	newlib_cflags="${newlib_cflags} -D_NO_GETLOGIN -D_NO_GETPWENT -D_NO_GETUT -D_NO_GETPASS -D_NO_SIGSET -D_NO_WORDEXP -D_NO_POPEN"
+	newlib_cflags="${newlib_cflags} -D_NO_GETLOGIN -D_NO_GETPWENT -D_NO_GETUT -D_NO_GETPASS -D_NO_SIGSET -D_NO_WORDEXP -D_NO_POPEN -D_NO_POSIX_SPAWN"
 	;;
 # VxWorks supplies its own version of malloc, and the newlib one
 # doesn't work because VxWorks does not have sbrk.
@@ -699,7 +700,7 @@ case "${host}" in
   mcore-*-*)
 	syscall_dir=syscalls
 	;;
-  microblaze-*-*)
+  microblaze*-*-*)
    	default_newlib_io_long_long="yes"
  	newlib_cflags="${newlib_cflags} -DMISSING_SYSCALL_NAMES -DSMALL_MEMORY -D_REENT_SMALL"
 	;;
@@ -724,6 +725,13 @@ case "${host}" in
         syscall_dir=syscalls
 	default_newlib_io_long_long="yes"
         ;;
+  nios2*)
+	syscall_dir=
+	newlib_cflags="${newlib_cflags} -DHAVE_RENAME -DHAVE_SYSTEM -DMISSING_SYSCALL_NAMES"
+	;;
+  nds32*)
+	syscall_dir=syscalls
+	;;
   powerpc*-*-eabialtivec*)
 	default_newlib_io_long_long="yes"
 	newlib_cflags="${newlib_cflags} -DMISSING_SYSCALL_NAMES"
@@ -742,7 +750,7 @@ case "${host}" in
 	newlib_cflags="${newlib_cflags} -mrelocatable-lib -mno-eabi -mstrict-align -DMISSING_SYSCALL_NAMES"
 	;;
   powerpcle-*-pe)
-	newlib_cflags="${newlib_cflags} -DHAVE_OPENDIR -DHAVE_RENAME -DHAVE_FCNTL"
+	newlib_cflags="${newlib_cflags} -DHAVE_OPENDIR -DHAVE_RENAME -DHAVE_FCNTL -D_NO_POSIX_SPAWN"
 	syscall_dir=syscalls
 	;;
   sh*-*-*)
@@ -829,6 +837,13 @@ if [ "x${newlib_atexit_dynamic_alloc}" = "x" ]; then
 	fi
 fi
 
+# Enable nano-malloc if requested.
+if [ "x${newlib_nano_malloc}" = "x" ]; then
+	if [ ${default_newlib_nano_malloc} = "yes" ]; then
+		newlib_nano_malloc="yes";
+	fi
+fi
+
 # Remove rpc headers if xdr_dir not specified
 if [ "x${xdr_dir}" = "x" ]; then
 	noinclude="${noinclude} rpc/types.h rpc/xdr.h"
@@ -837,6 +852,3 @@ fi
 if test -z "${have_crt0}" && test -n "${sys_dir}"; then
   have_crt0="yes"
 fi
-# Local Variables:
-# mode: autoconf
-# End:

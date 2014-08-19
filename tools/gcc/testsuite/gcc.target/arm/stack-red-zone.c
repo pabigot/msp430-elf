@@ -1,5 +1,6 @@
 /* No stack red zone.  PR38644.  */
 /* { dg-options "-mthumb -O2" } */
+/* { dg-skip-if "" { ! { arm_thumb1_ok || arm_thumb2_ok } } } */
 /* { dg-final { scan-assembler "ldrb\[^\n\]*\\n\[\t \]*add\[\t \]*sp" } } */
 
 extern int doStreamReadBlock (int *, char *, int size, int);

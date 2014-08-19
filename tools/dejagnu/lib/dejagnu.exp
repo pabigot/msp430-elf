@@ -1,4 +1,25 @@
-# a hairy pattern to recognize text
+# Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
+# 2001, 2002, 2003 Free Software Foundation, Inc.
+#
+# This file is part of DejaGnu.
+#
+# DejaGnu is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# DejaGnu is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with DejaGnu; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+
+# This file was written by Rob Savoye <rob@welcomehome.org>.
+
+# A hairy pattern to recognize text.
 set text "\[- A-Za-z0-9\.\;\"\_\:\'\`\(\)\!\#\=\+\?\&\*]"
 
 set SIZE size
@@ -6,7 +27,7 @@ if { [which $SIZE] == 0 } {
     perror "Can't find $SIZE."
 }
 
-# Get the size of the various section in an object file
+# Get the size of the various section in OBJECT.
 proc exe_size {object} {
     global SIZE
 
@@ -21,7 +42,7 @@ proc exe_size {object} {
 	perror "Need GNU size from the binutils" 0
 	return [list "-1" "Need GNU size."]
     }
-    
+
     # Get the object size. We pass -x, to force hex output
     verbose "Getting the object file size for $object" 2
     set status [catch "exec $SIZE -x $object" output]
@@ -43,11 +64,12 @@ proc exe_size {object} {
     return [list $text $data]
 }
 
-# Run the host's native compiler, not the cross one. Filter out the 
+# Run the host's native compiler, not the cross one. Filter out the
 # warnings and other extraneous stuff.
 #    Returns:
 #	A "" (empty) string if everything worked, or the
 #       output if there was a problem.
+#
 proc host_compile {compline} {
     global INCLUDES
     global LIBS
@@ -55,32 +77,33 @@ proc host_compile {compline} {
 
     # execute the compiler
     verbose "Compiling for the host using: $CC $INCLUDES $LIBS $compline" 2
-    set status [catch "exec $CC $INCLUDES $LIBS $compline" comp_output];
+    set status [catch "exec $CC $INCLUDES $LIBS $compline" comp_output]
     verbose "Compiler returned $comp_output" 2
-    
+
     # prune common warnings and other stuff we can safely ignore
-    set comp_output [prune_warnings $comp_output];
+    set comp_output [prune_warnings $comp_output]
 
     # Trim multiple CR/LF pairs out to keep things consistant
-    regsub "^\[\r\n\]+" $comp_output "" comp_output;
+    regsub "^\[\r\n\]+" $comp_output "" comp_output
 
     # if we got a compiler error, log it
     if { [lindex $status 0] != 0 } {
-	verbose -log "compiler exited with status [lindex $status 0]";
+	verbose -log "compiler exited with status [lindex $status 0]"
     }
     if { [lindex $status 1] != "" } {
-	verbose -log "output is:\n[lindex $status 1]" 2;
+	verbose -log "output is:\n[lindex $status 1]" 2
     }
 
     # return the filtered output
     return ${comp_output}
 }
 
-# Execute the executable file, and anaylyse the output for the 
+# Execute the executable file, and anaylyse the output for the
 # test state keywords.
 #    Returns:
 #	A "" (empty) string if everything worked, or an error message
 #	if there was a problem.
+#
 proc host_execute {args} {
     global text
 
@@ -89,9 +112,9 @@ proc host_execute {args} {
     set file all
     set timetol 0
     set arguments ""
-    
+
     expect_before buffer_full { perror "Buffer full" }
-    
+
     if { [llength $args] == 0} {
 	set executable $args
     } else {
@@ -101,7 +124,7 @@ proc host_execute {args} {
     }
 
     verbose "The executable is $executable" 2
-    if ![file exists ${executable}] {
+    if {![file exists ${executable}]} {
 	perror "The executable, \"$executable\" is missing" 0
 	return "No source file found"
     }
@@ -156,9 +179,9 @@ proc host_execute {args} {
 	    verbose "All done" 2
 	}
 	eof {
-#	    unresolved "${executable} died prematurely"
-#	    catch close
-#	    return "${executable} died prematurely"
+	    #	    unresolved "${executable} died prematurely"
+	    #	    catch close
+	    #	    return "${executable} died prematurely"
 	}
 	timeout {
 	    warning "Timed out executing test case"
@@ -166,7 +189,7 @@ proc host_execute {args} {
 		incr timetol
 		exp_continue
 	    } else {
--		catch close
+		-		catch close
 		return "Timed out executing test case"
 	    }
 	}

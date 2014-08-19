@@ -6,7 +6,7 @@
 // { dg-do run }
 // { dg-options "" }
 
-extern "C" int printf (char const *, ...);
+// extern "C" int printf (char const *, ...);
 extern "C" void abort ();
 
 static unsigned order[] = 
@@ -25,7 +25,7 @@ static unsigned point;
 
 static void Check (unsigned t, unsigned i, void const *ptr, char const *name)
 {
-  printf ("%d %d %p %s\n", t, i, ptr, name);
+  // printf ("%d %d %p %s\n", t, i, ptr, name);
   
   if (order[point++] != i + t)
     abort ();
@@ -51,3 +51,5 @@ int main ()
   ({A<14> a; a; });
   Check (0, 0, 0, "end");
 }
+
+// { dg-require-effective-target size32plus }

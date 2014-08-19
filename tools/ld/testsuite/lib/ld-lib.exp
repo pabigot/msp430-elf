@@ -1,5 +1,5 @@
 # Support routines for LD testsuite.
-#   Copyright 1949-2013 Free Software Foundation, Inc.
+#   Copyright 1994-2013 Free Software Foundation, Inc.
 #
 # This file is part of the GNU Binutils.
 #
@@ -179,6 +179,7 @@ proc default_ld_link { ld target objects } {
     global HOSTING_CRT0
     global HOSTING_SCRT0
     global HOSTING_LIBS
+    global HOSTING_SLIBS
     global LIBS
     global host_triplet
     global link_output
@@ -186,10 +187,11 @@ proc default_ld_link { ld target objects } {
 
     if { [ string match "* -pie *" $objects ] } {
 	set objs "$HOSTING_SCRT0 $objects"
+	set libs "$LIBS $HOSTING_SLIBS"
     } else {
 	set objs "$HOSTING_CRT0 $objects"
+	set libs "$LIBS $HOSTING_LIBS"
     }
-    set libs "$LIBS $HOSTING_LIBS"
 
     if [is_endian_output_format $objects] then {
 	set flags [big_or_little_endian]
@@ -229,6 +231,16 @@ proc default_ld_simple_link { ld target objects } {
     set ldexe [string replace $ldexe 0 [string last "/" $ldexe] ""]
     if {[string match "*gcc*" $ldexe] || [string match "*++*" $ldexe]} then {
 	set ldflags "$gcc_ld_flag $ldflags"
+
+	if [board_info [target_info name] exists ldflags] {
+	    append flags " [board_info [target_info name] ldflags]"
+	}
+	if [board_info [target_info name] exists cflags] {
+	    append flags " [board_info [target_info name] cflags]"
+	}
+	if [board_info [target_info name] exists multilib_flags] {
+	    append flags " [board_info [target_info name] multilib_flags]"
+	}
     }
 
     remote_file host delete $target
@@ -293,6 +305,10 @@ proc default_ld_compile { cc source object } {
 	set flags "$flags $CFLAGS"
     }
 
+    if [board_info [target_info name] exists cflags] {
+        append flags " [board_info [target_info name] cflags]"
+    }
+
     if [board_info [target_info name] exists multilib_flags] {
 	append flags " [board_info [target_info name] multilib_flags]"
     }
@@ -331,10 +347,12 @@ proc default_ld_compile { cc source object } {
 proc default_ld_assemble { as in_flags source object } {
     global ASFLAGS
     global host_triplet
+    global srcdir
+    global subdir
 
     if ![info exists ASFLAGS] { set ASFLAGS "" }
 
-    set flags [big_or_little_endian]
+    set flags "[big_or_little_endian] -I$srcdir/$subdir"
     set exec_output [run_host_cmd "$as" "$flags $in_flags $ASFLAGS -o $object $source"]
     set exec_output [prune_warnings $exec_output]
     if [string match "" $exec_output] then {
@@ -398,42 +416,46 @@ proc default_ld_nm { nm nmflags object } {
 
 # Define various symbols needed when not linking against all
 # target libs.
-proc ld_simple_link_defsyms {} {
+proc ld_simple_link_defsyms { { def_cmd {}} } {
 
-    set flags "--defsym __stack_chk_fail=0"
+    if { $def_cmd == "" } {
+	set def_cmd "--defsym "
+    }
+    
+    set flags "${def_cmd}__stack_chk_fail=0"
 
     # ARM targets call __gccmain
     if {[istarget arm*-*-*]} {
-        append flags " --defsym __gccmain=0"
+        append flags " ${def_cmd}__gccmain=0"
     }
 
     # Windows targets need __main, prefixed with underscore.
     if {[istarget *-*-cygwin* ] || [istarget *-*-mingw*]} {
-        append flags " --defsym ___main=0"
+        append flags " ${def_cmd}___main=0"
     }
 
     # PowerPC EABI code calls __eabi.
     if {[istarget powerpc*-*-eabi*] || [istarget powerpc*-*-rtems*]} {
-	append flags " --defsym __eabi=0"
+	append flags " ${def_cmd}__eabi=0"
     }
 
     # mn10200 code calls __truncsipsi2_d0_d2.
     if {[istarget mn10200*-*-*]} then {
-	append flags " --defsym __truncsipsi2_d0_d2=0"
+	append flags " ${def_cmd}__truncsipsi2_d0_d2=0"
     }
 
     # m6811/m6812 code has references to soft registers.
     if {[istarget m6811-*-*] || [istarget m6812-*-*] || [istarget m68hc1*-*-*]} {
-	append flags " --defsym _.frame=0 --defsym _.d1=0 --defsym _.d2=0"
-	append flags " --defsym _.d3=0 --defsym _.d4=0"
-	append flags " --defsym _.tmp=0 --defsym _.xy=0 --defsym _.z=0"
+	append flags " ${def_cmd}_.frame=0 ${def_cmd}_.d1=0 ${def_cmd}_.d2=0"
+	append flags " ${def_cmd}_.d3=0 ${def_cmd}_.d4=0"
+	append flags " ${def_cmd}_.tmp=0 ${def_cmd}_.xy=0 ${def_cmd}_.z=0"
     }
 
     # Some OpenBSD targets have ProPolice and reference __guard and
     # __stack_smash_handler.
     if [istarget *-*-openbsd*] {
-	append flags " --defsym __guard=0"
-	append flags " --defsym __stack_smash_handler=0"
+	append flags " ${def_cmd}__guard=0"
+	append flags " ${def_cmd}__stack_smash_handler=0"
     }
 
     return $flags
@@ -1424,7 +1446,7 @@ proc run_cc_link_tests { ldtests } {
 	    if { $warnings != "" } then {
 		verbose -log "returned with: <$exec_output>, expected: <$warnings>"
 		if { [regexp $warnings $exec_output] } then {
-		    set failed 2
+		    set failed 0
 		} else {
 		    set failed 1
 		}
@@ -1516,24 +1538,25 @@ proc check_gc_sections_available { } {
     if {![info exists gc_sections_available_saved]} {
 	# Some targets don't support gc-sections despite whatever's
 	# advertised by ld's options.
-	if {[istarget arc-*-*]
-	     || [istarget d30v-*-*]
-	     || [istarget dlx-*-*]
-	     || [istarget i960-*-*]
-	     || [istarget or32-*-*]
-	     || [istarget pj*-*-*]
-	     || [istarget alpha-*-*]
-	     || [istarget hppa*64-*-*]
-	     || [istarget i370-*-*]
-	     || [istarget i860-*-*]
-	     || [istarget ia64-*-*]
-	     || [istarget mep-*-*]
-	     || [istarget mn10200-*-*]
-	     || [istarget *-*-cygwin]
-	     || [istarget *-*-mingw*] } {
+	if {   [istarget arc-*-*]
+	    || [istarget d30v-*-*]
+	    || [istarget dlx-*-*]
+	    || [istarget i960-*-*]
+	    || [istarget or32-*-*]
+	    || [istarget pj*-*-*]
+	    || [istarget alpha-*-*]
+	    || [istarget hppa*64-*-*]
+	    || [istarget i370-*-*]
+	    || [istarget i860-*-*]
+	    || [istarget ia64-*-*]
+	    || [istarget mep-*-*]
+	    || [istarget mn10200-*-*]
+	    || [istarget *-*-cygwin]
+	    || [istarget *-*-mingw*] } {
 	    set gc_sections_available_saved 0
 	    return 0
 	}
+
 	if [is_pecoff_format] then  {
 	    set gc_sections_available_saved 0
 	    return 0
@@ -1581,12 +1604,27 @@ proc check_gc_sections_available { } {
 # Only used and accurate for ELF targets at the moment
 
 proc check_shared_lib_support { } {
+    if {   [istarget alpha-*-netbsd]
+	|| [istarget bfin-*-*]
+	|| [istarget hppa-linux-gnu]
+	|| [istarget ia64-*-elf]
+	|| [istarget mips*-*-elf]
+	|| [istarget mn10300-*-elf]
+	|| [istarget am3*-*-*]
+	|| [istarget s390-*-linux]
+	|| [istarget sh*-*-elf]
+	|| [istarget tile*-*-*]
+        || [istarget vax-*-netbsdelf]
+    } {
+	return 0
+    }
+
     if {![istarget aarch64*-*-elf]
 	 && ![istarget arc-*-*]
 	 && ![istarget arm*-*-elf]
 	 && ![istarget avr-*-*]
 	 && ![istarget cr16-*-*]
-	 && ![istarget cris*-*-*]
+	 && ![istarget cris*-*-elf]
 	 && ![istarget crx-*-*]
 	 && ![istarget d10v-*-*]
 	 && ![istarget d30v-*-*]
@@ -1608,13 +1646,16 @@ proc check_shared_lib_support { } {
 	 && ![istarget mcore*-*-*]
 	 && ![istarget mep-*-*]
 	 && ![istarget microblaze-*-*]
+	 && ![istarget mips*-*-elf]
 	 && ![istarget mn10200-*-*]
 	 && ![istarget moxie-*-*]
 	 && ![istarget msp430-*-*]
 	 && ![istarget mt-*-*]
+	 && ![istarget nds32*-*-*]
 	 && ![istarget openrisc-*-*]
 	 && ![istarget or32-*-*]
 	 && ![istarget pj-*-*]
+	 && ![istarget rl78-*-*]
 	 && ![istarget rx-*-*]
 	 && ![istarget spu-*-*]
 	 && ![istarget v850*-*-*]
@@ -1651,6 +1692,17 @@ proc check_plugin_api_available { } {
 proc check_lto_available { } {
     global lto_available_saved
     global CC
+
+    set flags ""
+
+    if [board_info [target_info name] exists cflags] {
+        append flags " [board_info [target_info name] cflags]"
+    }
+
+    if [board_info [target_info name] exists ldflags] {
+        append flags " [board_info [target_info name] ldflags]"
+    }
+
     if {![info exists lto_available_saved]} {
 	# Check if gcc supports -flto -fuse-linker-plugin
 	if { [which $CC] == 0 } {
@@ -1659,11 +1711,11 @@ proc check_lto_available { } {
 	}
 	set basename "lto"
 	set src ${basename}[pid].c
-	set output ${basename}[pid].so
+	set output ${basename}[pid].out
 	set f [open $src "w"]
-	puts $f ""
+	puts $f "int main() { return 0; }"
 	close $f
-	set status [remote_exec host $CC "-shared -B[pwd]/tmpdir/ld/ -flto -fuse-linker-plugin $src -o $output"]
+	set status [remote_exec host $CC "$flags -B[pwd]/tmpdir/ld/ -flto -ffat-lto-objects -fuse-linker-plugin $src -o $output"]
 	if { [lindex $status 0] == 0 } {
 	    set lto_available_saved 1
 	} else {
@@ -1673,6 +1725,45 @@ proc check_lto_available { } {
 	file delete $output
     }
     return $lto_available_saved
+}
+
+# Returns true if the target compiler supports LTO and -shared
+proc check_lto_shared_available { } {
+    global lto_shared_available_saved
+    global CC
+
+    set flags ""
+
+    if [board_info [target_info name] exists cflags] {
+        append flags " [board_info [target_info name] cflags]"
+    }
+
+    if [board_info [target_info name] exists ldflags] {
+        append flags " [board_info [target_info name] ldflags]"
+    }
+
+    if {![info exists lto_shared_available_saved]} {
+	# Check if gcc supports -flto -fuse-linker-plugin -shared
+	if { [which $CC] == 0 } {
+	    set lto_shared_available_saved 0
+	    return 0
+	}
+	set basename "lto_shared"
+	set src ${basename}[pid].c
+	set output ${basename}[pid].so
+	set f [open $src "w"]
+	puts $f ""
+	close $f
+	set status [remote_exec host $CC "$flags -shared -fPIC -B[pwd]/tmpdir/ld/ -flto -fuse-linker-plugin $src -o $output"]
+	if { [lindex $status 0] == 0 } {
+	    set lto_shared_available_saved 1
+	} else {
+	    set lto_shared_available_saved 0
+	}
+	file delete $src
+	file delete $output
+    }
+    return $lto_shared_available_saved
 }
 
 # Check if the assembler supports CFI statements.

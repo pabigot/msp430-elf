@@ -1,7 +1,7 @@
 /* Wrong method to get number of arg reg will cause argument corruption.  */
 /* { dg-do run } */
 /* { dg-require-effective-target arm_eabi } */
-/* { dg-options "-mthumb -O1" } */
+/* { dg-options "-O1" } */
 
 extern void abort (void);
 

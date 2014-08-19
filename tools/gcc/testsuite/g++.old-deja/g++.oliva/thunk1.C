@@ -34,3 +34,4 @@ struct derived: virtual mid {
 int main () {
   derived(1);
 }
+// { dg-require-effective-target size32plus }

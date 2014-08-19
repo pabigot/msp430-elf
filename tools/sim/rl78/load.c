@@ -1,6 +1,6 @@
 /* load.c --- loading object files into the RL78 simulator.
 
-   Copyright (C) 2005-2013 Free Software Foundation, Inc.
+   Copyright (C) 2005-2014 Free Software Foundation, Inc.
    Contributed by Red Hat, Inc.
 
    This file is part of the GNU simulators.
@@ -89,7 +89,7 @@ rl78_load (bfd *prog, host_callback *callbacks, const char * const simname)
       fprintf (stderr, "%s: Failed to read program headers\n", simname);
       return;
     }
-
+  
   for (i = 0; i < num_headers; i++)
     {
       Elf_Internal_Phdr * p = phdrs + i;

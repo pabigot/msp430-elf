@@ -1,13 +1,13 @@
-/README/1.1/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/add_n.asm/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/addmul_1.asm/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/arm-defs.m4/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/copyd.asm/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/copyi.asm/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/gmp-mparam.h/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/invert_limb.asm/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/mul_1.asm/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/sub_n.asm/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/submul_1.asm/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
-/udiv.asm/1.2/Wed Apr 14 09:40:40 2010//Tmsp430-130322-branch
+/README/1.1/Wed Apr 14 09:00:31 2010//Tmsp430-14r1-branch
+/add_n.asm/1.2/Wed Apr 14 09:00:31 2010//Tmsp430-14r1-branch
+/addmul_1.asm/1.2/Wed Apr 14 09:00:31 2010//Tmsp430-14r1-branch
+/arm-defs.m4/1.2/Wed Apr 14 09:00:31 2010//Tmsp430-14r1-branch
+/copyd.asm/1.2/Wed Apr 14 09:00:31 2010//Tmsp430-14r1-branch
+/copyi.asm/1.2/Wed Apr 14 09:00:31 2010//Tmsp430-14r1-branch
+/gmp-mparam.h/1.2/Wed Apr 14 09:00:31 2010//Tmsp430-14r1-branch
+/invert_limb.asm/1.2/Wed Apr 14 09:00:31 2010//Tmsp430-14r1-branch
+/mul_1.asm/1.2/Wed Apr 14 09:00:31 2010//Tmsp430-14r1-branch
+/sub_n.asm/1.2/Wed Apr 14 09:00:32 2010//Tmsp430-14r1-branch
+/submul_1.asm/1.2/Wed Apr 14 09:00:32 2010//Tmsp430-14r1-branch
+/udiv.asm/1.2/Wed Apr 14 09:00:32 2010//Tmsp430-14r1-branch
 D

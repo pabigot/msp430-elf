@@ -1,3 +1,22 @@
+# Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002, 2003 Free Software
+# Foundation, Inc.
+#
+# This file is part of DejaGnu.
+#
+# DejaGnu is free software; you can redistribute it and/or modify it
+# under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# DejaGnu is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with DejaGnu; if not, write to the Free Software Foundation,
+# Inc., 51 Franklin Street - Fifth Floor, Boston, MA 02110-1301, USA.
+
 # Load the tool-specific configuration for this board, as well as the
 # generic configuration. This will define any routines needed by the
 # tool to communicate with the board.
@@ -7,12 +26,12 @@ load_generic_config "i386-bozo"
 process_multilib_options ""
 
 # Default to COFF.
-set add_flags "";
+set add_flags ""
 if { [board_info $board obj_format] == "a.out" } {
     set_board_info support_libs "${prefix_dir}/i386-aout/"
-    set_board_info gdb_load_offset "0x41000000";
-    set_board_info gdb_sect_offset "0x41000000";
-    set add_flags "-N ";
+    set_board_info gdb_load_offset "0x41000000"
+    set_board_info gdb_sect_offset "0x41000000"
+    set add_flags "-N "
 } elseif { [board_info $board obj_format] == "elf" } {
     set_board_info support_libs "${prefix_dir}/i386-elf/"
 } else {
@@ -32,7 +51,7 @@ set_board_info ldscript "-Tbozo.ld"
 # The GDB protocol used with this board.
 set_board_info gdb_protocol "remote"
 # It's running a GDB stub in ROM.
-set_board_info use_gdb_stub 1;
+set_board_info use_gdb_stub 1
 
 # There's no support for argument-passing.
 set_board_info noargs 1
@@ -48,4 +67,4 @@ set_board_info gcc,stack_size 16384
 set_board_info needs_status_wrapper 1
 
 # This is the start symbol in crt0.o.
-set_board_info gdb,start_symbol "_start";
+set_board_info gdb,start_symbol "_start"

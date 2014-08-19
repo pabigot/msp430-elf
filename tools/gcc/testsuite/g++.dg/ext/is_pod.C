@@ -1,5 +1,4 @@
-// { dg-do run }
-// { dg-options "-std=c++0x" }
+// { dg-do run { target c++11 } }
 #include <cassert>
 
 struct A
@@ -74,3 +73,4 @@ int main()
 
   return 0;
 }
+// { dg-require-effective-target size32plus }

@@ -12,7 +12,6 @@
 * XStormy16 Opcodes::              Pseudo-Opcodes
 @end menu
 
-
 @node XStormy16 Syntax
 @section Syntax
 @menu

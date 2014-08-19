@@ -1,21 +1,21 @@
 /* Simulator tracing/debugging support.
-   Copyright (C) 1997-2013 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
-   This file is part of GDB, the GNU debugger.
+This file is part of GDB, the GNU debugger.
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 #include "sim-main.h"
 #include "sim-io.h"
@@ -725,7 +725,6 @@ trace_prefix (SIM_DESC sd,
   else
     {
       char buf[256];
-
       buf[0] = 0;
       if (STATE_TEXT_SECTION (CPU_STATE (cpu))
 	  && pc >= STATE_TEXT_START (CPU_STATE (cpu))
@@ -765,7 +764,6 @@ trace_prefix (SIM_DESC sd,
 				     &pc_filename, &pc_function, &pc_linenum))
 	    {
 	      char *p = buf;
-
 	      if (pc_linenum)
 		{
 		  sprintf (p, "#%-*d ", SIZE_LINE_NUMBER, pc_linenum);
@@ -777,10 +775,6 @@ trace_prefix (SIM_DESC sd,
 		  p += SIZE_LINE_NUMBER+2;
 		}
 
-	      /* Sanity check.  Bogus debug information can lead
-		 to corrupt function name pointers.  */
-	      if (pc_function < (char *) 0x1000)
-		pc_function = NULL;
 	      if (pc_function)
 		{
 		  sprintf (p, "%s ", pc_function);
@@ -836,9 +830,6 @@ trace_generic (SIM_DESC sd,
   va_start (ap, fmt);
   trace_vprintf (sd, cpu, fmt, ap);
   va_end (ap);
-  /* An example of how to add register tracing for sims that do not support it.
-     This version works for the MN10300.  */
-  /* trace_printf (sd, cpu, "\td0 = %x sp = %x ", State.regs[0], State.regs[REG_SP]); */
   trace_printf (sd, cpu, "\n");
 }
 
@@ -1309,7 +1300,7 @@ trace_one_insn (SIM_DESC sd, sim_cpu *cpu, address_word pc,
 }
 
 void
-trace_printf VPARAMS ((SIM_DESC sd, sim_cpu *cpu, const char *fmt, ...))
+trace_printf (SIM_DESC sd, sim_cpu *cpu, const char *fmt, ...)
 {
 #if !defined __STDC__ && !defined ALMOST_STDC
   SIM_DESC sd;
@@ -1318,7 +1309,7 @@ trace_printf VPARAMS ((SIM_DESC sd, sim_cpu *cpu, const char *fmt, ...))
 #endif
   va_list ap;
 
-  VA_START (ap, fmt);
+  va_start (ap, fmt);
 #if !defined __STDC__ && !defined ALMOST_STDC
   sd = va_arg (ap, SIM_DESC);
   cpu = va_arg (ap, sim_cpu *);
@@ -1331,7 +1322,7 @@ trace_printf VPARAMS ((SIM_DESC sd, sim_cpu *cpu, const char *fmt, ...))
 }
 
 void
-debug_printf VPARAMS ((sim_cpu *cpu, const char *fmt, ...))
+debug_printf (sim_cpu *cpu, const char *fmt, ...)
 {
 #if !defined __STDC__ && !defined ALMOST_STDC
   sim_cpu *cpu;
@@ -1339,7 +1330,7 @@ debug_printf VPARAMS ((sim_cpu *cpu, const char *fmt, ...))
 #endif
   va_list ap;
 
-  VA_START (ap, fmt);
+  va_start (ap, fmt);
 #if !defined __STDC__ && !defined ALMOST_STDC
   cpu = va_arg (ap, sim_cpu *);
   fmt = va_arg (ap, const char *);

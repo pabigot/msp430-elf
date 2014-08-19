@@ -38,8 +38,6 @@ LIB_COMPILE = $(COMPILE)
 noinst_DATA =
 endif # USE_LIBTOOL
 
-LIB_COMPILE += $(NEWLIB_CFLAGS)
-
 include $(srcdir)/../../Makefile.shared
 
 AM_CFLAGS = -I $(srcdir)/../stdio

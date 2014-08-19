@@ -1,17 +1,17 @@
 ; CPU family related simulator generator, excluding decoding and model support.
-; Copyright (C) 2000, 2002, 2003, 2005, 2006, 2009, 2010 Red Hat, Inc.
+; Copyright (C) 2000, 2002, 2003, 2005 Red Hat, Inc.
 ; This file is part of CGEN.
 
 ; ***********
 ; cgen-desc.h
 
-(define (/last-insn)
+(define (-last-insn)
   (string-upcase (gen-c-symbol (caar (list-take -1
        (gen-obj-list-enums (non-multi-insns (current-insn-list))))))))
 
 ; Declare the attributes.
 
-(define (/gen-attr-decls)
+(define (-gen-attr-decls)
   (string-list
    "// Insn attribute indices.\n\n"
    (gen-attr-enum-decl "cgen_insn" (current-insn-attr-list))
@@ -22,7 +22,7 @@
 
 ; Generate class to hold an instruction's attributes.
 
-(define (/gen-insn-attr-decls)
+(define (-gen-insn-attr-decls)
    (let ((attrs (current-insn-attr-list)))
      (string-append
       "// Insn attributes.\n\n"
@@ -59,7 +59,7 @@
 
 
 ; Emit a macro that specifies the word-bitsize for each machine.
-(define (/gen-mach-params)
+(define (-gen-mach-params)
   (string-map (lambda (mach) 
 		(string-append
 		 "#define MACH_" (string-upcase (gen-sym mach)) "_INSN_CHUNK_BITSIZE "
@@ -71,7 +71,7 @@
 ; Generate <cpu>-desc.h.
 
 (define (cgen-desc.h)
-  (logit 1 "Generating " (gen-cpu-name) "-desc.h ...\n")
+  (logit 1 "Generating " (gen-cpu-name) " desc.h ...\n")
 
   (string-write
    (gen-c-copyright "Misc. entries in the @arch@ description file."
@@ -80,22 +80,17 @@
 #ifndef DESC_@ARCH@_H
 #define DESC_@ARCH@_H
 
-#include \"cgen/bitset.h\"
+#include \"opcode/cgen-bitset.h\"
 
 namespace @arch@ {
 \n"
 
-   (let ((enums (find (lambda (obj) (not (obj-has-attr? obj 'VIRTUAL)))
-		      (current-enum-list))))
-     (if (null? enums)
-	 ""
-	 (string-list
-	  "// Enums.\n\n"
-	  (string-map gen-decl enums))))
+   "// Enums.\n\n"
+   (lambda () (string-map gen-decl (current-enum-list)))
 
-   /gen-attr-decls
-   /gen-insn-attr-decls
-   /gen-mach-params
+   -gen-attr-decls
+   -gen-insn-attr-decls
+   -gen-mach-params
 
    "
 } // end @arch@ namespace
@@ -111,11 +106,12 @@ namespace @arch@ {
 
 ; Get/set fns for hardware element HW.
 
-(define (/gen-reg-access-defns hw)
+(define (-gen-reg-access-defns hw)
   (let ((scalar? (hw-scalar? hw))
 	(name (obj:name hw))
 	(getter (hw-getter hw))
 	(setter (hw-setter hw))
+	(isas (bitset-attr->list (obj-attr-value hw 'ISA)))
 	(type (gen-type hw)))
     (let ((get-code (if getter
 			(let ((mode (hw-mode hw))
@@ -123,12 +119,10 @@ namespace @arch@ {
 			      (expr (cadr getter)))
 			  (string-append
 			   "return "
-			   (rtl-c++ mode
-				    #f ;; h/w is not ISA-specific
+			   (rtl-c++ mode expr
 				    (if scalar?
 					nil
 					(list (list (car args) 'UINT "regno")))
-				    expr
 				    #:rtl-cover-fns? #t)
 			   ";"))
 			(string-append
@@ -141,12 +135,11 @@ namespace @arch@ {
 			      (expr (cadr setter)))
 			  (rtl-c++
 			   VOID ; not `mode', sets have mode VOID
-			   #f ;; h/w is not ISA-specific
+			   expr
 			   (if scalar?
 			       (list (list (car args) (hw-mode hw) "newval"))
 			       (list (list (car args) 'UINT "regno")
 				     (list (cadr args) (hw-mode hw) "newval")))
-			   expr
 			   #:rtl-cover-fns? #t))
 			(string-append
 			 "this->hardware."
@@ -178,14 +171,10 @@ namespace @arch@ {
        (not (obj-has-attr? hw 'VIRTUAL)))
 )
 
-(define (hw-need-write-stack? hw)
-  (and (register? hw) (hw-used-in-delay-rtl? hw))
-)
-
-; Subroutine of /gen-hardware-types to generate the struct containing
+; Subroutine of -gen-hardware-types to generate the struct containing
 ; hardware elements of one isa.
 
-(define (/gen-hardware-struct prefix hw-list)
+(define (-gen-hardware-struct prefix hw-list)
   (if (null? hw-list)
       ; If struct is empty, leave it out to simplify generated code.
       ""
@@ -194,7 +183,7 @@ namespace @arch@ {
 	   (string-append "  // Hardware elements for " prefix ".\n")
 	   "  // Hardware elements.\n")
        "  struct {\n"
-       (string-list-map gen-defn hw-list)
+       (string-list-map gen-decl hw-list)
        "  } "
        (if prefix
 	   (string-append prefix "_")
@@ -206,25 +195,24 @@ namespace @arch@ {
 ; Return C type declarations of all of the hardware elements.
 ; The name of the type is prepended with the cpu family name.
 
-(define (/gen-hardware-types)
+(define (-gen-hardware-types)
   (string-list
    "// CPU state information.\n\n"
-   (/gen-hardware-struct #f (find hw-need-storage? (current-hw-list))))
+   (-gen-hardware-struct #f (find hw-need-storage? (current-hw-list))))
 )
 
-(define (/gen-hw-stream-and-destream-fns) 
+(define (-gen-hw-stream-and-destream-fns) 
   (let* ((sa string-append)
 	 (regs (find hw-need-storage? (current-hw-list)))
-	 (stack-regs (find hw-need-write-stack? (current-hw-list)))
 	 (reg-dim (lambda (r) 
-		    (let ((dims (/hw-vector-dims r)))
+		    (let ((dims (-hw-vector-dims r)))
 		      (if (equal? 0 (length dims)) 
 			  "0"
 			  (number->string (car dims))))))
 	 (write-stacks 
 	  (map (lambda (n) (sa n "_writes"))
-	       (append (map (lambda (r) (gen-c-symbol (obj:name r))) stack-regs)
-		       (map (lambda (m) (sa (symbol->string m) "_memory")) write-stack-memory-mode-names))))
+	       (append (map (lambda (r) (gen-c-symbol (obj:name r))) regs)
+		       (map (lambda (m) (sa (object->string m) "_memory")) useful-mode-names))))
 	 (stream-reg (lambda (r) 
 		       (let ((rname (sa "hardware." (gen-c-symbol (obj:name r)))))
 			 (if (hw-scalar? r)
@@ -294,7 +282,7 @@ namespace @arch@ {
 ; Generate <cpu>-cpu.h
 
 (define (cgen-cpu.h)
-  (logit 1 "Generating " (gen-cpu-name) "-cpu.h ...\n")
+  (logit 1 "Generating " (gen-cpu-name) " cpu.h ...\n")
   (assert-keep-one)
 
   ; Turn parallel execution support on if cpu needs it.
@@ -312,14 +300,14 @@ namespace @arch@ {
 public:
 \n"
 
-   /gen-hardware-types
+   -gen-hardware-types
 
-   /gen-hw-stream-and-destream-fns
+   -gen-hw-stream-and-destream-fns
 
    "  // C++ register access function templates\n"
    "#define current_cpu this\n\n"
    (lambda ()
-     (string-list-map /gen-reg-access-defns
+     (string-list-map -gen-reg-access-defns
 		      (find register? (current-hw-list))))
    "#undef current_cpu\n\n"
    )
@@ -332,7 +320,7 @@ public:
 ; A "cpu family" here is a collection of variants of a particular architecture
 ; that share sufficient commonality that they can be handled together.
 
-(define (/gen-cpu-defines)
+(define (-gen-cpu-defines)
   (string-append
    "\
 /* Maximum number of instructions that are fetched at a time.
@@ -352,7 +340,7 @@ public:
 
 ; Generate type of struct holding model state while executing.
 
-(define (/gen-model-decls)
+(define (-gen-model-decls)
   (logit 2 "Generating model decls ...\n")
   (string-list
    (string-list-map
@@ -393,9 +381,9 @@ typedef struct {
 ;;; begin stack-based write schedule
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define write-stack-memory-mode-names '())
+(define useful-mode-names '(BI QI HI SI DI UQI UHI USI UDI SF DF))
 
-(define (/calculated-memory-write-buffer-size)
+(define (-calculated-memory-write-buffer-size)
   (let* ((is-mem? (lambda (op) (eq? (hw-sem-name (op:type op)) 'h-memory)))
 	 (count-mem-writes
 	  (lambda (sfmt) (length (find is-mem? (sfmt-out-ops sfmt))))))
@@ -404,28 +392,28 @@ typedef struct {
 
 ;; note: this doesn't really correctly approximate the worst case. user-supplied functions
 ;; might rewrite the pipeline extensively while it's running. 
-;(define (/worst-case-number-of-writes-to hw-name)
+;(define (-worst-case-number-of-writes-to hw-name)
 ;  (let* ((sfmts (current-sfmt-list))
 ;	 (out-ops (map sfmt-out-ops sfmts))
 ;	 (pred (lambda (op) (equal? hw-name (gen-c-symbol (obj:name (op:type op))))))
 ;	 (filtered-ops (map (lambda (ops) (find pred ops)) out-ops)))
 ;    (apply max (cons 0 (map (lambda (ops) (length ops)) filtered-ops)))))
 	 
-(define (/hw-gen-write-stack-decl nm mode)
+(define (-hw-gen-write-stack-decl nm mode)
   (let* (
 ; for the time being, we're disabling this size-estimation stuff and just
 ; requiring the user to supply a parameter WRITE_BUF_SZ before they include -defs.h
 ;	 (pipe-sz (+ 1 (max-delay (cpu-max-delay (current-cpu)))))
-;	 (sz (* pipe-sz (/worst-case-number-of-writes-to nm))))
+;	 (sz (* pipe-sz (-worst-case-number-of-writes-to nm))))
 	 
-	 (mode-pad (spaces (- 4 (string-length (symbol->string mode)))))
+	 (mode-pad (spaces (- 4 (string-length (object->string mode)))))
 	 (stack-name (string-append nm "_writes")))
     (string-append
-     "  write_stack< write<" (symbol->string mode) "> >" mode-pad "\t" stack-name "\t[pipe_sz];\n")))
+     "  write_stack< write<" (object->string mode) "> >" mode-pad "\t" stack-name "\t[pipe_sz];\n")))
 
 
-(define (/hw-gen-write-struct-decl)
-  (let* ((dims (/worst-case-index-dims))
+(define (-hw-gen-write-struct-decl)
+  (let* ((dims (-worst-case-index-dims))
 	 (sa string-append)
 	 (ns number->string)
 	 (idxs (iota dims))
@@ -447,17 +435,17 @@ typedef struct {
      "    write() {}\n"
      "  };\n" )))
 	       
-(define (/hw-vector-dims hw) (elm-get (hw-type hw) 'dimensions))			    
-(define (/worst-case-index-dims)
+(define (-hw-vector-dims hw) (elm-get (hw-type hw) 'dimensions))			    
+(define (-worst-case-index-dims)
   (apply max
 	 (append '(1) ; for memory accesses
-		 (map (lambda (hw) (length (/hw-vector-dims hw))) 
+		 (map (lambda (hw) (length (-hw-vector-dims hw))) 
 		      (find (lambda (hw) (not (scalar? hw))) (current-hw-list))))))
 
 
-(define (/gen-writestacks)
-  (let* ((hw (find hw-need-write-stack? (current-hw-list)))
-	 (modes write-stack-memory-mode-names) 
+(define (-gen-writestacks)
+  (let* ((hw (find register? (current-hw-list)))
+	 (modes useful-mode-names) 
 	 (hw-pairs (map (lambda (h) (list (gen-c-symbol (obj:name h))
 					    (obj:name (hw-mode h)))) 
 			hw))
@@ -474,8 +462,8 @@ typedef struct {
 	        "\n  void reset ();"))
 	 (zz "\n\n  }; // end struct @prefix@::write_stacks \n\n"))    
     (string-append	
-     (/hw-gen-write-struct-decl)
-     (foldl (lambda (s pair) (string-append s (apply /hw-gen-write-stack-decl pair))) h1 all-pairs)	  
+     (-hw-gen-write-struct-decl)
+     (foldl (lambda (s pair) (string-append s (apply -hw-gen-write-stack-decl pair))) h1 all-pairs)	  
      wb
      zz)))
 
@@ -488,7 +476,7 @@ typedef struct {
 ; for use during parallel execution.  
 
 (define (gen-write-stack-structure)
-  (let ((membuf-sz (/calculated-memory-write-buffer-size))
+  (let ((membuf-sz (-calculated-memory-write-buffer-size))
 	(max-delay (cpu-max-delay (current-cpu))))
     (logit 2 "Generating write stack structure ...\n")
     (string-append
@@ -531,12 +519,12 @@ typedef struct {
 
 "
  
-     (/gen-writestacks)     
+     (-gen-writestacks)     
      )))
 
 ; Generate the TRACE_RECORD struct definition.
 
-(define (/gen-trace-record-type)
+(define (-gen-trace-record-type)
   (string-list
    "\
 /* Collection of various things for the trace handler to use.  */
@@ -552,7 +540,7 @@ typedef struct @prefix@_trace_record {
 ; Generate <cpu>-defs.h
 
 (define (cgen-defs.h)
-  (logit 1 "Generating " (gen-cpu-name) "-defs.h ...\n")
+  (logit 1 "Generating " (gen-cpu-name) " defs.h ...\n")
   (assert-keep-one)
 
   ; Turn parallel execution support on if cpu needs it.
@@ -608,7 +596,7 @@ using namespace cgen;
 
 ; Generate <cpu>-write.cxx.
 
-(define (/gen-register-writer nm mode dims)
+(define (-gen-register-writer nm mode dims)
   (let* ((pad "    ")
 	 (sa string-append)
 	 (mode (symbol->string mode))
@@ -621,7 +609,7 @@ using namespace cgen;
 	pad "  " nm "_writes[tick].pop();\n"
 	pad "}\n\n")))
 
-(define (/gen-memory-writer nm mode dims)
+(define (-gen-memory-writer nm mode dims)
   (let* ((pad "    ")
 	 (sa string-append)
 	 (mode (symbol->string mode))
@@ -635,12 +623,12 @@ using namespace cgen;
 	pad "}\n\n")))
 
 
-(define (/gen-reset-fn)
+(define (-gen-reset-fn)
   (let* ((sa string-append)
 	 (objs (append (map (lambda (h) (gen-c-symbol (obj:name h))) 
-			    (find hw-need-write-stack? (current-hw-list)))
+			    (find register? (current-hw-list)))
 		       (map (lambda (m) (sa (symbol->string m) "_memory"))
-			    write-stack-memory-mode-names)))
+			    useful-mode-names)))
 	 (clr (lambda (elt) (sa "    clear_stacks (" elt "_writes);\n"))))
     (sa 
      "  template <typename ST> \n"
@@ -653,12 +641,12 @@ using namespace cgen;
      (string-map clr objs)
      "  }")))
 
-(define (/gen-unified-write-fn) 
-  (let* ((hw (find hw-need-write-stack? (current-hw-list)))
-	 (modes write-stack-memory-mode-names)	
+(define (-gen-unified-write-fn) 
+  (let* ((hw (find register? (current-hw-list)))
+	 (modes useful-mode-names)	
 	 (hw-triples (map (lambda (h) (list (gen-c-symbol (obj:name h))
 					    (obj:name (hw-mode h))
-					    (length (/hw-vector-dims h)))) 
+					    (length (-hw-vector-dims h)))) 
 			hw))
 	 (mem-triples (map (lambda (m) (list (string-append (symbol->string m)
 							    "_memory")
@@ -671,15 +659,15 @@ using namespace cgen;
   {
 "
      "\n    // register writeback loops\n"
-     (string-map (lambda (t) (apply /gen-register-writer t)) hw-triples)
+     (string-map (lambda (t) (apply -gen-register-writer t)) hw-triples)
      "\n    // memory writeback loops\n"
-     (string-map (lambda (t) (apply /gen-memory-writer t)) mem-triples)
+     (string-map (lambda (t) (apply -gen-memory-writer t)) mem-triples)
 "
   }
 ")))
 
 (define (cgen-write.cxx)
-  (logit 1 "Generating " (gen-cpu-name) "-write.cxx ...\n")
+  (logit 1 "Generating " (gen-cpu-name) " write.cxx ...\n")
   (assert-keep-one)
 
   (sim-analyze-insns!)
@@ -700,8 +688,8 @@ using namespace cgen;
 #include \"@cpu@.h\"
 
 "
-   /gen-reset-fn
-   /gen-unified-write-fn
+   -gen-reset-fn
+   -gen-unified-write-fn
    )
 )
 
@@ -711,30 +699,27 @@ using namespace cgen;
 ; Return C code to perform the semantics of INSN.
 
 (define (gen-semantic-code insn)
-  (cond ((insn-compiled-semantics insn)
-	 => (lambda (sem)
-	      (rtl-c++-parsed VOID sem
-			      #:for-insn? #t
-			      #:rtl-cover-fns? #t
-			      #:owner insn)))
-	((insn-canonical-semantics insn)
-	 => (lambda (sem)
-	      (rtl-c++-parsed VOID sem
-			      #:for-insn? #t
-			      #:rtl-cover-fns? #t
-			      #:owner insn)))
-	(else
-	 (context-error (make-obj-context insn #f)
-			"While generating semantic code"
-			"semantics of insn are not canonicalized")))
+  ; Indicate generating code for INSN.
+  ; Use the compiled form if available.
+  ; The case when they're not available is for virtual insns.
+  (let ((sem-c-code
+	 (if (insn-compiled-semantics insn)
+	     (rtl-c++-parsed VOID (insn-compiled-semantics insn) nil
+			     #:rtl-cover-fns? #t
+			     #:owner insn)
+	     (rtl-c++ VOID (insn-semantics insn) nil
+		      #:rtl-cover-fns? #t
+		      #:owner insn)))
+	)
+    sem-c-code)
 )
 
 ; Return definition of C function to perform INSN.
 ; This version handles the with-scache case.
 
-(define (/gen-scache-semantic-fn insn)
+(define (-gen-scache-semantic-fn insn)
   (logit 2 "Processing semantics for " (obj:name insn) ": \"" (insn-syntax insn) "\" ...\n")
-  (set! /with-profile? /with-profile-fn?)
+  (set! -with-profile? -with-profile-fn?)
   (let ((cti? (insn-cti? insn))
 	(insn-len (insn-length-bytes insn)))
     (string-list
@@ -763,14 +748,6 @@ using namespace cgen;
      "\n"
      (gen-semantic-code insn)
      "\n"
-     ; Only update what's been written if some are conditionally written.
-     ; Otherwise we know they're all written so there's no point in
-     ; keeping track.
-     (if (or (with-profile?) (with-parallel-write?))
-	 (if (/any-cond-written? (insn-sfmt insn))
-	     "  abuf->written = written;\n"
-	     "")
-	 "")
      (if cti?
 	 "  current_cpu->done_cti_insn (npc, status);\n"
 	 "  current_cpu->done_insn (npc, status);\n")
@@ -782,11 +759,11 @@ using namespace cgen;
      ))
 )
 
-(define (/gen-all-semantic-fns)
+(define (-gen-all-semantic-fns)
   (logit 2 "Processing semantics ...\n")
   (let ((insns (scache-engine-insns)))
     (if (with-scache?)
-	(string-write-map /gen-scache-semantic-fn insns)
+	(string-write-map -gen-scache-semantic-fn insns)
 	(error "must specify `with-scache'")))
 )
 
@@ -794,7 +771,7 @@ using namespace cgen;
 ; Each instruction is implemented in its own function.
 
 (define (cgen-semantics.cxx)
-  (logit 1 "Generating " (gen-cpu-name) "-semantics.cxx ...\n")
+  (logit 1 "Generating " (gen-cpu-name) " semantics.cxx ...\n")
   (assert-keep-one)
 
   (sim-analyze-insns!)
@@ -827,7 +804,7 @@ using namespace @prefix@; // FIXME: namespace organization still wip\n"))
 
 \n"
 
-   /gen-all-semantic-fns
+   -gen-all-semantic-fns
    )
 )
 
@@ -837,11 +814,11 @@ using namespace @prefix@; // FIXME: namespace organization still wip\n"))
 ; The semantic switch engine has two flavors: one case per insn, and one
 ; case per "frag" (where each insn is split into one or more fragments).
 
-; Utility of /gen-sem-case to return the mask of operands always written
+; Utility of -gen-sem-case to return the mask of operands always written
 ; to in <sformat> SFMT.
 ; ??? Not currently used.
 
-(define (/uncond-written-mask sfmt)
+(define (-uncond-written-mask sfmt)
   (apply + (map (lambda (op)
 		  (if (op:cond? op)
 		      0
@@ -849,10 +826,10 @@ using namespace @prefix@; // FIXME: namespace organization still wip\n"))
 		(sfmt-out-ops sfmt)))
 )
 
-; Utility of /gen-sem-case to return #t if any operand in <sformat> SFMT is
+; Utility of -gen-sem-case to return #t if any operand in <sformat> SFMT is
 ; conditionally written to.
 
-(define (/any-cond-written? sfmt)
+(define (-any-cond-written? sfmt)
   (any-true? (map op:cond? (sfmt-out-ops sfmt)))
 )
 
@@ -860,12 +837,11 @@ using namespace @prefix@; // FIXME: namespace organization still wip\n"))
 
 ; Generate a switch case to perform INSN.
 
-(define (/gen-sem-case insn parallel?)
+(define (-gen-sem-case insn parallel?)
   (logit 2 "Processing "
 	 (if parallel? "parallel " "")
-	 "semantic switch case for " (obj:name insn) ": \""
-	 (insn-syntax insn) "\" ...\n")
-  (set! /with-profile? /with-profile-sw?)
+	 "semantic switch case for \"" (insn-syntax insn) "\" ...\n")
+  (set! -with-profile? -with-profile-sw?)
   (let ((cti? (insn-cti? insn))
 	(insn-len (insn-length-bytes insn)))
     (string-list
@@ -897,9 +873,7 @@ using namespace @prefix@; // FIXME: namespace organization still wip\n"))
 	      (isa-setup-semantics (current-isa)))
 	 (string-append
 	  "      "
-	  (rtl-c++ VOID (obj-isa-list insn) nil
-		   (isa-setup-semantics (current-isa))
-		   #:for-insn? #t
+	  (rtl-c++ VOID (isa-setup-semantics (current-isa)) nil
 		   #:rtl-cover-fns? #t
 		   #:owner insn))
 	 "")
@@ -910,7 +884,7 @@ using namespace @prefix@; // FIXME: namespace organization still wip\n"))
      ; Otherwise we know they're all written so there's no point in
      ; keeping track.
      (if (or (with-profile?) (with-parallel-write?))
-	 (if (/any-cond-written? (insn-sfmt insn))
+	 (if (-any-cond-written? (insn-sfmt insn))
 	     "        abuf->written = written;\n"
 	     "")
 	 "")
@@ -926,11 +900,11 @@ using namespace @prefix@; // FIXME: namespace organization still wip\n"))
      ))
 )
 
-(define (/gen-sem-switch)
+(define (-gen-sem-switch)
   (logit 2 "Processing semantic switch ...\n")
   ; Turn parallel execution support off.
   (set-with-parallel?! #f)
-  (string-write-map (lambda (insn) (/gen-sem-case insn #f))
+  (string-write-map (lambda (insn) (-gen-sem-case insn #f))
 		    (non-multi-insns (non-alias-insns (current-insn-list))))
 )
 
@@ -944,19 +918,19 @@ using namespace @prefix@; // FIXME: namespace organization still wip\n"))
 ; reduces the amount of code, though it is believed that in this particular
 ; instance the win isn't big enough.
 
-(define (/gen-parallel-sem-switch)
+(define (-gen-parallel-sem-switch)
   (logit 2 "Processing parallel insn semantic switch ...\n")
   ; Turn parallel execution support on.
   (set-with-parallel?! #t)
   (string-write-map (lambda (insn)
-		      (string-list (/gen-sem-case insn #t)
-				   (/gen-write-case (insn-sfmt insn) insn)))
+		      (string-list (-gen-sem-case insn #t)
+				   (-gen-write-case (insn-sfmt insn) insn)))
 		    (parallel-insns (current-insn-list)))
 )
 
 ; Return computed-goto engine.
 
-(define (/gen-sem-switch-engine)
+(define (-gen-sem-switch-engine)
   (string-write
    "\
 void
@@ -1015,7 +989,7 @@ void
 	@prefix@_idesc::idesc_table[labels[i].insn].cgoto.label = labels[i].label; 
 
       // confirm that table is all filled up
-      for (int i = 0; i <= @PREFIX@_INSN_" (/last-insn) "; i++)
+      for (int i = 0; i <= @PREFIX@_INSN_" (-last-insn) "; i++)
         assert (@prefix@_idesc::idesc_table[i].cgoto.label != 0);
 
       // Initialize the compiler virtual insn.
@@ -1051,10 +1025,10 @@ restart:
   {
 "
 
-  /gen-sem-switch
+  -gen-sem-switch
 
    (if (state-parallel-exec?)
-       /gen-parallel-sem-switch
+       -gen-parallel-sem-switch
        "")
 
 "
@@ -1076,7 +1050,7 @@ restart:
 
 ; Return declaration of frag enum.
 
-(define (/gen-sfrag-enum-decl frag-list)
+(define (-gen-sfrag-enum-decl frag-list)
   (gen-enum-decl "@prefix@_frag_type"
 		 "semantic fragments in cpu family @prefix@"
 		 "@PREFIX@_FRAG_"
@@ -1091,12 +1065,12 @@ restart:
 
 ; Return header file decls for semantic frag threaded engine.
 
-(define (/gen-sfrag-engine-decls)
+(define (-gen-sfrag-engine-decls)
   (string-write
    "namespace @cpu@ {\n\n"
 
    ; FIXME: vector->list
-   (/gen-sfrag-enum-decl (vector->list (sim-sfrag-frag-table)))
+   (-gen-sfrag-enum-decl (vector->list (sim-sfrag-frag-table)))
 
    "\
 struct @prefix@_insn_frag {
@@ -1118,34 +1092,38 @@ struct @prefix@_pbb_label {
 ; LOCALS is a list of sequence locals made global to all frags.
 ; Each element is (symbol <mode> "c-var-name").
 
-(define (/gen-sfrag-code frag locals)
-  (let ((sem (sfrag-semantics frag))
+(define (-gen-sfrag-code frag locals)
+  ; Indicate generating code for FRAG.
+  ; Use the compiled form if available.
+  ; The case when they're not available is for virtual insns.
+  (let ((sem (sfrag-compiled-semantics frag))
 	; If the frag has one owner, use it.  Otherwise indicate the owner is
 	; unknown.  In cases where the owner is needed by the semantics, the
-	; frag should have only one owner.  In practice this means that frags
-	; with the ref,current-insn rtx cannot be used by multiple insns.
+	; frag should have only one owner.
 	(owner (if (= (length (sfrag-users frag)) 1)
 		   (car (sfrag-users frag))
-		   #f)))
-    ;; NOTE: (sfrag-users frag) is nil for the x-header and x-trailer frags.
-    ;; They are just nops.
-    (rtl-c++ VOID (and owner (obj-isa-list owner)) locals sem
-	     #:for-insn? #t
-	     #:rtl-cover-fns? #t
-	     #:owner owner))
+		   #f))
+	)
+    (if sem
+	(rtl-c++-parsed VOID sem locals
+			#:rtl-cover-fns? #t
+			#:owner owner)
+	(rtl-c++ VOID (sfrag-semantics frag) locals
+		 #:rtl-cover-fns? #t
+		 #:owner owner)))
 )
 
 ; Generate a switch case to perform FRAG.
 ; LOCALS is a list of sequence locals made global to all frags.
 ; Each element is (symbol <mode> "c-var-name").
 
-(define (/gen-sfrag-case frag locals)
-  (set! /with-profile? /with-profile-sw?)
+(define (-gen-sfrag-case frag locals)
+  (set! -with-profile? -with-profile-sw?)
   (let ((cti? (sfmt-cti? (sfrag-sfmt frag)))
 	(parallel? (sfrag-parallel? frag)))
     (logit 2 "Processing "
 	   (if parallel? "parallel " "")
-	   "semantic switch case for " (obj:name frag) " ...\n")
+	   "semantic switch case for \"" (obj:name frag) "\" ...\n")
     (string-list
      ; FRAG_ is prepended here and not elsewhere to avoid name collisions
      ; with symbols like AND, etc.
@@ -1186,19 +1164,18 @@ struct @prefix@_pbb_label {
 	      (isa-setup-semantics (current-isa)))
 	 (string-append
 	  "      "
-	  (rtl-c++ VOID (list (obj:name (current-isa))) nil
-		   (isa-setup-semantics (current-isa))
+	  (rtl-c++ VOID (isa-setup-semantics (current-isa)) nil
 		   #:rtl-cover-fns? #t
 		   #:owner #f))
 	 "")
      "\n"
-     (/gen-sfrag-code frag locals)
+     (-gen-sfrag-code frag locals)
      "\n"
      ; Only update what's been written if some are conditionally written.
      ; Otherwise we know they're all written so there's no point in
      ; keeping track.
      (if (or (with-profile?) (with-parallel-write?))
-	 (if (/any-cond-written? (sfrag-sfmt frag))
+	 (if (-any-cond-written? (sfrag-sfmt frag))
 	     "        abuf->written = written;\n"
 	     "")
 	 "")
@@ -1218,9 +1195,9 @@ struct @prefix@_pbb_label {
 )
 
 ; Convert locals from form computed by sem-find-common-frags to that needed by
-; /gen-sfrag-engine-code (and ultimately rtl-c++).
+; -gen-sfrag-engine-code (and ultimately rtl-c++).
 
-(define (/frag-convert-c-locals locals)
+(define (-frag-convert-c-locals locals)
   (map (lambda (local)
 	 (list (car local) (mode:lookup (cadr local))
 	       (gen-c-symbol (car local))))
@@ -1229,7 +1206,7 @@ struct @prefix@_pbb_label {
 
 ; Return definition of insn frag usage table.
 
-(define (/gen-sfrag-engine-frag-table insn-list frag-table frag-usage)
+(define (-gen-sfrag-engine-frag-table insn-list frag-table frag-usage)
   (string-write
    "\
 // Table of frags used by each insn.
@@ -1255,7 +1232,7 @@ const @prefix@_insn_frag @prefix@_frag_usage[] = {\n"
 ; LOCALS is a list of sequence locals made global to all frags.
 ; Each element is (symbol <mode> "c-var-name").
 
-(define (/gen-sfrag-engine-fn frag-table locals)
+(define (-gen-sfrag-engine-fn frag-table locals)
   (string-write
    "\
 void
@@ -1306,7 +1283,7 @@ void
       // Allocate frag label table and point idesc table entries at it.
       // FIXME: Temporary hack, to be redone.
       static void** frag_label_table;
-      int max_insns = @PREFIX@_INSN_" (/last-insn) " + 1;
+      int max_insns = @PREFIX@_INSN_" (-last-insn) " + 1;
       int tabsize = max_insns * 4;
       frag_label_table = new void* [tabsize];
       memset (frag_label_table, 0, sizeof (void*) * tabsize);
@@ -1384,7 +1361,7 @@ restart:
      ; ??? Still needed?
      (set-with-parallel?! #f)
      (string-write-map (lambda (frag)
-			 (/gen-sfrag-case frag locals))
+			 (-gen-sfrag-case frag locals))
 		       ; FIXME: vector->list
 		       (vector->list frag-table)))
 
@@ -1403,22 +1380,22 @@ restart:
 \n")
 )
 
-(define (/gen-sfrag-engine)
+(define (-gen-sfrag-engine)
   (string-write
    (lambda ()
-     (/gen-sfrag-engine-frag-table (sim-sfrag-insn-list)
+     (-gen-sfrag-engine-frag-table (sim-sfrag-insn-list)
 				   (sim-sfrag-frag-table)
 				   (sim-sfrag-usage-table)))
    (lambda ()
-     (/gen-sfrag-engine-fn (sim-sfrag-frag-table)
-			   (/frag-convert-c-locals (sim-sfrag-locals-list))))
+     (-gen-sfrag-engine-fn (sim-sfrag-frag-table)
+			   (-frag-convert-c-locals (sim-sfrag-locals-list))))
    )
 )
 
 ; Generate sem-switch.cxx.
 
 (define (cgen-sem-switch.cxx)
-  (logit 1 "Generating " (gen-cpu-name) "-sem-switch.cxx ...\n")
+  (logit 1 "Generating " (gen-cpu-name) " sem-switch.cxx ...\n")
 
   (sim-analyze-insns!)
   (if (with-sem-frags?)
@@ -1448,11 +1425,11 @@ using namespace @cpu@; // FIXME: namespace organization still wip
 \n"
 
    (if (with-sem-frags?)
-       /gen-sfrag-engine-decls
+       -gen-sfrag-engine-decls
        "")
 
    (if (with-sem-frags?)
-       /gen-sfrag-engine
-       /gen-sem-switch-engine)
+       -gen-sfrag-engine
+       -gen-sem-switch-engine)
    )
 )

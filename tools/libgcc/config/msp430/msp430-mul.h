@@ -1,6 +1,5 @@
 /* libgcc routines for RL78
-   Copyright (C) 2005, 2009, 2011
-   Free Software Foundation, Inc.
+   Copyright (C) 2005-2014 Free Software Foundation, Inc.
    Contributed by Red Hat.
 
    This file is part of GCC.
@@ -32,7 +31,7 @@ C3(__mul,NAME_MODE,3) (UINT_TYPE a, UINT_TYPE b)
 
   char bit;
 
-  for (bit = 0; b && bit < sizeof (UINT_TYPE) * 8; bit++)
+  for (bit=0; b && bit<sizeof(UINT_TYPE)*8; bit++)
     {
       if (b & 1)
 	rv += a;

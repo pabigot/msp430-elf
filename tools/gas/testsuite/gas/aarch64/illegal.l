@@ -551,4 +551,15 @@
 [^:]*:543: Error: .*`fmov s0,#0x11'
 [^:]*:544: Error: .*`fmov s0,#0xC0280000C1400000'
 [^:]*:545: Error: .*`fmov d0,#0xC02f800000000000'
-[^:]*:550: Error: .*
+[^:]*:550: Error: .*`ands w0,w24,#0xffeefffffffffffd'
+[^:]*:554: Error: .*`cinc w0,w1,al'
+[^:]*:555: Error: .*`cinc w0,w1,nv'
+[^:]*:556: Error: .*`cset w0,al'
+[^:]*:557: Error: .*`cset w0,nv'
+[^:]*:558: Error: .*`cinv w0,w1,al'
+[^:]*:559: Error: .*`cinv w0,w1,nv'
+[^:]*:560: Error: .*`csetm w0,al'
+[^:]*:561: Error: .*`csetm w0,nv'
+[^:]*:562: Error: .*`cneg w0,w1,al'
+[^:]*:563: Error: .*`cneg w0,w1,nv'
+[^:]*:563: Error: .*

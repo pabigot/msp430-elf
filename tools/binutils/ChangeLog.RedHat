@@ -1,210 +1,281 @@
-2013-03-22  Nick Clifton  <nickc@redhat.com>
+2014-08-06  DJ Delorie  <dj@redhat.com>
 
-	* readelf.c (uses_msp430x_relocs): Fix expression evaluation.
+	* readelf.c (process_section_headers): Make eh_addr_size machine-dependent.
 
-2013-02-25  Nick Clifton  <nickc@redhat.com>
+2013-10-09  Nick Clifton  <nickc@redhat.com>
 
-	* objdump.c (remove_useless_symbols): Treat assembler local labels
-	are useless.
+	* dwarf.c (add64): New function.
+	(read_and_display_attr_value): Add CU offset in to the value
+	displayed for a DW_AT_ref8 attribute.
 
-2013-02-14  DJ Delorie  <dj@redhat.com>
+2013-09-10  Nick Clifton  <nickc@redhat.com>
 
-	* readelf.c (process_section_headers): msp430 is always 4-byte
-	addresses.
+	* dwarf.c (display_debug_frames): Check for DW64_CIE_ID with
+	64-bit DWARF info.
+	* readelf.c (process_section_headers): Determine eh_addr_size for
+	MIPS based on .gcc_compiled_longXX.
 
-2013-02-11  Nick Clifton  <nickc@redhat.com>
+2013-09-05  Nick Clifton  <nickc@redhat.com>
 
-	* readelf.c (uses_msp430x_relocs): New function.
-	(get_msp430x_section_type_name): Add TI special sections.
-	(display_raw_attribute): New function.
-	(process_attributes): Use it.
+	Import this delta from the mainline:
 
-2013-02-06  Nick Clifton  <nickc@redhat.com>
+	2013-01-07  Patrice Dumas  <pertusus@free.fr>
 
-	* readelf.c (target_specific_reloc_handling): Add support for
-	MSP430 sym_diff relocs.
-
-2012-12-19  Nick Clifton  <nickc@redhat.com>
-
-	* readelf.c (get_msp430x_section_type_name): New function.
-	(get_section_type_name): Use it.
-	(display_msp430x_attribute): New function.
-	(process_msp430x_specific): New function.
-	(process_arch_specific): Use it.
-
-2012-12-05  Nick Clifton  <nickc@redhat.com>
-
-	* readelf.c (process_section_headers): Use 2 byte address for
-	MSP430, 4 byte for MSP430X.
-	* dwarf.c (display_debug_frames): Use fc->ptr_size to calculate
-	number if digits to display when showing addresses.
-
-2012-11-26  Nick Clifton  <nickc@redhat.com>
-
-	* readelf.c: Add support for MSP430X.
+	* doc/binutils.texi: Replace @ with @@ when it is part of the text.
 
 2012-10-17  Nick Clifton  <nickc@redhat.com>
 
 	Issue 3223603
 	* readelf.c (get_machine_flags): Add support for E_FLAG_RX_ABI.
 
-2012-09-13  Nick Clifton  <nickc@redhat.com>
+2011-03-10  Nick Clifton  <nickc@redhat.com>
 
-	* readelf.c: Add support for RH850 relocs and e_flags.
-	(get_machine_flags): Fix thinko.
+	* readelf.c (get_machine_name): Update EM_V850 entry.
 
-2012-08-29  Nick Clifton  <nickc@redhat.com>
+2011-02-02  DJ Delorie  <dj@redhat.com>
 
-	* readelf.c: Add support for the v850e3v5 architecture.
+	* readelf.c (get_machine_flags): Print RX PID flag.
 
-2009-05-27  Nick Clifton  <nickc@redhat.com>
+2009-07-17  Nick Clifton  <nickc@redhat.com>
 
-	* readelf.c (display_debug_section): Check the type of the section
-	being dumped.  Do not dump sections with the NOBITS type.
+	* dwarf.c (display_debug_lines): Default to displaying raw
+	.debug_line section info.
 
-2008-05-01  Nick Clifton  <nickc@redhat.com>
+2008-09-04  Nick Clifton  <nickc@redhat.com>
 
-	* readelf.c (print_symbol): Add code to display non-printing
-	characters.
+	Import these patches from the mainline:
 
-2004-07-29  Alexandre Oliva  <aoliva@redhat.com>
+	2007-10-28  Nick Clifton  <nickc@redhat.com>
 
-	* readelf.c (get_machine_flags <EM_SH>): Handle EF_SH2A and
-	EF_SH2A_NOFPU.
+	* dwarf.c (process_debug_info): Check for corrupt lengths.
 
-2003-10-29  Dave Brolley  <brolley@redhat.com>
+	2008-01-03  Nick Clifton  <nickc@redhat.com>
 
-	* configure.in: Define SKIP_ZEROES and SKIP_ZEROES_AT_END for mep.
-	* configure: Regenerated.
+	* dwarf.c (process_debug_info): Warn about lengths that reserved
+	by the DWARF3 specification.
 
-2003-07-08  Alexandre Oliva  <aoliva@redhat.com>
+2007-10-26  Nick Clifton  <nickc@redhat.com>
 
-	* readelf.c (get_machine_flags <EM_SH)): Handle EF_SH4_NOFPU and
-	EF_SH4A_NOFPU.
-	
-2003-06-12  Alexandre Oliva  <aoliva@redhat.com>
+	* dwarf.c (process_debug_info): Extend infinite recursion check to
+	cover all negative values.
+	* readelf.c (is_32bit_abs_reloc): New function.  Determine if a
+	reloc type is one that might be used in a relocation for DWARF
+	debug information.
+	(is_32bit_pcrel_reloc): New function.  Like is_32abs_reloc but for
+	pc-relative relocations used in DWARF sections.
+	(debug_apply_rela_addends): Add test of the relocs being applied
+	and skip any that are unrecognised.
+	Add the symbol's value to the addend when computing the relocated
+	value.
+	Apply the relocation as absolute or pc-relative depending upon its
+	type.
 
-	* readelf.c (get_machine_flags <EM_SH>): Print SH ISA name.
+2007-10-19  DJ Delorie  <dj@redhat.com>
 
-2002-10-02  Nick Clifton  <nickc@redhat.com>
+	* dwarf.c (process_debug_info): Avoid infinite recursion.
 
-	* readelf.c (process_program_headers): Provide alternative
-	heuristic to map sections to segments.
+2007-07-24  Nick Clifton  <nickc@redhat.com>
 
-2002-09-30  Richard Sandiford  <rsandifo@redhat.com>
+	* Import this patch:
+	2006-10-04  H.J. Lu  <hongjiu.lu@intel.com>
 
-	* readelf.c (get_machine_flags): Remove E_MIPS_MACH_5000 handling.
+	* readelf.c (debug_apply_rela_addends): Don't ignore relocation
+	against symbols without type.
 
-2002-07-18  Nick Clifton  <nickc@redhat.com>
+2007-07-14  Nick Clifton  <nickc@redhat.com>
+
+	* dlltool.c: Add second parameter to bfd_get_symbol_leading_char
+	invocation.
+	* nlmconv.c: Likewise.
+
+2007-07-11  Nick Clifton  <nickc@redhat.com>
+
+	* budemang.c: Add second parameter to bfd_get_symbol_leading_char
+	invocation.
+	* objcopy.c: Likewise.
+	* stabs.c: Likewise.
+
+2005-11-05  Nick Clifton  <nickc@redhat.com>
+
+	Issue 80965:
+	* cxxfilt.c (flags): Remove DMGL_TYPES;
+	(long_options): Rename --no-types to --types.
+	(usage): Likewise.
+	(demangle_it): Add a comment describing why _ and $ prefixes are
+	skipped.  Use printf rather than puts to emit the demangled output
+	in order to avoid emitting a new line character.
+	(main): Have the -t flag enable type demangling.
+	Emit a newline after every demangled command line argument.
+	Copy whitespace from stdin to stdout.
+	* doc/binutils.texi (c++filt): Document the change to the -t
+	switch.
+	Document why demangling names on the command line is slightly
+	different to demangling names read from the standard input.
+
+2005-04-25  Nick Clifton  <nickc@redhat.com>
+
+	* Import this patch from the mainline:
+	2005-04-25  Nick Clifton  <nickc@redhat.com>
+
+	PR872
+	* objcopy.c (copy_archive): Initialise 'obfd' field of new
+	name_list structure.
+
+	* Import this patch from the mainline:
+	2005-04-25  Nick Clifton  <nickc@redhat.com>
+
+	* objcopy.c (copy_usage): Fix description of -K switch.
+	* doc/binutils.texi (strip, objcopy): Fix description of -K
+	switch.
+
+2004-12-06  Richard Sandiford  <rsandifo@redhat.com>
+
+	* MAINTAINERS: Remove mention of config.if.
+
+2004-09-30  Corinna Vinschen  <vinschen@redhat.com>
+
+	* Import -D 2004-07-10 (same day as gdb_6_2-branch).
+
+2004-02-26  Chandrakala Chavva  <cchavva@redhat.com>
+
+	* dlltool.c (inform): Convert to C90.
+	* dllwrap.c (inform): Convert to C90.
+	(warn): Ditto.
+
+2003-12-29  Nick Clifton  <nickc@redhat.com>
+
+	* readelf.c (debug_line_pointer_size): Replace with an array
+        called 'debug_line_pointer_sizes'.
+        (num_debug_line_pointer_sizes): New variable.
+        (display_debug_lines): Extract pointer size from the
+        debug_line_pointer_sizes array.
+        (display_debug_loc): Likewise.
+        (prescan_debug_info): Fill in the debug_line_pointer_sizes
+        array.
+
+2003-09-04  Nick Clifton  <nickc@redhat.com>
 
 	* readelf.c (get_machine_flags): Recognise V850E1 machine type.
 
-2002-02-14  Graydon Hoare  <graydon@redhat.com>
+2003-08-09  Nick Clifton  <nickc@redhat.com>
 
-	* objdump.c (objdump_print_addr_with_sym): Back out last
-	change; leave in vendor branch.
+	* Import patches from 2.14 branch to:
 
-2002-02-11  Graydon Hoare  <graydon@redhat.com>
+	  + Replace 'boolean' with 'bfd_boolean' and 'true/false' with
+	    'TRUE/FALSE'.
 
-	* objdump.c (objdump_print_addr_with_sym): Add "0x" prefix
-	in output.
-	
-2002-01-23  Graydon Hoare  <graydon@redhat.com>
+	Files affected:
 
-	* readelf.c (get_symbol_type): Add signed complex symbol support.
+	addr2line.c, ar.c, arsup.c, binemul.c, binemul.h, bucomm.c,
+	bucomm.h, budbg.h, configure.in, debug.c, debug.h,
+	dlltool.c, emul_aix.c, ieee.c, mpw-make.sed, nlmconv.c, nlmconv.h,
+	nlmheader.c, nlmheader.y, nm.c, objcopy.c, objdump.c, prdbg.c,
+	rclex.c, rclex.l, rdcoff.c, rddbg.c, readelf.c, rename.c, size.c,
+	stabs.c, strings.c, wrstabs.c.
 
-2001-11-14  Geoffrey Keating  <geoffk@redhat.com>
+	configure: Regenerated.
 
-	* readelf.c (guess_is_rela): Add support for stormy16.
-	(dump_relocations): Likewise.
-	(get_machine_name): Likewise.
+2003-08-05  Nick Clifton  <nickc@redhat.com>
 
-2001-11-06  Nick Clifton  <nickc@cambridge.redhat.com>
+	* Import new files from 2.14 branch:
 
-	* Add po/fr.po and po/tr.po files, missed from previous
-	merge.
+	doc/fdl.texi
+	po/zh_CN.po
+	cxxfilt.c
 
-2001-10-03  graydon hoare  <graydon@redhat.com>
+2003-07-31  Nick Clifton  <nickc@redhat.com>
 
-	* readelf.c (dump_relocations): Add complex relocations support.
-	(get_symbol_type): Likewise.
+	* Import this patch from 2.14 branch:
 
-2001-09-18  Nick Clifton  <nickc@cambridge.redhat.com>
+	2002-12-23  Nick Clifton  <nickc@redhat.com>
 
-	* readelf.c (get_machine_flags): Remove spurious mips3264 code.
+		* nlmconv.c (main): Pass TRUE as third argument to
+		bfd_arch_get_compatible.
 
-2001-09-13  Eric Christopher  <echristo@redhat.com>
+2003-07-23  Nick Clifton  <nickc@redhat.com>
 
-	* readelf.c (get_machine_flags): Remove references to
-	E_MIPS_MACH_MIPS32_4K
+	* Import these patches from mainline:
 
-2001-06-20  Frank Ch. Eigler  <fche@redhat.com>
+	2003-06-27  Nick Clifton  <nickc@redhat.com>
 
-	* readelf.c (get_symbol_binding): Detect STT_RELC.
+		* objcopy.c (copy_object): Replace call to
+		bfd_create_gnu_debuglink_section with seperate calls to
+		bfd_add_gnu_debuglink_section and
+		bfd_fill_in_gnu_debuglink_section, seperated by a walk
+		over the symbol tables.
 
-2001-04-03  Ben Elliston  <bje@redhat.com>
+	2003-06-11  Nick Clifton  <nickc@redhat.com>
 
-	* readelf.c: Include "elf/mep.h".
-	(guess_is_rela): Handle EM_CYGNUS_MEP.
-	(get_machine_name): Ditto.
-	(dump_relocations): Ditto.
+		* objcopy.c (gnu_debuglink_filename): New variable.
+	        (OPTION_ADD_GNU_DEBUGLINK): New switch
+		(copy_options): Describe --add-gnu-debuglink switch.
+		Mention that --strip-debug removes sections as well.
+		(is_strip_section): Process the sections removed and kept
+		lists before checking for debugging sections.
+		(add_redefine_syms_file): Make function static.
+		(copy_object): Use is_strip_section.
+		Check to see if a .gnu_debuglink section should be added.
+	        If so, call bfd_add_gnu_debuglink.
+		(setup_section): Use is_strip_section.
+		(copy_section): Use is_strip_section.
+		(copy_main): Handle OPTION_ADD_GNU_DEBUGLINK.
+		* NEWS: Mention new objcopy switch.
+		* doc/binutils.texi: Document new switch.
 
-2000-06-13  Syd Polk  <spolk@redhat.com>
+2003-07-04  Nick Clifton  <nickc@redhat.com>
 
-	* aclocal.m4 configure: Regenerate with correct libtool.
-
-2000-05-23  matthew green  <mrg@redhat.com>
-
-	* Makefile.in: Regenerate.
-	* aclocal.m4: Likewise.
-	* configure: Likewise.
-	
-2000-04-21  Richard Henderson  <rth@cygnus.com>
-	    David Mosberger  <davidm@hpl.hp.com>
-
-	* Makefile.am (readelf.o): Add elf/ia64.h.
-	* Makefile.in: Rebuild.
-	* readelf.c: Include elf/ia64.h.
-	(guess_is_rela, dump_relocations): Handle EM_IA_64.
-	
-1999-12-15  Tim Wall <twall@cygnus.com>
-
-	* Merge from ibmdsp branch
-        * objdump.c (show_line): changed value passed to
-          bfd_find_nearest_line to be an address instead of an
-          octet offset.
-        * objdump.c (dump_data): octet counter was scaled the wrong direction
-
-1999-09-14  Michael Meissner  <meissner@cygnus.com>
-
-	* configure.in (Canonicalization of target names): Remove adding
-	${CONFIG_SHELL} in front of $ac_config_sub, since autoconfig 2.14
-	generates $ac_config_sub with a ${CONFIG_SHELL} already.
+	* configure.in: Add support for xscalebe-elf target.
 	* configure: Regenerate.
 
-1999-07-31  Tim Wall <twall@cygnus.com>
-	* objdump.c: Handle multiple-octet bytes.  When calculating an
-	  address offset, convert the number of octets to the number
-	  of target bytes.
-	  Show section BLOCK/CLINK flags and load page.
-	
-1999-07-14  Richard Henderson  <rth@cygnus.com>
+2003-06-30  Nick Clifton  <nickc@redhat.com>
 
-	* Makefile.am (readelf.o): Depend on elf/ia64.h too.
-	* readelf.c: Add appropriate IA64 hooks.
+	* Import these patches from gcc 3.3 branch:
 
-1999-05-26  Catherine Moore  <clm@cygnus.com>
+	2003-04-23  J"orn Rennecke <joern.rennecke@superh.com>
 
-	* Makefile.am: Add dependency of readelf.c on elf/frv.h
-	* Makefile.in: Regenerate.
-	* readelf.c (dump_relocations): Support EM_CYGNUS_FRV.
-	(get_machine_name): Likewise.
+		* readelf.c (get_machine_name) <EM_SH>: Amend return value
+		to refer to SuperH.
 
-1999-05-11  DJ Delorie  <dj@cygnus.com>
+		* readelf.c (decode_location_expression): Don't add a trailing ';'.
 
-	* configure.in, configure: add sh-pe and mips-pe (Windows CE) support
-	* dlltool.c: ditto
-	* rescoff.c (write_coff_file): ditto
+	2003-04-22  Kazuhiro Inaoka  <inaoka.kazuhiro@renesas.com>
+
+		* readelf.c: Replace references to Mitsubishi M32R with
+		references to Renesas M32R.
+
+	2003-04-15  Rohit Kumar Srivastava <rohits@kpitcummins.com>
+
+		* readelf.c: Replace occurrances of 'Hitachi' with 'Renesas'.
+
+	2003-04-01  Bob Wilson  <bob.wilson@acm.org>
+
+		* readelf.c: Include "elf/xtensa.h".
+		(guess_is_rela): Add EM_XTENSA and EM_XTENSA_OLD to list of
+		targets that use RELA relocations.
+		(dump_relocations): Call elf_xtensa_reloc_type for
+		EM_XTENSA and EM_XTENSA_OLD.
+		(get_machine_name): Handle EM_XTENSA and EM_XTENSA_OLD.
+
+	2003-02-21  Ian Wienand  <ianw@gelato.unsw.edu.au>
+
+		* readelf.c (get_ia64_dynamic_type): New function.
+		(dynamic_segment_ia64_val): New function.
+		(get_dynamic_type): If machine type is EM_IA_64 call
+		get_ia64_dynamic_val.
+		(get_ia64_section_type_name): Handle sections with types in the
+		SHT_IA_64_LOPSREG to SHT_IA_64_HIPSREG range.
+		(get_dynamic_flags): If machine type is EM_IA_64 call
+		dynamic_segment_ia64_val.
+
+Fri Apr 25 12:11:32 PDT 2003  Brendan Conoboy  <blc@redhat.com>
+
+	Makefile.am: Revert previous patch.
+	Makefile.in: Regenerate.
+
+Fri Apr 25 00:29:43 UTC 2003  Brendan Conoboy  <blc@redhat.com>
+
+	Makefile.am: Use installed readline if available.
+	Makefile.in: Regenerate.
 
 
 Local Variables:

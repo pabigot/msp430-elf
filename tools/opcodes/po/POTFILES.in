@@ -12,19 +12,14 @@ aarch64-tbl.h
 alpha-dis.c
 alpha-opc.c
 arc-dis.c
-arc-dis.h
 arc-ext.c
-arc-ext.h
 arc-opc.c
 arm-dis.c
 avr-dis.c
 bfin-dis.c
 cgen-asm.c
-cgen-asm.in
 cgen-bitset.c
 cgen-dis.c
-cgen-dis.in
-cgen-ibld.in
 cgen-opc.c
 cr16-dis.c
 cr16-opc.c
@@ -85,7 +80,6 @@ ia64-opc-d.c
 ia64-opc-f.c
 ia64-opc-i.c
 ia64-opc-m.c
-ia64-opc-x.c
 ia64-opc.c
 ia64-opc.h
 ip2k-asm.c
@@ -145,9 +139,7 @@ mep-opc.c
 mep-opc.h
 metag-dis.c
 microblaze-dis.c
-microblaze-dis.h
 microblaze-opc.h
-microblaze-opcm.h
 micromips-opc.c
 mips-dis.c
 mips-opc.c
@@ -168,7 +160,6 @@ mt-opc.h
 nios2-dis.c
 nios2-opc.c
 ns32k-dis.c
-opc2c.c
 openrisc-asm.c
 openrisc-desc.c
 openrisc-desc.h
@@ -176,7 +167,6 @@ openrisc-dis.c
 openrisc-ibld.c
 openrisc-opc.c
 openrisc-opc.h
-opintl.h
 or32-dis.c
 or32-opc.c
 pdp11-dis.c

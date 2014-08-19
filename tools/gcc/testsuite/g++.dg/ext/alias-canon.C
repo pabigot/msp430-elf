@@ -1,5 +1,6 @@
 // PR c++/34935
 /* { dg-do compile } */
+/* { dg-options "-m64bit-doubles" { target rx*-*-* } } */
 /* { dg-final { scan-assembler "_Z1fi" } } */
 /* { dg-final { scan-assembler "_Z1fb" } } */
 /* { dg-final { scan-assembler "_Z1fd" } } */

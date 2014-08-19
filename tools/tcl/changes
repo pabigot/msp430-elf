@@ -1,6 +1,6 @@
 Recent user-visible changes to Tcl:
 
-RCS: @(#) $Id$
+RCS: @(#) $Id: changes,v 1.3 2012/04/18 00:36:11 kevinb Exp $
 
 1. No more [command1] [command2] construct for grouping multiple
 commands on a single command line.

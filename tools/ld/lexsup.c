@@ -145,6 +145,9 @@ static const struct ld_option ld_options[] =
   { {"library-path", required_argument, NULL, 'L'},
     'L', N_("DIRECTORY"), N_("Add DIRECTORY to library search path"),
     TWO_DASHES },
+  { {"search-path", required_argument, NULL, 'B'},
+    'B', N_("DIRECTORY"), N_("Add DIRECTORY to library search path"),
+    TWO_DASHES },
   { {"sysroot=<DIRECTORY>", required_argument, NULL, OPTION_SYSROOT},
     '\0', NULL, N_("Override the default sysroot location"), TWO_DASHES },
   { {NULL, required_argument, NULL, '\0'},
@@ -301,8 +304,6 @@ static const struct ld_option ld_options[] =
     TWO_DASHES },
   { {"embedded-relocs", no_argument, NULL, OPTION_EMBEDDED_RELOCS},
     '\0', NULL, N_("Generate embedded relocs"), TWO_DASHES},
-  { {"errors-to-file", required_argument, NULL, OPTION_STDERR_TO_FILE},
-    '\0', N_("FILE"), N_("Save errors to FILE instead of printing to stderr"), TWO_DASHES },
   { {"fatal-warnings", no_argument, NULL, OPTION_WARN_FATAL},
     '\0', NULL, N_("Treat warnings as errors"),
     TWO_DASHES },
@@ -410,13 +411,13 @@ static const struct ld_option ld_options[] =
   { {"pic-executable", no_argument, NULL, OPTION_PIE},
     '\0', NULL, NULL, TWO_DASHES },
   { {"sort-common", optional_argument, NULL, OPTION_SORT_COMMON},
-    '\0', N_("[=ascending|descending]"), 
-    N_("Sort common symbols by alignment [in specified order]"), 
+    '\0', N_("[=ascending|descending]"),
+    N_("Sort common symbols by alignment [in specified order]"),
     TWO_DASHES },
   { {"sort_common", no_argument, NULL, OPTION_SORT_COMMON},
     '\0', NULL, NULL, NO_HELP },
   { {"sort-section", required_argument, NULL, OPTION_SORT_SECTION},
-    '\0', N_("name|alignment"), 
+    '\0', N_("name|alignment"),
     N_("Sort sections by name or maximum alignment"), TWO_DASHES },
   { {"spare-dynamic-tags", required_argument, NULL, OPTION_SPARE_DYNAMIC_TAGS},
     '\0', N_("COUNT"), N_("How many tags to reserve in .dynamic section"),
@@ -816,6 +817,7 @@ parse_args (unsigned argc, char **argv)
 	  help ();
 	  xexit (0);
 	  break;
+	case 'B':
 	case 'L':
 	  ldfile_add_library_path (optarg, TRUE);
 	  break;
@@ -1065,21 +1067,6 @@ parse_args (unsigned argc, char **argv)
 	      command_line.rpath_link = buf;
 	    }
 	  break;
-        case OPTION_STDERR_TO_FILE:
-          {
-            FILE * fp = fopen (optarg, "w+");
-
-            if (fp == NULL)
-	      einfo (_("%P%F: can't redirect stderr to the file '%s'\n"),
-		     optarg);
-
-            fclose (fp);
-
-            if ((fp = freopen (optarg, "w+", stderr)) == NULL)
-	      einfo (_("%P%F: can't redirect stderr to the file '%s'\n"),
-		     optarg);
-            break;
-          }
 	case OPTION_NO_RELAX:
 	  DISABLE_RELAXATION;
 	  break;
@@ -1424,14 +1411,14 @@ parse_args (unsigned argc, char **argv)
 	  break;
 	case '(':
 	  lang_enter_group ();
-	  ingroup ++;
+	  ingroup++;
 	  break;
 	case ')':
 	  if (! ingroup)
 	    einfo (_("%P%F: group ended before it began (--help for usage)\n"));
 
 	  lang_leave_group ();
-	  ingroup --;
+	  ingroup--;
 	  break;
 
 	case OPTION_INIT:

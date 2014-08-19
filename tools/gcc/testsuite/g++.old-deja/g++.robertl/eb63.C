@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // { dg-options "-w -fpermissive" }
 //This uses GNU extensions, so disable -ansi
 #include <stdio.h>

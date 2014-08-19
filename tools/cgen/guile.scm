@@ -1,5 +1,5 @@
 ; Guile-specific functions.
-; Copyright (C) 2000, 2004, 2009 Red Hat, Inc.
+; Copyright (C) 2000, 2004 Red Hat, Inc.
 ; This file is part of CGEN.
 ; See file COPYING.CGEN for details.
 
@@ -64,13 +64,6 @@
        objs)
   (newline (current-error-port)))
 
-;; Guile 1.8 no longer has "." in %load-path so relative path loads
-;; no longer work.
-
-(if (or (> *guile-major-version* 1)
-	(>= *guile-minor-version* 8))
-    (set! %load-path (append %load-path (list ".")))
-)
 
 
 ;;; Enabling and disabling debugging features of the host Scheme.
@@ -98,7 +91,7 @@
 (define (cgen-call-with-debugging flag thunk)
   (if (memq 'debug-extensions *features*)
       ((if flag debug-enable debug-disable) 'debug))
-
+  
   ;; Now, make that debugging / no-debugging setting actually take
   ;; effect.
   ;;
@@ -134,7 +127,7 @@
 		(if (= (length args) 5)
 		    (begin
 		      (apply display-error #f (current-error-port) (cdr args))
-		      ;; Grab a copy of the current stack,
+		      ;; Grab a copy of the current stack, 
 		      (save-stack handler 0)
 		      (backtrace)))
 		(quit 1))
@@ -143,7 +136,7 @@
   ;; handler WITHOUT UNWINDING THE STACK (that's the 'lazy' part).  We
   ;; need the stack left alone so we can produce a backtrace.
   (lazy-catch #t
-	      (lambda ()
+	      (lambda () 
 		;; I have no idea why the 'load-stack' stack mark is
 		;; not still present on the stack; we're still loading
 		;; cgen-APP.scm, aren't we?  But stack-id returns #f

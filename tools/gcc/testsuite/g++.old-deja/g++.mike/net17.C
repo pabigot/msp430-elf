@@ -9,7 +9,7 @@ int i = 0;
 class A {
 public:
   A() {
-    printf("Doing A\n");
+    // printf("Doing A\n");
     if (++i != 1)
       exit(1);
   }
@@ -18,7 +18,7 @@ public:
 class B {
 public:
   B() {
-    printf("Doing B\n");
+    // printf("Doing B\n");
     if (++i != 2)
       exit(1);
   }
@@ -27,7 +27,7 @@ public:
 class C : public virtual A, public virtual B {
 public:
   C() {
-    printf("Doing C\n");
+    // printf("Doing C\n");
     if (++i != 3)
       exit(1);
   }
@@ -36,7 +36,7 @@ public:
 class D : public virtual B, public virtual A {
 public:
   D() {
-    printf("Doing D\n");
+    // printf("Doing D\n");
     if (++i != 4)
       exit(1);
   }
@@ -45,7 +45,7 @@ public:
 class E : public C, public D {
 public:
   E() {
-    printf("Doing E\n");
+    // printf("Doing E\n");
     if (++i != 5)
       exit(1);
   }

@@ -1,5 +1,6 @@
 /* { dg-do compile } */
 /* { dg-options "-Wstack-usage=512" } */
+/* { dg-skip-if "stack usage not supported" { rl78-*-* } "*" "" } */
 
 int foo1 (void)
 {

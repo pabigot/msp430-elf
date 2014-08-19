@@ -1,5 +1,5 @@
 ;; Predicate definitions for Renesas RX.
-;; Copyright (C) 2008-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2008-2014 Free Software Foundation, Inc.
 ;; Contributed by Red Hat.
 ;;
 ;; This file is part of GCC.
@@ -111,7 +111,7 @@
       ||   REGNO (XEXP (SET_SRC (element), 0)) != SP_REG
       || ! CONST_INT_P (XEXP (SET_SRC (element), 1)))
     return false;
-	 
+
   /* Check that the next element is the first push.  */
   element = XVECEXP (op, 0, 1);
   if (   ! SET_P (element)

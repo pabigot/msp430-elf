@@ -43,3 +43,4 @@ int main ()
   else
     { printf ("FAIL\n"); return 1; }
 }
+// { dg-require-effective-target size32plus }

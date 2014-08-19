@@ -47,7 +47,6 @@ int main (void)
 /* Requires versioning for aliasing.  */
 
 /* { dg-final { scan-tree-dump-times "vectorized 1 loops" 1 "vect" } } */
-/* { dg-final { scan-tree-dump-times "Vectorizing an unaligned access" 1 "vect" { xfail { vect_no_align } } } } */
 /* { dg-final { scan-tree-dump-times "Alignment of access forced using peeling" 0 "vect" } } */
 /* { dg-final { scan-tree-dump-times "Alignment of access forced using versioning." 1 "vect" { target vect_no_align } } } */
 /* { dg-final { cleanup-tree-dump "vect" } } */

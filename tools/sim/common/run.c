@@ -1,18 +1,18 @@
 /* run front end support for all the simulators.
-   Copyright (C) 1992-2013 Free Software Foundation, Inc.
+   Copyright (C) 1992-2014 Free Software Foundation, Inc.
 
-   This program is free software; you can redistribute it and/or modify
-   it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 3 of the License, or
-   (at your option) any later version.
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 3 of the License, or
+(at your option) any later version.
 
-   This program is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-   GNU General Public License for more details.
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
 
-   You should have received a copy of the GNU General Public License
-   along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
 /* Steve Chamberlain sac@cygnus.com,
    and others at Cygnus.  */
@@ -50,8 +50,8 @@
 #include "run-sim.h"
 #include "version.h"
 
-static void usage PARAMS ((int help));
-static void print_version PARAMS ((void));
+static void usage (int help);
+static void print_version (void);
 extern int optind;
 extern char *optarg;
 
@@ -63,7 +63,7 @@ extern int getopt ();
 
 #ifdef NEED_UI_LOOP_HOOK
 /* Gdb foolery. This is only needed for gdb using a gui.  */
-int (*deprecated_ui_loop_hook) PARAMS ((int signo));
+int (*deprecated_ui_loop_hook) (int signo);
 #endif
 
 static SIM_DESC sd;
@@ -344,9 +344,6 @@ usage (int help)
   sim_target_display_usage (help);
 #endif
 
-#ifndef REPORT_BUGS_TO
-#define REPORT_BUGS_TO "gdb@sourceware.org"
-#endif
   if (help && REPORT_BUGS_TO[0])
     printf ("Report bugs to %s\n", REPORT_BUGS_TO);
 
@@ -356,8 +353,5 @@ usage (int help)
 static void
 print_version ()
 {
-#ifndef PKGVERSION
-#define PKGVERSION ""
-#endif
   printf ("GNU simulator %s%s\n", PKGVERSION, version);
 }

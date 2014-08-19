@@ -1,5 +1,5 @@
 /* Support for printing Java types for GDB, the GNU debugger.
-   Copyright (C) 1997-2000, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -24,17 +24,19 @@
 #include "demangle.h"
 #include "gdb-demangle.h"
 #include "jv-lang.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "typeprint.h"
 #include "c-lang.h"
 #include "cp-abi.h"
+#include "cp-support.h"
 #include "gdb_assert.h"
 
 /* Local functions */
 
 static void java_type_print_base (struct type * type,
 				  struct ui_file *stream, int show,
-				  int level);
+				  int level,
+				  const struct type_print_options *flags);
 
 static void
 java_type_print_derivation_info (struct ui_file *stream, struct type *type)
@@ -84,7 +86,7 @@ java_type_print_derivation_info (struct ui_file *stream, struct type *type)
 
 static void
 java_type_print_base (struct type *type, struct ui_file *stream, int show,
-		      int level)
+		      int level, const struct type_print_options *flags)
 {
   int i;
   int len;
@@ -115,7 +117,8 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
   switch (TYPE_CODE (type))
     {
     case TYPE_CODE_PTR:
-      java_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level);
+      java_type_print_base (TYPE_TARGET_TYPE (type), stream, show, level,
+			    flags);
       break;
 
     case TYPE_CODE_STRUCT:
@@ -192,7 +195,7 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 
 	      java_print_type (TYPE_FIELD_TYPE (type, i),
 			       TYPE_FIELD_NAME (type, i),
-			       stream, show - 1, level + 4);
+			       stream, show - 1, level + 4, flags);
 
 	      fprintf_filtered (stream, ";\n");
 	    }
@@ -237,7 +240,8 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 		  physname[p - real_physname] = '\0';
 
 		  is_full_physname_constructor
-                    = (is_constructor_name (physname)
+                    = (TYPE_FN_FIELD_CONSTRUCTOR (f, j)
+		       || is_constructor_name (physname)
                        || is_destructor_name (physname));
 
 		  QUIT;
@@ -283,8 +287,8 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 		    mangled_name = physname;
 
 		  demangled_name =
-		    cplus_demangle (mangled_name,
-				    DMGL_ANSI | DMGL_PARAMS | DMGL_JAVA);
+		    gdb_demangle (mangled_name,
+				  DMGL_ANSI | DMGL_PARAMS | DMGL_JAVA);
 
 		  if (demangled_name == NULL)
 		    demangled_name = xstrdup (mangled_name);
@@ -323,7 +327,7 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
       break;
 
     default:
-      c_type_print_base (type, stream, show, level);
+      c_type_print_base (type, stream, show, level, flags);
     }
 }
 
@@ -331,11 +335,12 @@ java_type_print_base (struct type *type, struct ui_file *stream, int show,
 
 void
 java_print_type (struct type *type, const char *varstring,
-		 struct ui_file *stream, int show, int level)
+		 struct ui_file *stream, int show, int level,
+		 const struct type_print_options *flags)
 {
   int demangled_args;
 
-  java_type_print_base (type, stream, show, level);
+  java_type_print_base (type, stream, show, level, flags);
 
   if (varstring != NULL && *varstring != '\0')
     {
@@ -347,5 +352,5 @@ java_print_type (struct type *type, const char *varstring,
      so don't print an additional pair of ()'s.  */
 
   demangled_args = varstring != NULL && strchr (varstring, '(') != NULL;
-  c_type_print_varspec_suffix (type, stream, show, 0, demangled_args);
+  c_type_print_varspec_suffix (type, stream, show, 0, demangled_args, flags);
 }

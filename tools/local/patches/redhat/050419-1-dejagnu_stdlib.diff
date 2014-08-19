@@ -1,0 +1,24 @@
+gcc 4.x complains about non-declared abort and exit functions.
+
+dejagnu/ChangeLog.RedHat
+========================
+
+2005-04-19  Corinna Vinschen  <vinschen@redhat.com>
+
+	* testglue.c: Include stdlib.h to shut up gcc.
+
+
+Index: dejagnu/testglue.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/dejagnu/testglue.c,v
+retrieving revision 1.2
+diff -u -p -r1.2 testglue.c
+--- dejagnu/testglue.c	7 Dec 2002 00:51:26 -0000	1.2
++++ dejagnu/testglue.c	19 Apr 2005 17:37:12 -0000
+@@ -1,5 +1,6 @@
+ #include <stdio.h>
+ #include <string.h>
++#include <stdlib.h>
+ #ifndef NO_UNISTD_H
+ #include <sys/unistd.h>
+ #endif

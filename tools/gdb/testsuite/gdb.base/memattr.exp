@@ -1,4 +1,4 @@
-# Copyright 2011-2012 Free Software Foundation, Inc.
+# Copyright 2011-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -17,10 +17,13 @@
 
 # Test the memory attribute commands.
 
-set testfile "memattr"
-set srcfile  ${testfile}.c
+standard_testfile .c
+set opts [list debug]
+if { [istarget "rl78-*"] } then {
+    lappend opts "additional_flags=-Wl,--no-gc-sections"
+}
 
-if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
+if { [prepare_for_testing $testfile.exp $testfile $srcfile $opts] } {
     return -1
 }
 
@@ -458,7 +461,7 @@ proc delete_memory {} {
 
     gdb_test_multiple "delete mem" "delete mem" {
        -re "Delete all memory regions.*y or n.*$" {
-           send_gdb "y\n";
+           send_gdb "y\n"
            exp_continue
        }
        -re "$gdb_prompt $" { }

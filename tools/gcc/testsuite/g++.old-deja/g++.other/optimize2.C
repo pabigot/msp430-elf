@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // { dg-options "-O2" }
 // 
 // Copyright (C) 2001 Free Software Foundation, Inc.

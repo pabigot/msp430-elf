@@ -105,17 +105,6 @@ gld${EMULATION_NAME}_before_parse (void)
   input_flags.dynamic = ${DYNAMIC_LINK-TRUE};
   config.has_shared = `if test -n "$GENERATE_SHLIB_SCRIPT" ; then echo TRUE ; else echo FALSE ; fi`;
   config.separate_code = `if test "x${SEPARATE_CODE}" = xyes ; then echo TRUE ; else echo FALSE ; fi`;
-EOF
-  # Issue 251804: Default to stripping all local symbols in selected targets.
-  # Warning: This breaks some GDB tests as local common symbols are also removed.
-  case ${target} in
-    mn10300-*-* | am3*-*-* | rl78-*-*)
-fragment <<EOF
-  link_info.discard = discard_all;
-EOF
-    ;;
-  esac
-fragment <<EOF
 }
 
 EOF
@@ -458,7 +447,7 @@ fragment <<EOF
 
   /* Add this file into the symbol table.  */
   if (! bfd_link_add_symbols (abfd, &link_info))
-    einfo ("%F%B: could not read symbols: %E\n", abfd);
+    einfo ("%F%B: error adding symbols: %E\n", abfd);
 
   return TRUE;
 }
@@ -904,12 +893,10 @@ if test x"$LDEMUL_AFTER_OPEN" != xgld"$EMULATION_NAME"_after_open; then
 fragment <<EOF
 
 static bfd_size_type
-id_note_section_size (bfd *abfd)
+id_note_section_size (bfd *abfd ATTRIBUTE_UNUSED)
 {
   const char *style = emit_note_gnu_build_id;
   bfd_size_type size;
-
-  abfd = abfd;
 
   size = offsetof (Elf_External_Note, name[sizeof "GNU"]);
   size = (size + 3) & -(bfd_size_type) 4;
@@ -1189,13 +1176,16 @@ gld${EMULATION_NAME}_after_open (void)
       int force;
 
       /* If the lib that needs this one was --as-needed and wasn't
-	 found to be needed, then this lib isn't needed either.  Skip
-	 the lib when creating a shared object unless we are copying
-	 DT_NEEDED entres.  */
+	 found to be needed, then this lib isn't needed either.  */
       if (l->by != NULL
-	  && ((bfd_elf_get_dyn_lib_class (l->by) & DYN_AS_NEEDED) != 0
-	      || (!link_info.executable
-		  && bfd_elf_get_dyn_lib_class (l->by) & DYN_NO_ADD_NEEDED) != 0))
+	  && (bfd_elf_get_dyn_lib_class (l->by) & DYN_AS_NEEDED) != 0)
+	continue;
+
+      /* Skip the lib if --no-copy-dt-needed-entries and
+	 --allow-shlib-undefined is in effect.  */
+      if (l->by != NULL
+	  && link_info.unresolved_syms_in_shared_libs == RM_IGNORE
+	  && (bfd_elf_get_dyn_lib_class (l->by) & DYN_NO_ADD_NEEDED) != 0)
 	continue;
 
       /* If we've already seen this file, skip it.  */
@@ -1491,13 +1481,37 @@ gld${EMULATION_NAME}_before_allocation (void)
   asection *sinterp;
   bfd *abfd;
 
-  if (link_info.hash->type == bfd_link_elf_hash_table)
-    _bfd_elf_tls_setup (link_info.output_bfd, &link_info);
+  if (is_elf_hash_table (link_info.hash))
+    {
+      _bfd_elf_tls_setup (link_info.output_bfd, &link_info);
 
-  /* If we are going to make any variable assignments, we need to let
-     the ELF backend know about them in case the variables are
-     referred to by dynamic objects.  */
-  lang_for_each_statement (gld${EMULATION_NAME}_find_statement_assignment);
+      /* Make __ehdr_start hidden if it has been referenced, to
+	 prevent the symbol from being dynamic.  */
+      if (!link_info.relocatable)
+       {
+         struct elf_link_hash_entry *h
+           = elf_link_hash_lookup (elf_hash_table (&link_info), "__ehdr_start",
+                                   FALSE, FALSE, TRUE);
+
+         /* Only adjust the export class if the symbol was referenced
+            and not defined, otherwise leave it alone.  */
+         if (h != NULL
+             && (h->root.type == bfd_link_hash_new
+                 || h->root.type == bfd_link_hash_undefined
+                 || h->root.type == bfd_link_hash_undefweak
+                 || h->root.type == bfd_link_hash_common))
+           {
+             _bfd_elf_link_hash_hide_symbol (&link_info, h, TRUE);
+             if (ELF_ST_VISIBILITY (h->other) != STV_INTERNAL)
+               h->other = (h->other & ~ELF_ST_VISIBILITY (-1)) | STV_HIDDEN;
+           }
+       }
+
+      /* If we are going to make any variable assignments, we need to
+	 let the ELF backend know about them in case the variables are
+	 referred to by dynamic objects.  */
+      lang_for_each_statement (gld${EMULATION_NAME}_find_statement_assignment);
+    }
 
   /* Let the ELF backend work out the sizes of any sections required
      by dynamic linking.  */

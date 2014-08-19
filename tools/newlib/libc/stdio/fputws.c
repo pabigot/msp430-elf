@@ -35,16 +35,17 @@ INDEX
 
 ANSI_SYNOPSIS
 	#include <wchar.h>
-	int fputws(const wchar_t *<[ws]>, FILE *<[fp]>);
+	int fputws(const wchar_t *__restrict <[ws]>, FILE *__restrict <[fp]>);
 
 	#include <wchar.h>
-	int _fputws_r(struct _reent *<[ptr]>, const wchar_t *<[ws]>, FILE *<[fp]>);
+	int _fputws_r(struct _reent *<[ptr]>, const wchar_t *<[ws]>,
+                      FILE *<[fp]>);
 
 TRAD_SYNOPSIS   
 	#include <wchar.h>
 	int fputws(<[ws]>, <[fp]>)
-	wchar_t *<[ws]>;
-	FILE *<[fp]>;
+	wchar_t *__restrict <[ws]>;
+	FILE *__restrict <[fp]>;
 
 	#include <wchar.h>
 	int _fputws_r(<[ptr]>, <[ws]>, <[fp]>)
@@ -84,6 +85,7 @@ _DEFUN(_fputws_r, (ptr, ws, fp),
 {
   size_t nbytes;
   char buf[BUFSIZ];
+#ifdef _FVWRITE_IN_STREAMIO
   struct __suio uio;
   struct __siov iov;
 
@@ -108,15 +110,44 @@ _DEFUN(_fputws_r, (ptr, ws, fp),
   return (0);
 
 error:
-  _newlib_flockfile_end(fp);
+  _newlib_flockfile_end (fp);
   return (-1);
+#else
+  _newlib_flockfile_start (fp);
+  ORIENT (fp, 1);
+  if (cantwrite (ptr, fp) != 0)
+    goto error;
+
+  do
+    {
+      size_t i = 0;
+      nbytes = _wcsrtombs_r (ptr, buf, &ws, sizeof (buf), &fp->_mbstate);
+      if (nbytes == (size_t) -1)
+	goto error;
+      while (i < nbytes)
+        {
+	  if (__sputc_r (ptr, buf[i], fp) == EOF)
+	    goto error;
+	  i++;
+        }
+    }
+  while (ws != NULL);
+  _newlib_flockfile_exit (fp);
+  return (0);
+
+error:
+  _newlib_flockfile_end (fp);
+  return (-1);
+#endif
 }
 
 int
 _DEFUN(fputws, (ws, fp),
-	const wchar_t *ws _AND
-	FILE *fp)
+	const wchar_t *__restrict ws _AND
+	FILE *__restrict fp)
 {
-  CHECK_INIT (_REENT, fp);
-  return _fputws_r (_REENT, ws, fp);
+  struct _reent *reent = _REENT;
+
+  CHECK_INIT (reent, fp);
+  return _fputws_r (reent, ws, fp);
 }

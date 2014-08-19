@@ -19,7 +19,7 @@
    Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
    02111-1307 USA.  */
 
-/* $Id: thread-m.h,v 1.80 2013/03/17 22:15:17 nickc Exp $
+/* $Id: thread-m.h,v 1.10 2014/02/20 13:50:16 nickc Exp $
    One out of _LIBC, USE_PTHREADS, USE_THR or USE_SPROC should be
    defined, otherwise the token NO_THREADS and dummy implementations
    of the macros will be defined.  */

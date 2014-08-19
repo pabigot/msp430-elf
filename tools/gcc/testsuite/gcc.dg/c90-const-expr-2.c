@@ -3,13 +3,13 @@
 */
 /* Origin: Joseph Myers <jsm28@cam.ac.uk> */
 /* { dg-do compile } */
+/* { dg-skip-if "pointers are not power-of-2 in size" { "msp430-*-*" } { "-mlarge" } { "" } } */
 /* { dg-options "-std=iso9899:1990" } */
 /* Note: not using -pedantic since the -std option alone should be enough
    to give the correct behavior to conforming programs.  If -pedantic is
    needed to make (say) (0, 0) not be a constant expression, this is a
    bug.
 */
-/* { dg-skip-if "pointers are not power-of-2 in size" { "msp430-*-*" } { "-mlarge" } { "" } } */
 
 int *a;
 int b;

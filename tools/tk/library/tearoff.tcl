@@ -2,7 +2,7 @@
 #
 # This file contains procedures that implement tear-off menus.
 #
-# RCS: @(#) $Id: tearoff.tcl,v 1.12 2003/03/19 23:02:05 cagney Exp $
+# RCS: @(#) $Id: tearoff.tcl,v 1.3 2012/04/18 00:36:57 kevinb Exp $
 #
 # Copyright (c) 1994 The Regents of the University of California.
 # Copyright (c) 1994-1997 Sun Microsystems, Inc.

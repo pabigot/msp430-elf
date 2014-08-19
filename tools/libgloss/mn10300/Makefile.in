@@ -128,6 +128,7 @@ distclean maintainer-clean realclean: clean
 
 .PHONY: install info install-info clean-info
 install:
+	mkdir -p $(DESTDIR)$(tooldir)/lib${MULTISUBDIR};
 	@for crt in ${CRT0}; do \
 	$(INSTALL_PROGRAM) $${crt} $(DESTDIR)$(tooldir)/lib${MULTISUBDIR}/$${crt}; \
 	done
@@ -156,18 +157,3 @@ Makefile: Makefile.in config.status @host_makefile_frag_path@ @target_makefile_f
 
 config.status: configure
 	$(SHELL) config.status --recheck
-
-# Use -ffixed-a2 2when building crt1.c.  This is to support constructors that
-# have been built with -fPIC.  The -fPIC option makes the a2 register fixed,
-# which is at odds with the default behaviour of treating it as call-saved.
-# Making a2 fixed even for non-PIC code is safe, since it just means that gcc
-# will use a3 instead of a2 when it compiles __main() in crt1.c.
-#
-# Theoretically -fPIC ought to trigger a different set of multilibs, but this
-# has not been done.  (Presumably to save space).  This lack would only cause
-# problems if a non-PIC function calls a PIC function which handles pointers
-# in some fashion.  Apart from this case of invoking constructors, the only
-# other time this would happen is if a non-PIC compiled library function (eg:
-# qsort) calls a PIC compiled function which needs to access global data.
-crt1.o: crt1.c
-	$(CC) $(CFLAGS_FOR_TARGET) -O2 $(INCLUDES) -c $(CFLAGS) -ffixed-a2 $<

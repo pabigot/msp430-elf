@@ -25,12 +25,12 @@ constructing from unsigned
 
 */
 
-extern "C" int printf (const char *, ...);
+// extern "C" int printf (const char *, ...);
 extern "C" void exit (int);
 
 int count = 0;
 
-void die () { printf ("FAIL\n"); exit (1); }
+void die () { /* printf ("FAIL\n"); */ exit (1); }
 
 struct test {
 	test() { if (count != 0) die (); }
@@ -49,7 +49,7 @@ main() {
   test k;
   test l=k;
 
-  printf ("PASS\n");
+  // printf ("PASS\n");
 
   return 0;
 }

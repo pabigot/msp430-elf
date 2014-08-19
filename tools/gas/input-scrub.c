@@ -266,13 +266,6 @@ input_scrub_include_sb (sb *from, char *position, int is_expansion)
 {
   int newline;
 
-  /* I added this flag so that it's possible to do a wholesale replacement
-     of a single line w/o disrupting the input stream; if the checking is
-     enabled, substitutions on lines like " .if SUBS" will fail, thinking
-     they have to see ".endif" before the end of the single-line sb.
-     twall@redhat.com   */
-  if (!from->no_macro_check)
-    {
   if (macro_nest > max_macro_nest)
     as_fatal (_("macros nested too deeply"));
   ++macro_nest;
@@ -283,7 +276,6 @@ input_scrub_include_sb (sb *from, char *position, int is_expansion)
       md_macro_start ();
     }
 #endif
-    }
 
   next_saved_file = input_scrub_push (position);
 
@@ -302,7 +294,6 @@ input_scrub_include_sb (sb *from, char *position, int is_expansion)
      e.g. end-of-line at the end of a macro.  */
   sb_terminate (&from_sb);
 
-  from_sb.no_macro_check = from->no_macro_check;
   sb_index = 1;
 
   /* These variables are reset by input_scrub_push.  Restore them
@@ -328,9 +319,7 @@ input_scrub_next_buffer (char **bufp)
     {
       if (sb_index >= from_sb.len)
 	{
-          int macro_check = !from_sb.no_macro_check;
 	  sb_kill (&from_sb);
-	  if (macro_check)
 	  if (from_sb_is_expansion)
 	    {
 	      cond_finish_check (macro_nest);

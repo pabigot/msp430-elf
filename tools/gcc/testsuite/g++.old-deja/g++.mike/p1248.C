@@ -27,3 +27,4 @@ int main()
 }
 
 Base::~Base () { }
+// { dg-require-effective-target size32plus }

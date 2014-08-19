@@ -9,3 +9,5 @@ int main ()
       catch (...) { break; }
     }
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

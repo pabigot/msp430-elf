@@ -1,5 +1,4 @@
-# Copyright 1998-1999, 2002-2004, 2007-2012 Free Software Foundation,
-# Inc.
+# Copyright 1998-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -51,35 +50,17 @@
 # test running programs
 #
 
-set testfile "break"
-set srcfile ${testfile}.c
-set srcfile1 ${testfile}1.c
-set binfile ${objdir}/${subdir}/${testfile}
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}0.o" object {debug nowarnings}] != "" } {
-     untested completion.exp
-     return -1
-}
-
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}1.o" object {debug nowarnings}] != "" } {
-     untested completion.exp
-     return -1
-}
-
-if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug nowarnings}] != "" } {
-     untested completion.exp
-     return -1
-}
+standard_testfile break.c break1.c
 
 if [get_compiler_info] {
-    return -1;
+    return -1
 }
 
-gdb_exit
-
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
+if {[prepare_for_testing $testfile.exp $testfile \
+	 [list $srcfile $srcfile2] {debug nowarnings}]} {
+    untested $testfile.exp
+    return -1
+}
 
 if ![runto_main] then {
         perror "tests suppressed"
@@ -161,7 +142,7 @@ gdb_test_multiple "" "$test" {
     -re "^info t foo\\\x07$" {
 	send_gdb "\n"
 	gdb_test_multiple "" "$test" {
-	    -re "Ambiguous info command \"t foo\": target, tasks, terminal, threads, tp, tracepoints, tvariables, types\\..*$gdb_prompt $" {
+	    -re "Ambiguous info command \"t foo\": target, tasks, terminal, threads, tp, tracepoints, tvariables, (type-printers, )?types\\..*$gdb_prompt $" {
 		pass "$test"
 	    }
 	}
@@ -174,7 +155,7 @@ gdb_test_multiple "" "$test" {
     -re "^info t\\\x07$" {
 	send_gdb "\n"
 	gdb_test_multiple "" "$test" {
-	    -re "Ambiguous info command \"t\": target, tasks, terminal, threads, tp, tracepoints, tvariables, types\\..*$gdb_prompt $" {
+	    -re "Ambiguous info command \"t\": target, tasks, terminal, threads, tp, tracepoints, tvariables, (type-printers, )?types\\..*$gdb_prompt $" {
 		pass "$test"
 	    }
 	}
@@ -187,7 +168,7 @@ gdb_test_multiple "" "$test" {
     -re "^info t \\\x07$" {
 	send_gdb "\n"
 	gdb_test_multiple "" "$test" {
-	    -re "Ambiguous info command \"t \": target, tasks, terminal, threads, tp, tracepoints, tvariables, types\\..*$gdb_prompt $" {
+	    -re "Ambiguous info command \"t \": target, tasks, terminal, threads, tp, tracepoints, tvariables, (type-printers, )?types\\..*$gdb_prompt $" {
 		pass "$test"
 	    }
 	}
@@ -389,6 +370,19 @@ gdb_test_multiple "" "$test" {
     }
 }
 
+set test "complete help aliases"
+send_gdb "help user-define\t"
+gdb_test_multiple "" "$test" {
+    -re "^help user-defined $" {
+	send_gdb "\n"
+	gdb_test_multiple "" "$test" {
+	    -re "$gdb_prompt $" {
+		pass "$test"
+	    }
+	}
+    }
+}
+
 
 # These tests used to try completing the shorter "p b-a".
 # Unfortunately, on some systems, there are .o files in system
@@ -542,6 +536,14 @@ gdb_test "complete p &values\[0\]->z" \
     "p &values.0.->z_field" \
     "completion of field in anonymous union"
 
+gdb_test "complete ptype &values\[0\]->z" \
+    "ptype &values.0.->z_field" \
+    "ptype completion of field in anonymous union"
+
+gdb_test "complete whatis &values\[0\]->z" \
+    "whatis &values.0.->z_field" \
+    "whatis completion of field in anonymous union"
+
 # The following tests used to simply try to complete `${objdir}/file',
 # and so on.  The problem is that ${objdir} can be very long; the
 # completed filename may be more than eighty characters wide.  When
@@ -678,6 +680,54 @@ gdb_test "complete sav" "save" "test non-deprecated completion"
 # If there is only a deprecated completion, then it should be returned.
 gdb_test "complete save-t" "save-tracepoints" "test deprecated completion"
 
+
+#
+# Tag name completion.
+#
+
+gdb_test "complete ptype struct some_" "ptype struct some_struct"
+gdb_test "complete ptype enum some_" "ptype enum some_enum"
+gdb_test "complete ptype union some_" "ptype union some_union"
+
+
+gdb_test "complete set gnutarget aut" "set gnutarget auto"
+
+
+gdb_test "complete set cp-abi aut" "set cp-abi auto"
+
+# Test that completion of commands 'target FOO' works well.
+set targets [list "core" "tfile" "exec"]
+
+# Test that completion of command 'target ctf' if GDB supports ctf
+# target.
+gdb_test_multiple "target ctf" "" {
+    -re "Undefined target command: \"ctf\"\.  Try \"help target\"\.\r\n$gdb_prompt $" {
+    }
+    -re "No CTF directory specified.*\r\n$gdb_prompt $" {
+	lappend targets "ctf"
+    }
+}
+
+foreach target_name ${targets} {
+    gdb_test "complete target ${target_name} ./gdb.base/completion" \
+	"target ${target_name} ./gdb.base/completion\\.exp.*"
+}
+
+#
+# "set foo unlimited" completion.
+#
+
+# A var_uinteger command.
+gdb_test "complete set height " "set height unlimited"
+gdb_test "complete set height u" "set height unlimited"
+
+# A var_integer command.
+gdb_test "complete set listsize " "set listsize unlimited"
+gdb_test "complete set listsize unl" "set listsize unlimited"
+
+# A var_zuinteger_unlimited command.
+gdb_test "complete set trace-buffer-size " "set trace-buffer-size unlimited"
+gdb_test "complete set trace-buffer-size unl" "set trace-buffer-size unlimited"
 
 # Restore globals modified in this test...
 set timeout $oldtimeout1

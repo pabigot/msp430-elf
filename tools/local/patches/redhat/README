@@ -1,0 +1,66 @@
+This directory contains Red Hat specific patches that for one reason or
+another are not suitable for inclusion in the sources.redhat.com repository.
+They are stored here to ensure their inclusion after a merge from external
+repositories such as sources.redhat.com.
+
+If you are going to add a patch to this repository, please adhere to the
+formatting guidelines below.
+
+File Names
+----------
+
+Every patch filename contains 3 unique pieces of information, separate by
+"-" characters, and ending with a ".patch" suffix.  The 3 unique portions
+are:
+
+1. The year, month, and date the patch is generated.
+
+2. The revision number of the patch.
+
+3. A short string that mentiones what the patch concerns.
+
+As an example, assuming today's date is October 31, 2003, it's the
+first patch of its type, and it relates to an insight extension, the patch
+file name might be:
+
+031031-1-insightwidget.patch
+
+If for some reason another engineer has checked in an insightwidget patch
+and the above filename is not unique, one would instead use:
+
+031031-2-insightwidget.patch
+
+
+File Contents
+-------------
+
+Each patch file contains 3 sections.  The sections are separated by three
+"-" characters followed by a ^L (That's a control-L).  The sections are
+
+1.  A description of what the patch does and why it is included in this
+archive.  As an example:
+
+This patch updates the support URL to reflect where Red Hat customers
+actually submit bug reports for gdb.  This is necessary because the
+public gdb bug tracking system is not related to Red Hat support.
+
+2.  Standard ChangeLog entries, describing the nature of the change.  Each
+ChangeLog should be prefixed by the path the ChangeLog needs to be installed
+with.  This means if the patch needs to be applied to
+include/ChangeLog.RedHat, a hypothetical entry might say:
+
+include/ChangeLog.RedHat:
+2003-10-28  Brendan Conoboy  <blc@redhat.com>
+
+	* bin-bugs.h: Set REPORT_BUGS_TO to use issue-tracker URL.
+
+In the instance where there are multiple ChangeLogs, enter two blank
+lines before the beginning of the next ChangeLog path.
+
+3.  The patch itself in context diff format, generated from the top level
+of the gnupro source tree (For example, a patch to gcc's doc/trouble.texi
+would use gcc/doc/trouble.texi as its filename).  All patches should be
+directly applicable with the patch -p0 command while inside the gnupro
+directory.
+
+

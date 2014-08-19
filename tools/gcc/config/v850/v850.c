@@ -1,5 +1,5 @@
 /* Subroutines for insn-output.c for NEC V850 series
-   Copyright (C) 1996-2013 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
    Contributed by Jeff Law (law@cygnus.com).
 
    This file is part of GCC.
@@ -23,6 +23,10 @@
 #include "coretypes.h"
 #include "tm.h"
 #include "tree.h"
+#include "stringpool.h"
+#include "stor-layout.h"
+#include "varasm.h"
+#include "calls.h"
 #include "rtl.h"
 #include "regs.h"
 #include "hard-reg-set.h"
@@ -1133,13 +1137,13 @@ Saved %d bytes (%d uses of register %s) in function %s, starting as insn %d, end
 	     IDENTIFIER_POINTER (DECL_NAME (current_function_decl)),
 	     INSN_UID (first_insn), INSN_UID (last_insn));
 
-  if (GET_CODE (first_insn) == NOTE)
+  if (NOTE_P (first_insn))
     first_insn = next_nonnote_insn (first_insn);
 
   last_insn = next_nonnote_insn (last_insn);
   for (insn = first_insn; insn && insn != last_insn; insn = NEXT_INSN (insn))
     {
-      if (GET_CODE (insn) == INSN)
+      if (NONJUMP_INSN_P (insn))
 	{
 	  rtx pattern = single_set (insn);
 
@@ -1199,7 +1203,7 @@ Saved %d bytes (%d uses of register %s) in function %s, starting as insn %d, end
 
   /* Optimize back to back cases of ep <- r1 & r1 <- ep.  */
   insn = prev_nonnote_insn (first_insn);
-  if (insn && GET_CODE (insn) == INSN
+  if (insn && NONJUMP_INSN_P (insn)
       && GET_CODE (PATTERN (insn)) == SET
       && SET_DEST (PATTERN (insn)) == *p_ep
       && SET_SRC (PATTERN (insn)) == *p_r1)
@@ -3268,6 +3272,9 @@ v850_gen_movdi (rtx * operands)
 
 #undef  TARGET_LEGITIMATE_CONSTANT_P
 #define TARGET_LEGITIMATE_CONSTANT_P v850_legitimate_constant_p
+
+#undef  TARGET_CAN_USE_DOLOOP_P
+#define TARGET_CAN_USE_DOLOOP_P can_use_doloop_if_innermost
 
 struct gcc_target targetm = TARGET_INITIALIZER;
 

@@ -1,4 +1,5 @@
 /* { dg-do run } */
+/* { dg-require-effective-target trampolines } */
 
 #ifndef NO_TRAMPOLINES
 extern void abort (void);

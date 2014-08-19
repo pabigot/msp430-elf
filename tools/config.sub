@@ -1,10 +1,8 @@
 #! /bin/sh
 # Configuration validation subroutine script.
-#   Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999,
-#   2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010,
-#   2011, 2012, 2013 Free Software Foundation, Inc.
+#   Copyright 1992-2013 Free Software Foundation, Inc.
 
-timestamp='2013-02-23'
+timestamp='2013-10-01'
 
 # This file is free software; you can redistribute it and/or modify it
 # under the terms of the GNU General Public License as published by
@@ -25,6 +23,7 @@ timestamp='2013-02-23'
 # the same distribution terms that you use for the rest of that
 # program.  This Exception is an additional permission under section 7
 # of the GNU General Public License, version 3 ("GPLv3").
+
 
 # Please send patches with a ChangeLog entry to config-patches@gnu.org.
 #
@@ -69,9 +68,7 @@ Report bugs and patches to <config-patches@gnu.org>."
 version="\
 GNU config.sub ($timestamp)
 
-Copyright (C) 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000,
-2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011,
-2012, 2013 Free Software Foundation, Inc.
+Copyright 1992-2013 Free Software Foundation, Inc.
 
 This is free software; see the source for copying conditions.  There is NO
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
@@ -112,34 +109,6 @@ case $# in
  1) ;;
  *) echo "$me: too many arguments$help" >&2
     exit 1;;
-esac
-
-#  Here we handle any "marketing" names -
-#  translating them to standard triplets.
-case $1 in
-	mips-tx39-elf)
-		set mipstx39-unknown-elf
-                ;;
-	mips64vr5xxx-elf)
-		set mips64vr5000-elf
-                ;;
-	mips64vr5xxxel-elf)
-		set mips64vr5000el-elf
-                ;;
-	mt-elf)
-	        set mt-elf
-		;;
-	i686-pc-linux-gnulibc2.0)
-		set i686-pc-linux-gnu
-                ;;
-	i686-pc-linux-gnulibc2.1)
-		set i686-pc-linux-gnu
-                ;;
-	i686-pc-linux-gnulibc2.2)
-		set i686-pc-linux-gnu
-                ;;
-	*)
-		;;
 esac
 
 # Separate what the user gave into CPU-COMPANY and OS or KERNEL-OS (if any).
@@ -184,8 +153,8 @@ case $os in
 		os=
 		basic_machine=$1
 		;;
-        -bluegene*)
-	        os=-cnk
+	-bluegene*)
+		os=-cnk
 		;;
 	-sim | -cisco | -oki | -wec | -winbond)
 		os=
@@ -201,10 +170,10 @@ case $os in
 		os=-chorusos
 		basic_machine=$1
 		;;
- 	-chorusrdb)
- 		os=-chorusrdb
+	-chorusrdb)
+		os=-chorusrdb
 		basic_machine=$1
- 		;;
+		;;
 	-hiux*)
 		os=-hiuxwe2
 		;;
@@ -283,12 +252,12 @@ case $basic_machine in
 	| alpha | alphaev[4-8] | alphaev56 | alphaev6[78] | alphapca5[67] \
 	| alpha64 | alpha64ev[4-8] | alpha64ev56 | alpha64ev6[78] | alpha64pca5[67] \
 	| am33_2.0 \
-	| arc \
+	| arc | arceb \
 	| arm | arm[bl]e | arme[lb] | armv[2-8] | armv[3-8][lb] | armv7[arm] \
 	| avr | avr32 \
-        | be32 | be64 \
+	| be32 | be64 \
 	| bfin \
-	| c4x | clipper \
+	| c4x | c8051 | clipper \
 	| d10v | d30v | dlx | dsp16xx \
 	| epiphany \
 	| fido | fr30 | frv \
@@ -296,6 +265,7 @@ case $basic_machine in
 	| hexagon \
 	| i370 | i860 | i960 | ia64 \
 	| ip2k | iq2000 \
+	| k1om \
 	| le32 | le64 \
 	| lm32 \
 	| m32c | m32r | m32rle | m68000 | m68k | m88k \
@@ -324,10 +294,10 @@ case $basic_machine in
 	| mt \
 	| msp430 \
 	| nds32 | nds32le | nds32be \
-	| nios | nios2 \
+	| nios | nios2 | nios2eb | nios2el \
 	| ns16k | ns32k \
 	| open8 \
-	| or32 \
+	| or1k | or32 \
 	| pdp10 | pdp11 | pj | pjl \
 	| powerpc | powerpc64 | powerpc64le | powerpcle \
 	| pyramid \
@@ -346,17 +316,6 @@ case $basic_machine in
 	| z8k | z80)
 		basic_machine=$basic_machine-unknown
 		;;
-	mips64vr4111 | mips64vr4111el \
-	| mips64vr5400 \
-	| crx | cr16 \
-	| sparc86x \
-	| tic30 | c30 \
-	| v850ea)
-		basic_machine=$basic_machine-unknown
-		;;
-	mips64vr | mips64vrel)
-		basic_machine=$basic_machine-unknown
-		;;
 	c54x)
 		basic_machine=tic54x-unknown
 		;;
@@ -366,7 +325,7 @@ case $basic_machine in
 	c6x)
 		basic_machine=tic6x-unknown
 		;;
-	m6811 | m68hc11 | m6812 | m68hc12 | m68hcs12x | picochip)
+	m6811 | m68hc11 | m6812 | m68hc12 | m68hcs12x | nvptx | picochip)
 		basic_machine=$basic_machine-unknown
 		os=-none
 		;;
@@ -408,13 +367,13 @@ case $basic_machine in
 	| aarch64-* | aarch64_be-* \
 	| alpha-* | alphaev[4-8]-* | alphaev56-* | alphaev6[78]-* \
 	| alpha64-* | alpha64ev[4-8]-* | alpha64ev56-* | alpha64ev6[78]-* \
-	| alphapca5[67]-* | alpha64pca5[67]-* | arc-* \
+	| alphapca5[67]-* | alpha64pca5[67]-* | arc-* | arceb-* \
 	| arm-*  | armbe-* | armle-* | armeb-* | armv*-* \
 	| avr-* | avr32-* \
 	| be32-* | be64-* \
 	| bfin-* | bs2000-* \
 	| c[123]* | c30-* | [cjt]90-* | c4x-* \
-	| clipper-* | craynv-* | cydra-* \
+	| c8051-* | clipper-* | craynv-* | cydra-* \
 	| d10v-* | d30v-* | dlx-* \
 	| elxsi-* \
 	| f30[01]-* | f700-* | fido-* | fr30-* | frv-* | fx80-* \
@@ -423,6 +382,7 @@ case $basic_machine in
 	| hexagon-* \
 	| i*86-* | i860-* | i960-* | ia64-* \
 	| ip2k-* | iq2000-* \
+	| k1om-* \
 	| le32-* | le64-* \
 	| lm32-* \
 	| m32c-* | m32r-* | m32rle-* \
@@ -452,7 +412,7 @@ case $basic_machine in
 	| mt-* \
 	| msp430-* \
 	| nds32-* | nds32le-* | nds32be-* \
-	| nios-* | nios2-* \
+	| nios-* | nios2-* | nios2eb-* | nios2el-* \
 	| none-* | np1-* | ns16k-* | ns32k-* \
 	| open8-* \
 	| orion-* \
@@ -478,11 +438,6 @@ case $basic_machine in
 	| ymp-* \
 	| z8k-* | z80-*)
 		;;
-	v850e-* | v850ea-* \
-	| mips64vr4111-* | mips64vr4111el-*)
-		;;
-	mips64vr-* | mips64vrel-*)
-		;;
 	# Recognize the basic CPU types without company name, with glob match.
 	xtensa*)
 		basic_machine=$basic_machine-unknown
@@ -503,7 +458,7 @@ case $basic_machine in
 		basic_machine=a29k-amd
 		os=-udi
 		;;
-    	abacus)
+	abacus)
 		basic_machine=abacus-unknown
 		;;
 	adobe68k)
@@ -586,7 +541,7 @@ case $basic_machine in
 		basic_machine=c90-cray
 		os=-unicos
 		;;
-        cegcc)
+	cegcc)
 		basic_machine=arm-unknown
 		os=-cegcc
 		;;
@@ -833,7 +788,7 @@ case $basic_machine in
 		basic_machine=ns32k-utek
 		os=-sysv
 		;;
-        microblaze*)
+	microblaze*)
 		basic_machine=microblaze-xilinx
 		;;
 	mingw64)
@@ -841,7 +796,7 @@ case $basic_machine in
 		os=-mingw64
 		;;
 	mingw32)
-		basic_machine=i386-pc
+		basic_machine=i686-pc
 		os=-mingw32
 		;;
 	mingw32ce)
@@ -877,7 +832,7 @@ case $basic_machine in
 		basic_machine=`echo $basic_machine | sed -e 's/ms1-/mt-/'`
 		;;
 	msys)
-		basic_machine=i386-pc
+		basic_machine=i686-pc
 		os=-msys
 		;;
 	mvs)
@@ -1068,7 +1023,7 @@ case $basic_machine in
 		basic_machine=i586-unknown
 		os=-pw32
 		;;
-	rdos  | rdos64)
+	rdos | rdos64)
 		basic_machine=x86_64-pc
 		os=-rdos
 		;;
@@ -1371,11 +1326,11 @@ esac
 if [ x"$os" != x"" ]
 then
 case $os in
-        # First match some system type aliases
-        # that might get confused with valid system types.
+	# First match some system type aliases
+	# that might get confused with valid system types.
 	# -solaris* is a basic system type, with this one exception.
-        -auroraux)
-	        os=-auroraux
+	-auroraux)
+		os=-auroraux
 		;;
 	-solaris1 | -solaris1.*)
 		os=`echo $os | sed -e 's|solaris1|sunos4|'`
@@ -1460,7 +1415,7 @@ case $os in
 	-opened*)
 		os=-openedition
 		;;
-        -os400*)
+	-os400*)
 		os=-os400
 		;;
 	-wince*)
@@ -1509,7 +1464,7 @@ case $os in
 	-sinix*)
 		os=-sysv4
 		;;
-        -tpf*)
+	-tpf*)
 		os=-tpf
 		;;
 	-triton*)
@@ -1551,8 +1506,8 @@ case $os in
 	-dicos*)
 		os=-dicos
 		;;
-        -nacl*)
-	        ;;
+	-nacl*)
+		;;
 	-none)
 		;;
 	*)
@@ -1575,10 +1530,10 @@ else
 # system, and we'll never get to this point.
 
 case $basic_machine in
-        score-*)
+	score-*)
 		os=-elf
 		;;
-        spu-*)
+	spu-*)
 		os=-elf
 		;;
 	*-acorn)
@@ -1590,8 +1545,11 @@ case $basic_machine in
 	arm*-semi)
 		os=-aout
 		;;
-        c4x-* | tic4x-*)
-        	os=-coff
+	c4x-* | tic4x-*)
+		os=-coff
+		;;
+	c8051-*)
+		os=-elf
 		;;
 	hexagon-*)
 		os=-elf
@@ -1627,13 +1585,16 @@ case $basic_machine in
 	m68*-cisco)
 		os=-aout
 		;;
-        mep-*)
+	mep-*)
 		os=-elf
 		;;
 	mips*-cisco)
 		os=-elf
 		;;
 	mips*-*)
+		os=-elf
+		;;
+	or1k-*)
 		os=-elf
 		;;
 	or32-*)
@@ -1654,7 +1615,7 @@ case $basic_machine in
 	*-ibm)
 		os=-aix
 		;;
-    	*-knuth)
+	*-knuth)
 		os=-mmixware
 		;;
 	*-wec)
@@ -1825,7 +1786,6 @@ echo $basic_machine$os
 exit
 
 # Local variables:
-# mode: autoconf
 # eval: (add-hook 'write-file-hooks 'time-stamp)
 # time-stamp-start: "timestamp='"
 # time-stamp-format: "%:y-%02m-%02d"

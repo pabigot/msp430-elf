@@ -1,5 +1,5 @@
 /* Code to maintain a C++ template repository.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    Contributed by Jason Merrill (jason@cygnus.com)
 
 This file is part of GCC.
@@ -29,6 +29,7 @@ along with GCC; see the file COPYING3.  If not see
 #include "coretypes.h"
 #include "tm.h"
 #include "tree.h"
+#include "stringpool.h"
 #include "cp-tree.h"
 #include "input.h"
 #include "obstack.h"
@@ -291,8 +292,7 @@ repo_emit_p (tree decl)
 {
   int ret = 0;
   gcc_assert (TREE_PUBLIC (decl));
-  gcc_assert (TREE_CODE (decl) == FUNCTION_DECL
-	      || TREE_CODE (decl) == VAR_DECL);
+  gcc_assert (VAR_OR_FUNCTION_DECL_P (decl));
   gcc_assert (!DECL_REALLY_EXTERN (decl));
 
   /* When not using the repository, emit everything.  */
@@ -303,7 +303,7 @@ repo_emit_p (tree decl)
      is an artificial restriction; the code in the prelinker and here
      will work fine if all entities with vague linkage are managed by
      the repository.  */
-  if (TREE_CODE (decl) == VAR_DECL)
+  if (VAR_P (decl))
     {
       tree type = NULL_TREE;
       if (DECL_VTABLE_OR_VTT_P (decl))

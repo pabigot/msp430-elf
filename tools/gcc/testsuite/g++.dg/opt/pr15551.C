@@ -3,8 +3,8 @@
 // Testcase submitted by Hans Horn to mingw bug tracker
 //
 // { dg-do run }
-// { dg-options "-O3" }
 // { dg-require-effective-target int32plus }
+// { dg-options "-O3" }
 
 #include <cstring>
 #include <fstream>

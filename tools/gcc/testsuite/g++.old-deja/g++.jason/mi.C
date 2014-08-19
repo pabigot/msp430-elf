@@ -15,3 +15,4 @@ int main ()
 
   return status;
 }
+// { dg-require-effective-target size32plus }

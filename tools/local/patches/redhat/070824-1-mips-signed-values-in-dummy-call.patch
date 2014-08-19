@@ -1,0 +1,70 @@
+By treating all values as unsigned, 32 bit values are written to registers
+so that the necessary sign extension in 64 bit registers isn't made on
+64 bit ISAs.  The below patch treats all values as signed, so the sign
+extension is made and the simulator (and probbaly the HW) is happy.
+
+gdb/ChangeLog.RedHat
+====================
+
+2007-08-24  Corinna Vinschen  <vinschen@redhat.com>
+
+	* mips-tdep.c (mips_eabi_push_dummy_call): Treat all values as signed.
+
+
+Index: gdb/mips-tdep.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/mips-tdep.c,v
+retrieving revision 1.39
+diff -u -p -r1.39 mips-tdep.c
+--- gdb/mips-tdep.c	2 Feb 2010 22:11:04 -0000	1.39
++++ gdb/mips-tdep.c	2 Feb 2010 22:11:44 -0000
+@@ -2779,8 +2779,8 @@ mips_eabi_push_dummy_call (struct gdbarc
+ 	       && (typecode == TYPE_CODE_STRUCT 
+ 		   || typecode == TYPE_CODE_UNION))
+ 	{
+-	  store_unsigned_integer (valbuf, regsize, byte_order,
+-				  value_address (arg));
++	  store_signed_integer (valbuf, regsize, byte_order,
++				value_address (arg));
+ 	  typecode = TYPE_CODE_PTR;
+ 	  len = regsize;
+ 	  val = valbuf;
+@@ -2828,16 +2828,15 @@ mips_eabi_push_dummy_call (struct gdbarc
+ 	      unsigned long regval;
+ 
+ 	      /* Write the low word of the double to the even register(s).  */
+-	      regval = extract_unsigned_integer (val + low_offset,
+-						 4, byte_order);
++	      regval = extract_signed_integer (val + low_offset, 4, byte_order);
+ 	      if (mips_debug)
+ 		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
+ 				    float_argreg, phex (regval, 4));
+ 	      regcache_cooked_write_unsigned (regcache, float_argreg++, regval);
+ 
+ 	      /* Write the high word of the double to the odd register(s).  */
+-	      regval = extract_unsigned_integer (val + 4 - low_offset,
+-						 4, byte_order);
++	      regval = extract_signed_integer (val + 4 - low_offset, 4,
++	                                       byte_order);
+ 	      if (mips_debug)
+ 		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
+ 				    float_argreg, phex (regval, 4));
+@@ -2849,7 +2848,7 @@ mips_eabi_push_dummy_call (struct gdbarc
+ 	         in a single register.  */
+ 	      /* On 32 bit ABI's the float_argreg is further adjusted
+ 	         above to ensure that it is even register aligned.  */
+-	      LONGEST regval = extract_unsigned_integer (val, len, byte_order);
++	      LONGEST regval = extract_signed_integer (val, len, byte_order);
+ 	      if (mips_debug)
+ 		fprintf_unfiltered (gdb_stdlog, " - fpreg=%d val=%s",
+ 				    float_argreg, phex (regval, len));
+@@ -2936,7 +2935,7 @@ mips_eabi_push_dummy_call (struct gdbarc
+ 		  && !fp_register_arg_p (gdbarch, typecode, arg_type))
+ 		{
+ 		  LONGEST regval =
+-		    extract_unsigned_integer (val, partial_len, byte_order);
++		    extract_signed_integer (val, partial_len, byte_order);
+ 
+ 		  if (mips_debug)
+ 		    fprintf_filtered (gdb_stdlog, " - reg=%d val=%s",
+

@@ -116,7 +116,6 @@ if test "${TEA_PLATFORM}" = "windows" ; then
     TEA_ADD_SOURCES([dllEntryPoint.c])
 else
     CLEANFILES=
-    PKG_CFLAGS=-fPIC
 fi
 
 AC_SUBST(CLEANFILES)

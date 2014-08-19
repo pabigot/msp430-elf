@@ -16,3 +16,5 @@ main ()
   S *s = new S[2];
   return 0;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

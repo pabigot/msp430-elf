@@ -1,7 +1,5 @@
 /* Main program of GNU linker.
-   Copyright 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001,
-   2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012
-   Free Software Foundation, Inc.
+   Copyright 1991-2013 Free Software Foundation, Inc.
    Written by Steve Chamberlain steve@cygnus.com
 
    This file is part of the GNU Binutils.
@@ -82,7 +80,7 @@ const char *ld_sysroot;
 char * ld_canon_sysroot;
 int ld_canon_sysroot_len;
 
-/* Set by -G argument, for MIPS ECOFF target.  */
+/* Set by -G argument, for targets like MIPS ELF.  */
 int g_switch_value = 8;
 
 /* Nonzero means print names of input files as processed.  */
@@ -746,6 +744,7 @@ add_keepsyms_file (const char *filename)
 
   free (buf);
   link_info.strip = strip_some;
+  fclose (file);
 }
 
 /* Callbacks from the BFD linker routines.  */

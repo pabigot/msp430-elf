@@ -47,3 +47,5 @@ main ()
   B <char, A <char> > s;
   s.push_back ('a');
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

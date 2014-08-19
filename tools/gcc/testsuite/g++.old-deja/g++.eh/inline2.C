@@ -23,3 +23,4 @@ int main ()
       return (i != 42);
     }
 }
+// { dg-require-effective-target size32plus }

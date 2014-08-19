@@ -1,3 +1,0 @@
-@c This file documents configuring and building Libgloss,
-@c as @included in libgloss.texi.
-

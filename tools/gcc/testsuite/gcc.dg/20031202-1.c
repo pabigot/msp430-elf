@@ -30,8 +30,10 @@ foo (struct B *b)
 int __attribute__((noinline))
 bar (void *x)
 {
-  __asm __volatile ("" : "=r" (x) : "0" (x));
-  struct B y = { .b = x, .c = (void *) 0 };
+  struct B y = { .a.p[0] = 0, .a.p[1] = 0, .a.p[2] = 0, .a.p[3] = 0, .a.p[4] = 0, .a.p[5] = 0,
+		 .b = x,
+		 .c = (void *) 0,
+		 .d = (void *) 0 };
   return foo (&y) + 1;
 }
 

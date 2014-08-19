@@ -4,7 +4,7 @@
 
 // { dg-do run }
 
-extern "C" int printf (const char *, ...);
+// extern "C" int printf (const char *, ...);
 
 enum E { E1, E2 };
 
@@ -21,7 +21,7 @@ int c;
 int f()
 {
   ++c;
-  printf ("f()\n");
+  //printf ("f()\n");
   return 0;
 }
 

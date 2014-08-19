@@ -158,7 +158,6 @@ SECTIONS
   }
   _end = . ;
   PROVIDE (end = .);
-  PROVIDE (_heap_start = .);
   /* Stabs debugging sections.  */
   .stab 0		: { *(.stab) }
   .stabstr 0		: { *(.stabstr) }

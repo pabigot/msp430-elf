@@ -1,0 +1,26 @@
+# Copyright and info files
+file	${release}/COPYING
+file	${release}/COPYING.LIB
+file	${release}/COPYING.NEWLIB
+file	${release}/CYGNUS
+file	${release}/REDHAT
+# dummy send-pr files
+# eCos doesn't require these any longer
+#file	${release}/H-${host}/bin/send-pr
+#file	${release}/H-${host}/bin/install-sid
+#file	${release}/H-${host}/bin/gcertify
+#dir	${release}/share/prms
+# for gettext
+dir	${release}/share/locale
+# cygwin wackiness
+file	${release}/etc/termcap cygwin
+file	${release}/H-${host}/${host}/include/termcap.h cygwin
+file	${release}/H-${host}/${host}/lib/libtermcap.a cygwin
+dir	${release}/H-${host}/${host}/include/X11 cygwin
+dir	${release}/include/c++/X11 cygwin
+dir	${release}/H-${host}/tmp cygwin
+dir	${release}/H-${host}/opt cygwin
+# don't include at all
+#dir	${release}/include/X11 cygwin
+# readline
+dir	${release}/include/readline

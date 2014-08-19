@@ -1,0 +1,32 @@
+Fixes a problem with the MSP430 target where GCC chooses to use SImode for
+entries in the stack save area instead of PSImode.  Not submitted upstream yet
+as it is not clear the effect the patch will have on other targets.
+
+2014-04-28  Nick Clifton  <nickc@redhat.com>
+
+	* tree-nested.c (get_nl_goto_field): Always use ptr_type_node for
+	the stack save area.
+
+Index: gcc/tree-nested.c
+===================================================================
+--- gcc/tree-nested.c	(revision 209848)
++++ gcc/tree-nested.c	(working copy)
+@@ -549,7 +549,7 @@
+ /* Build or return the field within the non-local frame state that holds
+    the non-local goto "jmp_buf".  The buffer itself is maintained by the
+    rtl middle-end as dynamic stack space is allocated.  */
+-
++#include "print-tree.h"
+ static tree
+ get_nl_goto_field (struct nesting_info *info)
+ {
+@@ -567,6 +567,9 @@
+ 	type = ptr_type_node;
+       else
+ 	type = lang_hooks.types.type_for_mode (Pmode, 1);
++#if 1
++	type = ptr_type_node;
++#endif
+ 
+       size = GET_MODE_SIZE (STACK_SAVEAREA_MODE (SAVE_NONLOCAL));
+       size = size / GET_MODE_SIZE (Pmode);

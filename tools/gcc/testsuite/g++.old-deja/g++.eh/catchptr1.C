@@ -260,3 +260,4 @@ int main ()
     }
   return errors;
 }
+// { dg-require-effective-target size32plus }

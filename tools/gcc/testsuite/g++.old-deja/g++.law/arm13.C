@@ -12,5 +12,5 @@ int main()
   typedef int I;
   p->I::~I();
   free(p);
-  printf ("PASS\n");
+  // printf ("PASS\n");
 }

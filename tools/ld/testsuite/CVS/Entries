@@ -1,19 +1,18 @@
-/ChangeLog/1.321/Sun Mar 17 21:56:55 2013//Tmsp430-130322-branch
-/ChangeLog-2004/1.2/Sun Dec 16 15:04:24 2012//Tmsp430-130322-branch
-/ChangeLog-2005/1.2/Sun Dec 16 15:04:24 2012//Tmsp430-130322-branch
-/ChangeLog-2006/1.2/Sun Dec 16 15:04:24 2012//Tmsp430-130322-branch
-/ChangeLog-2007/1.2/Sun Dec 16 15:04:24 2012//Tmsp430-130322-branch
-/ChangeLog-2008/1.2/Sun Dec 16 15:04:24 2012//Tmsp430-130322-branch
-/ChangeLog-2009/1.2/Sun Dec 16 15:04:24 2012//Tmsp430-130322-branch
-/ChangeLog-2010/1.2/Sun Dec 16 15:04:24 2012//Tmsp430-130322-branch
-/ChangeLog-2011/1.2/Sun Dec 16 15:04:24 2012//Tmsp430-130322-branch
-/ChangeLog-2012/1.1/Sun Jan 27 12:32:16 2013//Tmsp430-130322-branch
-/ChangeLog-9303/1.2/Sun Dec 16 15:04:24 2012//Tmsp430-130322-branch
-/ChangeLog.RedHat/1.41.2.1/Wed Mar 27 02:39:41 2013//Tmsp430-130322-branch
+/ChangeLog/1.45/Mon Mar 10 09:18:32 2014//Tmsp430-14r1-branch
+/ChangeLog-2004/1.2/Thu Feb 20 13:40:36 2014//Tmsp430-14r1-branch
+/ChangeLog-2005/1.2/Thu Feb 20 13:40:36 2014//Tmsp430-14r1-branch
+/ChangeLog-2006/1.2/Thu Feb 20 13:40:36 2014//Tmsp430-14r1-branch
+/ChangeLog-2007/1.2/Thu Feb 20 13:40:36 2014//Tmsp430-14r1-branch
+/ChangeLog-2008/1.2/Thu Feb 20 13:40:36 2014//Tmsp430-14r1-branch
+/ChangeLog-2009/1.2/Thu Feb 20 13:40:36 2014//Tmsp430-14r1-branch
+/ChangeLog-2010/1.2/Thu Feb 20 13:40:36 2014//Tmsp430-14r1-branch
+/ChangeLog-2011/1.2/Thu Feb 20 13:40:36 2014//Tmsp430-14r1-branch
+/ChangeLog-2012/1.1/Thu Feb 20 16:42:30 2014//Tmsp430-14r1-branch
+/ChangeLog-9303/1.2/Thu Feb 20 13:40:36 2014//Tmsp430-14r1-branch
+/ChangeLog.RedHat/1.25/Fri Jun 27 08:05:34 2014//Tmsp430-14r1-branch
 D/config////
 D/ld-aarch64////
 D/ld-alpha////
-D/ld-am33////
 D/ld-arm////
 D/ld-auto-import////
 D/ld-bootstrap////
@@ -46,6 +45,7 @@ D/ld-mips-elf////
 D/ld-misc////
 D/ld-mmix////
 D/ld-mn10300////
+D/ld-nds32////
 D/ld-nios2////
 D/ld-pe////
 D/ld-pie////

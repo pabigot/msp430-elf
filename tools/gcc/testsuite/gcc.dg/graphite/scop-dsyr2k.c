@@ -1,4 +1,5 @@
 /* { dg-require-effective-target ilp32 } */
+
 #define NMAX 3000
 
 static double a[NMAX][NMAX], b[NMAX][NMAX], c[NMAX][NMAX];

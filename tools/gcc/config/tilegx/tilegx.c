@@ -1,5 +1,5 @@
 /* Subroutines used for code generation on the Tilera TILE-Gx.
-   Copyright (C) 2011-2013 Free Software Foundation, Inc.
+   Copyright (C) 2011-2014 Free Software Foundation, Inc.
    Contributed by Walter Lee (walt@tilera.com)
 
    This file is part of GCC.
@@ -39,7 +39,24 @@
 #include "function.h"
 #include "dwarf2.h"
 #include "timevar.h"
+#include "tree.h"
+#include "pointer-set.h"
+#include "hash-table.h"
+#include "vec.h"
+#include "ggc.h"
+#include "basic-block.h"
+#include "tree-ssa-alias.h"
+#include "internal-fn.h"
+#include "gimple-fold.h"
+#include "tree-eh.h"
+#include "gimple-expr.h"
+#include "is-a.h"
 #include "gimple.h"
+#include "stringpool.h"
+#include "stor-layout.h"
+#include "varasm.h"
+#include "calls.h"
+#include "gimplify.h"
 #include "cfgloop.h"
 #include "tilegx-builtins.h"
 #include "tilegx-multiply.h"
@@ -158,6 +175,17 @@ tilegx_pass_by_reference (cumulative_args_t cum ATTRIBUTE_UNUSED,
 }
 
 
+/* Implement TARGET_RETURN_IN_MSB.  We return a value in the most
+   significant part of a register if:
+   - the target is big-endian; and
+   - the value has an aggregate type (e.g., structure or union).  */
+static bool
+tilegx_return_in_msb (const_tree valtype)
+{
+  return (TARGET_BIG_ENDIAN && AGGREGATE_TYPE_P (valtype));
+}
+
+
 /* Implement TARGET_RETURN_IN_MEMORY.  */
 static bool
 tilegx_return_in_memory (const_tree type, const_tree fndecl ATTRIBUTE_UNUSED)
@@ -203,9 +231,17 @@ tilegx_function_arg (cumulative_args_t cum_v,
   CUMULATIVE_ARGS cum = *get_cumulative_args (cum_v);
   int byte_size = ((mode == BLKmode)
 		   ? int_size_in_bytes (type) : GET_MODE_SIZE (mode));
+  bool doubleword_aligned_p;
 
   if (cum >= TILEGX_NUM_ARG_REGS)
     return NULL_RTX;
+
+  /* See whether the argument has doubleword alignment.  */
+  doubleword_aligned_p =
+    tilegx_function_arg_boundary (mode, type) > BITS_PER_WORD;
+
+  if (doubleword_aligned_p)
+    cum += cum & 1;
 
   /* The ABI does not allow parameters to be passed partially in reg
      and partially in stack.  */
@@ -228,6 +264,14 @@ tilegx_function_arg_advance (cumulative_args_t cum_v,
   int byte_size = ((mode == BLKmode)
 		   ? int_size_in_bytes (type) : GET_MODE_SIZE (mode));
   int word_size = (byte_size + UNITS_PER_WORD - 1) / UNITS_PER_WORD;
+  bool doubleword_aligned_p;
+
+  /* See whether the argument has doubleword alignment.  */
+  doubleword_aligned_p =
+    tilegx_function_arg_boundary (mode, type) > BITS_PER_WORD;
+
+  if (doubleword_aligned_p)
+    *cum += *cum & 1;
 
   /* If the current argument does not fit in the pretend_args space,
      skip over it.  */
@@ -400,14 +444,17 @@ tilegx_setup_incoming_varargs (cumulative_args_t cum,
 
    generates code equivalent to:
   
-    paddedsize = (sizeof(TYPE) + 3) & -4;
+    paddedsize = (sizeof(TYPE) + 7) & -8;
     if (  (VALIST.__args + paddedsize > VALIST.__skip)
 	& (VALIST.__args <= VALIST.__skip))
       addr = VALIST.__skip + STACK_POINTER_OFFSET;
     else
       addr = VALIST.__args;
     VALIST.__args = addr + paddedsize;
-    ret = *(TYPE *)addr;
+    if (BYTES_BIG_ENDIAN)
+      ret = *(TYPE *)(addr + paddedsize - sizeof(TYPE));
+    else
+      ret = *(TYPE *)addr;
  */
 static tree
 tilegx_gimplify_va_arg_expr (tree valist, tree type, gimple_seq *pre_p,
@@ -440,9 +487,23 @@ tilegx_gimplify_va_arg_expr (tree valist, tree type, gimple_seq *pre_p,
   size = int_size_in_bytes (type);
   rsize = ((size + UNITS_PER_WORD - 1) / UNITS_PER_WORD) * UNITS_PER_WORD;
 
-  /* Assert alignment assumption.  */
-  gcc_assert (STACK_BOUNDARY == PARM_BOUNDARY);
+  /* If the alignment of the type is greater than the default for a
+     parameter, align to the STACK_BOUNDARY. */
+  if (TYPE_ALIGN (type) > PARM_BOUNDARY)
+    {
+      /* Assert the only case we generate code for: when
+	 stack boundary = 2 * parm boundary. */
+      gcc_assert (STACK_BOUNDARY == PARM_BOUNDARY * 2);
 
+      tmp = build2 (BIT_AND_EXPR, sizetype,
+		    fold_convert (sizetype, unshare_expr (args)),
+		    size_int (PARM_BOUNDARY / 8));
+      tmp = build2 (POINTER_PLUS_EXPR, ptr_type_node,
+		    unshare_expr (args), tmp);
+
+      gimplify_assign (unshare_expr (args), tmp, pre_p);
+    }
+ 
   /* Build conditional expression to calculate addr. The expression
      will be gimplified later.  */
   tmp = fold_build_pointer_plus_hwi (unshare_expr (args), rsize);
@@ -456,10 +517,17 @@ tilegx_gimplify_va_arg_expr (tree valist, tree type, gimple_seq *pre_p,
 			size_int (STACK_POINTER_OFFSET)),
 		unshare_expr (args));
 
+  /* Adjust the address of va_arg if it is in big endian mode.  */
+  if (BYTES_BIG_ENDIAN && rsize > size)
+    tmp = fold_build_pointer_plus_hwi (tmp, rsize - size);
   gimplify_assign (addr, tmp, pre_p);
 
   /* Update VALIST.__args.  */
-  tmp = fold_build_pointer_plus_hwi (addr, rsize);
+  
+  if (BYTES_BIG_ENDIAN && rsize > size)
+    tmp = fold_build_pointer_plus_hwi (addr, size);
+  else
+    tmp = fold_build_pointer_plus_hwi (addr, rsize);
   gimplify_assign (unshare_expr (args), tmp, pre_p);
 
   addr = fold_convert (build_pointer_type (type), addr);
@@ -699,6 +767,16 @@ tilegx_init_expanders (void)
 
       machine->calls_tls_get_addr = false;
     }
+}
+
+
+/* Implement TARGET_EXPAND_TO_RTL_HOOK.  */
+static void
+tilegx_expand_to_rtl_hook (void)
+{
+  /* Exclude earlier sets of crtl->uses_pic_offset_table, because we
+     only care about uses actually emitted.  */
+  crtl->uses_pic_offset_table = 0;
 }
 
 
@@ -1429,14 +1507,16 @@ expand_set_cint64_one_inst (rtx dest_reg,
     }
   else if (!three_wide_only)
     {
-      rtx imm_op = GEN_INT (val);
-
-      if (satisfies_constraint_J (imm_op)
-	  || satisfies_constraint_K (imm_op)
-	  || satisfies_constraint_N (imm_op)
-	  || satisfies_constraint_P (imm_op))
+      /* Test for the following constraints: J, K, N, P.  We avoid
+	 generating an rtx and using existing predicates because we
+	 can be testing and rejecting a lot of constants, and GEN_INT
+	 is O(N).  */
+      if ((val >= -32768 && val <= 65535)
+	  || ((val == (val & 0xFF) * 0x0101010101010101LL))
+	  || (val == ((trunc_int_for_mode (val, QImode) & 0xFFFF)
+		      * 0x0001000100010001LL)))
 	{
-	  emit_move_insn (dest_reg, imm_op);
+	  emit_move_insn (dest_reg, GEN_INT (val));
 	  return true;
 	}
     }
@@ -1788,39 +1868,51 @@ tilegx_expand_unaligned_load (rtx dest_reg, rtx mem, HOST_WIDE_INT bitsize,
 
   mode = GET_MODE (dest_reg);
 
-  hi = gen_reg_rtx (mode);
-
   if (bitsize == 2 * BITS_PER_UNIT && (bit_offset % BITS_PER_UNIT) == 0)
     {
+      rtx mem_left, mem_right;
+      rtx left = gen_reg_rtx (mode);
+
       /* When just loading a two byte value, we can load the two bytes
 	 individually and combine them efficiently.  */
 
       mem_lo = adjust_address (mem, QImode, byte_offset);
       mem_hi = adjust_address (mem, QImode, byte_offset + 1);
 
+      if (BYTES_BIG_ENDIAN)
+	{
+	  mem_left = mem_lo;
+	  mem_right = mem_hi;
+	}
+      else
+	{
+	  mem_left = mem_hi;
+	  mem_right = mem_lo;
+	}
+
       if (sign)
 	{
 	  /* Do a signed load of the second byte and use bfins to set
 	     the high bits of the result.  */
 	  emit_insn (gen_zero_extendqidi2 (gen_lowpart (DImode, dest_reg),
-					   mem_lo));
-	  emit_insn (gen_extendqidi2 (gen_lowpart (DImode, hi), mem_hi));
+					   mem_right));
+	  emit_insn (gen_extendqidi2 (gen_lowpart (DImode, left), mem_left));
 	  emit_insn (gen_insv (gen_lowpart (DImode, dest_reg),
 			       GEN_INT (64 - 8), GEN_INT (8),
-			       gen_lowpart (DImode, hi)));
+			       gen_lowpart (DImode, left)));
 	}
       else
 	{
 	  /* Do two unsigned loads and use v1int_l to interleave
 	     them.  */
-	  rtx lo = gen_reg_rtx (mode);
-	  emit_insn (gen_zero_extendqidi2 (gen_lowpart (DImode, lo),
-					   mem_lo));
-	  emit_insn (gen_zero_extendqidi2 (gen_lowpart (DImode, hi),
-					   mem_hi));
+	  rtx right = gen_reg_rtx (mode);
+	  emit_insn (gen_zero_extendqidi2 (gen_lowpart (DImode, right),
+					   mem_right));
+	  emit_insn (gen_zero_extendqidi2 (gen_lowpart (DImode, left),
+					   mem_left));
 	  emit_insn (gen_insn_v1int_l (gen_lowpart (DImode, dest_reg),
-				       gen_lowpart (DImode, hi),
-				       gen_lowpart (DImode, lo)));
+				       gen_lowpart (DImode, left),
+				       gen_lowpart (DImode, right)));
 	}
 
       return;
@@ -1858,6 +1950,7 @@ tilegx_expand_unaligned_load (rtx dest_reg, rtx mem, HOST_WIDE_INT bitsize,
     }
 
   /* Load hi first in case dest_reg is used in mema.  */
+  hi = gen_reg_rtx (mode);
   emit_move_insn (hi, mem_hi);
   emit_move_insn (wide_result, mem_lo);
 
@@ -1870,7 +1963,7 @@ tilegx_expand_unaligned_load (rtx dest_reg, rtx mem, HOST_WIDE_INT bitsize,
       rtx extracted =
 	extract_bit_field (gen_lowpart (DImode, wide_result),
 			   bitsize, bit_offset % BITS_PER_UNIT,
-			   !sign, false, gen_lowpart (DImode, dest_reg),
+			   !sign, gen_lowpart (DImode, dest_reg),
 			   DImode, DImode);
 
       if (extracted != dest_reg)
@@ -1886,12 +1979,17 @@ tilegx_expand_unaligned_store (rtx mem, rtx src, HOST_WIDE_INT bitsize,
 {
   HOST_WIDE_INT byte_offset = bit_offset / BITS_PER_UNIT;
   HOST_WIDE_INT bytesize = bitsize / BITS_PER_UNIT;
-  HOST_WIDE_INT shift_amt;
+  HOST_WIDE_INT shift_init, shift_increment, shift_amt;
   HOST_WIDE_INT i;
   rtx mem_addr;
   rtx store_val;
 
-  for (i = 0, shift_amt = 0; i < bytesize; i++, shift_amt += BITS_PER_UNIT)
+  shift_init = BYTES_BIG_ENDIAN ? (bitsize - BITS_PER_UNIT) : 0;
+  shift_increment = BYTES_BIG_ENDIAN ? -BITS_PER_UNIT : BITS_PER_UNIT;
+
+  for (i = 0, shift_amt = shift_init;
+       i < bytesize;
+       i++, shift_amt += shift_increment)
     {
       mem_addr = adjust_address (mem, QImode, byte_offset + i);
 
@@ -2527,7 +2625,7 @@ cbranch_predicted_p (rtx insn)
 
   if (x)
     {
-      int pred_val = INTVAL (XEXP (x, 0));
+      int pred_val = XINT (x, 0);
 
       return pred_val >= REG_BR_PROB_BASE / 2;
     }
@@ -2895,6 +2993,7 @@ static struct tile_builtin_info tilegx_builtin_info[TILEGX_BUILTIN_max] = {
   { CODE_FOR_lshrdi3,                   NULL }, /* shru */
   { CODE_FOR_lshrsi3,                   NULL }, /* shrux */
   { CODE_FOR_insn_shufflebytes,         NULL }, /* shufflebytes */
+  { CODE_FOR_insn_shufflebytes1,        NULL }, /* shufflebytes1 */
   { CODE_FOR_insn_st,                   NULL }, /* st */
   { CODE_FOR_insn_st1,                  NULL }, /* st1 */
   { CODE_FOR_insn_st2,                  NULL }, /* st2 */
@@ -3223,6 +3322,7 @@ static const struct tilegx_builtin_def tilegx_builtins[] = {
   { "__insn_shrux",              TILEGX_INSN_SHRUX,              true,  "iii"  },
   { "__insn_shruxi",             TILEGX_INSN_SHRUX,              true,  "iii"  },
   { "__insn_shufflebytes",       TILEGX_INSN_SHUFFLEBYTES,       true,  "llll" },
+  { "__insn_shufflebytes1",      TILEGX_INSN_SHUFFLEBYTES1,      true,  "lll"  },
   { "__insn_st",                 TILEGX_INSN_ST,                 false, "vpl"  },
   { "__insn_st1",                TILEGX_INSN_ST1,                false, "vpl"  },
   { "__insn_st2",                TILEGX_INSN_ST2,                false, "vpl"  },
@@ -3539,6 +3639,12 @@ tilegx_expand_builtin (tree exp,
     }
   if (!pat)
     return NULL_RTX;
+
+  /* If we are generating a prefetch, tell the scheduler not to move
+     it around.  */
+  if (GET_CODE (pat) == PREFETCH)
+    PREFETCH_SCHEDULE_BARRIER_P (pat) = true;
+
   emit_insn (pat);
 
   if (nonvoid)
@@ -3995,11 +4101,10 @@ tilegx_expand_prologue (void)
 
 	if (r == NULL_RTX)
 	  {
-	    rtx p = compute_frame_addr (offset, &next_scratch_regno);
-	    r = gen_rtx_REG (Pmode, next_scratch_regno--);
-	    reg_save_addr[which_scratch] = r;
-
-	    emit_insn (gen_rtx_SET (VOIDmode, r, p));
+	    int prev_scratch_regno = next_scratch_regno;
+	    r = compute_frame_addr (offset, &next_scratch_regno);
+	    if (prev_scratch_regno != next_scratch_regno)
+	      reg_save_addr[which_scratch] = r;
 	  }
 	else
 	  {
@@ -4363,12 +4468,14 @@ static void
 tilegx_gen_bundles (void)
 {
   basic_block bb;
-  FOR_EACH_BB (bb)
+  FOR_EACH_BB_FN (bb, cfun)
     {
-      rtx insn, next;
+      rtx insn, next, prev;
       rtx end = NEXT_INSN (BB_END (bb));
 
-      for (insn = next_insn_to_bundle (BB_HEAD (bb), end); insn; insn = next)
+      prev = NULL_RTX;
+      for (insn = next_insn_to_bundle (BB_HEAD (bb), end); insn;
+	   prev = insn, insn = next)
 	{
 	  next = next_insn_to_bundle (NEXT_INSN (insn), end);
 
@@ -4393,6 +4500,18 @@ tilegx_gen_bundles (void)
 		  PUT_MODE (insn, SImode);
 		}
 	    }
+
+	  /* Delete barrier insns, because they can mess up the
+	     emitting of bundle braces.  If it is end-of-bundle, then
+	     the previous insn must be marked end-of-bundle.  */
+	  if (get_attr_type (insn) == TYPE_NOTHING) {
+	    if (GET_MODE (insn) == QImode && prev != NULL
+		&& GET_MODE (prev) == SImode)
+	      {
+		PUT_MODE (prev, QImode);
+	      }
+	    delete_insn (insn);
+	  }
 	}
     }
 }
@@ -4689,7 +4808,7 @@ static void
 reorder_var_tracking_notes (void)
 {
   basic_block bb;
-  FOR_EACH_BB (bb)
+  FOR_EACH_BB_FN (bb, cfun)
   {
     rtx insn, next;
     rtx queue = NULL_RTX;
@@ -4786,13 +4905,8 @@ tilegx_reorg (void)
 int
 tilegx_asm_preferred_eh_data_format (int code ATTRIBUTE_UNUSED, int global)
 {
-  if (flag_pic)
-    {
-      int type = TARGET_32BIT ? DW_EH_PE_sdata4 : DW_EH_PE_sdata8;
-      return (global ? DW_EH_PE_indirect : 0) | DW_EH_PE_pcrel | type;
-    }
-  else
-    return DW_EH_PE_absptr;
+  int type = TARGET_32BIT ? DW_EH_PE_sdata4 : DW_EH_PE_sdata8;
+  return (global ? DW_EH_PE_indirect : 0) | DW_EH_PE_pcrel | type;
 }
 
 
@@ -5455,6 +5569,9 @@ tilegx_file_end (void)
 #undef  TARGET_PASS_BY_REFERENCE
 #define TARGET_PASS_BY_REFERENCE tilegx_pass_by_reference
 
+#undef  TARGET_RETURN_IN_MSB
+#define TARGET_RETURN_IN_MSB tilegx_return_in_msb
+
 #undef  TARGET_RETURN_IN_MEMORY
 #define TARGET_RETURN_IN_MEMORY tilegx_return_in_memory
 
@@ -5499,6 +5616,9 @@ tilegx_file_end (void)
 
 #undef  TARGET_RTX_COSTS
 #define TARGET_RTX_COSTS tilegx_rtx_costs
+
+#undef  TARGET_EXPAND_TO_RTL_HOOK
+#define TARGET_EXPAND_TO_RTL_HOOK tilegx_expand_to_rtl_hook
 
 #undef  TARGET_SHIFT_TRUNCATION_MASK
 #define TARGET_SHIFT_TRUNCATION_MASK tilegx_shift_truncation_mask
@@ -5579,6 +5699,8 @@ tilegx_file_end (void)
 #undef  TARGET_ASM_ALIGNED_DI_OP
 #define TARGET_ASM_ALIGNED_DI_OP "\t.quad\t"
 
+#undef  TARGET_CAN_USE_DOLOOP_P
+#define TARGET_CAN_USE_DOLOOP_P can_use_doloop_if_innermost
 
 struct gcc_target targetm = TARGET_INITIALIZER;
 

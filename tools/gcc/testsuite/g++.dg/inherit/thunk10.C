@@ -58,3 +58,5 @@ int main()
   else
     return 1;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

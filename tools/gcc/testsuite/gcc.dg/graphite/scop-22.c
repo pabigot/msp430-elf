@@ -1,4 +1,5 @@
 /* { dg-require-effective-target ilp32 } */
+
 double u[1782225];
 
 void foo(int N, int *res)

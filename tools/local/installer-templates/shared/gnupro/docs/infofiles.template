@@ -1,0 +1,2 @@
+dir     ${release}/share/info
+dir	${release}/info

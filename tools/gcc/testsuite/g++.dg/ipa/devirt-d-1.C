@@ -69,3 +69,4 @@ int main (int argc, char *argv[])
     bah ();
   return 0;
 }
+// { dg-require-effective-target size32plus }

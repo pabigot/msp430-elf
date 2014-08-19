@@ -63,7 +63,6 @@ sb_build (sb *ptr, size_t size)
   ptr->ptr = xmalloc (size + 1);
   ptr->max = size;
   ptr->len = 0;
-  ptr->no_macro_check = 0;
 }
 
 void
@@ -114,7 +113,7 @@ sb_scrub_and_add_sb (sb *ptr, sb *s)
 {
   sb_to_scrub = s;
   scrub_position = s->ptr;
-  
+
   sb_check (ptr, s->len);
   ptr->len += do_scrub_chars (scrub_from_sb, ptr->ptr + ptr->len, s->len);
 

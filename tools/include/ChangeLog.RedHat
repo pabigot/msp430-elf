@@ -1,80 +1,92 @@
-2004-05-13  Michael Snyder  <msnyder@redhat.com>
+2011-07-06  Kevin Buettner  <kevinb@redhat.com>
 
-	* dis-asm.h: Add ms1 target.
+	* dwarf2.h: Restore various declarations and definitions that
+	were deleted from the gdb-7_3-branch sources, but which are
+	still needed by our gnupro bfd sources.
 
-2003-09-29  Dave Brolley  <brolley@redhat.com>
+2007-07-11  Nick Clifton  <nickc@redhat.com>
+
+	* bfdlink.h (struct bfd_link_info): Add forced_underscore field.
+
+2006-03-08  Nick Clifton  <nickc@redhat.com>
+
+	* Import this patch:
+	2003-09-29  Dave Brolley  <brolley@redhat.com>
 
 	* dis-asm.h (disassemble_info): insn_sets now (void *) to allow for
 	more exotic underlying types to be used.
 
-2001-06-05  Nick Clifton  <nickc@cambridge.redhat.com>
+2004-09-29  Corinna Vinschen  <vinschen@redhat.com>
 
-	* dis-asm.h: Restore accidentally deleted code.
+	* Import gdb_6_2-branch.
 
-2001-06-01  Geoffrey Keating  <geoffk@redhat.com>
+2003-08-09  Nick Clifton  <nickc@redhat.com>
 
-	* dis-asm.h (print_insn_xstormy16): New prototype.
+	* Import patches from 2.14 branch to:
 
-2001-03-26  Ben Elliston  <bje@redhat.com>
+	  + Replace 'boolean' with 'bfd_boolean' and 'true/false' with
+	    'TRUE/FALSE'.
 
-	* dis-asm.h (print_insn_mep): Declare.
+	Files affected:
 
-2001-01-06  Hans-Peter Nilsson  <hpn@cygnus.com>
+	bfdlink.h
 
-	* dis-asm.h (sh64_address_is_shmedia): Move prototype to
-	include/elf/sh.h.
+2003-08-05  Nick Clifton  <nickc@redhat.com>
 
-2000-12-30  Hans-Peter Nilsson  <hpn@cygnus.com>
+	* Import new files from 2.14 branch:
+	
+	xtensa-config.h
+	xtensa-isa-internal.h
+	xtensa-isa.h
 
-	* dis-asm.h (sh64_address_is_shmedia): New prototype.
+2003-06-30  Nick Clifton  <nickc@redhat.com>
 
-2000-12-19  Hans-Peter Nilsson  <hpn@cygnus.com>
+	* Import these patches from gcc 3.3 branch:
 
-	* dis-asm.h (struct disassemble_info): New member "section".
-	(INIT_DISASSEMBLE_INFO_NO_ARCH): Initialize private_data member.
-	Initialize section member.
+	2003-03-17  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
 
-2000-12-07  Elena Zannoni  <ezannoni@kwikemart.cygnus.com>
+		* ansidecl.h (ATTRIBUTE_NONNULL, ATTRIBUTE_NULL_PRINTF,
+		ATTRIBUTE_NULL_PRINTF_1, ATTRIBUTE_NULL_PRINTF_2,
+		ATTRIBUTE_NULL_PRINTF_3, ATTRIBUTE_NULL_PRINTF_4,
+		ATTRIBUTE_NULL_PRINTF_5): New.
+		(ATTRIBUTE_PRINTF): Add ATTRIBUTE_NONNULL.
 
-	* sim-sh64.h: New file.
+	2002-10-26  Roger Sayle  <roger@eyesopen.com>
 
-2000-11-25  Hans-Peter Nilsson  <hpn@cygnus.com>
+		* partition.h:  Close the extern "C" scope when compiling with C++.
 
-	* dis-asm.h (print_insn_sh64): New prototype.
-	(print_insn_sh64l): New prototype.
-	(print_insn_sh64x_media): New prototype.
+	2002-10-26  Roger Sayle  <roger@eyesopen.com>
+		    DJ Delorie <dj@redhat.com>
 
-2000-05-27  matthew green  <mrg@redhat.com>
+		PR bootstrap/8351
+		* getopt.h: Avoid prototyping getopt with no arguments in C++.
 
-	(CGEN_MAX_SYNTAX_BYTES): Define as 40 now.
+	2003-02-27  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
 
-2000-02-14  Chandra Chavva  <cchavva@cygnus.com>
+		* libiberty.h: Document return value of physmem routines.
 
-	* opcode/d30v (FLAG_NOT_WITH_ADDSUBppp): Redefined as operation cannot 
-	be combined in parallel with ADD/SUBppp.
+	2003-02-20  Kaveh R. Ghazi  <ghazi@caip.rutgers.edu>
 
-1999-07-31  Tim Wall <twall@tiac.net>
+		* libiberty.h (physmem_total, physmem_available): Prototype.
 
-	* dis-asm.h: added octets_per_byte field to disasm_info struct
+	2002-11-23  Simon Burge  <simonb@wasabisystems.com>
 
-Thu Jun 17 12:17:12 1999  Jim Wilson  <wilson@cygnus.com>
+		* libiberty.h (basename): Add NetBSD to the list.
 
-	* elf/ia64.h (R_IA64_GPREL32MSB, R_IA64_GPREL32LSB): Correct numbers.
+	2002-11-22  Daniel Jacobowitz  <drow@mvista.com>
 
-1999-06-10  Bob Manson  <manson@charmed.cygnus.com>
+		* libiberty.h (make_relative_prefix): Add prototype.
 
-	* opcode/ia64.h: Add IA64_TYPE_DYN.  
-	(struct ia64_opcode): Replace next with ent_index.
- 	(ia64_find_opcode, ia64_find_next_opcode, ia64_free_opcode):
-	Declare.
+	2003-02-20  Daniel Jacobowitz  <drow@mvista.com>
+		* libiberty.h (lrealpath): Add declaration.
 
-1999-06-03  David Mosberger  <davidm@hpl.hp.com>
+2003-03-24  Nick Clifton  <nickc@redhat.com>
 
-	* dis-asm.h (print_insn_ia64): Declare.
+	* bin-bugs.h (REPORT_BUGS_TO): Change the address again.
 
-1999-05-11  Catherine Moore  <clm@cygnus.com>
+2003-03-13  Nick Clifton  <nickc@redhat.com>
 
-	* dis-asm.h (print_insn_frv): Declare.
+	* bin-bugs.h (REPORT_BUGS_TO): Change to Red Hat URL.
 
 
 Local Variables:

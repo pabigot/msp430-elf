@@ -24,3 +24,4 @@ main ()
 
   foo (objs);
 }
+// { dg-require-effective-target size32plus }

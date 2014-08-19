@@ -185,9 +185,6 @@ esac
 if test x"$silent" != x"yes" && test x"$sim_filter" != x""; then
   echo "Setting filter flags = $sim_filter" 6>&1
 fi],[sim_filter="-F 32,f,o"
-case "${target}" in
-  *altivec*) sim_filter="${sim_filter},av"
-esac
 if test x"$silent" != x"yes"; then
   echo "Setting filter flags = $sim_filter" 6>&1
 fi])dnl

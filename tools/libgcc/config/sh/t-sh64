@@ -4,4 +4,3 @@ LIB1ASMFUNCS = \
   _shcompact_incoming_args _ic_invalidate _nested_trampoline \
   _push_pop_shmedia_regs \
   _udivdi3 _divdi3 _umoddi3 _moddi3 _div_table
-LIB1ASMFUNCS += _udiv_qrnnd_16

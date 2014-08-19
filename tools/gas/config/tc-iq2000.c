@@ -515,10 +515,7 @@ md_cgen_lookup_reloc (const CGEN_INSN *    insn     ATTRIBUTE_UNUSED,
   switch (operand->type)
     {
     case IQ2000_OPERAND_OFFSET:      return BFD_RELOC_16_PCREL_S2;
-    case IQ2000_OPERAND_JMPTARG:     return BFD_RELOC_IQ2000_OFFSET_21;
-#if 0
     case IQ2000_OPERAND_JMPTARG:     return BFD_RELOC_IQ2000_OFFSET_16;
-#endif
     case IQ2000_OPERAND_JMPTARGQ10:  return BFD_RELOC_NONE;
     case IQ2000_OPERAND_HI16:        return BFD_RELOC_HI16;
     case IQ2000_OPERAND_LO16:        return BFD_RELOC_LO16;

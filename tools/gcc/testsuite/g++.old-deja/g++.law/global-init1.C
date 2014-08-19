@@ -17,5 +17,5 @@ int main ()
   if (cls->a != 6)
     { printf ("FAIL\n"); return 1; }
   else
-    printf ("PASS\n");
+    ; // printf ("PASS\n");
 }

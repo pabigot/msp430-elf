@@ -1,62 +1,83 @@
-/20090107-1.C/1.2/Mon Nov 22 09:14:41 2010//Tmsp430-130322-branch
-/20090121-1.C/1.2/Mon Nov 22 09:14:41 2010//Tmsp430-130322-branch
-/README/1.12/Sun Jan 27 20:28:19 2013//Tmsp430-130322-branch
-/cdce3.C/1.7/Sun Mar 25 17:53:59 2012//Tmsp430-130322-branch
-/constexpr-null1.C/1.1/Sun Jan 16 18:06:19 2011//Tmsp430-130322-branch
-/dg.exp/1.25/Sun Jan 27 20:28:19 2013//Tmsp430-130322-branch
-/func-args-1.C/1.1/Sun Mar 14 22:02:33 2010//Tmsp430-130322-branch
-/pr37742.C/1.2/Sun May 31 22:09:34 2009//Tmsp430-130322-branch
-/pr44328.C/1.1/Mon Aug 23 07:49:08 2010//Tmsp430-130322-branch
-/pr44486.C/1.1/Sun Jun 20 13:55:34 2010//Tmsp430-130322-branch
-/pr45038.C/1.1/Mon Nov 22 09:14:41 2010//Tmsp430-130322-branch
-/pr45049-1.C/1.1/Mon Aug 23 07:49:08 2010//Tmsp430-130322-branch
-/pr45049-2.C/1.1/Mon Aug 23 07:49:08 2010//Tmsp430-130322-branch
-/pr45056.C/1.2/Mon Jul 25 08:50:15 2011//Tmsp430-130322-branch
-/pr45112.C/1.1/Mon Aug 23 07:49:08 2010//Tmsp430-130322-branch
-/pr45310.C/1.1/Sun Jan 16 18:06:19 2011//Tmsp430-130322-branch
-/pr45330.C/1.1/Sun Jan 16 18:06:19 2011//Tmsp430-130322-branch
-/pr45788.C/1.1/Mon Oct 18 00:36:35 2010//Tmsp430-130322-branch
-/pr46065.C/1.1/Mon Nov 22 09:14:41 2010//Tmsp430-130322-branch
-/pr46852.C/1.1/Sun Jan 16 18:06:19 2011//Tmsp430-130322-branch
-/pr46868.C/1.1/Mon Mar 21 10:29:13 2011//Tmsp430-130322-branch
-/pr46890.C/1.1/Sun Feb 20 18:36:43 2011//Tmsp430-130322-branch
-/pr47053.C/1.1/Sun Feb 20 18:36:43 2011//Tmsp430-130322-branch
-/pr47589.C/1.1/Sun Feb 20 18:36:43 2011//Tmsp430-130322-branch
-/pr48484.C/1.2.10.1/Wed Mar 27 01:23:01 2013//Tmsp430-130322-branch
-/pr48633.C/1.1/Sun Jun 26 17:32:44 2011//Tmsp430-130322-branch
-/pr48660.C/1.1/Tue Nov  1 15:28:23 2011//Tmsp430-130322-branch
-/pr48772.C/1.1/Sun May 22 15:36:08 2011//Tmsp430-130322-branch
-/pr50672.C/1.1/Sun Nov 20 22:01:39 2011//Tmsp430-130322-branch
-/pr50763-3.C/1.1/Sun Nov 20 22:01:39 2011//Tmsp430-130322-branch
-/pr50763-4.C/1.1/Sun Nov 20 22:01:39 2011//Tmsp430-130322-branch
-/pr51264-4.C/1.1/Mon Apr 30 08:16:59 2012//Tmsp430-130322-branch
-/pr53055.C/1.1/Sun Oct 28 18:06:40 2012//Tmsp430-130322-branch
-/pr54655.C/1.1/Sun Oct 28 18:06:40 2012//Tmsp430-130322-branch
-/pr55106.C/1.1/Sun Nov 18 22:26:02 2012//Tmsp430-130322-branch
-/pr55263.C/1.1/Sun Nov 18 22:26:03 2012//Tmsp430-130322-branch
-/pr55513.C/1.1/Sun Dec 16 17:46:24 2012//Tmsp430-130322-branch
-/pr55604.C/1.1/Sun Dec 16 17:46:24 2012//Tmsp430-130322-branch
-/predict-loop-exit-1.C/1.1/Sun Oct 28 18:06:41 2012//Tmsp430-130322-branch
-/predict-loop-exit-2.C/1.1/Sun Oct 28 18:06:41 2012//Tmsp430-130322-branch
-/predict-loop-exit-3.C/1.1/Sun Oct 28 18:06:41 2012//Tmsp430-130322-branch
-/prof-robust-1.C/1.1/Sun May 22 15:36:08 2011//Tmsp430-130322-branch
-/pubtypes.C/1.2/Sun Feb 22 18:21:14 2009//Tmsp430-130322-branch
-/system-binary-constants-1.C/1.1/Sun May 20 20:33:45 2012//Tmsp430-130322-branch
-/system-binary-constants-1.h/1.1/Sun May 20 20:33:45 2012//Tmsp430-130322-branch
-/uninit-pred-1_a.C/1.1/Sun May 16 18:06:58 2010//Tmsp430-130322-branch
-/uninit-pred-1_b.C/1.1/Sun May 16 18:06:58 2010//Tmsp430-130322-branch
-/uninit-pred-2_a.C/1.1/Sun May 16 18:06:58 2010//Tmsp430-130322-branch
-/uninit-pred-2_b.C/1.1/Sun May 16 18:06:58 2010//Tmsp430-130322-branch
-/uninit-pred-3_a.C/1.1/Mon Oct 18 00:36:35 2010//Tmsp430-130322-branch
-/uninit-pred-3_b.C/1.2/Sun Jun 26 17:32:44 2011//Tmsp430-130322-branch
-/uninit-pred-loop-1_a.cc/1.1/Sun May 16 18:06:58 2010//Tmsp430-130322-branch
-/uninit-pred-loop-1_b.cc/1.1/Sun May 16 18:06:58 2010//Tmsp430-130322-branch
-/uninit-pred-loop-1_c.cc/1.1/Sun May 16 18:06:58 2010//Tmsp430-130322-branch
-/uninit-pred-loop_1.cc/1.1/Sun May 16 18:06:58 2010//Tmsp430-130322-branch
+/20090107-1.C/1.2/Fri Mar 25 11:21:19 2011//Tmsp430-14r1-branch
+/20090121-1.C/1.2/Fri Mar 25 11:21:19 2011//Tmsp430-14r1-branch
+/README/1.7/Thu Feb 20 16:40:51 2014//Tmsp430-14r1-branch
+/cdce3.C/1.6/Thu May  2 21:38:11 2013//Tmsp430-14r1-branch
+/constexpr-null1.C/1.2/Mon Mar 10 09:18:23 2014//Tmsp430-14r1-branch
+/dg.exp/1.24/Thu Feb 20 16:40:51 2014//Tmsp430-14r1-branch
+/fstack-protector-strong.C/1.1/Thu Feb 20 16:40:51 2014//Tmsp430-14r1-branch
+/func-args-1.C/1.1/Thu Mar 11 08:15:46 2010//Tmsp430-14r1-branch
+/pr37742.C/1.2/Mon Jun  8 13:47:47 2009//Tmsp430-14r1-branch
+/pr44328.C/1.1/Tue Sep  7 14:12:59 2010//Tmsp430-14r1-branch
+/pr44486.C/1.1/Fri Mar 25 11:21:19 2011//Tmsp430-14r1-branch
+/pr45038.C/1.1/Fri Mar 25 11:21:19 2011//Tmsp430-14r1-branch
+/pr45049-1.C/1.1/Fri Mar 25 11:21:19 2011//Tmsp430-14r1-branch
+/pr45049-2.C/1.1/Fri Mar 25 11:21:19 2011//Tmsp430-14r1-branch
+/pr45056.C/1.3/Wed Apr 18 17:09:07 2012//Tmsp430-14r1-branch
+/pr45112.C/1.1/Mon Aug  2 12:01:18 2010//Tmsp430-14r1-branch
+/pr45310.C/1.3/Wed Apr 18 17:09:07 2012//Tmsp430-14r1-branch
+/pr45330.C/1.1/Fri Mar 25 11:21:20 2011//Tmsp430-14r1-branch
+/pr45788.C/1.1/Fri Mar 25 11:21:20 2011//Tmsp430-14r1-branch
+/pr46065.C/1.1/Fri Mar 25 11:21:20 2011//Tmsp430-14r1-branch
+/pr46852.C/1.1/Fri Mar 25 11:21:20 2011//Tmsp430-14r1-branch
+/pr46868.C/1.1/Fri Mar 25 11:21:20 2011//Tmsp430-14r1-branch
+/pr46890.C/1.1/Fri Mar 25 11:21:20 2011//Tmsp430-14r1-branch
+/pr47053.C/1.3/Wed Apr 18 17:09:07 2012//Tmsp430-14r1-branch
+/pr47589.C/1.1/Fri Mar 25 11:21:20 2011//Tmsp430-14r1-branch
+/pr48484.C/1.6/Thu Feb 27 12:54:27 2014//Tmsp430-14r1-branch
+/pr48633.C/1.1/Wed Apr 18 17:09:07 2012//Tmsp430-14r1-branch
+/pr48660.C/1.1/Wed Apr 18 17:09:07 2012//Tmsp430-14r1-branch
+/pr48772.C/1.1/Wed Apr 18 17:09:07 2012//Tmsp430-14r1-branch
+/pr49718.C/1.2/Mon Apr  7 10:31:59 2014//Tmsp430-14r1-branch
+/pr49847.C/1.1/Tue Mar  4 14:20:45 2014//Tmsp430-14r1-branch
+/pr50672.C/1.1/Wed Apr 18 17:09:07 2012//Tmsp430-14r1-branch
+/pr50763-3.C/1.1/Wed Apr 18 17:09:07 2012//Tmsp430-14r1-branch
+/pr50763-4.C/1.1/Wed Apr 18 17:09:07 2012//Tmsp430-14r1-branch
+/pr51264-4.C/1.1/Thu May  2 21:38:11 2013//Tmsp430-14r1-branch
+/pr53055.C/1.1/Thu May  2 21:38:11 2013//Tmsp430-14r1-branch
+/pr54655.C/1.1/Thu May  2 21:38:12 2013//Tmsp430-14r1-branch
+/pr55106.C/1.1/Thu May  2 21:38:12 2013//Tmsp430-14r1-branch
+/pr55263.C/1.1/Thu May  2 21:38:12 2013//Tmsp430-14r1-branch
+/pr55513.C/1.1/Thu May  2 21:38:12 2013//Tmsp430-14r1-branch
+/pr55604.C/1.1/Thu May  2 21:38:12 2013//Tmsp430-14r1-branch
+/pr57175.C/1.2/Mon Mar 10 09:18:23 2014//Tmsp430-14r1-branch
+/pr57662.C/1.1/Thu Feb 20 16:40:51 2014//Tmsp430-14r1-branch
+/pr57878.C/1.4/Mon Mar 10 09:18:23 2014//Tmsp430-14r1-branch
+/pr58389.C/1.1/Thu Feb 20 16:40:51 2014//Tmsp430-14r1-branch
+/pr58438.C/1.1/Thu Feb 20 16:40:51 2014//Tmsp430-14r1-branch
+/pr58950.C/1.1/Thu Feb 20 16:40:51 2014//Tmsp430-14r1-branch
+/pr59445.C/1.1/Thu Feb 20 16:40:51 2014//Tmsp430-14r1-branch
+/pr59477.C/1.1/Thu Feb 20 16:40:51 2014//Tmsp430-14r1-branch
+/pr59482.C/1.1/Thu Feb 20 16:40:51 2014//Tmsp430-14r1-branch
+/pr59510.C/1.1/Thu Feb 20 16:40:51 2014//Tmsp430-14r1-branch
+/pr59695.C/1.2/Tue Jun 24 12:45:46 2014//Tmsp430-14r1-branch
+/pr60518.C/1.1/Mon Mar 17 09:19:49 2014//Tmsp430-14r1-branch
+/pr60969.C/1.2/Mon Jun  2 09:07:08 2014//Tmsp430-14r1-branch
+/pr61094.C/1.1/Mon Jun 16 10:56:52 2014//Tmsp430-14r1-branch
+/pr61289-2.c/1.1/Mon Jun 16 10:56:52 2014//Tmsp430-14r1-branch
+/pr61289.C/1.2/Tue Jun 24 12:45:46 2014//Tmsp430-14r1-branch
+/predict-loop-exit-1.C/1.1/Thu May  2 21:38:13 2013//Tmsp430-14r1-branch
+/predict-loop-exit-2.C/1.1/Thu May  2 21:38:13 2013//Tmsp430-14r1-branch
+/predict-loop-exit-3.C/1.1/Thu May  2 21:38:14 2013//Tmsp430-14r1-branch
+/prof-robust-1.C/1.1/Wed Apr 18 17:09:08 2012//Tmsp430-14r1-branch
+/pubtypes.C/1.3/Thu Feb 20 16:40:51 2014//Tmsp430-14r1-branch
+/system-binary-constants-1.C/1.2/Thu Feb 20 16:40:51 2014//Tmsp430-14r1-branch
+/system-binary-constants-1.h/1.1/Thu May  2 21:38:14 2013//Tmsp430-14r1-branch
+/uninit-pred-1_a.C/1.1/Fri Mar 25 11:21:20 2011//Tmsp430-14r1-branch
+/uninit-pred-1_b.C/1.1/Fri Mar 25 11:21:20 2011//Tmsp430-14r1-branch
+/uninit-pred-2_a.C/1.1/Fri Mar 25 11:21:20 2011//Tmsp430-14r1-branch
+/uninit-pred-2_b.C/1.1/Fri Mar 25 11:21:20 2011//Tmsp430-14r1-branch
+/uninit-pred-3_a.C/1.1/Fri Mar 25 11:21:20 2011//Tmsp430-14r1-branch
+/uninit-pred-3_b.C/1.2/Wed Apr 18 17:09:08 2012//Tmsp430-14r1-branch
+/uninit-pred-4.C/1.1/Mon Sep 16 10:38:49 2013//Tmsp430-14r1-branch
+/uninit-pred-loop-1_a.cc/1.1/Fri Mar 25 11:21:20 2011//Tmsp430-14r1-branch
+/uninit-pred-loop-1_b.cc/1.1/Fri Mar 25 11:21:20 2011//Tmsp430-14r1-branch
+/uninit-pred-loop-1_c.cc/1.1/Fri Mar 25 11:21:20 2011//Tmsp430-14r1-branch
+/uninit-pred-loop_1.cc/1.1/Fri Mar 25 11:21:20 2011//Tmsp430-14r1-branch
 D/abi////
 D/asan////
 D/bprob////
 D/charset////
+D/cilk-plus////
 D/compat////
 D/conversion////
 D/cpp////
@@ -93,5 +114,7 @@ D/tm////
 D/torture////
 D/tree-prof////
 D/tree-ssa////
+D/tsan////
+D/ubsan////
 D/vect////
 D/warn////

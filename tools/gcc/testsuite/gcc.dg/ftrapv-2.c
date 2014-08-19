@@ -7,8 +7,9 @@
    Written by Eric Botcazou  */
 
 /* { dg-do run } */
-/* { dg-options "-ftrapv" } */
 /* { dg-skip-if "trapping arithmetic not supported" { msp430-*-* rl78-*-* } "*" "" } */
+/* { dg-options "-ftrapv" } */
+/* { dg-require-effective-target trapping } */
 
 extern void abort(void);
 extern long labs(long);

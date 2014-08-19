@@ -1,6 +1,6 @@
 /* Target-dependent code for Xilinx MicroBlaze.
 
-   Copyright 2009-2012 Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -29,14 +29,13 @@
 #include "inferior.h"
 #include "regcache.h"
 #include "target.h"
-#include "frame.h"
 #include "frame-base.h"
 #include "frame-unwind.h"
 #include "dwarf2-frame.h"
 #include "osabi.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "target-descriptions.h"
 #include "opcodes/microblaze-opcm.h"
 #include "opcodes/microblaze-dis.h"
@@ -123,7 +122,7 @@ microblaze_register_type (struct gdbarch *gdbarch, int regnum)
 static unsigned long
 microblaze_fetch_instruction (CORE_ADDR pc)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   gdb_byte buf[4];
 
   /* If we can't read the instruction at PC, return zero.  */

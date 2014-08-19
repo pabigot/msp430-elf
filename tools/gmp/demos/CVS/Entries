@@ -1,11 +1,11 @@
-/Makefile.am/1.2/Wed Apr 14 09:40:37 2010//Tmsp430-130322-branch
-/Makefile.in/1.3/Wed Apr 14 09:40:37 2010//Tmsp430-130322-branch
-/factorize.c/1.2/Wed Apr 14 09:40:37 2010//Tmsp430-130322-branch
-/isprime.c/1.2/Wed Apr 14 09:40:37 2010//Tmsp430-130322-branch
-/pexpr-config-h.in/1.2/Wed Apr 14 09:40:37 2010//Tmsp430-130322-branch
-/pexpr.c/1.2/Wed Apr 14 09:40:37 2010//Tmsp430-130322-branch
-/primes.c/1.2/Wed Apr 14 09:40:37 2010//Tmsp430-130322-branch
-/qcn.c/1.2/Wed Apr 14 09:40:37 2010//Tmsp430-130322-branch
+/Makefile.am/1.2/Wed Apr 14 09:00:13 2010//Tmsp430-14r1-branch
+/Makefile.in/1.2/Wed Apr 14 09:00:13 2010//Tmsp430-14r1-branch
+/factorize.c/1.2/Wed Apr 14 09:00:13 2010//Tmsp430-14r1-branch
+/isprime.c/1.2/Wed Apr 14 09:00:14 2010//Tmsp430-14r1-branch
+/pexpr-config-h.in/1.2/Wed Apr 14 09:00:15 2010//Tmsp430-14r1-branch
+/pexpr.c/1.2/Wed Apr 14 09:00:15 2010//Tmsp430-14r1-branch
+/primes.c/1.2/Wed Apr 14 09:00:15 2010//Tmsp430-14r1-branch
+/qcn.c/1.2/Wed Apr 14 09:00:15 2010//Tmsp430-14r1-branch
 D/calc////
 D/expr////
 D/perl////

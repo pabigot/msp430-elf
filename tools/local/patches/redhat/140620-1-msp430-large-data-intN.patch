@@ -1,0 +1,3774 @@
+MSP430 large model patch - add __intN support to GCC's core.
+
+gcc/c/
+	* c-parser.c (c_parse_init): Add RID entries for each __intN.
+	(c_token_starts_typename): Check all __intN, not just __int128.
+	(c_token_starts_declspecs): Likewise.
+	(c_parser_declspecs): Likewise.
+	(c_parser_attribute_any_word): Likewise.
+	(c_parser_objc_selector): Likewise.
+	* c-tree.h (c_typespec_keyword): cts_int128 -> cts_int_n.
+	(struct c_declspecs): Add int_n_idx field to record *which* __intN
+	is specified.
+	* c-decl.c (declspecs_add_type): Check for all __intN, not just
+	__int128.
+	(finish_declspecs): Likewise.
+
+gcc/c-family/
+	* c-pretty-print.c (pp_c_integer_constant): Check for all __intN
+	types, not just __int128.
+	* c-cppbuiltin.c (c_cpp_builtins): Add builtins for all __intN
+	types, not just __int128.
+	(cpp_atomic_builtins): Round pointer sizes up.
+	(type_suffix): Use type precision, not specific types.
+	* c-common.c (c_common_reswords): Remove __int128 special case.
+	(c_common_type_for_size): Check for all __intN types, not just
+	__int128.
+	(c_common_type_for_mode): Likewise.
+	(c_common_signed_or_unsigned_type): Likewise.
+	(c_build_bitfield_integer_type): Likewise.
+	(c_common_nodes_and_builtins): Likewise.
+	(keyword_begins_type_specifier): Likewise.
+	* c-common.h (rid): Remove RID_INT128 and add RID_INT_N_* for all
+	__intN variants.
+
+gcc/
+	* machmode.h (int_n_data_t): New.
+	(int_n_enabled_p): New.
+	(int_n_data): New.
+	* tree.c (int_n_enabled_p): New.
+	(int_n_trees): New.
+	(make_or_reuse_type): Check for all __intN types, not just
+	__int128.
+	(build_common_tree_nodes): Likewise.  Also fill in integer_typs[]
+	entries.
+	* tree.h (int128_integer_type_node): Remove.
+	(int128_unsigned_type_node): Remove.
+	(int_n_trees_t): New.
+	(int_n_enabled_p): New.
+	(int_n_trees): New.
+	* toplev.c (standard_type_bitsize): New.
+	(do_compile): Check which __intN types are enabled for the current
+	run.
+	* builtin-types.def (BT_INT128): Remove.
+	(BT_UINT128): Remove.
+	* machmode.def: Add macro to create __int128 for all targets.
+	* stor-layout.c (mode_for_size): Support __intN types.
+	(smallest_mode_for_size): Likewise.
+	(layout_type): Use precision, not size.
+	(initialize_sizetypes): Support __intN types.
+	* genmodes.c (struct mode_data): Add int_n field.
+	(blank_mode): Likewise.
+	(INT_N): New.
+	(make_int_n): New.
+	(emit_insn_modes_h): Count __intN entries and define
+	NUM_INT_N_ENTS.
+	(emit_mode_int_n): New.
+	(emit_insn_modes_c): Call it.
+	* gimple.c (gimple_signed_or_unsigned_type): Check for all __intN
+	types, not just __int128.
+	* tree-core.h (integer_type_kind): Remove __int128-specific
+	entries, reserve spots for __intN entries.
+	* cppbuiltin.c (define_builtin_macros_for_type_sizes): Round
+	pointer size up to a power of two.
+	* defaults.h (DWARF2_ADDR_SIZE): Round up.
+	(POINTER_SIZE_UNITS): New, rounded up value.
+	* dwarf2asm.c (size_of_encoded_value): Use it.
+	(dw2_output_indirect_constant_1): Likewise.
+	* expmed.c (init_expmed_one_conv): We now know the sizes of
+	partial int modes.
+	* expr.c (convert_move): If the target has an explicit converter,
+	use it.
+	* loop-iv.c (iv_number_of_iterations): Use precision, not size.
+	* optabs.c (expand_float): Use precision, not size.
+	(expand_fix): Likewise.
+	* simplify-rtx (simplify_unary_operation_1): Likewise.
+	* tree-dfa.c (get_ref_base_and_extent): Likewise.
+	* varasm.c (assemble_addr_to_section): Round up pointer sizes.
+	(default_assemble_integer) Likewise.
+	(dump_tm_clone_pairs): Likewise.
+
+	* config/msp430/msp430-protos.h (msp430_hard_regno_nregs_has_padding): New.
+	(msp430_hard_regno_nregs_with_padding): New.
+	* config/msp430/msp430.c (msp430_scalar_mode_supported_p): New.
+	(msp430_hard_regno_nregs_has_padding): New.
+	(msp430_hard_regno_nregs_with_padding): New.
+	(msp430_unwind_word_mode): Use PSImode instead of SImode.
+	(msp430_addr_space_legitimate_address_p): New.
+	(msp430_asm_integer): New.
+	(msp430_init_dwarf_reg_sizes_extra): New.
+	(msp430_print_operand): Use X suffix for PSImode even in small model.
+	* config/msp430/msp430.h (POINTER_SIZE): Use 20 bits, not 32.
+	(PTR_SIZE): ...but 4 bytes for EH.
+	(SIZE_TYPE): Use __int20.
+	(PTRDIFF_TYPE): Likewise.
+	(INCOMING_FRAME_SP_OFFSET): Adjust.
+	* config/msp430/msp430.md (movqi_topbyte): New.
+	(movpsi): Use fixed suffixes.
+	(movsipsi2): Enable for 430X, not large model.
+	(extendhipsi2): Likewise.
+	(zero_extendhisi2): Likewise.
+	(zero_extendhisipsi2): Likewise.
+	(extend_and_shift1_hipsi2): Likewise.
+	(extendpsisi2): Likewise.
+	(*bitbranch<mode>4_z): Fix suffix logic.
+
+gcc/lto/
+	* lto-lang.c (lto_build_c_type_nodes): Check intN types for
+	size-type as well.
+	(lto_init): Initialize all intN types, not just int128.
+	* lto-object.c (lto_obj_begin_section): Do not assume pointers are
+	powers-of-two in size.
+
+libstdc++-v3/
+	* include/bits/cpp_type_traits.h: Add support for __intN types.
+	* include/c_global/cstdlib: Likewise.
+	* include/c_std/cstdlib: Likewise.
+	* include/std/limits: Likewise.
+	* include/std/type_traits: Likewise.
+	* src/c++11/limits.cc: Likewise.
+
+
+
+Index: gcc/builtin-types.def
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/builtin-types.def,v
+retrieving revision 1.15
+diff -p -U 5 -r1.15 builtin-types.def
+--- gcc/builtin-types.def	20 Feb 2014 16:40:23 -0000	1.15
++++ gcc/builtin-types.def	20 Jun 2014 07:30:01 -0000
+@@ -71,12 +71,10 @@ DEF_PRIMITIVE_TYPE (BT_INT, integer_type
+ DEF_PRIMITIVE_TYPE (BT_UINT, unsigned_type_node)
+ DEF_PRIMITIVE_TYPE (BT_LONG, long_integer_type_node)
+ DEF_PRIMITIVE_TYPE (BT_ULONG, long_unsigned_type_node)
+ DEF_PRIMITIVE_TYPE (BT_LONGLONG, long_long_integer_type_node)
+ DEF_PRIMITIVE_TYPE (BT_ULONGLONG, long_long_unsigned_type_node)
+-DEF_PRIMITIVE_TYPE (BT_INT128, int128_integer_type_node)
+-DEF_PRIMITIVE_TYPE (BT_UINT128, int128_unsigned_type_node)
+ DEF_PRIMITIVE_TYPE (BT_INTMAX, intmax_type_node)
+ DEF_PRIMITIVE_TYPE (BT_UINTMAX, uintmax_type_node)
+ DEF_PRIMITIVE_TYPE (BT_UINT16, uint16_type_node)
+ DEF_PRIMITIVE_TYPE (BT_UINT32, uint32_type_node)
+ DEF_PRIMITIVE_TYPE (BT_UINT64, uint64_type_node)
+Index: gcc/cppbuiltin.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/cppbuiltin.c,v
+retrieving revision 1.4
+diff -p -U 5 -r1.4 cppbuiltin.c
+--- gcc/cppbuiltin.c	20 Feb 2014 16:40:24 -0000	1.4
++++ gcc/cppbuiltin.c	20 Jun 2014 07:30:01 -0000
+@@ -173,11 +173,11 @@ define_builtin_macros_for_type_sizes (cp
+                          : "__ORDER_LITTLE_ENDIAN__"));
+ 
+   /* ptr_type_node can't be used here since ptr_mode is only set when
+      toplev calls backend_init which is not done with -E switch.  */
+   cpp_define_formatted (pfile, "__SIZEOF_POINTER__=%d",
+-			POINTER_SIZE / BITS_PER_UNIT);
++			1 << ceil_log2 ((POINTER_SIZE + BITS_PER_UNIT - 1) / BITS_PER_UNIT));
+ }
+ 
+ 
+ /* Define macros builtins common to all language performing CPP
+    preprocessing.  */
+Index: gcc/defaults.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/defaults.h,v
+retrieving revision 1.20
+diff -p -U 5 -r1.20 defaults.h
+--- gcc/defaults.h	20 Feb 2014 16:40:24 -0000	1.20
++++ gcc/defaults.h	20 Jun 2014 07:30:01 -0000
+@@ -449,11 +449,11 @@ see the files COPYING3 and COPYING.RUNTI
+    Some architectures use word addresses to refer to code locations,
+    but Dwarf 2 info always uses byte addresses.  On such machines,
+    Dwarf 2 addresses need to be larger than the architecture's
+    pointers.  */
+ #ifndef DWARF2_ADDR_SIZE
+-#define DWARF2_ADDR_SIZE (POINTER_SIZE / BITS_PER_UNIT)
++#define DWARF2_ADDR_SIZE ((POINTER_SIZE + BITS_PER_UNIT - 1) / BITS_PER_UNIT)
+ #endif
+ 
+ /* The size in bytes of a DWARF field indicating an offset or length
+    relative to a debug info section, specified to be 4 bytes in the
+    DWARF-2 specification.  The SGI/MIPS ABI defines it to be the same
+@@ -741,10 +741,14 @@ see the files COPYING3 and COPYING.RUNTI
+ 
+ /* Width in bits of a pointer.  Mind the value of the macro `Pmode'.  */
+ #ifndef POINTER_SIZE
+ #define POINTER_SIZE BITS_PER_WORD
+ #endif
++#ifndef POINTER_SIZE_UNITS
++#define POINTER_SIZE_UNITS ((POINTER_SIZE + BITS_PER_UNIT - 1) / BITS_PER_UNIT)
++#endif
++
+ 
+ #ifndef PIC_OFFSET_TABLE_REGNUM
+ #define PIC_OFFSET_TABLE_REGNUM INVALID_REGNUM
+ #endif
+ 
+Index: gcc/dwarf2asm.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/dwarf2asm.c,v
+retrieving revision 1.14
+diff -p -U 5 -r1.14 dwarf2asm.c
+--- gcc/dwarf2asm.c	20 Feb 2014 16:40:24 -0000	1.14
++++ gcc/dwarf2asm.c	20 Jun 2014 07:30:01 -0000
+@@ -388,11 +388,11 @@ size_of_encoded_value (int encoding)
+     return 0;
+ 
+   switch (encoding & 0x07)
+     {
+     case DW_EH_PE_absptr:
+-      return POINTER_SIZE / BITS_PER_UNIT;
++      return POINTER_SIZE_UNITS;
+     case DW_EH_PE_udata2:
+       return 2;
+     case DW_EH_PE_udata4:
+       return 4;
+     case DW_EH_PE_udata8:
+@@ -918,11 +918,11 @@ dw2_output_indirect_constant_1 (splay_tr
+ 	DECL_VISIBILITY (decl) = VISIBILITY_HIDDEN;
+     }
+ 
+   sym_ref = gen_rtx_SYMBOL_REF (Pmode, sym);
+   assemble_variable (decl, 1, 1, 1);
+-  assemble_integer (sym_ref, POINTER_SIZE / BITS_PER_UNIT, POINTER_SIZE, 1);
++  assemble_integer (sym_ref, POINTER_SIZE_UNITS, POINTER_SIZE, 1);
+ 
+   return 0;
+ }
+ 
+ /* Emit the constants queued through dw2_force_const_mem.  */
+Index: gcc/expmed.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/expmed.c,v
+retrieving revision 1.46
+diff -p -U 5 -r1.46 expmed.c
+--- gcc/expmed.c	20 Feb 2014 16:40:24 -0000	1.46
++++ gcc/expmed.c	20 Jun 2014 07:30:02 -0000
+@@ -104,17 +104,23 @@ init_expmed_one_conv (struct init_expmed
+ 		      enum machine_mode from_mode, bool speed)
+ {
+   int to_size, from_size;
+   rtx which;
+ 
+-  /* We're given no information about the true size of a partial integer,
+-     only the size of the "full" integer it requires for storage.  For
+-     comparison purposes here, reduce the bit size by one in that case.  */
+-  to_size = (GET_MODE_BITSIZE (to_mode)
+-	     - (GET_MODE_CLASS (to_mode) == MODE_PARTIAL_INT));
+-  from_size = (GET_MODE_BITSIZE (from_mode)
+-	       - (GET_MODE_CLASS (from_mode) == MODE_PARTIAL_INT));
++  to_size = GET_MODE_PRECISION (to_mode);
++  from_size = GET_MODE_PRECISION (from_mode);
++
++  /* Most partial integers have a precision less than the "full"
++     integer it requires for storage.  In case one doesn't, for
++     comparison purposes here, reduce the bit size by one in that
++     case.  */
++  if (GET_MODE_CLASS (to_mode) == MODE_PARTIAL_INT
++      && exact_log2 (to_size) != -1)
++    to_size --;
++  if (GET_MODE_CLASS (from_mode) == MODE_PARTIAL_INT
++      && exact_log2 (from_size) != -1)
++    from_size --;
+   
+   /* Assume cost of zero-extend and sign-extend is the same.  */
+   which = (to_size < from_size ? &all->trunc : &all->zext);
+ 
+   PUT_MODE (&all->reg, from_mode);
+Index: gcc/expr.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/expr.c,v
+retrieving revision 1.72
+diff -p -U 5 -r1.72 expr.c
+--- gcc/expr.c	23 Apr 2014 07:11:33 -0000	1.72
++++ gcc/expr.c	20 Jun 2014 07:30:05 -0000
+@@ -421,10 +421,30 @@ convert_move (rtx to, rtx from, int unsi
+ 			  : gen_rtx_FLOAT_EXTEND (to_mode, from));
+       return;
+     }
+ 
+   /* Handle pointer conversion.  */			/* SPEE 900220.  */
++  /* If the target has a converter from FROM_MODE to TO_MODE, use it.  */
++  {
++    convert_optab ctab;
++
++    if (GET_MODE_PRECISION (from_mode) > GET_MODE_PRECISION (to_mode))
++      ctab = trunc_optab;
++    else if (unsignedp)
++      ctab = zext_optab;
++    else
++      ctab = sext_optab;
++
++    if (convert_optab_handler (ctab, to_mode, from_mode)
++	!= CODE_FOR_nothing)
++      {
++	emit_unop_insn (convert_optab_handler (ctab, to_mode, from_mode),
++			to, from, UNKNOWN);
++	return;
++      }
++  }
++
+   /* Targets are expected to provide conversion insns between PxImode and
+      xImode for all MODE_PARTIAL_INT modes they use, but no others.  */
+   if (GET_MODE_CLASS (to_mode) == MODE_PARTIAL_INT)
+     {
+       enum machine_mode full_mode
+Index: gcc/gdbhooks.pyc
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/gdbhooks.pyc,v
+retrieving revision 1.1
+diff -p -U 5 -r1.1 gdbhooks.pyc
+Binary files /tmp/cvsYiO2pi and gdbhooks.pyc differ
+Index: gcc/genmodes.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/genmodes.c,v
+retrieving revision 1.10
+diff -p -U 5 -r1.10 genmodes.c
+--- gcc/genmodes.c	20 Feb 2014 16:40:24 -0000	1.10
++++ gcc/genmodes.c	20 Jun 2014 07:30:05 -0000
+@@ -70,21 +70,22 @@ struct mode_data
+   const char *file;		/* file and line of definition, */
+   unsigned int line;		/* for error reporting */
+   unsigned int counter;		/* Rank ordering of modes */
+   unsigned int ibit;		/* the number of integral bits */
+   unsigned int fbit;		/* the number of fractional bits */
++  unsigned int int_n;		/* If nonzero, then __int<INT_N> will be defined */
+ };
+ 
+ static struct mode_data *modes[MAX_MODE_CLASS];
+ static unsigned int n_modes[MAX_MODE_CLASS];
+ static struct mode_data *void_mode;
+ 
+ static const struct mode_data blank_mode = {
+   0, "<unknown>", MAX_MODE_CLASS,
+   -1U, -1U, -1U, -1U,
+   0, 0, 0, 0, 0,
+-  "<unknown>", 0, 0, 0, 0
++  "<unknown>", 0, 0, 0, 0, 0
+ };
+ 
+ static htab_t modes_by_name;
+ 
+ /* Data structure for recording target-specified runtime adjustments
+@@ -628,10 +629,38 @@ reset_float_format (const char *name, co
+       return;
+     }
+   m->format = format;
+ }
+ 
++/* __intN support.  */
++#define INT_N(M,PREC)				\
++  make_int_n (#M, PREC, __FILE__, __LINE__)
++static void ATTRIBUTE_UNUSED
++make_int_n (const char *m, int bitsize,
++            const char *file, unsigned int line)
++{
++  struct mode_data *component = find_mode (m);
++  if (!component)
++    {
++      error ("%s:%d: no mode \"%s\"", file, line, m);
++      return;
++    }
++  if (component->cl != MODE_INT
++      && component->cl != MODE_PARTIAL_INT)
++    {
++      error ("%s:%d: mode \"%s\" is not class INT or PARTIAL_INT", file, line, m);
++      return;
++    }
++  if (component->int_n != 0)
++    {
++      error ("%s:%d: mode \"%s\" already has an intN", file, line, m);
++      return;
++    }
++
++  component->int_n = bitsize;
++}
++
+ /* Partial integer modes are specified by relation to a full integer
+    mode.  */
+ #define PARTIAL_INT_MODE(M,PREC,NAME)				\
+   make_partial_integer_mode (#M, #NAME, PREC, __FILE__, __LINE__)
+ static void ATTRIBUTE_UNUSED
+@@ -907,10 +936,11 @@ emit_max_int (void)
+ static void
+ emit_insn_modes_h (void)
+ {
+   int c;
+   struct mode_data *m, *first, *last;
++  int n_int_n_ents = 0;
+ 
+   printf ("/* Generated automatically from machmode.def%s%s\n",
+ 	   HAVE_EXTRA_MODES ? " and " : "",
+ 	   EXTRA_MODES_FILE);
+ 
+@@ -967,10 +997,17 @@ enum machine_mode\n{");
+   printf ("#define CONST_REAL_FORMAT_FOR_MODE%s\n", adj_format ? "" :" const");
+ #endif
+   printf ("#define CONST_MODE_IBIT%s\n", adj_ibit ? "" : " const");
+   printf ("#define CONST_MODE_FBIT%s\n", adj_fbit ? "" : " const");
+   emit_max_int ();
++
++  for_all_modes (c, m)
++    if (m->int_n)
++      n_int_n_ents ++;
++
++  printf ("#define NUM_INT_N_ENTS %d\n", n_int_n_ents);
++
+   puts ("\
+ \n\
+ #endif /* insn-modes.h */");
+ }
+ 
+@@ -1410,10 +1447,57 @@ emit_mode_fbit (void)
+     tagged_printf ("%u", m->fbit, m->name);
+ 
+   print_closer ();
+ }
+ 
++/* Emit __intN for all modes.  */
++
++static void
++emit_mode_int_n (void)
++{
++  int c;
++  struct mode_data *m;
++  struct mode_data **mode_sort;
++  int n_modes = 0;
++  int i, j;
++
++  print_decl ("int_n_data_t", "int_n_data", "");
++
++  n_modes = 0;
++  for_all_modes (c, m)
++    if (m->int_n)
++      n_modes ++;
++  mode_sort = XALLOCAVEC (struct mode_data *, n_modes);
++
++  n_modes = 0;
++  for_all_modes (c, m)
++    if (m->int_n)
++      mode_sort[n_modes++] = m;
++
++  /* Yes, this is a bubblesort, but there are at most four (and
++     usually only 1-2) entries to sort.  */
++  for (i = 0; i<n_modes - 1; i++)
++    for (j = i + 1; j < n_modes; j++)
++      if (mode_sort[i]->int_n > mode_sort[j]->int_n)
++	{
++	  m = mode_sort[i];
++	  mode_sort[i] = mode_sort[j];
++	  mode_sort[j] = m;
++	}
++
++  for (i = 0; i < n_modes; i ++)
++    {
++      m = mode_sort[i];
++      printf(" {\n");
++      tagged_printf ("%u", m->int_n, m->name);
++      printf ("%smode,", m->name);
++      printf(" },\n");
++    }
++
++  print_closer ();
++}
++
+ 
+ static void
+ emit_insn_modes_c (void)
+ {
+   emit_insn_modes_c_header ();
+@@ -1429,10 +1513,11 @@ emit_insn_modes_c (void)
+   emit_class_narrowest_mode ();
+   emit_real_format_for_mode ();
+   emit_mode_adjustments ();
+   emit_mode_ibit ();
+   emit_mode_fbit ();
++  emit_mode_int_n ();
+ }
+ 
+ static void
+ emit_min_insn_modes_c (void)
+ {
+Index: gcc/gimple.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/gimple.c,v
+retrieving revision 1.15
+diff -p -U 5 -r1.15 gimple.c
+--- gcc/gimple.c	7 Apr 2014 10:31:57 -0000	1.15
++++ gcc/gimple.c	20 Jun 2014 07:30:05 -0000
+@@ -2097,10 +2097,11 @@ gimple_compare_field_offset (tree f1, tr
+ 
+ static tree
+ gimple_signed_or_unsigned_type (bool unsignedp, tree type)
+ {
+   tree type1;
++  int i;
+ 
+   type1 = TYPE_MAIN_VARIANT (type);
+   if (type1 == signed_char_type_node
+       || type1 == char_type_node
+       || type1 == unsigned_char_type_node)
+@@ -2114,14 +2115,19 @@ gimple_signed_or_unsigned_type (bool uns
+   if (type1 == long_long_integer_type_node
+       || type1 == long_long_unsigned_type_node)
+     return unsignedp
+            ? long_long_unsigned_type_node
+ 	   : long_long_integer_type_node;
+-  if (int128_integer_type_node && (type1 == int128_integer_type_node || type1 == int128_unsigned_type_node))
+-    return unsignedp
+-           ? int128_unsigned_type_node
+-	   : int128_integer_type_node;
++
++  for (i = 0; i < NUM_INT_N_ENTS; i ++)
++    if (int_n_enabled_p[i]
++	&& (type1 == int_n_trees[i].unsigned_type
++	    || type1 == int_n_trees[i].signed_type))
++	return unsignedp
++	  ? int_n_trees[i].unsigned_type
++	  : int_n_trees[i].signed_type;
++
+ #if HOST_BITS_PER_WIDE_INT >= 64
+   if (type1 == intTI_type_node || type1 == unsigned_intTI_type_node)
+     return unsignedp ? unsigned_intTI_type_node : intTI_type_node;
+ #endif
+   if (type1 == intDI_type_node || type1 == unsigned_intDI_type_node)
+@@ -2230,14 +2236,18 @@ gimple_signed_or_unsigned_type (bool uns
+     return unsignedp ? long_unsigned_type_node : long_integer_type_node;
+   if (TYPE_OK (long_long_integer_type_node))
+     return (unsignedp
+ 	    ? long_long_unsigned_type_node
+ 	    : long_long_integer_type_node);
+-  if (int128_integer_type_node && TYPE_OK (int128_integer_type_node))
+-    return (unsignedp
+-	    ? int128_unsigned_type_node
+-	    : int128_integer_type_node);
++
++  for (i = 0; i < NUM_INT_N_ENTS; i ++)
++    if (int_n_enabled_p[i]
++	&& TYPE_MODE (type) == int_n_data[i].m
++	&& TYPE_PRECISION (type) == int_n_data[i].bitsize)
++	return unsignedp
++	  ? int_n_trees[i].unsigned_type
++	  : int_n_trees[i].signed_type;
+ 
+ #if HOST_BITS_PER_WIDE_INT >= 64
+   if (TYPE_OK (intTI_type_node))
+     return unsignedp ? unsigned_intTI_type_node : intTI_type_node;
+ #endif
+Index: gcc/loop-iv.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/loop-iv.c,v
+retrieving revision 1.12
+diff -p -U 5 -r1.12 loop-iv.c
+--- gcc/loop-iv.c	20 Feb 2014 16:40:25 -0000	1.12
++++ gcc/loop-iv.c	20 Jun 2014 07:30:06 -0000
+@@ -2395,11 +2395,11 @@ iv_number_of_iterations (struct loop *lo
+   if (!canonicalize_iv_subregs (&iv0, &iv1, cond, desc))
+     goto fail;
+ 
+   comp_mode = iv0.extend_mode;
+   mode = iv0.mode;
+-  size = GET_MODE_BITSIZE (mode);
++  size = GET_MODE_PRECISION (mode);
+   get_mode_bounds (mode, (cond == LE || cond == LT), comp_mode, &mmin, &mmax);
+   mode_mmin = lowpart_subreg (mode, mmin, comp_mode);
+   mode_mmax = lowpart_subreg (mode, mmax, comp_mode);
+ 
+   if (!CONST_INT_P (iv0.step) || !CONST_INT_P (iv1.step))
+Index: gcc/machmode.def
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/machmode.def,v
+retrieving revision 1.10
+diff -p -U 5 -r1.10 machmode.def
+--- gcc/machmode.def	20 Feb 2014 16:40:25 -0000	1.10
++++ gcc/machmode.def	20 Jun 2014 07:30:06 -0000
+@@ -190,10 +190,17 @@ INT_MODE (SI, 4);
+ INT_MODE (DI, 8);
+ INT_MODE (TI, 16);
+ 
+ /* No partial integer modes are defined by default.  */
+ 
++/* The target normally defines any target-specific __intN types and
++   their modes, but __int128 for TImode is fairly common so define it
++   here.  The type will not be created unless the target supports
++   TImode.  */
++
++INT_N (TI, 128);
++
+ /* Basic floating point modes.  SF and DF are the only modes provided
+    by default.  The names QF, HF, XF, and TF are reserved for targets
+    that need 1-word, 2-word, 80-bit, or 128-bit float types respectively.
+ 
+    These are the IEEE mappings.  They can be overridden with
+Index: gcc/machmode.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/machmode.h,v
+retrieving revision 1.12
+diff -p -U 5 -r1.12 machmode.h
+--- gcc/machmode.h	20 Feb 2014 16:40:25 -0000	1.12
++++ gcc/machmode.h	20 Jun 2014 07:30:06 -0000
+@@ -323,6 +323,18 @@ extern void init_adjust_machine_modes (v
+ 
+ #define HWI_COMPUTABLE_MODE_P(MODE) \
+   (SCALAR_INT_MODE_P (MODE) \
+    && GET_MODE_PRECISION (MODE) <= HOST_BITS_PER_WIDE_INT)
+ 
++typedef struct {
++  /* These parts are initailized by genmodes output */
++  unsigned int bitsize;
++  enum machine_mode m;
++  /* RID_* is RID_INTN_BASE + index into this array */
++} int_n_data_t;
++
++/* This is also in tree.h.  genmodes.c guarantees the're sorted from
++   smallest bitsize to largest bitsize. */
++extern bool int_n_enabled_p[NUM_INT_N_ENTS];
++extern const int_n_data_t int_n_data[NUM_INT_N_ENTS];
++
+ #endif /* not HAVE_MACHINE_MODES */
+Index: gcc/optabs.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/optabs.c,v
+retrieving revision 1.31
+diff -p -U 5 -r1.31 optabs.c
+--- gcc/optabs.c	7 Apr 2014 10:31:57 -0000	1.31
++++ gcc/optabs.c	20 Jun 2014 07:30:06 -0000
+@@ -5163,11 +5163,11 @@ expand_float (rtx to, rtx from, int unsi
+       rtx libfunc;
+       rtx insns;
+       rtx value;
+       convert_optab tab = unsignedp ? ufloat_optab : sfloat_optab;
+ 
+-      if (GET_MODE_SIZE (GET_MODE (from)) < GET_MODE_SIZE (SImode))
++      if (GET_MODE_PRECISION (GET_MODE (from)) < GET_MODE_PRECISION (SImode))
+ 	from = convert_to_mode (SImode, from, unsignedp);
+ 
+       libfunc = convert_optab_libfunc (tab, GET_MODE (to), GET_MODE (from));
+       gcc_assert (libfunc);
+ 
+@@ -5339,11 +5339,11 @@ expand_fix (rtx to, rtx from, int unsign
+ 
+   /* We can't do it with an insn, so use a library call.  But first ensure
+      that the mode of TO is at least as wide as SImode, since those are the
+      only library calls we know about.  */
+ 
+-  if (GET_MODE_SIZE (GET_MODE (to)) < GET_MODE_SIZE (SImode))
++  if (GET_MODE_PRECISION (GET_MODE (to)) < GET_MODE_PRECISION (SImode))
+     {
+       target = gen_reg_rtx (SImode);
+ 
+       expand_fix (target, from, unsignedp);
+     }
+Index: gcc/simplify-rtx.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/simplify-rtx.c,v
+retrieving revision 1.42
+diff -p -U 5 -r1.42 simplify-rtx.c
+--- gcc/simplify-rtx.c	20 Feb 2014 16:40:26 -0000	1.42
++++ gcc/simplify-rtx.c	20 Jun 2014 07:30:06 -0000
+@@ -1345,12 +1345,12 @@ simplify_unary_operation_1 (enum rtx_cod
+ 
+       /* (sign_extend:M (sign_extend:N <X>)) is (sign_extend:M <X>).
+ 	 (sign_extend:M (zero_extend:N <X>)) is (zero_extend:M <X>).  */
+       if (GET_CODE (op) == SIGN_EXTEND || GET_CODE (op) == ZERO_EXTEND)
+ 	{
+-	  gcc_assert (GET_MODE_BITSIZE (mode)
+-		      > GET_MODE_BITSIZE (GET_MODE (op)));
++	  gcc_assert (GET_MODE_PRECISION (mode)
++		      > GET_MODE_PRECISION (GET_MODE (op)));
+ 	  return simplify_gen_unary (GET_CODE (op), mode, XEXP (op, 0),
+ 				     GET_MODE (XEXP (op, 0)));
+ 	}
+ 
+       /* (sign_extend:M (ashiftrt:N (ashift <X> (const_int I)) (const_int I)))
+Index: gcc/stor-layout.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/stor-layout.c,v
+retrieving revision 1.26
+diff -p -U 5 -r1.26 stor-layout.c
+--- gcc/stor-layout.c	20 Feb 2014 16:40:26 -0000	1.26
++++ gcc/stor-layout.c	20 Jun 2014 07:30:06 -0000
+@@ -310,21 +310,28 @@ finalize_size_functions (void)
+    than MAX_FIXED_MODE_SIZE will not be used.  */
+ 
+ enum machine_mode
+ mode_for_size (unsigned int size, enum mode_class mclass, int limit)
+ {
+-  enum machine_mode mode;
++  enum machine_mode mode = BLKmode;
++  int i;
+ 
+   if (limit && size > MAX_FIXED_MODE_SIZE)
+     return BLKmode;
+ 
+   /* Get the first mode which has this size, in the specified class.  */
+   for (mode = GET_CLASS_NARROWEST_MODE (mclass); mode != VOIDmode;
+        mode = GET_MODE_WIDER_MODE (mode))
+     if (GET_MODE_PRECISION (mode) == size)
+       return mode;
+ 
++  if (mclass == MODE_INT || mclass == MODE_PARTIAL_INT)
++    for (i = 0; i < NUM_INT_N_ENTS; i ++)
++      if (int_n_data[i].bitsize == size
++	  && int_n_enabled_p[i])
++	return int_n_data[i].m;
++
+   return BLKmode;
+ }
+ 
+ /* Similar, except passed a tree node.  */
+ 
+@@ -347,20 +354,31 @@ mode_for_size_tree (const_tree size, enu
+    contains at least the requested number of value bits.  */
+ 
+ enum machine_mode
+ smallest_mode_for_size (unsigned int size, enum mode_class mclass)
+ {
+-  enum machine_mode mode;
++  enum machine_mode mode = VOIDmode;
++  int i;
+ 
+   /* Get the first mode which has at least this size, in the
+      specified class.  */
+   for (mode = GET_CLASS_NARROWEST_MODE (mclass); mode != VOIDmode;
+        mode = GET_MODE_WIDER_MODE (mode))
+     if (GET_MODE_PRECISION (mode) >= size)
+-      return mode;
++      break;
+ 
+-  gcc_unreachable ();
++  if (mclass == MODE_INT || mclass == MODE_PARTIAL_INT)
++    for (i = 0; i < NUM_INT_N_ENTS; i ++)
++      if (int_n_data[i].bitsize >= size
++	  && int_n_data[i].bitsize < GET_MODE_PRECISION (mode)
++	  && int_n_enabled_p[i])
++	mode = int_n_data[i].m;
++
++  if (mode == VOIDmode)
++    gcc_unreachable ();
++
++  return mode;
+ }
+ 
+ /* Find an integer mode of the exact same size, or BLKmode on failure.  */
+ 
+ enum machine_mode
+@@ -1684,10 +1702,11 @@ finalize_type_size (tree type)
+     TYPE_SIZE_UNIT (type)
+       = fold_convert (sizetype,
+ 		      size_binop (FLOOR_DIV_EXPR, TYPE_SIZE (type),
+ 				  bitsize_unit_node));
+ 
++  /* DJ - this may break partial-int types.  */
+   if (TYPE_SIZE (type) != 0)
+     {
+       TYPE_SIZE (type) = round_up (TYPE_SIZE (type), TYPE_ALIGN (type));
+       TYPE_SIZE_UNIT (type)
+ 	= round_up (TYPE_SIZE_UNIT (type), TYPE_ALIGN_UNIT (type));
+@@ -2053,11 +2072,11 @@ layout_type (tree type)
+     case BOOLEAN_TYPE:
+     case INTEGER_TYPE:
+     case ENUMERAL_TYPE:
+       SET_TYPE_MODE (type,
+ 		     smallest_mode_for_size (TYPE_PRECISION (type), MODE_INT));
+-      TYPE_SIZE (type) = bitsize_int (GET_MODE_BITSIZE (TYPE_MODE (type)));
++      TYPE_SIZE (type) = bitsize_int (GET_MODE_PRECISION (TYPE_MODE (type)));
+       TYPE_SIZE_UNIT (type) = size_int (GET_MODE_SIZE (TYPE_MODE (type)));
+       break;
+ 
+     case REAL_TYPE:
+       SET_TYPE_MODE (type,
+@@ -2124,11 +2143,11 @@ layout_type (tree type)
+       SET_TYPE_MODE (type, VOIDmode);
+       break;
+ 
+     case OFFSET_TYPE:
+       TYPE_SIZE (type) = bitsize_int (POINTER_SIZE);
+-      TYPE_SIZE_UNIT (type) = size_int (POINTER_SIZE / BITS_PER_UNIT);
++      TYPE_SIZE_UNIT (type) = size_int (POINTER_SIZE_UNITS);
+       /* A pointer might be MODE_PARTIAL_INT,
+ 	 but ptrdiff_t must be integral.  */
+       SET_TYPE_MODE (type, mode_for_size (POINTER_SIZE, MODE_INT, 0));
+       TYPE_PRECISION (type) = POINTER_SIZE;
+       break;
+@@ -2154,11 +2173,11 @@ layout_type (tree type)
+ 	  }
+ 
+ 	TYPE_SIZE (type) = bitsize_int (GET_MODE_BITSIZE (mode));
+ 	TYPE_SIZE_UNIT (type) = size_int (GET_MODE_SIZE (mode));
+ 	TYPE_UNSIGNED (type) = 1;
+-	TYPE_PRECISION (type) = GET_MODE_BITSIZE (mode);
++	TYPE_PRECISION (type) = GET_MODE_PRECISION (mode);
+       }
+       break;
+ 
+     case ARRAY_TYPE:
+       {
+@@ -2449,14 +2468,31 @@ initialize_sizetypes (void)
+   else if (strcmp (SIZETYPE, "long long unsigned int") == 0)
+     precision = LONG_LONG_TYPE_SIZE;
+   else if (strcmp (SIZETYPE, "short unsigned int") == 0)
+     precision = SHORT_TYPE_SIZE;
+   else
+-    gcc_unreachable ();
++    {
++      int i;
++
++      precision = -1;
++      for (i = 0; i < NUM_INT_N_ENTS; i++)
++	if (int_n_enabled_p[i])
++	  {
++	    char name[50];
++	    sprintf (name, "__int%d unsigned", int_n_data[i].bitsize);
++
++	    if (strcmp (name, SIZETYPE) == 0)
++	      {
++		precision = int_n_data[i].bitsize;
++	      }
++	  }
++      if (precision == -1)
++	gcc_unreachable ();
++    }
+ 
+   bprecision
+-    = MIN (precision + BITS_PER_UNIT_LOG + 1, MAX_FIXED_MODE_SIZE);
++    = MIN (precision, MAX_FIXED_MODE_SIZE);
+   bprecision
+     = GET_MODE_PRECISION (smallest_mode_for_size (bprecision, MODE_INT));
+   if (bprecision > HOST_BITS_PER_DOUBLE_INT)
+     bprecision = HOST_BITS_PER_DOUBLE_INT;
+ 
+Index: gcc/toplev.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/toplev.c,v
+retrieving revision 1.42
+diff -p -U 5 -r1.42 toplev.c
+--- gcc/toplev.c	24 Mar 2014 11:28:32 -0000	1.42
++++ gcc/toplev.c	20 Jun 2014 07:30:07 -0000
+@@ -1868,10 +1868,25 @@ finalize (bool no_backend)
+ 
+   /* Language-specific end of compilation actions.  */
+   lang_hooks.finish ();
+ }
+ 
++static bool
++standard_type_bitsize (int bitsize)
++{
++  /* As a special exception, we always want __int128 enabled if possible.  */
++  if (bitsize == 128)
++    return false;
++  if (bitsize == CHAR_TYPE_SIZE
++      || bitsize == SHORT_TYPE_SIZE
++      || bitsize == INT_TYPE_SIZE
++      || bitsize == LONG_TYPE_SIZE
++      || (bitsize == LONG_LONG_TYPE_SIZE && LONG_LONG_TYPE_SIZE < GET_MODE_BITSIZE (TImode)))
++    return true;
++  return false;
++}
++
+ /* Initialize the compiler, and compile the input file.  */
+ static void
+ do_compile (void)
+ {
+   /* Initialize timing first.  The C front ends read the main file in
+@@ -1883,17 +1898,30 @@ do_compile (void)
+   process_options ();
+ 
+   /* Don't do any more if an error has already occurred.  */
+   if (!seen_error ())
+     {
++      int i;
++
+       timevar_start (TV_PHASE_SETUP);
+ 
+       /* This must be run always, because it is needed to compute the FP
+ 	 predefined macros, such as __LDBL_MAX__, for targets using non
+ 	 default FP formats.  */
+       init_adjust_machine_modes ();
+ 
++      /* This must happen after the backend has a chance to process
++	 command line options, but before the parsers are
++	 initialized.  */
++      for (i = 0; i < NUM_INT_N_ENTS; i ++)
++	if (targetm.scalar_mode_supported_p (int_n_data[i].m)
++	    && ! standard_type_bitsize (int_n_data[i].bitsize)
++	    && int_n_data[i].bitsize <= HOST_BITS_PER_WIDE_INT * 2)
++	  int_n_enabled_p[i] = true;
++	else
++	  int_n_enabled_p[i] = false;
++
+       /* Set up the back-end if requested.  */
+       if (!no_backend)
+ 	backend_init ();
+ 
+       /* Language-dependent initialization.  Returns true on success.  */
+Index: gcc/tree-cfg.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/tree-cfg.c,v
+retrieving revision 1.40
+diff -p -U 5 -r1.40 tree-cfg.c
+--- gcc/tree-cfg.c	23 Apr 2014 07:11:33 -0000	1.40
++++ gcc/tree-cfg.c	20 Jun 2014 07:30:08 -0000
+@@ -3088,10 +3088,12 @@ verify_types_in_gimple_reference (tree e
+ 	  else if (TREE_CODE (op) == SSA_NAME
+ 		   && TYPE_SIZE (TREE_TYPE (expr)) != TYPE_SIZE (TREE_TYPE (op)))
+ 	    {
+ 	      error ("conversion of register to a different size");
+ 	      debug_generic_stmt (expr);
++	      debug_tree (op);
++	      debug_tree (expr);
+ 	      return true;
+ 	    }
+ 	  else if (!handled_component_p (op))
+ 	    return false;
+ 	}
+Index: gcc/tree-core.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/tree-core.h,v
+retrieving revision 1.3
+diff -p -U 5 -r1.3 tree-core.h
+--- gcc/tree-core.h	16 Jun 2014 10:56:52 -0000	1.3
++++ gcc/tree-core.h	20 Jun 2014 07:30:08 -0000
+@@ -561,12 +561,20 @@ enum integer_type_kind {
+   itk_unsigned_int,
+   itk_long,
+   itk_unsigned_long,
+   itk_long_long,
+   itk_unsigned_long_long,
+-  itk_int128,
+-  itk_unsigned_int128,
++
++  itk_intN_0,
++  itk_unsigned_intN_0,
++  itk_intN_1,
++  itk_unsigned_intN_1,
++  itk_intN_2,
++  itk_unsigned_intN_2,
++  itk_intN_3,
++  itk_unsigned_intN_3,
++
+   itk_none
+ };
+ 
+ /* A pointer-to-function member type looks like:
+ 
+@@ -1123,11 +1131,11 @@ enum omp_clause_map_kind
+   OMP_CLAUSE_MAP_TO,
+   OMP_CLAUSE_MAP_FROM,
+   OMP_CLAUSE_MAP_TOFROM,
+   /* The following kind is an internal only map kind, used for pointer based
+      array sections.  OMP_CLAUSE_SIZE for these is not the pointer size,
+-     which is implicitly POINTER_SIZE / BITS_PER_UNIT, but the bias.  */
++     which is implicitly POINTER_SIZE_UNITS, but the bias.  */
+   OMP_CLAUSE_MAP_POINTER,
+   OMP_CLAUSE_MAP_LAST
+ };
+ 
+ enum omp_clause_proc_bind_kind
+Index: gcc/tree-dfa.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/tree-dfa.c,v
+retrieving revision 1.25
+diff -p -U 5 -r1.25 tree-dfa.c
+--- gcc/tree-dfa.c	28 Apr 2014 09:14:07 -0000	1.25
++++ gcc/tree-dfa.c	20 Jun 2014 07:30:08 -0000
+@@ -404,11 +404,11 @@ get_ref_base_and_extent (tree exp, HOST_
+     {
+       enum machine_mode mode = TYPE_MODE (TREE_TYPE (exp));
+       if (mode == BLKmode)
+ 	size_tree = TYPE_SIZE (TREE_TYPE (exp));
+       else
+-	bitsize = double_int::from_uhwi (GET_MODE_BITSIZE (mode));
++	bitsize = double_int::from_uhwi (GET_MODE_PRECISION (mode));
+     }
+   if (size_tree != NULL_TREE
+       && TREE_CODE (size_tree) == INTEGER_CST)
+     bitsize = tree_to_double_int (size_tree);
+ 
+Index: gcc/tree.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/tree.c,v
+retrieving revision 1.62
+diff -p -U 5 -r1.62 tree.c
+--- gcc/tree.c	17 Mar 2014 09:19:47 -0000	1.62
++++ gcc/tree.c	20 Jun 2014 07:30:14 -0000
+@@ -237,10 +237,13 @@ static unsigned int attribute_hash_list 
+ static bool decls_same_for_odr (tree decl1, tree decl2);
+ 
+ tree global_trees[TI_MAX];
+ tree integer_types[itk_none];
+ 
++bool int_n_enabled_p[NUM_INT_N_ENTS];
++struct int_n_trees_t int_n_trees [NUM_INT_N_ENTS];
++
+ unsigned char tree_contains_struct[MAX_TREE_CODES][64];
+ 
+ /* Number of operands for each OpenMP clause.  */
+ unsigned const char omp_clause_num_ops[] =
+ {
+@@ -9448,10 +9451,12 @@ make_vector_type (tree innertype, int nu
+ }
+ 
+ static tree
+ make_or_reuse_type (unsigned size, int unsignedp)
+ {
++  int i;
++
+   if (size == INT_TYPE_SIZE)
+     return unsignedp ? unsigned_type_node : integer_type_node;
+   if (size == CHAR_TYPE_SIZE)
+     return unsignedp ? unsigned_char_type_node : signed_char_type_node;
+   if (size == SHORT_TYPE_SIZE)
+@@ -9459,13 +9464,16 @@ make_or_reuse_type (unsigned size, int u
+   if (size == LONG_TYPE_SIZE)
+     return unsignedp ? long_unsigned_type_node : long_integer_type_node;
+   if (size == LONG_LONG_TYPE_SIZE)
+     return (unsignedp ? long_long_unsigned_type_node
+             : long_long_integer_type_node);
+-  if (size == 128 && int128_integer_type_node)
+-    return (unsignedp ? int128_unsigned_type_node
+-            : int128_integer_type_node);
++
++  for (i = 0; i < NUM_INT_N_ENTS; i ++)
++    if (size == int_n_data[i].bitsize
++	&& int_n_enabled_p[i])
++      return (unsignedp ? int_n_trees[i].unsigned_type
++	      : int_n_trees[i].signed_type);
+ 
+   if (unsignedp)
+     return make_unsigned_type (size);
+   else
+     return make_signed_type (size);
+@@ -9577,10 +9585,12 @@ build_atomic_base (tree type, unsigned i
+    as float.  */
+ 
+ void
+ build_common_tree_nodes (bool signed_char, bool short_double)
+ {
++  int i;
++
+   error_mark_node = make_node (ERROR_MARK);
+   TREE_TYPE (error_mark_node) = error_mark_node;
+ 
+   initialize_sizetypes ();
+ 
+@@ -9604,21 +9614,24 @@ build_common_tree_nodes (bool signed_cha
+   unsigned_type_node = make_unsigned_type (INT_TYPE_SIZE);
+   long_integer_type_node = make_signed_type (LONG_TYPE_SIZE);
+   long_unsigned_type_node = make_unsigned_type (LONG_TYPE_SIZE);
+   long_long_integer_type_node = make_signed_type (LONG_LONG_TYPE_SIZE);
+   long_long_unsigned_type_node = make_unsigned_type (LONG_LONG_TYPE_SIZE);
+-#if HOST_BITS_PER_WIDE_INT >= 64
+-    /* TODO: This isn't correct, but as logic depends at the moment on
+-       host's instead of target's wide-integer.
+-       If there is a target not supporting TImode, but has an 128-bit
+-       integer-scalar register, this target check needs to be adjusted. */
+-    if (targetm.scalar_mode_supported_p (TImode))
+-      {
+-        int128_integer_type_node = make_signed_type (128);
+-        int128_unsigned_type_node = make_unsigned_type (128);
+-      }
+-#endif
++
++  for (i = 0; i < NUM_INT_N_ENTS; i ++)
++    {
++      int_n_trees[i].signed_type = make_signed_type (int_n_data[i].bitsize);
++      int_n_trees[i].unsigned_type = make_unsigned_type (int_n_data[i].bitsize);
++      TYPE_SIZE (int_n_trees[i].signed_type) = bitsize_int (int_n_data[i].bitsize);
++      TYPE_SIZE (int_n_trees[i].unsigned_type) = bitsize_int (int_n_data[i].bitsize);
++
++      if (int_n_data[i].bitsize > LONG_LONG_TYPE_SIZE)
++	{
++	  integer_types[itk_intN_0 + i * 2] = int_n_trees[i].signed_type;
++	  integer_types[itk_unsigned_intN_0 + i * 2] = int_n_trees[i].unsigned_type;
++	}
++    }
+ 
+   /* Define a boolean type.  This type only represents boolean values but
+      may be larger than char depending on the value of BOOL_TYPE_SIZE.
+      Front ends which want to override this size (i.e. Java) can redefine
+      boolean_type_node before calling build_common_tree_nodes_2.  */
+@@ -9635,11 +9648,28 @@ build_common_tree_nodes (bool signed_cha
+   else if (strcmp (SIZE_TYPE, "long long unsigned int") == 0)
+     size_type_node = long_long_unsigned_type_node;
+   else if (strcmp (SIZE_TYPE, "short unsigned int") == 0)
+     size_type_node = short_unsigned_type_node;
+   else
+-    gcc_unreachable ();
++    {
++      int i;
++
++      size_type_node = NULL_TREE;
++      for (i = 0; i < NUM_INT_N_ENTS; i++)
++	if (int_n_enabled_p[i])
++	  {
++	    char name[50];
++	    sprintf (name, "__int%d unsigned", int_n_data[i].bitsize);
++
++	    if (strcmp (name, SIZE_TYPE) == 0)
++	      {
++		size_type_node = int_n_trees[i].unsigned_type;
++	      }
++	  }
++      if (size_type_node == NULL_TREE)
++	gcc_unreachable ();
++    }
+ 
+   /* Fill in the rest of the sized types.  Reuse existing type nodes
+      when possible.  */
+   intQI_type_node = make_or_reuse_type (GET_MODE_BITSIZE (QImode), 0);
+   intHI_type_node = make_or_reuse_type (GET_MODE_BITSIZE (HImode), 0);
+Index: gcc/tree.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/tree.h,v
+retrieving revision 1.38
+diff -p -U 5 -r1.38 tree.h
+--- gcc/tree.h	28 Apr 2014 09:14:07 -0000	1.38
++++ gcc/tree.h	20 Jun 2014 07:30:14 -0000
+@@ -3381,12 +3381,10 @@ tree_operand_check_code (const_tree __t,
+ #define unsigned_type_node		integer_types[itk_unsigned_int]
+ #define long_integer_type_node		integer_types[itk_long]
+ #define long_unsigned_type_node		integer_types[itk_unsigned_long]
+ #define long_long_integer_type_node	integer_types[itk_long_long]
+ #define long_long_unsigned_type_node	integer_types[itk_unsigned_long_long]
+-#define int128_integer_type_node	integer_types[itk_int128]
+-#define int128_unsigned_type_node	integer_types[itk_unsigned_int128]
+ 
+ #define NULL_TREE (tree) NULL
+ 
+ /* True if NODE is an erroneous expression.  */
+ 
+@@ -4580,6 +4578,17 @@ extern tree fold_call_stmt (gimple, bool
+ extern tree gimple_fold_builtin_snprintf_chk (gimple, tree, enum built_in_function);
+ extern void set_builtin_user_assembler_name (tree decl, const char *asmspec);
+ extern bool is_simple_builtin (tree);
+ extern bool is_inexpensive_builtin (tree);
+ 
++
++struct GTY(()) int_n_trees_t {
++  /* These parts are initialized at runtime */
++  tree signed_type;
++  tree unsigned_type;
++};
++
++/* This is also in machmode.h */
++extern bool int_n_enabled_p[NUM_INT_N_ENTS];
++extern GTY(()) struct int_n_trees_t int_n_trees[NUM_INT_N_ENTS];
++
+ #endif  /* GCC_TREE_H  */
+Index: gcc/varasm.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/varasm.c,v
+retrieving revision 1.49
+diff -p -U 5 -r1.49 varasm.c
+--- gcc/varasm.c	23 Apr 2014 07:11:33 -0000	1.49
++++ gcc/varasm.c	20 Jun 2014 07:30:17 -0000
+@@ -1449,11 +1449,11 @@ assemble_asm (tree string)
+ void
+ assemble_addr_to_section (rtx symbol, section *sec)
+ {
+   switch_to_section (sec);
+   assemble_align (POINTER_SIZE);
+-  assemble_integer (symbol, POINTER_SIZE / BITS_PER_UNIT, POINTER_SIZE, 1);
++  assemble_integer (symbol, (POINTER_SIZE + BITS_PER_UNIT - 1) / BITS_PER_UNIT, POINTER_SIZE, 1);
+ }
+ 
+ /* Return the numbered .ctors.N (if CONSTRUCTOR_P) or .dtors.N (if
+    not) section for PRIORITY.  */
+ section *
+@@ -2602,11 +2602,11 @@ default_assemble_integer (rtx x ATTRIBUT
+ 			  int aligned_p ATTRIBUTE_UNUSED)
+ {
+   const char *op = integer_asm_op (size, aligned_p);
+   /* Avoid GAS bugs for large values.  Specifically negative values whose
+      absolute value fits in a bfd_vma, but not in a bfd_signed_vma.  */
+-  if (size > UNITS_PER_WORD && size > POINTER_SIZE / BITS_PER_UNIT)
++  if (size > UNITS_PER_WORD && size > POINTER_SIZE_UNITS)
+     return false;
+   return op && (assemble_integer_with_op (op, x), true);
+ }
+ 
+ /* Assemble the integer constant X into an object of SIZE bytes.  ALIGN is
+@@ -5805,13 +5805,13 @@ dump_tm_clone_pairs (vec<tm_alias_pair> 
+ 	  assemble_align (POINTER_SIZE);
+ 	  switched = true;
+ 	}
+ 
+       assemble_integer (XEXP (DECL_RTL (src), 0),
+-			POINTER_SIZE / BITS_PER_UNIT, POINTER_SIZE, 1);
++			POINTER_SIZE_UNITS, POINTER_SIZE, 1);
+       assemble_integer (XEXP (DECL_RTL (dst), 0),
+-			POINTER_SIZE / BITS_PER_UNIT, POINTER_SIZE, 1);
++			POINTER_SIZE_UNITS, POINTER_SIZE, 1);
+     }
+ }
+ 
+ /* Provide a default for the tm_clone_table section.  */
+ 
+Index: gcc/c/c-decl.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/c/c-decl.c,v
+retrieving revision 1.5
+diff -p -U 5 -r1.5 c-decl.c
+--- gcc/c/c-decl.c	9 Jun 2014 10:41:35 -0000	1.5
++++ gcc/c/c-decl.c	20 Jun 2014 07:30:18 -0000
+@@ -9148,14 +9148,15 @@ declspecs_add_type (location_t loc, stru
+ 			   "declaration specifiers"));
+ 	      else if (specs->typespec_word == cts_void)
+ 		error_at (loc,
+ 			  ("both %<long%> and %<void%> in "
+ 			   "declaration specifiers"));
+-	      else if (specs->typespec_word == cts_int128)
++	      else if (specs->typespec_word == cts_int_n)
+ 		  error_at (loc,
+-			    ("both %<long%> and %<__int128%> in "
+-			     "declaration specifiers"));
++			    ("both %<long%> and %<__int%d%> in "
++			     "declaration specifiers"),
++			    int_n_data[specs->int_n_idx].bitsize);
+ 	      else if (specs->typespec_word == cts_bool)
+ 		error_at (loc,
+ 			  ("both %<long%> and %<_Bool%> in "
+ 			   "declaration specifiers"));
+ 	      else if (specs->typespec_word == cts_char)
+@@ -9196,14 +9197,15 @@ declspecs_add_type (location_t loc, stru
+ 			   "declaration specifiers"));
+ 	      else if (specs->typespec_word == cts_void)
+ 		error_at (loc,
+ 			  ("both %<short%> and %<void%> in "
+ 			   "declaration specifiers"));
+-	      else if (specs->typespec_word == cts_int128)
++	      else if (specs->typespec_word == cts_int_n)
+ 		error_at (loc,
+-			  ("both %<short%> and %<__int128%> in "
+-			   "declaration specifiers"));
++			  ("both %<short%> and %<__int%d%> in "
++			   "declaration specifiers"),
++			  int_n_data[specs->int_n_idx].bitsize);
+ 	      else if (specs->typespec_word == cts_bool)
+ 		error_at (loc,
+ 			  ("both %<short%> and %<_Bool%> in "
+ 			   "declaration specifiers"));
+ 	      else if (specs->typespec_word == cts_char)
+@@ -9373,15 +9375,16 @@ declspecs_add_type (location_t loc, stru
+ 	      break;
+ 	    case RID_SAT:
+ 	      dupe = specs->saturating_p;
+ 	      pedwarn (loc, OPT_Wpedantic,
+ 		       "ISO C does not support saturating types");
+-	      if (specs->typespec_word == cts_int128)
++	      if (specs->typespec_word == cts_int_n)
+ 	        {
+ 		  error_at (loc,
+-			    ("both %<_Sat%> and %<__int128%> in "
+-			     "declaration specifiers"));
++			    ("both %<_Sat%> and %<__int%d%> in "
++			     "declaration specifiers"),
++			    int_n_data[specs->int_n_idx].bitsize);
+ 	        }
+ 	      else if (specs->typespec_word == cts_auto_type)
+ 		error_at (loc,
+ 			  ("both %<_Sat%> and %<__auto_type%> in "
+ 			   "declaration specifiers"));
+@@ -9441,11 +9444,11 @@ declspecs_add_type (location_t loc, stru
+ 	  return specs;
+ 	}
+       else
+ 	{
+ 	  /* "void", "_Bool", "char", "int", "float", "double", "_Decimal32",
+-	     "__int128", "_Decimal64", "_Decimal128", "_Fract", "_Accum" or
++	     "__intN", "_Decimal64", "_Decimal128", "_Fract", "_Accum" or
+ 	     "__auto_type".  */
+ 	  if (specs->typespec_word != cts_none)
+ 	    {
+ 	      error_at (loc,
+ 			"two or more data types in declaration specifiers");
+@@ -9482,35 +9485,42 @@ declspecs_add_type (location_t loc, stru
+ 		{
+ 		  specs->typespec_word = cts_auto_type;
+ 		  specs->locations[cdw_typespec] = loc;
+ 		}
+ 	      return specs;
+-	    case RID_INT128:
+-	      if (int128_integer_type_node == NULL_TREE)
+-		{
+-		  error_at (loc, "%<__int128%> is not supported for this target");
+-		  return specs;
+-		}
++	    case RID_INT_N_0:
++	    case RID_INT_N_1:
++	    case RID_INT_N_2:
++	    case RID_INT_N_3:
++	      specs->int_n_idx = i - RID_INT_N_0;
+ 	      if (!in_system_header_at (input_location))
+ 		pedwarn (loc, OPT_Wpedantic,
+-			 "ISO C does not support %<__int128%> type");
++			 "ISO C does not support %<__int%d%> types",
++			 int_n_data[specs->int_n_idx].bitsize);
+ 
+ 	      if (specs->long_p)
+ 		error_at (loc,
+-			  ("both %<__int128%> and %<long%> in "
+-			   "declaration specifiers"));
++			  ("both %<__int%d%> and %<long%> in "
++			   "declaration specifiers"),
++			  int_n_data[specs->int_n_idx].bitsize);
+ 	      else if (specs->saturating_p)
+ 		error_at (loc,
+-			  ("both %<_Sat%> and %<__int128%> in "
+-			   "declaration specifiers"));
++			  ("both %<_Sat%> and %<__int%d%> in "
++			   "declaration specifiers"),
++			  int_n_data[specs->int_n_idx].bitsize);
+ 	      else if (specs->short_p)
+ 		error_at (loc,
+-			  ("both %<__int128%> and %<short%> in "
+-			   "declaration specifiers"));
++			  ("both %<__int%d%> and %<short%> in "
++			   "declaration specifiers"),
++			  int_n_data[specs->int_n_idx].bitsize);
++	      else if (! int_n_enabled_p [specs->int_n_idx])
++		error_at (loc,
++			  "%<__int%d%> is not supported on this target",
++			  int_n_data[specs->int_n_idx].bitsize);
+ 	      else
+ 		{
+-		  specs->typespec_word = cts_int128;
++		  specs->typespec_word = cts_int_n;
+ 		  specs->locations[cdw_typespec] = loc;
+ 		}
+ 	      return specs;
+ 	    case RID_VOID:
+ 	      if (specs->long_p)
+@@ -10071,16 +10081,16 @@ finish_declspecs (struct c_declspecs *sp
+ 	  pedwarn (specs->locations[cdw_complex], OPT_Wpedantic,
+ 		   "ISO C does not support complex integer types");
+ 	  specs->type = build_complex_type (specs->type);
+ 	}
+       break;
+-    case cts_int128:
++    case cts_int_n:
+       gcc_assert (!specs->long_p && !specs->short_p && !specs->long_long_p);
+       gcc_assert (!(specs->signed_p && specs->unsigned_p));
+       specs->type = (specs->unsigned_p
+-		     ? int128_unsigned_type_node
+-		     : int128_integer_type_node);
++		     ? int_n_trees[specs->int_n_idx].unsigned_type
++		     : int_n_trees[specs->int_n_idx].signed_type);
+       if (specs->complex_p)
+ 	{
+ 	  pedwarn (specs->locations[cdw_complex], OPT_Wpedantic,
+ 		   "ISO C does not support complex integer types");
+ 	  specs->type = build_complex_type (specs->type);
+Index: gcc/c/c-parser.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/c/c-parser.c,v
+retrieving revision 1.5
+diff -p -U 5 -r1.5 c-parser.c
+--- gcc/c/c-parser.c	28 Apr 2014 09:14:07 -0000	1.5
++++ gcc/c/c-parser.c	20 Jun 2014 07:30:19 -0000
+@@ -110,10 +110,20 @@ c_parse_init (void)
+       id = get_identifier (c_common_reswords[i].word);
+       C_SET_RID_CODE (id, c_common_reswords[i].rid);
+       C_IS_RESERVED_WORD (id) = 1;
+       ridpointers [(int) c_common_reswords[i].rid] = id;
+     }
++
++  for (i = 0; i < NUM_INT_N_ENTS; i++)
++    {
++      /* We always create the symbols but they aren't always supported.  */
++      char name[50];
++      sprintf (name, "__int%d", int_n_data[i].bitsize);
++      id = get_identifier (xstrdup (name));
++      C_SET_RID_CODE (id, RID_FIRST_INT_N + i);
++      C_IS_RESERVED_WORD (id) = 1;
++    }
+ }
+ 
+ /* The C lexer intermediates between the lexer in cpplib and c-lex.c
+    and the C parser.  Unlike the C++ lexer, the parser structure
+    stores the lexer information instead of using a separate structure.
+@@ -485,11 +495,10 @@ c_token_starts_typename (c_token *token)
+     case CPP_KEYWORD:
+       switch (token->keyword)
+ 	{
+ 	case RID_UNSIGNED:
+ 	case RID_LONG:
+-	case RID_INT128:
+ 	case RID_SHORT:
+ 	case RID_SIGNED:
+ 	case RID_COMPLEX:
+ 	case RID_INT:
+ 	case RID_CHAR:
+@@ -513,10 +522,14 @@ c_token_starts_typename (c_token *token)
+ 	case RID_ACCUM:
+ 	case RID_SAT:
+ 	case RID_AUTO_TYPE:
+ 	  return true;
+ 	default:
++	  if (token->keyword >= RID_FIRST_INT_N
++	      && token->keyword < RID_FIRST_INT_N + NUM_INT_N_ENTS
++	      && int_n_enabled_p[token->keyword - RID_FIRST_INT_N])
++	    return true;
+ 	  return false;
+ 	}
+     case CPP_LESS:
+       if (c_dialect_objc ())
+ 	return true;
+@@ -643,11 +656,10 @@ c_token_starts_declspecs (c_token *token
+ 	case RID_NORETURN:
+ 	case RID_AUTO:
+ 	case RID_THREAD:
+ 	case RID_UNSIGNED:
+ 	case RID_LONG:
+-	case RID_INT128:
+ 	case RID_SHORT:
+ 	case RID_SIGNED:
+ 	case RID_COMPLEX:
+ 	case RID_INT:
+ 	case RID_CHAR:
+@@ -672,10 +684,14 @@ c_token_starts_declspecs (c_token *token
+ 	case RID_ALIGNAS:
+ 	case RID_ATOMIC:
+ 	case RID_AUTO_TYPE:
+ 	  return true;
+ 	default:
++	  if (token->keyword >= RID_FIRST_INT_N
++	      && token->keyword < RID_FIRST_INT_N + NUM_INT_N_ENTS
++	      && int_n_enabled_p[token->keyword - RID_FIRST_INT_N])
++	    return true;
+ 	  return false;
+ 	}
+     case CPP_LESS:
+       if (c_dialect_objc ())
+ 	return true;
+@@ -2137,11 +2153,11 @@ c_parser_static_assert_declaration_no_se
+      __thread
+ 
+    type-specifier:
+      typeof-specifier
+      __auto_type
+-     __int128
++     __intN
+      _Decimal32
+      _Decimal64
+      _Decimal128
+      _Fract
+      _Accum
+@@ -2291,11 +2307,10 @@ c_parser_declspecs (c_parser *parser, st
+ 	  if (!auto_type_ok)
+ 	    goto out;
+ 	  /* Fall through.  */
+ 	case RID_UNSIGNED:
+ 	case RID_LONG:
+-	case RID_INT128:
+ 	case RID_SHORT:
+ 	case RID_SIGNED:
+ 	case RID_COMPLEX:
+ 	case RID_INT:
+ 	case RID_CHAR:
+@@ -2307,10 +2322,14 @@ c_parser_declspecs (c_parser *parser, st
+ 	case RID_DFLOAT128:
+ 	case RID_BOOL:
+ 	case RID_FRACT:
+ 	case RID_ACCUM:
+ 	case RID_SAT:
++	case RID_INT_N_0:
++	case RID_INT_N_1:
++	case RID_INT_N_2:
++	case RID_INT_N_3:
+ 	  if (!typespec_ok)
+ 	    goto out;
+ 	  attrs_ok = true;
+ 	  seen_type = true;
+ 	  if (c_dialect_objc ())
+@@ -3727,11 +3746,10 @@ c_parser_attribute_any_word (c_parser *p
+       switch (c_parser_peek_token (parser)->keyword)
+ 	{
+ 	case RID_STATIC:
+ 	case RID_UNSIGNED:
+ 	case RID_LONG:
+-	case RID_INT128:
+ 	case RID_CONST:
+ 	case RID_EXTERN:
+ 	case RID_REGISTER:
+ 	case RID_TYPEDEF:
+ 	case RID_SHORT:
+@@ -3757,10 +3775,14 @@ c_parser_attribute_any_word (c_parser *p
+ 	case RID_SAT:
+ 	case RID_TRANSACTION_ATOMIC:
+ 	case RID_TRANSACTION_CANCEL:
+ 	case RID_ATOMIC:
+ 	case RID_AUTO_TYPE:
++	case RID_INT_N_0:
++	case RID_INT_N_1:
++	case RID_INT_N_2:
++	case RID_INT_N_3:
+ 	  ok = true;
+ 	  break;
+ 	default:
+ 	  ok = false;
+ 	  break;
+@@ -8898,11 +8920,10 @@ c_parser_objc_selector (c_parser *parser
+     case RID_SIZEOF:
+     case RID_TYPEOF:
+     case RID_ALIGNOF:
+     case RID_UNSIGNED:
+     case RID_LONG:
+-    case RID_INT128:
+     case RID_CONST:
+     case RID_SHORT:
+     case RID_VOLATILE:
+     case RID_SIGNED:
+     case RID_RESTRICT:
+@@ -8919,10 +8940,14 @@ c_parser_objc_selector (c_parser *parser
+     case RID_DOUBLE:
+     case RID_VOID:
+     case RID_BOOL:
+     case RID_ATOMIC:
+     case RID_AUTO_TYPE:
++    case RID_INT_N_0:
++    case RID_INT_N_1:
++    case RID_INT_N_2:
++    case RID_INT_N_3:
+       c_parser_consume_token (parser);
+       return value;
+     default:
+       return NULL_TREE;
+     }
+Index: gcc/c/c-tree.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/c/c-tree.h,v
+retrieving revision 1.3
+diff -p -U 5 -r1.3 c-tree.h
+--- gcc/c/c-tree.h	31 Mar 2014 10:42:12 -0000	1.3
++++ gcc/c/c-tree.h	20 Jun 2014 07:30:21 -0000
+@@ -197,11 +197,11 @@ enum c_typespec_keyword {
+   cts_void,
+   cts_bool,
+   cts_char,
+   cts_int,
+   cts_float,
+-  cts_int128,
++  cts_int_n,
+   cts_double,
+   cts_dfloat32,
+   cts_dfloat64,
+   cts_dfloat128,
+   cts_fract,
+@@ -264,10 +264,12 @@ struct c_declspecs {
+   tree attrs;
+   /* The base-2 log of the greatest alignment required by an _Alignas
+      specifier, in bytes, or -1 if no such specifiers with nonzero
+      alignment.  */
+   int align_log;
++  /* For the __intN declspec, this stores the index into the int_n_* arrays.  */
++  int int_n_idx;
+   /* The storage class specifier, or csc_none if none.  */
+   enum c_storage_class storage_class;
+   /* Any type specifier keyword used such as "int", not reflecting
+      modifiers such as "short", or cts_none if none.  */
+   ENUM_BITFIELD (c_typespec_keyword) typespec_word : 8;
+Index: gcc/c-family/c-common.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/c-family/c-common.c,v
+retrieving revision 1.16
+diff -p -U 5 -r1.16 c-common.c
+--- gcc/c-family/c-common.c	9 Jun 2014 10:41:35 -0000	1.16
++++ gcc/c-family/c-common.c	20 Jun 2014 07:30:22 -0000
+@@ -58,16 +58,14 @@ cpp_reader *parse_in;		/* Declared in c-
+    INTEGER_TYPE and REAL_TYPE nodes for the standard data types.
+ 
+ 	tree short_integer_type_node;
+ 	tree long_integer_type_node;
+ 	tree long_long_integer_type_node;
+-	tree int128_integer_type_node;
+ 
+ 	tree short_unsigned_type_node;
+ 	tree long_unsigned_type_node;
+ 	tree long_long_unsigned_type_node;
+-	tree int128_unsigned_type_node;
+ 
+ 	tree truthvalue_type_node;
+ 	tree truthvalue_false_node;
+ 	tree truthvalue_true_node;
+ 
+@@ -461,11 +459,10 @@ const struct c_common_resword c_common_r
+   { "__has_virtual_destructor", RID_HAS_VIRTUAL_DESTRUCTOR, D_CXXONLY },
+   { "__imag",		RID_IMAGPART,	0 },
+   { "__imag__",		RID_IMAGPART,	0 },
+   { "__inline",		RID_INLINE,	0 },
+   { "__inline__",	RID_INLINE,	0 },
+-  { "__int128",		RID_INT128,	0 },
+   { "__is_abstract",	RID_IS_ABSTRACT, D_CXXONLY },
+   { "__is_base_of",	RID_IS_BASE_OF, D_CXXONLY },
+   { "__is_class",	RID_IS_CLASS,	D_CXXONLY },
+   { "__is_convertible_to", RID_IS_CONVERTIBLE_TO, D_CXXONLY },
+   { "__is_empty",	RID_IS_EMPTY,	D_CXXONLY },
+@@ -3396,10 +3393,12 @@ check_case_bounds (tree type, tree orig_
+    that is unsigned if UNSIGNEDP is nonzero, otherwise signed.  */
+ 
+ tree
+ c_common_type_for_size (unsigned int bits, int unsignedp)
+ {
++  int i;
++
+   if (bits == TYPE_PRECISION (integer_type_node))
+     return unsignedp ? unsigned_type_node : integer_type_node;
+ 
+   if (bits == TYPE_PRECISION (signed_char_type_node))
+     return unsignedp ? unsigned_char_type_node : signed_char_type_node;
+@@ -3412,14 +3411,15 @@ c_common_type_for_size (unsigned int bit
+ 
+   if (bits == TYPE_PRECISION (long_long_integer_type_node))
+     return (unsignedp ? long_long_unsigned_type_node
+ 	    : long_long_integer_type_node);
+ 
+-  if (int128_integer_type_node
+-      && bits == TYPE_PRECISION (int128_integer_type_node))
+-    return (unsignedp ? int128_unsigned_type_node
+-	    : int128_integer_type_node);
++  for (i = 0; i < NUM_INT_N_ENTS; i ++)
++    if (int_n_enabled_p[i]
++	&& bits == int_n_data[i].bitsize)
++      return (unsignedp ? int_n_trees[i].unsigned_type
++	      : int_n_trees[i].signed_type);
+ 
+   if (bits == TYPE_PRECISION (widest_integer_literal_type_node))
+     return (unsignedp ? widest_unsigned_literal_type_node
+ 	    : widest_integer_literal_type_node);
+ 
+@@ -3479,10 +3479,11 @@ static GTY(()) tree registered_builtin_t
+ 
+ tree
+ c_common_type_for_mode (enum machine_mode mode, int unsignedp)
+ {
+   tree t;
++  int i;
+ 
+   if (mode == TYPE_MODE (integer_type_node))
+     return unsignedp ? unsigned_type_node : integer_type_node;
+ 
+   if (mode == TYPE_MODE (signed_char_type_node))
+@@ -3495,13 +3496,15 @@ c_common_type_for_mode (enum machine_mod
+     return unsignedp ? long_unsigned_type_node : long_integer_type_node;
+ 
+   if (mode == TYPE_MODE (long_long_integer_type_node))
+     return unsignedp ? long_long_unsigned_type_node : long_long_integer_type_node;
+ 
+-  if (int128_integer_type_node
+-      && mode == TYPE_MODE (int128_integer_type_node))
+-    return unsignedp ? int128_unsigned_type_node : int128_integer_type_node;
++  for (i = 0; i < NUM_INT_N_ENTS; i ++)
++    if (int_n_enabled_p[i]
++	&& mode == int_n_data[i].m)
++      return (unsignedp ? int_n_trees[i].unsigned_type
++	      : int_n_trees[i].signed_type);
+ 
+   if (mode == TYPE_MODE (widest_integer_literal_type_node))
+     return unsignedp ? widest_unsigned_literal_type_node
+ 		     : widest_integer_literal_type_node;
+ 
+@@ -3695,10 +3698,11 @@ c_common_signed_type (tree type)
+ 
+ tree
+ c_common_signed_or_unsigned_type (int unsignedp, tree type)
+ {
+   tree type1;
++  int i;
+ 
+   /* This block of code emulates the behavior of the old
+      c_common_unsigned_type. In particular, it returns
+      long_unsigned_type_node if passed a long, even when a int would
+      have the same size. This is necessary for warnings to work
+@@ -3713,14 +3717,18 @@ c_common_signed_or_unsigned_type (int un
+     return unsignedp ? short_unsigned_type_node : short_integer_type_node;
+   if (type1 == long_integer_type_node || type1 == long_unsigned_type_node)
+     return unsignedp ? long_unsigned_type_node : long_integer_type_node;
+   if (type1 == long_long_integer_type_node || type1 == long_long_unsigned_type_node)
+     return unsignedp ? long_long_unsigned_type_node : long_long_integer_type_node;
+-  if (int128_integer_type_node
+-      && (type1 == int128_integer_type_node
+-	  || type1 == int128_unsigned_type_node))
+-    return unsignedp ? int128_unsigned_type_node : int128_integer_type_node;
++
++  for (i = 0; i < NUM_INT_N_ENTS; i ++)
++    if (int_n_enabled_p[i]
++	&& (type1 == int_n_trees[i].unsigned_type
++	    || type1 == int_n_trees[i].signed_type))
++      return (unsignedp ? int_n_trees[i].unsigned_type
++	      : int_n_trees[i].signed_type);
++
+   if (type1 == widest_integer_literal_type_node || type1 == widest_unsigned_literal_type_node)
+     return unsignedp ? widest_unsigned_literal_type_node : widest_integer_literal_type_node;
+ #if HOST_BITS_PER_WIDE_INT >= 64
+   if (type1 == intTI_type_node || type1 == unsigned_intTI_type_node)
+     return unsignedp ? unsigned_intTI_type_node : intTI_type_node;
+@@ -3831,13 +3839,18 @@ c_common_signed_or_unsigned_type (int un
+   if (TYPE_OK (long_integer_type_node))
+     return unsignedp ? long_unsigned_type_node : long_integer_type_node;
+   if (TYPE_OK (long_long_integer_type_node))
+     return (unsignedp ? long_long_unsigned_type_node
+ 	    : long_long_integer_type_node);
+-  if (int128_integer_type_node && TYPE_OK (int128_integer_type_node))
+-    return (unsignedp ? int128_unsigned_type_node
+-	    : int128_integer_type_node);
++
++  for (i = 0; i < NUM_INT_N_ENTS; i ++)
++    if (int_n_enabled_p[i]
++	&& TYPE_MODE (type) == int_n_data[i].m
++	&& TYPE_PRECISION (type) == int_n_data[i].bitsize)
++      return (unsignedp ? int_n_trees[i].unsigned_type
++	      : int_n_trees[i].signed_type);
++
+   if (TYPE_OK (widest_integer_literal_type_node))
+     return (unsignedp ? widest_unsigned_literal_type_node
+ 	    : widest_integer_literal_type_node);
+ 
+ #if HOST_BITS_PER_WIDE_INT >= 64
+@@ -3860,10 +3873,12 @@ c_common_signed_or_unsigned_type (int un
+ /* Build a bit-field integer type for the given WIDTH and UNSIGNEDP.  */
+ 
+ tree
+ c_build_bitfield_integer_type (unsigned HOST_WIDE_INT width, int unsignedp)
+ {
++  int i;
++
+   /* Extended integer types of the same width as a standard type have
+      lesser rank, so those of the same width as int promote to int or
+      unsigned int and are valid for printf formats expecting int or
+      unsigned int.  To avoid such special cases, avoid creating
+      extended integer types for bit-fields if a standard integer type
+@@ -3877,14 +3892,15 @@ c_build_bitfield_integer_type (unsigned 
+   if (width == TYPE_PRECISION (long_integer_type_node))
+     return unsignedp ? long_unsigned_type_node : long_integer_type_node;
+   if (width == TYPE_PRECISION (long_long_integer_type_node))
+     return (unsignedp ? long_long_unsigned_type_node
+ 	    : long_long_integer_type_node);
+-  if (int128_integer_type_node
+-      && width == TYPE_PRECISION (int128_integer_type_node))
+-    return (unsignedp ? int128_unsigned_type_node
+-	    : int128_integer_type_node);
++  for (i = 0; i < NUM_INT_N_ENTS; i ++)
++    if (int_n_enabled_p[i]
++	&& width == int_n_data[i].bitsize)
++      return (unsignedp ? int_n_trees[i].unsigned_type
++	      : int_n_trees[i].signed_type);
+   return build_nonstandard_integer_type (width, unsignedp);
+ }
+ 
+ /* The C version of the register_builtin_type langhook.  */
+ 
+@@ -5299,10 +5315,11 @@ c_common_nodes_and_builtins (void)
+   int char32_type_size;
+   int wchar_type_size;
+   tree array_domain_type;
+   tree va_list_ref_type_node;
+   tree va_list_arg_type_node;
++  int i;
+ 
+   build_common_tree_nodes (flag_signed_char, flag_short_double);
+ 
+   /* Define `int' and `char' first so that dbx will output them first.  */
+   record_builtin_type (RID_INT, NULL, integer_type_node);
+@@ -5315,17 +5332,23 @@ c_common_nodes_and_builtins (void)
+     record_builtin_type (RID_SIGNED, NULL, integer_type_node);
+   record_builtin_type (RID_LONG, "long int", long_integer_type_node);
+   record_builtin_type (RID_UNSIGNED, "unsigned int", unsigned_type_node);
+   record_builtin_type (RID_MAX, "long unsigned int",
+ 		       long_unsigned_type_node);
+-  if (int128_integer_type_node != NULL_TREE)
++
++  for (i = 0; i < NUM_INT_N_ENTS; i ++)
+     {
+-      record_builtin_type (RID_INT128, "__int128",
+-			   int128_integer_type_node);
+-      record_builtin_type (RID_MAX, "__int128 unsigned",
+-			   int128_unsigned_type_node);
++      char name[25];
++
++      sprintf (name, "__int%d", int_n_data[i].bitsize);
++      record_builtin_type ((enum rid)(RID_FIRST_INT_N + i), xstrdup (name),
++			   int_n_trees[i].signed_type);
++      sprintf (name, "__int%d unsigned", int_n_data[i].bitsize);
++      record_builtin_type (RID_MAX, xstrdup (name),
++			   int_n_trees[i].unsigned_type);
+     }
++
+   if (c_dialect_cxx ())
+     record_builtin_type (RID_MAX, "unsigned long", long_unsigned_type_node);
+   record_builtin_type (RID_MAX, "long long int",
+ 		       long_long_integer_type_node);
+   record_builtin_type (RID_MAX, "long long unsigned int",
+@@ -5357,10 +5380,12 @@ c_common_nodes_and_builtins (void)
+ 					 intSI_type_node));
+   lang_hooks.decls.pushdecl (build_decl (UNKNOWN_LOCATION,
+ 					 TYPE_DECL, NULL_TREE,
+ 					 intDI_type_node));
+ #if HOST_BITS_PER_WIDE_INT >= 64
++  /* Note that this is different than the __int128 type that's part of
++     the generic __intN support.  */
+   if (targetm.scalar_mode_supported_p (TImode))
+     lang_hooks.decls.pushdecl (build_decl (UNKNOWN_LOCATION,
+ 					   TYPE_DECL,
+ 					   get_identifier ("__int128_t"),
+ 					   intTI_type_node));
+@@ -11625,11 +11650,10 @@ keyword_begins_type_specifier (enum rid 
+     case RID_INT:
+     case RID_CHAR:
+     case RID_FLOAT:
+     case RID_DOUBLE:
+     case RID_VOID:
+-    case RID_INT128:
+     case RID_UNSIGNED:
+     case RID_LONG:
+     case RID_SHORT:
+     case RID_SIGNED:
+     case RID_DFLOAT32:
+@@ -11648,10 +11672,14 @@ keyword_begins_type_specifier (enum rid 
+     case RID_CLASS:
+     case RID_UNION:
+     case RID_ENUM:
+       return true;
+     default:
++      if (keyword >= RID_FIRST_INT_N
++	  && keyword < RID_FIRST_INT_N + NUM_INT_N_ENTS
++	  && int_n_enabled_p[keyword-RID_FIRST_INT_N])
++	return true;
+       return false;
+     }
+ }
+ 
+ /* Return true if KEYWORD names a type qualifier.  */
+Index: gcc/c-family/c-common.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/c-family/c-common.h,v
+retrieving revision 1.8
+diff -p -U 5 -r1.8 c-common.h
+--- gcc/c-family/c-common.h	9 Jun 2014 10:41:35 -0000	1.8
++++ gcc/c-family/c-common.h	20 Jun 2014 07:30:22 -0000
+@@ -89,11 +89,10 @@ enum rid
+      syntax error) */
+   RID_IMAGINARY,
+ 
+   /* C */
+   RID_INT,     RID_CHAR,   RID_FLOAT,    RID_DOUBLE, RID_VOID,
+-  RID_INT128,
+   RID_ENUM,    RID_STRUCT, RID_UNION,    RID_IF,     RID_ELSE,
+   RID_WHILE,   RID_DO,     RID_FOR,      RID_SWITCH, RID_CASE,
+   RID_DEFAULT, RID_BREAK,  RID_CONTINUE, RID_RETURN, RID_GOTO,
+   RID_SIZEOF,
+ 
+@@ -186,10 +185,27 @@ enum rid
+   RID_ADDR_SPACE_15,
+ 
+   RID_FIRST_ADDR_SPACE = RID_ADDR_SPACE_0,
+   RID_LAST_ADDR_SPACE = RID_ADDR_SPACE_15,
+ 
++  /* __intN_t keywords.  The _N_M here doesn't correspond to the intN
++     in the keyword; use the bitsize in int_n_t_data_t[M] for that.
++     For example, if int_n_t_data_t[0].bitsize is 13, then RID_INT_N_0
++     is for __int13_t.  */
++
++  /* Note that the range to use is RID_FIRST_INT_N through
++     RID_FIRST_INT_N + NUM_INT_N_ENTS - 1 and c-parser.c has a list of
++     all RID_INT_N_* in a case statement.  */
++
++  RID_INT_N_0,
++  RID_INT_N_1,
++  RID_INT_N_2,
++  RID_INT_N_3,
++
++  RID_FIRST_INT_N = RID_INT_N_0,
++  RID_LAST_INT_N = RID_INT_N_3,
++
+   RID_MAX,
+ 
+   RID_FIRST_MODIFIER = RID_STATIC,
+   RID_LAST_MODIFIER = RID_ONEWAY,
+ 
+Index: gcc/c-family/c-cppbuiltin.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/c-family/c-cppbuiltin.c,v
+retrieving revision 1.4
+diff -p -U 5 -r1.4 c-cppbuiltin.c
+--- gcc/c-family/c-cppbuiltin.c	20 Feb 2014 16:40:27 -0000	1.4
++++ gcc/c-family/c-cppbuiltin.c	20 Jun 2014 07:30:22 -0000
+@@ -676,11 +676,11 @@ cpp_atomic_builtins (cpp_reader *pfile)
+   builtin_define_with_int_value ("__GCC_ATOMIC_TEST_AND_SET_TRUEVAL",
+ 				 targetm.atomic_test_and_set_trueval);
+ 
+   /* ptr_type_node can't be used here since ptr_mode is only set when
+      toplev calls backend_init which is not done with -E  or pch.  */
+-  psize = POINTER_SIZE / BITS_PER_UNIT;
++  psize = POINTER_SIZE_UNITS;
+   if (psize >= SWAP_LIMIT)
+     psize = 0;
+   builtin_define_with_int_value ("__GCC_ATOMIC_POINTER_LOCK_FREE", 
+ 			(have_swap[psize]? 2 : 1));
+ }
+@@ -776,10 +776,12 @@ cpp_iec_559_complex_value (void)
+ 
+ /* Hook that registers front end and target-specific built-ins.  */
+ void
+ c_cpp_builtins (cpp_reader *pfile)
+ {
++  int i;
++
+   /* -undef turns off target-specific built-ins.  */
+   if (flag_undef)
+     return;
+ 
+   define_language_independent_builtin_macros (pfile);
+@@ -845,10 +847,45 @@ c_cpp_builtins (cpp_reader *pfile)
+   builtin_define_type_minmax ("__WCHAR_MIN__", "__WCHAR_MAX__",
+ 			      underlying_wchar_type_node);
+   builtin_define_type_minmax ("__WINT_MIN__", "__WINT_MAX__", wint_type_node);
+   builtin_define_type_max ("__PTRDIFF_MAX__", ptrdiff_type_node);
+   builtin_define_type_max ("__SIZE_MAX__", size_type_node);
++  for (i = 0; i < NUM_INT_N_ENTS; i ++)
++    if (int_n_enabled_p[i])
++      {
++	char buf[35+20+20];
++	char buf_min[15+20];
++	char buf_max[15+20];
++
++	sprintf(buf_min, "__INT%d_MIN__", int_n_data[i].bitsize);
++	sprintf(buf_max, "__INT%d_MAX__", int_n_data[i].bitsize);
++	builtin_define_type_minmax (buf_min, buf_max,
++				    int_n_trees[i].signed_type);
++	sprintf(buf_max, "__UINT%d_MAX__", int_n_data[i].bitsize);
++	builtin_define_type_max (buf_max,
++				 int_n_trees[i].unsigned_type);
++
++	/* These are used to configure the C++ library.  */
++
++	sprintf (buf, "__GLIBCXX_USE_INT_N_%d", i);
++	if (!flag_iso || int_n_data[i].bitsize == POINTER_SIZE)
++	  builtin_define_with_int_value (buf, 1);
++
++	sprintf (buf, "__GLIBCXX_TYPE_INT_N_%d=__int%d", i, int_n_data[i].bitsize);
++	cpp_define (parse_in, buf);
++
++	sprintf (buf, "__GLIBCXX_BITSIZE_INT_N_%d=%d", i, int_n_data[i].bitsize);
++	cpp_define (parse_in, buf);
++
++	sprintf(buf_min, "__GLIBCXX_MIN_INT_N_%d", i);
++	sprintf(buf_max, "__GLIBCXX_MAX_INT_N_%d", i);
++	builtin_define_type_minmax (buf_min, buf_max,
++				    int_n_trees[i].signed_type);
++	sprintf(buf_max, "__GLIBCXX_UMAX_INT_N_%d", i);
++	builtin_define_type_max (buf_max,
++				 int_n_trees[i].unsigned_type);
++      }
+ 
+   /* stdint.h and the testsuite need to know these.  */
+   builtin_define_stdint_macros ();
+ 
+   /* Provide information for library headers to determine whether to
+@@ -994,13 +1031,18 @@ c_cpp_builtins (cpp_reader *pfile)
+     cpp_define (pfile, "__SSP__=1");
+ 
+   if (flag_openmp)
+     cpp_define (pfile, "_OPENMP=201307");
+ 
+-  if (int128_integer_type_node != NULL_TREE)
+-    builtin_define_type_sizeof ("__SIZEOF_INT128__",
+-			        int128_integer_type_node);
++  for (i = 0; i < NUM_INT_N_ENTS; i ++)
++    if (int_n_enabled_p[i])
++      {
++	char buf[15+20];
++	sprintf(buf, "__SIZEOF_INT%d__", int_n_data[i].bitsize);
++	builtin_define_type_sizeof (buf,
++				    int_n_trees[i].signed_type);
++      }
+   builtin_define_type_sizeof ("__SIZEOF_WCHAR_T__", wchar_type_node);
+   builtin_define_type_sizeof ("__SIZEOF_WINT_T__", wint_type_node);
+   builtin_define_type_sizeof ("__SIZEOF_PTRDIFF_T__",
+ 			      unsigned_ptrdiff_type_node);
+ 
+@@ -1228,16 +1270,19 @@ static const char *
+ type_suffix (tree type)
+ {
+   static const char *const suffixes[] = { "", "U", "L", "UL", "LL", "ULL" };
+   int unsigned_suffix;
+   int is_long;
++  int tp = TYPE_PRECISION (type);
+ 
+   if (type == long_long_integer_type_node
+-      || type == long_long_unsigned_type_node)
++      || type == long_long_unsigned_type_node
++      || tp > TYPE_PRECISION (long_integer_type_node))
+     is_long = 2;
+   else if (type == long_integer_type_node
+-	   || type == long_unsigned_type_node)
++	   || type == long_unsigned_type_node
++	   || tp > TYPE_PRECISION (integer_type_node))
+     is_long = 1;
+   else if (type == integer_type_node
+ 	   || type == unsigned_type_node
+ 	   || type == short_integer_type_node
+ 	   || type == short_unsigned_type_node
+@@ -1286,43 +1331,72 @@ static void
+ builtin_define_type_max (const char *macro, tree type)
+ {
+   builtin_define_type_minmax (NULL, macro, type);
+ }
+ 
++/* Given a value with COUNT LSBs set, fill BUF with a hexidecimal
++   representation of that value.  For example, a COUNT of 10 would
++   return "0x3ff".  */
++
++static void
++print_bits_of_hex (char *buf, int bufsz, int count)
++{
++  gcc_assert (bufsz > 3);
++  *buf++ = '0';
++  *buf++ = 'x';
++  bufsz -= 2;
++
++  gcc_assert (count > 0);
++
++  switch (count % 4) {
++  case 0:
++    break;
++  case 1:
++    *buf++ = '1';
++    bufsz --;
++    count -= 1;
++    break;
++  case 2:
++    *buf++ = '3';
++    bufsz --;
++    count -= 2;
++    break;
++  case 3:
++    *buf++ = '7';
++    bufsz --;
++    count -= 3;
++    break;
++  }
++  while (count >= 4)
++    {
++      gcc_assert (bufsz > 1);
++      *buf++ = 'f';
++      bufsz --;
++      count -= 4;
++    }
++  gcc_assert (bufsz > 0);
++  *buf++ = 0;
++}
++
+ /* Define MIN_MACRO (if not NULL) and MAX_MACRO for TYPE based on the
+    precision of the type.  */
+ 
+ static void
+ builtin_define_type_minmax (const char *min_macro, const char *max_macro,
+ 			    tree type)
+ {
+-  static const char *const values[]
+-    = { "127", "255",
+-	"32767", "65535",
+-	"2147483647", "4294967295",
+-	"9223372036854775807", "18446744073709551615",
+-	"170141183460469231731687303715884105727",
+-	"340282366920938463463374607431768211455" };
++#define PBOH_SZ (128/4+4)
++  char value[PBOH_SZ];
+ 
+-  const char *value, *suffix;
++  const char *suffix;
+   char *buf;
+-  size_t idx;
++  int bits;
+ 
+-  /* Pre-rendering the values mean we don't have to futz with printing a
+-     multi-word decimal value.  There are also a very limited number of
+-     precisions that we support, so it's really a waste of time.  */
+-  switch (TYPE_PRECISION (type))
+-    {
+-    case 8:	idx = 0; break;
+-    case 16:	idx = 2; break;
+-    case 32:	idx = 4; break;
+-    case 64:	idx = 6; break;
+-    case 128:	idx = 8; break;
+-    default:    gcc_unreachable ();
+-    }
++  bits = TYPE_PRECISION (type) + (TYPE_UNSIGNED (type) ? 0 : -1);
++
++  print_bits_of_hex (value, PBOH_SZ, bits);
+ 
+-  value = values[idx + TYPE_UNSIGNED (type)];
+   suffix = type_suffix (type);
+ 
+   buf = (char *) alloca (strlen (max_macro) + 1 + strlen (value)
+                          + strlen (suffix) + 1);
+   sprintf (buf, "%s=%s%s", max_macro, value, suffix);
+Index: gcc/c-family/c-pretty-print.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/c-family/c-pretty-print.c,v
+retrieving revision 1.4
+diff -p -U 5 -r1.4 c-pretty-print.c
+--- gcc/c-family/c-pretty-print.c	20 Feb 2014 16:40:27 -0000	1.4
++++ gcc/c-family/c-pretty-print.c	20 Jun 2014 07:30:22 -0000
+@@ -908,10 +908,12 @@ pp_c_string_literal (c_pretty_printer *p
+ /* Pretty-print an INTEGER literal.  */
+ 
+ static void
+ pp_c_integer_constant (c_pretty_printer *pp, tree i)
+ {
++  int idx;
++
+   /* We are going to compare the type of I to other types using
+      pointer comparison so we need to use its canonical type.  */
+   tree type =
+     TYPE_CANONICAL (TREE_TYPE (i))
+     ? TYPE_CANONICAL (TREE_TYPE (i))
+@@ -940,13 +942,21 @@ pp_c_integer_constant (c_pretty_printer 
+   if (type == long_integer_type_node || type == long_unsigned_type_node)
+     pp_character (pp, 'l');
+   else if (type == long_long_integer_type_node
+ 	   || type == long_long_unsigned_type_node)
+     pp_string (pp, "ll");
+-  else if (type == int128_integer_type_node
+-           || type == int128_unsigned_type_node)
+-    pp_string (pp, "I128");
++  else for (idx = 0; idx < NUM_INT_N_ENTS; idx ++)
++    if (int_n_enabled_p[idx])
++      {
++	char buf[2+20];
++	if (type == int_n_trees[idx].signed_type
++	    || type == int_n_trees[idx].unsigned_type)
++	  {
++	    sprintf (buf, "I%d", int_n_data[idx].bitsize);
++	    pp_string (pp, buf);
++	  }
++      }
+ }
+ 
+ /* Print out a CHARACTER literal.  */
+ 
+ static void
+Index: gcc/config/msp430/msp430-modes.def
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/config/msp430/msp430-modes.def,v
+retrieving revision 1.1
+diff -p -U 5 -r1.1 msp430-modes.def
+--- gcc/config/msp430/msp430-modes.def	20 Feb 2014 16:40:38 -0000	1.1
++++ gcc/config/msp430/msp430-modes.def	20 Jun 2014 07:30:23 -0000
+@@ -1,3 +1,4 @@
+ /* 20-bit address */
+ PARTIAL_INT_MODE (SI, 20, PSI);
+ 
++INT_N (PSI, 20);
+Index: gcc/config/msp430/msp430-protos.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/config/msp430/msp430-protos.h,v
+retrieving revision 1.4
+diff -p -U 5 -r1.4 msp430-protos.h
+--- gcc/config/msp430/msp430-protos.h	13 Jun 2014 10:21:07 -0000	1.4
++++ gcc/config/msp430/msp430-protos.h	20 Jun 2014 07:30:23 -0000
+@@ -29,10 +29,13 @@ void	msp430_expand_helper (rtx *operands
+ void	msp430_expand_prologue (void);
+ const char * msp430x_extendhisi (rtx *);
+ void	msp430_fixup_compare_operands (enum machine_mode, rtx *);
+ int	msp430_hard_regno_mode_ok (int, enum machine_mode);
+ int	msp430_hard_regno_nregs (int, enum machine_mode);
++int	msp430_hard_regno_nregs_has_padding (int, enum machine_mode);
++int	msp430_hard_regno_nregs_with_padding (int, enum machine_mode);
++bool    msp430_hwmult_enabled (void);
+ rtx	msp430_incoming_return_addr_rtx (void);
+ void	msp430_init_cumulative_args (CUMULATIVE_ARGS *, tree, rtx, tree, int);
+ int	msp430_initial_elimination_offset (int, int);
+ bool    msp430_is_interrupt_func (void);
+ const char * msp430x_logical_shift_right (rtx);
+Index: gcc/config/msp430/msp430.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/config/msp430/msp430.c,v
+retrieving revision 1.7
+diff -p -U 5 -r1.7 msp430.c
+--- gcc/config/msp430/msp430.c	13 Jun 2014 10:21:07 -0000	1.7
++++ gcc/config/msp430/msp430.c	20 Jun 2014 07:30:23 -0000
+@@ -230,10 +230,25 @@ msp430_option_override (void)
+      possible to build newlib with -Os enabled.  Until now...  */
+   if (TARGET_OPT_SPACE && optimize < 3)
+     optimize_size = 1;
+ }
+ 
++#undef  TARGET_SCALAR_MODE_SUPPORTED_P
++#define TARGET_SCALAR_MODE_SUPPORTED_P msp430_scalar_mode_supported_p
++
++static bool
++msp430_scalar_mode_supported_p (enum machine_mode m)
++{
++  if (m == PSImode && msp430x)
++    return true;
++#if 0
++  if (m == TImode)
++    return true;
++#endif
++  return default_scalar_mode_supported_p (m);
++}
++
+ 
+ 
+ /* Storage Layout */
+ 
+ #undef  TARGET_MS_BITFIELD_LAYOUT_P
+@@ -259,10 +274,31 @@ msp430_hard_regno_nregs (int regno ATTRI
+     return 1;
+   return ((GET_MODE_SIZE (mode) + UNITS_PER_WORD - 1)
+ 	  / UNITS_PER_WORD);
+ }
+ 
++/* Implements HARD_REGNO_NREGS_HAS_PADDING.  */
++int
++msp430_hard_regno_nregs_has_padding (int regno ATTRIBUTE_UNUSED,
++				     enum machine_mode mode)
++{
++  if (mode == PSImode && msp430x)
++    return 1;
++  return ((GET_MODE_SIZE (mode) + UNITS_PER_WORD - 1)
++	  / UNITS_PER_WORD);
++}
++
++/* Implements HARD_REGNO_NREGS_WITH_PADDING.  */
++int
++msp430_hard_regno_nregs_with_padding (int regno ATTRIBUTE_UNUSED,
++				     enum machine_mode mode)
++{
++  if (mode == PSImode)
++    return 2;
++  return msp430_hard_regno_nregs (regno, mode);
++}
++
+ /* Implements HARD_REGNO_MODE_OK.  */
+ int
+ msp430_hard_regno_mode_ok (int regno ATTRIBUTE_UNUSED,
+ 			   enum machine_mode mode)
+ {
+@@ -372,11 +408,11 @@ msp430_addr_space_pointer_mode (addr_spa
+ #define TARGET_UNWIND_WORD_MODE msp430_unwind_word_mode
+ 
+ static enum machine_mode
+ msp430_unwind_word_mode (void)
+ {
+-  return TARGET_LARGE ? SImode : HImode;
++  return TARGET_LARGE ? PSImode : HImode;
+ }
+ 
+ /* Determine if one named address space is a subset of another.  */
+ #undef  TARGET_ADDR_SPACE_SUBSET_P
+ #define TARGET_ADDR_SPACE_SUBSET_P msp430_addr_space_subset_p
+@@ -887,10 +923,47 @@ msp430_legitimate_address_p (enum machin
+     default:
+       return false;
+     }
+ }
+ 
++#undef  TARGET_ADDR_SPACE_LEGITIMATE_ADDRESS_P
++#define TARGET_ADDR_SPACE_LEGITIMATE_ADDRESS_P msp430_addr_space_legitimate_address_p
++
++bool
++msp430_addr_space_legitimate_address_p (enum machine_mode mode,
++					rtx x,
++					bool strict,
++					addr_space_t as ATTRIBUTE_UNUSED)
++{
++  return msp430_legitimate_address_p (mode, x, strict);
++}
++
++#undef  TARGET_ASM_INTEGER
++#define TARGET_ASM_INTEGER msp430_asm_integer
++static bool
++msp430_asm_integer (rtx x, unsigned int size, int aligned_p)
++{
++  int c = GET_CODE (x);
++
++  if (size == 3 && GET_MODE (x) == PSImode)
++    size = 4;
++
++  switch (size)
++    {
++    case 4:
++      if (c == SYMBOL_REF || c == CONST || c == LABEL_REF || c == CONST_INT)
++	{
++	  fprintf (asm_out_file, "\t.long\t");
++	  output_addr_const (asm_out_file, x);
++	  fputc ('\n', asm_out_file);
++	  return true;
++	}
++      break;
++    }
++  return default_assemble_integer (x, size, aligned_p);
++}
++
+ #undef  TARGET_LEGITIMATE_CONSTANT_P
+ #define TARGET_LEGITIMATE_CONSTANT_P msp430_legitimate_constant
+ 
+ static bool
+ msp430_legitimate_constant (enum machine_mode mode, rtx x)
+@@ -2017,10 +2090,37 @@ msp430_expand_eh_return (rtx eh_handler)
+   tmp = plus_constant (Pmode, tmp, TARGET_LARGE ? -4 : -2);
+   tmp = gen_rtx_MEM (Pmode, tmp);
+   emit_move_insn (tmp, ra);
+ }
+ 
++#undef  TARGET_INIT_DWARF_REG_SIZES_EXTRA
++#define TARGET_INIT_DWARF_REG_SIZES_EXTRA msp430_init_dwarf_reg_sizes_extra
++void
++msp430_init_dwarf_reg_sizes_extra (tree address)
++{
++  int i;
++  rtx addr = expand_normal (address);
++  rtx mem = gen_rtx_MEM (BLKmode, addr);
++
++  if (!msp430x)
++    return;
++
++  for (i = 0; i < FIRST_PSEUDO_REGISTER; i++)
++    {
++      unsigned int dnum = DWARF_FRAME_REGNUM (i);
++      unsigned int rnum = DWARF2_FRAME_REG_OUT (dnum, 1);
++
++      if (rnum < DWARF_FRAME_REGISTERS)
++	{
++	  HOST_WIDE_INT offset = rnum * GET_MODE_SIZE (QImode);
++
++	  emit_move_insn (adjust_address (mem, QImode, offset),
++			  gen_int_mode (4, QImode));
++	}
++    }
++}
++
+ /* This is a list of MD patterns that implement fixed-count shifts.  */
+ static struct
+ {
+   const char *name;
+   int count;
+@@ -2627,11 +2727,11 @@ msp430_print_operand (FILE * file, rtx o
+       break;
+ 
+     case 'X':
+       /* This is used to turn, for example, an ADD opcode into an ADDX
+ 	 opcode when we're using 20-bit addresses.  */
+-      if (TARGET_LARGE)
++      if (TARGET_LARGE || GET_MODE (op) == PSImode)
+ 	fprintf (file, "X");
+       /* We don't care which operand we use, but we want 'X' in the MD
+ 	 file, so we do it this way.  */
+       return;
+ 
+Index: gcc/config/msp430/msp430.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/config/msp430/msp430.h,v
+retrieving revision 1.4
+diff -p -U 5 -r1.4 msp430.h
+--- gcc/config/msp430/msp430.h	9 Jun 2014 10:41:35 -0000	1.4
++++ gcc/config/msp430/msp430.h	20 Jun 2014 07:30:23 -0000
+@@ -129,14 +129,13 @@ extern bool msp430x;
+ #define FIRST_PARM_OFFSET(FNDECL) 	0
+ 
+ #define MAX_REGS_PER_ADDRESS 		1
+ 
+ #define Pmode 				(TARGET_LARGE ? PSImode : HImode)
+-/* Note: 32 is a lie.  Large pointers are actually 20-bits wide.  But gcc
+-   thinks that any non-power-of-2 pointer size equates to BLKmode, which
+-   causes all kinds of problems...  */
+-#define POINTER_SIZE			(TARGET_LARGE ? 32 : 16)
++#define POINTER_SIZE			(TARGET_LARGE ? 20 : 16)
++/* This is just for .eh_frame, to match bfd.  */
++#define PTR_SIZE			(TARGET_LARGE ? 4 : 2)
+ #define	POINTERS_EXTEND_UNSIGNED	1
+ 
+ #define ADDR_SPACE_NEAR	1
+ #define ADDR_SPACE_FAR	2
+ 
+@@ -156,13 +155,13 @@ extern bool msp430x;
+ #endif
+ 
+ /* Layout of Source Language Data Types */
+ 
+ #undef  SIZE_TYPE
+-#define SIZE_TYPE			(TARGET_LARGE ? "long unsigned int" : "unsigned int")
++#define SIZE_TYPE			(TARGET_LARGE ? "__int20 unsigned" : "unsigned int")
+ #undef  PTRDIFF_TYPE
+-#define PTRDIFF_TYPE			(TARGET_LARGE ? "long int" : "int")
++#define PTRDIFF_TYPE			(TARGET_LARGE ? "__int20" : "int")
+ #undef  WCHAR_TYPE
+ #define WCHAR_TYPE			"long int"
+ #undef  WCHAR_TYPE_SIZE
+ #define WCHAR_TYPE_SIZE			BITS_PER_WORD
+ #define FUNCTION_MODE 			HImode
+@@ -380,11 +379,11 @@ typedef struct
+ #define JUMP_TABLES_IN_TEXT_SECTION	1
+ 
+ #undef	DWARF2_ADDR_SIZE
+ #define	DWARF2_ADDR_SIZE			4
+ 
+-#define INCOMING_FRAME_SP_OFFSET		(POINTER_SIZE / BITS_PER_UNIT)
++#define INCOMING_FRAME_SP_OFFSET		(TARGET_LARGE ? 4 : 2)
+ 
+ #undef  PREFERRED_DEBUGGING_TYPE
+ #define PREFERRED_DEBUGGING_TYPE DWARF2_DEBUG
+ 
+ #define DWARF2_ASM_LINE_DEBUG_INFO		1
+Index: gcc/config/msp430/msp430.md
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/config/msp430/msp430.md,v
+retrieving revision 1.9
+diff -p -U 5 -r1.9 msp430.md
+--- gcc/config/msp430/msp430.md	13 Jun 2014 10:21:07 -0000	1.9
++++ gcc/config/msp430/msp430.md	20 Jun 2014 07:30:23 -0000
+@@ -180,10 +180,17 @@
+   "@
+    MOV.B\t%1, %0
+    MOV%X1.B\t%1, %0"
+ )
+ 
++(define_insn "movqi_topbyte"
++  [(set (match_operand:QI 0 "msp_nonimmediate_operand" "=r")
++	(subreg:QI (match_operand:PSI 1 "msp_general_operand" "r") 2))]
++  "msp430x"
++  "PUSHM.A\t#1,%1 { POPM.W\t#1,%0 { POPM.W\t#1,%0"
++)
++
+ (define_insn "movqi"
+   [(set (match_operand:QI 0 "msp_nonimmediate_operand" "=rYs,rm")
+ 	(match_operand:QI 1 "msp_general_operand" "riYs,rmi"))]
+   ""
+   "@
+@@ -250,13 +257,13 @@
+ (define_insn "movpsi"
+   [(set (match_operand:PSI 0 "msp_nonimmediate_operand" "=r,Ya,rm")
+ 	(match_operand:PSI 1 "msp_general_operand" "riYa,r,rmi"))]
+   ""
+   "@
+-  MOV%Q0\t%1, %0
+-  MOV%Q0\t%1, %0
+-  MOV%X0.%Q0\t%1, %0")
++  MOVA\t%1, %0
++  MOVA\t%1, %0
++  MOVX.A\t%1, %0")
+ 
+ ; This pattern is identical to the truncsipsi2 pattern except
+ ; that it uses a SUBREG instead of a TRUNC.  It is needed in
+ ; order to prevent reload from converting (set:SI (SUBREG:PSI (SI)))
+ ; into (SET:PSI (PSI)).
+@@ -264,11 +271,11 @@
+ ; Note: using POPM.A #1 is two bytes smaller than using POPX.A....
+ 
+ (define_insn "movsipsi2"
+   [(set (match_operand:PSI            0 "register_operand" "=r")
+ 	(subreg:PSI (match_operand:SI 1 "register_operand" "r") 0))]
+-  "TARGET_LARGE"
++  "msp430x"
+   "PUSH.W\t%H1 { PUSH.W\t%L1 { POPM.A #1, %0 ; Move reg-pair %L1:%H1 into pointer %0"
+ )
+ 
+ (define_insn "movpsisi2"
+   [(set (match_operand:SI             0 "register_operand" "=r")
+@@ -601,47 +608,47 @@
+ )
+ 
+ (define_insn "extendhipsi2"
+   [(set (match_operand:PSI 0 "nonimmediate_operand" "=r")
+ 	(subreg:PSI (sign_extend:SI (match_operand:HI 1 "nonimmediate_operand" "0")) 0))]
+-  "TARGET_LARGE"
++  "msp430x"
+   "RLAM #4, %0 { RRAM #4, %0"
+ )
+ 
+ ;; Look for cases where integer/pointer conversions are suboptimal due
+ ;; to missing patterns, despite us not having opcodes for these
+ ;; patterns.  Doing these manually allows for alternate optimization
+ ;; paths.
+ (define_insn "zero_extendhisi2"
+   [(set (match_operand:SI 0 "nonimmediate_operand" "=rm")
+ 	(zero_extend:SI (match_operand:HI 1 "nonimmediate_operand" "0")))]
+-  "TARGET_LARGE"
++  "msp430x"
+   "MOV.W\t#0,%H0"
+ )
+ 
+ (define_insn "zero_extendhisipsi2"
+   [(set (match_operand:PSI 0 "nonimmediate_operand" "=r,r")
+ 	(subreg:PSI (zero_extend:SI (match_operand:HI 1 "nonimmediate_operand" "0,r")) 0))]
+-  "TARGET_LARGE"
++  "msp430x"
+   "@
+    AND.W\t#-1,%0
+    MOV.W\t%1,%0"
+ )
+ 
+ (define_insn "extend_and_shift1_hipsi2"
+   [(set (subreg:SI (match_operand:PSI 0 "nonimmediate_operand" "=r") 0)
+ 	(ashift:SI (sign_extend:SI (match_operand:HI 1 "nonimmediate_operand" "0"))
+ 		   (const_int 1)))]
+-  "TARGET_LARGE"
++  "msp430x"
+   "RLAM #4, %0 { RRAM #3, %0"
+ )
+ 
+ (define_insn "extend_and_shift2_hipsi2"
+   [(set (subreg:SI (match_operand:PSI 0 "nonimmediate_operand" "=r") 0)
+ 	(ashift:SI (sign_extend:SI (match_operand:HI 1 "nonimmediate_operand" "0"))
+ 		   (const_int 2)))]
+-  "TARGET_LARGE"
++  "msp430x"
+   "RLAM #4, %0 { RRAM #2, %0"
+ )
+ 
+ ; Nasty - we are sign-extending a 20-bit PSI value in one register into
+ ; two adjacent 16-bit registers to make an SI value.  There is no MSP430X
+@@ -682,11 +689,11 @@
+ ;; it, we use a different method here.
+ 
+ (define_insn "extendpsisi2"
+   [(set (match_operand:SI                  0 "register_operand" "=r")
+ 	(sign_extend:SI (match_operand:PSI 1 "register_operand" "r")))]
+-  "TARGET_LARGE"
++  "msp430x"
+   "*
+     /* The intention here is that we copy the bottom 16-bits of
+        %1 into %L0 (zeroing the top four bits).  Then we copy the
+        entire 20-bits of %1 into %H0 and then arithmetically shift
+        it right by 16 bits, to get the top four bits of the pointer
+@@ -1234,11 +1241,11 @@
+               (label_ref (match_operand 2 "" ""))
+ 	      (pc)))
+    (clobber (reg:BI CARRY))
+    ]
+   ""
+-  "BIT%x0%X0%b0\t%1, %0 { JEQ\t%l2"
++  "BIT%x0%b0\t%1, %0 { JEQ\t%l2"
+   )
+ 
+ (define_insn "*bitbranch<mode>4"
+   [(set (pc) (if_then_else
+ 	      (eq (and:QHI (match_operand:QHI 0 "msp_nonimmediate_operand" "rm")
+Index: gcc/cp/cp-tree.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/cp/cp-tree.h,v
+retrieving revision 1.83
+diff -p -U 5 -r1.83 cp-tree.h
+--- gcc/cp/cp-tree.h	17 Mar 2014 09:19:48 -0000	1.83
++++ gcc/cp/cp-tree.h	20 Jun 2014 07:30:24 -0000
+@@ -4836,10 +4836,12 @@ typedef struct cp_decl_specifier_seq {
+      to some other type.  */
+   tree redefined_builtin_type;
+   /* The storage class specified -- or sc_none if no storage class was
+      explicitly specified.  */
+   cp_storage_class storage_class;
++  /* For the __intN declspec, this stores the index into the int_n_* arrays.  */
++  int int_n_idx;
+   /* True iff TYPE_SPEC defines a class or enum.  */
+   BOOL_BITFIELD type_definition_p : 1;
+   /* True iff multiple types were (erroneously) specified for this
+      decl-specifier-seq.  */
+   BOOL_BITFIELD multiple_types_p : 1;
+@@ -4851,12 +4853,12 @@ typedef struct cp_decl_specifier_seq {
+   BOOL_BITFIELD any_specifiers_p : 1;
+   /* True iff at least one type-specifier was found.  */
+   BOOL_BITFIELD any_type_specifiers_p : 1;
+   /* True iff "int" was explicitly provided.  */
+   BOOL_BITFIELD explicit_int_p : 1;
+-  /* True iff "__int128" was explicitly provided.  */
+-  BOOL_BITFIELD explicit_int128_p : 1;
++  /* True iff "__intN" was explicitly provided.  */
++  BOOL_BITFIELD explicit_intN_p : 1;
+   /* True iff "char" was explicitly provided.  */
+   BOOL_BITFIELD explicit_char_p : 1;
+   /* True iff ds_thread is set for __thread, not thread_local.  */
+   BOOL_BITFIELD gnu_thread_keyword_p : 1;
+ } cp_decl_specifier_seq;
+Index: gcc/cp/decl.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/cp/decl.c,v
+retrieving revision 1.123
+diff -p -U 5 -r1.123 decl.c
+--- gcc/cp/decl.c	16 Jun 2014 10:56:52 -0000	1.123
++++ gcc/cp/decl.c	20 Jun 2014 07:30:33 -0000
+@@ -8705,11 +8705,11 @@ grokdeclarator (const cp_declarator *dec
+ 		int initialized,
+ 		tree* attrlist)
+ {
+   tree type = NULL_TREE;
+   int longlong = 0;
+-  int explicit_int128 = 0;
++  int explicit_intN = 0;
+   int virtualp, explicitp, friendp, inlinep, staticp;
+   int explicit_int = 0;
+   int explicit_char = 0;
+   int defaulted_int = 0;
+ 
+@@ -8776,11 +8776,11 @@ grokdeclarator (const cp_declarator *dec
+   signed_p = decl_spec_seq_has_spec_p (declspecs, ds_signed);
+   unsigned_p = decl_spec_seq_has_spec_p (declspecs, ds_unsigned);
+   short_p = decl_spec_seq_has_spec_p (declspecs, ds_short);
+   long_p = decl_spec_seq_has_spec_p (declspecs, ds_long);
+   longlong = decl_spec_seq_has_spec_p (declspecs, ds_long_long);
+-  explicit_int128 = declspecs->explicit_int128_p;
++  explicit_intN = declspecs->explicit_intN_p;
+   thread_p = decl_spec_seq_has_spec_p (declspecs, ds_thread);
+ 
+   if (decl_context == FUNCDEF)
+     funcdef_flag = true, decl_context = NORMAL;
+   else if (decl_context == MEMFUNCDEF)
+@@ -9117,20 +9117,24 @@ grokdeclarator (const cp_declarator *dec
+       type = integer_type_node;
+     }
+ 
+   ctype = NULL_TREE;
+ 
+-  if (explicit_int128)
++  if (explicit_intN)
+     {
+-      if (int128_integer_type_node == NULL_TREE)
+-	{
+-	  error ("%<__int128%> is not supported by this target");
+-	  explicit_int128 = false;
+-	}
++      if (! int_n_enabled_p[declspecs->int_n_idx])
++       {
++         error ("%<__int%d%> is not supported by this target",
++		int_n_data[declspecs->int_n_idx].bitsize);
++         explicit_intN = false;
++       }
++#if 0 /* temporary - DJ */
+       else if (pedantic && ! in_system_header_at (input_location))
+-	pedwarn (input_location, OPT_Wpedantic,
+-		 "ISO C++ does not support %<__int128%> for %qs", name);
++       pedwarn (input_location, OPT_Wpedantic,
++                "ISO C++ does not support %<__int%d%> for %qs",
++		int_n_data[declspecs->int_n_idx].bitsize,  name);
++#endif
+     }
+ 
+   /* Now process the modifiers that were specified
+      and check for invalid combinations.  */
+ 
+@@ -9158,11 +9162,11 @@ grokdeclarator (const cp_declarator *dec
+ 	error ("%<long%> invalid for %qs", name);
+       else if (short_p && TREE_CODE (type) == REAL_TYPE)
+ 	error ("%<short%> invalid for %qs", name);
+       else if ((long_p || short_p) && TREE_CODE (type) != INTEGER_TYPE)
+ 	error ("%<long%> or %<short%> invalid for %qs", name);
+-      else if ((long_p || short_p || explicit_char || explicit_int) && explicit_int128)
++      else if ((long_p || short_p || explicit_char || explicit_int) && explicit_intN)
+ 	error ("%<long%>, %<int%>, %<short%>, or %<char%> invalid for %qs", name);
+       else if ((long_p || short_p) && explicit_char)
+ 	error ("%<long%> or %<short%> specified with char for %qs", name);
+       else if (long_p && short_p)
+ 	error ("%<long%> and %<short%> specified together for %qs", name);
+@@ -9174,11 +9178,11 @@ grokdeclarator (const cp_declarator *dec
+ 	    error ("%<short%> or %<long%> invalid for %qs", name);
+ 	}
+       else
+ 	{
+ 	  ok = 1;
+-	  if (!explicit_int && !defaulted_int && !explicit_char && !explicit_int128 && pedantic)
++	  if (!explicit_int && !defaulted_int && !explicit_char && !explicit_intN && pedantic)
+ 	    {
+ 	      pedwarn (input_location, OPT_Wpedantic, 
+ 		       "long, short, signed or unsigned used invalidly for %qs",
+ 		       name);
+ 	      if (flag_pedantic_errors)
+@@ -9216,12 +9220,12 @@ grokdeclarator (const cp_declarator *dec
+ 	  && !(typedef_decl
+ 	       && C_TYPEDEF_EXPLICITLY_SIGNED (typedef_decl))
+ 	  && TREE_CODE (type) == INTEGER_TYPE
+ 	  && !same_type_p (TYPE_MAIN_VARIANT (type), wchar_type_node)))
+     {
+-      if (explicit_int128)
+-	type = int128_unsigned_type_node;
++      if (explicit_intN)
++	type = int_n_trees[declspecs->int_n_idx].unsigned_type;
+       else if (longlong)
+ 	type = long_long_unsigned_type_node;
+       else if (long_p)
+ 	type = long_unsigned_type_node;
+       else if (short_p)
+@@ -9233,12 +9237,12 @@ grokdeclarator (const cp_declarator *dec
+       else
+ 	type = unsigned_type_node;
+     }
+   else if (signed_p && type == char_type_node)
+     type = signed_char_type_node;
+-  else if (explicit_int128)
+-    type = int128_integer_type_node;
++  else if (explicit_intN)
++    type = int_n_trees[declspecs->int_n_idx].signed_type;
+   else if (longlong)
+     type = long_long_integer_type_node;
+   else if (long_p)
+     type = long_integer_type_node;
+   else if (short_p)
+@@ -9250,11 +9254,11 @@ grokdeclarator (const cp_declarator *dec
+ 	error ("complex invalid for %qs", name);
+       /* If we just have "complex", it is equivalent to
+ 	 "complex double", but if any modifiers at all are specified it is
+ 	 the complex form of TYPE.  E.g, "complex short" is
+ 	 "complex short int".  */
+-      else if (defaulted_int && ! longlong && ! explicit_int128
++      else if (defaulted_int && ! longlong && ! explicit_intN
+ 	       && ! (long_p || short_p || signed_p || unsigned_p))
+ 	type = complex_double_type_node;
+       else if (type == integer_type_node)
+ 	type = complex_integer_type_node;
+       else if (type == float_type_node)
+Index: gcc/cp/lex.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/cp/lex.c,v
+retrieving revision 1.18
+diff -p -U 5 -r1.18 lex.c
+--- gcc/cp/lex.c	20 Feb 2014 16:40:45 -0000	1.18
++++ gcc/cp/lex.c	20 Jun 2014 07:30:33 -0000
+@@ -191,10 +191,19 @@ init_reswords (void)
+       C_SET_RID_CODE (id, c_common_reswords[i].rid);
+       ridpointers [(int) c_common_reswords[i].rid] = id;
+       if (! (c_common_reswords[i].disable & mask))
+ 	C_IS_RESERVED_WORD (id) = 1;
+     }
++
++  for (i = 0; i < NUM_INT_N_ENTS; i++)
++    {
++      char name[50];
++      sprintf (name, "__int%d", int_n_data[i].bitsize);
++      id = get_identifier (name);
++      C_SET_RID_CODE (id, RID_FIRST_INT_N + i);
++      C_IS_RESERVED_WORD (id) = 1;
++    }
+ }
+ 
+ static void
+ init_cp_pragma (void)
+ {
+Index: gcc/cp/mangle.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/cp/mangle.c,v
+retrieving revision 1.29
+diff -p -U 5 -r1.29 mangle.c
+--- gcc/cp/mangle.c	7 Apr 2014 10:31:58 -0000	1.29
++++ gcc/cp/mangle.c	20 Jun 2014 07:30:34 -0000
+@@ -150,12 +150,12 @@ integer_type_codes[itk_none] =
+   'j',  /* itk_unsigned_int */
+   'l',  /* itk_long */
+   'm',  /* itk_unsigned_long */
+   'x',  /* itk_long_long */
+   'y',  /* itk_unsigned_long_long */
+-  'n',  /* itk_int128 */
+-  'o',  /* itk_unsigned_int128  */
++  /* __intN types are handled separately */
++  '\0', '\0', '\0', '\0', '\0', '\0', '\0', '\0'
+ };
+ 
+ static int decl_is_template_id (const tree, tree* const);
+ 
+ /* Functions for handling substitutions.  */
+@@ -2238,10 +2238,11 @@ write_builtin_type (tree type)
+ 	  /* Assume TYPE is one of the shared integer type nodes.  Find
+ 	     it in the array of these nodes.  */
+ 	iagain:
+ 	  for (itk = 0; itk < itk_none; ++itk)
+ 	    if (integer_types[itk] != NULL_TREE
++		&& integer_type_codes[itk] != '\0'
+ 		&& type == integer_types[itk])
+ 	      {
+ 		/* Print the corresponding single-letter code.  */
+ 		write_char (integer_type_codes[itk]);
+ 		break;
+Index: gcc/cp/parser.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/cp/parser.c,v
+retrieving revision 1.118
+diff -p -U 5 -r1.118 parser.c
+--- gcc/cp/parser.c	27 May 2014 08:41:34 -0000	1.118
++++ gcc/cp/parser.c	20 Jun 2014 07:30:36 -0000
+@@ -937,11 +937,10 @@ cp_lexer_next_token_is_decl_specifier_ke
+     case RID_WCHAR:
+     case RID_BOOL:
+     case RID_SHORT:
+     case RID_INT:
+     case RID_LONG:
+-    case RID_INT128:
+     case RID_SIGNED:
+     case RID_UNSIGNED:
+     case RID_FLOAT:
+     case RID_DOUBLE:
+     case RID_VOID:
+@@ -952,10 +951,14 @@ cp_lexer_next_token_is_decl_specifier_ke
+     case RID_DECLTYPE:
+     case RID_UNDERLYING_TYPE:
+       return true;
+ 
+     default:
++      if (token->keyword >= RID_FIRST_INT_N
++	  && token->keyword < RID_FIRST_INT_N + NUM_INT_N_ENTS
++	  && int_n_enabled_p[token->keyword - RID_FIRST_INT_N])
++	return true;
+       return false;
+     }
+ }
+ 
+ /* Returns TRUE iff the token T begins a decltype type.  */
+@@ -14471,10 +14474,11 @@ cp_parser_simple_type_specifier (cp_pars
+ 				 cp_decl_specifier_seq *decl_specs,
+ 				 cp_parser_flags flags)
+ {
+   tree type = NULL_TREE;
+   cp_token *token;
++  int idx;
+ 
+   /* Peek at the next token.  */
+   token = cp_lexer_peek_token (parser->lexer);
+ 
+   /* If we're looking at a keyword, things are easy.  */
+@@ -14504,16 +14508,23 @@ cp_parser_simple_type_specifier (cp_pars
+     case RID_INT:
+       if (decl_specs)
+ 	decl_specs->explicit_int_p = true;
+       type = integer_type_node;
+       break;
+-    case RID_INT128:
+-      if (!int128_integer_type_node)
++    case RID_INT_N_0:
++    case RID_INT_N_1:
++    case RID_INT_N_2:
++    case RID_INT_N_3:
++      idx = token->keyword - RID_INT_N_0;
++      if (! int_n_enabled_p [idx])
+ 	break;
+       if (decl_specs)
+-        decl_specs->explicit_int128_p = true;
+-      type = int128_integer_type_node;
++	{
++	  decl_specs->explicit_intN_p = true;
++	  decl_specs->int_n_idx = idx;
++	}
++      type = int_n_trees [idx].signed_type;
+       break;
+     case RID_LONG:
+       if (decl_specs)
+ 	set_and_check_decl_spec_loc (decl_specs, ds_long, token);
+       type = long_integer_type_node;
+Index: gcc/cp/rtti.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/cp/rtti.c,v
+retrieving revision 1.22
+diff -p -U 5 -r1.22 rtti.c
+--- gcc/cp/rtti.c	20 Feb 2014 16:40:45 -0000	1.22
++++ gcc/cp/rtti.c	20 Jun 2014 07:30:37 -0000
+@@ -1474,29 +1474,42 @@ create_tinfo_types (void)
+ void
+ emit_support_tinfos (void)
+ {
+   /* Dummy static variable so we can put nullptr in the array; it will be
+      set before we actually start to walk the array.  */
+-  static tree *const fundamentals[] =
++  static tree * fundamentals[] =
+   {
+     &void_type_node,
+     &boolean_type_node,
+     &wchar_type_node, &char16_type_node, &char32_type_node,
+     &char_type_node, &signed_char_type_node, &unsigned_char_type_node,
+     &short_integer_type_node, &short_unsigned_type_node,
+     &integer_type_node, &unsigned_type_node,
+     &long_integer_type_node, &long_unsigned_type_node,
+     &long_long_integer_type_node, &long_long_unsigned_type_node,
+-    &int128_integer_type_node, &int128_unsigned_type_node,
+     &float_type_node, &double_type_node, &long_double_type_node,
+     &dfloat32_type_node, &dfloat64_type_node, &dfloat128_type_node,
++#define FUND_INT_N_IDX 22
++    // These eight are for intN_t nodes
++    &nullptr_type_node, &nullptr_type_node, &nullptr_type_node, &nullptr_type_node,
++    &nullptr_type_node, &nullptr_type_node, &nullptr_type_node, &nullptr_type_node,
+     &nullptr_type_node,
+     0
+   };
+-  int ix;
++  int ix, i;
+   tree bltn_type, dtor;
+ 
++  ix = FUND_INT_N_IDX;
++  for (i = 0; i < NUM_INT_N_ENTS; i ++)
++    if (int_n_enabled_p[i])
++      {
++	fundamentals [ix++] = &int_n_trees[i].signed_type;
++	fundamentals [ix++] = &int_n_trees[i].unsigned_type;
++      }
++  fundamentals [ix++] = &nullptr_type_node;
++  fundamentals [ix++] = 0;
++
+   push_abi_namespace ();
+   bltn_type = xref_tag (class_type,
+ 			get_identifier ("__fundamental_type_info"),
+ 			/*tag_scope=*/ts_current, false);
+   pop_abi_namespace ();
+Index: gcc/cp/typeck.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/cp/typeck.c,v
+retrieving revision 1.92
+diff -p -U 5 -r1.92 typeck.c
+--- gcc/cp/typeck.c	7 Apr 2014 10:31:58 -0000	1.92
++++ gcc/cp/typeck.c	20 Jun 2014 07:30:37 -0000
+@@ -268,10 +268,11 @@ static tree
+ cp_common_type (tree t1, tree t2)
+ {
+   enum tree_code code1 = TREE_CODE (t1);
+   enum tree_code code2 = TREE_CODE (t2);
+   tree attributes;
++  int i;
+ 
+ 
+   /* In what follows, we slightly generalize the rules given in [expr] so
+      as to deal with `long long' and `complex'.  First, merge the
+      attributes.  */
+@@ -362,20 +363,23 @@ cp_common_type (tree t1, tree t2)
+ 	  tree t = ((TYPE_UNSIGNED (t1) || TYPE_UNSIGNED (t2))
+ 		    ? long_long_unsigned_type_node
+ 		    : long_long_integer_type_node);
+ 	  return build_type_attribute_variant (t, attributes);
+ 	}
+-      if (int128_integer_type_node != NULL_TREE
+-	  && (same_type_p (TYPE_MAIN_VARIANT (t1),
+-			   int128_integer_type_node)
+-	      || same_type_p (TYPE_MAIN_VARIANT (t2),
+-			      int128_integer_type_node)))
++      for (i = 0; i < NUM_INT_N_ENTS; i ++)
+ 	{
+-	  tree t = ((TYPE_UNSIGNED (t1) || TYPE_UNSIGNED (t2))
+-		    ? int128_unsigned_type_node
+-		    : int128_integer_type_node);
+-	  return build_type_attribute_variant (t, attributes);
++	  if (int_n_enabled_p [i]
++	      && (same_type_p (TYPE_MAIN_VARIANT (t1),
++			       int_n_trees[i].signed_type)
++		  || same_type_p (TYPE_MAIN_VARIANT (t2),
++				  int_n_trees[i].signed_type)))
++	    {
++	      tree t = ((TYPE_UNSIGNED (t1) || TYPE_UNSIGNED (t2))
++			? int_n_trees[i].unsigned_type
++			: int_n_trees[i].signed_type);
++	      return build_type_attribute_variant (t, attributes);
++	    }
+ 	}
+ 
+       /* Go through the same procedure, but for longs.  */
+       if (same_type_p (TYPE_MAIN_VARIANT (t1), long_unsigned_type_node)
+ 	  || same_type_p (TYPE_MAIN_VARIANT (t2), long_unsigned_type_node))
+Index: gcc/lto/lto-lang.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/lto/lto-lang.c,v
+retrieving revision 1.8
+diff -p -U 5 -r1.8 lto-lang.c
+--- gcc/lto/lto-lang.c	24 Mar 2014 11:28:33 -0000	1.8
++++ gcc/lto/lto-lang.c	20 Jun 2014 07:30:37 -0000
+@@ -1141,21 +1141,42 @@ lto_build_c_type_nodes (void)
+       intmax_type_node = long_long_integer_type_node;
+       uintmax_type_node = long_long_unsigned_type_node;
+       signed_size_type_node = long_long_integer_type_node;
+     }
+   else
+-    gcc_unreachable ();
++    {
++      int i;
++
++      signed_size_type_node = NULL_TREE;
++      for (i = 0; i < NUM_INT_N_ENTS; i++)
++	if (int_n_enabled_p[i])
++	  {
++	    char name[50];
++	    sprintf (name, "__int%d unsigned", int_n_data[i].bitsize);
++
++	    if (strcmp (name, SIZE_TYPE) == 0)
++	      {
++		intmax_type_node = int_n_trees[i].signed_type;
++		uintmax_type_node = int_n_trees[i].unsigned_type;
++		signed_size_type_node = int_n_trees[i].signed_type;
++	      }
++	  }
++      if (signed_size_type_node == NULL_TREE)
++	gcc_unreachable ();
++    }
+ 
+   wint_type_node = unsigned_type_node;
+   pid_type_node = integer_type_node;
+ }
+ 
+ /* Perform LTO-specific initialization.  */
+ 
+ static bool
+ lto_init (void)
+ {
++  int i;
++
+   /* We need to generate LTO if running in WPA mode.  */
+   flag_generate_lto = (flag_wpa != NULL);
+ 
+   /* Create the basic integer types.  */
+   build_common_tree_nodes (flag_signed_char, flag_short_double);
+@@ -1223,12 +1244,17 @@ lto_init (void)
+   NAME_TYPE (void_type_node, "void");
+   NAME_TYPE (boolean_type_node, "bool");
+   NAME_TYPE (complex_float_type_node, "complex float");
+   NAME_TYPE (complex_double_type_node, "complex double");
+   NAME_TYPE (complex_long_double_type_node, "complex long double");
+-  if (int128_integer_type_node)
+-    NAME_TYPE (int128_integer_type_node, "__int128");
++  for (i = 0; i < NUM_INT_N_ENTS; i++)
++    if (int_n_enabled_p[i])
++      {
++	char name[50];
++	sprintf (name, "__int%d", int_n_data[i].bitsize);
++	NAME_TYPE (int_n_trees[i].signed_type, name);
++      }
+ #undef NAME_TYPE
+ 
+   /* Initialize LTO-specific data structures.  */
+   in_lto_p = true;
+ 
+Index: gcc/lto/lto-object.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/lto/lto-object.c,v
+retrieving revision 1.4
+diff -p -U 5 -r1.4 lto-object.c
+--- gcc/lto/lto-object.c	20 Feb 2014 16:40:48 -0000	1.4
++++ gcc/lto/lto-object.c	20 Jun 2014 07:30:37 -0000
+@@ -340,11 +340,11 @@ lto_obj_begin_section (const char *name)
+   gcc_assert (lo != NULL
+ 	      && lo->sobj_r == NULL
+ 	      && lo->sobj_w != NULL
+ 	      && lo->section == NULL);
+ 
+-  align = exact_log2 (POINTER_SIZE / BITS_PER_UNIT);
++  align = ceil_log2 (POINTER_SIZE_UNITS);
+   lo->section = simple_object_write_create_section (lo->sobj_w, name, align,
+ 						    &errmsg, &err);
+   if (lo->section == NULL)
+     {
+       if (err == 0)
+Index: libstdc++-v3/include/bits/cpp_type_traits.h
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/libstdc++-v3/include/bits/cpp_type_traits.h,v
+retrieving revision 1.18
+diff -p -U 5 -r1.18 cpp_type_traits.h
+--- libstdc++-v3/include/bits/cpp_type_traits.h	20 Feb 2014 13:46:51 -0000	1.18
++++ libstdc++-v3/include/bits/cpp_type_traits.h	20 Jun 2014 07:30:43 -0000
+@@ -139,11 +139,12 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
+       typedef __false_type __type;
+     };
+ 
+   // Thirteen specializations (yes there are eleven standard integer
+   // types; <em>long long</em> and <em>unsigned long long</em> are
+-  // supported as extensions)
++  // supported as extensions).  Up to four target-specific __int<N>
++  // types are supported as well.
+   template<>
+     struct __is_integer<bool>
+     {
+       enum { __value = 1 };
+       typedef __true_type __type;
+@@ -249,10 +250,39 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
+     {
+       enum { __value = 1 };
+       typedef __true_type __type;
+     };
+ 
++#define __INT_N(TYPE) 			\
++  template<>				\
++    struct __is_integer<TYPE>		\
++    {					\
++      enum { __value = 1 };		\
++      typedef __true_type __type;	\
++    };					\
++  template<>				\
++    struct __is_integer<unsigned TYPE>	\
++    {					\
++      enum { __value = 1 };		\
++      typedef __true_type __type;	\
++    };
++
++#ifdef __GLIBCXX_USE_INT_N_0
++__INT_N(__GLIBCXX_TYPE_INT_N_0)
++#endif
++#ifdef __GLIBCXX_USE_INT_N_1
++__INT_N(__GLIBCXX_TYPE_INT_N_1)
++#endif
++#ifdef __GLIBCXX_USE_INT_N_2
++__INT_N(__GLIBCXX_TYPE_INT_N_2)
++#endif
++#ifdef __GLIBCXX_USE_INT_N_3
++__INT_N(__GLIBCXX_TYPE_INT_N_3)
++#endif
++
++#undef __INT_N
++
+   //
+   // Floating point types
+   //
+   template<typename _Tp>
+     struct __is_floating
+Index: libstdc++-v3/include/c_global/cstdlib
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/libstdc++-v3/include/c_global/cstdlib,v
+retrieving revision 1.9
+diff -p -U 5 -r1.9 cstdlib
+--- libstdc++-v3/include/c_global/cstdlib	20 Feb 2014 13:46:52 -0000	1.9
++++ libstdc++-v3/include/c_global/cstdlib	20 Jun 2014 07:30:43 -0000
+@@ -172,15 +172,28 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
+ #ifdef _GLIBCXX_USE_LONG_LONG
+   inline long long
+   abs(long long __x) { return __builtin_llabs (__x); }
+ #endif
+ 
+-#if !defined(__STRICT_ANSI__) && defined(_GLIBCXX_USE_INT128)
+-  inline __int128
+-  abs(__int128 __x) { return __x >= 0 ? __x : -__x; }
++#if defined(__GLIBCXX_USE_INT_N_0)
++  inline __GLIBCXX_TYPE_INT_N_0
++  abs(__GLIBCXX_TYPE_INT_N_0 __x) { return __x >= 0 ? __x : -__x; }
++#endif
++#if defined(__GLIBCXX_USE_INT_N_1)
++  inline __GLIBCXX_TYPE_INT_N_1
++  abs(__GLIBCXX_TYPE_INT_N_1 __x) { return __x >= 0 ? __x : -__x; }
++#endif
++#if defined(__GLIBCXX_USE_INT_N_2)
++  inline __GLIBCXX_TYPE_INT_N_2
++  abs(__GLIBCXX_TYPE_INT_N_2 __x) { return __x >= 0 ? __x : -__x; }
++#endif
++#if defined(__GLIBCXX_USE_INT_N_3)
++  inline __GLIBCXX_TYPE_INT_N_3
++  abs(__GLIBCXX_TYPE_INT_N_3 __x) { return __x >= 0 ? __x : -__x; }
+ #endif
+ 
++
+ _GLIBCXX_END_NAMESPACE_VERSION
+ } // namespace
+ 
+ #if _GLIBCXX_USE_C99
+ 
+Index: libstdc++-v3/include/c_std/cstdlib
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/libstdc++-v3/include/c_std/cstdlib,v
+retrieving revision 1.6
+diff -p -U 5 -r1.6 cstdlib
+--- libstdc++-v3/include/c_std/cstdlib	20 Feb 2014 13:46:52 -0000	1.6
++++ libstdc++-v3/include/c_std/cstdlib	20 Jun 2014 07:30:43 -0000
+@@ -167,13 +167,25 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
+ #ifdef _GLIBCXX_USE_LONG_LONG
+   inline long long
+   abs(long long __x) { return __builtin_llabs (__x); }
+ #endif
+ 
+-#if !defined(__STRICT_ANSI__) && defined(_GLIBCXX_USE_INT128)
+-  inline __int128
+-  abs(__int128 __x) { return __x >= 0 ? __x : -__x; }
++#if defined(__GLIBCXX_USE_INT_N_0)
++  inline __GLIBCXX_TYPE_INT_N_0
++  abs(__GLIBCXX_TYPE_INT_N_0 __x) { return __x >= 0 ? __x : -__x; }
++#endif
++#if defined(__GLIBCXX_USE_INT_N_1)
++  inline __GLIBCXX_TYPE_INT_N_1
++  abs(__GLIBCXX_TYPE_INT_N_1 __x) { return __x >= 0 ? __x : -__x; }
++#endif
++#if defined(__GLIBCXX_USE_INT_N_2)
++  inline __GLIBCXX_TYPE_INT_N_2
++  abs(__GLIBCXX_TYPE_INT_N_2 __x) { return __x >= 0 ? __x : -__x; }
++#endif
++#if defined(__GLIBCXX_USE_INT_N_3)
++  inline __GLIBCXX_TYPE_INT_N_3
++  abs(__GLIBCXX_TYPE_INT_N_3 __x) { return __x >= 0 ? __x : -__x; }
+ #endif
+ 
+   inline ldiv_t
+   div(long __i, long __j) { return ldiv(__i, __j); }
+ 
+Index: libstdc++-v3/include/std/limits
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/libstdc++-v3/include/std/limits,v
+retrieving revision 1.10
+diff -p -U 5 -r1.10 limits
+--- libstdc++-v3/include/std/limits	20 Feb 2014 13:46:55 -0000	1.10
++++ libstdc++-v3/include/std/limits	20 Jun 2014 07:30:43 -0000
+@@ -1397,157 +1397,189 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
+       static _GLIBCXX_USE_CONSTEXPR bool tinyness_before = false;
+       static _GLIBCXX_USE_CONSTEXPR float_round_style round_style 
+        = round_toward_zero;
+     };
+ 
+-#if !defined(__STRICT_ANSI__) && defined(_GLIBCXX_USE_INT128)
+-  /// numeric_limits<__int128> specialization.
+-  template<>
+-    struct numeric_limits<__int128>
+-    {
+-      static _GLIBCXX_USE_CONSTEXPR bool is_specialized = true;
+-
+-      static _GLIBCXX_CONSTEXPR __int128
+-      min() _GLIBCXX_USE_NOEXCEPT { return __glibcxx_min (__int128); }
+-
+-      static _GLIBCXX_CONSTEXPR __int128
+-      max() _GLIBCXX_USE_NOEXCEPT { return __glibcxx_max (__int128); }
+-
+-#if __cplusplus >= 201103L
+-      static constexpr __int128
+-      lowest() noexcept { return min(); }
+-#endif
++#if !defined(__STRICT_ANSI__)
+ 
+-      static _GLIBCXX_USE_CONSTEXPR int digits
+-       = __glibcxx_digits (__int128);
+-      static _GLIBCXX_USE_CONSTEXPR int digits10
+-       = __glibcxx_digits10 (__int128);
+-#if __cplusplus >= 201103L
+-      static constexpr int max_digits10 = 0;
+-#endif
+-      static _GLIBCXX_USE_CONSTEXPR bool is_signed = true;
+-      static _GLIBCXX_USE_CONSTEXPR bool is_integer = true;
+-      static _GLIBCXX_USE_CONSTEXPR bool is_exact = true;
+-      static _GLIBCXX_USE_CONSTEXPR int radix = 2;
+-
+-      static _GLIBCXX_CONSTEXPR __int128
+-      epsilon() _GLIBCXX_USE_NOEXCEPT { return 0; }
+-
+-      static _GLIBCXX_CONSTEXPR __int128
+-      round_error() _GLIBCXX_USE_NOEXCEPT { return 0; }
+-
+-      static _GLIBCXX_USE_CONSTEXPR int min_exponent = 0;
+-      static _GLIBCXX_USE_CONSTEXPR int min_exponent10 = 0;
+-      static _GLIBCXX_USE_CONSTEXPR int max_exponent = 0;
+-      static _GLIBCXX_USE_CONSTEXPR int max_exponent10 = 0;
+-
+-      static _GLIBCXX_USE_CONSTEXPR bool has_infinity = false;
+-      static _GLIBCXX_USE_CONSTEXPR bool has_quiet_NaN = false;
+-      static _GLIBCXX_USE_CONSTEXPR bool has_signaling_NaN = false;
+-      static _GLIBCXX_USE_CONSTEXPR float_denorm_style has_denorm
+-       = denorm_absent;
+-      static _GLIBCXX_USE_CONSTEXPR bool has_denorm_loss = false;
+-
+-      static _GLIBCXX_CONSTEXPR __int128
+-      infinity() _GLIBCXX_USE_NOEXCEPT
+-      { return static_cast<__int128>(0); }
+-
+-      static _GLIBCXX_CONSTEXPR __int128
+-      quiet_NaN() _GLIBCXX_USE_NOEXCEPT
+-      { return static_cast<__int128>(0); }
+-      
+-      static _GLIBCXX_CONSTEXPR __int128
+-      signaling_NaN() _GLIBCXX_USE_NOEXCEPT
+-      { return static_cast<__int128>(0); }
+-      
+-      static _GLIBCXX_CONSTEXPR __int128
+-      denorm_min() _GLIBCXX_USE_NOEXCEPT
+-      { return static_cast<__int128>(0); }
+-
+-      static _GLIBCXX_USE_CONSTEXPR bool is_iec559 = false;
+-      static _GLIBCXX_USE_CONSTEXPR bool is_bounded = true;
+-      static _GLIBCXX_USE_CONSTEXPR bool is_modulo = false;
+-
+-      static _GLIBCXX_USE_CONSTEXPR bool traps
+-       = __glibcxx_integral_traps;
+-      static _GLIBCXX_USE_CONSTEXPR bool tinyness_before = false;
+-      static _GLIBCXX_USE_CONSTEXPR float_round_style round_style
+-       = round_toward_zero;
++#define __INT_N(TYPE, MIN, MAX, UMAX, BITSIZE, EXT, UEXT)			\
++  template<> 									\
++    struct numeric_limits<TYPE> 						\
++    { 										\
++      static _GLIBCXX_USE_CONSTEXPR bool is_specialized = true; 		\
++ 										\
++      static _GLIBCXX_CONSTEXPR TYPE 						\
++      min() _GLIBCXX_USE_NOEXCEPT { return MIN; } 				\
++ 										\
++      static _GLIBCXX_CONSTEXPR TYPE 						\
++      max() _GLIBCXX_USE_NOEXCEPT { return MAX; } 				\
++ 										\
++      static _GLIBCXX_USE_CONSTEXPR int digits 					\
++       = BITSIZE - 1; 								\
++      static _GLIBCXX_USE_CONSTEXPR int digits10 				\
++       = (BITSIZE - 1) * 643L / 2136; 						\
++      										\
++      static _GLIBCXX_USE_CONSTEXPR bool is_signed = true; 			\
++      static _GLIBCXX_USE_CONSTEXPR bool is_integer = true; 			\
++      static _GLIBCXX_USE_CONSTEXPR bool is_exact = true; 			\
++      static _GLIBCXX_USE_CONSTEXPR int radix = 2; 				\
++ 										\
++      static _GLIBCXX_CONSTEXPR TYPE 						\
++      epsilon() _GLIBCXX_USE_NOEXCEPT { return 0; } 				\
++ 										\
++      static _GLIBCXX_CONSTEXPR TYPE 						\
++      round_error() _GLIBCXX_USE_NOEXCEPT { return 0; } 			\
++ 										\
++      EXT									\
++ 										\
++      static _GLIBCXX_USE_CONSTEXPR int min_exponent = 0; 			\
++      static _GLIBCXX_USE_CONSTEXPR int min_exponent10 = 0; 			\
++      static _GLIBCXX_USE_CONSTEXPR int max_exponent = 0; 			\
++      static _GLIBCXX_USE_CONSTEXPR int max_exponent10 = 0; 			\
++ 										\
++      static _GLIBCXX_USE_CONSTEXPR bool has_infinity = false; 			\
++      static _GLIBCXX_USE_CONSTEXPR bool has_quiet_NaN = false; 		\
++      static _GLIBCXX_USE_CONSTEXPR bool has_signaling_NaN = false; 		\
++      static _GLIBCXX_USE_CONSTEXPR float_denorm_style has_denorm 		\
++       = denorm_absent; 							\
++      static _GLIBCXX_USE_CONSTEXPR bool has_denorm_loss = false; 		\
++ 										\
++      static _GLIBCXX_CONSTEXPR TYPE 						\
++      infinity() _GLIBCXX_USE_NOEXCEPT 						\
++      { return static_cast<TYPE>(0); } 						\
++ 										\
++      static _GLIBCXX_CONSTEXPR TYPE 						\
++      quiet_NaN() _GLIBCXX_USE_NOEXCEPT 					\
++      { return static_cast<TYPE>(0); } 						\
++       										\
++      static _GLIBCXX_CONSTEXPR TYPE 						\
++      signaling_NaN() _GLIBCXX_USE_NOEXCEPT 					\
++      { return static_cast<TYPE>(0); } 						\
++       										\
++      static _GLIBCXX_CONSTEXPR TYPE 						\
++      denorm_min() _GLIBCXX_USE_NOEXCEPT 					\
++      { return static_cast<TYPE>(0); } 						\
++ 										\
++      static _GLIBCXX_USE_CONSTEXPR bool is_iec559 = false; 			\
++      static _GLIBCXX_USE_CONSTEXPR bool is_bounded = true; 			\
++      static _GLIBCXX_USE_CONSTEXPR bool is_modulo = false; 			\
++ 										\
++      static _GLIBCXX_USE_CONSTEXPR bool traps 					\
++       = __glibcxx_integral_traps; 						\
++      static _GLIBCXX_USE_CONSTEXPR bool tinyness_before = false; 		\
++      static _GLIBCXX_USE_CONSTEXPR float_round_style round_style 		\
++       = round_toward_zero; 							\
++    }; 										\
++ 										\
++  template<> 									\
++    struct numeric_limits<unsigned TYPE> 					\
++    { 										\
++      static _GLIBCXX_USE_CONSTEXPR bool is_specialized = true; 		\
++ 										\
++      static _GLIBCXX_CONSTEXPR unsigned TYPE 					\
++      min() _GLIBCXX_USE_NOEXCEPT { return 0; } 				\
++ 										\
++      static _GLIBCXX_CONSTEXPR unsigned TYPE 					\
++      max() _GLIBCXX_USE_NOEXCEPT { return UMAX; } 				\
++ 										\
++      UEXT									\
++ 										\
++      static _GLIBCXX_USE_CONSTEXPR int digits 					\
++       = BITSIZE; 								\
++      static _GLIBCXX_USE_CONSTEXPR int digits10 				\
++       = BITSIZE * 643L / 2136; 						\
++      static _GLIBCXX_USE_CONSTEXPR bool is_signed = false; 			\
++      static _GLIBCXX_USE_CONSTEXPR bool is_integer = true; 			\
++      static _GLIBCXX_USE_CONSTEXPR bool is_exact = true; 			\
++      static _GLIBCXX_USE_CONSTEXPR int radix = 2; 				\
++ 										\
++      static _GLIBCXX_CONSTEXPR unsigned TYPE 					\
++      epsilon() _GLIBCXX_USE_NOEXCEPT { return 0; } 				\
++ 										\
++      static _GLIBCXX_CONSTEXPR unsigned TYPE 					\
++      round_error() _GLIBCXX_USE_NOEXCEPT { return 0; } 			\
++ 										\
++      static _GLIBCXX_USE_CONSTEXPR int min_exponent = 0; 			\
++      static _GLIBCXX_USE_CONSTEXPR int min_exponent10 = 0; 			\
++      static _GLIBCXX_USE_CONSTEXPR int max_exponent = 0; 			\
++      static _GLIBCXX_USE_CONSTEXPR int max_exponent10 = 0; 			\
++ 										\
++      static _GLIBCXX_USE_CONSTEXPR bool has_infinity = false; 			\
++      static _GLIBCXX_USE_CONSTEXPR bool has_quiet_NaN = false; 		\
++      static _GLIBCXX_USE_CONSTEXPR bool has_signaling_NaN = false; 		\
++      static _GLIBCXX_USE_CONSTEXPR float_denorm_style has_denorm 		\
++       = denorm_absent; 							\
++      static _GLIBCXX_USE_CONSTEXPR bool has_denorm_loss = false; 		\
++ 										\
++      static _GLIBCXX_CONSTEXPR unsigned TYPE 					\
++      infinity() _GLIBCXX_USE_NOEXCEPT 						\
++      { return static_cast<unsigned TYPE>(0); } 				\
++ 										\
++      static _GLIBCXX_CONSTEXPR unsigned TYPE 					\
++      quiet_NaN() _GLIBCXX_USE_NOEXCEPT 					\
++      { return static_cast<unsigned TYPE>(0); } 				\
++ 										\
++      static _GLIBCXX_CONSTEXPR unsigned TYPE 					\
++      signaling_NaN() _GLIBCXX_USE_NOEXCEPT 					\
++      { return static_cast<unsigned TYPE>(0); } 				\
++ 										\
++      static _GLIBCXX_CONSTEXPR unsigned TYPE 					\
++      denorm_min() _GLIBCXX_USE_NOEXCEPT 					\
++      { return static_cast<unsigned TYPE>(0); } 				\
++ 										\
++      static _GLIBCXX_USE_CONSTEXPR bool is_iec559 = false; 			\
++      static _GLIBCXX_USE_CONSTEXPR bool is_bounded = true; 			\
++      static _GLIBCXX_USE_CONSTEXPR bool is_modulo = true; 			\
++ 										\
++      static _GLIBCXX_USE_CONSTEXPR bool traps = __glibcxx_integral_traps; 	\
++      static _GLIBCXX_USE_CONSTEXPR bool tinyness_before = false; 		\
++      static _GLIBCXX_USE_CONSTEXPR float_round_style round_style 		\
++       = round_toward_zero; 							\
+     };
+ 
+-  /// numeric_limits<unsigned __int128> specialization.
+-  template<>
+-    struct numeric_limits<unsigned __int128>
+-    {
+-      static _GLIBCXX_USE_CONSTEXPR bool is_specialized = true;
+-
+-      static _GLIBCXX_CONSTEXPR unsigned __int128
+-      min() _GLIBCXX_USE_NOEXCEPT { return 0; }
+-
+-      static _GLIBCXX_CONSTEXPR unsigned __int128
+-      max() _GLIBCXX_USE_NOEXCEPT { return __glibcxx_max (unsigned __int128); }
+-
+ #if __cplusplus >= 201103L
+-      static constexpr unsigned __int128
+-      lowest() noexcept { return min(); }
+-#endif
+ 
+-      static _GLIBCXX_USE_CONSTEXPR int digits
+-       = __glibcxx_digits (unsigned __int128);
+-      static _GLIBCXX_USE_CONSTEXPR int digits10
+-       = __glibcxx_digits10 (unsigned __int128);
+-#if __cplusplus >= 201103L
++#define __INT_N_201103(TYPE)							\
++      static constexpr TYPE 							\
++      lowest() noexcept { return min(); }					\
+       static constexpr int max_digits10 = 0;
+-#endif
+-      static _GLIBCXX_USE_CONSTEXPR bool is_signed = false;
+-      static _GLIBCXX_USE_CONSTEXPR bool is_integer = true;
+-      static _GLIBCXX_USE_CONSTEXPR bool is_exact = true;
+-      static _GLIBCXX_USE_CONSTEXPR int radix = 2;
+-
+-      static _GLIBCXX_CONSTEXPR unsigned __int128
+-      epsilon() _GLIBCXX_USE_NOEXCEPT { return 0; }
+-
+-      static _GLIBCXX_CONSTEXPR unsigned __int128
+-      round_error() _GLIBCXX_USE_NOEXCEPT { return 0; }
+-
+-      static _GLIBCXX_USE_CONSTEXPR int min_exponent = 0;
+-      static _GLIBCXX_USE_CONSTEXPR int min_exponent10 = 0;
+-      static _GLIBCXX_USE_CONSTEXPR int max_exponent = 0;
+-      static _GLIBCXX_USE_CONSTEXPR int max_exponent10 = 0;
+-
+-      static _GLIBCXX_USE_CONSTEXPR bool has_infinity = false;
+-      static _GLIBCXX_USE_CONSTEXPR bool has_quiet_NaN = false;
+-      static _GLIBCXX_USE_CONSTEXPR bool has_signaling_NaN = false;
+-      static _GLIBCXX_USE_CONSTEXPR float_denorm_style has_denorm
+-       = denorm_absent;
+-      static _GLIBCXX_USE_CONSTEXPR bool has_denorm_loss = false;
+ 
+-      static _GLIBCXX_CONSTEXPR unsigned __int128
+-      infinity() _GLIBCXX_USE_NOEXCEPT
+-      { return static_cast<unsigned __int128>(0); }
+-
+-      static _GLIBCXX_CONSTEXPR unsigned __int128
+-      quiet_NaN() _GLIBCXX_USE_NOEXCEPT
+-      { return static_cast<unsigned __int128>(0); }
+-
+-      static _GLIBCXX_CONSTEXPR unsigned __int128
+-      signaling_NaN() _GLIBCXX_USE_NOEXCEPT
+-      { return static_cast<unsigned __int128>(0); }
+-
+-      static _GLIBCXX_CONSTEXPR unsigned __int128
+-      denorm_min() _GLIBCXX_USE_NOEXCEPT
+-      { return static_cast<unsigned __int128>(0); }
++#define __INT_N_U201103(TYPE)							\
++      static constexpr unsigned TYPE 						\
++      lowest() noexcept { return min(); }					\
++      static constexpr int max_digits10 = 0;
+ 
+-      static _GLIBCXX_USE_CONSTEXPR bool is_iec559 = false;
+-      static _GLIBCXX_USE_CONSTEXPR bool is_bounded = true;
+-      static _GLIBCXX_USE_CONSTEXPR bool is_modulo = true;
++#else
++#define __INT_N_201103(TYPE)
++#define __INT_N_U201103(TYPE)
++#endif
++
++#ifdef __GLIBCXX_USE_INT_N_0
++  __INT_N(__GLIBCXX_TYPE_INT_N_0, __GLIBCXX_MIN_INT_N_0, __GLIBCXX_MAX_INT_N_0,
++	  __GLIBCXX_UMAX_INT_N_0, __GLIBCXX_BITSIZE_INT_N_0,
++	  __INT_N_201103 (__GLIBCXX_TYPE_INT_N_0), __INT_N_U201103 (__GLIBCXX_TYPE_INT_N_0))
++#endif
++#ifdef __GLIBCXX_USE_INT_N_1
++  __INT_N (__GLIBCXX_TYPE_INT_N_1, __GLIBCXX_MIN_INT_N_1, __GLIBCXX_MAX_INT_N_1,
++	   __GLIBCXX_UMAX_INT_N_1, __GLIBCXX_BITSIZE_INT_N_1,
++	  __INT_N_201103 (__GLIBCXX_TYPE_INT_N_1), __INT_N_U201103 (__GLIBCXX_TYPE_INT_N_1))
++#endif
++#ifdef __GLIBCXX_USE_INT_N_2
++  __INT_N (__GLIBCXX_TYPE_INT_N_2, __GLIBCXX_MIN_INT_N_2, __GLIBCXX_MAX_INT_N_2,
++	   __GLIBCXX_UMAX_INT_N_2, __GLIBCXX_BITSIZE_INT_N_2,
++	  __INT_N_201103 (__GLIBCXX_TYPE_INT_N_2), __INT_N_U201103 (__GLIBCXX_TYPE_INT_N_2))
++#endif
++#ifdef __GLIBCXX_USE_INT_N_3
++  __INT_N (__GLIBCXX_TYPE_INT_N_3, __GLIBCXX_MIN_INT_N_3, __GLIBCXX_MAX_INT_N_3,
++	   __GLIBCXX_UMAX_INT_N_3, __GLIBCXX_BITSIZE_INT_N_3,
++	  __INT_N_201103 (__GLIBCXX_TYPE_INT_N_3), __INT_N_U201103 (__GLIBCXX_TYPE_INT_N_3))
++#endif
++
++#undef __INT_N
++#undef __INT_N_201103
++#undef __INT_N_U201103
+ 
+-      static _GLIBCXX_USE_CONSTEXPR bool traps = __glibcxx_integral_traps;
+-      static _GLIBCXX_USE_CONSTEXPR bool tinyness_before = false;
+-      static _GLIBCXX_USE_CONSTEXPR float_round_style round_style
+-       = round_toward_zero;
+-    };
+ #endif
+ 
+   /// numeric_limits<float> specialization.
+   template<>
+     struct numeric_limits<float>
+Index: libstdc++-v3/include/std/type_traits
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/libstdc++-v3/include/std/type_traits,v
+retrieving revision 1.12
+diff -p -U 5 -r1.12 type_traits
+--- libstdc++-v3/include/std/type_traits	16 Jun 2014 10:56:53 -0000	1.12
++++ libstdc++-v3/include/std/type_traits	20 Jun 2014 07:30:43 -0000
+@@ -237,17 +237,46 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
+ 
+   template<>
+     struct __is_integral_helper<unsigned long long>
+     : public true_type { };
+ 
+-#if !defined(__STRICT_ANSI__) && defined(_GLIBCXX_USE_INT128)
++  // Conditionalizing on __STRICT_ANSI__ here will break any port that
++  // uses one of these types for size_t.
++#if defined(__GLIBCXX_USE_INT_N_0)
+   template<>
+-    struct __is_integral_helper<__int128>
++    struct __is_integral_helper<__GLIBCXX_TYPE_INT_N_0>
+     : public true_type { };
+ 
+   template<>
+-    struct __is_integral_helper<unsigned __int128>
++    struct __is_integral_helper<unsigned __GLIBCXX_TYPE_INT_N_0>
++    : public true_type { };
++#endif
++#if defined(__GLIBCXX_USE_INT_N_1)
++  template<>
++    struct __is_integral_helper<__GLIBCXX_TYPE_INT_N_1>
++    : public true_type { };
++
++  template<>
++    struct __is_integral_helper<unsigned __GLIBCXX_TYPE_INT_N_1>
++    : public true_type { };
++#endif
++#if defined(__GLIBCXX_USE_INT_N_2)
++  template<>
++    struct __is_integral_helper<__GLIBCXX_TYPE_INT_N_2>
++    : public true_type { };
++
++  template<>
++    struct __is_integral_helper<unsigned __GLIBCXX_TYPE_INT_N_2>
++    : public true_type { };
++#endif
++#if defined(__GLIBCXX_USE_INT_N_3)
++  template<>
++    struct __is_integral_helper<__GLIBCXX_TYPE_INT_N_3>
++    : public true_type { };
++
++  template<>
++    struct __is_integral_helper<unsigned __GLIBCXX_TYPE_INT_N_3>
+     : public true_type { };
+ #endif
+ 
+   /// is_integral
+   template<typename _Tp>
+@@ -1599,14 +1628,29 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
+   template<>
+     struct __make_unsigned<wchar_t> : __make_unsigned<__WCHAR_TYPE__>
+     { };
+ #endif
+ 
+-#if !defined(__STRICT_ANSI__) && defined(_GLIBCXX_USE_INT128)
++#if defined(__GLIBCXX_USE_INT_N_0)
++  template<>
++    struct __make_unsigned<__GLIBCXX_TYPE_INT_N_0>
++    { typedef unsigned __GLIBCXX_TYPE_INT_N_0 __type; };
++#endif
++#if defined(__GLIBCXX_USE_INT_N_1)
++  template<>
++    struct __make_unsigned<__GLIBCXX_TYPE_INT_N_1>
++    { typedef unsigned __GLIBCXX_TYPE_INT_N_1 __type; };
++#endif
++#if defined(__GLIBCXX_USE_INT_N_2)
+   template<>
+-    struct __make_unsigned<__int128>
+-    { typedef unsigned __int128 __type; };
++    struct __make_unsigned<__GLIBCXX_TYPE_INT_N_2>
++    { typedef unsigned __GLIBCXX_TYPE_INT_N_2 __type; };
++#endif
++#if defined(__GLIBCXX_USE_INT_N_3)
++  template<>
++    struct __make_unsigned<__GLIBCXX_TYPE_INT_N_3>
++    { typedef unsigned __GLIBCXX_TYPE_INT_N_3 __type; };
+ #endif
+ 
+   // Select between integral and enum: not possible to be both.
+   template<typename _Tp, 
+ 	   bool _IsInt = is_integral<_Tp>::value,
+@@ -1696,14 +1740,29 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
+   template<>
+     struct __make_signed<char32_t> : __make_signed<uint_least32_t>
+     { };
+ #endif
+ 
+-#if !defined(__STRICT_ANSI__) && defined(_GLIBCXX_USE_INT128)
++#if defined(__GLIBCXX_USE_INT_N_0)
++  template<>
++    struct __make_signed<unsigned __GLIBCXX_TYPE_INT_N_0>
++    { typedef __GLIBCXX_TYPE_INT_N_0 __type; };
++#endif
++#if defined(__GLIBCXX_USE_INT_N_1)
++  template<>
++    struct __make_signed<unsigned __GLIBCXX_TYPE_INT_N_1>
++    { typedef __GLIBCXX_TYPE_INT_N_1 __type; };
++#endif
++#if defined(__GLIBCXX_USE_INT_N_2)
++  template<>
++    struct __make_signed<unsigned __GLIBCXX_TYPE_INT_N_2>
++    { typedef __GLIBCXX_TYPE_INT_N_2 __type; };
++#endif
++#if defined(__GLIBCXX_USE_INT_N_3)
+   template<>
+-    struct __make_signed<unsigned __int128>
+-    { typedef __int128 __type; };
++    struct __make_signed<unsigned __GLIBCXX_TYPE_INT_N_3>
++    { typedef __GLIBCXX_TYPE_INT_N_3 __type; };
+ #endif
+ 
+   // Select between integral and enum: not possible to be both.
+   template<typename _Tp, 
+ 	   bool _IsInt = is_integral<_Tp>::value,
+Index: libstdc++-v3/src/c++11/limits.cc
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/libstdc++-v3/src/c++11/limits.cc,v
+retrieving revision 1.3
+diff -p -U 5 -r1.3 limits.cc
+--- libstdc++-v3/src/c++11/limits.cc	20 Feb 2014 13:46:56 -0000	1.3
++++ libstdc++-v3/src/c++11/limits.cc	20 Jun 2014 07:30:43 -0000
+@@ -386,58 +386,72 @@ _GLIBCXX_BEGIN_NAMESPACE_VERSION
+   const bool numeric_limits<unsigned long long>::is_modulo;
+   const bool numeric_limits<unsigned long long>::traps;
+   const bool numeric_limits<unsigned long long>::tinyness_before;
+   const float_round_style numeric_limits<unsigned long long>::round_style;
+ 
+-#if !defined(__STRICT_ANSI__) && defined(_GLIBCXX_USE_INT128)
+-  const bool numeric_limits<__int128>::is_specialized;
+-  const int  numeric_limits<__int128>::digits;
+-  const int  numeric_limits<__int128>::digits10;
+-  const int  numeric_limits<__int128>::max_digits10;
+-  const bool numeric_limits<__int128>::is_signed;
+-  const bool numeric_limits<__int128>::is_integer;
+-  const bool numeric_limits<__int128>::is_exact;
+-  const int  numeric_limits<__int128>::radix;
+-  const int  numeric_limits<__int128>::min_exponent;
+-  const int  numeric_limits<__int128>::min_exponent10;
+-  const int  numeric_limits<__int128>::max_exponent;
+-  const int  numeric_limits<__int128>::max_exponent10;
+-  const bool numeric_limits<__int128>::has_infinity;
+-  const bool numeric_limits<__int128>::has_quiet_NaN;
+-  const bool numeric_limits<__int128>::has_signaling_NaN;
+-  const float_denorm_style numeric_limits<__int128>::has_denorm;
+-  const bool numeric_limits<__int128>::has_denorm_loss;
+-  const bool numeric_limits<__int128>::is_iec559;
+-  const bool numeric_limits<__int128>::is_bounded;
+-  const bool numeric_limits<__int128>::is_modulo;
+-  const bool numeric_limits<__int128>::traps;
+-  const bool numeric_limits<__int128>::tinyness_before;
+-  const float_round_style numeric_limits<__int128>::round_style;
+-
+-  const bool numeric_limits<unsigned __int128>::is_specialized;
+-  const int  numeric_limits<unsigned __int128>::digits;
+-  const int  numeric_limits<unsigned __int128>::digits10;
+-  const int  numeric_limits<unsigned __int128>::max_digits10;
+-  const bool numeric_limits<unsigned __int128>::is_signed;
+-  const bool numeric_limits<unsigned __int128>::is_integer;
+-  const bool numeric_limits<unsigned __int128>::is_exact;
+-  const int  numeric_limits<unsigned __int128>::radix;
+-  const int  numeric_limits<unsigned __int128>::min_exponent;
+-  const int  numeric_limits<unsigned __int128>::min_exponent10;
+-  const int  numeric_limits<unsigned __int128>::max_exponent;
+-  const int  numeric_limits<unsigned __int128>::max_exponent10;
+-  const bool numeric_limits<unsigned __int128>::has_infinity;
+-  const bool numeric_limits<unsigned __int128>::has_quiet_NaN;
+-  const bool numeric_limits<unsigned __int128>::has_signaling_NaN;
+-  const float_denorm_style numeric_limits<unsigned __int128>::has_denorm;
+-  const bool numeric_limits<unsigned __int128>::has_denorm_loss;
+-  const bool numeric_limits<unsigned __int128>::is_iec559;
+-  const bool numeric_limits<unsigned __int128>::is_bounded;
+-  const bool numeric_limits<unsigned __int128>::is_modulo;
+-  const bool numeric_limits<unsigned __int128>::traps;
+-  const bool numeric_limits<unsigned __int128>::tinyness_before;
+-  const float_round_style numeric_limits<unsigned __int128>::round_style;
++#if !defined(__STRICT_ANSI__)
++#define INT_N(__INT_N_TYPE)							\
++  const bool numeric_limits<__INT_N_TYPE>::is_specialized;			\
++  const int  numeric_limits<__INT_N_TYPE>::digits;				\
++  const int  numeric_limits<__INT_N_TYPE>::digits10;				\
++  const int  numeric_limits<__INT_N_TYPE>::max_digits10;			\
++  const bool numeric_limits<__INT_N_TYPE>::is_signed;				\
++  const bool numeric_limits<__INT_N_TYPE>::is_integer;				\
++  const bool numeric_limits<__INT_N_TYPE>::is_exact;				\
++  const int  numeric_limits<__INT_N_TYPE>::radix;				\
++  const int  numeric_limits<__INT_N_TYPE>::min_exponent;			\
++  const int  numeric_limits<__INT_N_TYPE>::min_exponent10;			\
++  const int  numeric_limits<__INT_N_TYPE>::max_exponent;			\
++  const int  numeric_limits<__INT_N_TYPE>::max_exponent10;			\
++  const bool numeric_limits<__INT_N_TYPE>::has_infinity;			\
++  const bool numeric_limits<__INT_N_TYPE>::has_quiet_NaN;			\
++  const bool numeric_limits<__INT_N_TYPE>::has_signaling_NaN;			\
++  const float_denorm_style numeric_limits<__INT_N_TYPE>::has_denorm;		\
++  const bool numeric_limits<__INT_N_TYPE>::has_denorm_loss;			\
++  const bool numeric_limits<__INT_N_TYPE>::is_iec559;				\
++  const bool numeric_limits<__INT_N_TYPE>::is_bounded;				\
++  const bool numeric_limits<__INT_N_TYPE>::is_modulo;				\
++  const bool numeric_limits<__INT_N_TYPE>::traps;				\
++  const bool numeric_limits<__INT_N_TYPE>::tinyness_before;			\
++  const float_round_style numeric_limits<__INT_N_TYPE>::round_style;		\
++  									\
++  const bool numeric_limits<unsigned __INT_N_TYPE>::is_specialized;		\
++  const int  numeric_limits<unsigned __INT_N_TYPE>::digits;			\
++  const int  numeric_limits<unsigned __INT_N_TYPE>::digits10;			\
++  const int  numeric_limits<unsigned __INT_N_TYPE>::max_digits10;		\
++  const bool numeric_limits<unsigned __INT_N_TYPE>::is_signed;			\
++  const bool numeric_limits<unsigned __INT_N_TYPE>::is_integer;			\
++  const bool numeric_limits<unsigned __INT_N_TYPE>::is_exact;			\
++  const int  numeric_limits<unsigned __INT_N_TYPE>::radix;			\
++  const int  numeric_limits<unsigned __INT_N_TYPE>::min_exponent;		\
++  const int  numeric_limits<unsigned __INT_N_TYPE>::min_exponent10;		\
++  const int  numeric_limits<unsigned __INT_N_TYPE>::max_exponent;		\
++  const int  numeric_limits<unsigned __INT_N_TYPE>::max_exponent10;		\
++  const bool numeric_limits<unsigned __INT_N_TYPE>::has_infinity;		\
++  const bool numeric_limits<unsigned __INT_N_TYPE>::has_quiet_NaN;		\
++  const bool numeric_limits<unsigned __INT_N_TYPE>::has_signaling_NaN;		\
++  const float_denorm_style numeric_limits<unsigned __INT_N_TYPE>::has_denorm;	\
++  const bool numeric_limits<unsigned __INT_N_TYPE>::has_denorm_loss;		\
++  const bool numeric_limits<unsigned __INT_N_TYPE>::is_iec559;			\
++  const bool numeric_limits<unsigned __INT_N_TYPE>::is_bounded;			\
++  const bool numeric_limits<unsigned __INT_N_TYPE>::is_modulo;			\
++  const bool numeric_limits<unsigned __INT_N_TYPE>::traps;			\
++  const bool numeric_limits<unsigned __INT_N_TYPE>::tinyness_before;		\
++  const float_round_style numeric_limits<unsigned __INT_N_TYPE>::round_style;
++
++#ifdef __GLIBCXX_USE_INT_N_0
++  INT_N (__GLIBCXX_TYPE_INT_N_0)
++#endif
++#ifdef __GLIBCXX_USE_INT_N_1
++  INT_N (__GLIBCXX_TYPE_INT_N_1)
++#endif
++#ifdef __GLIBCXX_USE_INT_N_2
++  INT_N (__GLIBCXX_TYPE_INT_N_2)
++#endif
++#ifdef __GLIBCXX_USE_INT_N_3
++  INT_N (__GLIBCXX_TYPE_INT_N_3)
++#endif
+ #endif
+ 
+   // float
+   const bool numeric_limits<float>::is_specialized;
+   const int  numeric_limits<float>::digits;

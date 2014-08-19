@@ -1,5 +1,5 @@
 /* Line completion stuff for GDB, the GNU debugger.
-   Copyright (C) 2000-2001, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -107,7 +107,7 @@ readline_line_completion_function (const char *text, int matches)
    symbols but don't want to complete on anything else either.  */
 VEC (char_ptr) *
 noop_completer (struct cmd_list_element *ignore, 
-		char *text, char *prefix)
+		const char *text, const char *prefix)
 {
   return NULL;
 }
@@ -115,7 +115,7 @@ noop_completer (struct cmd_list_element *ignore,
 /* Complete on filenames.  */
 VEC (char_ptr) *
 filename_completer (struct cmd_list_element *ignore, 
-		    char *text, char *word)
+		    const char *text, const char *word)
 {
   int subsequent_name;
   VEC (char_ptr) *return_val = NULL;
@@ -184,22 +184,22 @@ filename_completer (struct cmd_list_element *ignore,
 
 VEC (char_ptr) *
 location_completer (struct cmd_list_element *ignore, 
-		    char *text, char *word)
+		    const char *text, const char *word)
 {
   int n_syms, n_files, ix;
   VEC (char_ptr) *fn_list = NULL;
   VEC (char_ptr) *list = NULL;
-  char *p;
+  const char *p;
   int quote_found = 0;
   int quoted = *text == '\'' || *text == '"';
   int quote_char = '\0';
-  char *colon = NULL;
+  const char *colon = NULL;
   char *file_to_match = NULL;
-  char *symbol_start = text;
-  char *orig_text = text;
+  const char *symbol_start = text;
+  const char *orig_text = text;
   size_t text_len;
 
-  /* Do we have an unquoted colon, as in "break foo.c::bar"?  */
+  /* Do we have an unquoted colon, as in "break foo.c:bar"?  */
   for (p = text; *p != '\0'; ++p)
     {
       if (*p == '\\' && p[1] == '\'')
@@ -285,8 +285,10 @@ location_completer (struct cmd_list_element *ignore,
     }
   else
     {
-      for (ix = 0; VEC_iterate (char_ptr, fn_list, ix, p); ++ix)
-	VEC_safe_push (char_ptr, list, p);
+      char *fn;
+
+      for (ix = 0; VEC_iterate (char_ptr, fn_list, ix, fn); ++ix)
+	VEC_safe_push (char_ptr, list, fn);
       VEC_free (char_ptr, fn_list);
     }
 
@@ -296,6 +298,8 @@ location_completer (struct cmd_list_element *ignore,
     }
   else if (n_files)
     {
+      char *fn;
+
       /* If we only have file names as possible completion, we should
 	 bring them in sync with what rl_complete expects.  The
 	 problem is that if the user types "break /foo/b TAB", and the
@@ -311,10 +315,10 @@ location_completer (struct cmd_list_element *ignore,
 	 completion, because rl_complete will prepend "/foo/" to each
 	 candidate completion.  The loop below removes that leading
 	 part.  */
-      for (ix = 0; VEC_iterate (char_ptr, list, ix, p); ++ix)
+      for (ix = 0; VEC_iterate (char_ptr, list, ix, fn); ++ix)
 	{
-	  memmove (p, p + (word - text),
-		   strlen (p) + 1 - (word - text));
+	  memmove (fn, fn + (word - text),
+		   strlen (fn) + 1 - (word - text));
 	}
     }
   else if (!n_syms)
@@ -325,39 +329,6 @@ location_completer (struct cmd_list_element *ignore,
     }
 
   return list;
-}
-
-/* Helper for expression_completer which recursively counts the number
-   of named fields and methods in a structure or union type.  */
-static int
-count_struct_fields (struct type *type)
-{
-  int i, result = 0;
-
-  CHECK_TYPEDEF (type);
-  for (i = 0; i < TYPE_NFIELDS (type); ++i)
-    {
-      if (i < TYPE_N_BASECLASSES (type))
-	result += count_struct_fields (TYPE_BASECLASS (type, i));
-      else if (TYPE_FIELD_NAME (type, i))
-	{
-	  if (TYPE_FIELD_NAME (type, i)[0] != '\0')
-	    ++result;
-	  else if (TYPE_CODE (TYPE_FIELD_TYPE (type, i)) == TYPE_CODE_UNION)
-	    {
-	      /* Recurse into anonymous unions.  */
-	      result += count_struct_fields (TYPE_FIELD_TYPE (type, i));
-	    }
-	}
-    }
-
-  for (i = TYPE_NFN_FIELDS (type) - 1; i >= 0; --i)
-    {
-      if (TYPE_FN_FIELDLIST_NAME (type, i))
-	++result;
-    }
-
-  return result;
 }
 
 /* Helper for expression_completer which recursively adds field and
@@ -418,18 +389,20 @@ add_struct_fields (struct type *type, VEC (char_ptr) **output,
    field names.  */
 VEC (char_ptr) *
 expression_completer (struct cmd_list_element *ignore, 
-		      char *text, char *word)
+		      const char *text, const char *word)
 {
   struct type *type = NULL;
-  char *fieldname, *p;
+  char *fieldname;
+  const char *p;
   volatile struct gdb_exception except;
+  enum type_code code = TYPE_CODE_UNDEF;
 
   /* Perform a tentative parse of the expression, to see whether a
      field completion is required.  */
   fieldname = NULL;
   TRY_CATCH (except, RETURN_MASK_ERROR)
     {
-      type = parse_field_expression (text, &fieldname);
+      type = parse_expression_for_completion (text, &fieldname, &code);
     }
   if (except.reason < 0)
     return NULL;
@@ -447,7 +420,6 @@ expression_completer (struct cmd_list_element *ignore,
       if (TYPE_CODE (type) == TYPE_CODE_UNION
 	  || TYPE_CODE (type) == TYPE_CODE_STRUCT)
 	{
-	  int alloc = count_struct_fields (type);
 	  int flen = strlen (fieldname);
 	  VEC (char_ptr) *result = NULL;
 
@@ -455,6 +427,15 @@ expression_completer (struct cmd_list_element *ignore,
 	  xfree (fieldname);
 	  return result;
 	}
+    }
+  else if (fieldname && code != TYPE_CODE_UNDEF)
+    {
+      VEC (char_ptr) *result;
+      struct cleanup *cleanup = make_cleanup (xfree, fieldname);
+
+      result = make_symbol_completion_type (fieldname, fieldname, code);
+      do_cleanups (cleanup);
+      return result;
     }
   xfree (fieldname);
 
@@ -530,11 +511,13 @@ complete_line_internal_reason;
 
 static VEC (char_ptr) *
 complete_line_internal (const char *text, 
-			char *line_buffer, int point,
+			const char *line_buffer, int point,
 			complete_line_internal_reason reason)
 {
   VEC (char_ptr) *list = NULL;
-  char *tmp_command, *p;
+  char *tmp_command;
+  const char *p;
+  int ignore_help_classes;
   /* Pointer within tmp_command which corresponds to text.  */
   char *word;
   struct cmd_list_element *c, *result_list;
@@ -554,6 +537,9 @@ complete_line_internal (const char *text,
   tmp_command = (char *) alloca (point + 1);
   p = tmp_command;
 
+  /* The help command should complete help aliases.  */
+  ignore_help_classes = reason != handle_help;
+
   strncpy (tmp_command, line_buffer, point);
   tmp_command[point] = '\0';
   /* Since text always contains some number of characters leading up
@@ -570,7 +556,7 @@ complete_line_internal (const char *text,
     }
   else
     {
-      c = lookup_cmd_1 (&p, cmdlist, &result_list, 1);
+      c = lookup_cmd_1 (&p, cmdlist, &result_list, ignore_help_classes);
     }
 
   /* Move p up to the next interesting thing.  */
@@ -587,7 +573,7 @@ complete_line_internal (const char *text,
     }
   else if (c == CMD_LIST_AMBIGUOUS)
     {
-      char *q;
+      const char *q;
 
       /* lookup_cmd_1 advances p up to the first ambiguous thing, but
 	 doesn't advance over that thing itself.  Do so now.  */
@@ -611,12 +597,13 @@ complete_line_internal (const char *text,
 	    {
 	      if (reason != handle_brkchars)
 		list = complete_on_cmdlist (*result_list->prefixlist, p,
-					    word);
+					    word, ignore_help_classes);
 	    }
 	  else
 	    {
 	      if (reason != handle_brkchars)
-		list = complete_on_cmdlist (cmdlist, p, word);
+		list = complete_on_cmdlist (cmdlist, p, word,
+					    ignore_help_classes);
 	    }
 	  /* Ensure that readline does the right thing with respect to
 	     inserting quotes.  */
@@ -642,7 +629,8 @@ complete_line_internal (const char *text,
 		  /* It is a prefix command; what comes after it is
 		     a subcommand (e.g. "info ").  */
 		  if (reason != handle_brkchars)
-		    list = complete_on_cmdlist (*c->prefixlist, p, word);
+		    list = complete_on_cmdlist (*c->prefixlist, p, word,
+						ignore_help_classes);
 
 		  /* Ensure that readline does the right thing
 		     with respect to inserting quotes.  */
@@ -700,7 +688,7 @@ complete_line_internal (const char *text,
 		 complete on the command itself, e.g. "p" which is a
 		 command itself but also can complete to "print", "ptype"
 		 etc.  */
-	      char *q;
+	      const char *q;
 
 	      /* Find the command we are completing on.  */
 	      q = p;
@@ -713,7 +701,8 @@ complete_line_internal (const char *text,
 		}
 
 	      if (reason != handle_brkchars)
-		list = complete_on_cmdlist (result_list, q, word);
+		list = complete_on_cmdlist (result_list, q, word,
+					    ignore_help_classes);
 
 	      /* Ensure that readline does the right thing
 		 with respect to inserting quotes.  */
@@ -792,7 +781,7 @@ complete_line (const char *text, char *line_buffer, int point)
 /* Complete on command names.  Used by "help".  */
 VEC (char_ptr) *
 command_completer (struct cmd_list_element *ignore, 
-		   char *text, char *word)
+		   const char *text, const char *word)
 {
   return complete_line_internal (word, text, 
 				 strlen (text), handle_help);
@@ -802,9 +791,8 @@ command_completer (struct cmd_list_element *ignore,
 
 VEC (char_ptr) *
 signal_completer (struct cmd_list_element *ignore,
-		  char *text, char *word)
+		  const char *text, const char *word)
 {
-  int i;
   VEC (char_ptr) *return_val = NULL;
   size_t len = strlen (word);
   enum gdb_signal signum;
@@ -923,11 +911,12 @@ line_completion_function (const char *text, int matches,
    QUOTECHARS or BREAKCHARS is NULL, use the same values used by the
    completer.  */
 
-char *
-skip_quoted_chars (char *str, char *quotechars, char *breakchars)
+const char *
+skip_quoted_chars (const char *str, const char *quotechars,
+		   const char *breakchars)
 {
   char quote_char = '\0';
-  char *scan;
+  const char *scan;
 
   if (quotechars == NULL)
     quotechars = gdb_completer_quote_characters;
@@ -965,8 +954,8 @@ skip_quoted_chars (char *str, char *quotechars, char *breakchars)
    characters and word break characters used by the completer).
    Returns pointer to the location after the "word".  */
 
-char *
-skip_quoted (char *str)
+const char *
+skip_quoted (const char *str)
 {
   return skip_quoted_chars (str, NULL, NULL);
 }

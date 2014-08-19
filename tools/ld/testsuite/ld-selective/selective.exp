@@ -65,18 +65,6 @@ if [istarget sh64*-*-elf] {
     set ldflags "-e _start -mshelf32 $ldflags"
 }
 
-# ARM targets support a profiling multilib which is
-# incompatible with -ffunction-sections.
-if {[istarget arm-*-*] || [istarget xscale-*-*]} {
-	set cflags "$cflags -fno-profile"
-}
-
-# V850e targets need special version of libgcc and an
-# undefined reference to __ctbp which would normally
-# be provided by crt0.o.
-if [istarget v850*-*-elf] {
-    set ldflags "$ldflags -L ../gcc/v850e -u __ctbp"
-}
 # If we don't have g++ for the target, mark all tests as untested.
 if { ![is_remote host] && [which $CXX] == 0 } {
     foreach testitem $seltests {

@@ -1,5 +1,6 @@
 // { dg-lto-do link }
 // { dg-lto-options {{-flto -g}} }
+// { dg-require-effective-target size32plus }
 
 extern "C" void abort (void);
 

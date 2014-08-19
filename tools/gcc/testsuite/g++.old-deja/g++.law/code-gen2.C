@@ -29,7 +29,7 @@ class Y : public A, public B, public C {};
 int main ()
 {
         Y y;       // To call the constructor
-	printf ("PASS\n");
-        }
+	// printf ("PASS\n");
+}
 
 

@@ -71,3 +71,4 @@ int main()
   E(p,l,0) E(p,l,1) E(p,l,2) E(p,l,3)
   return 0;
 }
+// { dg-require-effective-target size32plus }

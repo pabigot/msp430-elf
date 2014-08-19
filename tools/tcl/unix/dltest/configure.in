@@ -7,7 +7,7 @@ AC_PREREQ(2.5)
 dnl END CYGNUS LOCAL
 
 AC_INIT(pkga.c)
-# RCS: @(#) $Id: configure.in,v 1.10 2003/03/19 23:01:32 cagney Exp $
+# RCS: @(#) $Id: configure.in,v 1.3 2012/04/18 00:36:39 kevinb Exp $
 
 # Recover information that Tcl computed with its configure script.
 

@@ -179,8 +179,6 @@ LIB_COMPILE = $(COMPILE)
 noinst_DATA =
 endif # USE_LIBTOOL
 
-LIB_COMPILE += $(NEWLIB_CFLAGS)
-
 include $(srcdir)/../../Makefile.shared
 
 # This rule is needed so that libtool compiles vfiprintf before vfprintf. Otherwise

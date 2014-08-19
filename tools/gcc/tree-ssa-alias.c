@@ -1,5 +1,5 @@
 /* Alias analysis for trees.
-   Copyright (C) 2004-2013 Free Software Foundation, Inc.
+   Copyright (C) 2004-2014 Free Software Foundation, Inc.
    Contributed by Diego Novillo <dnovillo@redhat.com>
 
 This file is part of GCC.
@@ -27,21 +27,27 @@ along with GCC; see the file COPYING3.  If not see
 #include "target.h"
 #include "basic-block.h"
 #include "timevar.h"	/* for TV_ALIAS_STMT_WALK */
-#include "ggc.h"
 #include "langhooks.h"
 #include "flags.h"
 #include "function.h"
 #include "tree-pretty-print.h"
 #include "dumpfile.h"
+#include "tree-ssa-alias.h"
+#include "internal-fn.h"
+#include "tree-eh.h"
+#include "gimple-expr.h"
+#include "is-a.h"
 #include "gimple.h"
-#include "tree-flow.h"
+#include "gimple-ssa.h"
+#include "stringpool.h"
+#include "tree-ssanames.h"
+#include "expr.h"
+#include "tree-dfa.h"
 #include "tree-inline.h"
 #include "params.h"
-#include "vec.h"
-#include "bitmap.h"
-#include "pointer-set.h"
 #include "alloc-pool.h"
 #include "tree-ssa-alias.h"
+#include "ipa-reference.h"
 
 /* Broad overview of how alias analysis on gimple works:
 
@@ -404,6 +410,7 @@ dump_alias_info (FILE *file)
       struct ptr_info_def *pi;
 
       if (ptr == NULL_TREE
+	  || !POINTER_TYPE_P (TREE_TYPE (ptr))
 	  || SSA_NAME_IN_FREE_LIST (ptr))
 	continue;
 
@@ -449,10 +456,39 @@ dump_points_to_solution (FILE *file, struct pt_solution *pt)
     {
       fprintf (file, ", points-to vars: ");
       dump_decl_set (file, pt->vars);
-      if (pt->vars_contains_global)
-	fprintf (file, " (includes global vars)");
+      if (pt->vars_contains_nonlocal
+	  && pt->vars_contains_escaped_heap)
+	fprintf (file, " (nonlocal, escaped heap)");
+      else if (pt->vars_contains_nonlocal
+	       && pt->vars_contains_escaped)
+	fprintf (file, " (nonlocal, escaped)");
+      else if (pt->vars_contains_nonlocal)
+	fprintf (file, " (nonlocal)");
+      else if (pt->vars_contains_escaped_heap)
+	fprintf (file, " (escaped heap)");
+      else if (pt->vars_contains_escaped)
+	fprintf (file, " (escaped)");
     }
 }
+
+
+/* Unified dump function for pt_solution.  */
+
+DEBUG_FUNCTION void
+debug (pt_solution &ref)
+{
+  dump_points_to_solution (stderr, &ref);
+}
+
+DEBUG_FUNCTION void
+debug (pt_solution *ptr)
+{
+  if (ptr)
+    debug (*ptr);
+  else
+    fprintf (stderr, "<nil>\n");
+}
+
 
 /* Dump points-to information for SSA_NAME PTR into FILE.  */
 
@@ -537,28 +573,54 @@ ao_ref_alias_set (ao_ref *ref)
 }
 
 /* Init an alias-oracle reference representation from a gimple pointer
-   PTR and a gimple size SIZE in bytes.  If SIZE is NULL_TREE the the
+   PTR and a gimple size SIZE in bytes.  If SIZE is NULL_TREE then the
    size is assumed to be unknown.  The access is assumed to be only
    to or after of the pointer target, not before it.  */
 
 void
 ao_ref_init_from_ptr_and_size (ao_ref *ref, tree ptr, tree size)
 {
-  HOST_WIDE_INT t1, t2;
+  HOST_WIDE_INT t, size_hwi, extra_offset = 0;
   ref->ref = NULL_TREE;
+  if (TREE_CODE (ptr) == SSA_NAME)
+    {
+      gimple stmt = SSA_NAME_DEF_STMT (ptr);
+      if (gimple_assign_single_p (stmt)
+	  && gimple_assign_rhs_code (stmt) == ADDR_EXPR)
+	ptr = gimple_assign_rhs1 (stmt);
+      else if (is_gimple_assign (stmt)
+	       && gimple_assign_rhs_code (stmt) == POINTER_PLUS_EXPR
+	       && TREE_CODE (gimple_assign_rhs2 (stmt)) == INTEGER_CST)
+	{
+	  ptr = gimple_assign_rhs1 (stmt);
+	  extra_offset = BITS_PER_UNIT
+			 * int_cst_value (gimple_assign_rhs2 (stmt));
+	}
+    }
+
   if (TREE_CODE (ptr) == ADDR_EXPR)
-    ref->base = get_ref_base_and_extent (TREE_OPERAND (ptr, 0),
-					 &ref->offset, &t1, &t2);
+    {
+      ref->base = get_addr_base_and_unit_offset (TREE_OPERAND (ptr, 0), &t);
+      if (ref->base)
+	ref->offset = BITS_PER_UNIT * t;
+      else
+	{
+	  size = NULL_TREE;
+	  ref->offset = 0;
+	  ref->base = get_base_address (TREE_OPERAND (ptr, 0));
+	}
+    }
   else
     {
       ref->base = build2 (MEM_REF, char_type_node,
 			  ptr, null_pointer_node);
       ref->offset = 0;
     }
+  ref->offset += extra_offset;
   if (size
-      && host_integerp (size, 0)
-      && TREE_INT_CST_LOW (size) * 8 / 8 == TREE_INT_CST_LOW (size))
-    ref->max_size = ref->size = TREE_INT_CST_LOW (size) * 8;
+      && tree_fits_shwi_p (size)
+      && (size_hwi = tree_to_shwi (size)) <= HOST_WIDE_INT_MAX / BITS_PER_UNIT)
+    ref->max_size = ref->size = size_hwi * BITS_PER_UNIT;
   else
     ref->max_size = ref->size = -1;
   ref->ref_alias_set = 0;
@@ -700,14 +762,111 @@ aliasing_component_refs_p (tree ref1,
   return false;
 }
 
-/* Return true if two memory references based on the variables BASE1
-   and BASE2 constrained to [OFFSET1, OFFSET1 + MAX_SIZE1) and
-   [OFFSET2, OFFSET2 + MAX_SIZE2) may alias.  */
+/* Return true if we can determine that component references REF1 and REF2,
+   that are within a common DECL, cannot overlap.  */
 
 static bool
-decl_refs_may_alias_p (tree base1,
+nonoverlapping_component_refs_of_decl_p (tree ref1, tree ref2)
+{
+  auto_vec<tree, 16> component_refs1;
+  auto_vec<tree, 16> component_refs2;
+
+  /* Create the stack of handled components for REF1.  */
+  while (handled_component_p (ref1))
+    {
+      component_refs1.safe_push (ref1);
+      ref1 = TREE_OPERAND (ref1, 0);
+    }
+  if (TREE_CODE (ref1) == MEM_REF)
+    {
+      if (!integer_zerop (TREE_OPERAND (ref1, 1)))
+	goto may_overlap;
+      ref1 = TREE_OPERAND (TREE_OPERAND (ref1, 0), 0);
+    }
+
+  /* Create the stack of handled components for REF2.  */
+  while (handled_component_p (ref2))
+    {
+      component_refs2.safe_push (ref2);
+      ref2 = TREE_OPERAND (ref2, 0);
+    }
+  if (TREE_CODE (ref2) == MEM_REF)
+    {
+      if (!integer_zerop (TREE_OPERAND (ref2, 1)))
+	goto may_overlap;
+      ref2 = TREE_OPERAND (TREE_OPERAND (ref2, 0), 0);
+    }
+
+  /* We must have the same base DECL.  */
+  gcc_assert (ref1 == ref2);
+
+  /* Pop the stacks in parallel and examine the COMPONENT_REFs of the same
+     rank.  This is sufficient because we start from the same DECL and you
+     cannot reference several fields at a time with COMPONENT_REFs (unlike
+     with ARRAY_RANGE_REFs for arrays) so you always need the same number
+     of them to access a sub-component, unless you're in a union, in which
+     case the return value will precisely be false.  */
+  while (true)
+    {
+      do
+	{
+	  if (component_refs1.is_empty ())
+	    goto may_overlap;
+	  ref1 = component_refs1.pop ();
+	}
+      while (!RECORD_OR_UNION_TYPE_P (TREE_TYPE (TREE_OPERAND (ref1, 0))));
+
+      do
+	{
+	  if (component_refs2.is_empty ())
+	     goto may_overlap;
+	  ref2 = component_refs2.pop ();
+	}
+      while (!RECORD_OR_UNION_TYPE_P (TREE_TYPE (TREE_OPERAND (ref2, 0))));
+
+      /* Beware of BIT_FIELD_REF.  */
+      if (TREE_CODE (ref1) != COMPONENT_REF
+	  || TREE_CODE (ref2) != COMPONENT_REF)
+	goto may_overlap;
+
+      tree field1 = TREE_OPERAND (ref1, 1);
+      tree field2 = TREE_OPERAND (ref2, 1);
+
+      /* ??? We cannot simply use the type of operand #0 of the refs here
+	 as the Fortran compiler smuggles type punning into COMPONENT_REFs
+	 for common blocks instead of using unions like everyone else.  */
+      tree type1 = DECL_CONTEXT (field1);
+      tree type2 = DECL_CONTEXT (field2);
+
+      /* We cannot disambiguate fields in a union or qualified union.  */
+      if (type1 != type2 || TREE_CODE (type1) != RECORD_TYPE)
+	 goto may_overlap;
+
+      /* Different fields of the same record type cannot overlap.
+	 ??? Bitfields can overlap at RTL level so punt on them.  */
+      if (field1 != field2)
+	{
+	  component_refs1.release ();
+	  component_refs2.release ();
+	  return !(DECL_BIT_FIELD (field1) && DECL_BIT_FIELD (field2));
+	}
+    }
+
+may_overlap:
+  component_refs1.release ();
+  component_refs2.release ();
+  return false;
+}
+
+/* Return true if two memory references based on the variables BASE1
+   and BASE2 constrained to [OFFSET1, OFFSET1 + MAX_SIZE1) and
+   [OFFSET2, OFFSET2 + MAX_SIZE2) may alias.  REF1 and REF2
+   if non-NULL are the complete memory reference trees.  */
+
+static bool
+decl_refs_may_alias_p (tree ref1, tree base1,
 		       HOST_WIDE_INT offset1, HOST_WIDE_INT max_size1,
-		       tree base2,
+		       tree ref2, tree base2,
 		       HOST_WIDE_INT offset2, HOST_WIDE_INT max_size2)
 {
   gcc_checking_assert (DECL_P (base1) && DECL_P (base2));
@@ -718,7 +877,17 @@ decl_refs_may_alias_p (tree base1,
 
   /* If both references are based on the same variable, they cannot alias if
      the accesses do not overlap.  */
-  return ranges_overlap_p (offset1, max_size1, offset2, max_size2);
+  if (!ranges_overlap_p (offset1, max_size1, offset2, max_size2))
+    return false;
+
+  /* For components with variable position, the above test isn't sufficient,
+     so we disambiguate component references manually.  */
+  if (ref1 && ref2
+      && handled_component_p (ref1) && handled_component_p (ref2)
+      && nonoverlapping_component_refs_of_decl_p (ref1, ref2))
+    return false;
+
+  return true;     
 }
 
 /* Return true if an indirect reference based on *PTR1 constrained
@@ -754,9 +923,7 @@ indirect_ref_may_alias_decl_p (tree ref1 ATTRIBUTE_UNUSED, tree base1,
   /* The offset embedded in MEM_REFs can be negative.  Bias them
      so that the resulting offset adjustment is positive.  */
   moff = mem_ref_offset (base1);
-  moff = moff.alshift (BITS_PER_UNIT == 8
-		       ? 3 : exact_log2 (BITS_PER_UNIT),
-		       HOST_BITS_PER_DOUBLE_INT);
+  moff = moff.lshift (BITS_PER_UNIT == 8 ? 3 : exact_log2 (BITS_PER_UNIT));
   if (moff.is_negative ())
     offset2p += (-moff).low;
   else
@@ -832,9 +999,7 @@ indirect_ref_may_alias_decl_p (tree ref1 ATTRIBUTE_UNUSED, tree base1,
       || TREE_CODE (dbase2) == TARGET_MEM_REF)
     {
       double_int moff = mem_ref_offset (dbase2);
-      moff = moff.alshift (BITS_PER_UNIT == 8
-			   ? 3 : exact_log2 (BITS_PER_UNIT),
-			   HOST_BITS_PER_DOUBLE_INT);
+      moff = moff.lshift (BITS_PER_UNIT == 8 ? 3 : exact_log2 (BITS_PER_UNIT));
       if (moff.is_negative ())
 	doffset1 -= (-moff).low;
       else
@@ -928,17 +1093,13 @@ indirect_refs_may_alias_p (tree ref1 ATTRIBUTE_UNUSED, tree base1,
       /* The offset embedded in MEM_REFs can be negative.  Bias them
 	 so that the resulting offset adjustment is positive.  */
       moff = mem_ref_offset (base1);
-      moff = moff.alshift (BITS_PER_UNIT == 8
-			   ? 3 : exact_log2 (BITS_PER_UNIT),
-			   HOST_BITS_PER_DOUBLE_INT);
+      moff = moff.lshift (BITS_PER_UNIT == 8 ? 3 : exact_log2 (BITS_PER_UNIT));
       if (moff.is_negative ())
 	offset2 += (-moff).low;
       else
 	offset1 += moff.low;
       moff = mem_ref_offset (base2);
-      moff = moff.alshift (BITS_PER_UNIT == 8
-			   ? 3 : exact_log2 (BITS_PER_UNIT),
-			   HOST_BITS_PER_DOUBLE_INT);
+      moff = moff.lshift (BITS_PER_UNIT == 8 ? 3 : exact_log2 (BITS_PER_UNIT));
       if (moff.is_negative ())
 	offset1 += (-moff).low;
       else
@@ -1067,8 +1228,8 @@ refs_may_alias_p_1 (ao_ref *ref1, ao_ref *ref2, bool tbaa_p)
   var1_p = DECL_P (base1);
   var2_p = DECL_P (base2);
   if (var1_p && var2_p)
-    return decl_refs_may_alias_p (base1, offset1, max_size1,
-				  base2, offset2, max_size2);
+    return decl_refs_may_alias_p (ref1->ref, base1, offset1, max_size1,
+				  ref2->ref, base2, offset2, max_size2);
 
   ind1_p = (TREE_CODE (base1) == MEM_REF
 	    || TREE_CODE (base1) == TARGET_MEM_REF);
@@ -1314,9 +1475,47 @@ ref_maybe_used_by_call_p_1 (gimple call, ao_ref *ref)
 					   size);
 	    return refs_may_alias_p_1 (&dref, ref, false);
 	  }
+	/* These read memory pointed to by the first argument.  */
+	case BUILT_IN_INDEX:
+	case BUILT_IN_STRCHR:
+	case BUILT_IN_STRRCHR:
+	  {
+	    ao_ref dref;
+	    ao_ref_init_from_ptr_and_size (&dref,
+					   gimple_call_arg (call, 0),
+					   NULL_TREE);
+	    return refs_may_alias_p_1 (&dref, ref, false);
+	  }
+	/* These read memory pointed to by the first argument with size
+	   in the third argument.  */
+	case BUILT_IN_MEMCHR:
+	  {
+	    ao_ref dref;
+	    ao_ref_init_from_ptr_and_size (&dref,
+					   gimple_call_arg (call, 0),
+					   gimple_call_arg (call, 2));
+	    return refs_may_alias_p_1 (&dref, ref, false);
+	  }
+	/* These read memory pointed to by the first and second arguments.  */
+	case BUILT_IN_STRSTR:
+	case BUILT_IN_STRPBRK:
+	  {
+	    ao_ref dref;
+	    ao_ref_init_from_ptr_and_size (&dref,
+					   gimple_call_arg (call, 0),
+					   NULL_TREE);
+	    if (refs_may_alias_p_1 (&dref, ref, false))
+	      return true;
+	    ao_ref_init_from_ptr_and_size (&dref,
+					   gimple_call_arg (call, 1),
+					   NULL_TREE);
+	    return refs_may_alias_p_1 (&dref, ref, false);
+	  }
+
 	/* The following builtins do not read from memory.  */
 	case BUILT_IN_FREE:
 	case BUILT_IN_MALLOC:
+	case BUILT_IN_POSIX_MEMALIGN:
 	case BUILT_IN_CALLOC:
 	case BUILT_IN_ALLOCA:
 	case BUILT_IN_ALLOCA_WITH_ALIGN:
@@ -1355,16 +1554,19 @@ ref_maybe_used_by_call_p_1 (gimple call, ao_ref *ref)
 	case BUILT_IN_GOMP_ATOMIC_START:
 	case BUILT_IN_GOMP_ATOMIC_END:
 	case BUILT_IN_GOMP_BARRIER:
+	case BUILT_IN_GOMP_BARRIER_CANCEL:
 	case BUILT_IN_GOMP_TASKWAIT:
+	case BUILT_IN_GOMP_TASKGROUP_END:
 	case BUILT_IN_GOMP_CRITICAL_START:
 	case BUILT_IN_GOMP_CRITICAL_END:
 	case BUILT_IN_GOMP_CRITICAL_NAME_START:
 	case BUILT_IN_GOMP_CRITICAL_NAME_END:
 	case BUILT_IN_GOMP_LOOP_END:
+	case BUILT_IN_GOMP_LOOP_END_CANCEL:
 	case BUILT_IN_GOMP_ORDERED_START:
 	case BUILT_IN_GOMP_ORDERED_END:
-	case BUILT_IN_GOMP_PARALLEL_END:
 	case BUILT_IN_GOMP_SECTIONS_END:
+	case BUILT_IN_GOMP_SECTIONS_END_CANCEL:
 	case BUILT_IN_GOMP_SINGLE_COPY_START:
 	case BUILT_IN_GOMP_SINGLE_COPY_END:
 	  return true;
@@ -1637,6 +1839,18 @@ call_may_clobber_ref_p_1 (gimple call, ao_ref *ref)
 	case BUILT_IN_ALLOCA_WITH_ALIGN:
 	case BUILT_IN_ASSUME_ALIGNED:
 	  return false;
+	/* But posix_memalign stores a pointer into the memory pointed to
+	   by its first argument.  */
+	case BUILT_IN_POSIX_MEMALIGN:
+	  {
+	    tree ptrptr = gimple_call_arg (call, 0);
+	    ao_ref dref;
+	    ao_ref_init_from_ptr_and_size (&dref, ptrptr,
+					   TYPE_SIZE_UNIT (ptr_type_node));
+	    return (refs_may_alias_p_1 (&dref, ref, false)
+		    || (flag_errno_math
+			&& targetm.ref_may_alias_errno (ref)));
+	  }
 	/* Freeing memory kills the pointed-to memory.  More importantly
 	   the call has to serve as a barrier for moving loads and stores
 	   across it.  */
@@ -1699,16 +1913,19 @@ call_may_clobber_ref_p_1 (gimple call, ao_ref *ref)
 	case BUILT_IN_GOMP_ATOMIC_START:
 	case BUILT_IN_GOMP_ATOMIC_END:
 	case BUILT_IN_GOMP_BARRIER:
+	case BUILT_IN_GOMP_BARRIER_CANCEL:
 	case BUILT_IN_GOMP_TASKWAIT:
+	case BUILT_IN_GOMP_TASKGROUP_END:
 	case BUILT_IN_GOMP_CRITICAL_START:
 	case BUILT_IN_GOMP_CRITICAL_END:
 	case BUILT_IN_GOMP_CRITICAL_NAME_START:
 	case BUILT_IN_GOMP_CRITICAL_NAME_END:
 	case BUILT_IN_GOMP_LOOP_END:
+	case BUILT_IN_GOMP_LOOP_END_CANCEL:
 	case BUILT_IN_GOMP_ORDERED_START:
 	case BUILT_IN_GOMP_ORDERED_END:
-	case BUILT_IN_GOMP_PARALLEL_END:
 	case BUILT_IN_GOMP_SECTIONS_END:
+	case BUILT_IN_GOMP_SECTIONS_END_CANCEL:
 	case BUILT_IN_GOMP_SINGLE_COPY_START:
 	case BUILT_IN_GOMP_SINGLE_COPY_END:
 	  return true;
@@ -1817,9 +2034,10 @@ static bool
 stmt_kills_ref_p_1 (gimple stmt, ao_ref *ref)
 {
   /* For a must-alias check we need to be able to constrain
-     the access properly.  */
-  ao_ref_base (ref);
-  if (ref->max_size == -1)
+     the access properly.
+     FIXME: except for BUILTIN_FREE.  */
+  if (!ao_ref_base (ref)
+      || ref->max_size == -1)
     return false;
 
   if (gimple_has_lhs (stmt)
@@ -1833,20 +2051,48 @@ stmt_kills_ref_p_1 (gimple stmt, ao_ref *ref)
       && !stmt_can_throw_internal (stmt))
     {
       tree base, lhs = gimple_get_lhs (stmt);
-      HOST_WIDE_INT size, offset, max_size;
+      HOST_WIDE_INT size, offset, max_size, ref_offset = ref->offset;
       base = get_ref_base_and_extent (lhs, &offset, &size, &max_size);
       /* We can get MEM[symbol: sZ, index: D.8862_1] here,
 	 so base == ref->base does not always hold.  */
-      if (base == ref->base)
+      if (base != ref->base)
 	{
-	  /* For a must-alias check we need to be able to constrain
-	     the access properly.  */
-	  if (size != -1 && size == max_size)
+	  /* If both base and ref->base are MEM_REFs, only compare the
+	     first operand, and if the second operand isn't equal constant,
+	     try to add the offsets into offset and ref_offset.  */
+	  if (TREE_CODE (base) == MEM_REF && TREE_CODE (ref->base) == MEM_REF
+	      && TREE_OPERAND (base, 0) == TREE_OPERAND (ref->base, 0))
 	    {
-	      if (offset <= ref->offset
-		  && offset + size >= ref->offset + ref->max_size)
-		return true;
+	      if (!tree_int_cst_equal (TREE_OPERAND (base, 1),
+				       TREE_OPERAND (ref->base, 1)))
+		{
+		  double_int off1 = mem_ref_offset (base);
+		  off1 = off1.lshift (BITS_PER_UNIT == 8
+				      ? 3 : exact_log2 (BITS_PER_UNIT));
+		  off1 = off1 + double_int::from_shwi (offset);
+		  double_int off2 = mem_ref_offset (ref->base);
+		  off2 = off2.lshift (BITS_PER_UNIT == 8
+				      ? 3 : exact_log2 (BITS_PER_UNIT));
+		  off2 = off2 + double_int::from_shwi (ref_offset);
+		  if (off1.fits_shwi () && off2.fits_shwi ())
+		    {
+		      offset = off1.to_shwi ();
+		      ref_offset = off2.to_shwi ();
+		    }
+		  else
+		    size = -1;
+		}
 	    }
+	  else
+	    size = -1;
+	}
+      /* For a must-alias check we need to be able to constrain
+	 the access properly.  */
+      if (size != -1 && size == max_size)
+	{
+	  if (offset <= ref_offset
+	      && offset + size >= ref_offset + ref->max_size)
+	    return true;
 	}
     }
 
@@ -1857,6 +2103,16 @@ stmt_kills_ref_p_1 (gimple stmt, ao_ref *ref)
 	  && DECL_BUILT_IN_CLASS (callee) == BUILT_IN_NORMAL)
 	switch (DECL_FUNCTION_CODE (callee))
 	  {
+	  case BUILT_IN_FREE:
+	    {
+	      tree ptr = gimple_call_arg (stmt, 0);
+	      tree base = ao_ref_base (ref);
+	      if (base && TREE_CODE (base) == MEM_REF
+		  && TREE_OPERAND (base, 0) == ptr)
+		return true;
+	      break;
+	    }
+
 	  case BUILT_IN_MEMCPY:
 	  case BUILT_IN_MEMPCPY:
 	  case BUILT_IN_MEMMOVE:
@@ -1868,23 +2124,33 @@ stmt_kills_ref_p_1 (gimple stmt, ao_ref *ref)
 	    {
 	      tree dest = gimple_call_arg (stmt, 0);
 	      tree len = gimple_call_arg (stmt, 2);
-	      tree base = NULL_TREE;
-	      HOST_WIDE_INT offset = 0;
-	      if (!host_integerp (len, 0))
+	      if (!tree_fits_shwi_p (len))
 		return false;
-	      if (TREE_CODE (dest) == ADDR_EXPR)
-		base = get_addr_base_and_unit_offset (TREE_OPERAND (dest, 0),
-						      &offset);
-	      else if (TREE_CODE (dest) == SSA_NAME)
-		base = dest;
-	      if (base
-		  && base == ao_ref_base (ref))
+	      tree rbase = ref->base;
+	      double_int roffset = double_int::from_shwi (ref->offset);
+	      ao_ref dref;
+	      ao_ref_init_from_ptr_and_size (&dref, dest, len);
+	      tree base = ao_ref_base (&dref);
+	      double_int offset = double_int::from_shwi (dref.offset);
+	      double_int bpu = double_int::from_uhwi (BITS_PER_UNIT);
+	      if (!base || dref.size == -1)
+		return false;
+	      if (TREE_CODE (base) == MEM_REF)
 		{
-		  HOST_WIDE_INT size = TREE_INT_CST_LOW (len);
-		  if (offset <= ref->offset / BITS_PER_UNIT
-		      && (offset + size
-		          >= ((ref->offset + ref->max_size + BITS_PER_UNIT - 1)
-			      / BITS_PER_UNIT)))
+		  if (TREE_CODE (rbase) != MEM_REF)
+		    return false;
+		  // Compare pointers.
+		  offset += bpu * mem_ref_offset (base);
+		  roffset += bpu * mem_ref_offset (rbase);
+		  base = TREE_OPERAND (base, 0);
+		  rbase = TREE_OPERAND (rbase, 0);
+		}
+	      if (base == rbase)
+		{
+		  double_int size = bpu * tree_to_double_int (len);
+		  double_int rsize = double_int::from_uhwi (ref->max_size);
+		  if (offset.sle (roffset)
+		      && (roffset + rsize).sle (offset + size))
 		    return true;
 		}
 	      break;

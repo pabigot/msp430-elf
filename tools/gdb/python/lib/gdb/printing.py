@@ -1,5 +1,5 @@
 # Pretty-printer utilities.
-# Copyright (C) 2010-2012 Free Software Foundation, Inc.
+# Copyright (C) 2010-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,7 +19,12 @@
 import gdb
 import gdb.types
 import re
+import sys
 
+if sys.version_info[0] > 2:
+    # Python 3 removed basestring and long
+    basestring = str
+    long = int
 
 class PrettyPrinter(object):
     """A basic pretty-printer.

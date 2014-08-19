@@ -19,7 +19,7 @@
  * 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA
  *
  ****************************************************************
- * $Id: extern.h,v 1.2 2011/07/30 03:10:04 kevinb Exp $ FAU
+ * $Id: extern.h,v 1.9 2014/03/06 15:48:29 nickc Exp $ FAU
  */
 
 #if !defined(__GNUC__) || __GNUC__ < 2

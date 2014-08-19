@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2013 Free Software Foundation, Inc.
+# Copyright (C) 2002-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -122,6 +122,7 @@ if [info exists ALT_CXX_UNDER_TEST] then {
 } else {
     return
 }
+
 
 set tstobjdir "$tmpdir/g++.dg-struct-layout-1"
 set generator "$tmpdir/g++.dg-struct-layout-1_generate.exe"

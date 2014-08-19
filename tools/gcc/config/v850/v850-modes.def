@@ -1,5 +1,5 @@
 /* Definitions of target machine for GNU compiler. NEC V850 series
-   Copyright (C) 2005-2013 Free Software Foundation, Inc.
+   Copyright (C) 2005-2014 Free Software Foundation, Inc.
    Contributed by NEC EL
 
    This file is part of GCC.
@@ -25,21 +25,3 @@ CC_MODE (CC_FPU_GE);
 CC_MODE (CC_FPU_EQ);
 CC_MODE (CC_FPU_NE);
 
-/* Floating point comparison modes.
-   Individual modes for each comparison type are needed because the
-   V850 encodes the type into the CMPF instruction, rather than into
-   the conditional brnch that will follow, but the COMPARE rtl does
-   not take a comparison type parameter, only a mode.  */
-
-CC_MODE (CC_FPU);
-
-CC_MODE (CC_FPU_UN);
-CC_MODE (CC_FPU_UNLT);
-CC_MODE (CC_FPU_UNLE);
-CC_MODE (CC_FPU_UNEQ);
-
-/* Integer comparison modes.  */
-
-CC_MODE (CC_Z);
-CC_MODE (CC_ZS);
-CC_MODE (CC_ZSO);

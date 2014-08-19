@@ -40,8 +40,6 @@ bindir = @bindir@
 libdir = @libdir@
 tooldir = $(exec_prefix)/$(target_alias)
 
-objtype = @objtype@
-
 INSTALL = @INSTALL@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_DATA = @INSTALL_DATA@
@@ -83,7 +81,7 @@ test:
 
 # Static pattern rule for assembling cpu init files to object files.
 ${CPU_INIT_OBJS}: %.o: %.S
-	$(CC) $(CFLAGS_FOR_TARGET) $(INCLUDES) -DARM_RDI_MONITOR -o $@ -c $<
+	$(CC) $(CFLAGS_FOR_TARGET) $(CFLAGS) $(INCLUDES) -DARM_RDI_MONITOR -o $@ -c $<
 
 clean mostlyclean:
 	rm -f a.out core *.i *.o *-test *.srec *.dis *.x
@@ -103,8 +101,8 @@ info:
 install-info:
 clean-info:
 
-Makefile: Makefile.in ../config.status @host_makefile_frag_path@
-	$(SHELL) ../config.status --file cpu-init/Makefile
+Makefile: Makefile.in config.status @host_makefile_frag_path@
+	$(SHELL) config.status
 
-../config.status: ../configure
-	$(SHELL) ../config.status --recheck
+config.status: configure
+	$(SHELL) config.status --recheck

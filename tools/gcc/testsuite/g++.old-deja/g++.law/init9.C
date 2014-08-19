@@ -28,7 +28,7 @@ int main() {
 	    && ob[1][0].get_a() == 3 && ob[1][1].get_a() == 4
 	    && ob[2][0].get_a() == 5 && ob[2][1].get_a() == 6
 	    && ob[3][0].get_a() == 7 && ob[3][1].get_a() == 8)
-	  printf ("PASS\n");
+	  ; // printf ("PASS\n");
 	else
 	  { printf ("FAIL\n"); return 1; }
 

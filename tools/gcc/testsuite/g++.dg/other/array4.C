@@ -17,3 +17,5 @@ int main(void)
 }
 
 
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

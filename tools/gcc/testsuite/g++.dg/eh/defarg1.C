@@ -8,3 +8,5 @@ int main()
 {
   try { h(); } catch (int) { }
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

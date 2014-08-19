@@ -16,3 +16,4 @@ foo (wint_t lc, wchar_t *ls)
   printf ("%lc", lc);
   printf ("%ls", ls);
 }
+/* { dg-prune-output ".*__int20.*" } */

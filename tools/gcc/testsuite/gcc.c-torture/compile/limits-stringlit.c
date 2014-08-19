@@ -1,4 +1,4 @@
-/* { dg-skip-if "Array too big" { avr-*-* picochip-*-* m32c-*-* pdp11-*-* } { "*" } { "" } } */ 
+/* { dg-skip-if "Array too big" { avr-*-* picochip-*-* m32c-*-* msp430-*-* pdp11-*-* } { "*" } { "" } } */ 
 /* { dg-skip-if "Does not work with small integer machines" { xstormy16-*-* } { "*" } { "" } } */
 
 #define STR2 "012345678901234567890123456789012345678901234567890123456789\

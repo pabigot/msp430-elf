@@ -1,6 +1,7 @@
 // PR debug/39372
 // { dg-do compile }
 // { dg-options "-O0 -g -dA" }
+// { dg-skip-if "Different style of debug info generation" { msp430-*-* } { "*" } { "" } }
 // { dg-final { scan-assembler "DW_OP_addr\[^\n\r\]*\[\n\r\]*\[^\n\r\]*staticvar1" } }
 // { dg-final { scan-assembler "DW_OP_addr\[^\n\r\]*\[\n\r\]*\[^\n\r\]*staticvar2" } }
 

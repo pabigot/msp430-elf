@@ -48,7 +48,7 @@ int main()
 {
         AB ab;
 	if (state == 3)
-		printf("PASS\n");
+	  ; // printf("PASS\n");
 	else
 		printf("FAIL\n");
 	exit (state != 3);

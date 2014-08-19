@@ -1,0 +1,25 @@
+This patch is needed to fix a start-up issue with GDB.
+
+gdb/gdbtk/ChangeLog.RedHat:
+
+ 	* generic/gdbtk-interp.c (_initialize_gdbtk_interp): Use non-NULL
+	parameter for `command_loop_proc argument.
+
+Index: gdb/gdbtk/generic/gdbtk-interp.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/gdbtk/generic/gdbtk-interp.c,v
+retrieving revision 1.11
+diff -u -p -r1.11 gdbtk-interp.c
+--- gdb/gdbtk/generic/gdbtk-interp.c	26 Feb 2014 15:48:33 -0000	1.11
++++ gdb/gdbtk/generic/gdbtk-interp.c	8 Mar 2014 20:05:23 -0000
+@@ -185,7 +185,9 @@ _initialize_gdbtk_interp (void)
+     gdbtk_interpreter_suspend,	        /* suspend_proc */
+     gdbtk_interpreter_exec,             /* exec_proc */
+     gdbtk_interpreter_display_prompt_p, /* prompt_proc_p */
+-    gdbtk_interpreter_ui_out		/* ui_out_proc */
++    gdbtk_interpreter_ui_out,		/* ui_out_proc */
++    NULL,				/* set_logging_proc */
++    gdbtk_command_loop			/* command_loop_proc */
+   };
+   interp_add (interp_new ("insight", &procs));
+ }

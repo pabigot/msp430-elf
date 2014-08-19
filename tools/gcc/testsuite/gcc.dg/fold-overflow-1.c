@@ -1,7 +1,8 @@
 /* { dg-do compile } */
-/* { dg-skip-if "consts are shorts, not longs" { "m32c-*-*" "avr-*-*" "msp430*-*-*" } { "*" } { "" } } */
+/* { dg-require-effective-target int32plus } */
 /* { dg-skip-if "No Inf support" { spu-*-* } } */
 /* { dg-options "-O -ftrapping-math" } */
+/* { dg-skip-if "test does not match RX behaviour" { "rx-*-*" } { "*" } { "" } } */
 
 /* There should be exactly 2 +Inf in the assembly file.  */
 

@@ -1,174 +1,64 @@
-2008-11-24  Nick Clifton  <nickc@redhat.com>
+2009-07-08  Nick Clifton  <nickc@redhat.com>
 
-	PR 37862
-	* parser.c: Pass cp_id_kind computed in
-	cp_parser_postfix_dot_deref_expression to
-	cp_parser_primary_expression.
+	* decl.c (start_decl): Skip assertion.  (For Thumb G++ tests).
 
-2008-06-05  Nick Clifton  <nickc@redhat.com>
+2005-01-05  Nick Clifton  <nickc@redhat.com>
 
-	* name-lookup.c (lookup_name_real): Suppress an abort which can be
-	triggered by user's code.
+	Import this patch from the mainline:
 
-2003-08-11  Nick Clifton  <nickc@redhat.com>
+	2004-02-12  Zack Weinberg  <zack@codesourcery.com>
 
-	* class.c (finish_struct_anon): Fix handling of nested anonymous
-	unions.
+	* cp-lang.c: Don't define LANG_HOOKS_BUILTIN_TYPE_DECLS.
+	* cp-tree.h: Don't declare cxx_builtin_type_decls.
+	* decl.c (builtin_type_decls, cxx_builtin_type_decls): Delete.
+	(record_builtin_type): Call debug_hooks->type_decl on the TYPE_DECL.
 
-2002-01-19  Nick Clifton <nickc@redhat.com>
+2004-12-06  Nick Clifton  <nickc@redhat.com>
 
-	Fix regression introduced with egcs merge
-	* parse.y (base_class_list): Do not call chainon twice.
-
-2001-06-20  Ben Elliston  <bje@redhat.com>
-
-	* lex.c (embedded_namespace_error): Remove unused variable.
-	(embedded_template_error): Likewise.
-	(embedded_eh_error): Likewise.
-
-2001-06-06  Nick Clifton  <nickc@cambridge.redhat.com>
-
-	* parse.c: Delete - it is created in the objdir from parse.y.
-	* parse.h: Delete - same reason
-
-2000-12-28  Alexandre Oliva  <aoliva@redhat.com>
-
-	* Make-lang.in (cp/parse.h cp/parse.c): Make our rules close to
-	those in net GCC.
-
-2000-11-25  Alexandre Oliva  <aoliva@redhat.com>
-
-	* Make-lang.in (cp/parse.c cp/parse.h): Delete duplicate rule.
-
-2000-05-05  Gavin Romig-Koch <gavin@cygnus.com>
-
-	* lex.c (yylex_buffer_max,yylex_buffer_count,
-	yylex_value_buffer,yylex_yylval_buffer): New. 
-	(real_yylex): Gather up a MSVC style inline assembler and send
-	it to the parser as an extended asm with the CONST attribute.
-	(msvc_asm_lookup_name,msvc_asm_lookup_this,msvc_asm_expand_operands,
-	msvc_asm_define_label,msvc_asm_addr_expr,msvc_asm_build_component_ref):
-	New.
-	* (init_parse): Add RID for __msvc_asm_.
-	* lex.h : Add RID for __msvc_asm_.
-	* semantics.c (finish_asm_stmt):  Look for the CONST attribute in
-	extended asms.
-	* gxx.gperf (_asm,__msvc_asm_) New keywords.
-	* hash.h : Rebuilt.
-
-1999-09-09  Jason Merrill  <jason@yorick.cygnus.com>
-
-	* lex.c (real_yylex): Fix EC++ template error typo.
-
-1999-08-25  Geoffrey Keating  <geoffk@cygnus.com>
-
-	* decl2.c (lang_decode_option): Add -Wparentheses-else.
-	(warn_parentheses_else): New variable to track it.
-
-1999-08-13  Gavin Romig-Koch  <gavin@cygnus.com>
-
-	* cp-tree.h (cplus_safe_for_unsave): New.
-	* tree.c (cplus_safe_for_unsave): New.
-
-1999-05-21  Ulrich Drepper  <drepper@cygnus.com>
-
-	* inc/new: Use __GCC_THROW and __GCC_nothing instead of __THROW
-	and __nothing.
-	* new1.cc: Likewise.
-	* new2.cc: Likewise.
-
-1999-01-15  Brendan Kehoe  <brendan@cygnus.com>
-
-	* typeck2.c (my_friendly_abort): Adjust where to report bugs as a
-	cygnus-local change.
-
-Fri Jan 15 12:32:23 1999  Dave Brolley  (brolley@cygnus.com)
-
-	* lex.c (lang_init_options): Fix typo: data->opts.
-
-Tue Oct 27 23:48:33 1998  Jeffrey A Law  (law@cygnus.com)
-
-	* lang-specs.h (default_compilers): Remove spurious backslashes.
-
-Thu Oct  8 11:00:50 1998  Nick Clifton  <nickc@cygnus.com>
-
-	* decl.c (duplicate_decls): Remove code to copy data_area
-	field of struct tree_decl.
-
-1998-08-27  Benjamin Kosnik  <bkoz@cygnus.com>
-
-	* decl.c (duplicate_decls):  Add DECL_DATA_AREA bits.
-
+	Import this patch from the mainline:
 	
-Thu May 21 10:21:04 EDT 1998  Andrew MacLeod  <amacleod@cygnus.com>
+	2004-03-29  Zack Weinberg  <zack@codesourcery.com>
 
-	* TODO: Updated the exception handling todo list a bit.
+	* error.c (dump_function_name): If T's DECL_LANG_SPECIFIC
+	is null, just print the literal name and return.
 
-Wed Feb 18 12:18:23 1998  Michael Tiemann  <tiemann@axon.cygnus.com>
+2004-10-28  Anthony Green  <green@redhat.com>
 
-	* inc/new: (__THROW, __nothing): New macros, for making libgcc2
-	functionality conditional on -fembedded-cxx.
-	(operator new*, operator delete*): Change type signatures to be
-	correct when -fembedded-cxx is specified.
+	From 2004-04-15  Bryce McKinlay  <mckinlay@redhat.com>
+ 	* init.c (build_new_1): Don't use type size argument for Java
+ 	_Jv_AllocObject call.
 
-	* new1.cc (operator new): Change `throw' to __THROW, so that file
-	can be compiled with -fembedded-cxx.  Also, don't try to call
-	`handler' if __EMBEDDED_CXX__ is defined.
-	* new2.cc (operator new[], operator delete, operator delete []):
-	Likewise.
+2004-09-18  Richard Sandiford  <rsandifo@redhat.com>
 
-	* new.cc (nothrow): Only define if not __EMBEDDED_CXX__.
+	Update last patch for changes made between 3.4.0 and 3.4.2.
+	* semantics.c (nullify_returns_r): Use build_init_expr.
 
-	* exception.cc: Contents of this file depend on	__EMBEDDED_CXX__
-	not being defined.
-	* tinfo2.cc: Ditto.
+2004-09-10  Richard Sandiford  <rsandifo@redhat.com>
 
-Mon Feb 9 17:28:39 EST 1998 Andrew MacLeod <amacleod@torpedo.to.cygnus.com>
+	* cp-tree.h (build_init_expr): Declare.
+	* init.c (build_init_expr): New function.
+	(perform_member_init, build_init, expand_default_init, build_vec_init):
+	Use it; don't call build (INIT_EXPR, ...) directly.
+	* call.c (build_over_call, initialize_reference): Likewise.
+	* decl.c (check_initializer): Likewise.
+	* method.c (do_build_copy_constructor): Likewise.
+	* typeck.c (build_modify_expr, check_return_expr): Likewise.
+	* typeck2.c (split_nonconstant_init, store_init_value): Likewise.
 
-	* TODO: Add new file with G++ todo items.
+2004-06-15  Alexandre Oliva  <aoliva@redhat.com>
 
-Tue Jan 27 12:04:38 1998  Jason Merrill  <jason@yorick.cygnus.com>
-
-	* decl2.c (lang_decode_option): -fembedded-cxx implies
- 	-fvtable-thunks.
-
-Wed Jan 21 10:01:32 1998  Benjamin Kosnik  <bkoz@rhino.cygnus.com>
-
-	* inc/new: Remove orphan C-style end comment.
-
-1997-10-31  Brendan Kehoe  <brendan@lisa.cygnus.com>
-
-	* lex.c (embedded_pedwarn): Change its return type to void.
-
-1997-10-14  Brendan Kehoe  <brendan@lisa.cygnus.com>
-
-	Compliance with the Embedded C++ language specification.
-	By default we generate warnings; use -pedantic-errors to turn them
-	into hard errors.
-	* decl2.c (flag_embedded_cxx): Define.
-	(struct lang_f_options): Add -fembedded-cxx.
-	(lang_decode_option): If -fembedded-cxx, set FLAG_EMBEDDED_CXX,
-	and clear FLAG_RTTI and FLAG_EXCEPTIONS.
-	* lang-options.h: Add -fembedded-cxx and -fno-embedded-cxx.
-	* lang-specs.h: If -fembedded-cxx, define __EMBEDDED_CXX__.
-	* cp-tree.h (flag_embedded_cxx): Add decl.
-	* parse.y (base_class_list): Give a pedwarn about inheritance if
-	FLAG_EMBEDDED_CXX.
-	(base_class): Likewise for the base_class_access_list case.
-
-	* lex.c (real_yylex): Give pedwarns if FLAG_EMBEDDED_CXX is true and
-	the token VALUE is any of TRY, CATCH, THROW, TEMPLATE, TYPENAME,
-	USING, or NAMESPACE.  Likewise for DYNAMIC_CAST, STATIC_CAST,
-	REINTERPRET_CAST, CONST_CAST, or TYPEID.
-	(embedded_{template,eh,namespace}_error): New global variables to
-	make us only give a warning/error about each once.
-	(embedded_pedwarn): New fn to do the actual pedwarn.
-	* decl.c (grokdeclarator): Give a pedwarn for using mutable.
-
-	* inc/new: Only make the EH stuff appear if !__EMBEDDED_CXX__.
-	(new, new[]) [__EMBEDDED_CXX__]: For placement versions, take out
-	the default throw.  This particular bit is under discussion with
-	the EC++ committee currently.
+	* parser.c: Change all assignments of c_lex_string_translate
+	to true and false to 1 and 0.
+	(cp_lexer_read_token): Convert type of the translated string.
+	(cp_parser_skip_to_closing_parentheses): Preserve original
+	value of c_lex_string_translate, and set it to -1 while
+	running.
+	(cp_parser_cache_group): Likewise.
+	(cp_parser_cache_group_1): Renamed.
+	(cp_parser_asm_operand_list): Remove redundant setting of
+	c_lex_string_translate.
+	(cp_parser_primary_expression) [CPP_STRING, CPP_WSTRING]:
+	Handle chained strings.
 
 Local Variables:
 mode: change-log
@@ -176,5 +66,4 @@ left-margin: 8
 fill-column: 74
 version-control: never
 change-log-default-name: "ChangeLog.RedHat"
-add-log-time-format: current-time-string
 End:

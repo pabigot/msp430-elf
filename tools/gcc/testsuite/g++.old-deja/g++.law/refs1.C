@@ -37,7 +37,7 @@ int main() {
    int i = 0;
    c.count(i);
    if (i == 3)
-     printf ("PASS\n");
+     ; // printf ("PASS\n");
    else
      { printf ("FAIL\n"); return 1; }
 }

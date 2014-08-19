@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // Test that binfos aren't erroneously shared between instantiations.
 
 class PK_CryptoSystem

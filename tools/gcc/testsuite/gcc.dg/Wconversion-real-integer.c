@@ -1,11 +1,13 @@
 /* Test for diagnostics for Wconversion between floating-point and
    integers.  */
 
-/* { dg-do compile }
+/* { dg-do compile } */
 /* { dg-skip-if "doubles are floats,ints are 16bits" { "avr-*-*" } { "*" } { "" } } */
 /* { dg-options "-std=c99 -Wconversion" } */
+/* { dg-options "-m64bit-doubles -std=c99 -Wconversion" { target rx-*-* } } */
 /* { dg-require-effective-target int32plus } */
 /* { dg-require-effective-target double64plus } */
+
 #include <limits.h>
 
 void fsi (signed int x);

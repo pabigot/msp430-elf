@@ -41,3 +41,4 @@ A::~A() { printf( "A::~A()\n" ); if (--c != 0) r = 1; }
 
 A f() { printf( "f()\n"); return A(); }
 void g( B const& ) { printf( "g()\n"); }
+// { dg-require-effective-target size32plus }

@@ -30,10 +30,11 @@ C c = { 1, 2 };
 int
 main ()
 {
+#if 0
   printf ("%d %d %d %d\n%d %d %d %d\n%d %d %d %d\n",
 	  ar[0].i, ar[1].i, ar[2].i, ar[3].i,
 	  b.a1.i, b.a2.i, b.a3.i, b.a4.i,
 	  c.ar[1-1].i, c.ar[2-1].i, c.ar[3-1].i, c.ar[4-1].i);
-
+#endif
   return (b.a4.i != 42 || c.ar[3].i != 42);
 }

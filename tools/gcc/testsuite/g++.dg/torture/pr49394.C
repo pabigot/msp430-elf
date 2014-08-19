@@ -1,5 +1,6 @@
 // { dg-do run }
 // { dg-options "-fipa-pta -fnon-call-exceptions" }
+// { dg-require-effective-target size32plus }
 
 struct Mutex
 {

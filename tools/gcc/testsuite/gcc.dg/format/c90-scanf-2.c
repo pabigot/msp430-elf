@@ -23,3 +23,4 @@ foo (signed char *hhp, float *fp, llong *llp, intmax_t *jp,
   scanf ("%a", fp); /* { dg-warning "C" "%a in C90" } */
   scanf ("%A", fp); /* { dg-warning "C" "%A in C90" } */
 }
+/* { dg-prune-output ".*__int20.*" } */

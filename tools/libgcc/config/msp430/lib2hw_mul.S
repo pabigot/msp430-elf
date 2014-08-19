@@ -20,16 +20,6 @@
 ; see the files COPYING3 and COPYING.RUNTIME respectively.  If not, see
 ; <http://www.gnu.org/licenses/>.
 
-;; This file contains hardware multiply functions for the libgcc library.
-;;
-;; Widening operations are not included here because gcc does not support
-;; widening and multiply via library operations.  Instead the widening
-;; versions of the hardware multiplies are defined as inline code in msp430.md.
-
-;; Macro: Declares the start of a multiply function.  They all use the same
-;;  start sequence.  Interrupts are disabled because the memory registers
-;;  being used are not guaranteed to be preserved across interrupts.
-	
 .macro start_func name
 	.pushsection .text.\name,"ax",@progbits
 	.align 2
@@ -40,9 +30,6 @@
 	DINT				; Disable interrupts
 	NOP				; Account for latency
 .endm
-
-
-;;  Macro: Declares the end of a multiply function.
 
 .macro end_func name
 #ifdef __MSP430X_LARGE__
@@ -55,38 +42,64 @@
 	.popsection
 .endm
 
-;;  Macro: Multiplies two 16-bit values, producing a 16-bit result.
-;;  The arguments are the memory registers to be used.
-;;  The macro uses R12 and R13 and changes R12.
-	
 .macro mult16 OP1, OP2, RESULT
+;* * 16-bit hardware multiply:  int16 = int16 * int16
+;*  
+;*   - Operand 1 is in R12
+;*   - Operand 2 is in R13
+;*   - Result is in R12
+;*
+;* To ensure that the multiply is performed atomically, interrupts are
+;* disabled upon routine entry.  Interrupt state is restored upon exit.
+;*
+;*   Registers used:  R12, R13
+;*
+;* Macro arguments are the memory locations of the hardware registers.
+	
 	MOV.W	r12, &\OP1		; Load operand 1 into multiplier
 	MOV.W	r13, &\OP2		; Load operand 2 which triggers MPY
 	MOV.W	&\RESULT, r12		; Move result into return register
 .endm
 
-;;  Macro: Multiplies two 32-bit values, producing a 32-bit result.
-;;  The arguments are the memory registers to be used.
-;;  The macro uses R12, R13, R14 and R15 and changes R12 and R13.
+.macro mult1632 OP1, OP2, RESULT_LO, RESULT_HI
+;* * 16-bit hardware multiply with a 32-bit result:
+;*	int32 = int16 * int16
+;* 	uint32 = uint16 * uint16
+;*  
+;*   - Operand 1 is in R12
+;*   - Operand 2 is in R13
+;*   - Result is in R12, R13
+;*
+;* To ensure that the multiply is performed atomically, interrupts are
+;* disabled upon routine entry.  Interrupt state is restored upon exit.
+;*
+;*   Registers used:  R12, R13
+;*
+;* Macro arguments are the memory locations of the hardware registers.
 	
-.macro mult32  OP1_LO  OP1_HI  OP2_LO  OP2_HI  RESULT_LO  RESULT_HI
-	MOV.W	r12, &\OP1_LO		; Load operand 1 Low into multiplier
-	MOV.W	r13, &\OP1_HI		; Load operand 1 High into multiplier
-	MOV.W	r14, &\OP2_LO		; Load operand 2 Low into multiplier
-	MOV.W	r15, &\OP2_HI		; Load operand 2 High, trigger MPY
-	MOV.W	&\RESULT_LO, r12	; Ready low 16-bits for return
-	MOV.W   &\RESULT_HI, r13	; Ready high 16-bits for return
+	MOV.W	r12, &\OP1		; Load operand 1 into multiplier
+	MOV.W	r13, &\OP2		; Load operand 2 which triggers MPY
+	MOV.W	&\RESULT_LO, r12	; Move low result into return register
+	MOV.W	&\RESULT_HI, r13	; Move high result into return register
 .endm
 
-;;  Macro: Multiplies two 32-bit values, producing a 32-bit result using
-;;    two 16-bit hardware multiplies.
-;;  The arguments are the memory registers to be used.
-;;  The macro uses R12, R13, R14 and R15 and changes R12 and R13.
-	
-.macro mult32_synth OP1, OP2, MAC_OP1, MAC_OP2, RESULT_LO, RESULT_HI
+.macro mult32 OP1, OP2, MAC_OP1, MAC_OP2, RESULT_LO, RESULT_HI
+;* * 32-bit hardware multiply with a 32-bit result using 16 multiply and accumulate:
+;*	int32 = int32 * int32
+;*  
+;*   - Operand 1 is in R12, R13
+;*   - Operand 2 is in R14, R15
+;*   - Result    is in R12, R13
+;*
+;* To ensure that the multiply is performed atomically, interrupts are
+;* disabled upon routine entry.  Interrupt state is restored upon exit.
+;*
+;*   Registers used:  R12, R13, R14, R15
+;*
+;* Macro arguments are the memory locations of the hardware registers.
 	
 	MOV.W	r12, &\OP1		; Load operand 1 Low into multiplier
-	MOV.W	r14, &\OP2		; Load operand 2 Low which triggers MPY
+	MOV.W	r14, &\OP2		; Load operand 2 Low which triggers MPY, clears MAC
 	MOV.W	r12, &\MAC_OP1		; Load operand 1 Low into mac
 	MOV.W   &\RESULT_LO, r12	; Low 16-bits of result ready for return
 	MOV.W   &\RESULT_HI, &\RESULT_LO; MOV intermediate mpy high into low
@@ -97,30 +110,117 @@
 .endm
 
 
+.macro mult32_hw  OP1_LO  OP1_HI  OP2_LO  OP2_HI  RESULT_LO  RESULT_HI
+;* * 32-bit hardware multiply with a 32-bit result
+;*	int32 = int32 * int32
+;*  
+;*   - Operand 1 is in R12, R13
+;*   - Operand 2 is in R14, R15
+;*   - Result    is in R12, R13
+;*
+;* To ensure that the multiply is performed atomically, interrupts are
+;* disabled upon routine entry.  Interrupt state is restored upon exit.
+;*
+;*   Registers used:  R12, R13, R14, R15
+;*
+;* Macro arguments are the memory locations of the hardware registers.
 	
-;; The multiply functions.  Note - the F5xxx series of MCUs support
-;; the same 16-bit and 32-bit hardware multiply operations, but they
-;;  are accessed from different memory registers.
+	MOV.W	r12, &\OP1_LO		; Load operand 1 Low into multiplier
+	MOV.W	r13, &\OP1_HI		; Load operand 1 High into multiplier
+	MOV.W	r14, &\OP2_LO		; Load operand 2 Low into multiplier
+	MOV.W	r15, &\OP2_HI		; Load operand 2 High, trigger MPY
+	MOV.W	&\RESULT_LO, r12	; Ready low 16-bits for return
+	MOV.W   &\RESULT_HI, r13	; Ready high 16-bits for return
+.endm
 
-start_func __mulhi2
-	mult16 0x0130, 0x0138, 0x013A
-end_func __mulhi2
+.macro mult3264_hw  OP1_LO  OP1_HI  OP2_LO  OP2_HI  RES0 RES1 RES2 RES3
+;* * 32-bit hardware multiply with a 64-bit result
+;*	int64 = int32 * int32
+;*	uint64 = uint32 * uint32
+;*  
+;*   - Operand 1 is in R12, R13
+;*   - Operand 2 is in R14, R15
+;*   - Result    is in R12, R13, R14, R15
+;*
+;* To ensure that the multiply is performed atomically, interrupts are
+;* disabled upon routine entry.  Interrupt state is restored upon exit.
+;*
+;*   Registers used:  R12, R13, R14, R15
+;*
+;* Macro arguments are the memory locations of the hardware registers.
+	
+	MOV.W	r12, &\OP1_LO		; Load operand 1 Low into multiplier
+	MOV.W	r13, &\OP1_HI		; Load operand 1 High into multiplier
+	MOV.W	r14, &\OP2_LO		; Load operand 2 Low into multiplier
+	MOV.W	r15, &\OP2_HI		; Load operand 2 High, trigger MPY
+	MOV.W	&\RES0, R12		; Ready low 16-bits for return
+	MOV.W   &\RES1, R13		; 
+	MOV.W	&\RES2, R14		; 
+	MOV.W   &\RES3, R15		; Ready high 16-bits for return
+.endm
 
-start_func __mulhi2_f5
+
+;;  First generation MSP430 hardware multiplies ....
+
+.set MPY_OP1,   0x0130
+.set MPY_OP1_S, 0x0132
+.set MAC_OP1, 	0x0134
+.set MPY_OP2, 	0x0138
+.set MAC_OP2, 	0x0138
+.set RESULT_LO, 0x013A
+.set RESULT_HI, 0x013C
+	
+	start_func __mulhi2
+	mult16 MPY_OP1, MPY_OP2, RESULT_LO
+	end_func __mulhi2
+
+	start_func __mulsihi2
+	mult1632 MPY_OP1_S, MPY_OP2, RESULT_LO, RESULT_HI
+	end_func __mulsihi2
+
+	start_func __umulsihi2
+	mult1632 MPY_OP1, MPY_OP2, RESULT_LO, RESULT_HI
+	end_func __umulsihi2
+
+	start_func __mulsi2
+	mult32 MPY_OP1, MPY_OP2, MAC_OP1, MAC_OP2, RESULT_LO, RESULT_HI
+	end_func __mulsi2
+
+	start_func __mulsi2_hw32
+	mult32_hw 0x0140, 0x0142, 0x0150, 0x0152, 0x0154, 0x0156
+	end_func __mulsi2_hw32
+
+	start_func __muldisi2_hw32
+	mult3264_hw 0x0144, 0x0146, 0x0150, 0x0152, 0x0154, 0x0156, 0x0158, 0x015A
+	end_func __muldisi2_hw32
+
+	start_func __umuldisi2_hw32
+	mult3264_hw 0x0140, 0x0142, 0x0150, 0x0152, 0x0154, 0x0156, 0x0158, 0x015A
+	end_func __umuldisi2_hw32
+	
+/* The F5xxx series of MCUs support the same 16-bit hardware
+   multiply, but it is accessed from different memory registers.  */
+	
+	start_func __mulhi2_f5
 	mult16 0x04C0, 0x04C8, 0x04CA
-end_func __mulhi2_f5
+	end_func __mulhi2_f5
 
+	start_func __mulsihi2_f5
+	mult1632 0x04C2, 0x04C8, 0x04CA, 0x04CC
+	end_func __mulsihi2_f5
+	
+	start_func __umulsihi2_f5
+	mult1632 0x04C0, 0x04C8, 0x04CA, 0x04CC
+	end_func __umulsihi2_f5
 
-;; Most MCUs do not have a 32-bit hardware multiply, but one
-;; can be synthesised using 16-bit operations.
-start_func __mulsi2
-	mult32_synth 0x0130, 0x0138, 0x0134, 0x0138, 0x013A, 0x013C
-end_func __mulsi2
-
-start_func __mulsi2_hw32
-	mult32 0x0140, 0x0142, 0x0150, 0x0152, 0x0154, 0x0156
-end_func __mulsi2_hw32
-
-start_func __mulsi2_f5
-	mult32 0x04D0, 0x04D2, 0x04E0, 0x04E2, 0x04E4, 0x04E6
-end_func __mulsi2_f5
+	start_func __mulsi2_f5
+	mult32_hw 0x04D0, 0x04D2, 0x04E0, 0x04E2, 0x04E4, 0x04E6
+	end_func __mulsi2_f5
+	
+	start_func __muldisi2_f5
+	mult3264_hw 0x04D4, 0x04D6, 0x04E0, 0x04E2, 0x04E4, 0x04E6, 0x04E8, 0x04EA
+	end_func __muldisi2_f5
+	
+	start_func __umuldisi2_f5
+	mult3264_hw 0x04D0, 0x04D2, 0x04E0, 0x04E2, 0x04E4, 0x04E6, 0x04E8, 0x04EA
+	end_func __umuldisi2_f5

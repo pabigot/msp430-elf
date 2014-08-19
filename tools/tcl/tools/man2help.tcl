@@ -6,7 +6,7 @@
 #
 # Copyright (c) 1996 by Sun Microsystems, Inc.
 #
-# RCS: @(#) $Id: man2help.tcl,v 1.3 2003/03/19 23:01:31 cagney Exp $
+# RCS: @(#) $Id: man2help.tcl,v 1.3 2012/04/18 00:36:36 kevinb Exp $
 # 
 
 #

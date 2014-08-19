@@ -333,10 +333,3 @@ sim_store_register (sd, rn, memory, length)
   State.regs[rn] = T2H_4 (*(unsigned32*)memory);
   return length;
 }
-
-SIM_RC
-sim_hardware_watchpoint (SIM_DESC sd, SIM_WATCH_ACTION action,
-                         SIM_WATCH_TYPE type, SIM_ADDR addr, long length)
-{
-  return SIM_RC_FAIL;
-}

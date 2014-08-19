@@ -1,4 +1,5 @@
 /* { dg-do run } */
+// { dg-require-effective-target size32plus }
 
 struct Dummy {};
 struct RefCount : public Dummy {

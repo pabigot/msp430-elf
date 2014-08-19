@@ -1,6 +1,5 @@
 #source: sort_b_n-1.s
 #ld: -T sort.t --sort-section name
-#ld_after_inputfiles: -X
 #name: --sort-section name
 #nm: -n
 

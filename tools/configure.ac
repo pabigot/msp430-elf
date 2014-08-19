@@ -134,7 +134,6 @@ build_tools="build-texinfo build-flex build-bison build-m4 build-fixincludes"
 # these libraries are used by various programs built for the host environment
 #
 host_libs="intl libiberty opcodes bfd readline tcl tk itcl libgui zlib libbacktrace libcpp libdecnumber gmp mpfr mpc isl cloog libelf libiconv"
-host_libs="${host_libs} flexlm"
 
 # these tools are built for the host environment
 # Note, the powerpc-eabi build depends on sim occurring before gdb in order to
@@ -143,7 +142,6 @@ host_libs="${host_libs} flexlm"
 # "make check" in that particular order.
 # If --enable-gold is used, "gold" may replace "ld".
 host_tools="texinfo flex bison binutils gas ld fixincludes gcc cgen sid sim gdb gprof etc expect dejagnu m4 utils guile fastjar gnattools"
-  host_tools="${host_tools} less vim ecos-monitors acovea"
 
 # libgcj represents the runtime libraries only used by gcj.
 libgcj="target-libffi \
@@ -163,6 +161,7 @@ target_libraries="target-libgcc \
 		target-libstdc++-v3 \
 		target-libmudflap \
 		target-libsanitizer \
+		target-libvtv \
 		target-libssp \
 		target-libquadmath \
 		target-libgfortran \
@@ -556,6 +555,22 @@ if test -d ${srcdir}/libsanitizer; then
     fi
 fi
 
+# Disable libvtv on unsupported systems.
+if test -d ${srcdir}/libvtv; then
+    if test x$enable_libvtv = x; then
+	AC_MSG_CHECKING([for libvtv support])
+	if (srcdir=${srcdir}/libvtv; \
+		. ${srcdir}/configure.tgt; \
+		test "$VTV_SUPPORTED" != "yes")
+	then
+	    AC_MSG_RESULT([no])
+	    noconfigdirs="$noconfigdirs target-libvtv"
+	else
+	    AC_MSG_RESULT([yes])
+	fi
+    fi
+fi
+
 # Disable libquadmath for some systems.
 case "${target}" in
   avr-*-*)
@@ -613,6 +628,8 @@ esac
 
 # Disable Java if libffi is not supported.
 case "${target}" in
+  aarch64-*-*)
+    ;;
   alpha*-*-*)
     ;;
   arm*-*-*)
@@ -1101,9 +1118,13 @@ case "${target}" in
     noconfigdirs="$noconfigdirs gprof target-libgloss"
     ;;
   mips*-*-bsd*)
-    noconfigdirs="$noconfigdirs gprof target-libgloss"
+    noconfigdirs="$noconfigdirs ld gas gprof target-libgloss"
     ;;
   mips*-*-linux*)
+    ;;
+  mips*-*-ultrix* | mips*-*-osf* | mips*-*-ecoff* | mips*-*-pe* \
+  | mips*-*-irix* | mips*-*-lnews* | mips*-*-riscos*)
+    noconfigdirs="$noconfigdirs ld gas gprof"
     ;;
   mips*-*-*)
     noconfigdirs="$noconfigdirs gprof"
@@ -1152,7 +1173,6 @@ case "${host}" in
   *-cygwin*)
     ACX_CHECK_CYGWIN_CAT_WORKS
     host_makefile_frag="config/mh-cygwin"
-    host_makefile_frag="config/mh-winx86pic"
     ;;
   *-mingw*)
     host_makefile_frag="config/mh-mingw"
@@ -1177,18 +1197,6 @@ case "${host}" in
     ;;
 esac
 fi
-
-# Enable both GOLD and LD for toolchains that support it.
-case "${target}" in
-  arm*-*-elf | \
-  arm*-*-eabi | \
-  i?86-*-linux* | \
-  x86_64-*-linux* | \
-  sparc*-*-* | \
-  powerpc*-*-* )
-    configdirs="$configdirs ld gold"
-    ;;
-esac
 
 if test "${build}" != "${host}" ; then
   AR_FOR_BUILD=${AR_FOR_BUILD-ar}
@@ -2046,11 +2054,11 @@ case ,${enable_languages},:${enable_objc_gc} in
     ;;
 esac
 
-# Disable libitm and libsanitizer if we're not building C++
+# Disable libitm, libsanitizer, libvtv if we're not building C++
 case ,${enable_languages}, in
   *,c++,*) ;;
   *)
-    noconfigdirs="$noconfigdirs target-libitm target-libsanitizer"
+    noconfigdirs="$noconfigdirs target-libitm target-libsanitizer target-libvtv"
     ;;
 esac
 
@@ -2347,9 +2355,6 @@ extra_nmflags_for_target=
 extra_ranlibflags_for_target=
 target_makefile_frag=/dev/null
 case "${target}" in
-  i[[3456789]]86-*-cygwin*)
-    target_makefile_frag="${target_makefile_frag} config/mt-winx86pic"
-    ;;
   spu-*-*)
     target_makefile_frag="config/mt-spu"
     ;;
@@ -2477,6 +2482,11 @@ fi
 # If we are building libsanitizer, bootstrap it.
 if echo " ${target_configdirs} " | grep " libsanitizer " > /dev/null 2>&1 ; then
   bootstrap_target_libs=${bootstrap_target_libs}target-libsanitizer,
+fi
+
+# If we are building libvtv, bootstrap it.
+if echo " ${target_configdirs} " | grep " libvtv " > /dev/null 2>&1 ; then
+  bootstrap_target_libs=${bootstrap_target_libs}target-libvtv,
 fi
 
 # Determine whether gdb needs tk/tcl or not.
@@ -3175,10 +3185,10 @@ GCC_TARGET_TOOL(as, AS_FOR_TARGET, AS, [gas/as-new])
 GCC_TARGET_TOOL(cc, CC_FOR_TARGET, CC, [gcc/xgcc -B$$r/$(HOST_SUBDIR)/gcc/])
 dnl see comments for CXX_FOR_TARGET_FLAG_TO_PASS
 GCC_TARGET_TOOL(c++, CXX_FOR_TARGET, CXX,
-		[gcc/xg++ -B$$r/$(HOST_SUBDIR)/gcc/ -nostdinc++ `if test -f $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags; then $(SHELL) $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags --build-includes; else echo -funconfigured-libstdc++-v3 ; fi` -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src/.libs],
+		[gcc/xg++ -B$$r/$(HOST_SUBDIR)/gcc/ -nostdinc++ `if test -f $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags; then $(SHELL) $$r/$(TARGET_SUBDIR)/libstdc++-v3/scripts/testsuite_flags --build-includes; else echo -funconfigured-libstdc++-v3 ; fi` -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs],
 		c++)
 GCC_TARGET_TOOL(c++ for libstdc++, RAW_CXX_FOR_TARGET, CXX,
-		[gcc/xgcc -shared-libgcc -B$$r/$(HOST_SUBDIR)/gcc -nostdinc++ -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src/.libs],
+		[gcc/xgcc -shared-libgcc -B$$r/$(HOST_SUBDIR)/gcc -nostdinc++ -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/src/.libs -L$$r/$(TARGET_SUBDIR)/libstdc++-v3/libsupc++/.libs],
 		c++)
 GCC_TARGET_TOOL(dlltool, DLLTOOL_FOR_TARGET, DLLTOOL, [binutils/dlltool])
 GCC_TARGET_TOOL(gcc, GCC_FOR_TARGET, , [gcc/xgcc -B$$r/$(HOST_SUBDIR)/gcc/])

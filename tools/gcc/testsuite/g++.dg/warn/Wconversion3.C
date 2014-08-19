@@ -1,7 +1,7 @@
 // PR c++/34198
 // { dg-do compile }
-// { dg-options "-O2 -Wconversion -Wsign-conversion" }
 // { dg-require-effective-target int32plus }
+// { dg-options "-O2 -Wconversion -Wsign-conversion" }
 
 signed char sc;
 unsigned char uc;

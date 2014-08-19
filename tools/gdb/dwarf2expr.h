@@ -1,7 +1,6 @@
 /* DWARF 2 Expression Evaluator.
 
-   Copyright (C) 2001-2003, 2005, 2007-2012 Free Software Foundation,
-   Inc.
+   Copyright (C) 2001-2014 Free Software Foundation, Inc.
 
    Contributed by Daniel Berlin <dan@dberlin.org>.
 
@@ -32,8 +31,15 @@ struct dwarf_expr_context;
 
 struct dwarf_expr_context_funcs
 {
-  /* Return the value of register number REGNUM.  */
-  CORE_ADDR (*read_reg) (void *baton, int regnum);
+  /* Return the value of register number REGNUM (a DWARF register number),
+     read as an address.  */
+  CORE_ADDR (*read_addr_from_reg) (void *baton, int regnum);
+
+  /* Return a value of type TYPE, stored in register number REGNUM
+     of the frame associated to the given BATON.
+
+     REGNUM is a DWARF register number.  */
+  struct value *(*get_reg_value) (void *baton, struct type *type, int regnum);
 
   /* Read LENGTH bytes at ADDR into BUF.  */
   void (*read_mem) (void *baton, gdb_byte *buf, CORE_ADDR addr, size_t length);
@@ -165,7 +171,7 @@ struct dwarf_expr_context
 
   /* For DWARF_VALUE_LITERAL, the current literal value's length and
      data.  For DWARF_VALUE_IMPLICIT_POINTER, LEN is the offset of the
-     target DIE of cu_offset kind.  */
+     target DIE of sect_offset kind.  */
   ULONGEST len;
   const gdb_byte *data;
 
@@ -236,7 +242,7 @@ struct dwarf_expr_piece
     struct
     {
       /* The referent DIE from DW_OP_GNU_implicit_pointer.  */
-      cu_offset die;
+      sect_offset die;
       /* The byte offset into the resulting data.  */
       LONGEST offset;
     } ptr;

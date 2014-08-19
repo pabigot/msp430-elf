@@ -1,0 +1,23 @@
+This patch makes `funcs' static to avoid a conflict with the mips
+simulator.
+
+libiberty/ChangeLog.RedHat:
+
+	* pex-unix.c (func): Make static.
+
+Index: libiberty/pex-unix.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/libiberty/pex-unix.c,v
+retrieving revision 1.12
+diff -u -p -r1.12 pex-unix.c
+--- libiberty/pex-unix.c	3 Aug 2012 14:17:59 -0000	1.12
++++ libiberty/pex-unix.c	1 Aug 2013 18:10:29 -0000
+@@ -316,7 +316,7 @@ static void pex_unix_cleanup (struct pex
+ 
+ /* The list of functions we pass to the common routines.  */
+ 
+-const struct pex_funcs funcs =
++static const struct pex_funcs funcs =
+ {
+   pex_unix_open_read,
+   pex_unix_open_write,

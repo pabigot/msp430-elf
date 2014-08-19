@@ -4,7 +4,6 @@
 	.global  _memset
 	.type	 _memset,@function
 _memset:
-#if 0
 	movm  [d2,d3,a2,a3], (sp)
 .Lend_of_prologue:
 	mov   d0, d3
@@ -58,96 +57,6 @@ _memset:
 .Lepilogue:
 	mov d3,a0
 	ret [d2,d3,a2,a3], 16
-#else
-	movm	[d2,d3], (sp)
-.Lend_of_prologue:
-	mov	d0, d3
-	mov	d1, d2
-	mov	(20, sp),a1
-	mov	d3, a0
-
-/*	Newlib for the MN10300 is compiled with -Os enabled all the time,
-	so normally the code below will not be triggered.  The test for
-	__LIW__ however enables us to build a speed optimized version when
-	building -mliw enabled multilibs.  -mliw allows long instruction
-	word generation which is faster but occupies more space.  LIW
-	instructions are not acutally used in the code below, but enabling
-	their generation implies that the user is more interested in code
-	performance than code size.  */
-#if ! defined __OPTIMIZE_SIZE__ || defined __LIW__
-	cmp	3, a1
-	bls	.L41
-	btst	3, d3
-	bne	.L41
-	extbu	d2
-	mov	d2, d1
-	asl	8, d1
-	or	d2, d1
-	mov	d1, d0
-	asl	16, d0
-	or	d0, d1
-	cmp	15, a1
-	bls	.L36
-#ifdef __NO_SETLB__
-.Loop1:
-#else
-	setlb
-#endif
-	mov	d1, (a0)
-	inc4	a0
-	mov	d1, (a0)
-	inc4	a0
-	mov	d1, (a0)
-	inc4	a0
-	mov	d1, (a0)
-	inc4	a0
-	add	-16, a1
-	cmp	15, a1
-#ifdef __NO_SETLB__
-	bhi	.Loop1
-#else
-	lhi
-#endif
-.L36:
-	cmp	3, a1
-	bls	.L41
-#ifdef __NO_SETLB__
-.Loop2:
-#else
-	setlb
-#endif
-	mov	d1, (a0)
-	inc4	a0
-	add	-4, a1
-	cmp	3, a1
-#ifdef __NO_SETLB__
-	bhi	.Loop2
-#else
-	lhi
-#endif
-.L41:
-#endif /* Optimize for speed.  */
-
-	cmp	0, a1
-	beq	.Lepilogue
-#ifdef __NO_SETLB__
-.Loop3:
-#else
-	setlb
-#endif
-	movbu	d2, (a0)
-	inc	a0
-	sub	1, a1
-#ifdef __NO_SETLB__
-	bne	.Loop3
-#else
-	lne
-#endif
-.Lepilogue:
-	mov	d3, a0
-	mov	d3, d0
-	ret	[d2,d3], 8
-#endif
 .Lend_of_memset:
 	.size	 _memset, .Lend_of_memset - _memset
 

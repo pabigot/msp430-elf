@@ -7,7 +7,7 @@
 # Copyright (c) 1998-2000 by Ajuba Solutions
 # All rights reserved.
 # 
-# RCS: @(#) $Id: all.tcl,v 1.1 2003/03/19 23:00:56 cagney Exp $
+# RCS: @(#) $Id: all.tcl,v 1.2 2000/07/06 06:43:38 mmc Exp $
 
 package require tcltest
 namespace import -force ::tcltest::*

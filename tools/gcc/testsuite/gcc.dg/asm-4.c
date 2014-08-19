@@ -1,6 +1,6 @@
 /* { dg-do compile } */
-/* { dg-options "" } */
 /* { dg-skip-if "unsupported operand format" { msp430-*-* rl78-*-* } { "*" } { "" } } */
+/* { dg-options "" } */
 
 int main()
 {

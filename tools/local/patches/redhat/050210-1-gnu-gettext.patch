@@ -1,0 +1,92 @@
+This patch works around a problem building native toolchains under
+Solaris and Cygwin.   The problem is that, for Solaris, the configure
+system decides to build in the intl/ directory but then does not add
+../intl/libintl.a to the linker command lines when building various
+programs (eg gas, objdump).  Cygwin has the opposite problem.  The
+../intl/libintl.a library is included on the linker command lines but
+the configure system has decided not to build in the intl/ directory.
+
+The patch works around these problems by forcing the configure switch
+--with-included-gettext to be used for non-Cygwin builds and
+--disable-nls to be used for cygwin builds.  This can still be
+overridden by the presence of these switches (or their inverses) on
+the configure command line
+
+The --with-included-gettext switch forces the configure system to
+always build and use the intl library in the GNUPro sources even if it
+thinks that the host provides its own version.  This does not work for
+cygwin targeted builds because the libintl.a that gets built will
+require libiconv.a to be linked in as well, and the configure system
+will not add this library to the linker command line fof gas,
+binutils, etc.
+
+The proper way to fix this problem is to fix the configuration files
+but hacking autocconf is a black art.
+
+======================================================================
+CV, 2005-06-09:  Changed so that Cygwin as target is not special cased
+to be build with --disable-nls anymore.  The latest changes to toplevel
+configury allow to build the Cygwin native toolchain with NLS.  Note that
+this requires that at least libiconv (better: also libintl) is already
+installed on the build machine.  It also requires having libintl and
+libiconv installed on the customer machines, so that's a requirement for
+gnupro Cygwin installations.
+======================================================================
+
+======================================================================
+CV, 2005-06-15:  Changed so that Cygwin as target is not special cased
+*at all* anymore.  We're always building with --with-internal-gettext now.
+We're doing this so that we don't rely on a libintl being installed,
+especially we're trying to avoid a dependency to a libintl DLL on Cygwin.
+======================================================================
+
+<toplevel>/ChangeLog.RedHat
+2005-06-15  Corinna Vinschen  <vinschen@redhat.com>
+
+	* configure.in: Change to use --with-included-gettext for all targets,
+	even Cygwin.
+	* configure: Regenerate.
+
+2005-06-09  Corinna Vinschen  <vinschen@redhat.com>
+
+	* configure.in: Drop adding --disable-nls to cygwin targeted build.
+	* configure: Regenerate.
+
+2005-03-10  Nick Clifton  <nickc@redhat.com>
+
+	* configure.in: Add --with-included-gettext (for non-cygwin) and
+	--disable-nls (for cygwin) to the configure args unless overridden
+	by the user.
+	* configure: Regenerate.
+
+
+Index: configure.ac
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/configure.in,v
+retrieving revision 1.42
+diff -c -3 -p -r1.42 configure.in
+*** configure.ac	2 Mar 2005 15:46:06 -0000	1.42
+--- configure.ac	10 Mar 2005 14:59:32 -0000
+*************** else
+*** 117,122 ****
+--- 117,136 ----
+    gcc_version_trigger=
+  fi
+  
++ # This is a hack to get around the mis-configuring of libintl.a
++ # support in GNUPro 05r1.  In theory this should not be necessary
++ # but test building native toolchains under Solaris and Cygwin
++ # before permanently removing it.
++ case "$ac_configure_args" in
++   *--with-included-gettext=* )
++       ;;
++   *--disable-nls* )
++       ;;
++   * )
++       ac_configure_args="$ac_configure_args --with-included-gettext"
++       ;;
++ esac
++ 	
+  ### To add a new directory to the tree, first choose whether it is a target
+  ### or a host dependent tool.  Then put it into the appropriate list
+  ### (library or tools, host or target), doing a dependency sort.

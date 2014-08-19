@@ -3,8 +3,8 @@
 /* { dg-require-profiling "-pg" } */
 /* { dg-options "-O2 -pg" } */
 /* { dg-options "-O2 -pg -static" { target hppa*-*-hpux* } } */
-/* { dg-error "profiler" "No profiler support" { target xstormy16-*-* } 0 } */
 /* { dg-skip-if "no profiling support" { "msp430-*-*" } { "*" } { "" } } */
+/* { dg-error "profiler" "No profiler support" { target xstormy16-*-* } 0 } */
 
 extern void abort (void);
 

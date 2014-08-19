@@ -1726,7 +1726,7 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-# RCS: $Id: configure,v 1.2 2009/02/03 19:07:29 kevinb Exp $
+# RCS: $Id: configure.in,v 1.9 2001/11/29 20:51:34 smithc Exp $
 
 ITCL_VERSION=3.2
 

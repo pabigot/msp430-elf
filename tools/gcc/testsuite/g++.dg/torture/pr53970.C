@@ -15,3 +15,4 @@ int main(int argc, char **argv)
     a->l[i] = 0xdeadbeaf;
   return 0;
 }
+// { dg-require-effective-target size32plus }

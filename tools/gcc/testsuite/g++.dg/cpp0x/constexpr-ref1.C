@@ -1,9 +1,10 @@
 // PR c++/49172
-// { dg-options -std=c++0x }
+// { dg-do compile { target c++11 } }
+// { dg-skip-if "the address of g is not a constexpr" { msp430-*-* } { "*" } { "" } }
 
 #define SA(X) static_assert((X),#X)
 
-constexpr int g() { return 42; };
+constexpr int g() { return 42; }
 constexpr int(&rg)() = g; // #1
 
 SA(rg() == 42);

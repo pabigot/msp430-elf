@@ -1,24 +1,23 @@
 #    Makefile template for Configure for the arm sim library.
-#    Copyright 1995, 1996, 1997, 2002 Free Software Foundation, Inc.
+#    Copyright 1995-2014 Free Software Foundation, Inc.
 #    Written by Cygnus Support.
 # 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 2 of the License, or
+# the Free Software Foundation; either version 3 of the License, or
 # (at your option) any later version.
-# 
+#
 # This program is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
-# 
+#
 # You should have received a copy of the GNU General Public License
-# along with this program; if not, write to the Free Software
-# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## COMMON_PRE_CONFIG_FRAG
 
-SIM_EXTRA_CFLAGS = -DMODET -DNEED_UI_LOOP_HOOK -DSIM_TARGET_SWITCHES
+SIM_EXTRA_CFLAGS = -DMODET -DNEED_UI_LOOP_HOOK -DSIM_TARGET_SWITCHES -lm
 
 COPRO=@COPRO@
 
@@ -28,7 +27,7 @@ SIM_OBJS = armemu26.o armemu32.o arminit.o armos.o armsupp.o \
 ## COMMON_POST_CONFIG_FRAG
 
 
-armos.o: armos.c armdefs.h armos.h armfpe.h
+armos.o: armos.c armdefs.h armos.h armfpe.h targ-vals.h
 
 armcopro.o: armcopro.c armdefs.h
 maverick.o: maverick.c armdefs.h

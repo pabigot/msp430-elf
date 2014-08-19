@@ -23,3 +23,4 @@ int main(int, char **)
 	abort ();
   }
 }
+// { dg-require-effective-target size32plus }

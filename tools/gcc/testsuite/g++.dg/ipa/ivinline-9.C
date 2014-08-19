@@ -2,7 +2,7 @@
    inlining, even when a typecast to an ancestor is involved along the
    way and that ancestor itself has an ancestor wich is not the
    primary base class.  */
-/* { dg-do run } */
+/* { dg-do run { target nonpic } } */
 /* { dg-options "-O3 -fdump-ipa-inline -fno-early-inlining -fno-ipa-cp"  } */
 
 extern "C" void abort (void);
@@ -90,5 +90,5 @@ int main (int argc, char *argv[])
 }
 
 /* { dg-final { scan-ipa-dump "Discovered a virtual call to a known target.*B::.*foo"  "inline"  } } */
-/* { dg-final { scan-ipa-dump "B::foo\[^\\n\]*inline copy in int main"  "inline"  { xfail *-*-* } } } */
+/* { dg-final { scan-ipa-dump "B::foo\[^\\n\]*inline copy in int main"  "inline" } } */
 /* { dg-final { cleanup-ipa-dump "inline" } } */

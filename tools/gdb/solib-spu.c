@@ -1,5 +1,5 @@
 /* Cell SPU GNU/Linux support -- shared library handling.
-   Copyright (C) 2009-2012 Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    Contributed by Ulrich Weigand <uweigand@de.ibm.com>.
 
@@ -21,9 +21,9 @@
 #include "defs.h"
 #include "solib-spu.h"
 #include "gdbcore.h"
-#include "gdb_string.h"
+#include <string.h>
 #include "gdb_assert.h"
-#include "gdb_stat.h"
+#include <sys/stat.h>
 #include "arch-utils.h"
 #include "bfd.h"
 #include "symtab.h"
@@ -158,11 +158,11 @@ append_ocl_sos (struct so_list **link_ptr)
 static struct so_list *
 spu_current_sos (void)
 {
-  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch);
+  enum bfd_endian byte_order = gdbarch_byte_order (target_gdbarch ());
   struct so_list *head;
   struct so_list **link_ptr;
 
-  char buf[MAX_SPE_FD * 4];
+  gdb_byte buf[MAX_SPE_FD * 4];
   int i, size;
 
   /* First, retrieve the SVR4 shared library list.  */
@@ -209,7 +209,7 @@ spu_current_sos (void)
 	 yet.  Skip such entries; we'll be back for them later.  */
       xsnprintf (annex, sizeof annex, "%d/object-id", fd);
       len = target_read (&current_target, TARGET_OBJECT_SPU, annex,
-			 id, 0, sizeof id);
+			 (gdb_byte *) id, 0, sizeof id);
       if (len <= 0 || len >= sizeof id)
 	continue;
       id[len] = 0;
@@ -286,7 +286,9 @@ static int
 spu_bfd_iovec_close (bfd *nbfd, void *stream)
 {
   xfree (stream);
-  return 1;
+
+  /* Zero means success.  */
+  return 0;
 }
 
 static file_ptr
@@ -418,9 +420,9 @@ spu_enable_break (struct objfile *objfile)
     {
       CORE_ADDR addr = SYMBOL_VALUE_ADDRESS (spe_event_sym);
 
-      addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch, addr,
+      addr = gdbarch_convert_from_func_ptr_addr (target_gdbarch (), addr,
                                                  &current_target);
-      create_solib_event_breakpoint (target_gdbarch, addr);
+      create_solib_event_breakpoint (target_gdbarch (), addr);
       return 1;
     }
 

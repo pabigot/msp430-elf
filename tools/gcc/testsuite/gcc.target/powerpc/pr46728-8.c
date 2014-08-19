@@ -57,6 +57,4 @@ main (int argc, char *argv[])
   return 0;
 }
 
-
-/* { dg-final { scan-assembler-times "cbrt" 5 { target powerpc*-*-* } } } */
 /* { dg-final { scan-assembler-not "bl\[\\. \]+pow" { target powerpc*-*-* } } } */

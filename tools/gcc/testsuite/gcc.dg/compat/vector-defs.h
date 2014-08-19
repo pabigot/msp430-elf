@@ -56,11 +56,7 @@ typedef float __attribute__((mode(V2SF))) v2sf;
 typedef float __attribute__((mode(V4SF))) v4sf;
 typedef float __attribute__((mode(V16SF))) v16sf;
 
-#if __SIZEOF_DOUBLE__ >= 8
 typedef float __attribute__((mode(V2DF))) v2df;
-#else
-typedef float __attribute__((mode(V2SF))) v2df;
-#endif
 
 #endif
 

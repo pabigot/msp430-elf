@@ -69,3 +69,5 @@ C::operator bool() const
     abort ();
   return false;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

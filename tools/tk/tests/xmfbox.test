@@ -10,7 +10,7 @@
 # Contributions from Don Porter, NIST, 2002.  (not subject to US copyright)
 # All rights reserved.
 #
-# RCS: @(#) $Id: xmfbox.test,v 1.3 2003/03/19 23:02:09 cagney Exp $
+# RCS: @(#) $Id: xmfbox.test,v 1.3 2012/04/18 00:37:08 kevinb Exp $
 
 package require tcltest 2.1
 namespace import -force tcltest::configure

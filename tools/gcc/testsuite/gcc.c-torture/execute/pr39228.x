@@ -7,4 +7,9 @@ if [istarget "spu-*-*"] {
 	return 1
 }
 
+if [istarget "rx-*-*"] {
+	# No Denormal support on RX.
+	return 1
+}
+
 return 0

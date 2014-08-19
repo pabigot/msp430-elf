@@ -76,3 +76,4 @@ int main (void)
     abort ();
   exit (0);
 }
+/* { dg-prune-output ".*__int20.*" } */

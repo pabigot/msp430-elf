@@ -1,20 +1,34 @@
-2009-02-16  Nick Clifton  <nickc@redhat.com>
+2012-07-31  Nick Clifton  <nickc@redhat.com>
 
-	* op_utils.c (do_syscall): Emulate (by ignoring) the 289 syscall
-	to flush the cache.
-	* am33.igen (syscall): Suppress bogus code and just call
-	do_syscall.
+	* interp.c (fpu_cmp): Handle comparisons of infinity.
+	* op_utils.c (do_syscall): Handle cache flush syscall.
 
-2008-02-20  Kevin Buettner  <kevinb@redhat.com>
+2012-05-03  Kevin Buettner  <kevinb@redhat.com>
 
+	* configure.ac (SIM_AC_OPTION_ALIGNMENT): Use it.
 	* configure: Regenerate.
 
-2000-08-07  Graham Stott  <grahams@cygnus.co.uk>
+2011-09-27  Kevin Buettner  <kevinb@redhat.com>
 
+	* interp.c (sim_fetch_register): Return length, not -1.
+
+2011-06-20  Nick Clifton  <nickc@redhat.com>
+
+	* am33.igen (sub Rm,Rn,Rd): Fix computation of carry bit.
+
+2010-05-18  DJ Delorie  <dj@redhat.com>
+
+	* Makefile.in: Make all objects depend on running igen.
+
+2006-07-14  Kevin Buettner  <kevinb@redhat.com>
+
+	* interp.c (sim_create_inferior): Test for NULL pointer.
+
+2004-05-24  Alexandre Oliva  <aoliva@redhat.com>
+
+	2000-08-07  Graham Stott  <grahams@cygnus.co.uk>
 	* am33-2.igen (fmadd, fmsub, fmnadd, fmnsub): Correct typo.
-
-2000-05-29  Alexandre Oliva  <aoliva@cygnus.com>
-
+	2000-05-29  Alexandre Oliva  <aoliva@cygnus.com>
 	* interp.c (fpu_disabled_exception, fpu_unimp_exception,
 	fpu_check_signal_exception): Take additional state arguments.
 	Print exception type and call program_interrupt.  Adjust callers.
@@ -26,19 +40,13 @@
 	(fpu_rsqrt, fpu_cmp, fpu_add, fpu_sub, fpu_mul, fpu_div,
 	fpu_fmadd, fpu_fmsub, fpu_fnmadd, fpu_fnmsub): Likewise.
 	* am33-2.igen: Adjust calls.
-
-2000-05-19  Alexandre Oliva  <aoliva@cygnus.com>
-
+	2000-05-19  Alexandre Oliva  <aoliva@cygnus.com>
 	* op_utils.c (cmp2fcc): Moved...
 	* interp.c: ... here.
-
-2000-05-18  Alexandre Oliva  <aoliva@cygnus.com>
-
+	2000-05-18  Alexandre Oliva  <aoliva@cygnus.com>
 	* am33-2.igen: Use `unsigned32', `signed32', `unsigned64' or
 	`signed64' where type width is relevant.
-
-2000-05-15  Alexandre Oliva  <aoliva@cygnus.com>
-
+	2000-05-15  Alexandre Oliva  <aoliva@cygnus.com>
 	* mn10300_sim.h: Include sim-fpu.h.
 	(FD2FPU, FPU2FD): Enclose the FD argument in parentheses.
 	(fpu_check_signal_exception): Declare.
@@ -57,26 +65,17 @@
 	fpu_fmadd, fpu_fmsub, fpu_fnmadd, fpu_fnmsub): Define.
 	* am33-2.igen (frsqrt, fcmp, fadd, fsub, fmul, fdiv,
 	fmadd, fmsub, fnmadd, fnmsub): Use new functions.
-	
-2000-04-27  Alexandre Oliva  <aoliva@cygnus.com>
-
+	2000-04-27  Alexandre Oliva  <aoliva@cygnus.com>
 	* interp.c (sim_create_inferior): Set PSW bit to enable FP insns
 	if architecture is AM33/2.0.
-
 	* am33.igen: Include am33-2.igen.
-
-2000-04-23  Alexandre Oliva  <aoliva@cygnus.com>
-
+	2000-04-23  Alexandre Oliva  <aoliva@cygnus.com>
 	* mn10300.igen (movm, call, ret, retf): Check for am33_2 too.
 	* am33.igen (movm): Likewise.
-
-2000-04-19  Alexandre Oliva  <aoliva@cygnus.com>
-
+	2000-04-19  Alexandre Oliva  <aoliva@cygnus.com>
 	* am33.igen: Added `*am33_2' to some instructions that were
 	missing it.
-
-2000-04-07  Alexandre Oliva  <aoliva@cygnus.com>
-
+	2000-04-07  Alexandre Oliva  <aoliva@cygnus.com>
 	* am33-2.igen: New file.  All insns implemented, but FP flags are
 	only set for fcmp, exceptional conditions are not handled yet.
 	* Makefile.in (IGEN_INSN): Added am33-2.igen.
@@ -95,8 +94,7 @@
 	implementation.
 	(fpu_unimp_exception): Likewise.
 	* op_utils.c (cmp2fcc): New function.
-
-
+
 Local Variables:
 mode: change-log
 left-margin: 8

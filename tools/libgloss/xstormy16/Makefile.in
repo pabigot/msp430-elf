@@ -65,6 +65,7 @@ EVA_STUB_OBJS   = xstormy16_stub.o crt0_stub.o
 # Host specific makefile fragment comes in here.
 @host_makefile_frag@
 
+#
 # build a test program for each target board. Just trying to get
 # it to link is a good test, so we ignore all the errors for now.
 #

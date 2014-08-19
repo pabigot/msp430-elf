@@ -1,11 +1,13 @@
 /* Test promotion of __fp16 to double as arguments to unprototyped
    function in another compilation unit.  */
 
-/* { dg-do run } */
+/* { dg-do compile } */
 /* { dg-options "-mfp16-format=ieee" } */
-/* { dg-additional-sources "fp16-unprototyped-2.c" } */
+
 
 #include <stdlib.h>
+
+#include "fp16-unprototyped-2.c"
 
 extern int f ();
 

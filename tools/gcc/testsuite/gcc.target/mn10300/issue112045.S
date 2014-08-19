@@ -1,6 +1,6 @@
 /* { dg-do run } */
 /* { dg-options "-mrelax" } */
-/* { dg-output ".*3.*" } */
+/* { dg-output ".*6.*" } */
         .file   "issue112045.S"
         .section        .rodata
 .LC0:

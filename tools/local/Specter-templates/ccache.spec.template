@@ -1,0 +1,72 @@
+# %define with_usrlocal_symlinks 1
+%define ccache_symlink_dir /usr/local/bin
+
+Summary: A compiler cache for C and C++ code.
+Name: ccache
+Version: 1.9
+Release: 3
+URL: http://ccache.samba.org
+Source0: http://ccache.samba.org/ftp/ccache/%{name}-%{version}.tar.gz
+Patch0: ccache-preproc.patch
+License: GPL
+Group: Development/Tools
+BuildRoot: %{_tmppath}/%{name}-root
+
+%description
+ccache is a compiler cache. It acts as a caching pre-processor to C/C++
+compilers, using the -E compiler switch and a hash to detect when a
+compilation can be satisfied from cache. This often results in a 5 to
+10 times speedup in common compilations.
+
+%prep
+%setup -q
+%patch0 -p0 -b .preproc
+
+%build
+%configure
+make
+
+%install
+rm -rf $RPM_BUILD_ROOT
+
+# Make directories the makefile misses
+mkdir -p $RPM_BUILD_ROOT/usr/{bin,share/man/man1}
+%makeinstall
+
+%if %{with_usrlocal_symlinks}
+mkdir -p %{buildroot}%{ccache_symlink_dir}
+ln -s ../../bin/ccache %{buildroot}%{ccache_symlink_dir}/gcc
+ln -s ../../bin/ccache %{buildroot}%{ccache_symlink_dir}/g++
+%endif
+
+%clean
+rm -rf $RPM_BUILD_ROOT
+
+%files
+%defattr(-,root,root)
+%doc README COPYING
+%{_bindir}/ccache
+%{_datadir}/man/man1/*
+%if %{with_usrlocal_symlinks}
+%{ccache_symlink_dir}/gcc
+%{ccache_symlink_dir}/g++
+%endif
+
+%changelog
+* Tue Jun 18 2002 Alexandre Oliva <aoliva@redhat.com> 1.9-3
+- Fixed ccache_symlink_dir.  Disable usrlocal symlinks by default.
+
+* Thu May 30 2002 Alexandre Oliva <aoliva@redhat.com> 1.9-2
+- Added ccache-preproc.patch.
+
+* Thu May 30 2002 Alexandre Oliva <aoliva@redhat.com> 1.9-1
+- Updated to ccache 1.9.
+
+* Tue Apr 30 2002 Mike A. Harris <mharris@redhat.com> 1.8-1
+- Updated to ccache 1.8
+- Added symlinks to ccache for gcc and g++ in buildtime configurable directory
+  with conditional specfile directive so someone can disable and/or change it
+  if they don't like it.
+
+* Tue Apr 15 2002 Mike A. Harris <mharris@redhat.com> 1.7-1
+- Initial build of ccache 1.7

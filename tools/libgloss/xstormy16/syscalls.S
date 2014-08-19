@@ -10,7 +10,7 @@ _exit:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _exit,0b-_exit
+0:	.size exit,0b-_exit
 
 	.globl _open
 _open:
@@ -18,7 +18,7 @@ _open:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _open,0b-_open
+0:	.size open,0b-_open
 
 	.globl _close
 _close:
@@ -26,7 +26,7 @@ _close:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _close,0b-_close
+0:	.size close,0b-_close
 
 	.globl _read
 _read:
@@ -34,7 +34,7 @@ _read:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _read,0b-_read
+0:	.size read,0b-_read
 
 	.globl _write
 _write:
@@ -42,7 +42,7 @@ _write:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _write,0b-_write
+0:	.size write,0b-_write
 
 	.globl _lseek
 _lseek:
@@ -50,7 +50,7 @@ _lseek:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _lseek,0b-_lseek
+0:	.size lseek,0b-_lseek
 
 	.globl _unlink
 _unlink:
@@ -58,7 +58,7 @@ _unlink:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _unlink,0b-_unlink
+0:	.size unlink,0b-_unlink
 
 	.globl _getpid
 _getpid:
@@ -66,7 +66,7 @@ _getpid:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _getpid,0b-_getpid
+0:	.size getpid,0b-_getpid
 
 	.globl _kill
 _kill:
@@ -74,7 +74,7 @@ _kill:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _kill,0b-_kill
+0:	.size kill,0b-_kill
 
 	.globl _fstat
 _fstat:
@@ -82,7 +82,7 @@ _fstat:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _fstat,0b-_fstat
+0:	.size fstat,0b-_fstat
 
 	.globl _chdir
 _chdir:
@@ -90,7 +90,7 @@ _chdir:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _chdir,0b-_chdir
+0:	.size chdir,0b-_chdir
 
 	.globl _stat
 _stat:
@@ -98,7 +98,7 @@ _stat:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _stat,0b-_stat
+0:	.size stat,0b-_stat
 
 	.globl _chmod
 _chmod:
@@ -106,7 +106,7 @@ _chmod:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _chmod,0b-_chmod
+0:	.size chmod,0b-_chmod
 
 	.globl _utime
 _utime:
@@ -114,7 +114,7 @@ _utime:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _utime,0b-_utime
+0:	.size utime,0b-_utime
 
 	.globl _time
 _time:
@@ -122,7 +122,7 @@ _time:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _time,0b-_time
+0:	.size time,0b-_time
 
 	.globl _gettimeofday
 _gettimeofday:
@@ -130,7 +130,7 @@ _gettimeofday:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _gettimeofday,0b-_gettimeofday
+0:	.size gettimeofday,0b-_gettimeofday
 
 	.globl _times
 _times:
@@ -138,7 +138,7 @@ _times:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _times,0b-_times
+0:	.size times,0b-_times
 
 	.globl _link
 _link:
@@ -146,7 +146,7 @@ _link:
 	.hword 0x0001
 	bnz r1,#0,syscall_error
 	ret
-0:	.size _link,0b-_link
+0:	.size link,0b-_link
 
 syscall_error:
 # Return value for the syscall is in r2.  Save it here, as

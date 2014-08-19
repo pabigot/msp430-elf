@@ -5,7 +5,7 @@
 #
 #   This program is free software; you can redistribute it and/or modify
 #   it under the terms of the GNU General Public License as published by
-#   the Free Software Foundation; either version 2 of the License, or
+#   the Free Software Foundation; either version 3 of the License, or
 #   (at your option) any later version.
 #
 #   This program is distributed in the hope that it will be useful,
@@ -14,15 +14,16 @@
 #   GNU General Public License for more details.
 #
 #   You should have received a copy of the GNU General Public License
-#   along with this program; if not, write to the Free Software
-#   Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
+#   along with this program; if not, see <http://www.gnu.org/licenses/>.
 #
 
 default: all
 
 VPATH = @srcdir@
 srcdir = @srcdir@
+srccom = $(srcdir)/../common
 srcroot = $(srcdir)/../..
+srcsim = $(srcdir)/..
 
 prefix = @prefix@
 exec_prefix = @exec_prefix@
@@ -34,6 +35,7 @@ bindir = @bindir@
 libdir = @libdir@
 tooldir = $(libdir)/$(target_alias)
 
+datarootdir = @datarootdir@
 datadir = @datadir@
 mandir = @mandir@
 man1dir = $(mandir)/man1
@@ -120,6 +122,7 @@ NOWARN_CFLAGS	= $(CFLAGS) $(INLINE_CFLAGS) $(CONFIG_CFLAGS) $(SIM_CFLAGS) $(HDEF
 BUILD_CFLAGS	= $(CFLAGS_FOR_BUILD) $(INCLUDES) $(WARNING_CFLAGS)
 
 BUILD_LDFLAGS	=
+LIBS = @LIBS@
 
 CONFIG_FILE = @sim_config@
 IGEN_OPCODE_RULES = @sim_opcode@
@@ -534,6 +537,7 @@ LIB_OBJ = \
 	support.o \
 	@sim_fpu@ \
 	psim.o \
+	version.o \
 	$(PACKAGE_OBJ) \
 	$(HW_OBJ) \
 	options.o
@@ -543,7 +547,6 @@ GDB_OBJ = gdb-sim.o sim_calls.o @sim_callback@
 
 HW_SRC = @sim_hw_src@
 HW_OBJ = @sim_hw_obj@
-LIBS = @LIBS@
 
 PACKAGE_SRC = @sim_pk_src@
 PACKAGE_OBJ = @sim_pk_obj@
@@ -560,6 +563,10 @@ $(TARGETLIB): tmp-igen tmp-dgen tmp-hw tmp-pk tmp-defines $(LIB_OBJ) $(GDB_OBJ)
 	rm -f $(TARGETLIB)
 	$(AR) $(AR_FLAGS) $(TARGETLIB) $(LIB_OBJ) $(GDB_OBJ)
 	$(RANLIB) $(TARGETLIB)
+
+version.c: Makefile $(srccom)/create-version.sh ../../bfd/version.h ../../gdb/version.in
+	$(SHELL) $(srccom)/create-version.sh $(srcsim) $(host_alias) $(target_alias) version.c
+version.o: version.c $(version_h)
 
 psim.o: psim.c $(CPU_H) $(IDECODE_H) $(OPTIONS_H) $(TREE_H) $(BFD_H)
 
@@ -835,6 +842,8 @@ hw_opic.o: hw_opic.c $(DEVICE_TABLE_H)
 hw_pal.o: hw_pal.c $(DEVICE_TABLE_H) $(CPU_H)
 hw_phb.o: hw_phb.c $(DEVICE_TABLE_H) $(HW_PHB_H) $(COREFILE_H)
 hw_register.o: hw_register.c $(DEVICE_TABLE_H) $(PSIM_H)
+hw_sem.o: hw_sem.c $(DEVICE_TABLE_H) $(PSIM_H)
+hw_shm.o: hw_shm.c $(DEVICE_TABLE_H) $(PSIM_H)
 hw_trace.o: hw_trace.c $(DEVICE_TABLE_H)
 hw_vm.o: hw_vm.c $(DEVICE_TABLE_H) $(CPU_H)
 # ignore this line, it stops make from getting confused

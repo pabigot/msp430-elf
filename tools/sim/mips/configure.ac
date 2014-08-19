@@ -109,10 +109,6 @@ sim_m16_filter="16"
 sim_mach_default="mips8000"
 
 case "${target}" in
-  mips64vr54*-*-*)	sim_gen=IGEN
-			sim_igen_machine="-M vr5000,vr5400 -G gen-multi-sim=vr5400"
-			sim_mach_default="mips64vr5400"
-			;;
   mips*tx39*)		sim_gen=IGEN
 			sim_igen_filter="32,f"
 			sim_igen_machine="-M r3900"
@@ -124,7 +120,6 @@ case "${target}" in
   mips64vr5*-*-*)	sim_gen=IGEN
 			sim_igen_machine="-M vr5000"
 			sim_mach_default="mips5000"
-			sim_igen_machine="-M vr5000,vr5400 -G gen-multi-sim=vr5000"
 			;;
   mips64vr41*)		sim_gen=M16
 			sim_igen_machine="-M vr4100"
@@ -239,7 +234,7 @@ if test ${sim_gen} = MULTI; then
 
   cat << __EOF__ > multi-run.c
 /* Main entry point for MULTI simulators.
-   Copyright (C) 2003-2013 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -424,8 +419,17 @@ case "${target}" in
 	;;
 esac
 SIM_AC_OPTION_HARDWARE($hw_enabled,$hw_devices,$hw_extra_devices)
-mips_extra_objs="dv-sockser.o"
+mips_extra_objs="$SIM_DV_SOCKSER_O"
 AC_SUBST(mips_extra_objs)
+
+if test "$sim_hw_p" = yes -a -z "$SIM_DV_SOCKSER_O"; then
+	case " $sim_hw " in
+	*" tx3904sio "*)
+		AC_MSG_ERROR([Sorry, but tx3904sio hardware support is
+unavailable for your target.  Please use --disable-sim-hardware, or pass a
+list of devices to enable that does not include that.])
+	esac
+fi
 
 
 # Choose simulator engine

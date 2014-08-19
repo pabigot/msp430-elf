@@ -15,3 +15,4 @@ int main(int argc, char**)
 	Foo* p = foo.release();
 	p->f();
 }
+// { dg-require-effective-target size32plus }

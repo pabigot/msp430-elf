@@ -1,0 +1,30 @@
+This patch disables the tree-vrp pass for the 20001226-1.c test in the
+gcc.c-torture/compile directory.  This pass requires a huge amount of
+stack space in order to complete successfully and not all of our build
+machines have enough memory.
+
+gcc/testsuite/ChangLog.RedHat
+2006-05-03  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/compile/20001226-1.c: Add -fno-tree-vrp to gcc
+	command line as the tree-vrp pass, enabled at -O2 or higher,
+	requires a huge amount of stack space, much more than is available
+	on lots of our host machines.
+
+Index: gcc/testsuite/gcc.c-torture/compile/20001226-1.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/testsuite/gcc.c-torture/compile/20001226-1.c,v
+retrieving revision 1.4
+diff -c -3 -p -r1.4 20001226-1.c
+*** gcc/testsuite/gcc.c-torture/compile/20001226-1.c	16 Dec 2005 20:17:35 -0000	1.4
+--- gcc/testsuite/gcc.c-torture/compile/20001226-1.c	3 May 2006 15:34:34 -0000
+***************
+*** 1,5 ****
+--- 1,6 ----
+  /* This does not assemble on m68hc11 because the function is larger
+     than 64K.  */
++ /* { dg-options "-fno-tree-vrp" } *//* XXX nickc: This test does not compile at -O2 or higher on machines without a large amount of stack space (> 2Mb!) because of the tree-vrp pass.  */
+  /* { dg-do assemble { xfail m6811-*-* m6812-*-* } } */
+  /* { dg-skip-if "too much code for avr" { "avr-*-*" } { "*" } { "" } } */
+  
+

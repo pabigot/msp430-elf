@@ -1,5 +1,5 @@
 /* Target definitions for GNU compiler for PowerPC running System V.4
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    Contributed by Cygnus Support.
 
    This file is part of GCC.
@@ -45,7 +45,7 @@
 				      & (OPTION_MASK_RELOCATABLE	\
 					 | OPTION_MASK_MINIMAL_TOC))	\
 				     && flag_pic > 1)			\
-				 || DEFAULT_ABI == ABI_AIX)
+				 || DEFAULT_ABI != ABI_V4)
 
 #define	TARGET_BITFIELD_TYPE	(! TARGET_NO_BITFIELD_TYPE)
 #define	TARGET_BIG_ENDIAN	(! TARGET_LITTLE_ENDIAN)
@@ -54,7 +54,7 @@
 #define	TARGET_NO_TOC		(! TARGET_TOC)
 #define	TARGET_NO_EABI		(! TARGET_EABI)
 #define	TARGET_REGNAMES		rs6000_regnames
-#define TARGET_BITFIELD_WORD	(! TARGET_NO_BITFIELD_WORD)
+
 #ifdef HAVE_AS_REL16
 #undef TARGET_SECURE_PLT
 #define TARGET_SECURE_PLT	secure_plt
@@ -147,7 +147,7 @@ do {									\
 	     rs6000_sdata_name);					\
     }									\
 									\
-  else if (flag_pic && DEFAULT_ABI != ABI_AIX				\
+  else if (flag_pic && DEFAULT_ABI == ABI_V4				\
 	   && (rs6000_sdata == SDATA_EABI				\
 	       || rs6000_sdata == SDATA_SYSV))				\
     {									\
@@ -173,24 +173,18 @@ do {									\
       error ("-mrelocatable and -mno-minimal-toc are incompatible");	\
     }									\
 									\
-  if (TARGET_RELOCATABLE && rs6000_current_abi == ABI_AIX)		\
+  if (TARGET_RELOCATABLE && rs6000_current_abi != ABI_V4)		\
     {									\
       rs6000_isa_flags &= ~OPTION_MASK_RELOCATABLE;			\
       error ("-mrelocatable and -mcall-%s are incompatible",		\
 	     rs6000_abi_name);						\
     }									\
 									\
-  if (!TARGET_64BIT && flag_pic > 1 && rs6000_current_abi == ABI_AIX)	\
+  if (!TARGET_64BIT && flag_pic > 1 && rs6000_current_abi != ABI_V4)	\
     {									\
       flag_pic = 0;							\
       error ("-fPIC and -mcall-%s are incompatible",			\
 	     rs6000_abi_name);						\
-    }									\
-									\
-  if (rs6000_current_abi == ABI_AIX && TARGET_LITTLE_ENDIAN)		\
-    {									\
-      rs6000_isa_flags &= ~OPTION_MASK_LITTLE_ENDIAN;			\
-      error ("-mcall-aixdesc must be big endian");			\
     }									\
 									\
   if (TARGET_SECURE_PLT != secure_plt)					\
@@ -199,7 +193,7 @@ do {									\
     }									\
 									\
   /* Treat -fPIC the same as -mrelocatable.  */				\
-  if (flag_pic > 1 && DEFAULT_ABI != ABI_AIX)				\
+  if (flag_pic > 1 && DEFAULT_ABI == ABI_V4)				\
     {									\
       rs6000_isa_flags |= OPTION_MASK_RELOCATABLE | OPTION_MASK_MINIMAL_TOC; \
       TARGET_NO_FP_IN_TOC = 1;						\
@@ -323,7 +317,7 @@ do {									\
 
 /* Put PC relative got entries in .got2.  */
 #define	MINIMAL_TOC_SECTION_ASM_OP \
-  (TARGET_RELOCATABLE || (flag_pic && DEFAULT_ABI != ABI_AIX)		\
+  (TARGET_RELOCATABLE || (flag_pic && DEFAULT_ABI == ABI_V4)		\
    ? "\t.section\t\".got2\",\"aw\"" : "\t.section\t\".got1\",\"aw\"")
 
 #define	SDATA_SECTION_ASM_OP "\t.section\t\".sdata\",\"aw\""
@@ -523,47 +517,30 @@ extern int fixuplabelno;
   while (0)
 #endif
 
+/* Select one of BIG_OPT, LITTLE_OPT or DEFAULT_OPT depending
+   on various -mbig, -mlittle and -mcall- options.  */
+#define ENDIAN_SELECT(BIG_OPT, LITTLE_OPT, DEFAULT_OPT)	\
+"%{mlittle|mlittle-endian:"	LITTLE_OPT ";"	\
+  "mbig|mbig-endian:"		BIG_OPT    ";"	\
+  "mcall-i960-old:"		LITTLE_OPT ";"	\
+  ":"				DEFAULT_OPT "}"
+
+#define DEFAULT_ASM_ENDIAN " -mbig"
+
 #undef	ASM_SPEC
 #define	ASM_SPEC "%(asm_cpu) \
 %{,assembler|,assembler-with-cpp: %{mregnames} %{mno-regnames}} \
 %{mrelocatable} %{mrelocatable-lib} %{fpic|fpie|fPIC|fPIE:-K PIC} \
-%{memb|msdata=eabi: -memb} \
-%{mlittle|mlittle-endian:-mlittle; \
-  mbig|mbig-endian      :-mbig;    \
-  mcall-aixdesc |		   \
-  mcall-freebsd |		   \
-  mcall-netbsd  |		   \
-  mcall-openbsd |		   \
-  mcall-linux           :-mbig;    \
-  mcall-i960-old        :-mlittle}"
-
-#define	CC1_ENDIAN_BIG_SPEC ""
-
-#define	CC1_ENDIAN_LITTLE_SPEC "\
-%{!mstrict-align: %{!mno-strict-align: \
-    %{!mcall-i960-old: \
-	-mstrict-align \
-    } \
-}}"
-
-#define	CC1_ENDIAN_DEFAULT_SPEC "%(cc1_endian_big)"
+%{memb|msdata=eabi: -memb}" \
+ENDIAN_SELECT(" -mbig", " -mlittle", DEFAULT_ASM_ENDIAN)
 
 #ifndef CC1_SECURE_PLT_DEFAULT_SPEC
 #define CC1_SECURE_PLT_DEFAULT_SPEC ""
 #endif
 
-/* Pass -G xxx to the compiler and set correct endian mode.  */
-#define	CC1_SPEC "%{G*} %(cc1_cpu) \
-%{mlittle|mlittle-endian: %(cc1_endian_little);           \
-  mbig   |mbig-endian   : %(cc1_endian_big);              \
-  mcall-aixdesc |					  \
-  mcall-freebsd |					  \
-  mcall-netbsd  |					  \
-  mcall-openbsd |					  \
-  mcall-linux           : -mbig %(cc1_endian_big);        \
-  mcall-i960-old        : -mlittle %(cc1_endian_little);  \
-                        : %(cc1_endian_default)}          \
-%{meabi: %{!mcall-*: -mcall-sysv }} \
+/* Pass -G xxx to the compiler.  */
+#define	CC1_SPEC "%{G*} %(cc1_cpu)" \
+"%{meabi: %{!mcall-*: -mcall-sysv }} \
 %{!meabi: %{!mno-eabi: \
     %{mrelocatable: -meabi } \
     %{mcall-freebsd: -mno-eabi } \
@@ -597,7 +574,6 @@ extern int fixuplabelno;
 %(link_shlib) \
 %{!T*: %(link_start) } \
 %(link_target) \
-%{mmpc860c0*:--mpc860c0%*} \
 %(link_os)"
 
 /* Shared libraries are not default.  */
@@ -608,11 +584,8 @@ extern int fixuplabelno;
 %{symbolic:-Bsymbolic -G -dy -z text }"
 
 /* Override the default target of the linker.  */
-#define	LINK_TARGET_SPEC "\
-%{mlittle: --oformat elf32-powerpcle } %{mlittle-endian: --oformat elf32-powerpcle } \
-%{!mlittle: %{!mlittle-endian: %{!mbig: %{!mbig-endian: \
-    %{mcall-i960-old: --oformat elf32-powerpcle} \
-  }}}}"
+#define	LINK_TARGET_SPEC \
+  ENDIAN_SELECT("", " --oformat elf32-powerpcle", "")
 
 /* Any specific OS flags.  */
 #define LINK_OS_SPEC "\
@@ -920,9 +893,6 @@ ncrtn.o%s"
   { "link_os_netbsd",		LINK_OS_NETBSD_SPEC },			\
   { "link_os_openbsd",		LINK_OS_OPENBSD_SPEC },			\
   { "link_os_default",		LINK_OS_DEFAULT_SPEC },			\
-  { "cc1_endian_big",		CC1_ENDIAN_BIG_SPEC },			\
-  { "cc1_endian_little",	CC1_ENDIAN_LITTLE_SPEC },		\
-  { "cc1_endian_default",	CC1_ENDIAN_DEFAULT_SPEC },		\
   { "cc1_secure_plt_default",	CC1_SECURE_PLT_DEFAULT_SPEC },		\
   { "cpp_os_ads",		CPP_OS_ADS_SPEC },			\
   { "cpp_os_yellowknife",	CPP_OS_YELLOWKNIFE_SPEC },		\

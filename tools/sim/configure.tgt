@@ -16,14 +16,12 @@ sim_common=yes
 sim_igen=no
 sim_arch=
 case "${target}" in
+   aarch64-*-*)
+       SIM_ARCH(aarch64)
+       ;;
    arm*-*-*)
        SIM_ARCH(arm)
        sim_testsuite=yes
-       ;;
-   m68k*-*-*)
-       SIM_ARCH(m68k)
-       sim_testsuite=yes
-       sim_common=yes
        ;;
    avr*-*-*)
        SIM_ARCH(avr)
@@ -83,6 +81,7 @@ case "${target}" in
        sim_testsuite=yes
        sim_igen=yes
        ;;
+   am3*-*-* | \
    mn10300*-*-*)
        SIM_ARCH(mn10300)
        sim_igen=yes
@@ -126,6 +125,7 @@ case "${target}" in
        ;;
 esac
 AC_SUBST(sim_arch)
+
 # Local variables:
 # mode: autoconf
 # End:

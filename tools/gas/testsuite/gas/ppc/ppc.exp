@@ -31,6 +31,7 @@ if { [istarget powerpc64*-*-*] || [istarget *-*-elf64*]} then {
     run_list_test "range64" "-a64"
 } elseif { [istarget powerpc*-*aix*] } then {
     run_dump_test "test1xcoff32"
+    run_dump_test "test2xcoff32"
 } elseif { [istarget powerpc*-*-*bsd*] \
      || [istarget powerpc*-*-elf*] \
      || [istarget powerpc*-*-eabi*] \
@@ -44,7 +45,6 @@ if { [istarget powerpc64*-*-*] || [istarget *-*-elf64*]} then {
 }
 
 if { [istarget powerpc*-*-*] } then {
-    run_dump_test "simpshft"
     run_dump_test "regnames"
     if { [is_elf_format] } then {
 	run_dump_test "machine"
@@ -67,6 +67,7 @@ if { [istarget powerpc*-*-*] } then {
 	run_dump_test "altivec_xcoff"
 	run_dump_test "altivec_xcoff64"
     } else {
+	run_dump_test "simpshft"
 	run_dump_test "altivec"
 	run_dump_test "altivec2"
 	run_dump_test "altivec_and_spe"
@@ -85,6 +86,7 @@ if { [istarget powerpc*-*-*] } then {
 	run_dump_test "power7"
 	run_dump_test "power8"
 	run_dump_test "vsx"
+	run_dump_test "vsx2"
 	run_dump_test "htm"
 	run_dump_test "titan"
     }

@@ -8,7 +8,7 @@
  * See the file "license.terms" for information on usage and redistribution
  * of this file, and for a DISCLAIMER OF ALL WARRANTIES.
  *
- * RCS: @(#) $Id: xutil.c,v 1.8 2000/10/11 21:52:04 spolk Exp $
+ * RCS: @(#) $Id: xutil.c,v 1.3 2012/04/18 00:37:13 kevinb Exp $
  */
 
 #include <stdlib.h>

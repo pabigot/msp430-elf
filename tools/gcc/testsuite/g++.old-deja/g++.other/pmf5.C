@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // Bug: g++ expanded b->member() multiple times, causing the optimizer to
 // decide that things weren't related and optimize 'die' into an infinite
 // loop.

@@ -111,6 +111,10 @@ proc default_binutils_assemble_flags { source object asflags } {
 	set source asm.s
     }
 
+    if { [istarget rx-*-*] } {
+	set asflags "$asflags -muse-conventional-section-names"
+    }
+
     set exec_output [target_assemble $source $object $asflags]
     set exec_output [prune_warnings $exec_output]
 

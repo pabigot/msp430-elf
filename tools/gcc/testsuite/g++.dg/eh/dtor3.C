@@ -1,5 +1,5 @@
 // Red Hat bug 750545
-// { dg-do run { target c++98 } }
+// { dg-do run { target { ! c++11 } } }
 
 class excep {};
 class A
@@ -34,3 +34,4 @@ int main()
 {
   f();
 }
+// { dg-require-effective-target size32plus }

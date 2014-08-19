@@ -9,7 +9,7 @@
  * Copyright (c) 1998-1999 by Scriptics Corporation.
  * All rights reserved.
  *
- * RCS: @(#) $Id: tclIntPlatDecls.h,v 1.3 2003/03/19 23:01:15 cagney Exp $
+ * RCS: @(#) $Id: tclIntPlatDecls.h,v 1.3 2012/04/18 00:36:25 kevinb Exp $
  */
 
 #ifndef _TCLINTPLATDECLS

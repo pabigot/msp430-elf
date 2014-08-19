@@ -206,6 +206,8 @@ TARGET_LIBOPCODES_CFILES = \
 	mt-dis.c \
 	mt-ibld.c \
 	mt-opc.c \
+	nds32-asm.c \
+	nds32-dis.c \
 	nios2-dis.c \
 	nios2-opc.c \
 	ns32k-dis.c \
@@ -401,7 +403,6 @@ XC16X_DEPS =
 XSTORMY16_DEPS = 
 endif
 
-
 run-cgen:
 	$(SHELL) $(srcdir)/cgen.sh opcodes $(srcdir) $(CGEN) \
 	  $(CGENDIR) "$(CGENFLAGS)" $(arch) $(prefix) $(archfile) $(opcfile) \
@@ -577,15 +578,6 @@ $(srcdir)/msp430-decode.c: @MAINT@ $(srcdir)/msp430-decode.opc opc2c$(EXEEXT_FOR
 
 $(srcdir)/rl78-decode.c: @MAINT@ $(srcdir)/rl78-decode.opc opc2c$(EXEEXT_FOR_BUILD)
 	./opc2c$(EXEEXT_FOR_BUILD) $(srcdir)/rl78-decode.opc > $(srcdir)/rl78-decode.c
-
-micromips-opc.lo: micromips-opc.c
-	$(LTCOMPILE) $(NO_WMISSING_FIELD_INITIALIZERS) -c -o $@ $<
-
-mips-opc.lo: mips-opc.c
-	$(LTCOMPILE) $(NO_WMISSING_FIELD_INITIALIZERS) -c -o $@ $<
-
-mips16-opc.lo: mips16-opc.c
-	$(LTCOMPILE) $(NO_WMISSING_FIELD_INITIALIZERS) -c -o $@ $<
 
 $(srcdir)/rx-decode.c: @MAINT@ $(srcdir)/rx-decode.opc opc2c$(EXEEXT_FOR_BUILD)
 	./opc2c$(EXEEXT_FOR_BUILD) $(srcdir)/rx-decode.opc > $(srcdir)/rx-decode.c

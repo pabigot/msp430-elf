@@ -1,37 +1,17 @@
-## Process this file with automake to generate Makefile.in
-#
-#   Copyright 2012 Free Software Foundation
-#
-# This file is free software; you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation; either version 3 of the License, or
-# (at your option) any later version.
-# 
-# This program is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# 
-# You should have received a copy of the GNU General Public License
-# along with this program; see the file COPYING3.  If not see
-# <http://www.gnu.org/licenses/>.
-#
+# Process this file with "automake --cygnus Makefile" to generate Makefile.in
 
-AUTOMAKE_OPTIONS = 1.9 cygnus
+AUTOMAKE_OPTIONS = cygnus
 
-SUBDIRS = doc testsuite
+SUBDIRS = doc
 
-GUILE = "`if test -f ../guile/libguile/guile ; then echo ../guile/libguile/guile; else echo guile ; fi`" -l $(srcdir)/guile.scm -s
+GUILE = "`if test -f ../guile/libguile/guile ; then echo ../guile/libguile/guile; else echo guile ; fi` -l guile -s"
 CGENFLAGS = -v
 ARCH = @arch@
-ARCHFILE = $(srcroot)/cpu/$(ARCH).cpu
+ARCHFILE = $(srcroot)/../cpu/$(ARCH).cpu
 
 # for various utility rules
 MACHS = all
 ISAS = all
-
-# file generation options
-OPTIONS =
 
 # for the html rule
 INSN_FILE_NAME = $(ARCH)-insn.html
@@ -45,9 +25,6 @@ srcroot = $(srcdir)/..
 # app-independent files.
 
 all-local: stamp-cgen
-
-install-pdf:
-install-html:
 
 stamp-cgen: $(CGENFILES)
 	rm -f stamp-cgen
@@ -63,13 +40,12 @@ stamp-cgen: $(CGENFILES)
 
 # Build the basic description support.
 # We just stuff them in tmp-* files.
-# Usage: make desc [ARCH=<arch>] [ARCHFILE=<arch-file>] OPTIONS="<option list>"
-#
-# -O tmp-opc.h -P tmp-opc.c -OPC $(dirname ${archfile})/${arch}.opc
+# Usage: make desc [ARCHFILE=<arch-file>] OPTIONS="<option list>"
 
 .PHONY: desc
+# FIXME: needs more dependencies
 desc: desc.scm
-	rm -f tmp-desc.h tmp-desc.c
+	rm -f tmp-desc.h tmp-desc.c tmp-opinst.c
 	$(GUILE) $(srcdir)/cgen-opc.scm \
 		-s $(srcdir) \
 		$(CGENFLAGS) \
@@ -78,8 +54,6 @@ desc: desc.scm
 		-i "$(ISAS)" \
 		-m "$(MACHS)" \
 		-H tmp-desc.h -C tmp-desc.c
-	$(SHELL) $(srcroot)/move-if-change tmp-desc.h $(ARCH)-desc.h
-	$(SHELL) $(srcroot)/move-if-change tmp-desc.c $(ARCH)-desc.c
 
 # Build the machine generated cpu documentation.
 # Usage: make html [ARCH=<arch>] [ARCHFILE=<arch-file>]
@@ -104,6 +78,7 @@ html: desc.scm html.scm cgen-doc.scm
 # Usage: make opcodes [ARCHFILE=<arch-file>] OPTIONS="<option list>"
 
 .PHONY: opcodes
+# FIXME: needs more dependencies
 opcodes: opcodes.scm
 	rm -f tmp-opc.h tmp-itab.c
 	rm -f tmp-asm.in tmp-dis.in tmp-ibld.h tmp-ibld.in
@@ -125,6 +100,7 @@ opcodes: opcodes.scm
 #          OPTIONS="<option list>"
 
 .PHONY: sim-arch sim-cpu
+# FIXME: needs more dependencies
 sim-arch: sim.scm
 	rm -f tmp-arch.h tmp-arch.c tmp-cpuall.h
 	$(GUILE) $(srcdir)/cgen-sim.scm \

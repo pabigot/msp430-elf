@@ -1,5 +1,5 @@
 # Makefile fragment for building LIBGCC for the Renesas RL78 target.
-# Copyright (C) 2011-2013 Free Software Foundation, Inc.
+# Copyright (C) 2011-2014 Free Software Foundation, Inc.
 # Contributed by Red Hat.
 #
 # This file is part of GCC.
@@ -30,9 +30,3 @@ LIB2ADD = \
 	$(srcdir)/config/rl78/divmodqi.S \
 	$(srcdir)/config/rl78/signbit.S \
 	$(srcdir)/config/rl78/cmpsi2.S
-
-HOST_LIBGCC2_CFLAGS += -Os -ffunction-sections -fdata-sections
-
-# Local Variables:
-# mode: Makefile
-# End:

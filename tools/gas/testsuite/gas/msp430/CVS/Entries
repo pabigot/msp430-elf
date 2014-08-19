@@ -1,9 +1,9 @@
-/msp430.exp/1.4.4.2/Fri Oct  4 08:41:09 2013//Tmsp430-130322-branch
-/msp430x.d/1.9.2.2/Fri Oct  4 08:41:09 2013//Tmsp430-130322-branch
-/msp430x.s/1.3.4.1/Fri Oct  4 08:41:09 2013//Tmsp430-130322-branch
-/opcode.d/1.3/Mon Nov 26 14:10:43 2012//Tmsp430-130322-branch
-/opcode.s/1.2.50.1/Tue May 14 16:30:48 2013//Tmsp430-130322-branch
-/bad.l/1.1.2.2/Thu Jan 30 17:58:42 2014//Tmsp430-130322-branch
-/bad.s/1.1.2.2/Thu Jan 30 17:58:42 2014//Tmsp430-130322-branch
-/bad.d/1.1.2.3/Thu Mar 13 04:40:27 2014//Tmsp430-130322-branch
+/bad.d/1.3/Tue May 27 09:30:24 2014//Tmsp430-14r1-branch
+/bad.l/1.2/Fri Apr 11 09:37:16 2014//Tmsp430-14r1-branch
+/bad.s/1.2/Fri Apr 11 09:37:16 2014//Tmsp430-14r1-branch
+/msp430.exp/1.4/Thu Mar  6 15:05:05 2014//Tmsp430-14r1-branch
+/msp430x.d/1.3/Mon Jun  9 10:41:35 2014//Tmsp430-14r1-branch
+/msp430x.s/1.2/Thu Mar  6 15:05:05 2014//Tmsp430-14r1-branch
+/opcode.d/1.3/Thu Feb 20 13:29:32 2014//Tmsp430-14r1-branch
+/opcode.s/1.3/Thu Feb 20 13:29:32 2014//Tmsp430-14r1-branch
 D

@@ -62,7 +62,9 @@ DIST_COMMON = ChangeLog $(srcdir)/Makefile.in $(srcdir)/Makefile.am \
 	$(srcdir)/config.in $(srcdir)/../mkinstalldirs \
 	$(top_srcdir)/po/Make-in $(srcdir)/../depcomp
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
-am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
+am__aclocal_m4_deps = $(top_srcdir)/../bfd/acinclude.m4 \
+	$(top_srcdir)/../config/zlib.m4 \
+	$(top_srcdir)/../bfd/warning.m4 $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/../config/depstand.m4 \
 	$(top_srcdir)/../config/gettext-sister.m4 \
 	$(top_srcdir)/../config/lead-dot.m4 \
@@ -71,12 +73,9 @@ am__aclocal_m4_deps = $(top_srcdir)/../config/acx.m4 \
 	$(top_srcdir)/../config/po.m4 \
 	$(top_srcdir)/../config/progtest.m4 \
 	$(top_srcdir)/../config/warnings.m4 \
-	$(top_srcdir)/../bfd/acinclude.m4 \
-	$(top_srcdir)/../config/zlib.m4 \
-	$(top_srcdir)/../bfd/warning.m4 $(top_srcdir)/../libtool.m4 \
-	$(top_srcdir)/../ltoptions.m4 $(top_srcdir)/../ltsugar.m4 \
-	$(top_srcdir)/../ltversion.m4 $(top_srcdir)/../lt~obsolete.m4 \
-	$(top_srcdir)/configure.in
+	$(top_srcdir)/../libtool.m4 $(top_srcdir)/../ltoptions.m4 \
+	$(top_srcdir)/../ltsugar.m4 $(top_srcdir)/../ltversion.m4 \
+	$(top_srcdir)/../lt~obsolete.m4 $(top_srcdir)/configure.in
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
@@ -479,6 +478,8 @@ TARGET_LIBOPCODES_CFILES = \
 	mt-dis.c \
 	mt-ibld.c \
 	mt-opc.c \
+	nds32-asm.c \
+	nds32-dis.c \
 	nios2-dis.c \
 	nios2-opc.c \
 	ns32k-dis.c \
@@ -609,9 +610,7 @@ CGENDEPS = \
 	$(CGENDIR)/opc-opinst.scm \
 	cgen-asm.in cgen-dis.in cgen-ibld.in
 
-CGEN_CPUS = epiphany fr30 frv ip2k iq2000 lm32 m32c m32r mep mt \
-	openrisc xc16x xstormy16 nios ip4k ip4kmath calmrisc16 \
-	calmrisc32 cy16
+CGEN_CPUS = epiphany fr30 frv ip2k iq2000 lm32 m32c m32r mep mt openrisc xc16x xstormy16
 @CGEN_MAINT_FALSE@EPIPHANY_DEPS = 
 @CGEN_MAINT_TRUE@EPIPHANY_DEPS = stamp-epiphany
 @CGEN_MAINT_FALSE@FR30_DEPS = 
@@ -638,7 +637,6 @@ CGEN_CPUS = epiphany fr30 frv ip2k iq2000 lm32 m32c m32r mep mt \
 @CGEN_MAINT_TRUE@XC16X_DEPS = stamp-xc16x
 @CGEN_MAINT_FALSE@XSTORMY16_DEPS = 
 @CGEN_MAINT_TRUE@XSTORMY16_DEPS = stamp-xstormy16
-
 MOSTLYCLEANFILES = aarch64-gen$(EXEEXT_FOR_BUILD) i386-gen$(EXEEXT_FOR_BUILD) \
 	ia64-gen$(EXEEXT_FOR_BUILD) s390-mkopc$(EXEEXT_FOR_BUILD) s390-opc.tab \
 	z8kgen$(EXEEXT_FOR_BUILD) opc2c$(EXEEXT_FOR_BUILD)
@@ -780,16 +778,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/arm-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/avr-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bfin-dis.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calmrisc16-asm.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calmrisc16-desc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calmrisc16-dis.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calmrisc16-ibld.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calmrisc16-opc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calmrisc32-asm.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calmrisc32-desc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calmrisc32-dis.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calmrisc32-ibld.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/calmrisc32-opc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cgen-asm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cgen-bitset.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cgen-dis.Plo@am__quote@
@@ -800,11 +788,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cris-opc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crx-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/crx-opc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cy16-asm.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cy16-desc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cy16-dis.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cy16-ibld.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cy16-opc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/d10v-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/d10v-opc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/d30v-dis.Plo@am__quote@
@@ -844,16 +827,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ip2k-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ip2k-ibld.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ip2k-opc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ip4k-asm.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ip4k-desc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ip4k-dis.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ip4k-ibld.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ip4k-opc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ip4kmath-asm.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ip4kmath-desc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ip4kmath-dis.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ip4kmath-ibld.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ip4kmath-opc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iq2000-asm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iq2000-desc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iq2000-dis.Plo@am__quote@
@@ -908,11 +881,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mt-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mt-ibld.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mt-opc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nios-asm.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nios-desc.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nios-dis.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nios-ibld.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nios-opc.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nds32-asm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nds32-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nios2-dis.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nios2-opc.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ns32k-dis.Plo@am__quote@
@@ -1471,15 +1441,6 @@ $(srcdir)/msp430-decode.c: @MAINT@ $(srcdir)/msp430-decode.opc opc2c$(EXEEXT_FOR
 
 $(srcdir)/rl78-decode.c: @MAINT@ $(srcdir)/rl78-decode.opc opc2c$(EXEEXT_FOR_BUILD)
 	./opc2c$(EXEEXT_FOR_BUILD) $(srcdir)/rl78-decode.opc > $(srcdir)/rl78-decode.c
-
-micromips-opc.lo: micromips-opc.c
-	$(LTCOMPILE) $(NO_WMISSING_FIELD_INITIALIZERS) -c -o $@ $<
-
-mips-opc.lo: mips-opc.c
-	$(LTCOMPILE) $(NO_WMISSING_FIELD_INITIALIZERS) -c -o $@ $<
-
-mips16-opc.lo: mips16-opc.c
-	$(LTCOMPILE) $(NO_WMISSING_FIELD_INITIALIZERS) -c -o $@ $<
 
 $(srcdir)/rx-decode.c: @MAINT@ $(srcdir)/rx-decode.opc opc2c$(EXEEXT_FOR_BUILD)
 	./opc2c$(EXEEXT_FOR_BUILD) $(srcdir)/rx-decode.opc > $(srcdir)/rx-decode.c

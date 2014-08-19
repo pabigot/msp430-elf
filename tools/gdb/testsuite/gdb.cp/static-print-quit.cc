@@ -1,6 +1,6 @@
 /* This testcase is part of GDB, the GNU debugger.
 
-   Copyright 2010-2012 Free Software Foundation, Inc.
+   Copyright 2010-2014 Free Software Foundation, Inc.
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -30,6 +30,3 @@ class C
 
 D C::field;
 C c;
-
-// Necessary so that the simulator does not complain about failing to find any loadable sections.
-int a = 1;

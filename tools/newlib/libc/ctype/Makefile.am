@@ -58,7 +58,6 @@ else
 noinst_LIBRARIES = lib.a
 lib_a_SOURCES = $(GENERAL_SOURCES) $(ELIX_SOURCES)
 lib_a_CFLAGS = $(AM_CFLAGS)
-lib_a_CFLAGS += $(NEWLIB_CFLAGS)
 noinst_DATA =
 endif # USE_LIBTOOL
 

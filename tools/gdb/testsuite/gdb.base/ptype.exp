@@ -1,5 +1,4 @@
-# Copyright 1988, 1990-1992, 1994-1997, 1999-2000, 2002-2003, 2007-2012
-# Free Software Foundation, Inc.
+# Copyright 1988-2014 Free Software Foundation, Inc.
 
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -20,34 +19,18 @@
 # test running programs
 #
 
-set testfile "ptype"
-set srcfile0 ${testfile}.c
-set srcfile1 ${testfile}1.c
-set binfile ${objdir}/${subdir}/${testfile}
+standard_testfile .c ptype1.c
 
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile0}" "${binfile}0.o" object {debug}] != "" } {
-     untested ptype.exp
-     return -1
-}
-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile1}" "${binfile}1.o" object {debug}] != "" } {
-     untested ptype.exp
-     return -1
-}
-if  { [gdb_compile "${binfile}0.o ${binfile}1.o" "${binfile}" executable {debug}] != "" } {
-     untested ptype.exp
-     return -1
+if {[prepare_for_testing ${testfile}.exp ${testfile} \
+	 [list $srcfile $srcfile2] {debug nowarnings}]} {
+    return -1
 }
 
 # Create and source the file that provides information about the compiler
 # used to compile the test case.
 if [get_compiler_info] {
-    return -1;
+    return -1
 }
-
-gdb_exit
-gdb_start
-gdb_reinitialize_dir $srcdir/$subdir
-gdb_load ${binfile}
 
 # Test ptype of unnamed enumeration members before any action causes
 # the partial symbol table to be expanded to full symbols.  This fails
@@ -369,6 +352,8 @@ gdb_test "ptype v_int" "type = int.*" "ptype int"
 if {!$gcc_compiled} then { setup_xfail "rs6000-*-*" "i*86-*-sysv4*" }
 if {$hp_aCC_compiler} {setup_xfail "hppa*-*-*"}
 gdb_test "ptype t_char_array" "type = (|unsigned )char \\\[0?\\\]"
+
+gdb_test "ptype pv_char_array" "type = (|unsigned )char \\(\\*\\)\\\[0?\\\]"
 
 #
 ##

@@ -2,6 +2,7 @@
 
 /* Origin: Joseph Myers <jsm28@cam.ac.uk>.  */
 /* { dg-do compile } */
+/* { dg-skip-if "too many local objects" { rl78-*-* } "*" "" } */
 /* { dg-options "-std=iso9899:1999 -pedantic-errors" } */
 
 #include <limits.h>

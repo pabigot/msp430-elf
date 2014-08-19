@@ -3,8 +3,7 @@
 
 /* Dynamic architecture support for GDB, the GNU debugger.
 
-   Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
-   2007, 2008, 2009 Free Software Foundation, Inc.
+   Copyright (C) 1998-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -50,7 +49,6 @@ struct disassemble_info;
 struct target_ops;
 struct obstack;
 struct bp_target_info;
-struct dwarf_expr_piece;
 struct target_desc;
 struct displaced_step_closure;
 struct core_regset_section;
@@ -58,18 +56,28 @@ struct syscall;
 struct agent_expr;
 struct axs_value;
 struct stap_parse_info;
+struct ravenscar_arch_ops;
+struct elf_internal_linux_prpsinfo;
 
-/* The architecture associated with the connection to the target.
- 
-   The architecture vector provides some information that is really
-   a property of the target: The layout of certain packets, for instance;
-   or the solib_ops vector.  Etc.  To differentiate architecture accesses
-   to per-target properties from per-thread/per-frame/per-objfile properties,
-   accesses to per-target properties should be made through target_gdbarch.
+/* The architecture associated with the inferior through the
+   connection to the target.
 
-   Eventually, when support for multiple targets is implemented in
-   GDB, this global should be made target-specific.  */
-extern struct gdbarch *target_gdbarch;
+   The architecture vector provides some information that is really a
+   property of the inferior, accessed through a particular target:
+   ptrace operations; the layout of certain RSP packets; the solib_ops
+   vector; etc.  To differentiate architecture accesses to
+   per-inferior/target properties from
+   per-thread/per-frame/per-objfile properties, accesses to
+   per-inferior/target properties should be made through this
+   gdbarch.  */
+
+/* This is a convenience wrapper for 'current_inferior ()->gdbarch'.  */
+extern struct gdbarch *target_gdbarch (void);
+
+/* The initial, default architecture.  It uses host values (for want of a better
+   choice).  */
+extern struct gdbarch startup_gdbarch;
+
 
 /* Callback type for the 'iterate_over_objfiles_in_search_order'
    gdbarch  method.  */
@@ -83,10 +91,10 @@ typedef int (iterate_over_objfiles_in_search_order_cb_ftype)
 extern const struct bfd_arch_info * gdbarch_bfd_arch_info (struct gdbarch *gdbarch);
 /* set_gdbarch_bfd_arch_info() - not applicable - pre-initialized.  */
 
-extern int gdbarch_byte_order (struct gdbarch *gdbarch);
+extern enum bfd_endian gdbarch_byte_order (struct gdbarch *gdbarch);
 /* set_gdbarch_byte_order() - not applicable - pre-initialized.  */
 
-extern int gdbarch_byte_order_for_code (struct gdbarch *gdbarch);
+extern enum bfd_endian gdbarch_byte_order_for_code (struct gdbarch *gdbarch);
 /* set_gdbarch_byte_order_for_code() - not applicable - pre-initialized.  */
 
 extern enum gdb_osabi gdbarch_osabi (struct gdbarch *gdbarch);
@@ -334,8 +342,6 @@ typedef struct type * (gdbarch_register_type_ftype) (struct gdbarch *gdbarch, in
 extern struct type * gdbarch_register_type (struct gdbarch *gdbarch, int reg_nr);
 extern void set_gdbarch_register_type (struct gdbarch *gdbarch, gdbarch_register_type_ftype *register_type);
 
-/* See gdbint.texinfo, and PUSH_DUMMY_CALL. */
-
 extern int gdbarch_dummy_id_p (struct gdbarch *gdbarch);
 
 typedef struct frame_id (gdbarch_dummy_id_ftype) (struct gdbarch *gdbarch, struct frame_info *this_frame);
@@ -347,8 +353,6 @@ extern void set_gdbarch_dummy_id (struct gdbarch *gdbarch, gdbarch_dummy_id_ftyp
 
 extern int gdbarch_deprecated_fp_regnum (struct gdbarch *gdbarch);
 extern void set_gdbarch_deprecated_fp_regnum (struct gdbarch *gdbarch, int deprecated_fp_regnum);
-
-/* See gdbint.texinfo.  See infcall.c. */
 
 extern int gdbarch_push_dummy_call_p (struct gdbarch *gdbarch);
 
@@ -396,7 +400,10 @@ typedef int (gdbarch_cannot_store_register_ftype) (struct gdbarch *gdbarch, int 
 extern int gdbarch_cannot_store_register (struct gdbarch *gdbarch, int regnum);
 extern void set_gdbarch_cannot_store_register (struct gdbarch *gdbarch, gdbarch_cannot_store_register_ftype *cannot_store_register);
 
-/* setjmp/longjmp support. */
+/* Determine the address where a longjmp will land and save this address
+   in PC.  Return nonzero on success.
+  
+   FRAME corresponds to the longjmp frame. */
 
 extern int gdbarch_get_longjmp_target_p (struct gdbarch *gdbarch);
 
@@ -593,13 +600,6 @@ typedef CORE_ADDR (gdbarch_addr_bits_remove_ftype) (struct gdbarch *gdbarch, COR
 extern CORE_ADDR gdbarch_addr_bits_remove (struct gdbarch *gdbarch, CORE_ADDR addr);
 extern void set_gdbarch_addr_bits_remove (struct gdbarch *gdbarch, gdbarch_addr_bits_remove_ftype *addr_bits_remove);
 
-/* It is not at all clear why gdbarch_smash_text_address is not folded into
-   gdbarch_addr_bits_remove. */
-
-typedef CORE_ADDR (gdbarch_smash_text_address_ftype) (struct gdbarch *gdbarch, CORE_ADDR addr);
-extern CORE_ADDR gdbarch_smash_text_address (struct gdbarch *gdbarch, CORE_ADDR addr);
-extern void set_gdbarch_smash_text_address (struct gdbarch *gdbarch, gdbarch_smash_text_address_ftype *smash_text_address);
-
 /* FIXME/cagney/2001-01-18: This should be split in two.  A target method that
    indicates if the target needs software single step.  An ISA method to
    implement it.
@@ -736,6 +736,18 @@ typedef char * (gdbarch_make_corefile_notes_ftype) (struct gdbarch *gdbarch, bfd
 extern char * gdbarch_make_corefile_notes (struct gdbarch *gdbarch, bfd *obfd, int *note_size);
 extern void set_gdbarch_make_corefile_notes (struct gdbarch *gdbarch, gdbarch_make_corefile_notes_ftype *make_corefile_notes);
 
+/* The elfcore writer hook to use to write Linux prpsinfo notes to core
+   files.  Most Linux architectures use the same prpsinfo32 or
+   prpsinfo64 layouts, and so won't need to provide this hook, as we
+   call the Linux generic routines in bfd to write prpsinfo notes by
+   default. */
+
+extern int gdbarch_elfcore_write_linux_prpsinfo_p (struct gdbarch *gdbarch);
+
+typedef char * (gdbarch_elfcore_write_linux_prpsinfo_ftype) (bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prpsinfo *info);
+extern char * gdbarch_elfcore_write_linux_prpsinfo (struct gdbarch *gdbarch, bfd *obfd, char *note_data, int *note_size, const struct elf_internal_linux_prpsinfo *info);
+extern void set_gdbarch_elfcore_write_linux_prpsinfo (struct gdbarch *gdbarch, gdbarch_elfcore_write_linux_prpsinfo_ftype *elfcore_write_linux_prpsinfo);
+
 /* Find core file memory regions */
 
 extern int gdbarch_find_memory_regions_p (struct gdbarch *gdbarch);
@@ -752,6 +764,15 @@ extern int gdbarch_core_xfer_shared_libraries_p (struct gdbarch *gdbarch);
 typedef LONGEST (gdbarch_core_xfer_shared_libraries_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len);
 extern LONGEST gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len);
 extern void set_gdbarch_core_xfer_shared_libraries (struct gdbarch *gdbarch, gdbarch_core_xfer_shared_libraries_ftype *core_xfer_shared_libraries);
+
+/* Read offset OFFSET of TARGET_OBJECT_LIBRARIES_AIX formatted shared
+   libraries list from core file into buffer READBUF with length LEN. */
+
+extern int gdbarch_core_xfer_shared_libraries_aix_p (struct gdbarch *gdbarch);
+
+typedef LONGEST (gdbarch_core_xfer_shared_libraries_aix_ftype) (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len);
+extern LONGEST gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdb_byte *readbuf, ULONGEST offset, LONGEST len);
+extern void set_gdbarch_core_xfer_shared_libraries_aix (struct gdbarch *gdbarch, gdbarch_core_xfer_shared_libraries_aix_ftype *core_xfer_shared_libraries_aix);
 
 /* How the core target converts a PTID from a core file to a string. */
 
@@ -971,6 +992,20 @@ typedef enum gdb_signal (gdbarch_gdb_signal_from_target_ftype) (struct gdbarch *
 extern enum gdb_signal gdbarch_gdb_signal_from_target (struct gdbarch *gdbarch, int signo);
 extern void set_gdbarch_gdb_signal_from_target (struct gdbarch *gdbarch, gdbarch_gdb_signal_from_target_ftype *gdb_signal_from_target);
 
+/* Signal translation: translate the GDB's internal signal number into
+   the inferior's signal (target's) representation.  The implementation
+   of this method must be host independent.  IOW, don't rely on symbols
+   of the NAT_FILE header (the nm-*.h files), the host <signal.h>
+   header, or similar headers.
+   Return the target signal number if found, or -1 if the GDB internal
+   signal number is invalid. */
+
+extern int gdbarch_gdb_signal_to_target_p (struct gdbarch *gdbarch);
+
+typedef int (gdbarch_gdb_signal_to_target_ftype) (struct gdbarch *gdbarch, enum gdb_signal signal);
+extern int gdbarch_gdb_signal_to_target (struct gdbarch *gdbarch, enum gdb_signal signal);
+extern void set_gdbarch_gdb_signal_to_target (struct gdbarch *gdbarch, gdbarch_gdb_signal_to_target_ftype *gdb_signal_to_target);
+
 /* Extra signal info inspection.
   
    Return a type suitable to inspect extra signal information. */
@@ -999,37 +1034,42 @@ extern LONGEST gdbarch_get_syscall_number (struct gdbarch *gdbarch, ptid_t ptid)
 extern void set_gdbarch_get_syscall_number (struct gdbarch *gdbarch, gdbarch_get_syscall_number_ftype *get_syscall_number);
 
 /* SystemTap related fields and functions.
-   Prefix used to mark an integer constant on the architecture's assembly
+   A NULL-terminated array of prefixes used to mark an integer constant
+   on the architecture's assembly.
    For example, on x86 integer constants are written as:
   
     $10 ;; integer constant 10
   
    in this case, this prefix would be the character `$'. */
 
-extern const char * gdbarch_stap_integer_prefix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_integer_prefix (struct gdbarch *gdbarch, const char * stap_integer_prefix);
+extern const char *const * gdbarch_stap_integer_prefixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_integer_prefixes (struct gdbarch *gdbarch, const char *const * stap_integer_prefixes);
 
-/* Suffix used to mark an integer constant on the architecture's assembly. */
+/* A NULL-terminated array of suffixes used to mark an integer constant
+   on the architecture's assembly. */
 
-extern const char * gdbarch_stap_integer_suffix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_integer_suffix (struct gdbarch *gdbarch, const char * stap_integer_suffix);
+extern const char *const * gdbarch_stap_integer_suffixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_integer_suffixes (struct gdbarch *gdbarch, const char *const * stap_integer_suffixes);
 
-/* Prefix used to mark a register name on the architecture's assembly.
+/* A NULL-terminated array of prefixes used to mark a register name on
+   the architecture's assembly.
    For example, on x86 the register name is written as:
   
     %eax ;; register eax
   
    in this case, this prefix would be the character `%'. */
 
-extern const char * gdbarch_stap_register_prefix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_register_prefix (struct gdbarch *gdbarch, const char * stap_register_prefix);
+extern const char *const * gdbarch_stap_register_prefixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_register_prefixes (struct gdbarch *gdbarch, const char *const * stap_register_prefixes);
 
-/* Suffix used to mark a register name on the architecture's assembly */
+/* A NULL-terminated array of suffixes used to mark a register name on
+   the architecture's assembly. */
 
-extern const char * gdbarch_stap_register_suffix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_register_suffix (struct gdbarch *gdbarch, const char * stap_register_suffix);
+extern const char *const * gdbarch_stap_register_suffixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_register_suffixes (struct gdbarch *gdbarch, const char *const * stap_register_suffixes);
 
-/* Prefix used to mark a register indirection on the architecture's assembly.
+/* A NULL-terminated array of prefixes used to mark a register
+   indirection on the architecture's assembly.
    For example, on x86 the register indirection is written as:
   
     (%eax) ;; indirecting eax
@@ -1039,10 +1079,11 @@ extern void set_gdbarch_stap_register_suffix (struct gdbarch *gdbarch, const cha
    Please note that we use the indirection prefix also for register
    displacement, e.g., `4(%eax)' on x86. */
 
-extern const char * gdbarch_stap_register_indirection_prefix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_register_indirection_prefix (struct gdbarch *gdbarch, const char * stap_register_indirection_prefix);
+extern const char *const * gdbarch_stap_register_indirection_prefixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_register_indirection_prefixes (struct gdbarch *gdbarch, const char *const * stap_register_indirection_prefixes);
 
-/* Suffix used to mark a register indirection on the architecture's assembly.
+/* A NULL-terminated array of suffixes used to mark a register
+   indirection on the architecture's assembly.
    For example, on x86 the register indirection is written as:
   
     (%eax) ;; indirecting eax
@@ -1052,10 +1093,10 @@ extern void set_gdbarch_stap_register_indirection_prefix (struct gdbarch *gdbarc
    Please note that we use the indirection suffix also for register
    displacement, e.g., `4(%eax)' on x86. */
 
-extern const char * gdbarch_stap_register_indirection_suffix (struct gdbarch *gdbarch);
-extern void set_gdbarch_stap_register_indirection_suffix (struct gdbarch *gdbarch, const char * stap_register_indirection_suffix);
+extern const char *const * gdbarch_stap_register_indirection_suffixes (struct gdbarch *gdbarch);
+extern void set_gdbarch_stap_register_indirection_suffixes (struct gdbarch *gdbarch, const char *const * stap_register_indirection_suffixes);
 
-/* Prefix used to name a register using GDB's nomenclature.
+/* Prefix(es) used to name a register using GDB's nomenclature.
   
    For example, on PPC a register is represented by a number in the assembly
    language (e.g., `10' is the 10th general-purpose register).  However,
@@ -1193,6 +1234,16 @@ typedef void (gdbarch_info_proc_ftype) (struct gdbarch *gdbarch, char *args, enu
 extern void gdbarch_info_proc (struct gdbarch *gdbarch, char *args, enum info_proc_what what);
 extern void set_gdbarch_info_proc (struct gdbarch *gdbarch, gdbarch_info_proc_ftype *info_proc);
 
+/* Implement the "info proc" command for core files.  Noe that there
+   are two "info_proc"-like methods on gdbarch -- one for core files,
+   one for live targets. */
+
+extern int gdbarch_core_info_proc_p (struct gdbarch *gdbarch);
+
+typedef void (gdbarch_core_info_proc_ftype) (struct gdbarch *gdbarch, char *args, enum info_proc_what what);
+extern void gdbarch_core_info_proc (struct gdbarch *gdbarch, char *args, enum info_proc_what what);
+extern void set_gdbarch_core_info_proc (struct gdbarch *gdbarch, gdbarch_core_info_proc_ftype *core_info_proc);
+
 /* Iterate over all objfiles in the order that makes the most sense
    for the architecture to make global symbol searches.
   
@@ -1210,6 +1261,11 @@ extern void set_gdbarch_info_proc (struct gdbarch *gdbarch, gdbarch_info_proc_ft
 typedef void (gdbarch_iterate_over_objfiles_in_search_order_ftype) (struct gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype *cb, void *cb_data, struct objfile *current_objfile);
 extern void gdbarch_iterate_over_objfiles_in_search_order (struct gdbarch *gdbarch, iterate_over_objfiles_in_search_order_cb_ftype *cb, void *cb_data, struct objfile *current_objfile);
 extern void set_gdbarch_iterate_over_objfiles_in_search_order (struct gdbarch *gdbarch, gdbarch_iterate_over_objfiles_in_search_order_ftype *iterate_over_objfiles_in_search_order);
+
+/* Ravenscar arch-dependent ops. */
+
+extern struct ravenscar_arch_ops * gdbarch_ravenscar_ops (struct gdbarch *gdbarch);
+extern void set_gdbarch_ravenscar_ops (struct gdbarch *gdbarch, struct ravenscar_arch_ops * ravenscar_ops);
 
 /* Definition for an unknown syscall, used basically in error-cases.  */
 #define UNKNOWN_SYSCALL (-1)
@@ -1286,9 +1342,9 @@ struct gdbarch_info
   const struct bfd_arch_info *bfd_arch_info;
 
   /* Use default: BFD_ENDIAN_UNKNOWN (NB: is not ZERO).  */
-  int byte_order;
+  enum bfd_endian byte_order;
 
-  int byte_order_for_code;
+  enum bfd_endian byte_order_for_code;
 
   /* Use default: NULL (ZERO).  */
   bfd *abfd;
@@ -1375,15 +1431,9 @@ extern int gdbarch_update_p (struct gdbarch_info info);
 extern struct gdbarch *gdbarch_find_by_info (struct gdbarch_info info);
 
 
-/* Helper function.  Set the global "target_gdbarch" to "gdbarch".
+/* Helper function.  Set the target gdbarch to "gdbarch".  */
 
-   FIXME: kettenis/20031124: Of the functions that follow, only
-   gdbarch_from_bfd is supposed to survive.  The others will
-   dissappear since in the future GDB will (hopefully) be truly
-   multi-arch.  However, for now we're still stuck with the concept of
-   a single active architecture.  */
-
-extern void deprecated_target_gdbarch_select_hack (struct gdbarch *gdbarch);
+extern void set_target_gdbarch (struct gdbarch *gdbarch);
 
 
 /* Register per-architecture data-pointer.

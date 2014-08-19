@@ -1903,6 +1903,3 @@ $(srcdir)/configure: @MAINT@ $(srcdir)/configure.ac $(srcdir)/config/acx.m4 \
 MAKEOVERRIDES=
 
 # end of Makefile.in
-# Local Variables:
-# mode: Makefile
-# End:

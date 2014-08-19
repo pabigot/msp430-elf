@@ -1,5 +1,4 @@
-// { dg-do run }
-// { dg-options "-std=c++0x" }
+// { dg-do run { target c++11 } }
 
 // Test throw and catch
 
@@ -53,3 +52,5 @@ int main()
   if (result[0] != 5 || result[1] != 5)
     abort ();
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

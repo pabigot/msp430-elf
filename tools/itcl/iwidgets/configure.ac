@@ -3,7 +3,7 @@ dnl	generate the file "configure", which is run during [incr Tcl]
 dnl installation to configure the system for the local environment.
 
 AC_INIT(generic/buttonbox.itk)
-# RCS: $Id: configure.ac,v 1.1 2009/02/03 19:07:29 kevinb Exp $
+# RCS: $Id: configure.ac,v 1.1 2012/04/18 00:44:00 kevinb Exp $
 
 ITCL_VERSION=3.2
 AC_SUBST(ITCL_VERSION)

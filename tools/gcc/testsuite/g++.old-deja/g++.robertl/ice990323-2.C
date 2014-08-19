@@ -1,4 +1,5 @@
 // { dg-do run  }
+// { dg-require-effective-target size32plus }
 // check EH with templates
 extern "C" void abort ();
 extern "C" void exit (int);

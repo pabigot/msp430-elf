@@ -2,7 +2,7 @@
 #
 # Copyright (c) 1993-1998 Lucent Technologies, Inc.
 #
-# RCS #(@) $Id: makefile.vc,v 1.1 2003/03/19 23:00:56 cagney Exp $
+# RCS #(@) $Id: makefile.vc,v 1.4 2001/05/22 23:23:56 davygrvy Exp $
 
 !include "pkg.vc"
 

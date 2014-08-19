@@ -1,5 +1,5 @@
 /* Define builtin-in macros for the C family front ends.
-   Copyright (C) 2002-2013 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -22,6 +22,8 @@ along with GCC; see the file COPYING3.  If not see
 #include "coretypes.h"
 #include "tm.h"
 #include "tree.h"
+#include "stor-layout.h"
+#include "stringpool.h"
 #include "version.h"
 #include "flags.h"
 #include "c-common.h"
@@ -106,7 +108,7 @@ static void
 builtin_define_type_sizeof (const char *name, tree type)
 {
   builtin_define_with_int_value (name,
-				 tree_low_cst (TYPE_SIZE_UNIT (type), 1));
+				 tree_to_uhwi (TYPE_SIZE_UNIT (type)));
 }
 
 /* Define the float.h constants for TYPE using NAME_PREFIX, FP_SUFFIX,
@@ -648,7 +650,7 @@ cpp_atomic_builtins (cpp_reader *pfile)
   /* Tell the source code about various types.  These map to the C++11 and C11
      macros where 2 indicates lock-free always, and 1 indicates sometimes
      lock free.  */
-#define SIZEOF_NODE(T) (tree_low_cst (TYPE_SIZE_UNIT (T), 1))
+#define SIZEOF_NODE(T) (tree_to_uhwi (TYPE_SIZE_UNIT (T)))
 #define SWAP_INDEX(T) ((SIZEOF_NODE (T) < SWAP_LIMIT) ? SIZEOF_NODE (T) : 0)
   builtin_define_with_int_value ("__GCC_ATOMIC_BOOL_LOCK_FREE", 
 			(have_swap[SWAP_INDEX (boolean_type_node)]? 2 : 1));
@@ -676,17 +678,108 @@ cpp_atomic_builtins (cpp_reader *pfile)
 
   /* ptr_type_node can't be used here since ptr_mode is only set when
      toplev calls backend_init which is not done with -E  or pch.  */
-  psize = POINTER_SIZE / BITS_PER_UNIT;
+  psize = POINTER_SIZE_UNITS;
   if (psize >= SWAP_LIMIT)
     psize = 0;
   builtin_define_with_int_value ("__GCC_ATOMIC_POINTER_LOCK_FREE", 
 			(have_swap[psize]? 2 : 1));
 }
 
+/* Return the value for __GCC_IEC_559.  */
+static int
+cpp_iec_559_value (void)
+{
+  /* The default is support for IEEE 754-2008.  */
+  int ret = 2;
+
+  /* float and double must be binary32 and binary64.  If they are but
+     with reversed NaN convention, at most IEEE 754-1985 is
+     supported.  */
+  const struct real_format *ffmt
+    = REAL_MODE_FORMAT (TYPE_MODE (float_type_node));
+  const struct real_format *dfmt
+    = REAL_MODE_FORMAT (TYPE_MODE (double_type_node));
+  if (!ffmt->qnan_msb_set || !dfmt->qnan_msb_set)
+    ret = 1;
+  if (ffmt->b != 2
+      || ffmt->p != 24
+      || ffmt->pnan != 24
+      || ffmt->emin != -125
+      || ffmt->emax != 128
+      || ffmt->signbit_rw != 31
+      || ffmt->round_towards_zero
+      || !ffmt->has_sign_dependent_rounding
+      || !ffmt->has_nans
+      || !ffmt->has_inf
+      || !ffmt->has_denorm
+      || !ffmt->has_signed_zero
+      || dfmt->b != 2
+      || dfmt->p != 53
+      || dfmt->pnan != 53
+      || dfmt->emin != -1021
+      || dfmt->emax != 1024
+      || dfmt->signbit_rw != 63
+      || dfmt->round_towards_zero
+      || !dfmt->has_sign_dependent_rounding
+      || !dfmt->has_nans
+      || !dfmt->has_inf
+      || !dfmt->has_denorm
+      || !dfmt->has_signed_zero)
+    ret = 0;
+
+  /* In strict C standards conformance mode, consider unpredictable
+     excess precision to mean lack of IEEE 754 support.  The same
+     applies to unpredictable contraction.  For C++, and outside
+     strict conformance mode, do not consider these options to mean
+     lack of IEEE 754 support.  */
+  if (flag_iso
+      && !c_dialect_cxx ()
+      && TARGET_FLT_EVAL_METHOD != 0
+      && flag_excess_precision_cmdline != EXCESS_PRECISION_STANDARD)
+    ret = 0;
+  if (flag_iso
+      && !c_dialect_cxx ()
+      && flag_fp_contract_mode == FP_CONTRACT_FAST)
+    ret = 0;
+
+  /* Various options are contrary to IEEE 754 semantics.  */
+  if (flag_unsafe_math_optimizations
+      || flag_associative_math
+      || flag_reciprocal_math
+      || flag_finite_math_only
+      || !flag_signed_zeros
+      || flag_single_precision_constant)
+    ret = 0;
+
+  /* If the target does not support IEEE 754 exceptions and rounding
+     modes, consider IEEE 754 support to be absent.  */
+  if (!targetm.float_exceptions_rounding_supported_p ())
+    ret = 0;
+
+  return ret;
+}
+
+/* Return the value for __GCC_IEC_559_COMPLEX.  */
+static int
+cpp_iec_559_complex_value (void)
+{
+  /* The value is no bigger than that of __GCC_IEC_559.  */
+  int ret = cpp_iec_559_value ();
+
+  /* Some options are contrary to the required default state of the
+     CX_LIMITED_RANGE pragma.  */
+  if (flag_complex_method != 2)
+    ret = 0;
+
+  return ret;
+}
+
 /* Hook that registers front end and target-specific built-ins.  */
 void
 c_cpp_builtins (cpp_reader *pfile)
 {
+  int i;
+
   /* -undef turns off target-specific built-ins.  */
   if (flag_undef)
     return;
@@ -713,10 +806,8 @@ c_cpp_builtins (cpp_reader *pfile)
 	cpp_define (pfile, "__DEPRECATED");
       if (flag_rtti)
 	cpp_define (pfile, "__GXX_RTTI");
-      if (cxx_dialect >= cxx0x)
+      if (cxx_dialect >= cxx11)
         cpp_define (pfile, "__GXX_EXPERIMENTAL_CXX0X__");
-      if (flag_embedded_cxx)
-	cpp_define (pfile, "__EMBEDDED_CXX__");
     }
   /* Note that we define this for C as well, so that we know if
      __attribute__((cleanup)) will interface with EH.  */
@@ -758,9 +849,51 @@ c_cpp_builtins (cpp_reader *pfile)
   builtin_define_type_minmax ("__WINT_MIN__", "__WINT_MAX__", wint_type_node);
   builtin_define_type_max ("__PTRDIFF_MAX__", ptrdiff_type_node);
   builtin_define_type_max ("__SIZE_MAX__", size_type_node);
+  for (i = 0; i < NUM_INT_N_ENTS; i ++)
+    if (int_n_enabled_p[i])
+      {
+	char buf[35+20+20];
+	char buf_min[15+20];
+	char buf_max[15+20];
+
+	sprintf(buf_min, "__INT%d_MIN__", int_n_data[i].bitsize);
+	sprintf(buf_max, "__INT%d_MAX__", int_n_data[i].bitsize);
+	builtin_define_type_minmax (buf_min, buf_max,
+				    int_n_trees[i].signed_type);
+	sprintf(buf_max, "__UINT%d_MAX__", int_n_data[i].bitsize);
+	builtin_define_type_max (buf_max,
+				 int_n_trees[i].unsigned_type);
+
+	/* These are used to configure the C++ library.  */
+
+	sprintf (buf, "__GLIBCXX_USE_INT_N_%d", i);
+	if (!flag_iso || int_n_data[i].bitsize == POINTER_SIZE)
+	  builtin_define_with_int_value (buf, 1);
+
+	sprintf (buf, "__GLIBCXX_TYPE_INT_N_%d=__int%d", i, int_n_data[i].bitsize);
+	cpp_define (parse_in, buf);
+
+	sprintf (buf, "__GLIBCXX_BITSIZE_INT_N_%d=%d", i, int_n_data[i].bitsize);
+	cpp_define (parse_in, buf);
+
+	sprintf(buf_min, "__GLIBCXX_MIN_INT_N_%d", i);
+	sprintf(buf_max, "__GLIBCXX_MAX_INT_N_%d", i);
+	builtin_define_type_minmax (buf_min, buf_max,
+				    int_n_trees[i].signed_type);
+	sprintf(buf_max, "__GLIBCXX_UMAX_INT_N_%d", i);
+	builtin_define_type_max (buf_max,
+				 int_n_trees[i].unsigned_type);
+      }
 
   /* stdint.h and the testsuite need to know these.  */
   builtin_define_stdint_macros ();
+
+  /* Provide information for library headers to determine whether to
+     define macros such as __STDC_IEC_559__ and
+     __STDC_IEC_559_COMPLEX__.  */
+  builtin_define_with_int_value ("__GCC_IEC_559", cpp_iec_559_value ());
+  builtin_define_with_int_value ("__GCC_IEC_559_COMPLEX",
+				 cpp_iec_559_complex_value ());
 
   /* float.h needs to know this.  */
   builtin_define_with_int_value ("__FLT_EVAL_METHOD__",
@@ -874,7 +1007,7 @@ c_cpp_builtins (cpp_reader *pfile)
     cpp_define (pfile, "__WCHAR_UNSIGNED__");
 
   cpp_atomic_builtins (pfile);
-
+    
 #ifdef DWARF2_UNWIND_INFO
   if (dwarf2out_do_cfi_asm ())
     cpp_define (pfile, "__GCC_HAVE_DWARF2_CFI_ASM");
@@ -890,17 +1023,24 @@ c_cpp_builtins (cpp_reader *pfile)
   /* Make the choice of the stack protector runtime visible to source code.
      The macro names and values here were chosen for compatibility with an
      earlier implementation, i.e. ProPolice.  */
+  if (flag_stack_protect == 3)
+    cpp_define (pfile, "__SSP_STRONG__=3");
   if (flag_stack_protect == 2)
     cpp_define (pfile, "__SSP_ALL__=2");
   else if (flag_stack_protect == 1)
     cpp_define (pfile, "__SSP__=1");
 
   if (flag_openmp)
-    cpp_define (pfile, "_OPENMP=201107");
+    cpp_define (pfile, "_OPENMP=201307");
 
-  if (int128_integer_type_node != NULL_TREE)
-    builtin_define_type_sizeof ("__SIZEOF_INT128__",
-			        int128_integer_type_node);
+  for (i = 0; i < NUM_INT_N_ENTS; i ++)
+    if (int_n_enabled_p[i])
+      {
+	char buf[15+20];
+	sprintf(buf, "__SIZEOF_INT%d__", int_n_data[i].bitsize);
+	builtin_define_type_sizeof (buf,
+				    int_n_trees[i].signed_type);
+      }
   builtin_define_type_sizeof ("__SIZEOF_WCHAR_T__", wchar_type_node);
   builtin_define_type_sizeof ("__SIZEOF_WINT_T__", wint_type_node);
   builtin_define_type_sizeof ("__SIZEOF_PTRDIFF_T__",
@@ -1132,12 +1272,15 @@ type_suffix (tree type)
   static const char *const suffixes[] = { "", "U", "L", "UL", "LL", "ULL" };
   int unsigned_suffix;
   int is_long;
+  int tp = TYPE_PRECISION (type);
 
   if (type == long_long_integer_type_node
-      || type == long_long_unsigned_type_node)
+      || type == long_long_unsigned_type_node
+      || tp > TYPE_PRECISION (long_integer_type_node))
     is_long = 2;
   else if (type == long_integer_type_node
-	   || type == long_unsigned_type_node)
+	   || type == long_unsigned_type_node
+	   || tp > TYPE_PRECISION (integer_type_node))
     is_long = 1;
   else if (type == integer_type_node
 	   || type == unsigned_type_node
@@ -1190,6 +1333,50 @@ builtin_define_type_max (const char *macro, tree type)
   builtin_define_type_minmax (NULL, macro, type);
 }
 
+/* Given a value with COUNT LSBs set, fill BUF with a hexidecimal
+   representation of that value.  For example, a COUNT of 10 would
+   return "0x3ff".  */
+
+static void
+print_bits_of_hex (char *buf, int bufsz, int count)
+{
+  gcc_assert (bufsz > 3);
+  *buf++ = '0';
+  *buf++ = 'x';
+  bufsz -= 2;
+
+  gcc_assert (count > 0);
+
+  switch (count % 4) {
+  case 0:
+    break;
+  case 1:
+    *buf++ = '1';
+    bufsz --;
+    count -= 1;
+    break;
+  case 2:
+    *buf++ = '3';
+    bufsz --;
+    count -= 2;
+    break;
+  case 3:
+    *buf++ = '7';
+    bufsz --;
+    count -= 3;
+    break;
+  }
+  while (count >= 4)
+    {
+      gcc_assert (bufsz > 1);
+      *buf++ = 'f';
+      bufsz --;
+      count -= 4;
+    }
+  gcc_assert (bufsz > 0);
+  *buf++ = 0;
+}
+
 /* Define MIN_MACRO (if not NULL) and MAX_MACRO for TYPE based on the
    precision of the type.  */
 
@@ -1197,32 +1384,17 @@ static void
 builtin_define_type_minmax (const char *min_macro, const char *max_macro,
 			    tree type)
 {
-  static const char *const values[]
-    = { "127", "255",
-	"32767", "65535",
-	"2147483647", "4294967295",
-	"9223372036854775807", "18446744073709551615",
-	"170141183460469231731687303715884105727",
-	"340282366920938463463374607431768211455" };
+#define PBOH_SZ (128/4+4)
+  char value[PBOH_SZ];
 
-  const char *value, *suffix;
+  const char *suffix;
   char *buf;
-  size_t idx;
+  int bits;
 
-  /* Pre-rendering the values mean we don't have to futz with printing a
-     multi-word decimal value.  There are also a very limited number of
-     precisions that we support, so it's really a waste of time.  */
-  switch (TYPE_PRECISION (type))
-    {
-    case 8:	idx = 0; break;
-    case 16:	idx = 2; break;
-    case 32:	idx = 4; break;
-    case 64:	idx = 6; break;
-    case 128:	idx = 8; break;
-    default:    gcc_unreachable ();
-    }
+  bits = TYPE_PRECISION (type) + (TYPE_UNSIGNED (type) ? 0 : -1);
 
-  value = values[idx + TYPE_UNSIGNED (type)];
+  print_bits_of_hex (value, PBOH_SZ, bits);
+
   suffix = type_suffix (type);
 
   buf = (char *) alloca (strlen (max_macro) + 1 + strlen (value)

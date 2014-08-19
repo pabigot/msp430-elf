@@ -1,5 +1,5 @@
 /* RTL utility routines.
-   Copyright (C) 1987-2013 Free Software Foundation, Inc.
+   Copyright (C) 1987-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -222,7 +222,7 @@ shared_const_p (const_rtx orig)
      a LABEL_REF, it isn't sharable.  */
   return (GET_CODE (XEXP (orig, 0)) == PLUS
 	  && GET_CODE (XEXP (XEXP (orig, 0), 0)) == SYMBOL_REF
-	  && CONST_INT_P(XEXP (XEXP (orig, 0), 1)));
+	  && CONST_INT_P (XEXP (XEXP (orig, 0), 1)));
 }
 
 
@@ -317,7 +317,6 @@ copy_rtx (rtx orig)
       case 'u':
       case 'B':
       case '0':
-      case 'n':
 	/* These are left unchanged.  */
 	break;
 

@@ -1,7 +1,6 @@
 #source: zero-range.s
 #ld: -T discard.ld
 #objdump: -s -j .debug_ranges
-#xfail: "cy16-*-*" "ip4k-*-*" "nios-*-*"
 
 .*:     file format .*elf.*
 

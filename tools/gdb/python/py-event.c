@@ -1,6 +1,6 @@
 /* Python interface to inferior events.
 
-   Copyright (C) 2009-2012 Free Software Foundation, Inc.
+   Copyright (C) 2009-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -17,13 +17,14 @@
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
+#include "defs.h"
 #include "py-event.h"
 
 void
 evpy_dealloc (PyObject *self)
 {
   Py_XDECREF (((event_object *) self)->dict);
-  self->ob_type->tp_free (self);
+  Py_TYPE (self)->tp_free (self);
 }
 
 PyObject *
@@ -59,11 +60,11 @@ evpy_add_attribute (PyObject *event, char *name, PyObject *attr)
 
 /* Initialize the Python event code.  */
 
-void
+int
 gdbpy_initialize_event (void)
 {
-  gdbpy_initialize_event_generic (&event_object_type,
-                                  "Event");
+  return gdbpy_initialize_event_generic (&event_object_type,
+					 "Event");
 }
 
 /* Initialize the given event type.  If BASE is not NULL it will
@@ -75,17 +76,9 @@ gdbpy_initialize_event_generic (PyTypeObject *type,
                                 char *name)
 {
   if (PyType_Ready (type) < 0)
-    goto fail;
-
-  Py_INCREF (type);
-  if (PyModule_AddObject (gdb_module, name, (PyObject *) type) < 0)
-    goto fail;
-
-  return 0;
-
-  fail:
-    Py_XDECREF (type);
     return -1;
+
+  return gdb_pymodule_addobject (gdb_module, name, (PyObject *) type);
 }
 
 
@@ -110,15 +103,22 @@ evpy_emit_event (PyObject *event,
   for (i = 0; i < PyList_Size (callback_list_copy); i++)
     {
       PyObject *func = PyList_GetItem (callback_list_copy, i);
+      PyObject *func_result;
 
       if (func == NULL)
 	goto fail;
 
-      if (!PyObject_CallFunctionObjArgs (func, event, NULL))
+      func_result = PyObject_CallFunctionObjArgs (func, event, NULL);
+
+      if (func_result == NULL)
 	{
 	  /* Print the trace here, but keep going -- we want to try to
 	     call all of the callbacks even if one is broken.  */
 	  gdbpy_print_stack ();
+	}
+      else
+	{
+	  Py_DECREF (func_result);
 	}
     }
 
@@ -142,8 +142,7 @@ static PyGetSetDef event_object_getset[] =
 
 PyTypeObject event_object_type =
 {
-  PyObject_HEAD_INIT (NULL)
-  0,                                          /* ob_size */
+  PyVarObject_HEAD_INIT (NULL, 0)
   "gdb.Event",                                /* tp_name */
   sizeof (event_object),                      /* tp_basicsize */
   0,                                          /* tp_itemsize */

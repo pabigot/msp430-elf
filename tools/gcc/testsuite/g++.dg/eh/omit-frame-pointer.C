@@ -1,6 +1,6 @@
 // { dg-do run }
-// { dg-options -fomit-frame-pointer }
 // { dg-require-effective-target int32plus }
+// { dg-options -fomit-frame-pointer }
 
 #include <iostream>
 

@@ -19,7 +19,7 @@ struct foo Ack = {5, X, 3};
 int main()
 {
   if (Ack.a == 5 && Ack.b == 7 && Ack.c == 3)
-    printf ("PASS\n");
+    ; // printf ("PASS\n");
   else
     { printf ("FAIL\n"); return 1; }
 }

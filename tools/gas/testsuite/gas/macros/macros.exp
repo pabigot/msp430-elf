@@ -21,13 +21,13 @@ if { ![istarget hppa*-*-*] || [istarget *-*-linux*] } {
     run_dump_test test1
 }
 
-if { ![istarget *c54x*-*-*] && ![istarget *c4x*-*-*] } {
+if { ![istarget *c54x*-*-*] && ![istarget *c4x*-*-*] && ![istarget "nds32*-*-*"] } {
     run_dump_test test2
 }
 
 run_dump_test test3
 
-if { ![istarget *c54x*-*-*] && ![istarget *c4x*-*-*] } {
+if { ![istarget *c54x*-*-*] && ![istarget *c4x*-*-*] && ![istarget "nds32*-*-*"] } {
     run_dump_test irp
     run_dump_test rept
     run_dump_test repeat
@@ -67,40 +67,19 @@ if { ![istarget hppa*-*-*] || [istarget *-*-linux*] } {
     run_dump_test strings
 }
 
-# These ports fail the app* tests because they do not
-# generate text symbols in the way that the test expects.
-if { ![istarget alpha*-*netware*]
-     && ![istarget alpha*-linuxecoff*]
-     && ![istarget alpha*-osf*]
-     && ![istarget mips*-big-*]
-     && ![istarget mips*-dec-*]
-     && ![istarget mips*-sgi-*]
-     && ![istarget mips*-bsd*]
-     && ![istarget mips*-*ecoff*]
-     && ![istarget mips*-lnews*]
-     && ![istarget mips*-sysv*]
-     && ![istarget mips*-riscos*]
-     && ![istarget powerpc*-aix*]
-     && ![istarget *-*-cygwin]
-     && ![istarget *-*-coff]
-     && ![istarget *-*-pe]
-     && ![istarget iq2000-*-*]
-     && ![istarget rs6000*-*]
-} {
 run_dump_test app1
 run_dump_test app2
 run_dump_test app3
 remote_download host "$srcdir/$subdir/app4b.s"
 run_dump_test app4
-}
 
 run_list_test badarg ""
 
 case $target_triplet in {
     { *c54x*-*-* } { }
     { *c4x*-*-* } { }
-    { tic6x-*-* } { }
     { mmix-* } { }
+    { rl78-*-* } { }
     { rx-*-* } { }
     default { run_list_test dot "-alm" }
 }

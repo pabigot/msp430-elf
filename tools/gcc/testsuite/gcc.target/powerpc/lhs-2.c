@@ -1,7 +1,6 @@
 /* { dg-do compile { target { powerpc*-*-* } } } */
 /* { dg-skip-if "" { powerpc*-*-darwin* } { "*" } { "" } } */
 /* { dg-options "-O2 -mcpu=power6 -msched-groups" } */
-/* { dg-final { scan-assembler "ori 1,1,0" } } */
 
 /* Test generation of group ending nop in load hit store situation.  */
 typedef union {

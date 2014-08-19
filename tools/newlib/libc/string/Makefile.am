@@ -104,6 +104,7 @@ else
 ELIX_4_SOURCES = \
 	memmem.c \
 	memrchr.c \
+	rawmemchr.c \
 	wcscasecmp.c \
 	wcsncasecmp.c
 endif !ELIX_LEVEL_3
@@ -120,7 +121,6 @@ else
 noinst_LIBRARIES = lib.a
 lib_a_SOURCES = $(GENERAL_SOURCES) $(ELIX_2_SOURCES) $(ELIX_4_SOURCES)
 lib_a_CFLAGS = $(AM_CFLAGS)
-lib_a_CFLAGS += $(NEWLIB_CFLAGS)
 noinst_DATA =
 endif # USE_LIBTOOL
 
@@ -142,7 +142,7 @@ wcsncmp.def	wcsncpy.def	wcsnlen.def	wcspbrk.def \
 wcsrchr.def	wcsspn.def	wcsstr.def 	wcstok.def  \
 wcswidth.def	wcsxfrm.def	wcwidth.def	wmemchr.def \
 wmemcmp.def	wmemcpy.def	wmemmove.def	wmemset.def \
-memmem.def	memrchr.def
+memmem.def	memrchr.def	rawmemchr.def
 
 SUFFIXES = .def
 

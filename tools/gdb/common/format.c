@@ -1,6 +1,6 @@
 /* Parse a printf-style format string.
 
-   Copyright (C) 1986-2012 Free Software Foundation, Inc.
+   Copyright (C) 1986-2014 Free Software Foundation, Inc.
 
    This file is part of GDB.
 
@@ -28,11 +28,12 @@
 #include "format.h"
 
 struct format_piece *
-parse_format_string (char **arg)
+parse_format_string (const char **arg)
 {
-  char *s, *f, *string;
-  char *prev_start;
-  char *percent_loc;
+  const char *s;
+  char *f, *string;
+  const char *prev_start;
+  const char *percent_loc;
   char *sub_start, *current_substring;
   struct format_piece *pieces;
   int next_frag;
@@ -155,7 +156,7 @@ parse_format_string (char **arg)
 
 	/* The first part of a format specifier is a set of flag
 	   characters.  */
-	while (strchr ("0-+ #", *f))
+	while (*f != '\0' && strchr ("0-+ #", *f))
 	  {
 	    if (*f == '#')
 	      seen_hash = 1;
@@ -169,7 +170,7 @@ parse_format_string (char **arg)
 	  }
 
 	/* The next part of a format specifier is a width.  */
-	while (strchr ("0123456789", *f))
+	while (*f != '\0' && strchr ("0123456789", *f))
 	  f++;
 
 	/* The next part of a format specifier is a precision.  */
@@ -177,7 +178,7 @@ parse_format_string (char **arg)
 	  {
 	    seen_prec = 1;
 	    f++;
-	    while (strchr ("0123456789", *f))
+	    while (*f != '\0' && strchr ("0123456789", *f))
 	      f++;
 	  }
 
@@ -245,10 +246,10 @@ parse_format_string (char **arg)
 	      this_argclass = long_arg;
 	    else
 	      this_argclass = long_long_arg;
- 
-	  if (seen_big_l)
-	    bad = 1;
-	  break;
+
+	    if (seen_big_l)
+	      bad = 1;
+	    break;
 
 	  case 'c':
 	    this_argclass = lcount == 0 ? int_arg : wide_char_arg;
@@ -262,7 +263,9 @@ parse_format_string (char **arg)
 	    this_argclass = ptr_arg;
 	    if (lcount || seen_h || seen_big_l)
 	      bad = 1;
-	    if (seen_prec || seen_zero || seen_space || seen_plus)
+	    if (seen_prec)
+	      bad = 1;
+	    if (seen_hash || seen_zero || seen_space || seen_plus)
 	      bad = 1;
 	    break;
 
@@ -286,9 +289,9 @@ parse_format_string (char **arg)
 	    else
 	      this_argclass = double_arg;
 
-	  if (lcount || seen_h)
-	    bad = 1;
-	  break;
+	    if (lcount || seen_h)
+	      bad = 1;
+	    break;
 
 	  case '*':
 	    error (_("`*' not supported for precision or width in printf"));

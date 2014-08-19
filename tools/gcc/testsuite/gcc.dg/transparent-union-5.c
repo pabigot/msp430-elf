@@ -1,7 +1,7 @@
 /* PR 24255 */
 /* { dg-do run } */
-/* { dg-options "-O" } */
 /* { dg-skip-if "pointers are not power-of-2 in size" { "msp430-*-*" } { "-mlarge" } { "" } } */
+/* { dg-options "-O" } */
 
 extern void abort (void);
 

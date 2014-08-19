@@ -3,7 +3,7 @@
 extern "C" int printf (const char*, ...);
 int val = 1;
 void S () { printf ("FAIL\n"); }
-void f () { printf ("PASS\n"); val = 0; }
+void f () { /*printf ("PASS\n");*/ val = 0; }
 int main ()
 {
   struct S { S () { f (); } };

@@ -22,10 +22,10 @@ BaseClass::Increm --> {i=7, virtMember()=30}
 b=9  b.virtMember()=30
 */
 
-extern "C" int printf (const char *, ...);
+// extern "C" int printf (const char *, ...);
 extern "C" void exit (int);
 
-void die () { printf ("FAIL\n"); exit (1); }
+void die () { /* printf ("FAIL\n"); */ exit (1); }
 
 class BaseClass {
 
@@ -82,5 +82,5 @@ main ()
     if (b != 9 || a.virtMember () != 30)
       die ();
 
-    printf ("PASS\n");
+    // printf ("PASS\n");
 }

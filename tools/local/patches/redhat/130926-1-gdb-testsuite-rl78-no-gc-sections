@@ -1,0 +1,1234 @@
+By default, the rl78 linker implicitly garbage collects sections as
+if -gc-sections were specified.  This is generally a good thing because
+otherwise a lot of rl78 code would fail to build due to running out of
+space.
+
+However, there are more than a few GDB tests which depend upon being
+able to access unreferenced code or variables.  These tests are generally
+not very large, so garbage collection of sections is not critical.
+
+This patch causes -Wl,--no-gc-sections to be passed on the gcc command
+line, disabling garbage collection in the linker for those tests.
+
+There were several other tests which seemed to be helped when I did a
+run using this flag for all tests, but in some cases, the test case
+failed to build.  There was also a case where the test case built
+okay, but GDB didn't get as far as where the failure might have
+occurred due to another error.  In each of these cases, I chose the
+option (of using the flag or not) which caused the test to get the
+furthest along.  Sometimes that meant not using the flag even though
+this results in more failures.
+
+This patch should go upstream (after testing internally on other
+targets).
+
+In my testing this change caused the failure count to go from 953
+to 581.  There is no difference in the number of unresolved or
+untested testcases due to this patch.  This is definitely not the
+case when -Wl,-no-gc-sections is used globally.
+
+
+gdb/testsuite/ChangeLog.RedHat:
+
+2013-09-26  Kevin Buettner  <kevinb@redhat.com>
+
+	* gdb/testsuite/gdb.base/debug-expr.exp,
+	gdb/testsuite/gdb.base/disasm-end-cu.exp,
+	gdb/testsuite/gdb.base/dup-sect.exp,
+	gdb/testsuite/gdb.base/exprs.exp,
+	gdb/testsuite/gdb.base/gdb11530.exp,
+	gdb/testsuite/gdb.base/gnu_vector.exp,
+	gdb/testsuite/gdb.base/memattr.exp,
+	gdb/testsuite/gdb.cp/classes.exp,
+	gdb/testsuite/gdb.cp/koenig.exp,
+	gdb/testsuite/gdb.cp/m-static.exp,
+	gdb/testsuite/gdb.cp/namespace-enum.exp,
+	gdb/testsuite/gdb.cp/namespace.exp,
+	gdb/testsuite/gdb.cp/nsimport.exp,
+	gdb/testsuite/gdb.cp/nsnested.exp,
+	gdb/testsuite/gdb.cp/nsnoimports.exp,
+	gdb/testsuite/gdb.cp/operator.exp,
+	gdb/testsuite/gdb.cp/overload.exp,
+	gdb/testsuite/gdb.cp/ovsrch.exp,
+	gdb/testsuite/gdb.cp/pr9067.exp,
+	gdb/testsuite/gdb.cp/ptype-cv-cp.exp,
+	gdb/testsuite/gdb.cp/ptype-flags.exp,
+	gdb/testsuite/gdb.cp/shadow.exp,
+	gdb/testsuite/gdb.cp/temargs.exp,
+	gdb/testsuite/gdb.cp/templates.exp,
+	gdb/testsuite/gdb.cp/typedef-operator.exp,
+	gdb/testsuite/gdb.dwarf2/dup-psym.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-anonymous-func.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-basic.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-const.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-cp-infcall-ref-static.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-cu-size.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-inline-param.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-intercu.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-linkage-name-trust.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-noloc.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-op-call.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-param-error.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-producer.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-skip-prologue.exp,
+	gdb/testsuite/gdb.dwarf2/dw2-strp.exp,
+	gdb/testsuite/gdb.dwarf2/mac-fileno.exp,
+	gdb/testsuite/gdb.mi/mi-var-cmd.exp,
+	gdb/testsuite/gdb.mi/mi-var-invalidate.exp,
+	gdb/testsuite/gdb.opt/inline-break.exp,
+	gdb/testsuite/gdb.python/lib-types.exp,
+	gdb/testsuite/gdb.python/py-mi.exp,
+	gdb/testsuite/gdb.python/py-symbol.exp,
+	gdb/testsuite/gdb.python/py-symtab.exp,
+	gdb/testsuite/gdb.python/py-type.exp,
+	gdb/testsuite/gdb.python/py-typeprint.exp,
+	gdb/testsuite/gdb.python/py-value.exp,
+	gdb/testsuite/gdb.stabs/exclfwd.exp: Use -Wl,--no-gc-sections to
+	build the test case for rl78.
+
+
+Index: gdb/testsuite/gdb.base/debug-expr.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.base/debug-expr.exp,v
+retrieving revision 1.1
+diff -u -p -r1.1 debug-expr.exp
+--- gdb/testsuite/gdb.base/debug-expr.exp	25 May 2013 03:47:50 -0000	1.1
++++ gdb/testsuite/gdb.base/debug-expr.exp	27 Sep 2013 03:58:57 -0000
+@@ -16,8 +16,12 @@
+ # Test "set debug expr 1" on c expressions.
+ 
+ standard_testfile .c
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
+ 
+-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug}]} {
++if {[prepare_for_testing $testfile.exp $testfile $srcfile $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.base/disasm-end-cu.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.base/disasm-end-cu.exp,v
+retrieving revision 1.3
+diff -u -p -r1.3 disasm-end-cu.exp
+--- gdb/testsuite/gdb.base/disasm-end-cu.exp	25 May 2013 03:47:52 -0000	1.3
++++ gdb/testsuite/gdb.base/disasm-end-cu.exp	27 Sep 2013 03:58:57 -0000
+@@ -17,7 +17,12 @@
+ # units displaying source lines.  This checks that the disassemble routine
+ # can handle our use of line number 0 to mark the end of sequence.
+ 
+-if { [prepare_for_testing disasm-end-cu.exp "disasm-end-cu" {disasm-end-cu-1.c disasm-end-cu-2.c} {debug}] } {
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if { [prepare_for_testing disasm-end-cu.exp "disasm-end-cu" {disasm-end-cu-1.c disasm-end-cu-2.c} $opts] } {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.base/dup-sect.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.base/dup-sect.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 dup-sect.exp
+--- gdb/testsuite/gdb.base/dup-sect.exp	25 May 2013 03:47:55 -0000	1.4
++++ gdb/testsuite/gdb.base/dup-sect.exp	27 Sep 2013 03:58:57 -0000
+@@ -38,8 +38,13 @@ set srcfile ${testfile}.S
+ set srcmainfile start.c
+ set executable ${testfile}
+ set binfile ${objdir}/${subdir}/${executable}
++set opts {}
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ 
+-if {[build_executable ${testfile}.exp $executable [list ${srcfile} ${srcmainfile}] {}] == -1} {
++if {[build_executable ${testfile}.exp $executable [list ${srcfile} ${srcmainfile}] $opts] == -1} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.base/exprs.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.base/exprs.exp,v
+retrieving revision 1.10
+diff -u -p -r1.10 exprs.exp
+--- gdb/testsuite/gdb.base/exprs.exp	25 May 2013 03:48:00 -0000	1.10
++++ gdb/testsuite/gdb.base/exprs.exp	27 Sep 2013 03:58:57 -0000
+@@ -22,7 +22,12 @@
+ set testfile "exprs"
+ set srcfile ${testfile}.c
+ set binfile ${objdir}/${subdir}/${testfile}
+-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $opts] != "" } {
+      untested exprs.exp
+      return -1
+ }
+Index: gdb/testsuite/gdb.base/gdb11530.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.base/gdb11530.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 gdb11530.exp
+--- gdb/testsuite/gdb.base/gdb11530.exp	25 May 2013 03:48:08 -0000	1.4
++++ gdb/testsuite/gdb.base/gdb11530.exp	27 Sep 2013 03:58:57 -0000
+@@ -20,6 +20,11 @@
+ 
+ set testfile "gdb11530"
+ set binfile ${testfile}${EXEEXT}
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ 
+ # Unnamed union is a GNU extension, thus we restrict the test
+ # to gcc compiler.
+@@ -32,7 +37,7 @@ if { ![test_compiler_info gcc*] } {
+     return 0;
+ }
+ 
+-if { [prepare_for_testing $testfile.exp $testfile $testfile.c {debug}] } {
++if { [prepare_for_testing $testfile.exp $testfile $testfile.c $opts] } {
+     return -1;
+ }
+ 
+Index: gdb/testsuite/gdb.base/gnu_vector.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.base/gnu_vector.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 gnu_vector.exp
+--- gdb/testsuite/gdb.base/gnu_vector.exp	25 May 2013 03:48:12 -0000	1.4
++++ gdb/testsuite/gdb.base/gnu_vector.exp	27 Sep 2013 03:58:57 -0000
+@@ -21,6 +21,11 @@
+ set testfile "gnu_vector"
+ set srcfile ${testfile}.c
+ set binfile ${objdir}/${subdir}/${testfile}
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ 
+ if [get_compiler_info] {
+     return -1
+@@ -33,7 +38,7 @@ if { ![test_compiler_info gcc-4-*] } {
+     return 0
+ }
+ 
+-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug}] } {
++if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} $opts] } {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.base/memattr.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.base/memattr.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 memattr.exp
+--- gdb/testsuite/gdb.base/memattr.exp	25 May 2013 03:48:23 -0000	1.4
++++ gdb/testsuite/gdb.base/memattr.exp	27 Sep 2013 03:58:57 -0000
+@@ -19,8 +19,12 @@
+ 
+ set testfile "memattr"
+ set srcfile  ${testfile}.c
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
+ 
+-if { [prepare_for_testing $testfile.exp $testfile $srcfile] } {
++if { [prepare_for_testing $testfile.exp $testfile $srcfile $opts] } {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/classes.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/classes.exp,v
+retrieving revision 1.13
+diff -u -p -r1.13 classes.exp
+--- gdb/testsuite/gdb.cp/classes.exp	25 May 2013 03:49:21 -0000	1.13
++++ gdb/testsuite/gdb.cp/classes.exp	27 Sep 2013 03:58:57 -0000
+@@ -23,8 +23,13 @@ if { [skip_cplus_tests] } { continue }
+ load_lib "cp-support.exp"
+ 
+ standard_testfile .cc
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ 
+-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
++if {[prepare_for_testing $testfile.exp $testfile $srcfile $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/koenig.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/koenig.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 koenig.exp
+--- gdb/testsuite/gdb.cp/koenig.exp	25 May 2013 03:49:29 -0000	1.4
++++ gdb/testsuite/gdb.cp/koenig.exp	27 Sep 2013 03:58:57 -0000
+@@ -14,8 +14,13 @@
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
+ standard_testfile .cc
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ 
+-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug c++}] } {
++if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} $opts] } {
+      return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/m-static.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/m-static.exp,v
+retrieving revision 1.12
+diff -u -p -r1.12 m-static.exp
+--- gdb/testsuite/gdb.cp/m-static.exp	25 May 2013 03:49:29 -0000	1.12
++++ gdb/testsuite/gdb.cp/m-static.exp	27 Sep 2013 03:58:57 -0000
+@@ -30,9 +30,14 @@ standard_testfile .cc m-static1.cc
+ if [get_compiler_info] {
+     return -1
+ }
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ 
+ if {[prepare_for_testing $testfile.exp $testfile \
+-	 [list $srcfile $srcfile2] {debug c++}]} {
++	 [list $srcfile $srcfile2] $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/namespace-enum.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/namespace-enum.exp,v
+retrieving revision 1.3
+diff -u -p -r1.3 namespace-enum.exp
+--- gdb/testsuite/gdb.cp/namespace-enum.exp	25 May 2013 03:49:33 -0000	1.3
++++ gdb/testsuite/gdb.cp/namespace-enum.exp	27 Sep 2013 03:58:57 -0000
+@@ -15,8 +15,13 @@
+ 
+ standard_testfile .cc namespace-enum-main.cc
+ 
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if {[prepare_for_testing $testfile.exp $testfile \
+-	 [list $srcfile $srcfile2] {debug c++}]} {
++	 [list $srcfile $srcfile2] $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/namespace.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/namespace.exp,v
+retrieving revision 1.12
+diff -u -p -r1.12 namespace.exp
+--- gdb/testsuite/gdb.cp/namespace.exp	25 May 2013 03:49:34 -0000	1.12
++++ gdb/testsuite/gdb.cp/namespace.exp	27 Sep 2013 03:58:57 -0000
+@@ -40,8 +40,13 @@ if {[test_compiler_info {gcc-[0-3]-*}]
+     set xfail_class_types 1
+ }
+ 
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if {[prepare_for_testing $testfile.exp $testfile \
+-	 [list $srcfile $srcfile2] {debug c++}]} {
++	 [list $srcfile $srcfile2] $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/nsimport.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/nsimport.exp,v
+retrieving revision 1.5
+diff -u -p -r1.5 nsimport.exp
+--- gdb/testsuite/gdb.cp/nsimport.exp	25 May 2013 03:49:35 -0000	1.5
++++ gdb/testsuite/gdb.cp/nsimport.exp	27 Sep 2013 03:58:57 -0000
+@@ -19,7 +19,12 @@
+ 
+ standard_testfile .cc
+ 
+-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if {[prepare_for_testing $testfile.exp $testfile $srcfile $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/nsnested.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/nsnested.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 nsnested.exp
+--- gdb/testsuite/gdb.cp/nsnested.exp	25 May 2013 03:49:35 -0000	1.4
++++ gdb/testsuite/gdb.cp/nsnested.exp	27 Sep 2013 03:58:57 -0000
+@@ -15,7 +15,12 @@
+ 
+ standard_testfile .cc
+ 
+-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug c++}] } {
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} $opts] } {
+      return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/nsnoimports.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/nsnoimports.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 nsnoimports.exp
+--- gdb/testsuite/gdb.cp/nsnoimports.exp	25 May 2013 03:49:36 -0000	1.4
++++ gdb/testsuite/gdb.cp/nsnoimports.exp	27 Sep 2013 03:58:57 -0000
+@@ -15,7 +15,12 @@
+ 
+ standard_testfile .cc
+ 
+-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug c++}] } {
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} $opts] } {
+      return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/operator.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/operator.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 operator.exp
+--- gdb/testsuite/gdb.cp/operator.exp	25 May 2013 03:49:36 -0000	1.4
++++ gdb/testsuite/gdb.cp/operator.exp	27 Sep 2013 03:58:57 -0000
+@@ -15,7 +15,12 @@
+ 
+ standard_testfile .cc
+ 
+-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug c++}] } {
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} $opts] } {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/overload.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/overload.exp,v
+retrieving revision 1.11
+diff -u -p -r1.11 overload.exp
+--- gdb/testsuite/gdb.cp/overload.exp	25 May 2013 03:49:37 -0000	1.11
++++ gdb/testsuite/gdb.cp/overload.exp	27 Sep 2013 03:58:57 -0000
+@@ -28,7 +28,12 @@ if { [skip_cplus_tests] } { continue }
+ 
+ standard_testfile .cc
+ 
+-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if {[prepare_for_testing $testfile.exp $testfile $srcfile $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/ovsrch.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/ovsrch.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 ovsrch.exp
+--- gdb/testsuite/gdb.cp/ovsrch.exp	25 May 2013 03:49:37 -0000	1.4
++++ gdb/testsuite/gdb.cp/ovsrch.exp	27 Sep 2013 03:58:57 -0000
+@@ -57,8 +57,13 @@ if { [skip_cplus_tests] } { continue }
+ # Test for c++/11734
+ standard_testfile ovsrch1.cc ovsrch2.cc ovsrch3.cc ovsrch4.cc
+ 
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if {[prepare_for_testing $testfile $testfile \
+-	 [list $srcfile $srcfile2 $srcfile3 $srcfile4] {c++ debug}]} {
++	 [list $srcfile $srcfile2 $srcfile3 $srcfile4] $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/pr9067.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/pr9067.exp,v
+retrieving revision 1.5
+diff -u -p -r1.5 pr9067.exp
+--- gdb/testsuite/gdb.cp/pr9067.exp	25 May 2013 03:49:41 -0000	1.5
++++ gdb/testsuite/gdb.cp/pr9067.exp	27 Sep 2013 03:58:57 -0000
+@@ -21,7 +21,12 @@ load_lib "cp-support.exp"
+ 
+ standard_testfile .cc
+ 
+-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if {[prepare_for_testing $testfile.exp $testfile $srcfile $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/ptype-cv-cp.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/ptype-cv-cp.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 ptype-cv-cp.exp
+--- gdb/testsuite/gdb.cp/ptype-cv-cp.exp	25 May 2013 03:49:43 -0000	1.4
++++ gdb/testsuite/gdb.cp/ptype-cv-cp.exp	27 Sep 2013 03:58:57 -0000
+@@ -19,7 +19,12 @@ if { [skip_cplus_tests] } { continue }
+ 
+ standard_testfile .cc
+ 
+-if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} {debug c++}] } {
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if { [prepare_for_testing ${testfile}.exp ${testfile} ${srcfile} $opts] } {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/ptype-flags.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/ptype-flags.exp,v
+retrieving revision 1.1
+diff -u -p -r1.1 ptype-flags.exp
+--- gdb/testsuite/gdb.cp/ptype-flags.exp	25 May 2013 03:49:44 -0000	1.1
++++ gdb/testsuite/gdb.cp/ptype-flags.exp	27 Sep 2013 03:58:57 -0000
+@@ -21,7 +21,12 @@ load_lib "cp-support.exp"
+ 
+ standard_testfile .cc
+ 
+-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if {[prepare_for_testing $testfile.exp $testfile $srcfile $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/shadow.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/shadow.exp,v
+retrieving revision 1.5
+diff -u -p -r1.5 shadow.exp
+--- gdb/testsuite/gdb.cp/shadow.exp	25 May 2013 03:49:46 -0000	1.5
++++ gdb/testsuite/gdb.cp/shadow.exp	27 Sep 2013 03:58:57 -0000
+@@ -23,7 +23,12 @@ if [get_compiler_info] {
+     return -1
+ }
+ 
+-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if {[prepare_for_testing $testfile.exp $testfile $srcfile $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/temargs.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/temargs.exp,v
+retrieving revision 1.5
+diff -u -p -r1.5 temargs.exp
+--- gdb/testsuite/gdb.cp/temargs.exp	25 May 2013 03:49:47 -0000	1.5
++++ gdb/testsuite/gdb.cp/temargs.exp	27 Sep 2013 03:58:57 -0000
+@@ -23,7 +23,12 @@ if {[skip_cplus_tests]} {
+ 
+ standard_testfile .cc
+ 
+-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if {[prepare_for_testing $testfile.exp $testfile $srcfile $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/templates.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/templates.exp,v
+retrieving revision 1.13
+diff -u -p -r1.13 templates.exp
+--- gdb/testsuite/gdb.cp/templates.exp	25 May 2013 03:49:47 -0000	1.13
++++ gdb/testsuite/gdb.cp/templates.exp	27 Sep 2013 03:58:57 -0000
+@@ -27,7 +27,12 @@ if [get_compiler_info "c++"] {
+     return -1
+ }
+ 
+-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if {[prepare_for_testing $testfile.exp $testfile $srcfile $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.cp/typedef-operator.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.cp/typedef-operator.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 typedef-operator.exp
+--- gdb/testsuite/gdb.cp/typedef-operator.exp	25 May 2013 03:49:48 -0000	1.4
++++ gdb/testsuite/gdb.cp/typedef-operator.exp	27 Sep 2013 03:58:57 -0000
+@@ -19,7 +19,12 @@ if {[skip_cplus_tests]} { continue }
+ 
+ standard_testfile .cc
+ 
+-if {[prepare_for_testing $testfile $testfile $srcfile {c++ debug}]} {
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if {[prepare_for_testing $testfile $testfile $srcfile $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.dwarf2/dup-psym.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/dup-psym.exp,v
+retrieving revision 1.8
+diff -u -p -r1.8 dup-psym.exp
+--- gdb/testsuite/gdb.dwarf2/dup-psym.exp	25 May 2013 03:49:54 -0000	1.8
++++ gdb/testsuite/gdb.dwarf2/dup-psym.exp	27 Sep 2013 03:58:57 -0000
+@@ -23,8 +23,13 @@ if {![dwarf2_support]} {
+ 
+ standard_testfile .S
+ 
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if {[prepare_for_testing_full $testfile.exp \
+-	 [list $testfile {debug} main.c debug $srcfile nodebug]]} {
++	 [list $testfile $opts main.c debug $srcfile nodebug]]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.dwarf2/dw2-anonymous-func.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/dw2-anonymous-func.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 dw2-anonymous-func.exp
+--- gdb/testsuite/gdb.dwarf2/dw2-anonymous-func.exp	25 May 2013 03:49:57 -0000	1.4
++++ gdb/testsuite/gdb.dwarf2/dw2-anonymous-func.exp	27 Sep 2013 03:58:57 -0000
+@@ -24,8 +24,13 @@ if {![dwarf2_support]} {
+ standard_testfile .S
+ set dwarf_srcfile "file1.txt"
+ 
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if {[prepare_for_testing_full $testfile.exp \
+-	 [list $testfile debug main.c debug $srcfile nodebug]]} {
++	 [list $testfile $opts main.c debug $srcfile nodebug]]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.dwarf2/dw2-basic.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/dw2-basic.exp,v
+retrieving revision 1.8
+diff -u -p -r1.8 dw2-basic.exp
+--- gdb/testsuite/gdb.dwarf2/dw2-basic.exp	25 May 2013 03:49:57 -0000	1.8
++++ gdb/testsuite/gdb.dwarf2/dw2-basic.exp	27 Sep 2013 03:58:57 -0000
+@@ -24,8 +24,13 @@ if {![dwarf2_support]} {
+ standard_testfile .S
+ set dwarf_srcfile "file1.txt"
+ 
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if {[prepare_for_testing_full $testfile.exp \
+-	 [list $testfile debug main.c debug $srcfile nodebug]]} {
++	 [list $testfile $opts main.c debug $srcfile nodebug]]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.dwarf2/dw2-const.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/dw2-const.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 dw2-const.exp
+--- gdb/testsuite/gdb.dwarf2/dw2-const.exp	25 May 2013 03:50:00 -0000	1.4
++++ gdb/testsuite/gdb.dwarf2/dw2-const.exp	27 Sep 2013 03:58:57 -0000
+@@ -21,8 +21,13 @@ if {![dwarf2_support]} {
+ 
+ standard_testfile .S
+ 
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if {[prepare_for_testing_full $testfile.exp \
+-	 [list $testfile debug main.c debug $srcfile nodebug]]} {
++	 [list $testfile $opts main.c debug $srcfile nodebug]]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.dwarf2/dw2-cp-infcall-ref-static.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/dw2-cp-infcall-ref-static.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 dw2-cp-infcall-ref-static.exp
+--- gdb/testsuite/gdb.dwarf2/dw2-cp-infcall-ref-static.exp	25 May 2013 03:50:00 -0000	1.4
++++ gdb/testsuite/gdb.dwarf2/dw2-cp-infcall-ref-static.exp	27 Sep 2013 03:58:57 -0000
+@@ -27,8 +27,13 @@ if {![dwarf2_support]} {
+ 
+ standard_testfile .S dw2-cp-infcall-ref-static-main.c
+ 
++set opts {}
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if { [prepare_for_testing ${testfile}.exp ${testfile} \
+-	  [list $srcfile2 $srcfile] {}] } {
++	  [list $srcfile2 $srcfile] $opts] } {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.dwarf2/dw2-cu-size.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/dw2-cu-size.exp,v
+retrieving revision 1.6
+diff -u -p -r1.6 dw2-cu-size.exp
+--- gdb/testsuite/gdb.dwarf2/dw2-cu-size.exp	25 May 2013 03:50:00 -0000	1.6
++++ gdb/testsuite/gdb.dwarf2/dw2-cu-size.exp	27 Sep 2013 03:58:57 -0000
+@@ -26,8 +26,13 @@ if {![dwarf2_support]} {
+ 
+ standard_testfile .S
+ 
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if {[prepare_for_testing_full $testfile.exp \
+-	 [list $testfile debug main.c debug $srcfile nodebug]]} {
++	 [list $testfile $opts main.c debug $srcfile nodebug]]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.dwarf2/dw2-inline-param.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/dw2-inline-param.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 dw2-inline-param.exp
+--- gdb/testsuite/gdb.dwarf2/dw2-inline-param.exp	25 May 2013 03:50:07 -0000	1.4
++++ gdb/testsuite/gdb.dwarf2/dw2-inline-param.exp	27 Sep 2013 03:58:57 -0000
+@@ -21,8 +21,13 @@ if {![dwarf2_support]} {
+ 
+ standard_testfile .S dw2-inline-param-main.c
+ 
++set opts [list nodebug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if { [prepare_for_testing ${testfile}.exp "${testfile}" \
+-	  [list $srcfile2 $srcfile] {nodebug}] } {
++	  [list $srcfile2 $srcfile] $opts] } {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.dwarf2/dw2-intercu.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/dw2-intercu.exp,v
+retrieving revision 1.8
+diff -u -p -r1.8 dw2-intercu.exp
+--- gdb/testsuite/gdb.dwarf2/dw2-intercu.exp	25 May 2013 03:50:07 -0000	1.8
++++ gdb/testsuite/gdb.dwarf2/dw2-intercu.exp	27 Sep 2013 03:58:57 -0000
+@@ -24,8 +24,13 @@ if {![dwarf2_support]} {
+ standard_testfile .S
+ set dwarf_srcfile "file1.txt"
+ 
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if {[prepare_for_testing_full $testfile.exp \
+-	 [list $testfile debug main.c debug $srcfile nodebug]]} {
++	 [list $testfile $opts main.c debug $srcfile nodebug]]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.dwarf2/dw2-linkage-name-trust.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/dw2-linkage-name-trust.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 dw2-linkage-name-trust.exp
+--- gdb/testsuite/gdb.dwarf2/dw2-linkage-name-trust.exp	25 May 2013 03:50:08 -0000	1.4
++++ gdb/testsuite/gdb.dwarf2/dw2-linkage-name-trust.exp	27 Sep 2013 03:58:57 -0000
+@@ -28,8 +28,14 @@ if {![dwarf2_support]} {
+ standard_testfile .S
+ set executable ${testfile}
+ 
++set opts {c++}
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++
+ if {[prepare_for_testing_full $testfile.exp \
+-	 [list $testfile c++ $testfile-main.cc {c++ debug} \
++	 [list $testfile $opts $testfile-main.cc {c++ debug} \
+ 	      $srcfile {}]]} {
+     return -1
+ }
+Index: gdb/testsuite/gdb.dwarf2/dw2-noloc.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/dw2-noloc.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 dw2-noloc.exp
+--- gdb/testsuite/gdb.dwarf2/dw2-noloc.exp	25 May 2013 03:50:10 -0000	1.7
++++ gdb/testsuite/gdb.dwarf2/dw2-noloc.exp	27 Sep 2013 03:58:57 -0000
+@@ -19,7 +19,12 @@ if {![dwarf2_support]} {
+     return 0  
+ }
+ 
+-if { [prepare_for_testing dw2-noloc.exp "dw2-noloc" {dw2-noloc-main.c dw2-noloc.S} {nodebug}] } {
++set opts [list nodebug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if { [prepare_for_testing dw2-noloc.exp "dw2-noloc" {dw2-noloc-main.c dw2-noloc.S} $opts] } {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.dwarf2/dw2-op-call.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/dw2-op-call.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 dw2-op-call.exp
+--- gdb/testsuite/gdb.dwarf2/dw2-op-call.exp	25 May 2013 03:50:11 -0000	1.4
++++ gdb/testsuite/gdb.dwarf2/dw2-op-call.exp	27 Sep 2013 03:58:57 -0000
+@@ -23,8 +23,13 @@ if {![dwarf2_support]} {
+ 
+ standard_testfile .S main.c
+ 
++set opts [list nodebug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if { [prepare_for_testing ${testfile}.exp ${testfile} \
+-	  [list $srcfile $srcfile2] {nodebug}] } {
++	  [list $srcfile $srcfile2] $opts] } {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.dwarf2/dw2-param-error.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/dw2-param-error.exp,v
+retrieving revision 1.3
+diff -u -p -r1.3 dw2-param-error.exp
+--- gdb/testsuite/gdb.dwarf2/dw2-param-error.exp	25 May 2013 03:50:12 -0000	1.3
++++ gdb/testsuite/gdb.dwarf2/dw2-param-error.exp	27 Sep 2013 03:58:57 -0000
+@@ -21,8 +21,13 @@ if {![dwarf2_support]} {
+ 
+ standard_testfile .S dw2-param-error-main.c
+ 
++set opts [list nodebug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if { [prepare_for_testing ${testfile}.exp "${testfile}" \
+-	  [list $srcfile2 $srcfile] {nodebug}] } {
++	  [list $srcfile2 $srcfile] $opts] } {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.dwarf2/dw2-producer.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/dw2-producer.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 dw2-producer.exp
+--- gdb/testsuite/gdb.dwarf2/dw2-producer.exp	25 May 2013 03:50:12 -0000	1.7
++++ gdb/testsuite/gdb.dwarf2/dw2-producer.exp	27 Sep 2013 03:58:57 -0000
+@@ -22,8 +22,13 @@ if {![dwarf2_support]} {
+ standard_testfile .S
+ set dwarf_srcfile "file1.txt"
+ 
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if {[prepare_for_testing_full $testfile.exp \
+-	 [list $testfile debug main.c debug $srcfile nodebug]]} {
++	 [list $testfile $opts main.c debug $srcfile nodebug]]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.dwarf2/dw2-skip-prologue.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/dw2-skip-prologue.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 dw2-skip-prologue.exp
+--- gdb/testsuite/gdb.dwarf2/dw2-skip-prologue.exp	25 May 2013 03:50:16 -0000	1.4
++++ gdb/testsuite/gdb.dwarf2/dw2-skip-prologue.exp	27 Sep 2013 03:58:57 -0000
+@@ -39,7 +39,12 @@ if {![dwarf2_support]} {
+ standard_testfile
+ set executable ${testfile}
+ 
+-if {[build_executable ${testfile}.exp ${executable} "${testfile}.c ${testfile}.S" {additional_flags=-DINLINED}] == -1} {
++set additional_flags "-DINLINED"
++if [istarget "rl78-*"] then {
++    set additional_flags "$additional_flags -Wl,--no-gc-sections"
++}
++
++if {[build_executable ${testfile}.exp ${executable} "${testfile}.c ${testfile}.S" [list additional_flags=$additional_flags]] == -1} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.dwarf2/dw2-strp.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/dw2-strp.exp,v
+retrieving revision 1.6
+diff -u -p -r1.6 dw2-strp.exp
+--- gdb/testsuite/gdb.dwarf2/dw2-strp.exp	25 May 2013 03:50:17 -0000	1.6
++++ gdb/testsuite/gdb.dwarf2/dw2-strp.exp	27 Sep 2013 03:58:57 -0000
+@@ -24,8 +24,13 @@ if {![dwarf2_support]} {
+ 
+ standard_testfile .S
+ 
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if {[prepare_for_testing_full $testfile.exp \
+-	 [list $testfile debug main.c debug $srcfile nodebug]]} {
++	 [list $testfile $opts main.c debug $srcfile nodebug]]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.dwarf2/mac-fileno.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.dwarf2/mac-fileno.exp,v
+retrieving revision 1.8
+diff -u -p -r1.8 mac-fileno.exp
+--- gdb/testsuite/gdb.dwarf2/mac-fileno.exp	25 May 2013 03:50:21 -0000	1.8
++++ gdb/testsuite/gdb.dwarf2/mac-fileno.exp	27 Sep 2013 03:58:57 -0000
+@@ -25,8 +25,13 @@ if {![dwarf2_support]} {
+ standard_testfile .S
+ set dwarf_srcfile "file1.txt"
+ 
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if {[prepare_for_testing_full $testfile.exp \
+-	 [list $testfile debug main.c debug $srcfile nodebug]]} {
++	 [list $testfile $opts main.c debug $srcfile nodebug]]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.mi/mi-var-cmd.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-var-cmd.exp,v
+retrieving revision 1.11
+diff -u -p -r1.11 mi-var-cmd.exp
+--- gdb/testsuite/gdb.mi/mi-var-cmd.exp	25 May 2013 03:50:50 -0000	1.11
++++ gdb/testsuite/gdb.mi/mi-var-cmd.exp	27 Sep 2013 03:58:57 -0000
+@@ -29,7 +29,12 @@ if [mi_gdb_start] {
+ 
+ standard_testfile var-cmd.c
+ 
+-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $opts] != "" } {
+     untested mi-var-cmd.exp
+     return -1
+ }
+Index: gdb/testsuite/gdb.mi/mi-var-invalidate.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.mi/mi-var-invalidate.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 mi-var-invalidate.exp
+--- gdb/testsuite/gdb.mi/mi-var-invalidate.exp	25 May 2013 03:50:51 -0000	1.7
++++ gdb/testsuite/gdb.mi/mi-var-invalidate.exp	27 Sep 2013 03:58:57 -0000
+@@ -28,9 +28,14 @@ if [mi_gdb_start] {
+     continue
+ }
+ 
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ standard_testfile var-cmd.c
+ 
+-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug}] != "" } {
++if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable $opts] != "" } {
+     untested mi-var-invalidate.exp
+     return -1
+ }
+Index: gdb/testsuite/gdb.opt/inline-break.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.opt/inline-break.exp,v
+retrieving revision 1.2
+diff -u -p -r1.2 inline-break.exp
+--- gdb/testsuite/gdb.opt/inline-break.exp	25 May 2013 03:51:10 -0000	1.2
++++ gdb/testsuite/gdb.opt/inline-break.exp	27 Sep 2013 03:58:57 -0000
+@@ -19,8 +19,13 @@
+ 
+ standard_testfile
+ 
++set additional_flags "-Winline"
++if [istarget "rl78-*"] then {
++    set additional_flags "$additional_flags -Wl,--no-gc-sections"
++}
++
+ if { [prepare_for_testing $testfile.exp $testfile $srcfile \
+-          {debug optimize=-O2 additional_flags=-Winline}] } {
++          [list debug optimize=-O2 additional_flags=$additional_flags ]] } {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.python/lib-types.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.python/lib-types.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 lib-types.exp
+--- gdb/testsuite/gdb.python/lib-types.exp	25 May 2013 03:51:13 -0000	1.4
++++ gdb/testsuite/gdb.python/lib-types.exp	27 Sep 2013 03:58:57 -0000
+@@ -20,7 +20,12 @@ load_lib gdb-python.exp
+ 
+ standard_testfile .cc
+ 
+-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if {[prepare_for_testing $testfile.exp $testfile $srcfile $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.python/py-mi.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.python/py-mi.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 py-mi.exp
+--- gdb/testsuite/gdb.python/py-mi.exp	25 May 2013 03:51:21 -0000	1.7
++++ gdb/testsuite/gdb.python/py-mi.exp	27 Sep 2013 03:58:57 -0000
+@@ -24,9 +24,14 @@ if [mi_gdb_start] {
+     continue
+ }
+ 
++set extra_additional_flags ""
++if [istarget "rl78-*"] then {
++    lappend extra_additional_flags "-Wl,--no-gc-sections"
++}
++
+ standard_testfile py-prettyprint.c
+ set pyfile py-prettyprint.py
+-if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable {debug additional_flags=-DMI}] != "" } {
++if  { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${binfile}" executable [list debug "additional_flags=-DMI $extra_additional_flags"]] != "" } {
+     untested ${testfile}.exp
+     return -1
+ }
+Index: gdb/testsuite/gdb.python/py-symbol.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.python/py-symbol.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 py-symbol.exp
+--- gdb/testsuite/gdb.python/py-symbol.exp	25 May 2013 03:51:26 -0000	1.4
++++ gdb/testsuite/gdb.python/py-symbol.exp	27 Sep 2013 03:58:57 -0000
+@@ -20,7 +20,12 @@ load_lib gdb-python.exp
+ 
+ standard_testfile
+ 
+-if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if {[prepare_for_testing $testfile.exp $testfile $srcfile $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.python/py-symtab.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.python/py-symtab.exp,v
+retrieving revision 1.4
+diff -u -p -r1.4 py-symtab.exp
+--- gdb/testsuite/gdb.python/py-symtab.exp	25 May 2013 03:51:26 -0000	1.4
++++ gdb/testsuite/gdb.python/py-symtab.exp	27 Sep 2013 03:58:57 -0000
+@@ -20,7 +20,12 @@ load_lib gdb-python.exp
+ 
+ standard_testfile py-symbol.c
+ 
+-if {[prepare_for_testing $testfile.exp $testfile $srcfile debug]} {
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if {[prepare_for_testing $testfile.exp $testfile $srcfile $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.python/py-type.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.python/py-type.exp,v
+retrieving revision 1.5
+diff -u -p -r1.5 py-type.exp
+--- gdb/testsuite/gdb.python/py-type.exp	25 May 2013 03:51:27 -0000	1.5
++++ gdb/testsuite/gdb.python/py-type.exp	27 Sep 2013 03:58:57 -0000
+@@ -24,11 +24,16 @@ if [get_compiler_info c++] {
+     return -1;
+ }
+ 
++set additional_opts ""
++if [istarget "rl78-*"] then {
++    set additional_opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ # Build inferior to language specification.
+ proc build_inferior {exefile lang} {
+-  global srcdir subdir srcfile testfile hex
++  global srcdir subdir srcfile testfile hex additional_opts
+ 
+-  if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${exefile}" executable "debug $lang"] != "" } {
++  if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${exefile}" executable "debug $lang $additional_opts"] != "" } {
+       untested "Couldn't compile ${srcfile} in $lang mode"
+       return -1
+   }
+Index: gdb/testsuite/gdb.python/py-typeprint.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.python/py-typeprint.exp,v
+retrieving revision 1.1
+diff -u -p -r1.1 py-typeprint.exp
+--- gdb/testsuite/gdb.python/py-typeprint.exp	25 May 2013 03:51:27 -0000	1.1
++++ gdb/testsuite/gdb.python/py-typeprint.exp	27 Sep 2013 03:58:57 -0000
+@@ -20,7 +20,12 @@ load_lib cp-support.exp
+ 
+ standard_testfile .cc
+ 
+-if {[prepare_for_testing $testfile.exp $testfile $srcfile {debug c++}]} {
++set opts [list debug c++]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
++if {[prepare_for_testing $testfile.exp $testfile $srcfile $opts]} {
+     return -1
+ }
+ 
+Index: gdb/testsuite/gdb.python/py-value.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.python/py-value.exp,v
+retrieving revision 1.7
+diff -u -p -r1.7 py-value.exp
+--- gdb/testsuite/gdb.python/py-value.exp	25 May 2013 03:51:28 -0000	1.7
++++ gdb/testsuite/gdb.python/py-value.exp	27 Sep 2013 03:58:57 -0000
+@@ -20,11 +20,16 @@ load_lib gdb-python.exp
+ 
+ standard_testfile
+ 
++set extra_opts ""
++if [istarget "rl78-*"] then {
++    set extra_opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ # Build inferior to language specification.
+ proc build_inferior {exefile lang} {
+-  global srcdir subdir srcfile testfile hex
++  global srcdir subdir srcfile testfile hex extra_opts
+ 
+-  if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${exefile}" executable "debug $lang"] != "" } {
++  if { [gdb_compile "${srcdir}/${subdir}/${srcfile}" "${exefile}" executable "debug $lang $extra_opts"] != "" } {
+       untested "Couldn't compile ${srcfile} in $lang mode"
+       return -1
+   }
+Index: gdb/testsuite/gdb.stabs/exclfwd.exp
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/testsuite/gdb.stabs/exclfwd.exp,v
+retrieving revision 1.9
+diff -u -p -r1.9 exclfwd.exp
+--- gdb/testsuite/gdb.stabs/exclfwd.exp	25 May 2013 03:51:43 -0000	1.9
++++ gdb/testsuite/gdb.stabs/exclfwd.exp	27 Sep 2013 03:58:57 -0000
+@@ -22,8 +22,13 @@
+ 
+ standard_testfile exclfwd1.c exclfwd2.c
+ 
++set opts [list debug]
++if [istarget "rl78-*"] then {
++    lappend opts "additional_flags=-Wl,--no-gc-sections"
++}
++
+ if {[prepare_for_testing $testfile.exp $testfile \
+-	 [list $srcfile $srcfile2] debug]} {
++	 [list $srcfile $srcfile2] $opts]} {
+     return -1
+ }
+ 

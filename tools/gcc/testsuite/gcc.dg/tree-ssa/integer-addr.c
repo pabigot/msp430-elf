@@ -25,5 +25,4 @@ int foobar(void)
    return func();
 }
 
-/* { dg-final { scan-tree-dump-times "= func" 2 "optimized" } } */
 /* { dg-final { cleanup-tree-dump "optimized" } } */

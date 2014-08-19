@@ -73,3 +73,4 @@ void test()
 	bp = new derived;
 	delete bp;
 }
+// { dg-require-effective-target size32plus }

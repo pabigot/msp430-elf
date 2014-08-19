@@ -21,5 +21,3 @@ unlink (const char * name)
 
   return __CIOBUF__.parms[0] + __CIOBUF__.parms[1] * 256;
 }
-
-

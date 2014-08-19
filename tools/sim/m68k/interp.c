@@ -453,7 +453,7 @@ int
 sim_write (sd, addr, buffer, size)
      SIM_DESC sd;
      SIM_ADDR addr;
-     unsigned char *buffer;
+     const unsigned char *buffer;
      int size;
 {
   int i;
@@ -951,11 +951,4 @@ sim_trace_one(pc)
       }
 
   printf("\n");
-}
-
-SIM_RC
-sim_hardware_watchpoint (SIM_DESC sd, SIM_WATCH_ACTION action,
-                         SIM_WATCH_TYPE type, SIM_ADDR addr, long length)
-{
-  return SIM_RC_FAIL;
 }

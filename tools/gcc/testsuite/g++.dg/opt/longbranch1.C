@@ -34,3 +34,5 @@ loop:
   delete[] argv;
   goto loop;
 }
+// { dg-require-effective-target size32plus }
+// { dg-require-effective-target size32plus }

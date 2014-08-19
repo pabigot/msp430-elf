@@ -1,0 +1,53 @@
+Index: gcc/ChangeLog.RedHat
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/ChangeLog.RedHat,v
+retrieving revision 1.443
+diff -p -U 5 -r1.443  gcc/ChangeLog.RedHat
+--- gcc/ChangeLog.RedHat	15 Aug 2013 07:18:52 -0000	1.443
++++ gcc/ChangeLog.RedHat	16 Aug 2013 02:49:47 -0000
+@@ -1,5 +1,10 @@
++2013-08-15  DJ Delorie  <dj@redhat.com>
++
++	* config/rl78/rl78.c (rl78_propogate_register_origins): Handle
++	clobbers of multi-byte registers correctly.
++
+ 2013-08-15  Nick Clifton  <nickc@redhat.com>
+ 
+ 	* config/rx/rx.h (TARGET_USE_FPU): Disable FPU use when using
+ 	64-bit doubles.
+ 
+Index: gcc/config/rl78/rl78.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gcc/config/rl78/rl78.c,v
+retrieving revision 1.4
+diff -p -U 5 -r1.4  gcc/config/rl78/rl78.c
+--- gcc/config/rl78/rl78.c	21 Jun 2013 10:30:19 -0000	1.4
++++ gcc/config/rl78/rl78.c	16 Aug 2013 02:49:48 -0000
+@@ -3587,13 +3587,25 @@ rl78_propogate_register_origins (void)
+ 	  else if (GET_CODE (pat) == CLOBBER)
+ 	    {
+ 	      if (REG_P (XEXP (pat, 0)))
+ 		{
+ 		  unsigned int reg = REGNO (XEXP (pat, 0));
++		  unsigned int mb = GET_MODE_SIZE (GET_MODE (XEXP (pat, 0)));
+ 
+-		  origins[reg] = reg;
+-		  age[reg] = 0;
++		  for (i=0; i<mb; i++)
++		    {
++		      origins[reg + i] = reg + i;
++		      age[reg + i] = 0;
++		    }
++
++		  /* Any registers marked with that reg as an origin are reset.  */
++		  for (i = 0; i < FIRST_PSEUDO_REGISTER; i++)
++		    if (origins[i] >= reg && origins[i] < reg + mb)
++		      {
++			origins[i] = i;
++			age[i] = 0;
++		      }
+ 		}
+ 	    }
+ 	}
+     }
+ }

@@ -1,6 +1,5 @@
 #objdump: -drw
 #name: i386 .bundle_lock
-#target: *-*-*linux*
 
 .*: +file format .*i386.*
 

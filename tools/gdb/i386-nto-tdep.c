@@ -1,6 +1,6 @@
 /* Target-dependent code for QNX Neutrino x86.
 
-   Copyright (C) 2003-2004, 2007-2012 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
 
    Contributed by QNX Software Systems Ltd.
 
@@ -26,7 +26,7 @@
 #include "target.h"
 
 #include "gdb_assert.h"
-#include "gdb_string.h"
+#include <string.h>
 
 #include "i386-tdep.h"
 #include "i387-tdep.h"
@@ -294,7 +294,7 @@ i386nto_sigcontext_addr (struct frame_info *this_frame)
 {
   struct gdbarch *gdbarch = get_frame_arch (this_frame);
   enum bfd_endian byte_order = gdbarch_byte_order (gdbarch);
-  char buf[4];
+  gdb_byte buf[4];
   CORE_ADDR ptrctx;
 
   /* We store __ucontext_t addr in EDI register.  */

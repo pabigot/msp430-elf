@@ -144,6 +144,8 @@ SECTIONS
     ${CONSTRUCTING+ __dtors_end = . ; }
 
     ${RELOCATING+. = ALIGN(2);}
+    *(.lower.text.* .lower.text)
+    ${RELOCATING+. = ALIGN(2);}
     *(.text)
     ${RELOCATING+. = ALIGN(2);}
     *(.text.*)
@@ -168,6 +170,8 @@ SECTIONS
 
   .rodata :
   {
+    ${RELOCATING+. = ALIGN(2);}
+    *(.lower.rodata.* .lower.rodata)
     . = ALIGN(2);
     *(.plt)
     *(.rodata .rodata.* .gnu.linkonce.r.* .const .const:*)
@@ -222,8 +226,8 @@ SECTIONS
     ${RELOCATING+ _vectors_end = . ; }
   } ${RELOCATING+ > vectors}
 
-  .data ${RELOCATING-0} : ${RELOCATING+AT (ADDR (.text) + SIZEOF (.text) + SIZEOF (.rodata))}
-  {  
+  .data ${RELOCATING-0} :
+  {
     ${RELOCATING+ PROVIDE (__data_start = .) ; }
     ${RELOCATING+ PROVIDE (__datastart = .) ; }
     ${RELOCATING+. = ALIGN(2);}
@@ -232,9 +236,10 @@ SECTIONS
     *(.data.rel.ro.local) *(.data.rel.ro*)
     *(.dynamic)
 
+    ${RELOCATING+. = ALIGN(2);}
+    *(.lower.data.* .lower.data)
     *(.data)
     *(.data.*)
-    ${RELOCATING+. = ALIGN(2);}
     *(.gnu.linkonce.d*)
     KEEP (*(.gnu.linkonce.d.*personality*))
     *(.data1)
@@ -243,19 +248,21 @@ SECTIONS
     *(.sdata .sdata.* .gnu.linkonce.s.*)
     ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ _edata = . ; }
-  } ${RELOCATING+ > data}
-  
+  } ${RELOCATING+ > data ${RELOCATING+AT> text}}
+
   .bss ${RELOCATING+ SIZEOF(.data) + ADDR(.data)} :
   {
     ${RELOCATING+. = ALIGN(2);}
     ${RELOCATING+ PROVIDE (__bss_start = .) ; }
+    *(.lower.bss.* .lower.bss)
+    ${RELOCATING+. = ALIGN(2);}
     *(.bss)
     *(COMMON)
     ${RELOCATING+ PROVIDE (__bss_end = .) ; }
     ${RELOCATING+ _end = . ;  }
   } ${RELOCATING+ > data}
 
-  .noinit ${RELOCATING+ SIZEOF(.bss) + ADDR(.bss)} :
+  .noinit ${RELOCATING+ SIZEOF(.bss) + ADDR(.bss)} ${RELOCATING-(NOLOAD)} :
   {
     ${RELOCATING+ PROVIDE (__noinit_start = .) ; }
     *(.noinit)
@@ -277,45 +284,11 @@ SECTIONS
   .stab.index 0 : { *(.stab.index) }
   .stab.indexstr 0 : { *(.stab.indexstr) }
   .comment 0 : { *(.comment) }
- 
-  /* DWARF debug sections.
-     Symbols in the DWARF debugging sections are relative to the beginning
-     of the section so we begin them at 0.  */
+EOF
 
-  /* DWARF 1 */
-  .debug          0 : { *(.debug) }
-  .line           0 : { *(.line) }
+source $srcdir/scripttempl/DWARF.sc
 
-  /* GNU DWARF 1 extensions */
-  .debug_srcinfo  0 : { *(.debug_srcinfo) }
-  .debug_sfnames  0 : { *(.debug_sfnames) }
-
-  /* DWARF 1.1 and DWARF 2 */
-  .debug_aranges  0 : { *(.debug_aranges) }
-  .debug_pubnames 0 : { *(.debug_pubnames) }
-
-  /* DWARF 2 */
-  .debug_info     0 : { *(.debug_info ${RELOCATING+ .gnu.linkonce.wi.*}) }
-  .debug_abbrev   0 : { *(.debug_abbrev) }
-  .debug_line     0 : { *(.debug_line) }
-  .debug_frame    0 : { *(.debug_frame) }
-  .debug_str      0 : { *(.debug_str) }
-  .debug_loc      0 : { *(.debug_loc) }
-  .debug_macinfo  0 : { *(.debug_macinfo) }
-
-  /* SGI/MIPS DWARF 2 extensions */
-  .debug_weaknames 0 : { *(.debug_weaknames) }
-  .debug_funcnames 0 : { *(.debug_funcnames) }
-  .debug_typenames 0 : { *(.debug_typenames) }
-  .debug_varnames  0 : { *(.debug_varnames) }
-
-  /* DWARF 3 */
-  .debug_pubtypes 0 : { *(.debug_pubtypes) }
-  .debug_ranges   0 : { *(.debug_ranges) }
-
-  /* DWARF Extension.  */
-  .debug_macro    0 : { *(.debug_macro) } 
-
+cat <<EOF
   .MP430.attributes 0 :
   {
     KEEP (*(.MSP430.attributes))

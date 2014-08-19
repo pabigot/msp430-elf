@@ -37,3 +37,4 @@ int main(int argc, char **argv) {
    theBar->init(argc, argv);
    return fail;
 }
+// { dg-require-effective-target size32plus }

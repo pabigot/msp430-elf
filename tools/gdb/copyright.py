@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# Copyright (C) 2011-2012 Free Software Foundation, Inc.
+# Copyright (C) 2011-2014 Free Software Foundation, Inc.
 #
 # This file is part of GDB.
 #
@@ -171,9 +171,9 @@ def main ():
 #
 # Filenames are relative to the root directory.
 EXCLUDE_LIST = (
+    'gdb/common/glibc_thread_db.h',
     'gdb/CONTRIBUTE',
-    'gdb/gdbarch.c', 'gdb/gdbarch.h',
-    'gdb/gnulib'
+    'gdb/gnulib/import'
 )
 
 # Files which should not be modified, either because they are
@@ -202,13 +202,13 @@ BY_HAND = (
 MULTIPLE_COPYRIGHT_HEADERS = (
     "gdb/doc/gdb.texinfo",
     "gdb/doc/refcard.tex",
+    "gdb/gdbarch.sh",
 )
 
 # The list of file which have a copyright, but not head by the FSF.
 # Filenames are relative to the root directory.
 NOT_FSF_LIST = (
     "gdb/exc_request.defs",
-    "gdb/osf-share",
     "gdb/gdbtk",
     "gdb/testsuite/gdb.gdbtk/",
     "sim/arm/armemu.h", "sim/arm/armos.c", "sim/arm/gdbhost.c",
@@ -220,13 +220,12 @@ NOT_FSF_LIST = (
     "sim/arm/bag.c", "sim/arm/armvirt.c", "sim/arm/main.c", "sim/arm/bag.h",
     "sim/arm/communicate.c", "sim/arm/gdbhost.h", "sim/arm/armfpe.h",
     "sim/arm/arminit.c",
-    "sim/common/cgen-fpu.c", "sim/common/cgen-fpu.h", "sim/common/cgen-fpu.h",
-    "sim/common/cgen-accfp.c", "sim/common/sim-fpu.c",
+    "sim/common/cgen-fpu.c", "sim/common/cgen-fpu.h",
+    "sim/common/cgen-accfp.c",
     "sim/erc32/sis.h", "sim/erc32/erc32.c", "sim/erc32/func.c",
     "sim/erc32/float.c", "sim/erc32/interf.c", "sim/erc32/sis.c",
     "sim/erc32/exec.c",
     "sim/mips/m16run.c", "sim/mips/sim-main.c",
-    "sim/mn10300/sim-main.h",
     "sim/moxie/moxie-gdb.dts",
     # Not a single file in sim/ppc/ appears to be copyright FSF :-(.
     "sim/ppc/filter.h", "sim/ppc/gen-support.h", "sim/ppc/ld-insn.h",

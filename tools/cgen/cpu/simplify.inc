@@ -1,5 +1,5 @@
 ; Collection of macros to simplify .cpu file writing. -*- Scheme -*-
-; Copyright (C) 2000, 2009 Red Hat, Inc.
+; Copyright (C) 2000 Red Hat, Inc.
 ; This file is part of CGEN.
 ; See file COPYING.CGEN for details.
 
@@ -10,103 +10,75 @@
 ; that way (it's define-full-enum that would change).
 
 (define-pmacro (define-normal-enum name comment attrs prefix vals)
-  "Define a normal enum, fixed number of arguments."
+  "\
+Define a normal enum, fixed number of arguments.
+"
   (define-full-enum name comment attrs prefix vals)
 )
 
 ; Define a normal insn enum.
 
 (define-pmacro (define-normal-insn-enum name comment attrs prefix fld vals)
-  "Define a normal instruction opcode enum."
+  "\
+Define a normal instruction opcode enum.
+"
   (define-full-insn-enum name comment attrs prefix fld vals)
 )
 
 ; Instruction fields.
 
-; Normally, fields are unsigned and have no encode/decode needs.
+; Normally, fields are unsigned have no encode/decode needs.
 
 (define-pmacro (define-normal-ifield name comment attrs start length)
-  "Define a normal instruction field."
+  "Define a normal instruction field.\n"
   (define-full-ifield name comment attrs start length UINT #f #f)
 )
 
 ; For those who don't like typing.
 
-(define-pmacro (df name comment attrs start length mode encode decode)
-  "Shorthand form of normal fields requiring mode, encode/decode."
-  (define-full-ifield name comment attrs start length mode encode decode)
+(define-pmacro df
+  "Shorthand form of define-full-ifield.\n"
+  define-full-ifield
 )
 (define-pmacro dnf
-  "Shorthand form of define-normal-ifield."
+  "Shorthand form of define-normal-ifield.\n"
   define-normal-ifield
 )
 
 ; Define a normal multi-ifield.
+; FIXME: The define-normal version for ifields doesn't include the mode.
 
 (define-pmacro (define-normal-multi-ifield name comment attrs
 		 mode subflds insert extract)
-  "Define a normal multi-part instruction field."
+  "Define a normal multi-part instruction field.\n"
   (define-full-multi-ifield name comment attrs mode subflds insert extract)
 )
 
 ; For those who don't like typing.
 
 (define-pmacro dnmf
-  "Shorthand form of define-normal-multi-ifield."
+  "Shorthand form of define-normal-multi-ifield.\n"
   define-normal-multi-ifield
 )
 
-; Simple multi-ifields: mode is UINT, default insert/extract support,
-; default encode/decode support.
+; Simple multi-ifields: mode is UINT, default insert/extract support.
 
 (define-pmacro (dsmf name comment attrs subflds)
-  "Define a simple multi-part instruction field."
+  "Define a simple multi-part instruction field.\n"
   (define-full-multi-ifield name comment attrs UINT subflds #f #f)
 )
-
-;; Workarounds for having to model this chip as MSB0
-(define-pmacro (dnf-lsb0-word16 xname xcomment xattrs xstart xlen)
-  "notational convenience for writing MSB0 bits as LSB0 bits in a 16-bit word"
-  (dnf xname xcomment xattrs (.eval (- 16 (+ xstart xlen)))))
-
-(define-pmacro (dnf-lsb0-word32 xname xcomment xattrs xstart xlen)
-  "notational convenience for writing MSB0 bits as LSB0 bits in a 32-bit word"
-  (dnf xname xcomment xattrs (.eval (- 32 (+ xstart xlen)))))
-
-(define-pmacro (dnf-lsb0-word48 xname xcomment xattrs xstart xlen)
-  "notational convenience for writing MSB0 bits as LSB0 bits in a 48-bit word"
-  (dnf xname xcomment xattrs (.eval (- 48 (+ xstart xlen)))))
-
-(define-pmacro (dnf-lsb0-word64 xname xcomment xattrs xstart xlen)
-  "notational convenience for writing MSB0 bits as LSB0 bits in a 64-bit word"
-  (dnf xname xcomment xattrs (.eval (- 64 (+ xstart xlen)))))
-
-;; Workarounds for having to model this chip as MSB0
-(define-pmacro (df-lsb0-word16 xname xcomment xattrs xstart xlen xmode xencode xdecode)
-  "notational convenience for writing MSB0 bits as LSB0 bits in a 16-bit word"
-  (dnf xname xcomment xattrs (.eval (- 16 (+ xstart xlen))) xmode xencode xdecode))
-
-(define-pmacro (df-lsb0-word32 xname xcomment xattrs xstart xlen xmode xencode xdecode)
-  "notational convenience for writing MSB0 bits as LSB0 bits in a 32-bit word"
-  (dnf xname xcomment xattrs (.eval (- 32 (+ xstart xlen))) xmode xencode xdecode))
-
-(define-pmacro (df-lsb0-word48 xname xcomment xattrs xstart xlen xmode xencode xdecode)
-  "notational convenience for writing MSB0 bits as LSB0 bits in a 48-bit word"
-  (dnf xname xcomment xattrs (.eval (- 48 (+ xstart xlen))) xmode xencode xdecode))
-
-(define-pmacro (df-lsb0-word64 xname xcomment xattrs xstart xlen xmode xencode xdecode)
-  "notational convenience for writing MSB0 bits as LSB0 bits in a 64-bit word"
-  (dnf xname xcomment xattrs (.eval (- 64 (+ xstart xlen))) xmode xencode xdecode))
 
 ; Hardware.
 
 ; Simpler version for most hardware elements.
-; Allow special assembler support specification but no semantic-name,
-; getter/setter, or layout specs.
+; Allow special assembler support specification but no semantic-name or
+; get/set specs.
 
 (define-pmacro (define-normal-hardware name comment attrs type
 		 indices values handlers)
-  "Define a normal hardware element."
+  "\
+Define a normal hardware element.
+"
   (define-full-hardware name comment attrs name type
     indices values handlers () () ())
 )
@@ -114,12 +86,12 @@
 ; For those who don't like typing.
 
 (define-pmacro dnh
-  "Shorthand form of define-normal-hardware."
+  "Shorthand form of define-normal-hardware.\n"
   define-normal-hardware
 )
 
 ; Simpler version of dnh that leaves out the indices, values, handlers,
-; getter/setter, and layout specs.
+; get, set, and layout specs.
 ; This is useful for 1 bit registers.
 ; ??? While dsh and dnh aren't that distinguishable when perusing a .cpu file,
 ; they both take a fixed number of positional arguments, and dsh is a proper
@@ -127,37 +99,29 @@
 ; are ok.
 
 (define-pmacro (define-simple-hardware name comment attrs type)
-  "Define a simple hardware element (usually a scalar register)."
+  "\
+Define a simple hardware element (usually a scalar register).
+"
   (define-full-hardware name comment attrs name type () () () () () ())
 )
 
 (define-pmacro dsh
-  "Shorthand form of define-simple-hardware."
+  "Shorthand form of define-simple-hardware.\n"
   define-simple-hardware
 )
 
 ; Operands.
 
-; Simpler version for most operands.
-; Allow special assembler support specification but no handlers or
-; getter/setter specs.
-
 (define-pmacro (define-normal-operand name comment attrs type index)
-  "Define a normal operand."
+  "Define a normal operand.\n"
   (define-full-operand name comment attrs type DFLT index () () ())
 )
 
 ; For those who don't like typing.
-
-(define-pmacro dno
-  "Shorthand form of define-normal-operand."
-  define-normal-operand
-)
-
-; Deprecated, but still in wide use.
+; FIXME: dno?
 
 (define-pmacro dnop
-  "Shorthand form of define-normal-operand."
+  "Shorthand form of define-normal-operand.\n"
   define-normal-operand
 )
 
@@ -185,7 +149,7 @@
 ; Fields ifield-assertion is absent.
 
 (define-pmacro (define-normal-insn name comment attrs syntax fmt semantics timing)
-  "Define a normal instruction."
+  "Define a normal instruction.\n"
   (define-full-insn name comment attrs syntax fmt () semantics timing)
 )
 
@@ -194,7 +158,7 @@
 ; this must be the right way to go. :-)
 
 (define-pmacro dni
-  "Shorthand form of define-normal-insn."
+  "Shorthand form of define-normal-insn.\n"
   define-normal-insn
 )
 
@@ -204,14 +168,14 @@
 ; This only supports expanding to one real insn.
 
 (define-pmacro (define-normal-macro-insn name comment attrs syntax expansion)
-  "Define a normal macro instruction."
+  "Define a normal macro instruction.\n"
   (define-full-minsn name comment attrs syntax expansion)
 )
 
 ; To reduce the amount of typing.
 
 (define-pmacro dnmi
-  "Shorthand form of define-normal-macro-insn."
+  "Shorthand form of define-normal-macro-insn.\n"
   define-normal-macro-insn
 )
 

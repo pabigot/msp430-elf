@@ -33,3 +33,4 @@ int main ()
   T t;
   t.g (f ().s);
 }
+// { dg-require-effective-target size32plus }

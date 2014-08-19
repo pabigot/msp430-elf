@@ -13,3 +13,4 @@ struct B: public A {
 };
 #line 5 "synth5.C"
 int main() { }
+// { dg-require-effective-target size32plus }

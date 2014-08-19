@@ -14,3 +14,4 @@ int main() {
   if (count!=1)
     return 1;
 }
+// { dg-require-effective-target size32plus }

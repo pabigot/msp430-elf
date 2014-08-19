@@ -1,6 +1,6 @@
 /* Operating system specific defines to be used when targeting GCC for
    hosting on Windows32, using GNU tools and the Windows32 API Library.
-   Copyright (C) 1997-2013 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
 
 This file is part of GCC.
 
@@ -148,6 +148,7 @@ along with GCC; see the file COPYING3.  If not see
 #undef ENDFILE_SPEC
 #define ENDFILE_SPEC \
   "%{Ofast|ffast-math|funsafe-math-optimizations:crtfastmath.o%s} \
+   %{!shared:%:if-exists(default-manifest.o%s)}\
   crtend.o%s"
 
 /* Override startfile prefix defaults.  */

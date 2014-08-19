@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Design Notes</title><meta name="generator" content="DocBook XSL-NS Stylesheets V1.77.1" /><meta name="keywords" content="ISO C++, library" /><meta name="keywords" content="ISO C++, runtime, library" /><link rel="home" href="../index.html" title="The GNU C++ Library" /><link rel="up" href="appendix_contributing.html" title="Appendix A.  Contributing" /><link rel="prev" href="source_code_style.html" title="Coding Style" /><link rel="next" href="appendix_porting.html" title="Appendix B.  Porting and Maintenance" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Design Notes</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="source_code_style.html">Prev</a> </td><th width="60%" align="center">Appendix A. 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /><title>Design Notes</title><meta name="generator" content="DocBook XSL-NS Stylesheets V1.78.1" /><meta name="keywords" content="ISO C++, library" /><meta name="keywords" content="ISO C++, runtime, library" /><link rel="home" href="../index.html" title="The GNU C++ Library" /><link rel="up" href="appendix_contributing.html" title="Appendix A.  Contributing" /><link rel="prev" href="source_code_style.html" title="Coding Style" /><link rel="next" href="appendix_porting.html" title="Appendix B.  Porting and Maintenance" /></head><body><div class="navheader"><table width="100%" summary="Navigation header"><tr><th colspan="3" align="center">Design Notes</th></tr><tr><td width="20%" align="left"><a accesskey="p" href="source_code_style.html">Prev</a> </td><th width="60%" align="center">Appendix A. 
   Contributing
   
 </th><td width="20%" align="right"> <a accesskey="n" href="appendix_porting.html">Next</a></td></tr></table><hr /></div><div class="section"><div class="titlepage"><div><div><h2 class="title" style="clear: both"><a id="contrib.design_notes"></a>Design Notes</h2></div></div></div><p>
@@ -190,7 +190,7 @@
 <br />
     Fixing these cases will require an audit of all inline functions<br />
     defined in the library to determine which merit inlining, and moving<br />
-    the rest out of line. This is an issue mainly in chapters 23, 25, and<br />
+    the rest out of line. This is an issue mainly in clauses 23, 25, and<br />
     27. Of course it can be done incrementally, and we should generally<br />
     accept patches that move large functions out of line and into ".tcc"<br />
     files, which can later be pulled into a repository. Compiler/linker<br />
@@ -404,7 +404,7 @@
     must be replaced with something more rationally behaved.)<br />
 <br />
     All the C headers need the treatment above; in the standard these<br />
-    headers are mentioned in various chapters. Below, I have only<br />
+    headers are mentioned in various clauses. Below, I have only<br />
     mentioned those that present interesting implementation issues.<br />
 <br />
     The components identified as "mostly complete", below, have not been<br />
@@ -533,7 +533,7 @@
     files to improve link-time behavior is extremely unsatisfactory,<br />
     literally tripling library-build time with no commensurate improvement<br />
     in static program link sizes. It must be redone. (Similar work is<br />
-    needed for some components in chapters 22 and 27.)<br />
+    needed for some components in clauses 22 and 27.)<br />
 <br />
     Other work needed for strings is MT-safety, as discussed under the<br />
     chapter 20 heading.<br />
