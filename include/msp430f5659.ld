@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430F5659 devices. */
-/* Version: 1.146    (Beta-Build-Tag: #0006) */
+/* Version: 1.153 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
@@ -115,6 +115,7 @@ MEMORY {
   BSL              : ORIGIN = 0x1000, LENGTH = 0x0800
   RAM2             : ORIGIN = 0xF0000, LENGTH = 0xC000
   RAM_MIRROR       : ORIGIN = 0xFC000, LENGTH = 0x4000
+  USBRAM           : ORIGIN = 0x1C00, LENGTH = 0x0800
   FAR_ROM          : ORIGIN = 0x00010000, LENGTH = 0x00077FFF
 }
 

@@ -49,7 +49,7 @@
 #define __msp430FR2XX_FR4XXGENERIC
 
 
-#define __MSP430_HEADER_VERSION__ 1146      /* Beta-Build-Tag: #0006 */
+#define __MSP430_HEADER_VERSION__ 1153
 
 #define __MSP430_TI_HEADERS__
 
@@ -1859,9 +1859,9 @@ extern "C" {
 #define CAPIV_NONE          (0x0000)    /* No Interrupt pending */
 #define CAPIV_EOCIFG        (0x0002)    /* End of conversion interrupt, Flag = EOCIFG */
 #define CAPIV_CAPDTCTIFG    (0x0004)    /* Detection interrupt, Flag = CAPDTCTIFG */
-#define CAPIV_CAPTIFG       (0x0008)    /* Captivate Timer interrupt, Flag = CAPTIFG */
-#define CAPIV_CAPCNTRIFG    (0x000A)    /* Captivate Counter interrupt, Flag = CAPCNTRIFG */
-#define CAPIV_CAPMAXIFG     (0x000C)    /* max count value reached, Flag = CAPMAXIFG */
+#define CAPIV_CAPTIFG       (0x0006)    /* Captivate Timer interrupt, Flag = CAPTIFG */
+#define CAPIV_CAPCNTRIFG    (0x0008)    /* Captivate Counter interrupt, Flag = CAPCNTRIFG */
+#define CAPIV_CAPMAXIFG     (0x000A)    /* max count value reached, Flag = CAPMAXIFG */
 
 
 #endif

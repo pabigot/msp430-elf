@@ -49,7 +49,7 @@
 #ifndef __MSP430F6776A
 #define __MSP430F6776A
 
-#define __MSP430_HEADER_VERSION__ 1146      /* Beta-Build-Tag: #0006 */
+#define __MSP430_HEADER_VERSION__ 1153
 
 #define __MSP430_TI_HEADERS__
 
@@ -3793,6 +3793,15 @@ sfrb(RTCYEARBAK1, RTCYEARBAK1_);
 #define RT0IP_6             (0x0018)   /* RTC Prescale Timer 0 Interrupt Interval /128 */
 #define RT0IP_7             (0x001C)   /* RTC Prescale Timer 0 Interrupt Interval /256 */
 
+#define RT0PSDIV_0          (0x0000)   /* RTC Prescale Timer 0 Clock Divide: /2 */
+#define RT0PSDIV_1          (0x0800)   /* RTC Prescale Timer 0 Clock Divide: /4 */
+#define RT0PSDIV_2          (0x1000)   /* RTC Prescale Timer 0 Clock Divide: /8 */
+#define RT0PSDIV_3          (0x1800)   /* RTC Prescale Timer 0 Clock Divide: /16 */
+#define RT0PSDIV_4          (0x2000)   /* RTC Prescale Timer 0 Clock Divide: /32 */
+#define RT0PSDIV_5          (0x2800)   /* RTC Prescale Timer 0 Clock Divide: /64 */
+#define RT0PSDIV_6          (0x3000)   /* RTC Prescale Timer 0 Clock Divide: /128 */
+#define RT0PSDIV_7          (0x3800)   /* RTC Prescale Timer 0 Clock Divide: /256 */
+
 
 /* RTCPS1CTL Control Bits */
 #define RT1SSEL1            (0x8000)   /* RTC Prescale Timer 1 Source Select Bit 1 */
@@ -3845,6 +3854,21 @@ sfrb(RTCYEARBAK1, RTCYEARBAK1_);
 #define RT1IP_5             (0x0014)   /* RTC Prescale Timer 1 Interrupt Interval /64 */
 #define RT1IP_6             (0x0018)   /* RTC Prescale Timer 1 Interrupt Interval /128 */
 #define RT1IP_7             (0x001C)   /* RTC Prescale Timer 1 Interrupt Interval /256 */
+
+#define RT1PSDIV_0          (0x0000)   /* RTC Prescale Timer 1 Clock Divide: /2 */
+#define RT1PSDIV_1          (0x0800)   /* RTC Prescale Timer 1 Clock Divide: /4 */
+#define RT1PSDIV_2          (0x1000)   /* RTC Prescale Timer 1 Clock Divide: /8 */
+#define RT1PSDIV_3          (0x1800)   /* RTC Prescale Timer 1 Clock Divide: /16 */
+#define RT1PSDIV_4          (0x2000)   /* RTC Prescale Timer 1 Clock Divide: /32 */
+#define RT1PSDIV_5          (0x2800)   /* RTC Prescale Timer 1 Clock Divide: /64 */
+#define RT1PSDIV_6          (0x3000)   /* RTC Prescale Timer 1 Clock Divide: /128 */
+#define RT1PSDIV_7          (0x3800)   /* RTC Prescale Timer 1 Clock Divide: /256 */
+
+#define RT1SSEL_0           (0x0000)   /* RTC Prescale Timer 1 Source Select: 0 */
+#define RT1SSEL_1           (0x4000)   /* RTC Prescale Timer 1 Source Select: 1 */
+#define RT1SSEL_2           (0x8000)   /* RTC Prescale Timer 1 Source Select: 2 */
+#define RT1SSEL_3           (0xC000)   /* RTC Prescale Timer 1 Source Select: 3 */
+
 
 /* RTCTCCTL0 Control Bits */
 #define TCEN                (0x0001)   /* RTC Enable for RTC Tamper Detection with Time Stamp */

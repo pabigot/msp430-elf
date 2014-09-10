@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430F1122 devices. */
-/* Version: 1.146    (Beta-Build-Tag: #0006) */
+/* Version: 1.153 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)

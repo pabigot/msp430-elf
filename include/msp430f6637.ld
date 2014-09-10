@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430F6637 devices. */
-/* Version: 1.146    (Beta-Build-Tag: #0006) */
+/* Version: 1.153 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
@@ -113,6 +113,7 @@ MEMORY {
   VECT63           : ORIGIN = 0xFFFC, LENGTH = 0x0002
   RESETVEC         : ORIGIN = 0xFFFE, LENGTH = 0x0002
   BSL              : ORIGIN = 0x1000, LENGTH = 0x0800
+  USBRAM           : ORIGIN = 0x1C00, LENGTH = 0x0800
   FAR_ROM          : ORIGIN = 0x00010000, LENGTH = 0x00027FFF
 }
 
