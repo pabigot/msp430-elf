@@ -8,18 +8,20 @@ releases may be found on [TI's web site][msp430-elf].
 
 Two branches are present in this repository:
 
- * [``sources``](/pabigot/msp430-elf/tree/sources) contains the public
-   releases of the aggregate toolchain sources, in the format supplied
-   by Red Hat which includes the complete sources to the various tools.
+ * [``sources``](https://github.com/pabigot/msp430-elf/tree/sources)
+   contains the public releases of the aggregate toolchain sources, in
+   the format supplied by Red Hat which includes the complete sources to
+   the various tools.
 
- * [``gcc_rh``](/pabigot/msp430-elf/tree/sources) contains the public
-   releases of the MSP430 headers and linker scripts supplied by Texas
-   Instruments.
+ * [``gcc_rh``](https://github.com/pabigot/msp430-elf/tree/gcc_rh)
+   contains the public releases of the MSP430 headers and linker scripts
+   supplied by Texas Instruments.
 
 All material in this repository is believed to be open source, licensed
-under terms described within each release.  The debug stack is not
-archived in this repository as it contains proprietary material and is
-not available from the [TI MSPGCC site][msp430-elf].
+under terms described within each release.  The [MSP Debug
+Stack](http://processors.wiki.ti.com/index.php/MSP_Debug_Stack) is not
+archived in this repository since [it contains proprietary
+material](http://forum.43oh.com/topic/5364-msp-debug-stack-no-longer-open-source/).
 
 Each commit message describes the location from which the corresponding
 file was downloaded, along with MD5 and SHA256 checksums of the released
