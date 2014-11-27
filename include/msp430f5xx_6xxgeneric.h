@@ -48,7 +48,7 @@
 #ifndef __msp430F5XX_F6XXGENERIC
 #define __msp430F5XX_F6XXGENERIC
 
-#define __MSP430_HEADER_VERSION__ 1153
+#define __MSP430_HEADER_VERSION__ 1155
 
 #define __MSP430_TI_HEADERS__
 
@@ -5518,6 +5518,7 @@ extern "C" {
 #define OFS_RTCCTL0           (0x0000)  /* Real Timer Clock Control 0/Key */
 #define OFS_RTCCTL0_L          OFS_RTCCTL0
 #define OFS_RTCCTL0_H          OFS_RTCCTL0+1
+#define RTCPWD              RTCCTL0_H
 #define OFS_RTCCTL13          (0x0002)  /* Real Timer Clock Control 1/3 */
 #define OFS_RTCCTL13_L         OFS_RTCCTL13
 #define OFS_RTCCTL13_H         OFS_RTCCTL13+1

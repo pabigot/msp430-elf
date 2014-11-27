@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430FR5723 devices. */
-/* Version: 1.153 */
+/* Version: 1.155 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
@@ -45,7 +45,7 @@ MEMORY {
   INFOMEM          : ORIGIN = 0x1800, LENGTH = 0x0100 /* END=0x18FF, size 256 as 2 128-byte segments */
   INFOA            : ORIGIN = 0x1880, LENGTH = 0x0080 /* END=0x18FF, size 128 */
   INFOB            : ORIGIN = 0x1800, LENGTH = 0x0080 /* END=0x187F, size 128 */
-  ROM              : ORIGIN = 0xE000, LENGTH = 0x1F80 /* END=0xFF7F, size 8064 */
+  ROM (rx)         : ORIGIN = 0xE000, LENGTH = 0x1F80 /* END=0xFF7F, size 8064 */
   VECT1            : ORIGIN = 0xFF90, LENGTH = 0x0002
   VECT2            : ORIGIN = 0xFF92, LENGTH = 0x0002
   VECT3            : ORIGIN = 0xFF94, LENGTH = 0x0002
@@ -288,6 +288,9 @@ SECTIONS
     PROVIDE (__stack = .);
     *(.stack)
   }
+
+  .infoA     : {} > INFOA              /* MSP430 INFO FLASH MEMORY SEGMENTS */
+  .infoB     : {} > INFOB
 
   .MP430.attributes 0 :
   {

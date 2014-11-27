@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430G2253 devices. */
-/* Version: 1.153 */
+/* Version: 1.155 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
@@ -47,7 +47,7 @@ MEMORY {
   INFOB            : ORIGIN = 0x1080, LENGTH = 0x0040 /* END=0x10BF, size 64 */
   INFOC            : ORIGIN = 0x1040, LENGTH = 0x0040 /* END=0x107F, size 64 */
   INFOD            : ORIGIN = 0x1000, LENGTH = 0x0040 /* END=0x103F, size 64 */
-  ROM              : ORIGIN = 0xF800, LENGTH = 0x07E0 /* END=0xFFDF, size 2016 */
+  ROM (rx)         : ORIGIN = 0xF800, LENGTH = 0x07E0 /* END=0xFFDF, size 2016 */
   VECT1            : ORIGIN = 0xFFE0, LENGTH = 0x0002
   VECT2            : ORIGIN = 0xFFE2, LENGTH = 0x0002
   VECT3            : ORIGIN = 0xFFE4, LENGTH = 0x0002
@@ -209,6 +209,11 @@ SECTIONS
     PROVIDE (__stack = .);
     *(.stack)
   }
+
+  .infoA     : {} > INFOA              /* MSP430 INFO FLASH MEMORY SEGMENTS */
+  .infoB     : {} > INFOB
+  .infoC     : {} > INFOC
+  .infoD     : {} > INFOD
 
   .MP430.attributes 0 :
   {

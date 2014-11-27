@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430P313 devices. */
-/* Version: 1.153 */
+/* Version: 1.155 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
@@ -42,7 +42,7 @@ MEMORY {
   PERIPHERAL_8BIT  : ORIGIN = 0x0010, LENGTH = 0x00F0 /* END=0x0100, size 240 */
   PERIPHERAL_16BIT : ORIGIN = 0x0100, LENGTH = 0x0100 /* END=0x0200, size 256 */
   RAM              : ORIGIN = 0x0200, LENGTH = 0x0100 /* END=0x02FF, size 256 */
-  ROM              : ORIGIN = 0xE000, LENGTH = 0x1FE0 /* END=0xFFDF, size 8160 */
+  ROM (rx)         : ORIGIN = 0xE000, LENGTH = 0x1FE0 /* END=0xFFDF, size 8160 */
   VECT1            : ORIGIN = 0xFFE0, LENGTH = 0x0002
   VECT2            : ORIGIN = 0xFFE2, LENGTH = 0x0002
   VECT3            : ORIGIN = 0xFFE4, LENGTH = 0x0002
@@ -204,6 +204,7 @@ SECTIONS
     PROVIDE (__stack = .);
     *(.stack)
   }
+
 
   .MP430.attributes 0 :
   {

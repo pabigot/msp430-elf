@@ -61,7 +61,7 @@
 #ifndef __cc430x513x
 #define __cc430x513x
 
-#define __MSP430_HEADER_VERSION__ 1153
+#define __MSP430_HEADER_VERSION__ 1155
 
 #define __MSP430_TI_HEADERS__
 

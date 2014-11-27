@@ -1575,6 +1575,24 @@
 #elif defined (__MSP430i2041__)
 #include "msp430i2041.h"
 
+#elif defined (__RF430FRL152H__)
+#include "rf430frl152h.h"
+
+#elif defined (__RF430FRL153H__)
+#include "rf430frl153h.h"
+
+#elif defined (__RF430FRL154H__)
+#include "rf430frl154h.h"
+
+#elif defined (__RF430FRL152H_ROM__)
+#include "rf430frl152h_rom.h"
+
+#elif defined (__RF430FRL153H_ROM__)
+#include "rf430frl153h_rom.h"
+
+#elif defined (__RF430FRL154H_ROM__)
+#include "rf430frl154h_rom.h"
+
 #elif defined (__MSP430FR69271__)
 #include "msp430fr69271.h"
 
@@ -1652,6 +1670,60 @@
 
 #elif defined (__MSP430FR6989__)
 #include "msp430fr6989.h"
+
+#elif defined (__MSP430FR5870__)
+#include "msp430fr5870.h"
+
+#elif defined (__MSP430FR5970__)
+#include "msp430fr5970.h"
+
+#elif defined (__MSP430FR5872__)
+#include "msp430fr5872.h"
+
+#elif defined (__MSP430FR5972__)
+#include "msp430fr5972.h"
+
+#elif defined (__MSP430FR6820__)
+#include "msp430fr6820.h"
+
+#elif defined (__MSP430FR6920__)
+#include "msp430fr6920.h"
+
+#elif defined (__MSP430FR6822__)
+#include "msp430fr6822.h"
+
+#elif defined (__MSP430FR6922__)
+#include "msp430fr6922.h"
+
+#elif defined (__MSP430FR6870__)
+#include "msp430fr6870.h"
+
+#elif defined (__MSP430FR6970__)
+#include "msp430fr6970.h"
+
+#elif defined (__MSP430FR6872__)
+#include "msp430fr6872.h"
+
+#elif defined (__MSP430FR6972__)
+#include "msp430fr6972.h"
+
+#elif defined (__MSP430FR58721__)
+#include "msp430fr58721.h"
+
+#elif defined (__MSP430FR59721__)
+#include "msp430fr59721.h"
+
+#elif defined (__MSP430FR68221__)
+#include "msp430fr68221.h"
+
+#elif defined (__MSP430FR69221__)
+#include "msp430fr69221.h"
+
+#elif defined (__MSP430FR68721__)
+#include "msp430fr68721.h"
+
+#elif defined (__MSP430FR69721__)
+#include "msp430fr69721.h"
 
 #elif defined (__MSP430SL5438A__)
 #include "msp430sl5438a.h"

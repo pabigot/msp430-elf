@@ -48,9 +48,7 @@
 #ifndef __MSP430FR4132
 #define __MSP430FR4132
 
-
-
-#define __MSP430_HEADER_VERSION__ 1153
+#define __MSP430_HEADER_VERSION__ 1155
 
 #define __MSP430_TI_HEADERS__
 
@@ -130,7 +128,7 @@ extern "C" {
 * CPU
 ************************************************************/
 #define __MSP430_HAS_MSP430XV2_CPU__  /* Definition to show that it has MSP430XV2 CPU */
-#define __MSP430FR5XX_6XX_FAMILY__
+#define __MSP430FR2XX_4XX_FAMILY__
 
 /************************************************************
 * PERIPHERAL FILE MAP
@@ -942,21 +940,6 @@ sfrw(GCCTL1, GCCTL1_);
 #define NWAITS_7            (0x0070)  /* FRAM Wait state control: 7 */
 
 
-/* Legacy Defines */
-#define NAUTO               (0x0008)  /* FRAM Disables the wait state generator (obsolete on Rev.E and later)*/
-#define NACCESS0            (0x0010)  /* FRAM Wait state Generator Access Time control Bit: 0 */
-#define NACCESS1            (0x0020)  /* FRAM Wait state Generator Access Time control Bit: 1 */
-#define NACCESS2            (0x0040)  /* FRAM Wait state Generator Access Time control Bit: 2 */
-#define NACCESS_0           (0x0000)  /* FRAM Wait state Generator Access Time control: 0 */
-#define NACCESS_1           (0x0010)  /* FRAM Wait state Generator Access Time control: 1 */
-#define NACCESS_2           (0x0020)  /* FRAM Wait state Generator Access Time control: 2 */
-#define NACCESS_3           (0x0030)  /* FRAM Wait state Generator Access Time control: 3 */
-#define NACCESS_4           (0x0040)  /* FRAM Wait state Generator Access Time control: 4 */
-#define NACCESS_5           (0x0050)  /* FRAM Wait state Generator Access Time control: 5 */
-#define NACCESS_6           (0x0060)  /* FRAM Wait state Generator Access Time control: 6 */
-#define NACCESS_7           (0x0070)  /* FRAM Wait state Generator Access Time control: 7 */
-
-
 /* GCCTL0 Control Bits */
 //#define RESERVED            (0x0001)  /* RESERVED */
 #define FRLPMPWR            (0x0002)  /* FRAM Enable FRAM auto power up after LPM */
@@ -1698,43 +1681,6 @@ sfrb(LCDBM18W_H , LCDBM18W_+1);
 sfrw(LCDBM18W, LCDBM18W_);
 #define LCDBM18             LCDBM18W_L /* LCD Blinking Memory 18 */
 #define LCDBM19             LCDBM18W_H /* LCD Blinking Memory 19 */
-#define LCDBM20W_             0x0654    /* LCD Blinking Memory 20/21 */
-sfrb(LCDBM20W_L , LCDBM20W_);
-sfrb(LCDBM20W_H , LCDBM20W_+1);
-sfrw(LCDBM20W, LCDBM20W_);
-#define LCDBM20             LCDBM20W_L /* LCD Blinking Memory 20 */
-#define LCDBM21             LCDBM20W_H /* LCD Blinking Memory 21 */
-#define LCDBM22W_             0x0656    /* LCD Blinking Memory 22/23 */
-sfrb(LCDBM22W_L , LCDBM22W_);
-sfrb(LCDBM22W_H , LCDBM22W_+1);
-sfrw(LCDBM22W, LCDBM22W_);
-#define LCDBM22             LCDBM22W_L /* LCD Blinking Memory 22 */
-#define LCDBM23             LCDBM22W_H /* LCD Blinking Memory 23 */
-#define LCDBM24W_             0x0658    /* LCD Blinking Memory 24/25 */
-sfrb(LCDBM24W_L , LCDBM24W_);
-sfrb(LCDBM24W_H , LCDBM24W_+1);
-sfrw(LCDBM24W, LCDBM24W_);
-#define LCDBM24             LCDBM24W_L /* LCD Blinking Memory 24 */
-#define LCDBM25             LCDBM24W_H /* LCD Blinking Memory 25 */
-#define LCDBM26W_             0x065A    /* LCD Blinking Memory 26/27 */
-sfrb(LCDBM26W_L , LCDBM26W_);
-sfrb(LCDBM26W_H , LCDBM26W_+1);
-sfrw(LCDBM26W, LCDBM26W_);
-#define LCDBM26             LCDBM26W_L /* LCD Blinking Memory 26 */
-#define LCDBM27             LCDBM26W_H /* LCD Blinking Memory 27 */
-#define LCDBM28W_             0x065C    /* LCD Blinking Memory 28/29 */
-sfrb(LCDBM28W_L , LCDBM28W_);
-sfrb(LCDBM28W_H , LCDBM28W_+1);
-sfrw(LCDBM28W, LCDBM28W_);
-#define LCDBM28             LCDBM28W_L /* LCD Blinking Memory 28 */
-#define LCDBM29             LCDBM28W_H /* LCD Blinking Memory 29 */
-#define LCDBM30W_             0x065E    /* LCD Blinking Memory 30/31 */
-sfrb(LCDBM30W_L , LCDBM30W_);
-sfrb(LCDBM30W_H , LCDBM30W_+1);
-sfrw(LCDBM30W, LCDBM30W_);
-#define LCDBM30             LCDBM30W_L /* LCD Blinking Memory 30 */
-#define LCDBM31             LCDBM30W_H /* LCD Blinking Memory 31 */
-
 
 /* LCDIV Definitions */
 #define LCDIV_NONE         (0x0000)    /* No Interrupt pending */
@@ -1743,7 +1689,7 @@ sfrw(LCDBM30W, LCDBM30W_);
 #define LCDIV_LCDFRMIFG    (0x0008)    /* Frame interrupt */
 
 /************************************************************
-* PMM - Power Management System for G6xx
+* PMM - Power Management System for FR2xx/FR4xx
 ************************************************************/
 #define __MSP430_HAS_PMM_FRAM__       /* Definition to show that Module is available */
 #define __MSP430_BASEADDRESS_PMM_FRAM__ 0x0120

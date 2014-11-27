@@ -48,7 +48,7 @@
 #ifndef __msp430FR5XX_FR6XXGENERIC
 #define __msp430FR5XX_FR6XXGENERIC
 
-#define __MSP430_HEADER_VERSION__ 1153
+#define __MSP430_HEADER_VERSION__ 1155
 
 #define __MSP430_TI_HEADERS__
 
@@ -2941,21 +2941,6 @@ extern "C" {
 #define NWAITS_7            (0x0070)  /* FRAM Wait state control: 7 */
 
 
-/* Legacy Defines */
-#define NAUTO               (0x0008)  /* FRAM Disables the wait state generator (obsolete on Rev.E and later)*/
-#define NACCESS0            (0x0010)  /* FRAM Wait state Generator Access Time control Bit: 0 */
-#define NACCESS1            (0x0020)  /* FRAM Wait state Generator Access Time control Bit: 1 */
-#define NACCESS2            (0x0040)  /* FRAM Wait state Generator Access Time control Bit: 2 */
-#define NACCESS_0           (0x0000)  /* FRAM Wait state Generator Access Time control: 0 */
-#define NACCESS_1           (0x0010)  /* FRAM Wait state Generator Access Time control: 1 */
-#define NACCESS_2           (0x0020)  /* FRAM Wait state Generator Access Time control: 2 */
-#define NACCESS_3           (0x0030)  /* FRAM Wait state Generator Access Time control: 3 */
-#define NACCESS_4           (0x0040)  /* FRAM Wait state Generator Access Time control: 4 */
-#define NACCESS_5           (0x0050)  /* FRAM Wait state Generator Access Time control: 5 */
-#define NACCESS_6           (0x0060)  /* FRAM Wait state Generator Access Time control: 6 */
-#define NACCESS_7           (0x0070)  /* FRAM Wait state Generator Access Time control: 7 */
-
-
 /* GCCTL0 Control Bits */
 //#define RESERVED            (0x0001)  /* RESERVED */
 #define FRLPMPWR            (0x0002)  /* FRAM Enable FRAM auto power up after LPM */
@@ -5075,6 +5060,7 @@ extern "C" {
 #define OFS_RTCCTL0           (0x0000)  /* Real Timer Clock Control 0/Key */
 #define OFS_RTCCTL0_L          OFS_RTCCTL0
 #define OFS_RTCCTL0_H          OFS_RTCCTL0+1
+#define RTCPWD              RTCCTL0_H
 #define OFS_RTCCTL13          (0x0002)  /* Real Timer Clock Control 1/3 */
 #define OFS_RTCCTL13_L         OFS_RTCCTL13
 #define OFS_RTCCTL13_H         OFS_RTCCTL13+1
@@ -5497,9 +5483,6 @@ extern "C" {
 #define OFS_SYSCTL            (0x0000)  /* System control */
 #define OFS_SYSCTL_L           OFS_SYSCTL
 #define OFS_SYSCTL_H           OFS_SYSCTL+1
-#define OFS_SYSBSLC           (0x0002)  /* Boot strap configuration area */
-#define OFS_SYSBSLC_L          OFS_SYSBSLC
-#define OFS_SYSBSLC_H          OFS_SYSBSLC+1
 #define OFS_SYSJMBC           (0x0006)  /* JTAG mailbox control */
 #define OFS_SYSJMBC_L          OFS_SYSJMBC
 #define OFS_SYSJMBC_H          OFS_SYSJMBC+1
@@ -5516,9 +5499,6 @@ extern "C" {
 #define OFS_SYSJMBO1_L         OFS_SYSJMBO1
 #define OFS_SYSJMBO1_H         OFS_SYSJMBO1+1
 
-#define OFS_SYSBERRIV         (0x0018)  /* Bus Error vector generator */
-#define OFS_SYSBERRIV_L        OFS_SYSBERRIV
-#define OFS_SYSBERRIV_H        OFS_SYSBERRIV+1
 #define OFS_SYSUNIV           (0x001A)  /* User NMI vector generator */
 #define OFS_SYSUNIV_L          OFS_SYSUNIV
 #define OFS_SYSUNIV_H          OFS_SYSUNIV+1
@@ -5565,55 +5545,6 @@ extern "C" {
 //#define RESERVED            (0x4000)  /* SYS - Reserved */
 //#define RESERVED            (0x8000)  /* SYS - Reserved */
 
-
-/* SYSBSLC Control Bits */
-#define SYSBSLSIZE0         (0x0001)  /* SYS - BSL Protection Size 0 */
-#define SYSBSLSIZE1         (0x0002)  /* SYS - BSL Protection Size 1 */
-#define SYSBSLR             (0x0004)  /* SYS - RAM assigned to BSL */
-//#define RESERVED            (0x0008)  /* SYS - Reserved */
-//#define RESERVED            (0x0010)  /* SYS - Reserved */
-//#define RESERVED            (0x0020)  /* SYS - Reserved */
-//#define RESERVED            (0x0040)  /* SYS - Reserved */
-//#define RESERVED            (0x0080)  /* SYS - Reserved */
-//#define RESERVED            (0x0100)  /* SYS - Reserved */
-//#define RESERVED            (0x0200)  /* SYS - Reserved */
-//#define RESERVED            (0x0400)  /* SYS - Reserved */
-//#define RESERVED            (0x0800)  /* SYS - Reserved */
-//#define RESERVED            (0x1000)  /* SYS - Reserved */
-//#define RESERVED            (0x2000)  /* SYS - Reserved */
-#define SYSBSLOFF           (0x4000)  /* SYS - BSL Memory disabled */
-#define SYSBSLPE            (0x8000)  /* SYS - BSL Memory protection enabled */
-
-/* SYSBSLC Control Bits */
-#define SYSBSLSIZE0_L       (0x0001)  /* SYS - BSL Protection Size 0 */
-#define SYSBSLSIZE1_L       (0x0002)  /* SYS - BSL Protection Size 1 */
-#define SYSBSLR_L           (0x0004)  /* SYS - RAM assigned to BSL */
-//#define RESERVED            (0x0008)  /* SYS - Reserved */
-//#define RESERVED            (0x0010)  /* SYS - Reserved */
-//#define RESERVED            (0x0020)  /* SYS - Reserved */
-//#define RESERVED            (0x0040)  /* SYS - Reserved */
-//#define RESERVED            (0x0080)  /* SYS - Reserved */
-//#define RESERVED            (0x0100)  /* SYS - Reserved */
-//#define RESERVED            (0x0200)  /* SYS - Reserved */
-//#define RESERVED            (0x0400)  /* SYS - Reserved */
-//#define RESERVED            (0x0800)  /* SYS - Reserved */
-//#define RESERVED            (0x1000)  /* SYS - Reserved */
-//#define RESERVED            (0x2000)  /* SYS - Reserved */
-
-/* SYSBSLC Control Bits */
-//#define RESERVED            (0x0008)  /* SYS - Reserved */
-//#define RESERVED            (0x0010)  /* SYS - Reserved */
-//#define RESERVED            (0x0020)  /* SYS - Reserved */
-//#define RESERVED            (0x0040)  /* SYS - Reserved */
-//#define RESERVED            (0x0080)  /* SYS - Reserved */
-//#define RESERVED            (0x0100)  /* SYS - Reserved */
-//#define RESERVED            (0x0200)  /* SYS - Reserved */
-//#define RESERVED            (0x0400)  /* SYS - Reserved */
-//#define RESERVED            (0x0800)  /* SYS - Reserved */
-//#define RESERVED            (0x1000)  /* SYS - Reserved */
-//#define RESERVED            (0x2000)  /* SYS - Reserved */
-#define SYSBSLOFF_H         (0x0040)  /* SYS - BSL Memory disabled */
-#define SYSBSLPE_H          (0x0080)  /* SYS - BSL Memory protection enabled */
 
 /* SYSJMBC Control Bits */
 #define JMBIN0FG            (0x0001)  /* SYS - Incoming JTAG Mailbox 0 Flag */

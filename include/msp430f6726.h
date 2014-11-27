@@ -50,7 +50,7 @@
 #ifndef __MSP430F6726
 #define __MSP430F6726
 
-#define __MSP430_HEADER_VERSION__ 1153
+#define __MSP430_HEADER_VERSION__ 1155
 
 #define __MSP430_TI_HEADERS__
 
@@ -2948,6 +2948,7 @@ sfrw(REFCTL0, REFCTL0_);
 sfrb(RTCCTL0_L , RTCCTL0_);
 sfrb(RTCCTL0_H , RTCCTL0_+1);
 sfrw(RTCCTL0, RTCCTL0_);
+#define RTCPWD              RTCCTL0_H
 #define RTCCTL13_             0x04A2    /* Real Timer Clock Control 1/3 */
 sfrb(RTCCTL13_L , RTCCTL13_);
 sfrb(RTCCTL13_H , RTCCTL13_+1);

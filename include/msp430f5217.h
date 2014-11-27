@@ -48,7 +48,7 @@
 #ifndef __MSP430F5217
 #define __MSP430F5217
 
-#define __MSP430_HEADER_VERSION__ 1153
+#define __MSP430_HEADER_VERSION__ 1155
 
 #define __MSP430_TI_HEADERS__
 
@@ -1406,6 +1406,66 @@ sfrw(PCSEL, PCSEL_);
 #define P6REN               (PCREN_H) /* Port 6 Resistor Enable */
 #define P6DS                (PCDS_H)  /* Port 6 Drive Strenght */
 #define P6SEL               (PCSEL_H) /* Port 6 Selection */
+
+
+
+/************************************************************
+* DIGITAL I/O Port7 Pull up / Pull down Resistors
+************************************************************/
+#define __MSP430_HAS_PORT7_R__        /* Definition to show that Module is available */
+#define __MSP430_BASEADDRESS_PORT7_R__ 0x0260
+#define P7_BASE __MSP430_BASEADDRESS_PORT7_R__
+#define __MSP430_HAS_PORTD_R__        /* Definition to show that Module is available */
+#define __MSP430_BASEADDRESS_PORTD_R__ 0x0260
+#define PD_BASE __MSP430_BASEADDRESS_PORTD_R__
+#define __MSP430_HAS_P7SEL__          /* Define for DriverLib */
+#define __MSP430_HAS_PDSEL__          /* Define for DriverLib */
+
+#define PDIN_                 0x0260    /* Port D Input */
+const_sfrb(PDIN_L , PDIN_);
+const_sfrb(PDIN_H , PDIN_+1);
+const_sfrw(PDIN, PDIN_);
+#define PDOUT_                0x0262    /* Port D Output */
+sfrb(PDOUT_L , PDOUT_);
+sfrb(PDOUT_H , PDOUT_+1);
+sfrw(PDOUT, PDOUT_);
+#define PDDIR_                0x0264    /* Port D Direction */
+sfrb(PDDIR_L , PDDIR_);
+sfrb(PDDIR_H , PDDIR_+1);
+sfrw(PDDIR, PDDIR_);
+#define PDREN_                0x0266    /* Port D Resistor Enable */
+sfrb(PDREN_L , PDREN_);
+sfrb(PDREN_H , PDREN_+1);
+sfrw(PDREN, PDREN_);
+#define PDDS_                 0x0268    /* Port D Drive Strenght */
+sfrb(PDDS_L , PDDS_);
+sfrb(PDDS_H , PDDS_+1);
+sfrw(PDDS, PDDS_);
+#define PDSEL_                0x026A    /* Port D Selection */
+sfrb(PDSEL_L , PDSEL_);
+sfrb(PDSEL_H , PDSEL_+1);
+sfrw(PDSEL, PDSEL_);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#define P7IN                (PDIN_L)  /* Port 7 Input */
+#define P7OUT               (PDOUT_L) /* Port 7 Output */
+#define P7DIR               (PDDIR_L) /* Port 7 Direction */
+#define P7REN               (PDREN_L) /* Port 7 Resistor Enable */
+#define P7DS                (PDDS_L)  /* Port 7 Drive Strenght */
+#define P7SEL               (PDSEL_L) /* Port 7 Selection */
+
 
 
 

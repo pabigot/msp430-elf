@@ -31,15 +31,15 @@
 /* ============================================================================ */
 
 /* This file supports MSP430FR5986 devices. */
-/* Version: 1.153 */
+/* Version: 1.155 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
 ENTRY(_start)
 
 MEMORY {
-  SFR              : ORIGIN = 0x0000, LENGTH = 0x0010 /* END=0x0010, size 16 */
-  PERIPHERAL_8BIT  : ORIGIN = 0x0010, LENGTH = 0x00F0 /* END=0x0100, size 240 */
+  TINYRAM          : ORIGIN = 0x0006, LENGTH = 0x001A
+  PERIPHERAL_8BIT  : ORIGIN = 0x0020, LENGTH = 0x00E0 /* END=0x0100, size 224 */
   PERIPHERAL_16BIT : ORIGIN = 0x0100, LENGTH = 0x0100 /* END=0x0200, size 256 */
   RAM              : ORIGIN = 0x1C00, LENGTH = 0x0800 /* END=0x23FF, size 2048 */
   INFOMEM          : ORIGIN = 0x1800, LENGTH = 0x0200 /* END=0x19FF, size 512 as 4 128-byte segments */
@@ -47,7 +47,7 @@ MEMORY {
   INFOB            : ORIGIN = 0x1900, LENGTH = 0x0080 /* END=0x197F, size 128 */
   INFOC            : ORIGIN = 0x1880, LENGTH = 0x0080 /* END=0x18FF, size 128 */
   INFOD            : ORIGIN = 0x1800, LENGTH = 0x0080 /* END=0x187F, size 128 */
-  ROM              : ORIGIN = 0x4400, LENGTH = 0xBB80 /* END=0xFF7F, size 48000 */
+  ROM (rx)         : ORIGIN = 0x4400, LENGTH = 0xBB80 /* END=0xFF7F, size 48000 */
   VECT1            : ORIGIN = 0xFF90, LENGTH = 0x0002
   VECT2            : ORIGIN = 0xFF92, LENGTH = 0x0002
   VECT3            : ORIGIN = 0xFF94, LENGTH = 0x0002
@@ -290,6 +290,11 @@ SECTIONS
     PROVIDE (__stack = .);
     *(.stack)
   }
+
+  .infoA     : {} > INFOA              /* MSP430 INFO FLASH MEMORY SEGMENTS */
+  .infoB     : {} > INFOB
+  .infoC     : {} > INFOC
+  .infoD     : {} > INFOD
 
   .MP430.attributes 0 :
   {

@@ -53,7 +53,7 @@
 #ifndef __msp430xG47x
 #define __msp430xG47x
 
-#define __MSP430_HEADER_VERSION__ 1153
+#define __MSP430_HEADER_VERSION__ 1155
 
 #define __MSP430_TI_HEADERS__
 

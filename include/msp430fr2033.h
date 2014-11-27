@@ -48,9 +48,7 @@
 #ifndef __MSP430FR2033
 #define __MSP430FR2033
 
-
-
-#define __MSP430_HEADER_VERSION__ 1153
+#define __MSP430_HEADER_VERSION__ 1155
 
 #define __MSP430_TI_HEADERS__
 
@@ -130,7 +128,7 @@ extern "C" {
 * CPU
 ************************************************************/
 #define __MSP430_HAS_MSP430XV2_CPU__  /* Definition to show that it has MSP430XV2 CPU */
-#define __MSP430FR5XX_6XX_FAMILY__
+#define __MSP430FR2XX_4XX_FAMILY__
 
 /************************************************************
 * PERIPHERAL FILE MAP
@@ -942,21 +940,6 @@ sfrw(GCCTL1, GCCTL1_);
 #define NWAITS_7            (0x0070)  /* FRAM Wait state control: 7 */
 
 
-/* Legacy Defines */
-#define NAUTO               (0x0008)  /* FRAM Disables the wait state generator (obsolete on Rev.E and later)*/
-#define NACCESS0            (0x0010)  /* FRAM Wait state Generator Access Time control Bit: 0 */
-#define NACCESS1            (0x0020)  /* FRAM Wait state Generator Access Time control Bit: 1 */
-#define NACCESS2            (0x0040)  /* FRAM Wait state Generator Access Time control Bit: 2 */
-#define NACCESS_0           (0x0000)  /* FRAM Wait state Generator Access Time control: 0 */
-#define NACCESS_1           (0x0010)  /* FRAM Wait state Generator Access Time control: 1 */
-#define NACCESS_2           (0x0020)  /* FRAM Wait state Generator Access Time control: 2 */
-#define NACCESS_3           (0x0030)  /* FRAM Wait state Generator Access Time control: 3 */
-#define NACCESS_4           (0x0040)  /* FRAM Wait state Generator Access Time control: 4 */
-#define NACCESS_5           (0x0050)  /* FRAM Wait state Generator Access Time control: 5 */
-#define NACCESS_6           (0x0060)  /* FRAM Wait state Generator Access Time control: 6 */
-#define NACCESS_7           (0x0070)  /* FRAM Wait state Generator Access Time control: 7 */
-
-
 /* GCCTL0 Control Bits */
 //#define RESERVED            (0x0001)  /* RESERVED */
 #define FRLPMPWR            (0x0002)  /* FRAM Enable FRAM auto power up after LPM */
@@ -992,7 +975,7 @@ sfrw(GCCTL1, GCCTL1_);
 
 
 /************************************************************
-* PMM - Power Management System for G6xx
+* PMM - Power Management System for FR2xx/FR4xx
 ************************************************************/
 #define __MSP430_HAS_PMM_FRAM__       /* Definition to show that Module is available */
 #define __MSP430_BASEADDRESS_PMM_FRAM__ 0x0120

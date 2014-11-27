@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430L092 devices. */
-/* Version: 1.153 */
+/* Version: 1.155 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
@@ -44,7 +44,7 @@ MEMORY {
   RAM              : ORIGIN = 0x2380, LENGTH = 0x0080 /* END=0x23FF, size 128 */
   INFOMEM          : ORIGIN = 0x1C00, LENGTH = 0x0060 /* END=0x1C5F, size 96 as 1 96-byte segments */
   INFOA            : ORIGIN = 0x1C00, LENGTH = 0x0060 /* END=0x1C5F, size 96 */
-  ROM              : ORIGIN = 0x1C80, LENGTH = 0x0700 /* END=0x237F, size 1792 */
+  ROM (rx)         : ORIGIN = 0x1C80, LENGTH = 0x0700 /* END=0x237F, size 1792 */
   VECT1            : ORIGIN = 0x1C60, LENGTH = 0x0002
   VECT2            : ORIGIN = 0x1C62, LENGTH = 0x0002
   VECT3            : ORIGIN = 0x1C64, LENGTH = 0x0002
@@ -206,6 +206,8 @@ SECTIONS
     PROVIDE (__stack = .);
     *(.stack)
   }
+
+  .infoA     : {} > INFOA              /* MSP430 INFO FLASH MEMORY SEGMENTS */
 
   .MP430.attributes 0 :
   {

@@ -48,8 +48,7 @@
 #ifndef __msp430FR2XX_FR4XXGENERIC
 #define __msp430FR2XX_FR4XXGENERIC
 
-
-#define __MSP430_HEADER_VERSION__ 1153
+#define __MSP430_HEADER_VERSION__ 1155
 
 #define __MSP430_TI_HEADERS__
 
@@ -990,12 +989,12 @@ extern "C" {
 #define CAPTCNTRSEL2_H      (0x0010)  /* Captivate counter select Bit 2 */
 
 #define CAPTSSEL_0          (0x0000)  /* Captivate timer source select: XT1CLK */
-#define CAPTSSEL_1          (0x0008)  /* Captivate timer source select: VLOCLK */
+#define CAPTSSEL_1          (0x0004)  /* Captivate timer source select: VLOCLK */
 #define CAPTSSEL_2          (0x0008)  /* Captivate timer source select: REFO */
-#define CAPTSSEL_3          (0x0008)  /* Captivate timer source select: Reserved */
+#define CAPTSSEL_3          (0x000C)  /* Captivate timer source select: Reserved */
 
 #define CAPTSSEL__XT1CLK    (0x0000)  /* Captivate timer source select: XT1CLK */
-#define CAPTSSEL__VLOCLK    (0x0008)  /* Captivate timer source select: VLOCLK */
+#define CAPTSSEL__VLOCLK    (0x0004)  /* Captivate timer source select: VLOCLK */
 #define CAPTSSEL__REFO      (0x0008)  /* Captivate timer source select: REFO */
 
 #define CAPTDIV_0           (0x0000)  /* Captivate timer divider: 1 */
@@ -2693,21 +2692,6 @@ extern "C" {
 #define NWAITS_7            (0x0070)  /* FRAM Wait state control: 7 */
 
 
-/* Legacy Defines */
-#define NAUTO               (0x0008)  /* FRAM Disables the wait state generator (obsolete on Rev.E and later)*/
-#define NACCESS0            (0x0010)  /* FRAM Wait state Generator Access Time control Bit: 0 */
-#define NACCESS1            (0x0020)  /* FRAM Wait state Generator Access Time control Bit: 1 */
-#define NACCESS2            (0x0040)  /* FRAM Wait state Generator Access Time control Bit: 2 */
-#define NACCESS_0           (0x0000)  /* FRAM Wait state Generator Access Time control: 0 */
-#define NACCESS_1           (0x0010)  /* FRAM Wait state Generator Access Time control: 1 */
-#define NACCESS_2           (0x0020)  /* FRAM Wait state Generator Access Time control: 2 */
-#define NACCESS_3           (0x0030)  /* FRAM Wait state Generator Access Time control: 3 */
-#define NACCESS_4           (0x0040)  /* FRAM Wait state Generator Access Time control: 4 */
-#define NACCESS_5           (0x0050)  /* FRAM Wait state Generator Access Time control: 5 */
-#define NACCESS_6           (0x0060)  /* FRAM Wait state Generator Access Time control: 6 */
-#define NACCESS_7           (0x0070)  /* FRAM Wait state Generator Access Time control: 7 */
-
-
 /* GCCTL0 Control Bits */
 //#define RESERVED            (0x0001)  /* RESERVED */
 #define FRLPMPWR            (0x0002)  /* FRAM Enable FRAM auto power up after LPM */
@@ -3406,37 +3390,6 @@ extern "C" {
 #define OFS_LCDBM18W_H         OFS_LCDBM18W+1
 #define LCDBM18             LCDBM18W_L /* LCD Blinking Memory 18 */
 #define LCDBM19             LCDBM18W_H /* LCD Blinking Memory 19 */
-#define OFS_LCDBM20W          (0x0054)   /* LCD Blinking Memory 20/21 */
-#define OFS_LCDBM20W_L         OFS_LCDBM20W
-#define OFS_LCDBM20W_H         OFS_LCDBM20W+1
-#define LCDBM20             LCDBM20W_L /* LCD Blinking Memory 20 */
-#define LCDBM21             LCDBM20W_H /* LCD Blinking Memory 21 */
-#define OFS_LCDBM22W          (0x0056)   /* LCD Blinking Memory 22/23 */
-#define OFS_LCDBM22W_L         OFS_LCDBM22W
-#define OFS_LCDBM22W_H         OFS_LCDBM22W+1
-#define LCDBM22             LCDBM22W_L /* LCD Blinking Memory 22 */
-#define LCDBM23             LCDBM22W_H /* LCD Blinking Memory 23 */
-#define OFS_LCDBM24W          (0x0058)   /* LCD Blinking Memory 24/25 */
-#define OFS_LCDBM24W_L         OFS_LCDBM24W
-#define OFS_LCDBM24W_H         OFS_LCDBM24W+1
-#define LCDBM24             LCDBM24W_L /* LCD Blinking Memory 24 */
-#define LCDBM25             LCDBM24W_H /* LCD Blinking Memory 25 */
-#define OFS_LCDBM26W          (0x005A)   /* LCD Blinking Memory 26/27 */
-#define OFS_LCDBM26W_L         OFS_LCDBM26W
-#define OFS_LCDBM26W_H         OFS_LCDBM26W+1
-#define LCDBM26             LCDBM26W_L /* LCD Blinking Memory 26 */
-#define LCDBM27             LCDBM26W_H /* LCD Blinking Memory 27 */
-#define OFS_LCDBM28W          (0x005C)   /* LCD Blinking Memory 28/29 */
-#define OFS_LCDBM28W_L         OFS_LCDBM28W
-#define OFS_LCDBM28W_H         OFS_LCDBM28W+1
-#define LCDBM28             LCDBM28W_L /* LCD Blinking Memory 28 */
-#define LCDBM29             LCDBM28W_H /* LCD Blinking Memory 29 */
-#define OFS_LCDBM30W          (0x005E)   /* LCD Blinking Memory 30/31 */
-#define OFS_LCDBM30W_L         OFS_LCDBM30W
-#define OFS_LCDBM30W_H         OFS_LCDBM30W+1
-#define LCDBM30             LCDBM30W_L /* LCD Blinking Memory 30 */
-#define LCDBM31             LCDBM30W_H /* LCD Blinking Memory 31 */
-
 
 /* LCDIV Definitions */
 #define LCDIV_NONE         (0x0000)    /* No Interrupt pending */
@@ -3715,7 +3668,7 @@ extern "C" {
 
 #endif
 /************************************************************
-* PMM - Power Management System for G6xx
+* PMM - Power Management System for FR2xx/FR4xx
 ************************************************************/
 #ifdef  __MSP430_HAS_PMM_FRAM__       /* Definition to show that Module is available */
 
@@ -5927,7 +5880,7 @@ extern "C" {
 #define UCSSEL_2            (0x0080)    /* USCI 0 Clock Source: 2 */
 #define UCSSEL_3            (0x00C0)    /* USCI 0 Clock Source: 3 */
 #define UCSSEL__UCLK        (0x0000)    /* USCI 0 Clock Source: UCLK */
-#define UCSSEL__ACLK        (0x0040)    /* USCI 0 Clock Source: ACLK */
+#define UCSSEL__MODCLK      (0x0040)    /* USCI 0 Clock Source: MODCLK */
 #define UCSSEL__SMCLK       (0x0080)    /* USCI 0 Clock Source: SMCLK */
 
 
