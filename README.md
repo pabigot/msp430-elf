@@ -47,9 +47,9 @@ From [this message](http://www.mail-archive.com/mspgcc-users@lists.sourceforge.n
     3. Digit: Header/linker file version
     4. Digit: Build number
 
-The material in this repository is current to release: 2.01.01.00
+The material in this repository is current to release: 3.02.02.00
 
-The sources version matches: 2.00.00.00
+The sources version matches: 3.02.02.00
 
 [msp430-elf]: http://www.ti.com/tool/msp430-gcc-opensource "TI MSP430 GCC"
 [mspgcc]: http://sourceforge.net/projects/mspgcc/ "MSPGCC"
