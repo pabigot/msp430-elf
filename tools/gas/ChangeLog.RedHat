@@ -1,3 +1,16 @@
+2014-10-16  Nick Clifton  <nickc@redhat.com>
+
+	Issue 5228433
+	* config/tc-msp430.c (msp430_section): Detect the use of
+	.upper.bss and creater a symbol __crt0_init_highbss for it.
+	(msp430_frob_section): Likewise.
+
+2014-08-27  Nick Clifton  <nickc@redhat.com>
+
+	Issue: 5173833
+	* config/tc-msp430.c (MAX_OP_LEN): Increase to 4096 to allow for
+	long C++ template names.
+
 2014-08-06  DJ Delorie  <dj@redhat.com>
 
 	* config/tc-msp430.c (msp430_target_is_430x): New.

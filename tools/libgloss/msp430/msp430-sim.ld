@@ -1,4 +1,4 @@
-/*  Copyright (c) 2013-2014 Red Hat, Inc. All rights reserved.
+/* Copyright (c) 2013-2014 Red Hat, Inc. All rights reserved.
 
    This copyrighted material is made available to anyone wishing to use, modify,
    copy, or redistribute it subject to the terms and conditions of the BSD
@@ -158,6 +158,16 @@ SECTIONS
   {
     PROVIDE (__stack = .);
     *(.stack)
+  }
+
+  /* Make sure that .upper sections are not used without -mlarge support.  */
+  .upper :
+  {
+    *(.upper.rodata.* .upper.rodata)
+    *(.upper.data.*   .upper.data)
+    *(.upper.bss.* .upper.bss)
+    *(.upper.text.* .upper.text)  
+    ASSERT (SIZEOF(.upper) == 0, ".upper sections present in a binary linked without -mlarge support");
   }
 
   /* The rest are all not normally part of the runtime image.  */

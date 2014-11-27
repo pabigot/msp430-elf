@@ -255,7 +255,7 @@ relax_typeS md_relax_table[] =
 };
 
 
-#define MAX_OP_LEN	256
+#define MAX_OP_LEN	4096
 
 typedef enum msp_isa
 {
@@ -858,9 +858,8 @@ msp430_section (int arg)
       || strncmp (name, ".gnu.linkonce.b.", 16) == 0)
     (void) symbol_find_or_make ("__crt0_init_bss");
 
-  if (strncmp (name, ".data", 5) == 0
-      || strncmp (name, ".gnu.linkonce.d.", 16) == 0)
-    (void) symbol_find_or_make ("__crt0_movedata");
+  if (strncmp (name, ".upper.bss", 10) == 0)
+    (void) symbol_find_or_make ("__crt0_init_highbss");
 
   input_line_pointer = saved_ilp;
   obj_elf_section (arg);
@@ -878,9 +877,8 @@ msp430_frob_section (asection *sec)
       || strncmp (name, ".gnu.linkonce.b.", 16) == 0)
     (void) symbol_find_or_make ("__crt0_init_bss");
 
-  if (strncmp (name, ".data", 5) == 0
-      || strncmp (name, ".gnu.linkonce.d.", 16) == 0)
-    (void) symbol_find_or_make ("__crt0_movedata");
+  if (strncmp (name, ".upper.bss", 10) == 0)
+    (void) symbol_find_or_make ("__crt0_init_highbss");
 }
 
 static void

@@ -31,7 +31,6 @@
 /mmix-elfnmmo.em/1.9/Fri Mar 25 11:31:39 2011//Tmsp430-14r1-branch
 /mmixelf.em/1.8/Thu May  2 21:54:55 2013//Tmsp430-14r1-branch
 /mmo.em/1.13/Thu May  2 21:54:55 2013//Tmsp430-14r1-branch
-/msp430.em/1.2/Fri Jun 13 10:21:07 2014//Tmsp430-14r1-branch
 /nds32elf.em/1.1/Thu Feb 20 16:42:30 2014//Tmsp430-14r1-branch
 /needrelax.em/1.8/Fri Mar 25 11:31:39 2011//Tmsp430-14r1-branch
 /netbsd.em/1.4/Fri Mar 25 11:31:39 2011//Tmsp430-14r1-branch
@@ -57,4 +56,5 @@
 /vxworks.em/1.4/Thu Jan 21 20:53:52 2010//Tmsp430-14r1-branch
 /xtensaelf.em/1.14/Wed Sep  5 09:08:56 2012//Tmsp430-14r1-branch
 /z80.em/1.5/Fri Mar 25 11:31:40 2011//Tmsp430-14r1-branch
+/msp430.em/1.2.2.2/Sun Sep 28 08:33:48 2014//Tmsp430-14r1-branch
 D

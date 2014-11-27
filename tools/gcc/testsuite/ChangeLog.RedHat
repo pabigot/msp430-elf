@@ -1,3 +1,8 @@
+2014-09-25  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.dg/pr59605-2.c: Compile only, do not run.
+	* gcc.dg/20020425-1.c: Skip.
+
 2014-07-07  Nick Clifton  <nickc@redhat.com>
 
 	* g++.old-deja/g++.robertl/eb43.C: Require 32-bit+ size.

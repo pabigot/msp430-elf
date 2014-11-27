@@ -2084,6 +2084,9 @@ generic_load (char *args, int from_tty)
 	     bfd_errmsg (bfd_get_error ()));
     }
 
+  /* Set the gdbarch to that of the file that we're loading.  */
+  set_gdbarch_from_file (loadfile_bfd);
+
   bfd_map_over_sections (loadfile_bfd, add_section_size_callback,
 			 (void *) &total_progress.total_size);
 
@@ -2123,6 +2126,14 @@ generic_load (char *args, int from_tty)
      was commented out), making the call confuses GDB if more than one
      file is loaded in.  Some targets do (e.g., remote-vx.c) but
      others don't (or didn't - perhaps they have all been deleted).  */
+
+  {
+    const int add_flags = (current_inferior ()->symfile_flags
+			   | (from_tty ? SYMFILE_VERBOSE : 0));
+
+    symbol_file_add (args, add_flags, NULL, 0);
+    reinit_frame_cache ();
+  }
 
   print_transfer_performance (gdb_stdout, total_progress.data_count,
 			      total_progress.write_count,

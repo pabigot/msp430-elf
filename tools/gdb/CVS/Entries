@@ -688,7 +688,6 @@
 /std-regs.c/1.15/Thu Feb 20 13:38:42 2014//Tmsp430-14r1-branch
 /symfile-debug.c/1.1/Thu Feb 20 16:41:50 2014//Tmsp430-14r1-branch
 /symfile-mem.c/1.14/Thu Feb 20 13:38:42 2014//Tmsp430-14r1-branch
-/symfile.c/1.26/Thu Feb 20 13:38:42 2014//Tmsp430-14r1-branch
 /symfile.h/1.17/Thu Feb 20 13:38:42 2014//Tmsp430-14r1-branch
 /symmisc.c/1.19/Thu Feb 20 13:38:42 2014//Tmsp430-14r1-branch
 /symtab.c/1.26/Thu Feb 20 13:38:42 2014//Tmsp430-14r1-branch
@@ -789,9 +788,10 @@ D/system-gdbinit////
 D/target////
 D/testsuite////
 D/tui////
-/ChangeLog.RedHat/1.125.2.1/Tue Jul 29 22:37:30 2014//Tmsp430-14r1-branch
 /Makefile.in/1.38.2.1/Tue Jul 29 22:37:30 2014//Tmsp430-14r1-branch
 /configure.tgt/1.37.2.1/Tue Jul 29 22:37:30 2014//Tmsp430-14r1-branch
 /msp430-cio.c/1.1.2.1/Fri Jul 11 03:47:51 2014//Tmsp430-14r1-branch
 /msp430-cio.h/1.1.2.1/Fri Jul 11 03:47:51 2014//Tmsp430-14r1-branch
 /msp430-tdep.c/1.1.2.1/Tue Jul 29 22:37:30 2014//Tmsp430-14r1-branch
+/ChangeLog.RedHat/1.125.2.3/Tue Nov 11 00:01:14 2014//Tmsp430-14r1-branch
+/symfile.c/1.26.2.2/Tue Nov 11 00:01:14 2014//Tmsp430-14r1-branch

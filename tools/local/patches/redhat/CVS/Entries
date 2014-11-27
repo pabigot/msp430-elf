@@ -66,4 +66,7 @@
 /plumhall-files.tar.bz2/1.1/Wed Oct 31 11:04:30 2007/-kb/Tmsp430-14r1-branch
 /140710-1-gdb-msp430-CIO.patch/1.1.2.1/Fri Jul 11 03:47:50 2014//Tmsp430-14r1-branch
 /140724-1-gdb-static-expat.patch/1.1.2.1/Fri Jul 25 00:20:05 2014//Tmsp430-14r1-branch
+/140904-1-msp430-sim_open.patch/1.1.2.2/Fri Sep  5 00:53:58 2014//Tmsp430-14r1-branch
+/141022-1-symfile-load-gdbarch.patch/1.1.2.1/Wed Oct 22 23:27:31 2014//Tmsp430-14r1-branch
+/141110-1-gdb-symfile-load-addsyms.patch/1.1.2.1/Mon Nov 10 23:42:29 2014//Tmsp430-14r1-branch
 D

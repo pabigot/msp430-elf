@@ -1,6 +1,6 @@
-This is /opt/redhat/msp430-14r1-10/sources/tools/newlib/libm/libm.info,
+This is /opt/redhat/msp430-14r1-98/sources/tools/newlib/libm/libm.info,
 produced by makeinfo version 4.8 from
-/opt/redhat/msp430-14r1-10/sources/tools/newlib/libm/libm.texinfo.
+/opt/redhat/msp430-14r1-98/sources/tools/newlib/libm/libm.texinfo.
 
 START-INFO-DIR-ENTRY
 * libm::                        An ANSI-C conforming mathematical library.

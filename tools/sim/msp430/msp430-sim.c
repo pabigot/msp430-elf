@@ -202,11 +202,13 @@ sim_open (SIM_OPEN_KIND kind,
 			    0 /* verbose */,
 			    1 /* use LMA instead of VMA */,
 			    loader_write_mem);
+#if 0
   if (prog_bfd == NULL)
     {
       sim_state_free (sd);
       return 0;
     }
+#endif
 
   /* Establish any remaining configuration options.  */
   if (sim_config (sd) != SIM_RC_OK)
@@ -227,10 +229,13 @@ sim_open (SIM_OPEN_KIND kind,
 
   msp430_trace_init (STATE_PROG_BFD (sd));
 
-  MSP430_CPU (sd)->state.cio_breakpoint = lookup_symbol (sd, "C$$IO$$");
-  MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "__CIOBUF__");
-  if (MSP430_CPU (sd)->state.cio_buffer == -1)
-    MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "_CIOBUF_");
+  if (prog_bfd != NULL)
+    {
+      MSP430_CPU (sd)->state.cio_breakpoint = lookup_symbol (sd, "C$$IO$$");
+      MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "__CIOBUF__");
+      if (MSP430_CPU (sd)->state.cio_buffer == -1)
+	MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "_CIOBUF_");
+    }
 
   return sd;
 }

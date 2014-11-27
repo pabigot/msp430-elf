@@ -1,3 +1,43 @@
+2014-10-23  DJ Delorie  <dj@redhat.com>
+
+	* config/msp430/msp430.c (msp430_print_operand): 'x' modifier is independend of -mlarge.
+
+2014-10-16  Nick Clifton  <nickc@redhat.com>
+
+	Issue 5228433
+	* config/msp430/msp430.c (msp430_gen_prefix): Set memory regions for
+	data as well.
+	(msp430_output_aligned_decl_common): New function.
+	* config/msp430/msp430-protos.h: Prototype
+	msp430_output_aligned_decl_common.
+	* config/msp430/msp430.h (ASM_OUTPUT_ALIGNED_DECL_COMMON):
+	Define.
+
+2014-09-12  DJ Delorie  <dj@redhat.com>
+
+	* config/msp430/msp430.md (extendhipsi2): Use 20-bit form of RLAM/RRAM.
+	(extend_and_shift1_hipsi2): Likewise.
+	(extend_and_shift2_hipsi2): Likewise.
+
+2014-09-12  Nick Clifton  <nickc@redhat.com>
+
+	Issue 5215003
+	* config/msp430/msp430.c (msp430_use_f5_series_hwmult): Add more
+	F5 names.  Add search caching.
+	(use_32bit_hwmult): Add search caching.
+	(msp430_no_hwmult): Add more no-mult MCU names.
+
+2014-09-11  Nick Clifton  <nickc@redhat.com>
+
+	Issue 5215003
+	* config/msp430/msp430.c (msp430_no_hwmult): New function.
+	(msp430_output_labelref): Use it.
+
+2014-09-05  DJ Delorie  <dj@redhat.com>
+
+	* doc/invoke.texi (MSP430 Options): Minor tweaks to text, add
+	-minrt to index.
+
 2014-08-08  DJ Delorie  <dj@redhat.com>
 
 	* dwarf2out.c (mem_loc_descriptor): Allow partial-int modes for

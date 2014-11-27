@@ -96,7 +96,7 @@ fragment <<EOF
     return
 EOF
 sed $sc ldscripts/${EMULATION_NAME}.xu                 >> e${EMULATION_NAME}.c
-echo '  ; else if (link_info.relocatable) return'     >> e${EMULATION_NAME}.c
+echo '  ; else if (link_info.relocatable) return'      >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xr                 >> e${EMULATION_NAME}.c
 echo '  ; else if (!config.text_read_only) return'     >> e${EMULATION_NAME}.c
 sed $sc ldscripts/${EMULATION_NAME}.xbn                >> e${EMULATION_NAME}.c
@@ -177,6 +177,7 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
 {
   char * lower_name;
   char * upper_name;
+  char * name;
   lang_output_section_statement_type * lower;
   lang_output_section_statement_type * upper;
   lang_output_section_statement_type * os;
@@ -198,27 +199,27 @@ gld${EMULATION_NAME}_place_orphan (asection * s,
   /* Skip the .either prefix.  */
   secname += 7;
 
-  /* If the section name contains another period, only
-     use the part of the name before the second dot.  */
+  /* Compute the names of the corresponding upper and lower
+     sections.  If the input section name contains another period,
+     only use the part of the name before the second dot.  */
   if (strchr (secname + 1, '.') != NULL)
     {
-      char * name = name = ACONCAT ((secname, NULL));
+      name = ACONCAT ((secname, NULL));
 
       * strchr (name + 1, '.') = 0;
-      lower_name = ACONCAT ((".lower", name, NULL));
-      upper_name = ACONCAT ((".upper", name, NULL));
     }
   else
-    {
-      lower_name = ACONCAT ((".lower", secname, NULL));
-      upper_name = ACONCAT ((".upper", secname, NULL));
-    }
+    name = (char *) secname;
   
+  lower_name = ACONCAT ((".lower", name, NULL));
+  upper_name = ACONCAT ((".upper", name, NULL));
+
   /* Find the corresponding lower and upper sections.  */
   lower = lang_output_section_find (lower_name);
   upper = lang_output_section_find (upper_name);
+  /* If the upper section does not exist, try again without the suffix.  */
   if (upper == NULL)
-    upper = lang_output_section_find (secname);
+    upper = lang_output_section_find (name);
 
   if (lower == NULL)
     {

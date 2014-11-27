@@ -1,3 +1,8 @@
+2014-09-04  Kevin Buettner  <kevinb@redhat.com>
+
+	* msp430/msp430-sim.c (sim_open): Allow simulator to be opened
+	even when program cannot be loaded.
+
 2014-06-18  Kevin Buettner  <kevinb@redhat.com>
 
 	* msp430/msp43-sim.c (sim_open): Allow accesses to low memory.

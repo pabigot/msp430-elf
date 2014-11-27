@@ -10,7 +10,7 @@
    License and may only be used or replicated with the express permission of
    Red Hat, Inc.  */
 
-/* Default linker script, for normal MSP430X executables.  */
+/* Default linker script, for large MSP430X executables.  */
 
 OUTPUT_ARCH(msp430)
 ENTRY(_start)
@@ -19,9 +19,9 @@ INCLUDE intr_vectors.ld
 
 MEMORY
 {
-  RAM (rx)     : ORIGIN = 0x00200, LENGTH = 0x0ee00
-  LOWROM (w)   : ORIGIN = 0x0f000, LENGTH = 0x00800
-  ROM (w)      : ORIGIN = 0x10000, LENGTH = 0x80000
+  RAM (w)      : ORIGIN = 0x00200, LENGTH = 0x01e00
+  ROM (rx)     : ORIGIN = 0x02000, LENGTH = 0x0df00
+  HIFRAM (rxw) : ORIGIN = 0x10000, LENGTH = 0x80000
 }
 
 SECTIONS
@@ -31,18 +31,19 @@ SECTIONS
     *(.resetvec)
   } > VECT31
 
-  .lower.rodata :
+  .upper.rodata :
   {
-    *(.lower.rodata.* .lower.rodata)
-  } > LOWROM
-    
+    . = ALIGN(2);
+    *(.upper.rodata.* .upper.rodata)
+  } > HIFRAM
+
   .rodata :
   {
     . = ALIGN(2);
     *(.plt)
+    *(.lower.rodata.* .lower.rodata)
     *(.rodata .rodata.* .gnu.linkonce.r.* .const .const:*)
     *(.rodata1)
-    *(.upper.rodata.* .upper.rodata)
 
     *(.eh_frame_hdr)
     KEEP (*(.eh_frame))
@@ -82,20 +83,18 @@ SECTIONS
     KEEP (*(.dtors))
   } > ROM
 
-  .lower.data :
+  .upper.data :
   {
     . = ALIGN(2);
-    PROVIDE (__low_datastart = .);
-    *(.lower.data.*)
-    *(.lower.data)
-    PROVIDE (__low_dataend = .);
-  } > RAM
+    *(.upper.data.* .upper.data)
+  } > HIFRAM
 
   .data :
   {
     . = ALIGN(2);
-    PROVIDE (__datastart = .);
+    *(.lower.data.* .lower.data)
 
+    . = ALIGN(2);
     KEEP (*(.jcr))
     *(.data.rel.ro.local) *(.data.rel.ro*)
     *(.dynamic)
@@ -113,32 +112,28 @@ SECTIONS
     *(.sdata .sdata.* .gnu.linkonce.s.* D_2 D_1)
 
     . = ALIGN(2);
-    *(.upper.data.* .upper.data)
-    . = ALIGN(2);
+
     _edata = .;
     PROVIDE (edata = .);
     PROVIDE (__dataend = .);
-  } > RAM AT>ROM
+  } > RAM
 
-  /* Note that crt0 assumes this is a multiple of two; all the
-     start/stop symbols are also assumed word-aligned.  */
-  PROVIDE(__romdatastart = LOADADDR(.data));
-  PROVIDE (__romdatacopysize = SIZEOF(.data));
-
-  .lower.bss :
+  .upper.bss :
   {
     . = ALIGN(2);
-    *(.lower.bss.* .lower.bss)
-  } > LOWROM
+    PROVIDE (__high_bssstart = .);
+    *(.upper.bss.* .upper.bss)
+    PROVIDE (__high_bssend = .);
+  } > HIFRAM
 
   .bss :
   {
     . = ALIGN(2);
     PROVIDE (__bssstart = .);
+    *(.lower.bss.* .lower.bss)
     *(.dynbss)
     *(.sbss .sbss.*)
     *(.bss .bss.* .gnu.linkonce.b.*)
-    *(.upper.bss.* .upper.bss)
     . = ALIGN(2);
     PROVIDE (__bssend = .);
   } > RAM
@@ -165,25 +160,26 @@ SECTIONS
   }
 
   /* This is just for crt0.S and interrupt handlers.  */
-  .lowtext           :
+  .lowtext :
   {
     PROVIDE (_start = .);
     . = ALIGN(2);
     KEEP (*(SORT(.crt_*)))
     KEEP (*(.lowtext))
-  } > LOWROM
+  } > ROM
 
-  .lower.text :
+  .upper.text :
   {
     . = ALIGN(2);
-    *(.lower.text.* .lower.text)
-  } > LOWROM
+    *(.upper.text.* .upper.text)
+  } > HIFRAM
 
   .text :
   {
     . = ALIGN(2);
+    *(.lower.text.* .lower.text)
+    . = ALIGN(2);
     *(.text .stub .text.* .gnu.linkonce.t.* .text:*)
-    *(.upper.text.* .upper.text)
 
     KEEP (*(.text.*personality*))
     /* .gnu.warning sections are handled specially by elf32.em.  */

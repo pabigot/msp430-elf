@@ -826,7 +826,7 @@ Objective-C and Objective-C++ Dialects}.
 
 @emph{MSP430 Options}
 @gccoptlist{-msim -masm-hex -mmcu= -mcpu= -mlarge -msmall -mrelax @gol
--mhwmult= -mcode-region= -mdata-region=}
+-mhwmult= -mcode-region= -mdata-region= -minrt}
 
 @emph{NDS32 Options}
 @gccoptlist{-mbig-endian -mlittle-endian @gol
@@ -18241,9 +18241,10 @@ the final link.
 
 @item -minrt
 @opindex minrt
-Enable the use of a minimum runtime environemtn - no static
+Enable the use of a minimum runtime environment - no static
 initializers or constructors.  This is intended for memory-constrained
-devices.
+devices.  The compiler will include special symbols in some objects
+that tell the linker and runtime which code fragments are required.
 
 @item mhwmult=
 @opindex mhwmult=
@@ -18274,11 +18275,13 @@ them safe to use inside interrupt handlers as well as in normal code.
 These options tell gcc to tell the linker where to place functions and
 data that do not have one of the @code{lower}, @code{upper},
 @code{either} or @code{section} attributes.  Possible values are
-@code{lower}, @code{upper}, @code{either} or @code{none}.  The first
+@code{lower}, @code{upper}, @code{either} or @code{any}.  The first
 three behave like the corresponding attribute.  The fourth possible
-value - @code{none} - is the default.  It leaves placement entirely up
-to the linker script and how it assigns the standard sections (.text,
-.data etc) to the memory regions.
+value - @code{any} - is the default unless @option{-mlarge} has been
+specified.  It leaves placement entirely up to the linker script and
+how it assigns the standard sections (.text, .data etc) to the memory
+regions.  The default when @option{-mlarge} is enabled is
+@code{either}.
 
 @end table
 

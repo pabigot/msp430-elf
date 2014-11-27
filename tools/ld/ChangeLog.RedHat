@@ -1,3 +1,8 @@
+2014-09-23  Nick Clifton  <nickc@redhat.com>
+
+	* emultempl/msp430.em (place_orphan): Correct computation of
+	non-suffixed upper section name.
+
 2014-07-17  DJ Delorie  <dj@redhat.com>
 
 	* scripttempl/elf32msp430.sc: Mark .noinit as LOLOAD.

@@ -1,0 +1,44 @@
+This patch causes generic_load() to load the symbol table via
+symbol_file_add().
+
+For the moment, I've left in place a FIXME comment which immediately
+precedes the hunk of code that I've added.  This FIXME notes that some
+load implementations load the symbol table and others do not.  It says
+remote-mips.c had, at one time - it's gone now, a comment which stated
+that calling symbol_file_add more than once confuses GDB.
+
+In any case, when this patch is submitted upstream, that FIXME will
+have to be replaced by some other comment.
+
+Lastly, I'll note that the manual states that the symbols are loaded.
+If this patch does not go in, the manual should instead be fixed.
+
+gdb/ChangeLog.RedHat:
+
+2014-11-10  Kevin Buettner  <kevinb@redhat.com>
+
+	* symfile.c (generic_load): Load symbol table.
+
+
+Index: gdb/symfile.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/symfile.c,v
+retrieving revision 1.26.2.1
+diff -u -p -r1.26.2.1 symfile.c
+--- gdb/symfile.c	22 Oct 2014 23:27:31 -0000	1.26.2.1
++++ gdb/symfile.c	10 Nov 2014 23:26:48 -0000
+@@ -2127,6 +2127,14 @@ generic_load (char *args, int from_tty)
+      file is loaded in.  Some targets do (e.g., remote-vx.c) but
+      others don't (or didn't - perhaps they have all been deleted).  */
+ 
++  {
++    const int add_flags = (current_inferior ()->symfile_flags
++			   | (from_tty ? SYMFILE_VERBOSE : 0));
++
++    symbol_file_add (args, add_flags, NULL, 0);
++    reinit_frame_cache ();
++  }
++
+   print_transfer_performance (gdb_stdout, total_progress.data_count,
+ 			      total_progress.write_count,
+ 			      &start_time, &end_time);

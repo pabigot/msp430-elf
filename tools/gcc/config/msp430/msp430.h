@@ -376,6 +376,9 @@ typedef struct
     }						\
   while (0)
 
+#define ASM_OUTPUT_ALIGNED_DECL_COMMON(FILE, DECL, NAME, SIZE, ALIGN)	\
+  msp430_output_aligned_decl_common ((FILE), (DECL), (NAME), (SIZE), (ALIGN))
+
 #define JUMP_TABLES_IN_TEXT_SECTION	1
 
 #undef	DWARF2_ADDR_SIZE

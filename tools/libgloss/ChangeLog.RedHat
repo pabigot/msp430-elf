@@ -1,3 +1,17 @@
+2014-10-16  Nick Clifton  <nickc@redhat.com>
+
+	Issue 5228433
+	* msp430/Makefile.in (CRT_OBJS): Remove crt_movedata.o and add
+	crt_high_bss.o.
+	* msp430/crt0.S (movedata): Delete.
+	(high_bss): Add.
+	* msp430/msp430-sim.ld: Add error message if .upper sections are
+	detected.
+	* msp430/msp430xl-sim.ld (MEMORY): Adjust to better mimic real
+	life MCUs.
+	(.lower.XXX): Move these sections into the normal sections and
+	move the .upper.XXX sections out into their own sections.
+
 2014-07-17  DJ Delorie  <dj@redhat.com>
 
 	* msp430/msp430-sim.ld: Mark .noinit as LOLOAD.

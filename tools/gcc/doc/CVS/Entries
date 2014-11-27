@@ -31,7 +31,6 @@
 /install.texi/1.74/Mon Jul  7 07:51:10 2014//Tmsp430-14r1-branch
 /install.texi2html/1.10/Thu Feb 20 16:40:46 2014//Tmsp430-14r1-branch
 /interface.texi/1.7/Thu Feb 20 16:40:46 2014//Tmsp430-14r1-branch
-/invoke.texi/1.153/Mon Jun  9 10:41:35 2014//Tmsp430-14r1-branch
 /languages.texi/1.4/Thu Feb 20 16:40:46 2014//Tmsp430-14r1-branch
 /libgcc.texi/1.9/Thu Feb 20 16:40:46 2014//Tmsp430-14r1-branch
 /loop.texi/1.9/Mon Mar 24 11:28:33 2014//Tmsp430-14r1-branch
@@ -53,3 +52,4 @@
 /tree-ssa.texi/1.14/Thu Feb 20 16:40:46 2014//Tmsp430-14r1-branch
 /trouble.texi/1.20/Thu Feb 20 16:40:46 2014//Tmsp430-14r1-branch
 D/include////
+/invoke.texi/1.153.2.2/Fri Oct 17 01:15:39 2014//Tmsp430-14r1-branch

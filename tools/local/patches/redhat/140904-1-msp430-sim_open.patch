@@ -1,0 +1,85 @@
+This patch allows sim_open() to succeed even when the program in question
+cannot be loaded.  The GDB test suite works better for several of its tests
+when this is the case.
+
+E.g. consider gdb.base/readline-ask.exp.  Prior to this patch, this
+is what happens when the test opens the simulator:
+
+    (gdb) target sim 
+    gdbsim: no loadable sections "the program"
+    unable to create simulator instance
+    (gdb) ERROR: Couldn't set target for simulator.
+    UNRESOLVED: gdb.base/readline-ask.exp: set width 50
+    set width 50
+    (gdb) set height 3
+    (gdb) FAIL: gdb.base/readline-ask.exp: set height 3
+
+Not only could the sim not be opened, but we ended up with an unresolved
+test case in addition to a failure.  When this patch is used, we now
+see the following behavior instead:
+
+    (gdb) target sim 
+    gdbsim: no loadable sections "the program"
+    Connected to the simulator.
+    (gdb) load
+    gdbsim: no loadable sections "/mesquite2/.ironwood2/msp430-14r1-branch/msp430-elf/bld/gdb/testsuite/gdb.base/readline-ask"
+    unable to load program
+    (gdb) set width 50
+    (gdb) PASS: gdb.base/readline-ask.exp: set width 50
+    set height 3
+    (gdb) PASS: gdb.base/readline-ask.exp: set height 3
+
+This fixes the problem with the unresolved test case and allows the
+failing test to now pass.
+
+It is my hope that this patch will also fix the (increasing number of)
+transient failures that we've been seeing.  In each case that I've
+observed so far, we had been seeing one or more additional failures
+after receiving the error, "Couldn't set target for simulator".
+
+
+2014-09-04  Kevin Buettner  <kevinb@redhat.com>
+
+	* msp430/msp430-sim.c (sim_open): Allow simulator to be opened
+	even when program cannot be loaded.
+
+
+Index: sim/msp430/msp430-sim.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/msp430/msp430-sim.c,v
+retrieving revision 1.12
+diff -u -p -r1.12 msp430-sim.c
+--- sim/msp430/msp430-sim.c	1 Jul 2014 16:29:56 -0000	1.12
++++ sim/msp430/msp430-sim.c	4 Sep 2014 19:28:01 -0000
+@@ -202,11 +202,13 @@ sim_open (SIM_OPEN_KIND kind,
+ 			    0 /* verbose */,
+ 			    1 /* use LMA instead of VMA */,
+ 			    loader_write_mem);
++#if 0
+   if (prog_bfd == NULL)
+     {
+       sim_state_free (sd);
+       return 0;
+     }
++#endif
+ 
+   /* Establish any remaining configuration options.  */
+   if (sim_config (sd) != SIM_RC_OK)
+@@ -227,10 +229,13 @@ sim_open (SIM_OPEN_KIND kind,
+ 
+   msp430_trace_init (STATE_PROG_BFD (sd));
+ 
+-  MSP430_CPU (sd)->state.cio_breakpoint = lookup_symbol (sd, "C$$IO$$");
+-  MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "__CIOBUF__");
+-  if (MSP430_CPU (sd)->state.cio_buffer == -1)
+-    MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "_CIOBUF_");
++  if (prog_bfd != NULL)
++    {
++      MSP430_CPU (sd)->state.cio_breakpoint = lookup_symbol (sd, "C$$IO$$");
++      MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "__CIOBUF__");
++      if (MSP430_CPU (sd)->state.cio_buffer == -1)
++	MSP430_CPU (sd)->state.cio_buffer = lookup_symbol (sd, "_CIOBUF_");
++    }
+ 
+   return sd;
+ }

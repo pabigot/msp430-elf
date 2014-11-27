@@ -1,0 +1,25 @@
+This is a patch for TI issue #5268913.
+
+gdb/ChangeLog.RedHat:
+
+	* symfile.c (generic_load): Set current architecture from the
+	file being loaded.
+
+
+Index: gdb/symfile.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/symfile.c,v
+retrieving revision 1.26
+diff -u -p -r1.26 symfile.c
+--- gdb/symfile.c	20 Feb 2014 13:38:42 -0000	1.26
++++ gdb/symfile.c	22 Oct 2014 23:19:14 -0000
+@@ -2084,6 +2084,9 @@ generic_load (char *args, int from_tty)
+ 	     bfd_errmsg (bfd_get_error ()));
+     }
+ 
++  /* Set the gdbarch to that of the file that we're loading.  */
++  set_gdbarch_from_file (loadfile_bfd);
++
+   bfd_map_over_sections (loadfile_bfd, add_section_size_callback,
+ 			 (void *) &total_progress.total_size);
+ 
