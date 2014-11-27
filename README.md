@@ -34,9 +34,18 @@ link.
 source-compatible with existing applications developed for mspgcc.
 
 **Note**: Although I (pabigot) maintained mspgcc for several years, I am
-not involved in maintaining or evolving msp430-elf nor do I provide free
-support for it.  See [Texas Instruments][msp430-elf], or contact me to
-discuss contracted support options.
+not involved in maintaining or evolving msp430-elf nor do I provide
+support for it.  For visibility,
+if toolchain problems are reproducible on upstream builds please file
+them first at the appropriate Bugzilla:
+[GCC](https://gcc.gnu.org/bugzilla) or
+[Binutils/newlib](https://sourceware.org/bugzilla/).  Per [this
+message](http://e2e.ti.com/support/development_tools/compiler/f/343/t/384148.aspx)
+bugs should also be reported on the [E2E TI C/C++ Compiler
+forum](http://e2e.ti.com/support/development_tools/compiler/default.aspx),
+though the people there do not maintain the headers or linker scripts.
+For TI it is sufficient to reference the upstream bugzilla report.  See
+also the [TI MSP430 GCC homepage][msp430-elf].  
 
 From [this message](http://www.mail-archive.com/mspgcc-users@lists.sourceforge.net/msg12169.html):
 
