@@ -1,3 +1,25 @@
+2015-01-23  Nick Clifton  <nickc@redhat.com>
+
+	Issue 5475913
+	* config/tc-msp430.c (msp430_frob_section): Define
+	__crt0_init_highbss when the .either.bss section is referenced.
+	(msp430_section): Likewise.
+
+2015-01-16  Nick Clifton  <nickc@redhat.com>
+
+	* dwarf2dbg.c (out_header): When dwarf sections are enabled use
+	real symbols for the start and end of the .debug_line section.
+	* config/tc-msp430.h (TC_FORCE_RELOCATION_SUB_SAME): Prevent the
+	adjustment of relocations in debug sections,.
+	(TC_LINKRELAX_FIXUP): Likewise.
+
+2014-12-10  Nick Clifton  <nickc@redhat.com>
+
+	* config/tc-msp430.c (msp430_section): Restore creation of the
+	__crt0_movedata symbol and add detection and creation of the
+	__crt0_move_highdata symbol.
+	(msp430_frob_section): Likewise.
+
 2014-10-16  Nick Clifton  <nickc@redhat.com>
 
 	Issue 5228433

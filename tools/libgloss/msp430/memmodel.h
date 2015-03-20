@@ -39,3 +39,27 @@
 
 
 #endif
+
+/* Start a function in its own named and numbered section, so that it
+   can be subject to linker garbage collection.  The numbers are used
+   to enforce link-time ordering of the sections.  Note - the construction
+   of the symbol names is critical - they need to match the unresolved
+   symbol references created by the compiler and assembler.  */
+.macro START_CRT_FUNC number name 
+	.section .crt_\number\name,"ax",@progbits
+	.global __crt0_\name
+	.type __crt0_\name , @function
+__crt0_\name:
+.endm
+
+
+.macro END_CRT_FUNC name 
+	.size __crt0_\name, . - __crt0_\name
+.endm
+   
+
+.macro WEAK_DEF name
+	.global \name
+	.weak	\name
+   \name  = 0
+.endm

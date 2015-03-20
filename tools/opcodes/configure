@@ -11539,9 +11539,9 @@ case "${host}" in
 esac
 
 # Enable -Werror by default when using gcc
-if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
-    ERROR_ON_WARNING=yes
-fi
+#if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" ; then
+#    ERROR_ON_WARNING=yes
+#fi
 
 NO_WERROR=
 if test "${ERROR_ON_WARNING}" = yes ; then

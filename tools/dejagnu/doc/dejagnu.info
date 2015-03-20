@@ -1,7 +1,7 @@
 This is
-/opt/redhat/msp430-14r1-98/sources/tools/dejagnu/doc/dejagnu.info,
+/opt/redhat/msp430-14r1-167/sources/tools/dejagnu/doc/dejagnu.info,
 produced by makeinfo version 4.8 from
-/opt/redhat/msp430-14r1-98/sources/tools/dejagnu/doc/dejagnu.texi.
+/opt/redhat/msp430-14r1-167/sources/tools/dejagnu/doc/dejagnu.texi.
 
 INFO-DIR-SECTION Programming
 START-INFO-DIR-ENTRY
@@ -6033,278 +6033,278 @@ This prints out the total numbers of all the test state outputs.
 
 
 Tag Table:
-Node: Top310
-Node: Abstract1853
-Node: Overview2614
-Node: What is DejaGnu ?2901
-Node: Release Notes5511
-Node: Windows Support6784
-Node: Design Goals7505
-Node: A POSIX Conforming Test Framework9155
-Node: Getting DejaGnu up and running14508
-Node: Test your installation15654
-Node: Windows17119
-Node: Getting the source code for the calc example17742
-Node: Create a minimal project; e_g_ calc18228
-Node: A simple project without the GNU autotools18703
-Node: Using autoconf/autoheader/automake19346
-Node: Our first automated tests24663
-Node: Running the test for the calc example25054
-Node: The various config files or how to avoid warnings27322
-Node: When trouble strikes29726
-Node: Testing "Hello world" locally30563
-Node: A first remote test31202
-Node: Setup telnet to your own host31899
-Node: A test case for login via telnet33298
-Node: Remote testing "Hello world"35294
-Node: Transferring files from/to the target37161
-Node: Preparing for crosscompilation38390
-Node: Remote testing of calc40553
-Node: Using Windows as host and vxWorks as target40903
-Node: Running Tests41893
-Node: Make Check42508
-Node: Runtest43600
-Node: Output States44200
-Node: Invoking Runtest46685
-Ref: --tool[name[s]]52381
-Node: Common Operations55557
-Node: Output Files57206
-Node: Summary File57708
-Node: Log File59474
-Node: Debug Log File61331
-Node: Customizing DejaGnu65271
-Node: Local Config File67596
-Node: Global Config File71485
-Node: Board Config File74494
-Node: Remote Host Testing77709
-Node: Config File Values82021
-Node: Option Variables82532
-Node: Personal Config File86112
-Node: Extending DejaGnu87038
-Node: Adding a new Testsuite87580
-Node: Adding A New Tool88084
-Node: Adding A New Target96349
-Node: Adding A New Board98344
-Node: Board File Values101387
-Node: Writing A Test Case107503
-Node: Debugging A Test Case109937
-Node: Adding A Test Case To A Testsuite112254
-Node: Hints On Writing A Test Case114287
-Node: Test Case Variables116969
-Node: Unit Testing118413
-Node: What Is Unit Testing ?118634
-Node: The dejagnu_h Header File119473
-Node: Reference120167
-Node: Obtaining DejaGnu120373
-Node: Installation120688
-Node: Configuring DejaGnu121088
-Node: Installing DejaGnu122777
-Node: Builtin Procedures123735
-Node: Core Internal Procedures124339
-Node: mail_file procedure126156
-Node: open_logs procedure126360
-Node: close_logs procedure126574
-Node: isbuild procedure126789
-Node: is_remote procedure127482
-Node: is3way procedure127699
-Node: ishost procedure128077
-Node: istarget procedure128653
-Node: isnative procedure129338
-Node: unknown procedure129712
-Node: clone_output procedure129933
-Node: reset_vars procedure130177
-Node: log_and_exit procedure130402
-Node: log_summary procedure130632
-Node: cleanup procedure130868
-Node: setup_xfail procedure131079
-Node: record_test procedure132617
-Node: pass procedure132881
-Node: fail procedure133303
-Node: xpass procedure133720
-Node: xfail procedure134194
-Node: set_warning_threshold procedure134643
-Node: get_warning_threshold procedure135131
-Node: warning procedure135574
-Node: perror procedure136940
-Node: note procedure137977
-Node: untested procedure138547
-Node: unresolved procedure139076
-Node: unsupported procedure139679
-Node: init_testcounts procedure140179
-Node: incr_count procedure140421
-Node: transform procedure140671
-Node: check_conditional_xfail procedure141335
-Node: clear_xfail procedure143988
-Node: verbose procedure144588
-Node: load_lib procedure145479
-Node: Procedures For Remote Communication146232
-Node: call_remote procedure149677
-Node: check_for_board_status procedure149937
-Node: file_on_build procedure150239
-Node: file_on_host procedure150529
-Node: local_exec procedure150804
-Node: remote_binary procedure151093
-Node: remote_close procedure151349
-Node: remote_download procedure151853
-Node: remote_exec procedure152144
-Node: remote_expect procedure152438
-Node: remote_file procedure152730
-Node: remote_ld procedure152993
-Node: remote_load procedure153248
-Node: remote_open procedure153522
-Node: remote_pop_conn procedure154312
-Node: remote_push_conn procedure154583
-Node: remote_raw_binary procedure154863
-Node: remote_raw_close procedure155147
-Node: remote_raw_file procedure155427
-Node: remote_raw_ld procedure155713
-Node: remote_raw_load procedure155992
-Node: remote_raw_open procedure156290
-Node: remote_raw_send procedure156564
-Node: remote_raw_spawn procedure156856
-Node: remote_raw_transmit procedure157165
-Node: remote_raw_wait procedure157469
-Node: remote_reboot procedure157764
-Node: remote_send procedure158026
-Node: remote_spawn procedure158296
-Node: remote_swap_conn procedure158595
-Node: remote_transmit procedure158866
-Node: remote_upload procedure159152
-Node: remote_wait procedure159444
-Node: standard_close procedure159718
-Node: standard_download procedure159986
-Node: standard_exec procedure160299
-Node: standard_file procedure160586
-Node: standard_load procedure160852
-Node: standard_reboot procedure161142
-Node: standard_send procedure161412
-Node: standard_spawn procedure161694
-Node: standard_transmit procedure161990
-Node: standard_upload procedure162284
-Node: standard_wait procedure162598
-Node: unix_clean_filename procedure162887
-Node: connprocs163154
-Node: telnet procedure164487
-Node: rsh procedure164676
-Node: tip procedure165400
-Node: kermit procedure166083
-Node: kermit_open procedure166712
-Node: kermit_command procedure166945
-Node: kermit_send procedure167192
-Node: kermit_transmit procedure167451
-Node: telnet_open procedure167715
-Node: telnet_binary procedure167964
-Node: telnet_transmit procedure168208
-Node: tip_open procedure168473
-Node: rlogin_open procedure168697
-Node: rlogin_spawn procedure168917
-Node: rsh_open procedure169161
-Node: rsh_download procedure169383
-Node: rsh_upload procedure169655
-Node: rsh_exec procedure169921
-Node: ftp_open procedure170163
-Node: ftp_upload procedure170371
-Node: ftp_download procedure170637
-Node: ftp_close procedure170910
-Node: tip_download procedure171128
-Node: Procedures For Target Boards171688
-Node: default_link procedure172456
-Node: default_target_assemble procedure172740
-Node: default_target_compile procedure173081
-Node: pop_config procedure173434
-Node: prune_warnings procedure173685
-Node: push_build procedure173936
-Node: push_config procedure174176
-Node: reboot_target procedure174431
-Node: target_assemble procedure174672
-Node: target_compile procedure174974
-Node: target database library file175260
-Node: board_info procedure176283
-Node: host_info procedure176516
-Node: set_board_info procedure176760
-Node: set_currtarget_info procedure177036
-Node: target_info procedure177329
-Node: unset_board_info procedure177592
-Node: unset_currtarget_info procedure177865
-Node: push_target procedure178153
-Node: poptarget procedure178627
-Node: list_targets procedure178896
-Node: push_host procedure179188
-Node: pop_host procedure179593
-Node: compile procedure179848
-Node: archive procedure180521
-Node: ranlib procedure181063
-Node: execute_anywhere procedure181429
-Node: platform dependant procedures182336
-Node: ${tool}_start procedure183694
-Node: ${tool}_load procedure184729
-Node: ${tool}_exit procedure185616
-Node: ${tool}_version procedure186090
-Node: Utility Procedures186537
-Node: getdirs procedure187289
-Node: find procedure187833
-Node: which procedure188572
-Node: grep procedure189142
-Node: prune procedure190071
-Node: slay procedure190445
-Node: absolute procedure190821
-Node: psource procedure191207
-Node: runtest_file_p procedure191601
-Node: diff procedure192340
-Node: setenv procedure192779
-Node: unsetenv procedure193125
-Node: getenv procedure193414
-Node: prune_system_crud procedure193767
-Node: Libgloss194340
-Node: libgloss_link_flags procedure195988
-Node: libgloss_include_flags procedure196222
-Node: newlib_link_flags procedure196501
-Node: newlib_include_flags procedure196766
-Node: libio_include_flags procedure197037
-Node: libio_link_flags procedure197304
-Node: g++_include_flags procedure197559
-Node: g++_link_flags procedure197812
-Node: libstdc++_include_flags procedure198063
-Node: libstdc++_link_flags procedure198344
-Node: get_multilibs procedure198617
-Node: find_binutils_prog procedure198864
-Node: find_gcc procedure199114
-Node: find_gcj procedure199317
-Node: find_g++ procedure199510
-Node: find_g77 procedure199703
-Node: process_multilib_options procedure199912
-Node: add_multilib_option procedure200192
-Node: find_gas procedure200457
-Node: find_ld procedure200660
-Node: build_wrapper procedure200854
-Node: winsup_include_flags procedure201098
-Node: winsup_link_flags procedure201365
-Node: Debugging Procedures201591
-Node: dumpvars procedure202350
-Node: dumplocals procedure202715
-Node: dumprocs procedure203083
-Node: dumpwatch procedure203482
-Node: watcharray procedure203871
-Node: watchvar procedure204150
-Node: watchunset procedure204369
-Node: watchwrite procedure204685
-Node: watchread procedure205031
-Node: watchdel procedure205369
-Node: print procedure205663
-Node: quit procedure205934
-Node: File Map206149
-Node: Unit Testing API206794
-Node: C Unit Testing API206966
-Node: pass function207470
-Node: fail function207676
-Node: untested function207911
-Node: unresolved function208186
-Node: totals function208559
-Node: C++ Unit Testing API208785
-Node: pass method209286
-Node: fail method209497
-Node: untested method209735
-Node: unresolved method210013
-Node: totals method210389
+Node: Top312
+Node: Abstract1855
+Node: Overview2616
+Node: What is DejaGnu ?2903
+Node: Release Notes5513
+Node: Windows Support6786
+Node: Design Goals7507
+Node: A POSIX Conforming Test Framework9157
+Node: Getting DejaGnu up and running14510
+Node: Test your installation15656
+Node: Windows17121
+Node: Getting the source code for the calc example17744
+Node: Create a minimal project; e_g_ calc18230
+Node: A simple project without the GNU autotools18705
+Node: Using autoconf/autoheader/automake19348
+Node: Our first automated tests24665
+Node: Running the test for the calc example25056
+Node: The various config files or how to avoid warnings27324
+Node: When trouble strikes29728
+Node: Testing "Hello world" locally30565
+Node: A first remote test31204
+Node: Setup telnet to your own host31901
+Node: A test case for login via telnet33300
+Node: Remote testing "Hello world"35296
+Node: Transferring files from/to the target37163
+Node: Preparing for crosscompilation38392
+Node: Remote testing of calc40555
+Node: Using Windows as host and vxWorks as target40905
+Node: Running Tests41895
+Node: Make Check42510
+Node: Runtest43602
+Node: Output States44202
+Node: Invoking Runtest46687
+Ref: --tool[name[s]]52383
+Node: Common Operations55559
+Node: Output Files57208
+Node: Summary File57710
+Node: Log File59476
+Node: Debug Log File61333
+Node: Customizing DejaGnu65273
+Node: Local Config File67598
+Node: Global Config File71487
+Node: Board Config File74496
+Node: Remote Host Testing77711
+Node: Config File Values82023
+Node: Option Variables82534
+Node: Personal Config File86114
+Node: Extending DejaGnu87040
+Node: Adding a new Testsuite87582
+Node: Adding A New Tool88086
+Node: Adding A New Target96351
+Node: Adding A New Board98346
+Node: Board File Values101389
+Node: Writing A Test Case107505
+Node: Debugging A Test Case109939
+Node: Adding A Test Case To A Testsuite112256
+Node: Hints On Writing A Test Case114289
+Node: Test Case Variables116971
+Node: Unit Testing118415
+Node: What Is Unit Testing ?118636
+Node: The dejagnu_h Header File119475
+Node: Reference120169
+Node: Obtaining DejaGnu120375
+Node: Installation120690
+Node: Configuring DejaGnu121090
+Node: Installing DejaGnu122779
+Node: Builtin Procedures123737
+Node: Core Internal Procedures124341
+Node: mail_file procedure126158
+Node: open_logs procedure126362
+Node: close_logs procedure126576
+Node: isbuild procedure126791
+Node: is_remote procedure127484
+Node: is3way procedure127701
+Node: ishost procedure128079
+Node: istarget procedure128655
+Node: isnative procedure129340
+Node: unknown procedure129714
+Node: clone_output procedure129935
+Node: reset_vars procedure130179
+Node: log_and_exit procedure130404
+Node: log_summary procedure130634
+Node: cleanup procedure130870
+Node: setup_xfail procedure131081
+Node: record_test procedure132619
+Node: pass procedure132883
+Node: fail procedure133305
+Node: xpass procedure133722
+Node: xfail procedure134196
+Node: set_warning_threshold procedure134645
+Node: get_warning_threshold procedure135133
+Node: warning procedure135576
+Node: perror procedure136942
+Node: note procedure137979
+Node: untested procedure138549
+Node: unresolved procedure139078
+Node: unsupported procedure139681
+Node: init_testcounts procedure140181
+Node: incr_count procedure140423
+Node: transform procedure140673
+Node: check_conditional_xfail procedure141337
+Node: clear_xfail procedure143990
+Node: verbose procedure144590
+Node: load_lib procedure145481
+Node: Procedures For Remote Communication146234
+Node: call_remote procedure149679
+Node: check_for_board_status procedure149939
+Node: file_on_build procedure150241
+Node: file_on_host procedure150531
+Node: local_exec procedure150806
+Node: remote_binary procedure151095
+Node: remote_close procedure151351
+Node: remote_download procedure151855
+Node: remote_exec procedure152146
+Node: remote_expect procedure152440
+Node: remote_file procedure152732
+Node: remote_ld procedure152995
+Node: remote_load procedure153250
+Node: remote_open procedure153524
+Node: remote_pop_conn procedure154314
+Node: remote_push_conn procedure154585
+Node: remote_raw_binary procedure154865
+Node: remote_raw_close procedure155149
+Node: remote_raw_file procedure155429
+Node: remote_raw_ld procedure155715
+Node: remote_raw_load procedure155994
+Node: remote_raw_open procedure156292
+Node: remote_raw_send procedure156566
+Node: remote_raw_spawn procedure156858
+Node: remote_raw_transmit procedure157167
+Node: remote_raw_wait procedure157471
+Node: remote_reboot procedure157766
+Node: remote_send procedure158028
+Node: remote_spawn procedure158298
+Node: remote_swap_conn procedure158597
+Node: remote_transmit procedure158868
+Node: remote_upload procedure159154
+Node: remote_wait procedure159446
+Node: standard_close procedure159720
+Node: standard_download procedure159988
+Node: standard_exec procedure160301
+Node: standard_file procedure160588
+Node: standard_load procedure160854
+Node: standard_reboot procedure161144
+Node: standard_send procedure161414
+Node: standard_spawn procedure161696
+Node: standard_transmit procedure161992
+Node: standard_upload procedure162286
+Node: standard_wait procedure162600
+Node: unix_clean_filename procedure162889
+Node: connprocs163156
+Node: telnet procedure164489
+Node: rsh procedure164678
+Node: tip procedure165402
+Node: kermit procedure166085
+Node: kermit_open procedure166714
+Node: kermit_command procedure166947
+Node: kermit_send procedure167194
+Node: kermit_transmit procedure167453
+Node: telnet_open procedure167717
+Node: telnet_binary procedure167966
+Node: telnet_transmit procedure168210
+Node: tip_open procedure168475
+Node: rlogin_open procedure168699
+Node: rlogin_spawn procedure168919
+Node: rsh_open procedure169163
+Node: rsh_download procedure169385
+Node: rsh_upload procedure169657
+Node: rsh_exec procedure169923
+Node: ftp_open procedure170165
+Node: ftp_upload procedure170373
+Node: ftp_download procedure170639
+Node: ftp_close procedure170912
+Node: tip_download procedure171130
+Node: Procedures For Target Boards171690
+Node: default_link procedure172458
+Node: default_target_assemble procedure172742
+Node: default_target_compile procedure173083
+Node: pop_config procedure173436
+Node: prune_warnings procedure173687
+Node: push_build procedure173938
+Node: push_config procedure174178
+Node: reboot_target procedure174433
+Node: target_assemble procedure174674
+Node: target_compile procedure174976
+Node: target database library file175262
+Node: board_info procedure176285
+Node: host_info procedure176518
+Node: set_board_info procedure176762
+Node: set_currtarget_info procedure177038
+Node: target_info procedure177331
+Node: unset_board_info procedure177594
+Node: unset_currtarget_info procedure177867
+Node: push_target procedure178155
+Node: poptarget procedure178629
+Node: list_targets procedure178898
+Node: push_host procedure179190
+Node: pop_host procedure179595
+Node: compile procedure179850
+Node: archive procedure180523
+Node: ranlib procedure181065
+Node: execute_anywhere procedure181431
+Node: platform dependant procedures182338
+Node: ${tool}_start procedure183696
+Node: ${tool}_load procedure184731
+Node: ${tool}_exit procedure185618
+Node: ${tool}_version procedure186092
+Node: Utility Procedures186539
+Node: getdirs procedure187291
+Node: find procedure187835
+Node: which procedure188574
+Node: grep procedure189144
+Node: prune procedure190073
+Node: slay procedure190447
+Node: absolute procedure190823
+Node: psource procedure191209
+Node: runtest_file_p procedure191603
+Node: diff procedure192342
+Node: setenv procedure192781
+Node: unsetenv procedure193127
+Node: getenv procedure193416
+Node: prune_system_crud procedure193769
+Node: Libgloss194342
+Node: libgloss_link_flags procedure195990
+Node: libgloss_include_flags procedure196224
+Node: newlib_link_flags procedure196503
+Node: newlib_include_flags procedure196768
+Node: libio_include_flags procedure197039
+Node: libio_link_flags procedure197306
+Node: g++_include_flags procedure197561
+Node: g++_link_flags procedure197814
+Node: libstdc++_include_flags procedure198065
+Node: libstdc++_link_flags procedure198346
+Node: get_multilibs procedure198619
+Node: find_binutils_prog procedure198866
+Node: find_gcc procedure199116
+Node: find_gcj procedure199319
+Node: find_g++ procedure199512
+Node: find_g77 procedure199705
+Node: process_multilib_options procedure199914
+Node: add_multilib_option procedure200194
+Node: find_gas procedure200459
+Node: find_ld procedure200662
+Node: build_wrapper procedure200856
+Node: winsup_include_flags procedure201100
+Node: winsup_link_flags procedure201367
+Node: Debugging Procedures201593
+Node: dumpvars procedure202352
+Node: dumplocals procedure202717
+Node: dumprocs procedure203085
+Node: dumpwatch procedure203484
+Node: watcharray procedure203873
+Node: watchvar procedure204152
+Node: watchunset procedure204371
+Node: watchwrite procedure204687
+Node: watchread procedure205033
+Node: watchdel procedure205371
+Node: print procedure205665
+Node: quit procedure205936
+Node: File Map206151
+Node: Unit Testing API206796
+Node: C Unit Testing API206968
+Node: pass function207472
+Node: fail function207678
+Node: untested function207913
+Node: unresolved function208188
+Node: totals function208561
+Node: C++ Unit Testing API208787
+Node: pass method209288
+Node: fail method209499
+Node: untested method209737
+Node: unresolved method210015
+Node: totals method210391
 
 End Tag Table

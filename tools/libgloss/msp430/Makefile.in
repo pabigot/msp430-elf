@@ -56,6 +56,8 @@ OBJCOPY = `if [ -f ${objroot}/../binutils/objcopy ] ; \
 	then echo ${objroot}/../binutils/objcopy ; \
 	else t='$(program_transform_name)'; echo objcopy | sed -e $$t ; fi`
 
+# Note: msp430.ld is redundant.  It is maintained for backwards
+# compatibility only.  Use msp430-sim.ld or msp430xl-sim.ld instead.
 SCRIPTS  = $(srcdir)/msp430.ld
 SCRIPTS += $(srcdir)/msp430-sim.ld
 SCRIPTS += $(srcdir)/msp430xl-sim.ld
@@ -82,6 +84,8 @@ NOSYS_OBJS = nosyscalls.o \
 CRT_OBJS = \
 	crt_bss.o \
 	crt_high_bss.o \
+	crt_movedata.o \
+	crt_move_highdata.o \
 	crt_main.o \
 	crt_main_minrt.o \
 	crt_callexit.o \

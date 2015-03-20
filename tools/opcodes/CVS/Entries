@@ -48,7 +48,6 @@
 /cgen-opc.c/1.8/Fri Aug  3 14:18:34 2012//Tmsp430-14r1-branch
 /cgen.sh/1.7/Thu Jan 21 20:54:26 2010//Tmsp430-14r1-branch
 /config.in/1.10/Thu May  2 22:26:05 2013//Tmsp430-14r1-branch
-/configure/1.26/Thu Mar  6 15:07:14 2014//Tmsp430-14r1-branch
 /configure.com/1.2/Thu Feb 20 13:50:54 2014//Tmsp430-14r1-branch
 /configure.in/1.18/Thu Mar  6 15:07:14 2014//Tmsp430-14r1-branch
 /cr16-dis.c/1.6/Thu Feb 20 13:50:54 2014//Tmsp430-14r1-branch
@@ -287,3 +286,4 @@
 /z8k-opc.h/1.8/Thu May  2 22:26:07 2013//Tmsp430-14r1-branch
 /z8kgen.c/1.10/Thu May  2 22:26:07 2013//Tmsp430-14r1-branch
 D/po////
+/configure/1.26.2.1/Fri Nov 14 11:55:21 2014//Tmsp430-14r1-branch

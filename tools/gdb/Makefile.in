@@ -154,7 +154,7 @@ READLINE_DEPS = @READLINE_DEPS@
 READLINE_CFLAGS = @READLINE_CFLAGS@
 
 # Where is expat?  This will be empty if expat was not available.
-LIBEXPAT = -Wl,-Bstatic @LIBEXPAT@ -Wl,-Bdynamic
+LIBEXPAT = @BSTATIC@ @LIBEXPAT@ @BDYNAMIC@
 
 # Where is lzma?  This will be empty if lzma was not available.
 LIBLZMA = @LIBLZMA@

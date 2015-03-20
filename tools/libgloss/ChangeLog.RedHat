@@ -1,6 +1,53 @@
+2015-01-23  Nick Clifton  <nickc@redhat.com>
+
+	Issue 5475913
+	* msp430/crt0.S: Provide weak definitions of symbols used by the
+	high memory initialisation routines.
+	(init_highbss): Check the size before calling memset.
+	(move_highdata): Check the size before calling memcpy or testing
+	the startus word.
+	* msp430/memmodel.h (WEAK_DEF): New macro.
+	* msp430/msp430xl-sim.ld: Update comments.
+
+2015-01-16  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/memmove.h (END_CRT_FUNC): New macro.
+	* msp430/crt0.S: Use it.
+	* msp430/syscalls.S (isatty):  Add .size directive.
+	(getpid): Likewise.
+
+2014-12-19  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/memmove.h (START_CRT_FUNC): New macro.
+	* msp430/crt0.S: Use it.
+	(move_highdata): Add code to use a status word to control the
+	direction of the copy.
+	* msp430/msp430xl-sim.ld (.upper.data): Add a status word at the
+	start of the section controlling how it should be initialised.
+	Add example code for storing a shadow copy of the .upper.data
+	section in HIFRAM if HIROM is not available.
+
+2014-12-11  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/msp430sl-sim.ld (MEMORY): Add HIROM region.
+	(.resetvec): Delete - it is provided by intr-vectors.ld.
+	(.upper.rodata): Place in HIROM.
+	(.upper.data): Store in HIROM, copy into HIFRAM.
+	(COMMON): Move into .bss section.
+	(.upper.text): Place into HIROM.
+
+2014-12-10  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/Makefile.in (CRT_OBJS): Restore crt_movedata.o and add
+	crt_move_highdata.o.
+	* msp430/msp430/crt0.S (movedata): Restore section.
+	(move_highdata): New section.
+	* msp430.ld: Synchronize with msp430-sim.ld.
+	* msp430xl-sim.ld: Move code and initialized data into ROM.  Add
+	symbols to allow the copying of upper.data into HIFRAM.
+
 2014-10-16  Nick Clifton  <nickc@redhat.com>
 
-	Issue 5228433
 	* msp430/Makefile.in (CRT_OBJS): Remove crt_movedata.o and add
 	crt_high_bss.o.
 	* msp430/crt0.S (movedata): Delete.

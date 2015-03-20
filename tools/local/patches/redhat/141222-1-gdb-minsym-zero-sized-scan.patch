@@ -1,0 +1,49 @@
+This patch fixes the following failures for 
+msp430-sim/-msim/-mmcu=msp430x/-mlarge/-mdata-region=either :
+
+FAIL: gdb.cp/classes.exp: print &foo.st
+FAIL: gdb.cp/classes.exp: print &Bar::st
+
+The code in question did not do as the comment indicates. The comment
+says:
+
+		  /* If the minimal symbol has a zero size, save it
+		     but keep scanning backwards looking for one with
+		     a non-zero size.  A zero size may mean that the
+		     symbol isn't an object or function (e.g. a
+		     label), or it may just mean that the size was not
+		     specified.  */
+
+The code was written to only scan past the first symbol of zero
+size.
+
+This patch should go upstream.
+
+gdb/ChangeLog.RedHat:
+
+2014-12-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* minsyms.c (lookup_minimal_symbol_by_pc_section_1): Scan backwards
+	over all zero-sized symbols.
+
+Index: gdb/minsyms.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/minsyms.c,v
+retrieving revision 1.20
+diff -u -p -r1.20 minsyms.c
+--- gdb/minsyms.c	20 Feb 2014 13:38:40 -0000	1.20
++++ gdb/minsyms.c	22 Dec 2014 21:33:33 -0000
+@@ -631,10 +631,10 @@ lookup_minimal_symbol_by_pc_section_1 (C
+ 		     symbol isn't an object or function (e.g. a
+ 		     label), or it may just mean that the size was not
+ 		     specified.  */
+-		  if (MSYMBOL_SIZE (&msymbol[hi]) == 0
+-		      && best_zero_sized == -1)
++		  if (MSYMBOL_SIZE (&msymbol[hi]) == 0)
+ 		    {
+-		      best_zero_sized = hi;
++		      if (best_zero_sized == -1)
++			best_zero_sized = hi;
+ 		      hi--;
+ 		      continue;
+ 		    }

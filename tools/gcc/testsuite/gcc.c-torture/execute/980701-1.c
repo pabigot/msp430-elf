@@ -6,7 +6,7 @@ ns_name_skip (unsigned char **x, unsigned char *y)
 
 unsigned char a[2];
 
-int dn_skipname(unsigned char *ptr, unsigned char *eom) {
+__PTRDIFF_TYPE__  dn_skipname(unsigned char *ptr, unsigned char *eom) {
     unsigned char *saveptr = ptr;
 
     if (ns_name_skip(&ptr, eom) == -1)

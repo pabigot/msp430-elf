@@ -1,0 +1,47 @@
+The patch below fixes the following failures:
+
+FAIL: gdb.cp/classes.exp: call class_param.Aref_a (g_A)
+FAIL: gdb.cp/classes.exp: call class_param.Aref_x (g_A)
+FAIL: gdb.cp/classes.exp: call class_param.Aref_a (g_B)
+FAIL: gdb.cp/classes.exp: call class_param.Aref_x (g_B)
+FAIL: gdb.cp/ref-params.exp: print value of f1 on Child in main
+FAIL: gdb.cp/ref-params.exp: print value of f2 on Child in main
+FAIL: gdb.cp/ref-params.exp: print value of f1 on (Child&) in main
+FAIL: gdb.cp/ref-params.exp: print value of f2 on (Child&) in main
+FAIL: gdb.cp/ref-params.exp: print value of f1 on Child& in f2
+FAIL: gdb.cp/ref-params.exp: print f1(MQ)
+FAIL: gdb.cp/ref-params.exp: print mf1(MQ)
+FAIL: gdb.cp/ref-params.exp: print mf2(MQ)
+FAIL: gdb.cp/ref-params.exp: print f1(MQR)
+FAIL: gdb.cp/ref-params.exp: print mf1(MQR)
+FAIL: gdb.cp/ref-params.exp: print mf2(MQR)
+
+It should go upstream.
+
+
+gdb/ChangeLog.RedHat:
+
+2014-12-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* msp430-tdep.c (msp430_push_dummy_call): Treat reference arguments
+	the same as pointer arguments when determining size of argument.
+
+
+
+Index: gdb/msp430-tdep.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/msp430-tdep.c,v
+retrieving revision 1.1.2.1
+diff -u -p -r1.1.2.1 msp430-tdep.c
+--- gdb/msp430-tdep.c	11 Jul 2014 03:47:51 -0000	1.1.2.1
++++ gdb/msp430-tdep.c	17 Dec 2014 08:23:14 -0000
+@@ -772,7 +772,8 @@ msp430_push_dummy_call (struct gdbarch *
+ 		  int size = 2;
+ 
+ 		  if (code_model == MSP_LARGE_CODE_MODEL
+-		      && TYPE_CODE (arg_type) == TYPE_CODE_PTR)
++		      && (TYPE_CODE (arg_type) == TYPE_CODE_PTR
++		          || TYPE_CODE (arg_type) == TYPE_CODE_REF))
+ 		    {
+ 		      /* Pointer arguments using large memory model are passed
+ 		         using entire register.  */

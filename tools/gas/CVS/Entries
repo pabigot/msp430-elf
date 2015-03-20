@@ -39,7 +39,6 @@
 /compress-debug.h/1.1/Fri Mar 25 11:08:56 2011//Tmsp430-14r1-branch
 /cond.c/1.9/Thu Feb 20 13:29:27 2014//Tmsp430-14r1-branch
 /config.in/1.11/Thu May  2 21:24:04 2013//Tmsp430-14r1-branch
-/configure/1.30/Thu Mar  6 15:05:04 2014//Tmsp430-14r1-branch
 /configure.com/1.2/Thu Feb 20 13:29:27 2014//Tmsp430-14r1-branch
 /configure.in/1.22/Thu Mar  6 15:05:04 2014//Tmsp430-14r1-branch
 /configure.tgt/1.13/Thu Mar  6 15:05:04 2014//Tmsp430-14r1-branch
@@ -48,7 +47,6 @@
 /depend.c/1.7/Wed Apr 18 12:52:48 2012//Tmsp430-14r1-branch
 /dw2gencfi.c/1.12/Thu Feb 20 13:29:27 2014//Tmsp430-14r1-branch
 /dw2gencfi.h/1.5/Wed Apr 18 12:52:48 2012//Tmsp430-14r1-branch
-/dwarf2dbg.c/1.24/Thu Feb 20 13:29:27 2014//Tmsp430-14r1-branch
 /dwarf2dbg.h/1.11/Thu Feb 20 13:29:27 2014//Tmsp430-14r1-branch
 /ecoff.c/1.15/Thu Feb 20 13:29:27 2014//Tmsp430-14r1-branch
 /ecoff.h/1.8/Fri Mar 25 11:08:57 2011//Tmsp430-14r1-branch
@@ -112,4 +110,6 @@ D/config////
 D/doc////
 D/po////
 D/testsuite////
-/ChangeLog.RedHat/1.65.2.5/Sat Nov  1 04:24:55 2014//Tmsp430-14r1-branch
+/configure/1.30.2.1/Fri Nov 14 11:52:45 2014//Tmsp430-14r1-branch
+/dwarf2dbg.c/1.24.2.1/Fri Jan 16 23:11:24 2015//Tmsp430-14r1-branch
+/ChangeLog.RedHat/1.65.2.8/Sat Jan 24 21:02:27 2015//Tmsp430-14r1-branch

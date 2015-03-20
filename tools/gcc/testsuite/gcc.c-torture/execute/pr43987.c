@@ -1,4 +1,4 @@
-char B[256 * sizeof(void *)];
+long B[256 * sizeof(void *)];
 typedef void *FILE;
 typedef struct globals {
     int c;

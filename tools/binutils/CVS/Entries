@@ -41,7 +41,6 @@
 /coffgrok.c/1.8/Thu Feb 20 13:27:08 2014//Tmsp430-14r1-branch
 /coffgrok.h/1.7/Thu Mar  6 15:02:28 2014//Tmsp430-14r1-branch
 /config.in/1.12/Thu Feb 20 13:27:08 2014//Tmsp430-14r1-branch
-/configure/1.26/Thu Feb 20 13:27:08 2014//Tmsp430-14r1-branch
 /configure.com/1.3/Thu Feb 20 13:27:08 2014//Tmsp430-14r1-branch
 /configure.in/1.17/Thu Feb 20 13:27:08 2014//Tmsp430-14r1-branch
 /configure.tgt/1.4/Thu Feb 20 13:27:08 2014//Tmsp430-14r1-branch
@@ -86,7 +85,6 @@
 /not-ranlib.c/1.2/Mon Mar 10 10:42:54 2008//Tmsp430-14r1-branch
 /not-strip.c/1.2/Mon Mar 10 10:42:54 2008//Tmsp430-14r1-branch
 /objcopy.c/1.25/Thu Mar  6 15:02:28 2014//Tmsp430-14r1-branch
-/objdump.c/1.23/Thu Mar  6 15:02:28 2014//Tmsp430-14r1-branch
 /objdump.h/1.2/Fri Aug  3 14:16:30 2012//Tmsp430-14r1-branch
 /od-macho.c/1.2/Thu Feb 20 13:27:08 2014//Tmsp430-14r1-branch
 /od-xcoff.c/1.3/Thu Feb 20 13:27:08 2014//Tmsp430-14r1-branch
@@ -134,3 +132,5 @@ D/po////
 D/testsuite////
 /ChangeLog.RedHat/1.25.10.1/Wed Aug  6 23:26:34 2014//Tmsp430-14r1-branch
 /readelf.c/1.49.2.1/Wed Aug  6 23:26:34 2014//Tmsp430-14r1-branch
+/configure/1.26.2.1/Fri Nov 14 11:52:39 2014//Tmsp430-14r1-branch
+/objdump.c/1.23.2.1/Fri Dec 19 19:07:44 2014//Tmsp430-14r1-branch

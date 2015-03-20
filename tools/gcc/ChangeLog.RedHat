@@ -1,3 +1,32 @@
+2015-01-22  Nick Clifton  <nickc@redhat.com>
+
+	Issue 5553743
+	* config/msp430/msp430.c (msp430_use_f5_series_hwmult): Add more
+	MCU names and prefixes.
+
+2015-01-09  Nick Clifton  <nickc@redhat.com>
+
+	Issue 5472893:
+	* config/msp430/msp430.md (zero_extendqihi2): Add
+	register-to-register extending pattern.
+	(zero_extendqihi2 peephole): Fix test for invocation.
+
+2014-12-22  Nick Clifton  <nickc@redhat.com>
+
+	BZ 64160
+	* config/msp430/msp430.md (SImode add splitter): Do not use when
+	the source and destination partially overlap.
+
+2014-12-15  DJ Delorie  <dj@redhat.com>
+
+	* config/msp430/msp430.c (msp430_attr): Remove unneeded assert.
+
+2014-12-11  Nick Clifton  <nickc@redhat.com>
+
+	BZ target/64160
+	* config/msp430/msp430.md (Split SImode add into two HImode adds):
+	Do not split if the source and destination partially overlap.
+
 2014-10-23  DJ Delorie  <dj@redhat.com>
 
 	* config/msp430/msp430.c (msp430_print_operand): 'x' modifier is independend of -mlarge.

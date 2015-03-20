@@ -1,6 +1,7 @@
-This is /opt/redhat/msp430-14r1-98/sources/tools/newlib/libm/libm.info,
+This is
+/opt/redhat/msp430-14r1-167/sources/tools/newlib/libm/libm.info,
 produced by makeinfo version 4.8 from
-/opt/redhat/msp430-14r1-98/sources/tools/newlib/libm/libm.texinfo.
+/opt/redhat/msp430-14r1-167/sources/tools/newlib/libm/libm.texinfo.
 
 START-INFO-DIR-ENTRY
 * libm::                        An ANSI-C conforming mathematical library.
@@ -2694,89 +2695,89 @@ Document Index
 
 
 Tag Table:
-Node: Top1281
-Node: Math1643
-Node: version4942
-Node: acos7463
-Node: acosh8249
-Node: asin9074
-Node: asinh9865
-Node: atan10440
-Node: atan210962
-Node: atanh11700
-Node: jN12574
-Node: cbrt13869
-Node: copysign14272
-Node: cosh15101
-Node: erf15916
-Node: exp16951
-Node: exp217734
-Node: expm118420
-Node: fabs19152
-Node: fdim19689
-Node: floor20274
-Node: fma20980
-Node: fmax22165
-Node: fmin22755
-Node: fmod23346
-Node: frexp24124
-Node: gamma25071
-Node: hypot28096
-Node: ilogb28826
-Node: infinity29834
-Node: isgreater30576
-Node: fpclassify33283
-Node: ldexp37739
-Node: log38440
-Node: log1039330
-Node: log1p39938
-Node: log240676
-Node: logb42011
-Node: lrint43268
-Node: lround44254
-Node: matherr45287
-Node: modf47842
-Node: nan48784
-Node: nearbyint49226
-Node: nextafter50391
-Node: pow51200
-Node: remainder52024
-Node: remquo52585
-Node: rint54178
-Node: round55146
-Node: scalbn55991
-Node: signbit56894
-Node: sin57833
-Node: sinh58486
-Node: sqrt59309
-Node: tan59948
-Node: tanh60425
-Node: trunc61009
-Node: Complex61818
-Node: cabs62896
-Node: cacos63487
-Node: cacosh64249
-Node: carg65070
-Node: casin65711
-Node: casinh66472
-Node: catan67290
-Node: catanh68067
-Node: ccos68890
-Node: ccosh69433
-Node: cexp70030
-Node: cimag70626
-Node: clog71179
-Node: conj71955
-Node: cpow72557
-Node: cproj73229
-Node: creal74110
-Node: csin74632
-Node: csinh75168
-Node: csqrt75758
-Node: ctan76452
-Node: ctanh77000
-Node: Reentrancy77586
-Node: Long Double Functions78442
-Node: Document Index78853
+Node: Top1283
+Node: Math1645
+Node: version4944
+Node: acos7465
+Node: acosh8251
+Node: asin9076
+Node: asinh9867
+Node: atan10442
+Node: atan210964
+Node: atanh11702
+Node: jN12576
+Node: cbrt13871
+Node: copysign14274
+Node: cosh15103
+Node: erf15918
+Node: exp16953
+Node: exp217736
+Node: expm118422
+Node: fabs19154
+Node: fdim19691
+Node: floor20276
+Node: fma20982
+Node: fmax22167
+Node: fmin22757
+Node: fmod23348
+Node: frexp24126
+Node: gamma25073
+Node: hypot28098
+Node: ilogb28828
+Node: infinity29836
+Node: isgreater30578
+Node: fpclassify33285
+Node: ldexp37741
+Node: log38442
+Node: log1039332
+Node: log1p39940
+Node: log240678
+Node: logb42013
+Node: lrint43270
+Node: lround44256
+Node: matherr45289
+Node: modf47844
+Node: nan48786
+Node: nearbyint49228
+Node: nextafter50393
+Node: pow51202
+Node: remainder52026
+Node: remquo52587
+Node: rint54180
+Node: round55148
+Node: scalbn55993
+Node: signbit56896
+Node: sin57835
+Node: sinh58488
+Node: sqrt59311
+Node: tan59950
+Node: tanh60427
+Node: trunc61011
+Node: Complex61820
+Node: cabs62898
+Node: cacos63489
+Node: cacosh64251
+Node: carg65072
+Node: casin65713
+Node: casinh66474
+Node: catan67292
+Node: catanh68069
+Node: ccos68892
+Node: ccosh69435
+Node: cexp70032
+Node: cimag70628
+Node: clog71181
+Node: conj71957
+Node: cpow72559
+Node: cproj73231
+Node: creal74112
+Node: csin74634
+Node: csinh75170
+Node: csqrt75760
+Node: ctan76454
+Node: ctanh77002
+Node: Reentrancy77588
+Node: Long Double Functions78444
+Node: Document Index78855
 
 End Tag Table

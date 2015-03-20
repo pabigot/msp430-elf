@@ -1,3 +1,20 @@
+2014-12-19  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/msp430-sim.c (put_op): Fix range of address test.
+
+2014-12-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* msp430/msp430-sim.c (sim_open): Reenable code for setting up
+	memory region starting at 0x0.
+
+2014-12-15  Nick Clifton  <nickc@redhat.com>
+
+	* msp430-sim.c (get_op): Disable invalid memory access debug message.
+
+2014-12-11  Nick Clifton  <nickc@redhat.com>
+
+	* msp430/msp430-sim.c (sim_open): Update allocated memory regions.
+
 2014-09-04  Kevin Buettner  <kevinb@redhat.com>
 
 	* msp430/msp430-sim.c (sim_open): Allow simulator to be opened

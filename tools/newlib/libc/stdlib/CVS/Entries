@@ -73,7 +73,6 @@
 /msize.c/1.1.1.1/Tue Dec  3 19:09:56 2002//Tmsp430-14r1-branch
 /mstats.c/1.4/Fri Aug  4 10:08:15 2006//Tmsp430-14r1-branch
 /mtrim.c/1.1.1.1/Tue Dec  3 19:09:56 2002//Tmsp430-14r1-branch
-/nano-mallocr.c/1.1/Thu Feb 20 16:43:45 2014//Tmsp430-14r1-branch
 /nrand48.c/1.1.1.1/Tue Dec  3 19:09:56 2002//Tmsp430-14r1-branch
 /on_exit.c/1.8/Thu Jan 21 20:54:17 2010//Tmsp430-14r1-branch
 /putenv.c/1.2/Fri Aug  4 10:08:15 2006//Tmsp430-14r1-branch
@@ -91,7 +90,6 @@
 /srand48.c/1.1.1.1/Tue Dec  3 19:09:56 2002//Tmsp430-14r1-branch
 /std.h/1.2/Tue Dec 30 17:20:46 2008//Tmsp430-14r1-branch
 /stdlib.tex/1.6/Fri Mar 25 11:50:17 2011//Tmsp430-14r1-branch
-/strtod.c/1.12/Thu Feb 20 13:50:15 2014//Tmsp430-14r1-branch
 /strtol.c/1.3/Thu Feb 20 13:50:15 2014//Tmsp430-14r1-branch
 /strtold.c/1.2/Thu Feb 20 13:50:15 2014//Tmsp430-14r1-branch
 /strtoll.c/1.3/Thu Feb 20 13:50:15 2014//Tmsp430-14r1-branch
@@ -117,4 +115,6 @@
 /wctob.c/1.6/Thu Feb 20 13:50:15 2014//Tmsp430-14r1-branch
 /wctomb.c/1.4/Thu Feb 20 13:50:15 2014//Tmsp430-14r1-branch
 /wctomb_r.c/1.5/Thu May  2 22:25:21 2013//Tmsp430-14r1-branch
+/nano-mallocr.c/1.1.2.1/Tue Dec 16 17:02:23 2014//Tmsp430-14r1-branch
+/strtod.c/1.12.2.1/Fri Dec 19 19:10:16 2014//Tmsp430-14r1-branch
 D

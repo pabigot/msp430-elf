@@ -81,7 +81,6 @@
 /s_pow10.c/1.1/Tue May 29 11:54:50 2007//Tmsp430-14r1-branch
 /s_remquo.c/1.2/Thu Jan 21 20:54:26 2010//Tmsp430-14r1-branch
 /s_rint.c/1.3/Fri Mar 25 11:50:26 2011//Tmsp430-14r1-branch
-/s_round.c/1.2/Thu Jan 21 20:54:26 2010//Tmsp430-14r1-branch
 /s_scalbln.c/1.1.1.1/Tue Dec  3 19:09:57 2002//Tmsp430-14r1-branch
 /s_scalbn.c/1.3/Thu Jan 21 20:54:26 2010//Tmsp430-14r1-branch
 /s_signbit.c/1.2/Thu Jan 21 20:54:26 2010//Tmsp430-14r1-branch
@@ -129,4 +128,5 @@
 /tanl.c/1.1/Thu Jan 21 20:54:26 2010//Tmsp430-14r1-branch
 /tgammal.c/1.1/Thu Jan 21 20:54:26 2010//Tmsp430-14r1-branch
 /truncl.c/1.1/Thu Jan 21 20:54:26 2010//Tmsp430-14r1-branch
+/s_round.c/1.2.36.1/Fri Dec 19 19:10:25 2014//Tmsp430-14r1-branch
 D

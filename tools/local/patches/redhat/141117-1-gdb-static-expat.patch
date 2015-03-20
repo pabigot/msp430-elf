@@ -1,0 +1,135 @@
+This patch should be applied on top of 140724-1-gdb-static-expat.patch.
+
+That earlier patch placed linker options -Bstatic and -Bdynamic (along
+with the markup for getting these through the compiler) around the
+specification for the expat library, causing it to be linked statically.
+
+This patch merely refines that earlier patch. It checks to make sure
+that -Bstatic and -Bdynamic actually work.
+
+Several other refinements are possible. They include:
+
+- Checking to make sure that expat can be linked with these options.
+  If not, they wouldn't be used.
+
+- Adding a command line option which selects whether to prefer a
+  dynamic or static libexpat library.
+
+gdb/ChangeLog.RedHat:
+
+2014-11-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (LIBEXPAT): Update to use @BSTATIC@ and @BDYNAMIC@
+	to place the linker flags as chosen by the configure script.
+	* configure.ac (BSTATIC, BDYNAMIC): Check to see if linker
+	handles both -Bstatic and -Bdynamic switches.
+	* configure: Regenerate.
+
+
+Index: gdb/Makefile.in
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/Makefile.in,v
+retrieving revision 1.38.2.1
+diff -u -p -r1.38.2.1 Makefile.in
+--- gdb/Makefile.in	25 Jul 2014 00:20:05 -0000	1.38.2.1
++++ gdb/Makefile.in	18 Nov 2014 00:02:57 -0000
+@@ -154,7 +154,7 @@ READLINE_DEPS = @READLINE_DEPS@
+ READLINE_CFLAGS = @READLINE_CFLAGS@
+ 
+ # Where is expat?  This will be empty if expat was not available.
+-LIBEXPAT = -Wl,-Bstatic @LIBEXPAT@ -Wl,-Bdynamic
++LIBEXPAT = @BSTATIC@ @LIBEXPAT@ @BDYNAMIC@
+ 
+ # Where is lzma?  This will be empty if lzma was not available.
+ LIBLZMA = @LIBLZMA@
+Index: gdb/configure
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/configure,v
+retrieving revision 1.40
+diff -u -p -r1.40 configure
+--- gdb/configure	20 Feb 2014 13:38:38 -0000	1.40
++++ gdb/configure	18 Nov 2014 00:02:58 -0000
+@@ -656,6 +656,8 @@ WARN_CFLAGS
+ SYSTEM_GDBINIT
+ TARGET_SYSTEM_ROOT
+ CONFIG_LDFLAGS
++BDYNAMIC
++BSTATIC
+ RDYNAMIC
+ ALLOCA
+ PYTHON_LIBS
+@@ -11966,6 +11968,42 @@ fi
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: $found" >&5
+ $as_echo "$found" >&6; }
+ 
++{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for linker flags -Bstatic and -Bdynamic" >&5
++$as_echo_n "checking for linker flags -Bstatic and -Bdynamic... " >&6; }
++found=false
++old_LDFLAGS="$LDFLAGS"
++LDFLAGS="$LDFLAGS -Wl,-Bstatic -Wl,-Bdynamic"
++cat confdefs.h - <<_ACEOF >conftest.$ac_ext
++/* end confdefs.h.  */
++
++int
++main ()
++{
++
++  ;
++  return 0;
++}
++_ACEOF
++if ac_fn_c_try_link "$LINENO"; then :
++  found=true
++fi
++rm -f core conftest.err conftest.$ac_objext \
++    conftest$ac_exeext conftest.$ac_ext
++LDFLAGS="$old_LDFLAGS"
++if $found; then
++  BSTATIC="-Wl,-Bstatic"
++  BDYNAMIC="-Wl,-Bdynamic"
++  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
++$as_echo "yes" >&6; }
++else
++  BSTATIC="";
++  BDYNAMIC=""
++  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
++$as_echo "no" >&6; }
++fi
++
++
++
+ 
+ if test ${build} = ${host} -a ${host} = ${target} ; then
+    case ${host_os} in
+Index: gdb/configure.ac
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/gdb/configure.ac,v
+retrieving revision 1.20
+diff -u -p -r1.20 configure.ac
+--- gdb/configure.ac	20 Feb 2014 13:38:38 -0000	1.20
++++ gdb/configure.ac	18 Nov 2014 00:02:58 -0000
+@@ -1617,6 +1617,24 @@ fi
+ AC_SUBST(RDYNAMIC)
+ AC_MSG_RESULT($found)
+ 
++AC_MSG_CHECKING(for linker flags -Bstatic and -Bdynamic)
++found=false
++old_LDFLAGS="$LDFLAGS"
++LDFLAGS="$LDFLAGS -Wl,-Bstatic -Wl,-Bdynamic"
++AC_LINK_IFELSE(AC_LANG_PROGRAM([],[]), [found=true], [])
++LDFLAGS="$old_LDFLAGS"
++if $found; then
++  BSTATIC="-Wl,-Bstatic"
++  BDYNAMIC="-Wl,-Bdynamic"
++  AC_MSG_RESULT(yes)
++else
++  BSTATIC="";
++  BDYNAMIC=""
++  AC_MSG_RESULT(no)
++fi
++AC_SUBST(BSTATIC)
++AC_SUBST(BDYNAMIC)
++
+ dnl For certain native configurations, we need to check whether thread
+ dnl support can be built in or not.
+ dnl

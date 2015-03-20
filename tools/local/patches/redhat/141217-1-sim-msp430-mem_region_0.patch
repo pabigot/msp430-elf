@@ -1,0 +1,42 @@
+Some of the GDB tests attempt to access location 0x0. This patch allows
+them to to this. Without this patch, we've seen the following failures:
+
+FAIL: gdb.cp/expand-psymtabs-cxx.exp: before expand
+FAIL: gdb.cp/expand-psymtabs-cxx.exp: force expand
+FAIL: gdb.cp/expand-psymtabs-cxx.exp: after expand
+FAIL: gdb.cp/static-print-quit.exp: print c - <return>
+FAIL: gdb.cp/static-print-quit.exp: print c - q <return> (timeout)
+FAIL: gdb.cp/static-print-quit.exp: print c - to quit (timeout)
+FAIL: gdb.dwarf2/dw2-empty-namespace.exp: p var
+FAIL: gdb.dwarf2/dw2-namespaceless-anonymous.exp: p '(anonymous namespace)::v'
+FAIL: gdb.dwarf2/dw2-op-stack-value.exp: x/wx &aa551234
+
+This patch should go upstream.
+
+
+sim/ChangeLog.RedHat:
+
+	* msp430/msp430-sim.c (sim_open): Reenable code for setting up
+	memory region starting at 0x0.
+
+
+Index: sim/msp430/msp430-sim.c
+===================================================================
+RCS file: /cvs/cvsfiles/gnupro/sim/msp430/msp430-sim.c,v
+retrieving revision 1.12.2.3
+diff -u -p -r1.12.2.3 msp430-sim.c
+--- sim/msp430/msp430-sim.c	15 Dec 2014 17:45:11 -0000	1.12.2.3
++++ sim/msp430/msp430-sim.c	17 Dec 2014 08:23:19 -0000
+@@ -176,10 +176,9 @@ sim_open (SIM_OPEN_KIND kind,
+ 
+   /* Allocate memory if none specified by user.
+      Note - these values match the memory regions in the libgloss/msp430/msp430[xl]-sim.ld scripts.  */
+-#if 0
+   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x2, 1) == 0)
+-    sim_do_commandf (sd, "memory-region 0,0x20"); /* FIXME: Are these needed ?  */
+-#endif
++    sim_do_commandf (sd, "memory-region 0,0x20"); /* Needed for GDB testing.  */
++
+   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x200, 1) == 0)
+     sim_do_commandf (sd, "memory-region 0x200,0xfd00");  /* RAM and/or ROM */
+   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0xfffe, 1) == 0)

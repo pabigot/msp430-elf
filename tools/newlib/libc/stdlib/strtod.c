@@ -158,7 +158,7 @@ _DEFUN (sulp, (x, scale),
 {
         U u;
         double rv;
-        int i;
+        long int i;
 
         rv = ulp(dval(x));
         if (!scale || (i = 2*P + 1 - ((dword0(x) & Exp_mask) >> Exp_shift)) <= 0)

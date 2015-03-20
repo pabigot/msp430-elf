@@ -174,18 +174,20 @@ sim_open (SIM_OPEN_KIND kind,
   CPU_REG_FETCH (MSP430_CPU (sd)) = msp430_reg_fetch;
   CPU_REG_STORE (MSP430_CPU (sd)) = msp430_reg_store;
 
-  /* Allocate memory if none specified by user.  */
-  if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x130, 1) == 0)
-    sim_do_commandf (sd, "memory-region 0,0x20");
+  /* Allocate memory if none specified by user.
+     Note - these values match the memory regions in the libgloss/msp430/msp430[xl]-sim.ld scripts.  */
+  if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x2, 1) == 0)
+    sim_do_commandf (sd, "memory-region 0,0x20"); /* Needed for GDB testing.  */
+
   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x200, 1) == 0)
-    sim_do_commandf (sd, "memory-region 0x200,0xee00"); /* RAM.  */
-  if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0xf000, 1) == 0)
-    sim_do_commandf (sd, "memory-region 0xf000,0x800"); /* LOWROM.  */
+    sim_do_commandf (sd, "memory-region 0x200,0xfd00");  /* RAM and/or ROM */
   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0xfffe, 1) == 0)
     sim_do_commandf (sd, "memory-region 0xffc0,0x40"); /* VECTORS.  */
   if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x10000, 1) == 0)
-    sim_do_commandf (sd, "memory-region 0x10000,0x80000"); /* HIGH ROM.  */
-
+    sim_do_commandf (sd, "memory-region 0x10000,0x80000"); /* HIGH FLASH RAM.  */
+  if (sim_core_read_buffer (sd, MSP430_CPU (sd), read_map, &c, 0x90000, 1) == 0)
+    sim_do_commandf (sd, "memory-region 0x90000,0x70000"); /* HIGH ROM.  */
+  
   /* Check for/establish the a reference program image.  */
   if (sim_analyze_program (sd,
 			   (STATE_PROG_ARGV (sd) != NULL
@@ -498,10 +500,10 @@ get_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n)
 	      break;
 	    }
 	}
-
-      if (addr < 0x130 || (addr >= 0xf800 && addr < 0xfc00) || (addr > 0x90000))
+#if 0
+      if (addr < 0x130 || (addr >= 0xff00 && addr < 0xffc0) || (addr > 0x100000))
 	fprintf (stderr, "XXX OUT OF RANGE MEMORY READ from %x\n", addr);
-
+#endif
       if (TRACE_MEMORY_P (MSP430_CPU (sd)))
 	trace_generic (sd, MSP430_CPU (sd), TRACE_MEMORY_IDX,
 		       "GET: [%#x].%d -> %#x", addr, opc->size, rv);
@@ -694,7 +696,7 @@ put_op (SIM_DESC sd, MSP430_Opcode_Decoded *opc, int n, int val)
 	      break;
 	    }
 
-	  if (addr < 0x130 || (addr >= 0xf800 && addr < 0xfc00) || (addr > 0x90000))
+	  if (addr < 0x130 || (addr >= 0xf800 && addr < 0xfc00) || (addr > 0x100000))
 	    fprintf (stderr, "XXX OUT OF RANGE MEMORY write to %x\n", addr);
 	}
 

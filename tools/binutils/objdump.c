@@ -622,6 +622,13 @@ remove_useless_symbols (asymbol **symbols, long count)
       if (bfd_is_und_section (sym->section)
 	  || bfd_is_com_section (sym->section))
 	continue;
+      /* If the symbol ends in ^A or ^B it is
+	 an assembler generated local label.  */
+      if (sym->name[strlen (sym->name) - 1] < 32)
+	continue;
+      /* Skip local label names aswell.  */
+      if (sym->name[0] == '.' && sym->name[1] == 'L')
+	continue;
 
       *out_ptr++ = sym;
     }

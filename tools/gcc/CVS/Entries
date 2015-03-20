@@ -5,7 +5,6 @@
 /COPYING.LIB/1.2/Fri Dec 16 20:17:01 2005//Tmsp430-14r1-branch
 /COPYING3/1.1/Mon Mar 10 12:29:07 2008//Tmsp430-14r1-branch
 /COPYING3.LIB/1.1/Mon Mar 10 12:29:07 2008//Tmsp430-14r1-branch
-/ChangeLog/1.488/Mon Jul  7 07:51:09 2014//Tmsp430-14r1-branch
 /ChangeLog-1997/1.2/Fri Feb 12 10:26:55 2010//Tmsp430-14r1-branch
 /ChangeLog-1998/1.3/Fri Feb 12 10:26:55 2010//Tmsp430-14r1-branch
 /ChangeLog-1999/1.3/Fri Feb 12 10:26:55 2010//Tmsp430-14r1-branch
@@ -461,7 +460,6 @@
 /regs.h/1.14/Thu Feb 20 16:40:26 2014//Tmsp430-14r1-branch
 /regset.h/1.4/Thu Feb 20 16:40:26 2014//Tmsp430-14r1-branch
 /regstat.c/1.7/Thu Feb 20 16:40:26 2014//Tmsp430-14r1-branch
-/reload.c/1.33/Thu Feb 20 16:40:26 2014//Tmsp430-14r1-branch
 /reload.h/1.15/Thu Feb 20 16:40:26 2014//Tmsp430-14r1-branch
 /reload1.c/1.43/Thu Feb 27 12:54:22 2014//Tmsp430-14r1-branch
 /reorg.c/1.21/Thu Feb 20 16:40:26 2014//Tmsp430-14r1-branch
@@ -703,4 +701,6 @@ D/objcp////
 D/po////
 D/testsuite////
 /dwarf2out.c/1.88.2.1/Fri Aug  8 23:13:38 2014//Tmsp430-14r1-branch
-/ChangeLog.RedHat/1.472.2.10/Sat Nov  1 04:22:39 2014//Tmsp430-14r1-branch
+/ChangeLog/1.488.2.1/Fri Nov 14 11:50:10 2014//Tmsp430-14r1-branch
+/reload.c/1.33.2.1/Thu Dec 11 21:55:08 2014//Tmsp430-14r1-branch
+/ChangeLog.RedHat/1.472.2.15/Fri Jan 23 10:53:58 2015//Tmsp430-14r1-branch

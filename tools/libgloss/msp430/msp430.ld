@@ -22,7 +22,6 @@ INCLUDE intr_vectors.ld
 
 MEMORY {
 	RAM (w)      : ORIGIN = 0x00200, LENGTH = 0x0ee00
-	RESETVEC (w) : ORIGIN = 0x0fffe, LENGTH = 0x00002
 }
 
 SECTIONS
@@ -30,11 +29,12 @@ SECTIONS
   .resetvec :
   {
     *(.resetvec)
-  } > RESETVEC
+  } > VECT31
 
   .rodata : {
     . = ALIGN(2);
     *(.plt)
+    *(.lower.rodata.* .lower.rodata)
     *(.rodata .rodata.* .gnu.linkonce.r.* .const .const:*)
     *(.rodata1)
     *(.eh_frame_hdr)
@@ -81,6 +81,7 @@ SECTIONS
     PROVIDE (_start = .);
     KEEP (*(SORT(.crt_*)))
     *(.lowtext .text .stub .text.* .gnu.linkonce.t.* .text:*)
+    *(.lower.text.* .lower.text)    
     KEEP (*(.text.*personality*))
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
@@ -98,6 +99,7 @@ SECTIONS
     . = ALIGN(2);
     PROVIDE (__datastart = .);
 
+    *(.lower.data.* .lower.data)
     KEEP (*(.jcr))
     *(.data.rel.ro.local) *(.data.rel.ro*)
     *(.dynamic)
@@ -128,6 +130,7 @@ SECTIONS
   .bss : {
     . = ALIGN(2);
     PROVIDE (__bssstart = .);
+    *(.lower.bss.* .lower.bss)
     *(.dynbss)
     *(.sbss .sbss.*)
     *(.bss .bss.* .gnu.linkonce.b.*)
@@ -154,14 +157,24 @@ SECTIONS
     *(.stack)
   }
 
+  /* Make sure that .upper sections are not used without -mlarge support.  */
+  .upper :
+  {
+    *(.upper.rodata.* .upper.rodata)
+    *(.upper.data.*   .upper.data)
+    *(.upper.bss.* .upper.bss)
+    *(.upper.text.* .upper.text)  
+    ASSERT (SIZEOF(.upper) == 0, ".upper sections present in a binary linked without -mlarge support");
+  }
+
+  /* The rest are all not normally part of the runtime image.  */
+
   .MP430.attributes 0 :
   {
     KEEP (*(.MSP430.attributes))
     KEEP (*(.gnu.attributes))
     KEEP (*(__TI_build_attributes))
   }
-
-  /* The rest are all not normally part of the runtime image.  */
 
   /* Stabs debugging sections.  */
   .stab          0 : { *(.stab) }
@@ -196,5 +209,11 @@ SECTIONS
   .debug_funcnames 0 : { *(.debug_funcnames) }
   .debug_typenames 0 : { *(.debug_typenames) }
   .debug_varnames  0 : { *(.debug_varnames) }
+  /* DWARF 3.  */
+  .debug_pubtypes 0 : { *(.debug_pubtypes) }
+  .debug_ranges   0 : { *(.debug_ranges) }
+  /* DWARF Extension.  */
+  .debug_macro    0 : { *(.debug_macro) }
+
   /DISCARD/ : { *(.note.GNU-stack) }
 }

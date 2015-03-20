@@ -772,7 +772,8 @@ msp430_push_dummy_call (struct gdbarch *gdbarch, struct value *function,
 		  int size = 2;
 
 		  if (code_model == MSP_LARGE_CODE_MODEL
-		      && TYPE_CODE (arg_type) == TYPE_CODE_PTR)
+		      && (TYPE_CODE (arg_type) == TYPE_CODE_PTR
+		          || TYPE_CODE (arg_type) == TYPE_CODE_REF))
 		    {
 		      /* Pointer arguments using large memory model are passed
 		         using entire register.  */

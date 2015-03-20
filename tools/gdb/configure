@@ -656,6 +656,8 @@ WARN_CFLAGS
 SYSTEM_GDBINIT
 TARGET_SYSTEM_ROOT
 CONFIG_LDFLAGS
+BDYNAMIC
+BSTATIC
 RDYNAMIC
 ALLOCA
 PYTHON_LIBS
@@ -11966,6 +11968,42 @@ fi
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $found" >&5
 $as_echo "$found" >&6; }
 
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for linker flags -Bstatic and -Bdynamic" >&5
+$as_echo_n "checking for linker flags -Bstatic and -Bdynamic... " >&6; }
+found=false
+old_LDFLAGS="$LDFLAGS"
+LDFLAGS="$LDFLAGS -Wl,-Bstatic -Wl,-Bdynamic"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  found=true
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LDFLAGS="$old_LDFLAGS"
+if $found; then
+  BSTATIC="-Wl,-Bstatic"
+  BDYNAMIC="-Wl,-Bdynamic"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  BSTATIC="";
+  BDYNAMIC=""
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+
 
 if test ${build} = ${host} -a ${host} = ${target} ; then
    case ${host_os} in
@@ -12465,9 +12503,9 @@ fi
 
 
 # Enable -Werror by default when using gcc.  Turn it off for releases.
-if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" && $development; then
-    ERROR_ON_WARNING=yes
-fi
+#if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" && $development; then
+#    ERROR_ON_WARNING=yes
+#fi
 
 WERROR_CFLAGS=""
 if test "${ERROR_ON_WARNING}" = yes ; then

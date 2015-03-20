@@ -16,7 +16,6 @@
 /ChangeLog-9495/1.2/Thu Feb 20 13:26:36 2014//Tmsp430-14r1-branch
 /ChangeLog-9697/1.2/Thu Feb 20 13:26:36 2014//Tmsp430-14r1-branch
 /ChangeLog-9899/1.2/Thu Feb 20 13:26:36 2014//Tmsp430-14r1-branch
-/ChangeLog.RedHat/1.81/Tue May 20 19:44:25 2014//Tmsp430-14r1-branch
 /MAINTAINERS/1.2/Thu Feb 20 13:26:36 2014//Tmsp430-14r1-branch
 /Makefile.am/1.25/Thu Mar  6 14:57:05 2014//Tmsp430-14r1-branch
 /Makefile.in/1.38/Thu Mar  6 14:57:05 2014//Tmsp430-14r1-branch
@@ -95,7 +94,6 @@
 /compress.c/1.6/Thu Feb 20 13:26:36 2014//Tmsp430-14r1-branch
 /config.bfd/1.40/Thu Mar  6 14:57:05 2014//Tmsp430-14r1-branch
 /config.in/1.19/Thu Mar  6 14:57:05 2014//Tmsp430-14r1-branch
-/configure/1.53/Thu Mar  6 14:57:05 2014//Tmsp430-14r1-branch
 /configure.com/1.4/Thu Feb 20 13:26:36 2014//Tmsp430-14r1-branch
 /configure.host/1.8/Thu Feb 20 13:26:36 2014//Tmsp430-14r1-branch
 /configure.in/1.45/Thu Mar  6 14:57:05 2014//Tmsp430-14r1-branch
@@ -248,7 +246,6 @@
 /elf32-microblaze.c/1.6/Thu Mar  6 14:57:06 2014//Tmsp430-14r1-branch
 /elf32-mips.c/1.18/Thu Mar  6 14:57:06 2014//Tmsp430-14r1-branch
 /elf32-moxie.c/1.5/Thu Mar  6 14:57:06 2014//Tmsp430-14r1-branch
-/elf32-msp430.c/1.12/Tue May 20 19:44:25 2014//Tmsp430-14r1-branch
 /elf32-mt.c/1.8/Thu Mar  6 14:57:06 2014//Tmsp430-14r1-branch
 /elf32-nds32.c/1.1/Thu Mar  6 14:57:06 2014//Tmsp430-14r1-branch
 /elf32-nds32.h/1.1/Thu Mar  6 14:57:06 2014//Tmsp430-14r1-branch
@@ -458,7 +455,6 @@
 /vms-lib.c/1.7/Thu Mar  6 14:57:06 2014//Tmsp430-14r1-branch
 /vms-misc.c/1.13/Wed Apr 18 12:48:55 2012//Tmsp430-14r1-branch
 /vms.h/1.8/Fri Mar 25 11:06:17 2011//Tmsp430-14r1-branch
-/warning.m4/1.5/Thu Feb 20 13:26:37 2014//Tmsp430-14r1-branch
 /xcofflink.c/1.15/Thu Feb 20 13:26:37 2014//Tmsp430-14r1-branch
 /xsym.c/1.15/Thu Feb 20 13:26:37 2014//Tmsp430-14r1-branch
 /xsym.h/1.5/Fri Aug  3 14:16:28 2012//Tmsp430-14r1-branch
@@ -467,3 +463,7 @@
 D/doc////
 D/hosts////
 D/po////
+/configure/1.53.2.1/Fri Nov 14 11:52:37 2014//Tmsp430-14r1-branch
+/warning.m4/1.5.2.1/Fri Nov 14 11:52:39 2014//Tmsp430-14r1-branch
+/ChangeLog.RedHat/1.81.2.3/Thu Jan 15 11:23:39 2015//Tmsp430-14r1-branch
+/elf32-msp430.c/1.12.2.4/Thu Jan 15 11:23:39 2015//Tmsp430-14r1-branch

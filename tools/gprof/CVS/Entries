@@ -36,7 +36,6 @@
 /cg_print.c/1.10/Wed Apr 18 13:06:25 2012//Tmsp430-14r1-branch
 /cg_print.h/1.5/Mon Mar 10 10:44:12 2008//Tmsp430-14r1-branch
 /config.texi/1.4/Thu May  2 21:53:08 2013//Tmsp430-14r1-branch
-/configure/1.19/Thu Feb 20 13:39:30 2014//Tmsp430-14r1-branch
 /configure.in/1.12/Thu Feb 20 13:39:30 2014//Tmsp430-14r1-branch
 /corefile.c/1.19/Mon Mar 31 10:42:15 2014//Tmsp430-14r1-branch
 /corefile.h/1.6/Thu Jan 21 20:53:48 2010//Tmsp430-14r1-branch
@@ -78,3 +77,4 @@
 /utils.h/1.3/Thu Feb 20 13:39:30 2014//Tmsp430-14r1-branch
 /vax.c/1.5/Thu Jan 21 20:53:49 2010//Tmsp430-14r1-branch
 D/po////
+/configure/1.19.2.1/Fri Nov 14 11:53:33 2014//Tmsp430-14r1-branch

@@ -1,4 +1,4 @@
-/* Copyright (c) 2013  Red Hat, Inc. All rights reserved.
+/* Copyright (c) 2013-2015  Red Hat, Inc. All rights reserved.
 
    This copyrighted material is made available to anyone wishing to use,
    modify, copy, or redistribute it subject to the terms and conditions
@@ -60,6 +60,7 @@ setjmp:
 	clr   	r12
 	ret
 #endif	
+	.size setjmp , . - setjmp
 
 	
 	.global	longjmp
@@ -102,4 +103,4 @@ longjmp:
 	add.w    #2, r1
 	mov.w	r14, r0
 #endif
-
+	.size longjmp , . - longjmp

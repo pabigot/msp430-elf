@@ -22,7 +22,6 @@
 /aclocal.m4/1.21/Thu Feb 20 13:40:35 2014//Tmsp430-14r1-branch
 /config.in/1.13/Thu May  2 21:54:53 2013//Tmsp430-14r1-branch
 /configdoc.texi/1.7/Thu May  2 21:54:53 2013//Tmsp430-14r1-branch
-/configure/1.29/Thu Mar  6 15:09:08 2014//Tmsp430-14r1-branch
 /configure.host/1.17/Thu Mar  6 15:09:08 2014//Tmsp430-14r1-branch
 /configure.in/1.19/Thu Mar  6 15:09:08 2014//Tmsp430-14r1-branch
 /configure.tgt/1.38/Fri Apr 11 09:37:16 2014//Tmsp430-14r1-branch
@@ -84,3 +83,4 @@ D/po////
 D/scripttempl////
 D/testsuite////
 /ChangeLog.RedHat/1.25.2.2/Tue Sep 23 19:05:52 2014//Tmsp430-14r1-branch
+/configure/1.29.2.1/Fri Nov 14 11:53:33 2014//Tmsp430-14r1-branch

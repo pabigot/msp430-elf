@@ -40,6 +40,8 @@
 
 #define SC(n) sc2 n,SYS_##n
 
+	.text
+	
 	sc2	_exit,SYS_exit
 	SC (exit)
 	SC (open)
@@ -56,11 +58,13 @@ isatty:
 	.weak	_isatty
 	.global	_isatty
 _isatty:
-	MOV	#1,R12
-	ret_
+	MOV	#1, R12
+	ret_	
+	.size _isatty , . - _isatty
 	
 	.weak	getpid
 	.global	getpid
 getpid:
-	MOV	#42,R12
+	MOV	#42, R12
 	ret_
+	.size getpid , . - getpid

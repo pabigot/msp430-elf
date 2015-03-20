@@ -1,3 +1,7 @@
+2014-10-17  DJ Delorie  <dj@redhat.com>
+
+	* config/msp430/msp430.c (msp430_print_operand): Fix logic typo.
+
 2014-07-06  Gerald Pfeifer  <gerald@pfeifer.com>
 
 	* doc/install.texi (Specific, aarch64*-*-*): Fix markup.  Reword a bit.

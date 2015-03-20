@@ -1,3 +1,21 @@
+2014-12-22  Kevin Buettner  <kevinb@redhat.com>
+
+	* minsyms.c (lookup_minimal_symbol_by_pc_section_1): Scan backwards
+	over all zero-sized symbols.
+
+2014-12-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* msp430-tdep.c (msp430_push_dummy_call): Treat reference arguments
+	the same as pointer arguments when determining size of argument.
+
+2014-11-17  Kevin Buettner  <kevinb@redhat.com>
+
+	* Makefile.in (LIBEXPAT): Update to use @BSTATIC@ and @BDYNAMIC@
+	to place the linker flags as chosen by the configure script.
+	* configure.ac (BSTATIC, BDYNAMIC): Check to see if linker
+	handles both -Bstatic and -Bdynamic switches.
+	* configure: Regenerate.
+
 2014-11-10  Kevin Buettner  <kevinb@redhat.com>
 
 	* symfile.c (generic_load): Load symbol table.

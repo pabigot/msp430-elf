@@ -1617,6 +1617,24 @@ fi
 AC_SUBST(RDYNAMIC)
 AC_MSG_RESULT($found)
 
+AC_MSG_CHECKING(for linker flags -Bstatic and -Bdynamic)
+found=false
+old_LDFLAGS="$LDFLAGS"
+LDFLAGS="$LDFLAGS -Wl,-Bstatic -Wl,-Bdynamic"
+AC_LINK_IFELSE(AC_LANG_PROGRAM([],[]), [found=true], [])
+LDFLAGS="$old_LDFLAGS"
+if $found; then
+  BSTATIC="-Wl,-Bstatic"
+  BDYNAMIC="-Wl,-Bdynamic"
+  AC_MSG_RESULT(yes)
+else
+  BSTATIC="";
+  BDYNAMIC=""
+  AC_MSG_RESULT(no)
+fi
+AC_SUBST(BSTATIC)
+AC_SUBST(BDYNAMIC)
+
 dnl For certain native configurations, we need to check whether thread
 dnl support can be built in or not.
 dnl
@@ -1812,9 +1830,9 @@ AC_ARG_ENABLE(werror,
    esac])
 
 # Enable -Werror by default when using gcc.  Turn it off for releases.
-if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" && $development; then
-    ERROR_ON_WARNING=yes
-fi
+#if test "${GCC}" = yes -a -z "${ERROR_ON_WARNING}" && $development; then
+#    ERROR_ON_WARNING=yes
+#fi
 
 WERROR_CFLAGS=""
 if test "${ERROR_ON_WARNING}" = yes ; then

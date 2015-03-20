@@ -69,4 +69,8 @@
 /140904-1-msp430-sim_open.patch/1.1.2.2/Fri Sep  5 00:53:58 2014//Tmsp430-14r1-branch
 /141022-1-symfile-load-gdbarch.patch/1.1.2.1/Wed Oct 22 23:27:31 2014//Tmsp430-14r1-branch
 /141110-1-gdb-symfile-load-addsyms.patch/1.1.2.1/Mon Nov 10 23:42:29 2014//Tmsp430-14r1-branch
+/141117-1-gdb-static-expat.patch/1.1.2.1/Tue Nov 18 00:25:49 2014//Tmsp430-14r1-branch
+/141217-1-gdb-push_dummy_reg_arg.patch/1.1.2.1/Wed Dec 17 08:40:27 2014//Tmsp430-14r1-branch
+/141217-1-sim-msp430-mem_region_0.patch/1.1.2.1/Wed Dec 17 08:40:27 2014//Tmsp430-14r1-branch
+/141222-1-gdb-minsym-zero-sized-scan.patch/1.1.2.1/Mon Dec 22 21:45:53 2014//Tmsp430-14r1-branch
 D

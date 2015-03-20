@@ -858,8 +858,21 @@ msp430_section (int arg)
       || strncmp (name, ".gnu.linkonce.b.", 16) == 0)
     (void) symbol_find_or_make ("__crt0_init_bss");
 
-  if (strncmp (name, ".upper.bss", 10) == 0)
+  /* See note about .either.data below.  */
+  if (strncmp (name, ".upper.bss", 10) == 0
+      || strncmp (name, ".either.bss", 11) == 0)
     (void) symbol_find_or_make ("__crt0_init_highbss");
+
+  if (strncmp (name, ".data", 5) == 0
+      || strncmp (name, ".gnu.linkonce.d.", 16) == 0)
+    (void) symbol_find_or_make ("__crt0_movedata");
+
+  /* Note - data assigned to the .either.data section may end up being
+     placed in the .upper.data section if the .lower.data section is
+     full.  Hence the need to define the crt0 symbol.  */
+  if (strncmp (name, ".either.data", 12) == 0
+      || strncmp (name, ".upper.data", 11) == 0)
+    (void) symbol_find_or_make ("__crt0_move_highdata");
 
   input_line_pointer = saved_ilp;
   obj_elf_section (arg);
@@ -877,8 +890,17 @@ msp430_frob_section (asection *sec)
       || strncmp (name, ".gnu.linkonce.b.", 16) == 0)
     (void) symbol_find_or_make ("__crt0_init_bss");
 
-  if (strncmp (name, ".upper.bss", 10) == 0)
+  if (strncmp (name, ".upper.bss", 10) == 0
+      || strncmp (name, ".either.bss", 11) == 0)
     (void) symbol_find_or_make ("__crt0_init_highbss");
+
+  if (strncmp (name, ".data", 5) == 0
+      || strncmp (name, ".gnu.linkonce.d.", 16) == 0)
+    (void) symbol_find_or_make ("__crt0_movedata");
+
+  if (strncmp (name, ".either.data", 12) == 0
+      || strncmp (name, ".upper.data", 11) == 0)
+    (void) symbol_find_or_make ("__crt0_move_highdata");
 }
 
 static void

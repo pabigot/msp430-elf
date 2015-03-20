@@ -164,7 +164,7 @@ SECTIONS
   .upper :
   {
     *(.upper.rodata.* .upper.rodata)
-    *(.upper.data.*   .upper.data)
+    *(.upper.data.* .upper.data)
     *(.upper.bss.* .upper.bss)
     *(.upper.text.* .upper.text)  
     ASSERT (SIZEOF(.upper) == 0, ".upper sections present in a binary linked without -mlarge support");

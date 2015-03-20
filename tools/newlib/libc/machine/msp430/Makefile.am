@@ -22,7 +22,7 @@ AM_CCASFLAGS = $(INCLUDES)
 noinst_LIBRARIES = lib.a
 
 lib_a_SOURCES = setjmp.S
-lib_a_CCASFLAGS=$(AM_CCASFLAGS)
+lib_a_CCASFLAGS=$(AM_CCASFLAGS) -Wa,--gdwarf-2
 lib_a_CFLAGS=$(AM_CFLAGS)
 
 ACLOCAL_AMFLAGS = -I ../../.. -I ../../../..

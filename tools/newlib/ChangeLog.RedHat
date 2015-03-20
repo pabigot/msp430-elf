@@ -1,3 +1,26 @@
+2015-01-16  Nick Clifton  <nickc@redhat.com>
+
+	* libc/machine/msp430/Makefile.am (lib_a_CCASFLAGS): Add
+	-Wa,-gdwarf-2.
+	* libc/machine/msp430/Makefile.in: Regenerate.
+
+2015-01-15  Nick Clifton  <nickc@redhat.com>
+
+	* libc/machine/msp430/setjmp.S (setjmp): Add .size directive.
+	(longjmp): Likewise.
+
+2014-12-19  Nick Clifton  <nickc@redhat.com>
+
+	* libc/stdlib/strtod.c (sulp): Change local variable 'i' to a long
+	int to avoid truncation.
+	* libm/common/s_round.c (round): Add L prefix to constant to avoid
+	shift overflow.
+
+2014-12-15  DJ Delorie  <dj@redhat.com>
+
+	* libc/stdlib/nano-mallocr.c (ALIGN_TO): Do not assume that
+	integers are as big as pointers.
+
 2014-06-09  DJ Delorie  <dj@redhat.com>
 
 	* configure.host (default_newlib_nano_malloc): New.

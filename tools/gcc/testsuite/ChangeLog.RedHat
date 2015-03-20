@@ -1,3 +1,14 @@
+2014-12-16  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/execute/980701-1.c (dn_skipname): Use
+	__PTRDIFF_TYPE__ as the return type as otherwise precision is
+	lost.
+
+2014-12-11  Nick Clifton  <nickc@redhat.com>
+
+	* gcc.c-torture/execute/pr43987.c: Use a long type for array B in
+	order to avoid aliasing problems derferencing the inner field l.
+
 2014-09-25  Nick Clifton  <nickc@redhat.com>
 
 	* gcc.dg/pr59605-2.c: Compile only, do not run.

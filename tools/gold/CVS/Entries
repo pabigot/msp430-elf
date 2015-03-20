@@ -21,7 +21,6 @@
 /compressed_output.cc/1.2/Fri Mar 25 11:30:07 2011//Tmsp430-14r1-branch
 /compressed_output.h/1.2/Fri Mar 25 11:30:07 2011//Tmsp430-14r1-branch
 /config.in/1.8/Thu Mar  6 15:46:55 2014//Tmsp430-14r1-branch
-/configure/1.15/Thu Mar  6 15:46:55 2014//Tmsp430-14r1-branch
 /configure.ac/1.12/Thu Mar  6 15:46:55 2014//Tmsp430-14r1-branch
 /configure.tgt/1.5/Thu Feb 20 13:39:12 2014//Tmsp430-14r1-branch
 /copy-relocs.cc/1.5/Fri Aug  3 14:17:10 2012//Tmsp430-14r1-branch
@@ -127,3 +126,4 @@
 /yyscript.y/1.5/Fri Aug  3 14:17:14 2012//Tmsp430-14r1-branch
 D/po////
 D/testsuite////
+/configure/1.15.2.1/Fri Nov 14 11:53:32 2014//Tmsp430-14r1-branch
