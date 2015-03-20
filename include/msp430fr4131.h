@@ -1,5 +1,5 @@
 /* ============================================================================ */
-/* Copyright (c) 2014, Texas Instruments Incorporated                           */
+/* Copyright (c) 2015, Texas Instruments Incorporated                           */
 /*  All rights reserved.                                                        */
 /*                                                                              */
 /*  Redistribution and use in source and binary forms, with or without          */
@@ -48,7 +48,7 @@
 #ifndef __MSP430FR4131
 #define __MSP430FR4131
 
-#define __MSP430_HEADER_VERSION__ 1155
+#define __MSP430_HEADER_VERSION__ 1159
 
 #define __MSP430_TI_HEADERS__
 
@@ -2495,17 +2495,18 @@ sfrw(SYSCFG2, SYSCFG2_);
 
 /* SYSSNIV Definitions */
 #define SYSSNIV_NONE       (0x0000)    /* No Interrupt pending */
-#define SYSSNIV_UBDIFG     (0x0002)    /* SYSSNIV : FRAM Uncorrectable bit Error */
-#define SYSSNIV_RES4       (0x0004)    /* SYSSNIV : Reserved */
-#define SYSSNIV_RES6       (0x0006)    /* SYSSNIV : Reserved */
+#define SYSSNIV_SVS        (0x0002)    /* SYSSNIV : SVS low-power reset entry */
+#define SYSSNIV_UBDIFG     (0x0004)    /* SYSSNIV : FRAM Uncorrectable bit Error */
+#define SYSSNIV_ACCTEIFG   (0x0006)    /* SYSSNIV : ACCTEIFG access time error */
 #define SYSSNIV_RES8       (0x0008)    /* SYSSNIV : Reserved */
 #define SYSSNIV_RES10      (0x000A)    /* SYSSNIV : Reserved */
 #define SYSSNIV_RES12      (0x000C)    /* SYSSNIV : Reserved */
-#define SYSSNIV_ACCV       (0x000E)    /* SYSSNIV : Access violation */
-#define SYSSNIV_VMAIFG     (0x0010)    /* SYSSNIV : VMAIFG */
-#define SYSSNIV_JMBINIFG   (0x0012)    /* SYSSNIV : JMBINIFG */
-#define SYSSNIV_JMBOUTIFG  (0x0014)    /* SYSSNIV : JMBOUTIFG */
-#define SYSSNIV_CBDIFG     (0x0016)    /* SYSSNIV : FRAM Correctable Bit error */
+#define SYSSNIV_RES14      (0x000E)    /* SYSSNIV : Reserved */
+#define SYSSNIV_RES16      (0x0010)    /* SYSSNIV : Reserved */
+#define SYSSNIV_VMAIFG     (0x0012)    /* SYSSNIV : VMAIFG */
+#define SYSSNIV_JMBINIFG   (0x0014)    /* SYSSNIV : JMBINIFG */
+#define SYSSNIV_JMBOUTIFG  (0x0016)    /* SYSSNIV : JMBOUTIFG */
+#define SYSSNIV_CBDIFG     (0x0018)    /* SYSSNIV : FRAM Correctable Bit error */
 
 /* SYSRSTIV Definitions */
 #define SYSRSTIV_NONE      (0x0000)    /* No Interrupt pending */

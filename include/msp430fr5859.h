@@ -1,5 +1,5 @@
 /* ============================================================================ */
-/* Copyright (c) 2014, Texas Instruments Incorporated                           */
+/* Copyright (c) 2015, Texas Instruments Incorporated                           */
 /*  All rights reserved.                                                        */
 /*                                                                              */
 /*  Redistribution and use in source and binary forms, with or without          */
@@ -53,7 +53,7 @@
 #ifndef __MSP430FR5859
 #define __MSP430FR5859
 
-#define __MSP430_HEADER_VERSION__ 1155
+#define __MSP430_HEADER_VERSION__ 1159
 
 #define __MSP430_TI_HEADERS__
 
@@ -1725,7 +1725,7 @@ sfrw(CSCTL6, CSCTL6_);
 
 
 /* CSCTL4 Control Bits */
-#define LFXTOFF             (0x0001)    /* High Frequency Oscillator 1 (XT1) disable */
+#define LFXTOFF             (0x0001)    /* Low Frequency Oscillator (LFXT) disable */
 #define SMCLKOFF            (0x0002)    /* SMCLK Off */
 #define VLOOFF              (0x0008)    /* VLO Off */
 #define LFXTBYPASS          (0x0010)    /* LFXT bypass mode : 0: internal 1:sourced from external pin */
@@ -1739,7 +1739,7 @@ sfrw(CSCTL6, CSCTL6_);
 #define HFXTDRIVE1          (0x8000)    /* HFXT Drive Level mode Bit 1 */
 
 /* CSCTL4 Control Bits */
-#define LFXTOFF_L           (0x0001)    /* High Frequency Oscillator 1 (XT1) disable */
+#define LFXTOFF_L           (0x0001)    /* Low Frequency Oscillator (LFXT) disable */
 #define SMCLKOFF_L          (0x0002)    /* SMCLK Off */
 #define VLOOFF_L            (0x0008)    /* VLO Off */
 #define LFXTBYPASS_L        (0x0010)    /* LFXT bypass mode : 0: internal 1:sourced from external pin */

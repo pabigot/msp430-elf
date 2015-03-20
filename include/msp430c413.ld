@@ -1,5 +1,5 @@
 /* ============================================================================ */
-/* Copyright (c) 2014, Texas Instruments Incorporated                           */
+/* Copyright (c) 2015, Texas Instruments Incorporated                           */
 /*  All rights reserved.                                                        */
 /*                                                                              */
 /*  Redistribution and use in source and binary forms, with or without          */
@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430C413 devices. */
-/* Version: 1.155 */
+/* Version: 1.159 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
@@ -81,7 +81,7 @@ SECTIONS
   __reset_vector : 
   { 
     KEEP (*(__interrupt_vector_16)) 
-    KEEP (*(__interrupt_vector_reset)) 
+    KEEP (*(__interrupt_vector_reset))
     KEEP (*(.resetvec))
   } > RESETVEC
 
@@ -198,7 +198,7 @@ SECTIONS
     PROVIDE (__noinit_end = .);
     end = .;
   } > RAM
-  
+
   .stack (ORIGIN (RAM) + LENGTH(RAM)) :
   {
     PROVIDE (__stack = .);

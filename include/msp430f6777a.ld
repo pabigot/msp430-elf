@@ -1,5 +1,5 @@
 /* ============================================================================ */
-/* Copyright (c) 2014, Texas Instruments Incorporated                           */
+/* Copyright (c) 2015, Texas Instruments Incorporated                           */
 /*  All rights reserved.                                                        */
 /*                                                                              */
 /*  Redistribution and use in source and binary forms, with or without          */
@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430F6777A devices. */
-/* Version: 1.155 */
+/* Version: 1.159 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
@@ -184,22 +184,19 @@ SECTIONS
   __reset_vector : 
   { 
     KEEP (*(__interrupt_vector_64)) 
-    KEEP (*(__interrupt_vector_reset)) 
+    KEEP (*(__interrupt_vector_reset))
     KEEP (*(.resetvec))
   } > RESETVEC
 
-  .upper.rodata :
-  {
-    *(.upper.rodata.* .upper.rodata)
-  } > HIROM
-    
   .rodata :
   {
     . = ALIGN(2);
     *(.plt)
+    . = ALIGN(2);
+    *(.lower.rodata.* .lower.rodata)
+    . = ALIGN(2);
     *(.rodata .rodata.* .gnu.linkonce.r.* .const .const:*)
     *(.rodata1)
-    *(.lower.rodata.* .lower.rodata)
 
     *(.eh_frame_hdr)
     KEEP (*(.eh_frame))
@@ -239,15 +236,26 @@ SECTIONS
     KEEP (*(.dtors))
   } > ROM
 
+  .upper.rodata :
+  {
+    *(.upper.rodata.* .upper.rodata)
+  } > HIROM
+
   .data :
   {
     . = ALIGN(2);
     PROVIDE (__datastart = .);
+    *(.lower.data.* .lower.data)
 
+    . = ALIGN(2);
+    *(.either.data.* .either.data)
+
+    . = ALIGN(2);
     KEEP (*(.jcr))
     *(.data.rel.ro.local) *(.data.rel.ro*)
     *(.dynamic)
 
+    . = ALIGN(2);
     *(.data .data.* .gnu.linkonce.d.*)
     KEEP (*(.gnu.linkonce.d.*personality*))
     SORT(CONSTRUCTORS)
@@ -261,13 +269,10 @@ SECTIONS
     *(.sdata .sdata.* .gnu.linkonce.s.* D_2 D_1)
 
     . = ALIGN(2);
-    *(.lower.data.* .lower.data)
-    . = ALIGN(2);
-
     _edata = .;
     PROVIDE (edata = .);
     PROVIDE (__dataend = .);
-  } > RAM
+  } > RAM AT> ROM
 
   /* Note that crt0 assumes this is a multiple of two; all the
      start/stop symbols are also assumed word-aligned.  */
@@ -278,10 +283,14 @@ SECTIONS
   {
     . = ALIGN(2);
     PROVIDE (__bssstart = .);
+    *(.lower.bss.* .lower.bss)
+    . = ALIGN(2);
+    *(.either.bss.* .either.bss)
     *(.dynbss)
     *(.sbss .sbss.*)
     *(.bss .bss.* .gnu.linkonce.b.*)
     . = ALIGN(2);
+    *(COMMON)
     PROVIDE (__bssend = .);
   } > RAM
   PROVIDE (__bsssize = SIZEOF(.bss));
@@ -293,7 +302,6 @@ SECTIONS
     PROVIDE (__noinit_start = .);
     *(.noinit)
     . = ALIGN(2);
-    *(COMMON)
     PROVIDE (__noinit_end = .);
   } > RAM
 
@@ -319,6 +327,8 @@ SECTIONS
   {
     . = ALIGN(2);
     *(.lower.text.* .lower.text)
+
+    . = ALIGN(2);
     *(.text .stub .text.* .gnu.linkonce.t.* .text:*)
 
     KEEP (*(.text.*personality*))
@@ -344,6 +354,14 @@ SECTIONS
   .infoB     : {} > INFOB
   .infoC     : {} > INFOC
   .infoD     : {} > INFOD
+
+  /* Make sure that upper data sections are not used.  */
+  .upper :
+  {
+    *(.upper.bss.* .upper.bss)
+    *(.upper.data.* .upper.data)
+    ASSERT (SIZEOF(.upper) == 0, "This MCU does not support placing read/write data into high memory");
+  }
 
   /* The rest are all not normally part of the runtime image.  */
 

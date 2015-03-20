@@ -1,5 +1,5 @@
 /* ============================================================================ */
-/* Copyright (c) 2014, Texas Instruments Incorporated                           */
+/* Copyright (c) 2015, Texas Instruments Incorporated                           */
 /*  All rights reserved.                                                        */
 /*                                                                              */
 /*  Redistribution and use in source and binary forms, with or without          */
@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430FR69791 devices. */
-/* Version: 1.155 */
+/* Version: 1.159 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
@@ -168,15 +168,10 @@ SECTIONS
   __reset_vector : 
   { 
     KEEP (*(__interrupt_vector_56)) 
-    KEEP (*(__interrupt_vector_reset)) 
+    KEEP (*(__interrupt_vector_reset))
     KEEP (*(.resetvec))
   } > RESETVEC
 
-  .upper.rodata :
-  {
-    *(.upper.rodata.* .upper.rodata)
-  } > HIFRAM
-    
   .rodata :
   {
     . = ALIGN(2);
@@ -223,13 +218,9 @@ SECTIONS
     KEEP (*(.dtors))
   } > ROM
 
-  .upper.data :
+  .upper.rodata :
   {
-    . = ALIGN(2);
-    PROVIDE (__high_datastart = .);
-    *(.upper.data.*)
-    *(.upper.data)
-    PROVIDE (__high_dataend = .);
+    *(.upper.rodata.* .upper.rodata)
   } > HIFRAM
 
   .data :
@@ -260,18 +251,25 @@ SECTIONS
     _edata = .;
     PROVIDE (edata = .);
     PROVIDE (__dataend = .);
-  } > RAM
+  } > RAM AT> ROM
 
   /* Note that crt0 assumes this is a multiple of two; all the
      start/stop symbols are also assumed word-aligned.  */
   PROVIDE(__romdatastart = LOADADDR(.data));
   PROVIDE (__romdatacopysize = SIZEOF(.data));
 
-  .upper.bss :
+  .upper.data :
   {
-    . = ALIGN(2);
-    *(.upper.bss.* .upper.bss)
-  } > HIFRAM
+    __upper_data_init = LOADADDR (.upper.data);
+    /* Status word.  */
+    SHORT(1);
+    __high_datastart = .;
+    *(.upper.data.* .upper.data)
+    __high_dataend = .;
+  } > HIFRAM AT> ROM
+
+  __rom_highdatacopysize = SIZEOF(.upper.data) - 2;
+  __rom_highdatastart = LOADADDR(.upper.data) + 2;
 
   .bss :
   {
@@ -282,6 +280,7 @@ SECTIONS
     *(.bss .bss.* .gnu.linkonce.b.*)
     *(.lower.bss.* .lower.bss)
     . = ALIGN(2);
+    *(COMMON)
     PROVIDE (__bssend = .);
   } > RAM
   PROVIDE (__bsssize = SIZEOF(.bss));
@@ -293,12 +292,20 @@ SECTIONS
     PROVIDE (__noinit_start = .);
     *(.noinit)
     . = ALIGN(2);
-    *(COMMON)
     PROVIDE (__noinit_end = .);
   } > RAM
 
   _end = .;
   PROVIDE (end = .);
+
+  .upper.bss :
+  {
+    . = ALIGN(2);
+    __high_bssstart = .;
+    *(.upper.bss.* .upper.bss)
+    . = ALIGN(2);
+    __high_bssend = .;
+  } > HIFRAM
 
   .stack (ORIGIN (RAM) + LENGTH(RAM)) :
   {
@@ -306,26 +313,21 @@ SECTIONS
     *(.stack)
   }
 
-  /* This is just for crt0.S and interrupt handlers.  */
-  .lowtext           :
-  {
-    PROVIDE (_start = .);
-    . = ALIGN(2);
-    KEEP (*(SORT(.crt_*)))
-    KEEP (*(.lowtext))
-  } > ROM
-
-  .upper.text :
-  {
-    . = ALIGN(2);
-    *(.upper.text.* .upper.text)
-  } > HIFRAM
-
   .text :
   {
+    PROVIDE (_start = .);
+
+    . = ALIGN(2);
+    KEEP (*(SORT(.crt_*)))
+
+    . = ALIGN(2);
+    KEEP (*(.lowtext))
+
+    . = ALIGN(2);
+    *(.lower.text.* .lower.text)
+
     . = ALIGN(2);
     *(.text .stub .text.* .gnu.linkonce.t.* .text:*)
-    *(.lower.text.* .lower.text)
 
     KEEP (*(.text.*personality*))
     /* .gnu.warning sections are handled specially by elf32.em.  */
@@ -339,6 +341,12 @@ SECTIONS
     KEEP (*(.fini))
     KEEP (*(.tm_clone_table))
   } > ROM
+
+  .upper.text :
+  {
+    . = ALIGN(2);
+    *(.upper.text.* .upper.text)
+  } > HIFRAM
 
   .infoA     : {} > INFOA              /* MSP430 INFO FLASH MEMORY SEGMENTS */
   .infoB     : {} > INFOB

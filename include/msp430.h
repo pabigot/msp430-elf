@@ -948,24 +948,6 @@
 #elif defined (__MSP430C092__)
 #include "msp430c092.h"
 
-#elif defined (__MSP430XGENERIC__)
-#include "msp430xgeneric.h"
-
-#elif defined (__MSP430F5XX_6XXGENERIC__)
-#include "msp430f5xx_6xxgeneric.h"
-
-#elif defined (__MSP430FR5XX_6XXGENERIC__)
-#include "msp430fr5xx_6xxgeneric.h"
-
-#elif defined (__MSP430FR2XX_4XXGENERIC__)
-#include "msp430fr2xx_4xxgeneric.h"
-
-#elif defined (__MSP430FR57XXGENERIC__)
-#include "msp430fr57xxgeneric.h"
-
-#elif defined (__MSP430I2XXGENERIC__)
-#include "msp430i2xxgeneric.h"
-
 #elif defined (__MSP430F5131__)
 #include "msp430f5131.h"
 
@@ -1766,6 +1748,24 @@
 
 #elif defined (__MSP430F5259__)
 #include "msp430f5259.h"
+
+#elif defined (__MSP430XGENERIC__)
+#include "msp430xgeneric.h"
+
+#elif defined (__MSP430F5XX_6XXGENERIC__)
+#include "msp430f5xx_6xxgeneric.h"
+
+#elif defined (__MSP430FR5XX_6XXGENERIC__)
+#include "msp430fr5xx_6xxgeneric.h"
+
+#elif defined (__MSP430FR2XX_4XXGENERIC__)
+#include "msp430fr2xx_4xxgeneric.h"
+
+#elif defined (__MSP430FR57XXGENERIC__)
+#include "msp430fr57xxgeneric.h"
+
+#elif defined (__MSP430I2XXGENERIC__)
+#include "msp430i2xxgeneric.h"
 
 /********************************************************************
  *  msp430 generic
