@@ -48,7 +48,7 @@
 #ifndef __msp430XGENERIC
 #define __msp430XGENERIC
 
-#define __MSP430_HEADER_VERSION__ 1159
+#define __MSP430_HEADER_VERSION__ 1167
 
 #define __MSP430_TI_HEADERS__
 
@@ -4987,7 +4987,7 @@ extern "C" {
 //#define RESERVED            (0x0001)  /* RESERVED */
 #define FRLPMPWR            (0x0002)  /* FRAM Enable FRAM auto power up after LPM */
 #define FRPWR               (0x0004)  /* FRAM Power Control */
-#define ACCTEIE             (0x0008)  /* Enable NMI event if Access time error occurs */
+#define ACCTEIE             (0x0008)  /* RESERVED */
 //#define RESERVED            (0x0010)  /* RESERVED */
 #define CBDIE               (0x0020)  /* Enable NMI event if correctable bit error detected */
 #define UBDIE               (0x0040)  /* Enable NMI event if uncorrectable bit error detected */
@@ -4997,7 +4997,7 @@ extern "C" {
 //#define RESERVED            (0x0001)  /* RESERVED */
 #define FRLPMPWR_L          (0x0002)  /* FRAM Enable FRAM auto power up after LPM */
 #define FRPWR_L             (0x0004)  /* FRAM Power Control */
-#define ACCTEIE_L           (0x0008)  /* Enable NMI event if Access time error occurs */
+#define ACCTEIE_L           (0x0008)  /* RESERVED */
 //#define RESERVED            (0x0010)  /* RESERVED */
 #define CBDIE_L             (0x0020)  /* Enable NMI event if correctable bit error detected */
 #define UBDIE_L             (0x0040)  /* Enable NMI event if uncorrectable bit error detected */
@@ -9059,41 +9059,6 @@ extern "C" {
 #define SD24DMA_7           (0x0700)  /* SD24B DMA Trigger: 7 */
 #define SD24DMA_8           (0x0800)  /* SD24B DMA Trigger: 8 */
 
-/* SD24BTRGCTL */
-#define SD24SC              (0x0001)  /* SD24B Start Conversion */
-#define SD24SCS0            (0x0002)  /* SD24B Start Conversion Select Bit 0 */
-#define SD24SCS1            (0x0004)  /* SD24B Start Conversion Select Bit 1 */
-#define SD24SCS2            (0x0008)  /* SD24B Start Conversion Select Bit 2 */
-#define SD24SNGL            (0x0100)  /* SD24B Single Trigger Mode */
-#define SD24TRGIFG          (0x0400)  /* SD24B Trigger Interrupt Flag */
-#define SD24TRGIE           (0x0800)  /* SD24B Trigger Interrupt Enable */
-
-#define SD24SC_L            (0x0001)  /* SD24B Start Conversion */
-#define SD24SCS0_L          (0x0002)  /* SD24B Start Conversion Select Bit 0 */
-#define SD24SCS1_L          (0x0004)  /* SD24B Start Conversion Select Bit 1 */
-#define SD24SCS2_L          (0x0008)  /* SD24B Start Conversion Select Bit 2 */
-
-#define SD24SNGL_H          (0x0001)  /* SD24B Single Trigger Mode */
-#define SD24TRGIFG_H        (0x0004)  /* SD24B Trigger Interrupt Flag */
-#define SD24TRGIE_H         (0x0008)  /* SD24B Trigger Interrupt Enable */
-
-#define SD24SCS_0           (0x0000)  /* SD24B Start Conversion Select: 0 */
-#define SD24SCS_1           (0x0002)  /* SD24B Start Conversion Select: 1 */
-#define SD24SCS_2           (0x0004)  /* SD24B Start Conversion Select: 2 */
-#define SD24SCS_3           (0x0006)  /* SD24B Start Conversion Select: 3 */
-#define SD24SCS_4           (0x0008)  /* SD24B Start Conversion Select: 4 */
-#define SD24SCS_5           (0x000A)  /* SD24B Start Conversion Select: 5 */
-#define SD24SCS_6           (0x000C)  /* SD24B Start Conversion Select: 6 */
-#define SD24SCS_7           (0x000E)  /* SD24B Start Conversion Select: 7 */
-#define SD24SCS__SD24SC     (0x0000)  /* SD24B Start Conversion Select: SD24SC */
-#define SD24SCS__EXT1       (0x0002)  /* SD24B Start Conversion Select: EXT1   */
-#define SD24SCS__EXT2       (0x0004)  /* SD24B Start Conversion Select: EXT2   */
-#define SD24SCS__EXT3       (0x0006)  /* SD24B Start Conversion Select: EXT3   */
-#define SD24SCS__GROUP0     (0x0008)  /* SD24B Start Conversion Select: GROUP0 */
-#define SD24SCS__GROUP1     (0x000A)  /* SD24B Start Conversion Select: GROUP1 */
-#define SD24SCS__GROUP2     (0x000C)  /* SD24B Start Conversion Select: GROUP2 */
-#define SD24SCS__GROUP3     (0x000E)  /* SD24B Start Conversion Select: GROUP3 */
-
 /* SD24BIFG */
 #define SD24IFG0            (0x0001)  /* SD24B Channel 0 Interrupt Flag */
 #define SD24OVIFG0          (0x0100)  /* SD24B Channel 0 Overflow Interrupt Flag */
@@ -9117,9 +9082,14 @@ extern "C" {
 #define SD24BIV_SD24IFG0     (0x0006)    /* SD24IFG0 */
 
 /* SD24BCCTLx */
+#define SD24SC               (0x0001)  /* SD24B Start Conversion */
+#define SD24SCS0             (0x0002)  /* SD24B Start Conversion Select Bit 0 */
+#define SD24SCS1             (0x0004)  /* SD24B Start Conversion Select Bit 1 */
+#define SD24SCS2             (0x0008)  /* SD24B Start Conversion Select Bit 2 */
 #define SD24DF0              (0x0010)  /* SD24B Data Format Bit: 0 */
 #define SD24DF1              (0x0020)  /* SD24B Data Format Bit: 1 */
 #define SD24ALGN             (0x0040)  /* SD24B Data Alignment */
+#define SD24SNGL             (0x0100)  /* SD24B Single Trigger Mode */
 #define SD24CAL              (0x0200)  /* SD24B Calibration */
 #define SD24DFS0             (0x0400)  /* SD24B Digital Filter Bit: 0 */
 #define SD24DFS1             (0x0800)  /* SD24B Digital Filter Bit: 1 */
@@ -9127,16 +9097,46 @@ extern "C" {
 #define SD24MC0              (0x2000)  /* SD24B Manchaster Encoding Bit: 0 */
 #define SD24MC1              (0x4000)  /* SD24B Manchaster Encoding Bit: 1 */
 
+#define SD24SC_L            (0x0001)  /* SD24B Start Conversion */
+#define SD24SCS0_L          (0x0002)  /* SD24B Start Conversion Select Bit 0 */
+#define SD24SCS1_L          (0x0004)  /* SD24B Start Conversion Select Bit 1 */
+#define SD24SCS2_L          (0x0008)  /* SD24B Start Conversion Select Bit 2 */
 #define SD24DF0_L           (0x0010)  /* SD24B Data Format Bit: 0 */
 #define SD24DF1_L           (0x0020)  /* SD24B Data Format Bit: 1 */
 #define SD24ALGN_L          (0x0040)  /* SD24B Data Alignment */
 
+#define SD24SNGL_H          (0x0001)  /* SD24B Single Trigger Mode */
 #define SD24CAL_H           (0x0002)  /* SD24B Calibration */
 #define SD24DFS0_H          (0x0004)  /* SD24B Digital Filter Bit: 0 */
 #define SD24DFS1_H          (0x0008)  /* SD24B Digital Filter Bit: 1 */
 #define SD24DI_H            (0x0010)  /* SD24B Digital Bitstream Input */
 #define SD24MC0_H           (0x0020)  /* SD24B Manchaster Encoding Bit: 0 */
 #define SD24MC1_H           (0x0040)  /* SD24B Manchaster Encoding Bit: 1 */
+
+/* SD24BTRGCTL */
+#define SD24TRGIFG          (0x0400)  /* SD24B Trigger Interrupt Flag */
+#define SD24TRGIE           (0x0800)  /* SD24B Trigger Interrupt Enable */
+
+
+#define SD24TRGIFG_H        (0x0004)  /* SD24B Trigger Interrupt Flag */
+#define SD24TRGIE_H         (0x0008)  /* SD24B Trigger Interrupt Enable */
+
+#define SD24SCS_0            (0x0000)  /* SD24B Start Conversion Select: 0 */
+#define SD24SCS_1            (0x0002)  /* SD24B Start Conversion Select: 1 */
+#define SD24SCS_2            (0x0004)  /* SD24B Start Conversion Select: 2 */
+#define SD24SCS_3            (0x0006)  /* SD24B Start Conversion Select: 3 */
+#define SD24SCS_4            (0x0008)  /* SD24B Start Conversion Select: 4 */
+#define SD24SCS_5            (0x000A)  /* SD24B Start Conversion Select: 5 */
+#define SD24SCS_6            (0x000C)  /* SD24B Start Conversion Select: 6 */
+#define SD24SCS_7            (0x000E)  /* SD24B Start Conversion Select: 7 */
+#define SD24SCS__SD24SC      (0x0000)  /* SD24B Start Conversion Select: SD24SC */
+#define SD24SCS__EXT1        (0x0002)  /* SD24B Start Conversion Select: EXT1   */
+#define SD24SCS__EXT2        (0x0004)  /* SD24B Start Conversion Select: EXT2   */
+#define SD24SCS__EXT3        (0x0006)  /* SD24B Start Conversion Select: EXT3   */
+#define SD24SCS__GROUP0      (0x0008)  /* SD24B Start Conversion Select: GROUP0 */
+#define SD24SCS__GROUP1      (0x000A)  /* SD24B Start Conversion Select: GROUP1 */
+#define SD24SCS__GROUP2      (0x000C)  /* SD24B Start Conversion Select: GROUP2 */
+#define SD24SCS__GROUP3      (0x000E)  /* SD24B Start Conversion Select: GROUP3 */
 
 #define SD24DF_0             (0x0000)  /* SD24B Data Format: Offset Binary  */
 #define SD24DF_1             (0x0010)  /* SD24B Data Format: 2's complement */
@@ -9204,6 +9204,7 @@ extern "C" {
 #define OSR8_H              (0x0001)  /* SD24B Oversampling Rate Bit: 8 */
 #define OSR9_H              (0x0002)  /* SD24B Oversampling Rate Bit: 9 */
 #define OSR10_H             (0x0004)  /* SD24B Oversampling Rate Bit: 10 */
+
 
 /* SD24BTRGOSR */
 
@@ -12536,20 +12537,6 @@ extern "C" {
 #define USCI_I2C_UCBCNTIFG  (0x001A)    /* USCI I2C Mode: UCBCNTIFG */
 #define USCI_I2C_UCCLTOIFG  (0x001C)    /* USCI I2C Mode: UCCLTOIFG */
 #define USCI_I2C_UCBIT9IFG  (0x001E)    /* USCI I2C Mode: UCBIT9IFG */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif
 /************************************************************

@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430F5517 devices. */
-/* Version: 1.159 */
+/* Version: 1.167 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
@@ -182,9 +182,9 @@ SECTIONS
   __interrupt_vector_61  : { KEEP (*(__interrupt_vector_61)) KEEP (*(__interrupt_vector_comp_b)) } > VECT61
   __interrupt_vector_62  : { KEEP (*(__interrupt_vector_62)) KEEP (*(__interrupt_vector_unmi)) } > VECT62
   __interrupt_vector_63  : { KEEP (*(__interrupt_vector_63)) KEEP (*(__interrupt_vector_sysnmi)) } > VECT63
-  __reset_vector : 
-  { 
-    KEEP (*(__interrupt_vector_64)) 
+  __reset_vector :
+  {
+    KEEP (*(__interrupt_vector_64))
     KEEP (*(__interrupt_vector_reset))
     KEEP (*(.resetvec))
   } > RESETVEC

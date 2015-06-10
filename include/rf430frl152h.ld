@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports RF430FRL152H devices. */
-/* Version: 1.159 */
+/* Version: 1.167 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
@@ -78,9 +78,9 @@ SECTIONS
   __interrupt_vector_13  : { KEEP (*(__interrupt_vector_13)) KEEP (*(__interrupt_vector_timer0_a0)) } > VECT13
   __interrupt_vector_14  : { KEEP (*(__interrupt_vector_14)) KEEP (*(__interrupt_vector_unmi)) } > VECT14
   __interrupt_vector_15  : { KEEP (*(__interrupt_vector_15)) KEEP (*(__interrupt_vector_sysnmi)) } > VECT15
-  __reset_vector : 
-  { 
-    KEEP (*(__interrupt_vector_16)) 
+  __reset_vector :
+  {
+    KEEP (*(__interrupt_vector_16))
     KEEP (*(__interrupt_vector_reset))
     KEEP (*(.resetvec))
   } > RESETVEC

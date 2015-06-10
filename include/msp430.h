@@ -1575,6 +1575,15 @@
 #elif defined (__RF430FRL154H_ROM__)
 #include "rf430frl154h_rom.h"
 
+#elif defined (__RF430F5175__)
+#include "rf430f5175.h"
+
+#elif defined (__RF430F5155__)
+#include "rf430f5155.h"
+
+#elif defined (__RF430F5144__)
+#include "rf430f5144.h"
+
 #elif defined (__MSP430FR69271__)
 #include "msp430fr69271.h"
 
@@ -1653,6 +1662,9 @@
 #elif defined (__MSP430FR6989__)
 #include "msp430fr6989.h"
 
+#elif defined (__MSP430FR5922__)
+#include "msp430fr5922.h"
+
 #elif defined (__MSP430FR5870__)
 #include "msp430fr5870.h"
 
@@ -1688,6 +1700,9 @@
 
 #elif defined (__MSP430FR6972__)
 #include "msp430fr6972.h"
+
+#elif defined (__MSP430FR59221__)
+#include "msp430fr59221.h"
 
 #elif defined (__MSP430FR58721__)
 #include "msp430fr58721.h"
@@ -1778,7 +1793,7 @@
 
 
 /********************************************************************
- *  
+ *
  ********************************************************************/
 #else
 #error "Failed to match a default include file"

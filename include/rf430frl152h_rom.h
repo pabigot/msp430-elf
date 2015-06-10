@@ -47,7 +47,7 @@
 #ifndef __RF430FRL152H_ROM
 #define __RF430FRL152H_ROM
 
-#define __MSP430_HEADER_VERSION__ 1159
+#define __MSP430_HEADER_VERSION__ 1167
 
 #define __MSP430_TI_HEADERS__
 
@@ -1482,20 +1482,6 @@ sfrw(UCB0IV, UCB0IV_);
 #define USCI_I2C_UCBCNTIFG  (0x001A)    /* USCI I2C Mode: UCBCNTIFG */
 #define USCI_I2C_UCCLTOIFG  (0x001C)    /* USCI I2C Mode: UCCLTOIFG */
 #define USCI_I2C_UCBIT9IFG  (0x001E)    /* USCI I2C Mode: UCBIT9IFG */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /************************************************************
 * SFR - Special Function Register Module

@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430F2471 devices. */
-/* Version: 1.159 */
+/* Version: 1.167 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
@@ -116,9 +116,9 @@ SECTIONS
   __interrupt_vector_29  : { KEEP (*(__interrupt_vector_29)) KEEP (*(__interrupt_vector_timerb1)) } > VECT29
   __interrupt_vector_30  : { KEEP (*(__interrupt_vector_30)) KEEP (*(__interrupt_vector_timerb0)) } > VECT30
   __interrupt_vector_31  : { KEEP (*(__interrupt_vector_31)) KEEP (*(__interrupt_vector_nmi)) } > VECT31
-  __reset_vector : 
-  { 
-    KEEP (*(__interrupt_vector_32)) 
+  __reset_vector :
+  {
+    KEEP (*(__interrupt_vector_32))
     KEEP (*(__interrupt_vector_reset))
     KEEP (*(.resetvec))
   } > RESETVEC

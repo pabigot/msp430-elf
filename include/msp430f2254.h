@@ -53,7 +53,7 @@
 #ifndef __MSP430F2254
 #define __MSP430F2254
 
-#define __MSP430_HEADER_VERSION__ 1159
+#define __MSP430_HEADER_VERSION__ 1167
 
 #define __MSP430_TI_HEADERS__
 

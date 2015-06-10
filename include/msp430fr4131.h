@@ -48,7 +48,7 @@
 #ifndef __MSP430FR4131
 #define __MSP430FR4131
 
-#define __MSP430_HEADER_VERSION__ 1159
+#define __MSP430_HEADER_VERSION__ 1167
 
 #define __MSP430_TI_HEADERS__
 
@@ -944,7 +944,7 @@ sfrw(GCCTL1, GCCTL1_);
 //#define RESERVED            (0x0001)  /* RESERVED */
 #define FRLPMPWR            (0x0002)  /* FRAM Enable FRAM auto power up after LPM */
 #define FRPWR               (0x0004)  /* FRAM Power Control */
-#define ACCTEIE             (0x0008)  /* Enable NMI event if Access time error occurs */
+#define ACCTEIE             (0x0008)  /* RESERVED */
 //#define RESERVED            (0x0010)  /* RESERVED */
 #define CBDIE               (0x0020)  /* Enable NMI event if correctable bit error detected */
 #define UBDIE               (0x0040)  /* Enable NMI event if uncorrectable bit error detected */
@@ -954,7 +954,7 @@ sfrw(GCCTL1, GCCTL1_);
 //#define RESERVED            (0x0001)  /* RESERVED */
 #define FRLPMPWR_L          (0x0002)  /* FRAM Enable FRAM auto power up after LPM */
 #define FRPWR_L             (0x0004)  /* FRAM Power Control */
-#define ACCTEIE_L           (0x0008)  /* Enable NMI event if Access time error occurs */
+#define ACCTEIE_L           (0x0008)  /* RESERVED */
 //#define RESERVED            (0x0010)  /* RESERVED */
 #define CBDIE_L             (0x0020)  /* Enable NMI event if correctable bit error detected */
 #define UBDIE_L             (0x0040)  /* Enable NMI event if uncorrectable bit error detected */
@@ -3332,20 +3332,6 @@ sfrw(UCB0IV, UCB0IV_);
 #define USCI_I2C_UCCLTOIFG  (0x001C)    /* USCI I2C Mode: UCCLTOIFG */
 #define USCI_I2C_UCBIT9IFG  (0x001E)    /* USCI I2C Mode: UCBIT9IFG */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /************************************************************
 * WATCHDOG TIMER A
 ************************************************************/
@@ -3439,6 +3425,8 @@ sfrw(WDTCTL, WDTCTL_);
 
 #define TLV_START             (0x1A08)    /* Start Address of the TLV structure */
 #define TLV_END               (0x1AFF)    /* End Address of the TLV structure */
+#define TLV_CRC_START         (0x1A04)    /* Start Address of the CRC protected structure */
+#define TLV_CRC_END           (0x1A77)    /* End Address of the TLV protected structure */
 
 #define TLV_LDTAG             (0x01)      /*  Legacy descriptor (1xx, 2xx, 4xx families) */
 #define TLV_PDTAG             (0x02)      /*  Peripheral discovery descriptor */

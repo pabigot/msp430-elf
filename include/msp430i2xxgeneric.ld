@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430I2XXGENERIC devices. */
-/* Version: 1.159 */
+/* Version: 1.167 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
@@ -44,7 +44,7 @@ MEMORY {
   RAM              : ORIGIN = 0x0200, LENGTH = 0x0400 /* END=0x05FF, size 1024 */
   INFOMEM          : ORIGIN = 0x1000, LENGTH = 0x0400 /* END=0x13FF, size 1024 as 1 1024-byte segments */
   INFOA            : ORIGIN = 0x1000, LENGTH = 0x0400 /* END=0x13FF, size 1024 */
-  ROM (rx)         : ORIGIN = 0xC000, LENGTH = 0x3FE0 /* END=0xFFDF, size 16352 */
+  ROM (rx)         : ORIGIN = 0xC000, LENGTH = 0x3FDC /* END=0xFFDB, size 16348 */
   VECT1            : ORIGIN = 0xFF80, LENGTH = 0x0002
   VECT2            : ORIGIN = 0xFF82, LENGTH = 0x0002
   VECT3            : ORIGIN = 0xFF84, LENGTH = 0x0002
@@ -176,9 +176,9 @@ SECTIONS
   __interrupt_vector_61  : { KEEP (*(__interrupt_vector_61)) } > VECT61
   __interrupt_vector_62  : { KEEP (*(__interrupt_vector_62)) } > VECT62
   __interrupt_vector_63  : { KEEP (*(__interrupt_vector_63)) } > VECT63
-  __reset_vector : 
-  { 
-    KEEP (*(__interrupt_vector_64)) 
+  __reset_vector :
+  {
+    KEEP (*(__interrupt_vector_64))
     KEEP (*(__interrupt_vector_reset))
     KEEP (*(.resetvec))
   } > RESETVEC

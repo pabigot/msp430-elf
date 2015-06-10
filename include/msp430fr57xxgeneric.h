@@ -48,7 +48,7 @@
 #ifndef __msp430FR57XXGENERIC
 #define __msp430FR57XXGENERIC
 
-#define __MSP430_HEADER_VERSION__ 1159
+#define __MSP430_HEADER_VERSION__ 1167
 
 #define __MSP430_TI_HEADERS__
 
@@ -4086,20 +4086,6 @@ extern "C" {
 #define USCI_I2C_UCBCNTIFG  (0x001A)    /* USCI I2C Mode: UCBCNTIFG */
 #define USCI_I2C_UCCLTOIFG  (0x001C)    /* USCI I2C Mode: UCCLTOIFG */
 #define USCI_I2C_UCBIT9IFG  (0x001E)    /* USCI I2C Mode: UCBIT9IFG */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #endif
 /************************************************************
