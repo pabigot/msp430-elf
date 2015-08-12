@@ -56,7 +56,7 @@ From [this message](http://www.mail-archive.com/mspgcc-users@lists.sourceforge.n
     3. Digit: Header/linker file version
     4. Digit: Build number
 
-The material in this repository is current to release: 3.03.04.00
+The material in this repository is current to release: 3.04.05.00
 
 The sources version matches: 3.02.03.00
 
