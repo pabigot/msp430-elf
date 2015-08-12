@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430G2101 devices. */
-/* Version: 1.167 */
+/* Version: 1.173 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)

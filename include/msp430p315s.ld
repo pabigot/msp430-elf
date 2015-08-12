@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430P315S devices. */
-/* Version: 1.167 */
+/* Version: 1.173 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)

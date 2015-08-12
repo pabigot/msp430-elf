@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430F247 devices. */
-/* Version: 1.167 */
+/* Version: 1.173 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
@@ -47,7 +47,7 @@ MEMORY {
   INFOB            : ORIGIN = 0x1080, LENGTH = 0x0040 /* END=0x10BF, size 64 */
   INFOC            : ORIGIN = 0x1040, LENGTH = 0x0040 /* END=0x107F, size 64 */
   INFOD            : ORIGIN = 0x1000, LENGTH = 0x0040 /* END=0x103F, size 64 */
-  ROM (rx)         : ORIGIN = 0x8000, LENGTH = 0x7FBE /* END=0xFFBD, size 32702 */
+  ROM (rx)         : ORIGIN = 0x8000, LENGTH = 0x7FC0 /* END=0xFFBF, size 32704 */
   VECT1            : ORIGIN = 0xFFC0, LENGTH = 0x0002
   VECT2            : ORIGIN = 0xFFC2, LENGTH = 0x0002
   VECT3            : ORIGIN = 0xFFC4, LENGTH = 0x0002

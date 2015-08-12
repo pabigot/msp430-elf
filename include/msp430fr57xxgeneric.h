@@ -48,7 +48,7 @@
 #ifndef __msp430FR57XXGENERIC
 #define __msp430FR57XXGENERIC
 
-#define __MSP430_HEADER_VERSION__ 1167
+#define __MSP430_HEADER_VERSION__ 1173
 
 #define __MSP430_TI_HEADERS__
 
@@ -4177,6 +4177,8 @@ extern "C" {
 #define __MSP430_HAS_TLV__                /* Definition to show that Module is available */
 #define TLV_BASE __MSP430_BASEADDRESS_TLV__
 
+#define TLV_CRC_LENGTH        (0x1A01)    /* CRC length of the TLV structure */
+#define TLV_CRC_VALUE         (0x1A02)    /* CRC value of the TLV structure */
 #define TLV_START             (0x1A08)    /* Start Address of the TLV structure */
 #define TLV_END               (0x1AFF)    /* End Address of the TLV structure */
 

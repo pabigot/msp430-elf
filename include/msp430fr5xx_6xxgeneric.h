@@ -48,7 +48,7 @@
 #ifndef __msp430FR5XX_FR6XXGENERIC
 #define __msp430FR5XX_FR6XXGENERIC
 
-#define __MSP430_HEADER_VERSION__ 1167
+#define __MSP430_HEADER_VERSION__ 1173
 
 #define __MSP430_TI_HEADERS__
 
@@ -2101,6 +2101,232 @@ extern "C" {
 #define DMAIV_DMA0IFG        (0x0002)    /* DMA0IFG*/
 #define DMAIV_DMA1IFG        (0x0004)    /* DMA1IFG*/
 #define DMAIV_DMA2IFG        (0x0006)    /* DMA2IFG*/
+
+#endif
+/************************************************************
+* DMA_X
+************************************************************/
+#ifdef  __MSP430_HAS_DMAX_6__           /* Definition to show that Module is available */
+
+#define OFS_DMACTL0           (0x0000)    /* DMA Module Control 0 */
+#define OFS_DMACTL0_L          OFS_DMACTL0
+#define OFS_DMACTL0_H          OFS_DMACTL0+1
+#define OFS_DMACTL1           (0x0002)    /* DMA Module Control 1 */
+#define OFS_DMACTL1_L          OFS_DMACTL1
+#define OFS_DMACTL1_H          OFS_DMACTL1+1
+#define OFS_DMACTL2           (0x0004)    /* DMA Module Control 2 */
+#define OFS_DMACTL2_L          OFS_DMACTL2
+#define OFS_DMACTL2_H          OFS_DMACTL2+1
+#define OFS_DMACTL3           (0x0006)    /* DMA Module Control 3 */
+#define OFS_DMACTL3_L          OFS_DMACTL3
+#define OFS_DMACTL3_H          OFS_DMACTL3+1
+#define OFS_DMACTL4           (0x0008)    /* DMA Module Control 4 */
+#define OFS_DMACTL4_L          OFS_DMACTL4
+#define OFS_DMACTL4_H          OFS_DMACTL4+1
+#define OFS_DMAIV             (0x000E)    /* DMA Interrupt Vector Word */
+#define OFS_DMAIV_L            OFS_DMAIV
+#define OFS_DMAIV_H            OFS_DMAIV+1
+
+#define OFS_DMA0CTL           (0x0010)    /* DMA Channel 0 Control */
+#define OFS_DMA0CTL_L          OFS_DMA0CTL
+#define OFS_DMA0CTL_H          OFS_DMA0CTL+1
+#define OFS_DMA0SA            (0x0012)    /* DMA Channel 0 Source Address */
+#define OFS_DMA0DA            (0x0016)    /* DMA Channel 0 Destination Address */
+#define OFS_DMA0SZ            (0x001A)    /* DMA Channel 0 Transfer Size */
+
+#define OFS_DMA1CTL           (0x0020)    /* DMA Channel 1 Control */
+#define OFS_DMA1CTL_L          OFS_DMA1CTL
+#define OFS_DMA1CTL_H          OFS_DMA1CTL+1
+#define OFS_DMA1SA            (0x0022)    /* DMA Channel 1 Source Address */
+#define OFS_DMA1DA            (0x0026)    /* DMA Channel 1 Destination Address */
+#define OFS_DMA1SZ            (0x002A)    /* DMA Channel 1 Transfer Size */
+
+#define OFS_DMA2CTL           (0x0030)    /* DMA Channel 2 Control */
+#define OFS_DMA2CTL_L          OFS_DMA2CTL
+#define OFS_DMA2CTL_H          OFS_DMA2CTL+1
+#define OFS_DMA2SA            (0x0032)    /* DMA Channel 2 Source Address */
+#define OFS_DMA2DA            (0x0036)    /* DMA Channel 2 Destination Address */
+#define OFS_DMA2SZ            (0x003A)    /* DMA Channel 2 Transfer Size */
+
+#define OFS_DMA3CTL           (0x0040)    /* DMA Channel 3 Control */
+#define OFS_DMA3CTL_L          OFS_DMA3CTL
+#define OFS_DMA3CTL_H          OFS_DMA3CTL+1
+#define OFS_DMA3SA            (0x0042)    /* DMA Channel 3 Source Address */
+#define OFS_DMA3DA            (0x0046)    /* DMA Channel 3 Destination Address */
+#define OFS_DMA3SZ            (0x004A)    /* DMA Channel 3 Transfer Size */
+
+#define OFS_DMA4CTL           (0x0050)    /* DMA Channel 4 Control */
+#define OFS_DMA4CTL_L          OFS_DMA4CTL
+#define OFS_DMA4CTL_H          OFS_DMA4CTL+1
+#define OFS_DMA4SA            (0x0052)    /* DMA Channel 4 Source Address */
+#define OFS_DMA4DA            (0x0056)    /* DMA Channel 4 Destination Address */
+#define OFS_DMA4SZ            (0x005A)    /* DMA Channel 4 Transfer Size */
+
+#define OFS_DMA5CTL           (0x0060)    /* DMA Channel 5 Control */
+#define OFS_DMA5CTL_L          OFS_DMA5CTL
+#define OFS_DMA5CTL_H          OFS_DMA5CTL+1
+#define OFS_DMA5SA            (0x0062)    /* DMA Channel 5 Source Address */
+#define OFS_DMA5DA            (0x0066)    /* DMA Channel 5 Destination Address */
+#define OFS_DMA5SZ            (0x006A)    /* DMA Channel 5 Transfer Size */
+
+/* DMACTL0 Control Bits */
+#define DMA0TSEL0           (0x0001)    /* DMA channel 0 transfer select bit 0 */
+#define DMA0TSEL1           (0x0002)    /* DMA channel 0 transfer select bit 1 */
+#define DMA0TSEL2           (0x0004)    /* DMA channel 0 transfer select bit 2 */
+#define DMA0TSEL3           (0x0008)    /* DMA channel 0 transfer select bit 3 */
+#define DMA0TSEL4           (0x0010)    /* DMA channel 0 transfer select bit 4 */
+#define DMA1TSEL0           (0x0100)    /* DMA channel 1 transfer select bit 0 */
+#define DMA1TSEL1           (0x0200)    /* DMA channel 1 transfer select bit 1 */
+#define DMA1TSEL2           (0x0400)    /* DMA channel 1 transfer select bit 2 */
+#define DMA1TSEL3           (0x0800)    /* DMA channel 1 transfer select bit 3 */
+#define DMA1TSEL4           (0x1000)    /* DMA channel 1 transfer select bit 4 */
+
+/* DMACTL0 Control Bits */
+#define DMA0TSEL0_L         (0x0001)    /* DMA channel 0 transfer select bit 0 */
+#define DMA0TSEL1_L         (0x0002)    /* DMA channel 0 transfer select bit 1 */
+#define DMA0TSEL2_L         (0x0004)    /* DMA channel 0 transfer select bit 2 */
+#define DMA0TSEL3_L         (0x0008)    /* DMA channel 0 transfer select bit 3 */
+#define DMA0TSEL4_L         (0x0010)    /* DMA channel 0 transfer select bit 4 */
+
+/* DMACTL0 Control Bits */
+#define DMA1TSEL0_H         (0x0001)    /* DMA channel 1 transfer select bit 0 */
+#define DMA1TSEL1_H         (0x0002)    /* DMA channel 1 transfer select bit 1 */
+#define DMA1TSEL2_H         (0x0004)    /* DMA channel 1 transfer select bit 2 */
+#define DMA1TSEL3_H         (0x0008)    /* DMA channel 1 transfer select bit 3 */
+#define DMA1TSEL4_H         (0x0010)    /* DMA channel 1 transfer select bit 4 */
+
+/* DMACTL01 Control Bits */
+#define DMA2TSEL0           (0x0001)    /* DMA channel 2 transfer select bit 0 */
+#define DMA2TSEL1           (0x0002)    /* DMA channel 2 transfer select bit 1 */
+#define DMA2TSEL2           (0x0004)    /* DMA channel 2 transfer select bit 2 */
+#define DMA2TSEL3           (0x0008)    /* DMA channel 2 transfer select bit 3 */
+#define DMA2TSEL4           (0x0010)    /* DMA channel 2 transfer select bit 4 */
+#define DMA3TSEL0           (0x0100)    /* DMA channel 3 transfer select bit 0 */
+#define DMA3TSEL1           (0x0200)    /* DMA channel 3 transfer select bit 1 */
+#define DMA3TSEL2           (0x0400)    /* DMA channel 3 transfer select bit 2 */
+#define DMA3TSEL3           (0x0800)    /* DMA channel 3 transfer select bit 3 */
+#define DMA3TSEL4           (0x1000)    /* DMA channel 3 transfer select bit 4 */
+
+/* DMACTL01 Control Bits */
+#define DMA2TSEL0_L         (0x0001)    /* DMA channel 2 transfer select bit 0 */
+#define DMA2TSEL1_L         (0x0002)    /* DMA channel 2 transfer select bit 1 */
+#define DMA2TSEL2_L         (0x0004)    /* DMA channel 2 transfer select bit 2 */
+#define DMA2TSEL3_L         (0x0008)    /* DMA channel 2 transfer select bit 3 */
+#define DMA2TSEL4_L         (0x0010)    /* DMA channel 2 transfer select bit 4 */
+
+/* DMACTL01 Control Bits */
+#define DMA3TSEL0_H         (0x0001)    /* DMA channel 3 transfer select bit 0 */
+#define DMA3TSEL1_H         (0x0002)    /* DMA channel 3 transfer select bit 1 */
+#define DMA3TSEL2_H         (0x0004)    /* DMA channel 3 transfer select bit 2 */
+#define DMA3TSEL3_H         (0x0008)    /* DMA channel 3 transfer select bit 3 */
+#define DMA3TSEL4_H         (0x0010)    /* DMA channel 3 transfer select bit 4 */
+
+/* DMACTL0 Control Bits */
+#define DMA4TSEL0           (0x0001)    /* DMA channel 4 transfer select bit 0 */
+#define DMA4TSEL1           (0x0002)    /* DMA channel 4 transfer select bit 1 */
+#define DMA4TSEL2           (0x0004)    /* DMA channel 4 transfer select bit 2 */
+#define DMA4TSEL3           (0x0008)    /* DMA channel 4 transfer select bit 3 */
+#define DMA4TSEL4           (0x0010)    /* DMA channel 4 transfer select bit 4 */
+#define DMA5TSEL0           (0x0100)    /* DMA channel 5 transfer select bit 0 */
+#define DMA5TSEL1           (0x0200)    /* DMA channel 5 transfer select bit 1 */
+#define DMA5TSEL2           (0x0400)    /* DMA channel 5 transfer select bit 2 */
+#define DMA5TSEL3           (0x0800)    /* DMA channel 5 transfer select bit 3 */
+#define DMA5TSEL4           (0x1000)    /* DMA channel 5 transfer select bit 4 */
+
+/* DMACTL0 Control Bits */
+#define DMA4TSEL0_L         (0x0001)    /* DMA channel 4 transfer select bit 0 */
+#define DMA4TSEL1_L         (0x0002)    /* DMA channel 4 transfer select bit 1 */
+#define DMA4TSEL2_L         (0x0004)    /* DMA channel 4 transfer select bit 2 */
+#define DMA4TSEL3_L         (0x0008)    /* DMA channel 4 transfer select bit 3 */
+#define DMA4TSEL4_L         (0x0010)    /* DMA channel 4 transfer select bit 4 */
+
+/* DMACTL0 Control Bits */
+#define DMA5TSEL0_H         (0x0001)    /* DMA channel 5 transfer select bit 0 */
+#define DMA5TSEL1_H         (0x0002)    /* DMA channel 5 transfer select bit 1 */
+#define DMA5TSEL2_H         (0x0004)    /* DMA channel 5 transfer select bit 2 */
+#define DMA5TSEL3_H         (0x0008)    /* DMA channel 5 transfer select bit 3 */
+#define DMA5TSEL4_H         (0x0010)    /* DMA channel 5 transfer select bit 4 */
+
+/* DMACTL4 Control Bits */
+#define ENNMI               (0x0001)    /* Enable NMI interruption of DMA */
+#define ROUNDROBIN          (0x0002)    /* Round-Robin DMA channel priorities */
+#define DMARMWDIS           (0x0004)    /* Inhibited DMA transfers during read-modify-write CPU operations */
+
+/* DMACTL4 Control Bits */
+#define ENNMI_L             (0x0001)    /* Enable NMI interruption of DMA */
+#define ROUNDROBIN_L        (0x0002)    /* Round-Robin DMA channel priorities */
+#define DMARMWDIS_L         (0x0004)    /* Inhibited DMA transfers during read-modify-write CPU operations */
+
+
+
+/* DMAxCTL Control Bits */
+#define DMAREQ              (0x0001)    /* Initiate DMA transfer with DMATSEL */
+#define DMAABORT            (0x0002)    /* DMA transfer aborted by NMI */
+#define DMAIE               (0x0004)    /* DMA interrupt enable */
+#define DMAIFG              (0x0008)    /* DMA interrupt flag */
+#define DMAEN               (0x0010)    /* DMA enable */
+#define DMALEVEL            (0x0020)    /* DMA level sensitive trigger select */
+#define DMASRCBYTE          (0x0040)    /* DMA source byte */
+#define DMADSTBYTE          (0x0080)    /* DMA destination byte */
+#define DMASRCINCR0         (0x0100)    /* DMA source increment bit 0 */
+#define DMASRCINCR1         (0x0200)    /* DMA source increment bit 1 */
+#define DMADSTINCR0         (0x0400)    /* DMA destination increment bit 0 */
+#define DMADSTINCR1         (0x0800)    /* DMA destination increment bit 1 */
+#define DMADT0              (0x1000)    /* DMA transfer mode bit 0 */
+#define DMADT1              (0x2000)    /* DMA transfer mode bit 1 */
+#define DMADT2              (0x4000)    /* DMA transfer mode bit 2 */
+
+/* DMAxCTL Control Bits */
+#define DMAREQ_L            (0x0001)    /* Initiate DMA transfer with DMATSEL */
+#define DMAABORT_L          (0x0002)    /* DMA transfer aborted by NMI */
+#define DMAIE_L             (0x0004)    /* DMA interrupt enable */
+#define DMAIFG_L            (0x0008)    /* DMA interrupt flag */
+#define DMAEN_L             (0x0010)    /* DMA enable */
+#define DMALEVEL_L          (0x0020)    /* DMA level sensitive trigger select */
+#define DMASRCBYTE_L        (0x0040)    /* DMA source byte */
+#define DMADSTBYTE_L        (0x0080)    /* DMA destination byte */
+
+/* DMAxCTL Control Bits */
+#define DMASRCINCR0_H       (0x0001)    /* DMA source increment bit 0 */
+#define DMASRCINCR1_H       (0x0002)    /* DMA source increment bit 1 */
+#define DMADSTINCR0_H       (0x0004)    /* DMA destination increment bit 0 */
+#define DMADSTINCR1_H       (0x0008)    /* DMA destination increment bit 1 */
+#define DMADT0_H            (0x0010)    /* DMA transfer mode bit 0 */
+#define DMADT1_H            (0x0020)    /* DMA transfer mode bit 1 */
+#define DMADT2_H            (0x0040)    /* DMA transfer mode bit 2 */
+
+#define DMASWDW             (0x0000)  /* DMA transfer: source word to destination word */
+#define DMASBDW             (0x0040)  /* DMA transfer: source byte to destination word */
+#define DMASWDB             (0x0080)  /* DMA transfer: source word to destination byte */
+#define DMASBDB             (0x00C0)  /* DMA transfer: source byte to destination byte */
+
+#define DMASRCINCR_0        (0x0000)  /* DMA source increment 0: source address unchanged */
+#define DMASRCINCR_1        (0x0100)  /* DMA source increment 1: source address unchanged */
+#define DMASRCINCR_2        (0x0200)  /* DMA source increment 2: source address decremented */
+#define DMASRCINCR_3        (0x0300)  /* DMA source increment 3: source address incremented */
+
+#define DMADSTINCR_0        (0x0000)  /* DMA destination increment 0: destination address unchanged */
+#define DMADSTINCR_1        (0x0400)  /* DMA destination increment 1: destination address unchanged */
+#define DMADSTINCR_2        (0x0800)  /* DMA destination increment 2: destination address decremented */
+#define DMADSTINCR_3        (0x0C00)  /* DMA destination increment 3: destination address incremented */
+
+#define DMADT_0             (0x0000)  /* DMA transfer mode 0: Single transfer */
+#define DMADT_1             (0x1000)  /* DMA transfer mode 1: Block transfer */
+#define DMADT_2             (0x2000)  /* DMA transfer mode 2: Burst-Block transfer */
+#define DMADT_3             (0x3000)  /* DMA transfer mode 3: Burst-Block transfer */
+#define DMADT_4             (0x4000)  /* DMA transfer mode 4: Repeated Single transfer */
+#define DMADT_5             (0x5000)  /* DMA transfer mode 5: Repeated Block transfer */
+#define DMADT_6             (0x6000)  /* DMA transfer mode 6: Repeated Burst-Block transfer */
+#define DMADT_7             (0x7000)  /* DMA transfer mode 7: Repeated Burst-Block transfer */
+
+/* DMAIV Definitions */
+#define DMAIV_NONE           (0x0000)    /* No Interrupt pending */
+#define DMAIV_DMA0IFG        (0x0002)    /* DMA0IFG*/
+#define DMAIV_DMA1IFG        (0x0004)    /* DMA1IFG*/
+#define DMAIV_DMA2IFG        (0x0006)    /* DMA2IFG*/
+#define DMAIV_DMA3IFG        (0x0008)    /* DMA3IFG*/
+#define DMAIV_DMA4IFG        (0x000A)    /* DMA4IFG*/
+#define DMAIV_DMA5IFG        (0x000C)    /* DMA5IFG*/
 
 #endif
 /************************************************************
@@ -6654,6 +6880,8 @@ extern "C" {
 #define __MSP430_HAS_TLV__                /* Definition to show that Module is available */
 #define TLV_BASE __MSP430_BASEADDRESS_TLV__
 
+#define TLV_CRC_LENGTH        (0x1A01)    /* CRC length of the TLV structure */
+#define TLV_CRC_VALUE         (0x1A02)    /* CRC value of the TLV structure */
 #define TLV_START             (0x1A08)    /* Start Address of the TLV structure */
 #define TLV_END               (0x1AFF)    /* End Address of the TLV structure */
 

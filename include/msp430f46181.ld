@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports MSP430F46181 devices. */
-/* Version: 1.167 */
+/* Version: 1.173 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)
@@ -45,7 +45,7 @@ MEMORY {
   INFOMEM          : ORIGIN = 0x1000, LENGTH = 0x0100 /* END=0x10FF, size 256 as 2 128-byte segments */
   INFOA            : ORIGIN = 0x1080, LENGTH = 0x0080 /* END=0x10FF, size 128 */
   INFOB            : ORIGIN = 0x1000, LENGTH = 0x0080 /* END=0x107F, size 128 */
-  ROM (rx)         : ORIGIN = 0x3100, LENGTH = 0xCEC0 /* END=0xFFBF, size 52928 */
+  ROM (rx)         : ORIGIN = 0x3100, LENGTH = 0xCEBE /* END=0xFFBD, size 52926 */
   VECT1            : ORIGIN = 0xFFC0, LENGTH = 0x0002
   VECT2            : ORIGIN = 0xFFC2, LENGTH = 0x0002
   VECT3            : ORIGIN = 0xFFC4, LENGTH = 0x0002

@@ -48,7 +48,7 @@
 #ifndef __msp430F5XX_F6XXGENERIC
 #define __msp430F5XX_F6XXGENERIC
 
-#define __MSP430_HEADER_VERSION__ 1167
+#define __MSP430_HEADER_VERSION__ 1173
 
 #define __MSP430_TI_HEADERS__
 
@@ -10517,6 +10517,8 @@ extern "C" {
 #define __MSP430_HAS_TLV__                /* Definition to show that Module is available */
 #define TLV_BASE __MSP430_BASEADDRESS_TLV__
 
+#define TLV_CRC_LENGTH        (0x1A01)    /* CRC length of the TLV structure */
+#define TLV_CRC_VALUE         (0x1A02)    /* CRC value of the TLV structure */
 #define TLV_START             (0x1A08)    /* Start Address of the TLV structure */
 #define TLV_END               (0x1AFF)    /* End Address of the TLV structure */
 
@@ -10533,6 +10535,7 @@ extern "C" {
 #define TLV_REFCAL            (0x12)      /*  REF calibration */
 #define TLV_ADC10CAL          (0x13)      /*  ADC10 calibration */
 #define TLV_TIMERDCAL         (0x15)      /*  TIMER_D calibration */
+#define TLV_CTSD16CAL         (0x1D)      /*  CTSD16 calibration */
 #define TLV_TAGEXT            (0xFE)      /*  Tag extender */
 #define TLV_TAGEND            (0xFF)      /*  Tag End of Table */
 

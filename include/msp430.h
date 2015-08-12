@@ -1740,6 +1740,9 @@
 #elif defined (__MSP430FR2033__)
 #include "msp430fr2033.h"
 
+#elif defined (__MSP430FR2433__)
+#include "msp430fr2433.h"
+
 #elif defined (__MSP430F5252__)
 #include "msp430f5252.h"
 

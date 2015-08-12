@@ -48,7 +48,7 @@
 #ifndef __msp430FR2XX_FR4XXGENERIC
 #define __msp430FR2XX_FR4XXGENERIC
 
-#define __MSP430_HEADER_VERSION__ 1167
+#define __MSP430_HEADER_VERSION__ 1173
 
 #define __MSP430_TI_HEADERS__
 
@@ -462,364 +462,140 @@ extern "C" {
 
 #endif
 /************************************************************
-* Comparator E
+* eComparator
 ************************************************************/
-#ifdef  __MSP430_HAS_COMP_E__          /* Definition to show that Module is available */
+#ifdef  __MSP430_HAS_ECOMP__            /* Definition to show that Module is available */
 
-#define OFS_CECTL0            (0x0000)  /* Comparator E Control Register 0 */
-#define OFS_CECTL0_L           OFS_CECTL0
-#define OFS_CECTL0_H           OFS_CECTL0+1
-#define OFS_CECTL1            (0x0002)  /* Comparator E Control Register 1 */
-#define OFS_CECTL1_L           OFS_CECTL1
-#define OFS_CECTL1_H           OFS_CECTL1+1
-#define OFS_CECTL2            (0x0004)  /* Comparator E Control Register 2 */
-#define OFS_CECTL2_L           OFS_CECTL2
-#define OFS_CECTL2_H           OFS_CECTL2+1
-#define OFS_CECTL3            (0x0006)  /* Comparator E Control Register 3 */
-#define OFS_CECTL3_L           OFS_CECTL3
-#define OFS_CECTL3_H           OFS_CECTL3+1
-#define OFS_CEINT             (0x000C)  /* Comparator E Interrupt Register */
-#define OFS_CEINT_L            OFS_CEINT
-#define OFS_CEINT_H            OFS_CEINT+1
-#define OFS_CEIV              (0x000E)  /* Comparator E Interrupt Vector Word */
-#define OFS_CEIV_L             OFS_CEIV
-#define OFS_CEIV_H             OFS_CEIV+1
-
-
-/* CECTL0 Control Bits */
-#define CEIPSEL0            (0x0001)  /* Comp. E Pos. Channel Input Select 0 */
-#define CEIPSEL1            (0x0002)  /* Comp. E Pos. Channel Input Select 1 */
-#define CEIPSEL2            (0x0004)  /* Comp. E Pos. Channel Input Select 2 */
-#define CEIPSEL3            (0x0008)  /* Comp. E Pos. Channel Input Select 3 */
-//#define RESERVED            (0x0010)  /* Comp. E */
-//#define RESERVED            (0x0020)  /* Comp. E */
-//#define RESERVED            (0x0040)  /* Comp. E */
-#define CEIPEN              (0x0080)  /* Comp. E Pos. Channel Input Enable */
-#define CEIMSEL0            (0x0100)  /* Comp. E Neg. Channel Input Select 0 */
-#define CEIMSEL1            (0x0200)  /* Comp. E Neg. Channel Input Select 1 */
-#define CEIMSEL2            (0x0400)  /* Comp. E Neg. Channel Input Select 2 */
-#define CEIMSEL3            (0x0800)  /* Comp. E Neg. Channel Input Select 3 */
-//#define RESERVED            (0x1000)  /* Comp. E */
-//#define RESERVED            (0x2000)  /* Comp. E */
-//#define RESERVED            (0x4000)  /* Comp. E */
-#define CEIMEN              (0x8000)  /* Comp. E Neg. Channel Input Enable */
-
-/* CECTL0 Control Bits */
-#define CEIPSEL0_L          (0x0001)  /* Comp. E Pos. Channel Input Select 0 */
-#define CEIPSEL1_L          (0x0002)  /* Comp. E Pos. Channel Input Select 1 */
-#define CEIPSEL2_L          (0x0004)  /* Comp. E Pos. Channel Input Select 2 */
-#define CEIPSEL3_L          (0x0008)  /* Comp. E Pos. Channel Input Select 3 */
-//#define RESERVED            (0x0010)  /* Comp. E */
-//#define RESERVED            (0x0020)  /* Comp. E */
-//#define RESERVED            (0x0040)  /* Comp. E */
-#define CEIPEN_L            (0x0080)  /* Comp. E Pos. Channel Input Enable */
-//#define RESERVED            (0x1000)  /* Comp. E */
-//#define RESERVED            (0x2000)  /* Comp. E */
-//#define RESERVED            (0x4000)  /* Comp. E */
-
-/* CECTL0 Control Bits */
-//#define RESERVED            (0x0010)  /* Comp. E */
-//#define RESERVED            (0x0020)  /* Comp. E */
-//#define RESERVED            (0x0040)  /* Comp. E */
-#define CEIMSEL0_H          (0x0001)  /* Comp. E Neg. Channel Input Select 0 */
-#define CEIMSEL1_H          (0x0002)  /* Comp. E Neg. Channel Input Select 1 */
-#define CEIMSEL2_H          (0x0004)  /* Comp. E Neg. Channel Input Select 2 */
-#define CEIMSEL3_H          (0x0008)  /* Comp. E Neg. Channel Input Select 3 */
-//#define RESERVED            (0x1000)  /* Comp. E */
-//#define RESERVED            (0x2000)  /* Comp. E */
-//#define RESERVED            (0x4000)  /* Comp. E */
-#define CEIMEN_H            (0x0080)  /* Comp. E Neg. Channel Input Enable */
-
-#define CEIPSEL_0           (0x0000)  /* Comp. E V+ terminal Input Select: Channel 0 */
-#define CEIPSEL_1           (0x0001)  /* Comp. E V+ terminal Input Select: Channel 1 */
-#define CEIPSEL_2           (0x0002)  /* Comp. E V+ terminal Input Select: Channel 2 */
-#define CEIPSEL_3           (0x0003)  /* Comp. E V+ terminal Input Select: Channel 3 */
-#define CEIPSEL_4           (0x0004)  /* Comp. E V+ terminal Input Select: Channel 4 */
-#define CEIPSEL_5           (0x0005)  /* Comp. E V+ terminal Input Select: Channel 5 */
-#define CEIPSEL_6           (0x0006)  /* Comp. E V+ terminal Input Select: Channel 6 */
-#define CEIPSEL_7           (0x0007)  /* Comp. E V+ terminal Input Select: Channel 7 */
-#define CEIPSEL_8           (0x0008)  /* Comp. E V+ terminal Input Select: Channel 8 */
-#define CEIPSEL_9           (0x0009)  /* Comp. E V+ terminal Input Select: Channel 9 */
-#define CEIPSEL_10          (0x000A)  /* Comp. E V+ terminal Input Select: Channel 10 */
-#define CEIPSEL_11          (0x000B)  /* Comp. E V+ terminal Input Select: Channel 11 */
-#define CEIPSEL_12          (0x000C)  /* Comp. E V+ terminal Input Select: Channel 12 */
-#define CEIPSEL_13          (0x000D)  /* Comp. E V+ terminal Input Select: Channel 13 */
-#define CEIPSEL_14          (0x000E)  /* Comp. E V+ terminal Input Select: Channel 14 */
-#define CEIPSEL_15          (0x000F)  /* Comp. E V+ terminal Input Select: Channel 15 */
-
-#define CEIMSEL_0           (0x0000)  /* Comp. E V- Terminal Input Select: Channel 0 */
-#define CEIMSEL_1           (0x0100)  /* Comp. E V- Terminal Input Select: Channel 1 */
-#define CEIMSEL_2           (0x0200)  /* Comp. E V- Terminal Input Select: Channel 2 */
-#define CEIMSEL_3           (0x0300)  /* Comp. E V- Terminal Input Select: Channel 3 */
-#define CEIMSEL_4           (0x0400)  /* Comp. E V- Terminal Input Select: Channel 4 */
-#define CEIMSEL_5           (0x0500)  /* Comp. E V- Terminal Input Select: Channel 5 */
-#define CEIMSEL_6           (0x0600)  /* Comp. E V- Terminal Input Select: Channel 6 */
-#define CEIMSEL_7           (0x0700)  /* Comp. E V- Terminal Input Select: Channel 7 */
-#define CEIMSEL_8           (0x0800)  /* Comp. E V- terminal Input Select: Channel 8 */
-#define CEIMSEL_9           (0x0900)  /* Comp. E V- terminal Input Select: Channel 9 */
-#define CEIMSEL_10          (0x0A00)  /* Comp. E V- terminal Input Select: Channel 10 */
-#define CEIMSEL_11          (0x0B00)  /* Comp. E V- terminal Input Select: Channel 11 */
-#define CEIMSEL_12          (0x0C00)  /* Comp. E V- terminal Input Select: Channel 12 */
-#define CEIMSEL_13          (0x0D00)  /* Comp. E V- terminal Input Select: Channel 13 */
-#define CEIMSEL_14          (0x0E00)  /* Comp. E V- terminal Input Select: Channel 14 */
-#define CEIMSEL_15          (0x0F00)  /* Comp. E V- terminal Input Select: Channel 15 */
-
-/* CECTL1 Control Bits */
-#define CEOUT               (0x0001)  /* Comp. E Output */
-#define CEOUTPOL            (0x0002)  /* Comp. E Output Polarity */
-#define CEF                 (0x0004)  /* Comp. E Enable Output Filter */
-#define CEIES               (0x0008)  /* Comp. E Interrupt Edge Select */
-#define CESHORT             (0x0010)  /* Comp. E Input Short */
-#define CEEX                (0x0020)  /* Comp. E Exchange Inputs */
-#define CEFDLY0             (0x0040)  /* Comp. E Filter delay Bit 0 */
-#define CEFDLY1             (0x0080)  /* Comp. E Filter delay Bit 1 */
-#define CEPWRMD0            (0x0100)  /* Comp. E Power mode Bit 0 */
-#define CEPWRMD1            (0x0200)  /* Comp. E Power mode Bit 1 */
-#define CEON                (0x0400)  /* Comp. E enable */
-#define CEMRVL              (0x0800)  /* Comp. E CEMRV Level */
-#define CEMRVS              (0x1000)  /* Comp. E Output selects between VREF0 or VREF1*/
-//#define RESERVED            (0x2000)  /* Comp. E */
-//#define RESERVED            (0x4000)  /* Comp. E */
-//#define RESERVED            (0x8000)  /* Comp. E */
-
-/* CECTL1 Control Bits */
-#define CEOUT_L             (0x0001)  /* Comp. E Output */
-#define CEOUTPOL_L          (0x0002)  /* Comp. E Output Polarity */
-#define CEF_L               (0x0004)  /* Comp. E Enable Output Filter */
-#define CEIES_L             (0x0008)  /* Comp. E Interrupt Edge Select */
-#define CESHORT_L           (0x0010)  /* Comp. E Input Short */
-#define CEEX_L              (0x0020)  /* Comp. E Exchange Inputs */
-#define CEFDLY0_L           (0x0040)  /* Comp. E Filter delay Bit 0 */
-#define CEFDLY1_L           (0x0080)  /* Comp. E Filter delay Bit 1 */
-//#define RESERVED            (0x2000)  /* Comp. E */
-//#define RESERVED            (0x4000)  /* Comp. E */
-//#define RESERVED            (0x8000)  /* Comp. E */
-
-/* CECTL1 Control Bits */
-#define CEPWRMD0_H          (0x0001)  /* Comp. E Power mode Bit 0 */
-#define CEPWRMD1_H          (0x0002)  /* Comp. E Power mode Bit 1 */
-#define CEON_H              (0x0004)  /* Comp. E enable */
-#define CEMRVL_H            (0x0008)  /* Comp. E CEMRV Level */
-#define CEMRVS_H            (0x0010)  /* Comp. E Output selects between VREF0 or VREF1*/
-//#define RESERVED            (0x2000)  /* Comp. E */
-//#define RESERVED            (0x4000)  /* Comp. E */
-//#define RESERVED            (0x8000)  /* Comp. E */
-
-#define CEPWRMD_0          (0x0000)  /* Comp. E Power mode 0 */
-#define CEPWRMD_1          (0x0100)  /* Comp. E Power mode 1 */
-#define CEPWRMD_2          (0x0200)  /* Comp. E Power mode 2 */
-#define CEPWRMD_3          (0x0300)  /* Comp. E Power mode 3*/
-
-#define CEFDLY_0           (0x0000)  /* Comp. E Filter delay 0 : 450ns */
-#define CEFDLY_1           (0x0040)  /* Comp. E Filter delay 1 : 900ns */
-#define CEFDLY_2           (0x0080)  /* Comp. E Filter delay 2 : 1800ns */
-#define CEFDLY_3           (0x00C0)  /* Comp. E Filter delay 3 : 3600ns */
+#define OFS_CPCTL0            (0x0000)  /* eComparator Control Register 0 */
+#define OFS_CPCTL0_L           OFS_CPCTL0
+#define OFS_CPCTL0_H           OFS_CPCTL0+1
+#define OFS_CPCTL1            (0x0002)  /* eComparator Control Register 1 */
+#define OFS_CPCTL1_L           OFS_CPCTL1
+#define OFS_CPCTL1_H           OFS_CPCTL1+1
+#define OFS_CPINT             (0x000C)  /* eComparator Interrupt Register */
+#define OFS_CPINT_L            OFS_CPINT
+#define OFS_CPINT_H            OFS_CPINT+1
+#define OFS_CPIV              (0x000E)  /* eComparator Interrupt Vector Word */
+#define OFS_CPIV_L             OFS_CPIV
+#define OFS_CPIV_H             OFS_CPIV+1
+#define OFS_CPDACCTL          (0x0010)  /* eComparator Built-in DAC control register */
+#define OFS_CPDACCTL_L         OFS_CPDACCTL
+#define OFS_CPDACCTL_H         OFS_CPDACCTL+1
+#define OFS_CPDACDATA         (0x0012)  /* eComparator Built-in DAC data register */
+#define OFS_CPDACDATA_L        OFS_CPDACDATA
+#define OFS_CPDACDATA_H        OFS_CPDACDATA+1
 
 
-/* CECTL2 Control Bits */
-#define CEREF00             (0x0001)  /* Comp. E Reference 0 Resistor Select Bit : 0 */
-#define CEREF01             (0x0002)  /* Comp. E Reference 0 Resistor Select Bit : 1 */
-#define CEREF02             (0x0004)  /* Comp. E Reference 0 Resistor Select Bit : 2 */
-#define CEREF03             (0x0008)  /* Comp. E Reference 0 Resistor Select Bit : 3 */
-#define CEREF04             (0x0010)  /* Comp. E Reference 0 Resistor Select Bit : 4 */
-#define CERSEL              (0x0020)  /* Comp. E Reference select */
-#define CERS0               (0x0040)  /* Comp. E Reference Source Bit : 0 */
-#define CERS1               (0x0080)  /* Comp. E Reference Source Bit : 1 */
-#define CEREF10             (0x0100)  /* Comp. E Reference 1 Resistor Select Bit : 0 */
-#define CEREF11             (0x0200)  /* Comp. E Reference 1 Resistor Select Bit : 1 */
-#define CEREF12             (0x0400)  /* Comp. E Reference 1 Resistor Select Bit : 2 */
-#define CEREF13             (0x0800)  /* Comp. E Reference 1 Resistor Select Bit : 3 */
-#define CEREF14             (0x1000)  /* Comp. E Reference 1 Resistor Select Bit : 4 */
-#define CEREFL0             (0x2000)  /* Comp. E Reference voltage level Bit : 0 */
-#define CEREFL1             (0x4000)  /* Comp. E Reference voltage level Bit : 1 */
-#define CEREFACC            (0x8000)  /* Comp. E Reference Accuracy */
+/* CPCTL0 Control Bits */
+#define CPPSEL0            (0x0001)  /* eComp. Pos. Channel Input Select 0 */
+#define CPPSEL1            (0x0002)  /* eComp. Pos. Channel Input Select 1 */
+#define CPPSEL2            (0x0004)  /* eComp. Pos. Channel Input Select 2 */
+#define CPPEN              (0x0010)  /* eComp. Pos. Channel Input Enable */
+#define CPNSEL0            (0x0100)  /* eComp. Neg. Channel Input Select 0 */
+#define CPNSEL1            (0x0200)  /* eComp. Neg. Channel Input Select 1 */
+#define CPNSEL2            (0x0400)  /* eComp. Neg. Channel Input Select 2 */
+#define CPNEN              (0x1000)  /* eComp. Neg. Channel Input Enable */
 
-/* CECTL2 Control Bits */
-#define CEREF00_L           (0x0001)  /* Comp. E Reference 0 Resistor Select Bit : 0 */
-#define CEREF01_L           (0x0002)  /* Comp. E Reference 0 Resistor Select Bit : 1 */
-#define CEREF02_L           (0x0004)  /* Comp. E Reference 0 Resistor Select Bit : 2 */
-#define CEREF03_L           (0x0008)  /* Comp. E Reference 0 Resistor Select Bit : 3 */
-#define CEREF04_L           (0x0010)  /* Comp. E Reference 0 Resistor Select Bit : 4 */
-#define CERSEL_L            (0x0020)  /* Comp. E Reference select */
-#define CERS0_L             (0x0040)  /* Comp. E Reference Source Bit : 0 */
-#define CERS1_L             (0x0080)  /* Comp. E Reference Source Bit : 1 */
+/* CPCTL0 Control Bits */
+#define CPPSEL0_L           (0x0001)  /* eComp. Pos. Channel Input Select 0 */
+#define CPPSEL1_L           (0x0002)  /* eComp. Pos. Channel Input Select 1 */
+#define CPPSEL2_L           (0x0004)  /* eComp. Pos. Channel Input Select 2 */
+#define CPPEN_L             (0x0010)  /* eComp. Pos. Channel Input Enable */
 
-/* CECTL2 Control Bits */
-#define CEREF10_H           (0x0001)  /* Comp. E Reference 1 Resistor Select Bit : 0 */
-#define CEREF11_H           (0x0002)  /* Comp. E Reference 1 Resistor Select Bit : 1 */
-#define CEREF12_H           (0x0004)  /* Comp. E Reference 1 Resistor Select Bit : 2 */
-#define CEREF13_H           (0x0008)  /* Comp. E Reference 1 Resistor Select Bit : 3 */
-#define CEREF14_H           (0x0010)  /* Comp. E Reference 1 Resistor Select Bit : 4 */
-#define CEREFL0_H           (0x0020)  /* Comp. E Reference voltage level Bit : 0 */
-#define CEREFL1_H           (0x0040)  /* Comp. E Reference voltage level Bit : 1 */
-#define CEREFACC_H          (0x0080)  /* Comp. E Reference Accuracy */
+/* CPCTL0 Control Bits */
+#define CPNSEL0_H           (0x0001)  /* eComp. Neg. Channel Input Select 0 */
+#define CPNSEL1_H           (0x0002)  /* eComp. Neg. Channel Input Select 1 */
+#define CPNSEL2_H           (0x0004)  /* eComp. Neg. Channel Input Select 2 */
+#define CPNEN_H             (0x0010)  /* eComp. Neg. Channel Input Enable */
 
-#define CEREF0_0            (0x0000)  /* Comp. E Int. Ref.0 Select 0 : 1/32 */
-#define CEREF0_1            (0x0001)  /* Comp. E Int. Ref.0 Select 1 : 2/32 */
-#define CEREF0_2            (0x0002)  /* Comp. E Int. Ref.0 Select 2 : 3/32 */
-#define CEREF0_3            (0x0003)  /* Comp. E Int. Ref.0 Select 3 : 4/32 */
-#define CEREF0_4            (0x0004)  /* Comp. E Int. Ref.0 Select 4 : 5/32 */
-#define CEREF0_5            (0x0005)  /* Comp. E Int. Ref.0 Select 5 : 6/32 */
-#define CEREF0_6            (0x0006)  /* Comp. E Int. Ref.0 Select 6 : 7/32 */
-#define CEREF0_7            (0x0007)  /* Comp. E Int. Ref.0 Select 7 : 8/32 */
-#define CEREF0_8            (0x0008)  /* Comp. E Int. Ref.0 Select 0 : 9/32 */
-#define CEREF0_9            (0x0009)  /* Comp. E Int. Ref.0 Select 1 : 10/32 */
-#define CEREF0_10           (0x000A)  /* Comp. E Int. Ref.0 Select 2 : 11/32 */
-#define CEREF0_11           (0x000B)  /* Comp. E Int. Ref.0 Select 3 : 12/32 */
-#define CEREF0_12           (0x000C)  /* Comp. E Int. Ref.0 Select 4 : 13/32 */
-#define CEREF0_13           (0x000D)  /* Comp. E Int. Ref.0 Select 5 : 14/32 */
-#define CEREF0_14           (0x000E)  /* Comp. E Int. Ref.0 Select 6 : 15/32 */
-#define CEREF0_15           (0x000F)  /* Comp. E Int. Ref.0 Select 7 : 16/32 */
-#define CEREF0_16           (0x0010)  /* Comp. E Int. Ref.0 Select 0 : 17/32 */
-#define CEREF0_17           (0x0011)  /* Comp. E Int. Ref.0 Select 1 : 18/32 */
-#define CEREF0_18           (0x0012)  /* Comp. E Int. Ref.0 Select 2 : 19/32 */
-#define CEREF0_19           (0x0013)  /* Comp. E Int. Ref.0 Select 3 : 20/32 */
-#define CEREF0_20           (0x0014)  /* Comp. E Int. Ref.0 Select 4 : 21/32 */
-#define CEREF0_21           (0x0015)  /* Comp. E Int. Ref.0 Select 5 : 22/32 */
-#define CEREF0_22           (0x0016)  /* Comp. E Int. Ref.0 Select 6 : 23/32 */
-#define CEREF0_23           (0x0017)  /* Comp. E Int. Ref.0 Select 7 : 24/32 */
-#define CEREF0_24           (0x0018)  /* Comp. E Int. Ref.0 Select 0 : 25/32 */
-#define CEREF0_25           (0x0019)  /* Comp. E Int. Ref.0 Select 1 : 26/32 */
-#define CEREF0_26           (0x001A)  /* Comp. E Int. Ref.0 Select 2 : 27/32 */
-#define CEREF0_27           (0x001B)  /* Comp. E Int. Ref.0 Select 3 : 28/32 */
-#define CEREF0_28           (0x001C)  /* Comp. E Int. Ref.0 Select 4 : 29/32 */
-#define CEREF0_29           (0x001D)  /* Comp. E Int. Ref.0 Select 5 : 30/32 */
-#define CEREF0_30           (0x001E)  /* Comp. E Int. Ref.0 Select 6 : 31/32 */
-#define CEREF0_31           (0x001F)  /* Comp. E Int. Ref.0 Select 7 : 32/32 */
+#define CPPSEL_0           (0x0000)  /* eComp. V+ terminal Input Select: Channel 0 */
+#define CPPSEL_1           (0x0001)  /* eComp. V+ terminal Input Select: Channel 1 */
+#define CPPSEL_2           (0x0002)  /* eComp. V+ terminal Input Select: Channel 2 */
+#define CPPSEL_3           (0x0003)  /* eComp. V+ terminal Input Select: Channel 3 */
+#define CPPSEL_4           (0x0004)  /* eComp. V+ terminal Input Select: Channel 4 */
+#define CPPSEL_5           (0x0005)  /* eComp. V+ terminal Input Select: Channel 5 */
+#define CPPSEL_6           (0x0006)  /* eComp. V+ terminal Input Select: Channel 6 */
+#define CPPSEL_7           (0x0007)  /* eComp. V+ terminal Input Select: Channel 7 */
 
-#define CERS_0              (0x0000)  /* Comp. E Reference Source 0 : Off */
-#define CERS_1              (0x0040)  /* Comp. E Reference Source 1 : Vcc */
-#define CERS_2              (0x0080)  /* Comp. E Reference Source 2 : Shared Ref. */
-#define CERS_3              (0x00C0)  /* Comp. E Reference Source 3 : Shared Ref. / Off */
+#define CPNSEL_0           (0x0000)  /* eComp. V- Terminal Input Select: Channel 0 */
+#define CPNSEL_1           (0x0100)  /* eComp. V- Terminal Input Select: Channel 1 */
+#define CPNSEL_2           (0x0200)  /* eComp. V- Terminal Input Select: Channel 2 */
+#define CPNSEL_3           (0x0300)  /* eComp. V- Terminal Input Select: Channel 3 */
+#define CPNSEL_4           (0x0400)  /* eComp. V- Terminal Input Select: Channel 4 */
+#define CPNSEL_5           (0x0500)  /* eComp. V- Terminal Input Select: Channel 5 */
+#define CPNSEL_6           (0x0600)  /* eComp. V- Terminal Input Select: Channel 6 */
+#define CPNSEL_7           (0x0700)  /* eComp. V- Terminal Input Select: Channel 7 */
 
-#define CEREF1_0            (0x0000)  /* Comp. E Int. Ref.1 Select 0 : 1/32 */
-#define CEREF1_1            (0x0100)  /* Comp. E Int. Ref.1 Select 1 : 2/32 */
-#define CEREF1_2            (0x0200)  /* Comp. E Int. Ref.1 Select 2 : 3/32 */
-#define CEREF1_3            (0x0300)  /* Comp. E Int. Ref.1 Select 3 : 4/32 */
-#define CEREF1_4            (0x0400)  /* Comp. E Int. Ref.1 Select 4 : 5/32 */
-#define CEREF1_5            (0x0500)  /* Comp. E Int. Ref.1 Select 5 : 6/32 */
-#define CEREF1_6            (0x0600)  /* Comp. E Int. Ref.1 Select 6 : 7/32 */
-#define CEREF1_7            (0x0700)  /* Comp. E Int. Ref.1 Select 7 : 8/32 */
-#define CEREF1_8            (0x0800)  /* Comp. E Int. Ref.1 Select 0 : 9/32 */
-#define CEREF1_9            (0x0900)  /* Comp. E Int. Ref.1 Select 1 : 10/32 */
-#define CEREF1_10           (0x0A00)  /* Comp. E Int. Ref.1 Select 2 : 11/32 */
-#define CEREF1_11           (0x0B00)  /* Comp. E Int. Ref.1 Select 3 : 12/32 */
-#define CEREF1_12           (0x0C00)  /* Comp. E Int. Ref.1 Select 4 : 13/32 */
-#define CEREF1_13           (0x0D00)  /* Comp. E Int. Ref.1 Select 5 : 14/32 */
-#define CEREF1_14           (0x0E00)  /* Comp. E Int. Ref.1 Select 6 : 15/32 */
-#define CEREF1_15           (0x0F00)  /* Comp. E Int. Ref.1 Select 7 : 16/32 */
-#define CEREF1_16           (0x1000)  /* Comp. E Int. Ref.1 Select 0 : 17/32 */
-#define CEREF1_17           (0x1100)  /* Comp. E Int. Ref.1 Select 1 : 18/32 */
-#define CEREF1_18           (0x1200)  /* Comp. E Int. Ref.1 Select 2 : 19/32 */
-#define CEREF1_19           (0x1300)  /* Comp. E Int. Ref.1 Select 3 : 20/32 */
-#define CEREF1_20           (0x1400)  /* Comp. E Int. Ref.1 Select 4 : 21/32 */
-#define CEREF1_21           (0x1500)  /* Comp. E Int. Ref.1 Select 5 : 22/32 */
-#define CEREF1_22           (0x1600)  /* Comp. E Int. Ref.1 Select 6 : 23/32 */
-#define CEREF1_23           (0x1700)  /* Comp. E Int. Ref.1 Select 7 : 24/32 */
-#define CEREF1_24           (0x1800)  /* Comp. E Int. Ref.1 Select 0 : 25/32 */
-#define CEREF1_25           (0x1900)  /* Comp. E Int. Ref.1 Select 1 : 26/32 */
-#define CEREF1_26           (0x1A00)  /* Comp. E Int. Ref.1 Select 2 : 27/32 */
-#define CEREF1_27           (0x1B00)  /* Comp. E Int. Ref.1 Select 3 : 28/32 */
-#define CEREF1_28           (0x1C00)  /* Comp. E Int. Ref.1 Select 4 : 29/32 */
-#define CEREF1_29           (0x1D00)  /* Comp. E Int. Ref.1 Select 5 : 30/32 */
-#define CEREF1_30           (0x1E00)  /* Comp. E Int. Ref.1 Select 6 : 31/32 */
-#define CEREF1_31           (0x1F00)  /* Comp. E Int. Ref.1 Select 7 : 32/32 */
+/* CPCTL1 Control Bits */
+#define CPOUT               (0x0001)  /* eComp. Output */
+#define CPINV               (0x0002)  /* eComp. Output Polarity */
+#define CPIES               (0x0010)  /* eComp. Interrupt Edge Select */
+#define CPFLT               (0x0020)  /* eComp. Enable Output Filter */
+#define CPFILTDLY0          (0x0040)  /* eComp. Filter delay Bit 0 */
+#define CPFILTDLY1          (0x0080)  /* eComp. Filter delay Bit 1 */
+#define CPMSEL              (0x0100)  /* eComp. Power mode selection */
+#define CPEN                (0x0200)  /* eComp. enable */
+#define CPHSEL0             (0x0400)  /* eComp. Programable Hysteresis mode Bit: 0 */
+#define CPHSEL1             (0x0800)  /* eComp. Programable Hysteresis mode Bit: 1 */
+#define CPIE                (0x4000)  /* eComp. Interrupt Enable */
+#define CPIIE               (0x8000)  /* eComp. Inverted Interrupt Enable */
 
-#define CEREFL_0            (0x0000)  /* Comp. E Reference voltage level 0 : None */
-#define CEREFL_1            (0x2000)  /* Comp. E Reference voltage level 1 : 1.2V */
-#define CEREFL_2            (0x4000)  /* Comp. E Reference voltage level 2 : 2.0V  */
-#define CEREFL_3            (0x6000)  /* Comp. E Reference voltage level 3 : 2.5V  */
+/* CPCTL1 Control Bits */
+#define CPOUT_L             (0x0001)  /* eComp. Output */
+#define CPINV_L             (0x0002)  /* eComp. Output Polarity */
+#define CPIES_L             (0x0010)  /* eComp. Interrupt Edge Select */
+#define CPFLT_L             (0x0020)  /* eComp. Enable Output Filter */
+#define CPFILTDLY0_L        (0x0040)  /* eComp. Filter delay Bit 0 */
+#define CPFILTDLY1_L        (0x0080)  /* eComp. Filter delay Bit 1 */
+
+/* CPCTL1 Control Bits */
+#define CPMSEL_H            (0x0001)  /* eComp. Power mode selection */
+#define CPEN_H              (0x0002)  /* eComp. enable */
+#define CPHSEL0_H           (0x0004)  /* eComp. Programable Hysteresis mode Bit: 0 */
+#define CPHSEL1_H           (0x0008)  /* eComp. Programable Hysteresis mode Bit: 1 */
+#define CPIE_H              (0x0040)  /* eComp. Interrupt Enable */
+#define CPIIE_H             (0x0080)  /* eComp. Inverted Interrupt Enable */
+
+#define CPFILTDLY_0        (0x0000)  /* eComp. Filter delay 0 : 450ns */
+#define CPFILTDLY_1        (0x0040)  /* eComp. Filter delay 1 : 900ns */
+#define CPFILTDLY_2        (0x0080)  /* eComp. Filter delay 2 : 1800ns */
+#define CPFILTDLY_3        (0x00C0)  /* eComp. Filter delay 3 : 3600ns */
+
+#define CPHSEL_0           (0x0000)  /* eComp. Programable Hysteresis mode 0 */
+#define CPHSEL_1           (0x0400)  /* eComp. Programable Hysteresis mode 1 */
+#define CPHSEL_2           (0x0800)  /* eComp. Programable Hysteresis mode 2 */
+#define CPHSEL_3           (0x0C00)  /* eComp. Programable Hysteresis mode 3*/
 
 
-#define CEPD0               (0x0001)  /* Comp. E Disable Input Buffer of Port Register .0 */
-#define CEPD1               (0x0002)  /* Comp. E Disable Input Buffer of Port Register .1 */
-#define CEPD2               (0x0004)  /* Comp. E Disable Input Buffer of Port Register .2 */
-#define CEPD3               (0x0008)  /* Comp. E Disable Input Buffer of Port Register .3 */
-#define CEPD4               (0x0010)  /* Comp. E Disable Input Buffer of Port Register .4 */
-#define CEPD5               (0x0020)  /* Comp. E Disable Input Buffer of Port Register .5 */
-#define CEPD6               (0x0040)  /* Comp. E Disable Input Buffer of Port Register .6 */
-#define CEPD7               (0x0080)  /* Comp. E Disable Input Buffer of Port Register .7 */
-#define CEPD8               (0x0100)  /* Comp. E Disable Input Buffer of Port Register .8 */
-#define CEPD9               (0x0200)  /* Comp. E Disable Input Buffer of Port Register .9 */
-#define CEPD10              (0x0400)  /* Comp. E Disable Input Buffer of Port Register .10 */
-#define CEPD11              (0x0800)  /* Comp. E Disable Input Buffer of Port Register .11 */
-#define CEPD12              (0x1000)  /* Comp. E Disable Input Buffer of Port Register .12 */
-#define CEPD13              (0x2000)  /* Comp. E Disable Input Buffer of Port Register .13 */
-#define CEPD14              (0x4000)  /* Comp. E Disable Input Buffer of Port Register .14 */
-#define CEPD15              (0x8000)  /* Comp. E Disable Input Buffer of Port Register .15 */
+/* CPINT Control Bits */
+#define CPIFG                (0x0001)  /* eComp. Interrupt Flag */
+#define CPIIFG               (0x0002)  /* eComp. Interrupt Flag Inverted Polarity */
 
-#define CEPD0_L             (0x0001)  /* Comp. E Disable Input Buffer of Port Register .0 */
-#define CEPD1_L             (0x0002)  /* Comp. E Disable Input Buffer of Port Register .1 */
-#define CEPD2_L             (0x0004)  /* Comp. E Disable Input Buffer of Port Register .2 */
-#define CEPD3_L             (0x0008)  /* Comp. E Disable Input Buffer of Port Register .3 */
-#define CEPD4_L             (0x0010)  /* Comp. E Disable Input Buffer of Port Register .4 */
-#define CEPD5_L             (0x0020)  /* Comp. E Disable Input Buffer of Port Register .5 */
-#define CEPD6_L             (0x0040)  /* Comp. E Disable Input Buffer of Port Register .6 */
-#define CEPD7_L             (0x0080)  /* Comp. E Disable Input Buffer of Port Register .7 */
-
-#define CEPD8_H             (0x0001)  /* Comp. E Disable Input Buffer of Port Register .8 */
-#define CEPD9_H             (0x0002)  /* Comp. E Disable Input Buffer of Port Register .9 */
-#define CEPD10_H            (0x0004)  /* Comp. E Disable Input Buffer of Port Register .10 */
-#define CEPD11_H            (0x0008)  /* Comp. E Disable Input Buffer of Port Register .11 */
-#define CEPD12_H            (0x0010)  /* Comp. E Disable Input Buffer of Port Register .12 */
-#define CEPD13_H            (0x0020)  /* Comp. E Disable Input Buffer of Port Register .13 */
-#define CEPD14_H            (0x0040)  /* Comp. E Disable Input Buffer of Port Register .14 */
-#define CEPD15_H            (0x0080)  /* Comp. E Disable Input Buffer of Port Register .15 */
+/* CPINT Control Bits */
+#define CPIFG_L             (0x0001)  /* eComp. Interrupt Flag */
+#define CPIIFG_L            (0x0002)  /* eComp. Interrupt Flag Inverted Polarity */
 
 
-/* CEINT Control Bits */
-#define CEIFG                (0x0001)  /* Comp. E Interrupt Flag */
-#define CEIIFG               (0x0002)  /* Comp. E Interrupt Flag Inverted Polarity */
-//#define RESERVED             (0x0004)  /* Comp. E */
-//#define RESERVED             (0x0008)  /* Comp. E */
-#define CERDYIFG             (0x0010)  /* Comp. E Comparator_E ready interrupt flag */
-//#define RESERVED             (0x0020)  /* Comp. E */
-//#define RESERVED             (0x0040)  /* Comp. E */
-//#define RESERVED             (0x0080)  /* Comp. E */
-#define CEIE                 (0x0100)  /* Comp. E Interrupt Enable */
-#define CEIIE                (0x0200)  /* Comp. E Interrupt Enable Inverted Polarity */
-//#define RESERVED             (0x0400)  /* Comp. E */
-//#define RESERVED             (0x0800)  /* Comp. E */
-#define CERDYIE              (0x1000)  /* Comp. E Comparator_E ready interrupt enable */
-//#define RESERVED             (0x2000)  /* Comp. E */
-//#define RESERVED             (0x4000)  /* Comp. E */
-//#define RESERVED             (0x8000)  /* Comp. E */
+/* CPIV Definitions */
+#define CPIV_NONE           (0x0000)    /* No Interrupt pending */
+#define CPIV_CPIFG          (0x0002)    /* CPIFG */
+#define CPIV_CPIIFG         (0x0004)    /* CPIIFG */
 
-/* CEINT Control Bits */
-#define CEIFG_L             (0x0001)  /* Comp. E Interrupt Flag */
-#define CEIIFG_L            (0x0002)  /* Comp. E Interrupt Flag Inverted Polarity */
-//#define RESERVED             (0x0004)  /* Comp. E */
-//#define RESERVED             (0x0008)  /* Comp. E */
-#define CERDYIFG_L          (0x0010)  /* Comp. E Comparator_E ready interrupt flag */
-//#define RESERVED             (0x0020)  /* Comp. E */
-//#define RESERVED             (0x0040)  /* Comp. E */
-//#define RESERVED             (0x0080)  /* Comp. E */
-//#define RESERVED             (0x0400)  /* Comp. E */
-//#define RESERVED             (0x0800)  /* Comp. E */
-//#define RESERVED             (0x2000)  /* Comp. E */
-//#define RESERVED             (0x4000)  /* Comp. E */
-//#define RESERVED             (0x8000)  /* Comp. E */
+/* CPDACCTL Control Bits */
+#define CPDACSW             (0x0001)  /* CPDACBUFx select */
+#define CPDACBUFS           (0x0002)  /* eComparator built-in DAC buffer controlled source selection */
+#define CPDACREFS           (0x0004)  /* eComparator built-in DAC reference voltage selection */
+#define CPDACEN             (0x0080)  /* eComparator built-in DAC output enable */
 
-/* CEINT Control Bits */
-//#define RESERVED             (0x0004)  /* Comp. E */
-//#define RESERVED             (0x0008)  /* Comp. E */
-//#define RESERVED             (0x0020)  /* Comp. E */
-//#define RESERVED             (0x0040)  /* Comp. E */
-//#define RESERVED             (0x0080)  /* Comp. E */
-#define CEIE_H              (0x0001)  /* Comp. E Interrupt Enable */
-#define CEIIE_H             (0x0002)  /* Comp. E Interrupt Enable Inverted Polarity */
-//#define RESERVED             (0x0400)  /* Comp. E */
-//#define RESERVED             (0x0800)  /* Comp. E */
-#define CERDYIE_H           (0x0010)  /* Comp. E Comparator_E ready interrupt enable */
-//#define RESERVED             (0x2000)  /* Comp. E */
-//#define RESERVED             (0x4000)  /* Comp. E */
-//#define RESERVED             (0x8000)  /* Comp. E */
+/* CPDACCTL Control Bits */
+#define CPDACSW_L           (0x0001)  /* CPDACBUFx select */
+#define CPDACBUFS_L         (0x0002)  /* eComparator built-in DAC buffer controlled source selection */
+#define CPDACREFS_L         (0x0004)  /* eComparator built-in DAC reference voltage selection */
+#define CPDACEN_L           (0x0080)  /* eComparator built-in DAC output enable */
 
-/* CEIV Definitions */
-#define CEIV_NONE           (0x0000)    /* No Interrupt pending */
-#define CEIV_CEIFG          (0x0002)    /* CEIFG */
-#define CEIV_CEIIFG         (0x0004)    /* CEIIFG */
-#define CEIV_CERDYIFG       (0x000A)    /* CERDYIFG */
+
+/* CPDACDATA Control Bits */
+
 
 #endif
 /*************************************************************
@@ -3552,6 +3328,49 @@ extern "C" {
 #define RTCIV_NONE          (0x0000)  /* No Interrupt pending */
 #define RTCIV_RTCIF         (0x0002)  /* RTC Overflow */
 
+#endif
+/************************************************************
+* Smart Analog Combo 0 - Config 1 (SAC0)
+************************************************************/
+#ifdef  __MSP430_HAS_SAC0__           /* Definition to show that Module is available */
+
+#define OFS_SAC0OA            (0x0000)  /* SAC0 OA Control Register */
+#define OFS_SAC0OA_L           OFS_SAC0OA
+#define OFS_SAC0OA_H           OFS_SAC0OA+1
+
+/* SAC0OA Control Bits */
+#define PSEL0               (0x0001)    /* SAC OA Positive input source selection Bit: 0 */
+#define PSEL1               (0x0002)    /* SAC OA Positive input source selection Bit: 1 */
+#define PMUXEN              (0x0008)    /* SAC Positive input MUX control */
+#define NSEL0               (0x0010)    /* SAC OA Negative input source selection Bit: 0 */
+#define NSEL1               (0x0020)    /* SAC OA Negative input source selection Bit: 1 */
+#define NMUXEN              (0x0080)    /* SAC Negative input MUX control */
+#define OAEN                (0x0100)    /* SAC OA Enable selection */
+#define OAPM                (0x0200)    /* SAC OA power mode selection */
+#define SACEN               (0x0400)    /* SAC Enable selection */
+
+/* SAC0OA Control Bits */
+#define PSEL0_L             (0x0001)    /* SAC OA Positive input source selection Bit: 0 */
+#define PSEL1_L             (0x0002)    /* SAC OA Positive input source selection Bit: 1 */
+#define PMUXEN_L            (0x0008)    /* SAC Positive input MUX control */
+#define NSEL0_L             (0x0010)    /* SAC OA Negative input source selection Bit: 0 */
+#define NSEL1_L             (0x0020)    /* SAC OA Negative input source selection Bit: 1 */
+#define NMUXEN_L            (0x0080)    /* SAC Negative input MUX control */
+
+/* SAC0OA Control Bits */
+#define OAEN_H              (0x0001)    /* SAC OA Enable selection */
+#define OAPM_H              (0x0002)    /* SAC OA power mode selection */
+#define SACEN_H             (0x0004)    /* SAC Enable selection */
+
+#define PSEL_0              (0x0000)    /* SAC OA Positive input source selection: 0 */
+#define PSEL_1              (0x0001)    /* SAC OA Positive input source selection: 1 */
+#define PSEL_2              (0x0002)    /* SAC OA Positive input source selection: 2 */
+#define PSEL_3              (0x0003)    /* SAC OA Positive input source selection: 3 */
+
+#define NSEL_0              (0x0000)    /* SAC OA Negative input source selection: 0 */
+#define NSEL_1              (0x0010)    /* SAC OA Negative input source selection: 1 */
+#define NSEL_2              (0x0020)    /* SAC OA Negative input source selection: 2 */
+#define NSEL_3              (0x0030)    /* SAC OA Negative input source selection: 3 */
 
 #endif
 /************************************************************
@@ -4158,6 +3977,36 @@ extern "C" {
 #define ID_1                   (0x0040)      /* Timer B input divider: 1 - /2 */
 #define ID_2                   (0x0080)      /* Timer B input divider: 2 - /4 */
 #define ID_3                   (0x00C0)      /* Timer B input divider: 3 - /8 */
+
+#endif
+/************************************************************
+* Transimpedance amplifier (TRI)
+************************************************************/
+#ifdef  __MSP430_HAS_TRI__            /* Definition to show that Module is available */
+
+#define OFS_TRICTL            (0x0000)  /* TRI Control register 0 */
+#define OFS_TRICTL_L           OFS_TRICTL
+#define OFS_TRICTL_H           OFS_TRICTL+1
+
+/* TRICTL Control Bits */
+#define TRIEN               (0x0001)    /* TRI enable */
+#define TRIPM               (0x0002)    /* TRI power mode select */
+#define TRIOUTSEL           (0x0008)    /* TRI output to package terminal selection */
+#define TRIPSEL0            (0x0040)    /* TRI positive input select Bit: 0 */
+#define TRIPSEL1            (0x0080)    /* TRI positive input select Bit: 1 */
+
+/* TRICTL Control Bits */
+#define TRIEN_L             (0x0001)    /* TRI enable */
+#define TRIPM_L             (0x0002)    /* TRI power mode select */
+#define TRIOUTSEL_L         (0x0008)    /* TRI output to package terminal selection */
+#define TRIPSEL0_L          (0x0040)    /* TRI positive input select Bit: 0 */
+#define TRIPSEL1_L          (0x0080)    /* TRI positive input select Bit: 1 */
+
+
+#define TRIPSEL_0           (0x0000)    /* TRI positive input select: 0 */
+#define TRIPSEL_1           (0x0040)    /* TRI positive input select: 1 */
+#define TRIPSEL_2           (0x0080)    /* TRI positive input select: 2 */
+#define TRIPSEL_3           (0x00C0)    /* TRI positive input select: 3 */
 
 #endif
 /************************************************************
@@ -4916,11 +4765,14 @@ extern "C" {
 /************************************************************
 * TLV Descriptors
 ************************************************************/
-#define __MSP430_HAS_TLV__                /* Definition to show that Module is available */
+#define __MSP430_HAS_TLV__              /* Definition to show that Module is available */
 #define TLV_BASE __MSP430_BASEADDRESS_TLV__
 
+#define TLV_CRC_LENGTH        (0x1A01)    /* CRC length of the TLV structure */
+#define TLV_CRC_VALUE         (0x1A02)    /* CRC value of the TLV structure */
 #define TLV_START             (0x1A08)    /* Start Address of the TLV structure */
 #define TLV_END               (0x1AFF)    /* End Address of the TLV structure */
+#define TLV_CRC_START         (0x1A04)    /* Start Address of the CRC protected structure */
 
 #define TLV_LDTAG             (0x01)      /*  Legacy descriptor (1xx, 2xx, 4xx families) */
 #define TLV_PDTAG             (0x02)      /*  Peripheral discovery descriptor */
@@ -4932,11 +4784,11 @@ extern "C" {
 #define TLV_DIERECORD         (0x08)      /*  Die Record  */
 #define TLV_ADCCAL            (0x11)      /*  ADC12 calibration */
 #define TLV_ADC12CAL          (0x11)      /*  ADC12 calibration */
-#define TLV_REFCAL            (0x12)      /*  REF calibration */
 #define TLV_ADC10CAL          (0x13)      /*  ADC10 calibration */
-#define TLV_TIMERDCAL         (0x15)      /*  TIMER_D calibration */
+#define TLV_REFCAL            (0x12)      /*  REF calibration */
 #define TLV_TAGEXT            (0xFE)      /*  Tag extender */
-#define TLV_TAGEND            (0xFF)      /*  Tag End of Table */
+#define TLV_TAGEND            (0xFF)      //  Tag End of Table
+
 
 /************************************************************
 * Interrupt Vectors (offset from 0xFF80)

@@ -31,7 +31,7 @@
 /* ============================================================================ */
 
 /* This file supports CC430F5133 devices. */
-/* Version: 1.167 */
+/* Version: 1.173 */
 /* Default linker script, for normal executables */
 
 OUTPUT_ARCH(msp430)

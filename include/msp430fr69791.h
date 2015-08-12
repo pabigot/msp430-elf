@@ -48,7 +48,7 @@
 #ifndef __MSP430FR69791
 #define __MSP430FR69791
 
-#define __MSP430_HEADER_VERSION__ 1167
+#define __MSP430_HEADER_VERSION__ 1173
 
 #define __MSP430_TI_HEADERS__
 
@@ -4747,9 +4747,9 @@ sfrw(SYSRSTIV, SYSRSTIV_);
 
 /* SYSSNIV Definitions */
 #define SYSSNIV_NONE       (0x0000)    /* No Interrupt pending */
-#define SYSSNIV_SVS        (0x0002)    /* SYSSNIV : SVS low_power reset */
+#define SYSSNIV_RES02      (0x0002)    /* SYSSNIV : Reserved */
 #define SYSSNIV_UBDIFG     (0x0004)    /* SYSSNIV : FRAM Uncorrectable bit Error */
-#define SYSSNIV_ACCTEIFG   (0x0006)    /* SYSSNIV : Access time error */
+#define SYSSNIV_RES06      (0x0006)    /* SYSSNIV : Reserved */
 #define SYSSNIV_MPUSEGPIFG (0x0008)    /* SYSSNIV : MPUSEGPIFG violation */
 #define SYSSNIV_MPUSEGIIFG (0x000A)    /* SYSSNIV : MPUSEGIIFG violation */
 #define SYSSNIV_MPUSEG1IFG (0x000C)    /* SYSSNIV : MPUSEG1IFG violation */
@@ -6078,6 +6078,8 @@ sfrw(WDTCTL, WDTCTL_);
 #define __MSP430_HAS_TLV__              /* Definition to show that Module is available */
 #define TLV_BASE __MSP430_BASEADDRESS_TLV__
 
+#define TLV_CRC_LENGTH        (0x1A01)    /* CRC length of the TLV structure */
+#define TLV_CRC_VALUE         (0x1A02)    /* CRC value of the TLV structure */
 #define TLV_START             (0x1A08)    /* Start Address of the TLV structure */
 #define TLV_END               (0x1AFF)    /* End Address of the TLV structure */
 

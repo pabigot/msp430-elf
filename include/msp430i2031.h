@@ -48,7 +48,7 @@
 #ifndef __MSP430i2031
 #define __MSP430i2031
 
-#define __MSP430_HEADER_VERSION__ 1167
+#define __MSP430_HEADER_VERSION__ 1173
 
 #define __MSP430_TI_HEADERS__
 
@@ -1465,6 +1465,7 @@ sfrw(WDTCTL, WDTCTL_);
 #define __MSP430_HAS_TLV__                 /* Definition to show that Module is available */
 
 #define TLV_START             (0x13C0u)    /* Start Address of the TLV structure */
+#define TLV_CRC_VALUE         (0x13C0u)    /* CRC value of the TLV structure */
 #define TLV_END               (0x13FFu)    /* End Address of the TLV structure */
 #define JTAG_DIS_PWD1         (0xFFDC)
 #define JTAG_DIS_PWD2         (0xFFDE)

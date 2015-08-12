@@ -49,7 +49,7 @@
 #ifndef __MSP430F6766A
 #define __MSP430F6766A
 
-#define __MSP430_HEADER_VERSION__ 1167
+#define __MSP430_HEADER_VERSION__ 1173
 
 #define __MSP430_TI_HEADERS__
 
@@ -1470,7 +1470,7 @@ sfrw(DMA2SZ, DMA2SZ_);
 #define DMA0TSEL__USCIB0TX  (0x0017) /* DMA channel 0 transfer select 23: USCIB0 transmit */
 #define DMA0TSEL__ADC10IFG0 (0x0018) /* DMA channel 0 transfer select 24: ADC10IFG0 */
 #define DMA0TSEL__USCIA3RX  (0x0019) /* DMA channel 0 transfer select 25: USCIA3 receive */
-#define DMA0TSEL__USCIB3TX  (0x001A) /* DMA channel 0 transfer select 26: USCIA3 transmit */
+#define DMA0TSEL__USCIA3TX  (0x001A) /* DMA channel 0 transfer select 26: USCIA3 transmit */
 #define DMA0TSEL__USCIB1RX  (0x001B) /* DMA channel 0 transfer select 27: USCIB1 receive */
 #define DMA0TSEL__USCIB1TX  (0x001C) /* DMA channel 0 transfer select 28: USCIB1 transmit */
 #define DMA0TSEL__MPY       (0x001D) /* DMA channel 0 transfer select 29: Multiplier ready */
@@ -1503,7 +1503,7 @@ sfrw(DMA2SZ, DMA2SZ_);
 #define DMA1TSEL__USCIB0TX  (0x1700) /* DMA channel 1 transfer select 23: USCIB0 transmit */
 #define DMA1TSEL__ADC10IFG0 (0x1800) /* DMA channel 1 transfer select 24: ADC10IFG0 */
 #define DMA1TSEL__USCIA3RX  (0x1900) /* DMA channel 1 transfer select 25: USCIA3 receive */
-#define DMA1TSEL__USCIB3TX  (0x1A00) /* DMA channel 1 transfer select 26: USCIA3 transmit */
+#define DMA1TSEL__USCIA3TX  (0x1A00) /* DMA channel 1 transfer select 26: USCIA3 transmit */
 #define DMA1TSEL__USCIB1RX  (0x1B00) /* DMA channel 1 transfer select 27: USCIB1 receive */
 #define DMA1TSEL__USCIB1TX  (0x1C00) /* DMA channel 1 transfer select 28: USCIB1 transmit */
 #define DMA1TSEL__MPY       (0x1D00) /* DMA channel 1 transfer select 29: Multiplier ready */
@@ -1536,7 +1536,7 @@ sfrw(DMA2SZ, DMA2SZ_);
 #define DMA2TSEL__USCIB0TX  (0x0017) /* DMA channel 2 transfer select 23: USCIB0 transmit */
 #define DMA2TSEL__ADC10IFG0 (0x0018) /* DMA channel 2 transfer select 24: ADC10IFG0 */
 #define DMA2TSEL__USCIA3RX  (0x0019) /* DMA channel 2 transfer select 25: USCIA3 receive */
-#define DMA2TSEL__USCIB3TX  (0x001A) /* DMA channel 2 transfer select 26: USCIA3 transmit */
+#define DMA2TSEL__USCIA3TX  (0x001A) /* DMA channel 2 transfer select 26: USCIA3 transmit */
 #define DMA2TSEL__USCIB1RX  (0x001B) /* DMA channel 2 transfer select 27: USCIB1 receive */
 #define DMA2TSEL__USCIB1TX  (0x001C) /* DMA channel 2 transfer select 28: USCIB1 transmit */
 #define DMA2TSEL__MPY       (0x001D) /* DMA channel 2 transfer select 29: Multiplier ready */
@@ -6465,6 +6465,8 @@ sfrw(WDTCTL, WDTCTL_);
 #define __MSP430_HAS_TLV__              /* Definition to show that Module is available */
 #define TLV_BASE __MSP430_BASEADDRESS_TLV__
 
+#define TLV_CRC_LENGTH        (0x1A01)    /* CRC length of the TLV structure */
+#define TLV_CRC_VALUE         (0x1A02)    /* CRC value of the TLV structure */
 #define TLV_START             (0x1A08)    /* Start Address of the TLV structure */
 #define TLV_END               (0x1AFF)    /* End Address of the TLV structure */
 

@@ -50,7 +50,7 @@
 #ifndef __MSP430F6733A
 #define __MSP430F6733A
 
-#define __MSP430_HEADER_VERSION__ 1167
+#define __MSP430_HEADER_VERSION__ 1173
 
 #define __MSP430_TI_HEADERS__
 
@@ -3240,7 +3240,7 @@ sfrw(BCD2BIN, BCD2BIN_);
 #define __MSP430_HAS_SD24_B__         /* Definition to show that Module is available */
 #define __MSP430_BASEADDRESS_SD24_B__ 0x0800
 #define SD24_BASE __MSP430_BASEADDRESS_SD24_B__
-#define __MSP430_HAS_SD24_B2__        /* Definition to show that Module is available */
+#define __MSP430_HAS_SD24_B3__        /* Definition to show that Module is available */
 
 #define SD24BCTL0_            0x0800    /* SD24B Control Register 0 */
 sfrb(SD24BCTL0_L , SD24BCTL0_);
@@ -3295,6 +3295,22 @@ sfrw(SD24BOSR1, SD24BOSR1_);
 sfrb(SD24BPRE1_L , SD24BPRE1_);
 sfrb(SD24BPRE1_H , SD24BPRE1_+1);
 sfrw(SD24BPRE1, SD24BPRE1_);
+#define SD24BCCTL2_           0x0820    /* SD24B Channel 2 Control Register */
+sfrb(SD24BCCTL2_L , SD24BCCTL2_);
+sfrb(SD24BCCTL2_H , SD24BCCTL2_+1);
+sfrw(SD24BCCTL2, SD24BCCTL2_);
+#define SD24BINCTL2_          0x0822    /* SD24B Channel 2 Input Control Register */
+sfrb(SD24BINCTL2_L , SD24BINCTL2_);
+sfrb(SD24BINCTL2_H , SD24BINCTL2_+1);
+sfrw(SD24BINCTL2, SD24BINCTL2_);
+#define SD24BOSR2_            0x0824    /* SD24B Channel 2 OSR Control Register */
+sfrb(SD24BOSR2_L , SD24BOSR2_);
+sfrb(SD24BOSR2_H , SD24BOSR2_+1);
+sfrw(SD24BOSR2, SD24BOSR2_);
+#define SD24BPRE2_            0x0826    /* SD24B Channel 2 Preload Register */
+sfrb(SD24BPRE2_L , SD24BPRE2_);
+sfrb(SD24BPRE2_H , SD24BPRE2_+1);
+sfrw(SD24BPRE2, SD24BPRE2_);
 
 #define SD24BMEML0_           0x0850    /* SD24B Channel 0 Conversion Memory Low word */
 sfrb(SD24BMEML0_L , SD24BMEML0_);
@@ -3312,6 +3328,14 @@ sfrw(SD24BMEML1, SD24BMEML1_);
 sfrb(SD24BMEMH1_L , SD24BMEMH1_);
 sfrb(SD24BMEMH1_H , SD24BMEMH1_+1);
 sfrw(SD24BMEMH1, SD24BMEMH1_);
+#define SD24BMEML2_           0x0858    /* SD24B Channel 2 Conversion Memory Low word */
+sfrb(SD24BMEML2_L , SD24BMEML2_);
+sfrb(SD24BMEML2_H , SD24BMEML2_+1);
+sfrw(SD24BMEML2, SD24BMEML2_);
+#define SD24BMEMH2_           0x085A    /* SD24B Channel 2 Conversion Memory High Word */
+sfrb(SD24BMEMH2_L , SD24BMEMH2_);
+sfrb(SD24BMEMH2_H , SD24BMEMH2_+1);
+sfrw(SD24BMEMH2, SD24BMEMH2_);
 
 
 /* SD24BCTL0 */
@@ -3397,26 +3421,34 @@ sfrw(SD24BMEMH1, SD24BMEMH1_);
 /* SD24BIFG */
 #define SD24IFG0            (0x0001)  /* SD24B Channel 0 Interrupt Flag */
 #define SD24IFG1            (0x0002)  /* SD24B Channel 1 Interrupt Flag */
+#define SD24IFG2            (0x0004)  /* SD24B Channel 2 Interrupt Flag */
 #define SD24OVIFG0          (0x0100)  /* SD24B Channel 0 Overflow Interrupt Flag */
 #define SD24OVIFG1          (0x0200)  /* SD24B Channel 1 Overflow Interrupt Flag */
+#define SD24OVIFG2          (0x0400)  /* SD24B Channel 2 Overflow Interrupt Flag */
 
 #define SD24IFG0_L          (0x0001)  /* SD24B Channel 0 Interrupt Flag */
 #define SD24IFG1_L          (0x0002)  /* SD24B Channel 1 Interrupt Flag */
+#define SD24IFG2_L          (0x0004)  /* SD24B Channel 2 Interrupt Flag */
 
 #define SD24OVIFG0_H        (0x0001)  /* SD24B Channel 0 Overflow Interrupt Flag */
 #define SD24OVIFG1_H        (0x0002)  /* SD24B Channel 1 Overflow Interrupt Flag */
+#define SD24OVIFG2_H        (0x0004)  /* SD24B Channel 2 Overflow Interrupt Flag */
 
 /* SD24BIE */
 #define SD24IE0             (0x0001)  /* SD24B Channel 0 Interrupt Enable */
 #define SD24IE1             (0x0002)  /* SD24B Channel 1 Interrupt Enable */
+#define SD24IE2             (0x0004)  /* SD24B Channel 2 Interrupt Enable */
 #define SD24OVIE0           (0x0100)  /* SD24B Channel 0 Overflow Interrupt Enable */
 #define SD24OVIE1           (0x0200)  /* SD24B Channel 1 Overflow Interrupt Enable */
+#define SD24OVIE2           (0x0400)  /* SD24B Channel 2 Overflow Interrupt Enable */
 
 #define SD24IE0_L           (0x0001)  /* SD24B Channel 0 Interrupt Enable */
 #define SD24IE1_L           (0x0002)  /* SD24B Channel 1 Interrupt Enable */
+#define SD24IE2_L           (0x0004)  /* SD24B Channel 2 Interrupt Enable */
 
 #define SD24OVIE0_H         (0x0001)  /* SD24B Channel 0 Overflow Interrupt Enable */
 #define SD24OVIE1_H         (0x0002)  /* SD24B Channel 1 Overflow Interrupt Enable */
+#define SD24OVIE2_H         (0x0004)  /* SD24B Channel 2 Overflow Interrupt Enable */
 
 /* SD24BIV Definitions */
 #define SD24BIV_NONE         (0x0000)    /* No Interrupt pending */
@@ -3424,6 +3456,7 @@ sfrw(SD24BMEMH1, SD24BMEMH1_);
 #define SD24BIV_SD24TRGIFG   (0x0004)    /* SD24TRGIFG */
 #define SD24BIV_SD24IFG0     (0x0006)    /* SD24IFG0 */
 #define SD24BIV_SD24IFG1     (0x0008)    /* SD24IFG1 */
+#define SD24BIV_SD24IFG2     (0x000A)    /* SD24IFG2 */
 
 /* SD24BCCTLx */
 #define SD24SC               (0x0001)  /* SD24B Start Conversion */
@@ -5498,6 +5531,8 @@ sfrw(WDTCTL, WDTCTL_);
 #define __MSP430_HAS_TLV__              /* Definition to show that Module is available */
 #define TLV_BASE __MSP430_BASEADDRESS_TLV__
 
+#define TLV_CRC_LENGTH        (0x1A01)    /* CRC length of the TLV structure */
+#define TLV_CRC_VALUE         (0x1A02)    /* CRC value of the TLV structure */
 #define TLV_START             (0x1A08)    /* Start Address of the TLV structure */
 #define TLV_END               (0x1AFF)    /* End Address of the TLV structure */
 
