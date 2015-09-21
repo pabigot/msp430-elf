@@ -1,6 +1,6 @@
 /* tc-msp430.c -- Assembler code for the Texas Instruments MSP430
 
-  Copyright (C) 2002-2014 Free Software Foundation, Inc.
+  Copyright (C) 2002-2015 Free Software Foundation, Inc.
   Contributed by Dmitry Diky <diwil@mail.ru>
 
   This file is part of GAS, the GNU Assembler.
@@ -2131,7 +2131,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  line = extract_operand (line, l1, sizeof (l1));
 	  strncpy (l2, l1, sizeof (l2));
 	  l2[sizeof (l2) - 1] = '\0';
-	  res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, & imm_op, extended_op, TRUE);
+	  res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, &imm_op, extended_op, TRUE);
 	  res += msp430_dstoperand (&op2, l2, opcode->bin_opcode, extended_op, TRUE);
 
 	  if (res)
@@ -2261,7 +2261,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    }
 
 	  line = extract_operand (line, l1, sizeof (l1));
-	  res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, & imm_op, extended_op, FALSE);
+	  res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, &imm_op, extended_op, FALSE);
 	  if (res)
 	    break;
 
@@ -2304,7 +2304,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	  line = extract_operand (line, l1, sizeof (l1));
 	  imm_op = FALSE;
 
-	  res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, & imm_op,
+	  res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, &imm_op,
 				   extended_op, FALSE);
 	  if (res)
 	    break;
@@ -2655,7 +2655,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 	    {
 	      line = extract_operand (line, l1, sizeof (l1));
 	      res = msp430_srcoperand (&op1, l1, opcode->bin_opcode,
-				       & imm_op, extended_op, FALSE);
+				       &imm_op, extended_op, FALSE);
 
 	      if (is_opcode ("bra"))
 		{
@@ -2736,7 +2736,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
     case 1:			/* Format 1, double operand.  */
       line = extract_operand (line, l1, sizeof (l1));
       line = extract_operand (line, l2, sizeof (l2));
-      res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, & imm_op, extended_op, TRUE);
+      res = msp430_srcoperand (&op1, l1, opcode->bin_opcode, &imm_op, extended_op, TRUE);
       res += msp430_dstoperand (&op2, l2, opcode->bin_opcode, extended_op, TRUE);
 
       if (res)
@@ -2910,7 +2910,7 @@ msp430_operands (struct msp430_opcode_s * opcode, char * line)
 
       line = extract_operand (line, l1, sizeof (l1));
       res = msp430_srcoperand (&op1, l1, opcode->bin_opcode,
-			       & imm_op, extended_op, TRUE);
+			       &imm_op, extended_op, TRUE);
       if (res)
 	break;		/* Error in operand.  */
 

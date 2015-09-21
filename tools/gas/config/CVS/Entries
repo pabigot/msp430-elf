@@ -231,6 +231,6 @@
 /xtensa-istack.h/1.8/Thu Jan 21 20:53:12 2010//Tmsp430-14r1-branch
 /xtensa-relax.c/1.10/Thu Jan 21 20:53:12 2010//Tmsp430-14r1-branch
 /xtensa-relax.h/1.8/Thu Jan 21 20:53:12 2010//Tmsp430-14r1-branch
-/tc-msp430.h/1.7.2.3/Fri Jan 16 23:11:24 2015//Tmsp430-14r1-branch
-/tc-msp430.c/1.16.2.5/Sat Jan 24 21:02:28 2015//Tmsp430-14r1-branch
+/tc-msp430.c/1.16.2.6/Fri Mar  6 00:07:13 2015//Tmsp430-14r1-branch
+/tc-msp430.h/1.7.2.4/Fri Mar  6 00:07:13 2015//Tmsp430-14r1-branch
 D

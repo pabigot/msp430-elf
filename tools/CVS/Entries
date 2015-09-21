@@ -51,7 +51,6 @@ D/tk////
 /Makefile.def/1.45/Mon Apr  7 10:31:57 2014//Tmsp430-14r1-branch
 /Makefile.in/1.55/Mon Apr  7 10:31:57 2014//Tmsp430-14r1-branch
 /Makefile.tpl/1.27/Mon Mar 31 10:42:11 2014//Tmsp430-14r1-branch
-/README/1.16/Thu Mar  6 15:45:30 2014//Tmsp430-14r1-branch
 /README-maintainer-mode/1.3/Thu Jan 21 20:52:57 2010//Tmsp430-14r1-branch
 /REDHAT/1.1.1.1/Thu Aug 22 00:23:52 2002//Tmsp430-14r1-branch
 /compile/1.3/Thu Jan 21 20:52:57 2010//Tmsp430-14r1-branch
@@ -85,3 +84,4 @@ D/include////
 /ylwrap/1.3/Thu Jan 21 20:52:58 2010//Tmsp430-14r1-branch
 D/libgloss////
 D/local////
+/README/1.16/Thu Mar  6 15:45:30 2014//Tmsp430-14r1-branch

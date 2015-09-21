@@ -25,7 +25,7 @@ INCLUDE intr_vectors.ld
    toolchain tests can be run against the simulator.  */
 MEMORY
 {
-  RAM (rw)     : ORIGIN = 0x00200, LENGTH = 0x01e00
+  RAM (rw)     : ORIGIN = 0x00500, LENGTH = 0x01b00
   ROM (rx)     : ORIGIN = 0x02000, LENGTH = 0x0df00
   /* The regions from intr_vectors.ld go here.  */
   HIFRAM (rw)  : ORIGIN = 0x10000, LENGTH = 0x80000
@@ -42,6 +42,20 @@ SECTIONS
     . = ALIGN(2);
     *(.lower.rodata.* .lower.rodata)
 
+    /* Note: By default we do not have this line:
+
+         *(.either.rodata.*) *(.either.rodata)
+
+       defined here, or anywhere else in this script.  This is deliberate.
+       The algorithm in the linker that automatically places rodata into
+       either the .rodata or the .upper.rodata sections relies upon the
+       fact that the .either.rodata section is not defined.  If the
+       .upper.rodata is not going to be defined then the line above should
+       be restored to this section.
+
+       The same reason applies to the absence of definitions for the
+       .either.text, .either.data and .either.bss sections as well.  */
+       
     . = ALIGN(2);
     *(.rodata .rodata.* .gnu.linkonce.r.* .const .const:*)
     *(.rodata1)
@@ -85,6 +99,13 @@ SECTIONS
 
   .upper.rodata :
   {
+    /* Note: If this section is not defined then please add:
+    
+         *(.either.rodata.*) *(.either.rodata)
+
+       to the definition of the .rodata section above.  This will allow
+       code compiled with -mdata-region=either to work properly.  */
+
     . = ALIGN(2);
     *(.upper.rodata.* .upper.rodata)
   } > HIROM
@@ -102,6 +123,12 @@ SECTIONS
 
     . = ALIGN(2);
     *(.data .data.* .gnu.linkonce.d.*)
+
+    /* See note in .rodata section about why we do not have this line here:
+
+      *(.either.data.* .either.data)
+    */
+
     KEEP (*(.gnu.linkonce.d.*personality*))
     SORT(CONSTRUCTORS)
     *(.data1)
@@ -169,7 +196,7 @@ SECTIONS
 
         __rom_highdatastart = LOADADDR(.shadow.upper.data) + 2;
 
-      Note - remove the space in this sequence: * / when you copy one
+      Note - remove the space in this sequence: * / (twice) when you copy one
       of the script fragments above into your script.
 
       Note - the symbols defined here are *not* enclosed by the PROVIDE
@@ -194,7 +221,13 @@ SECTIONS
 
       The status word is necessary as this allows us to have one routine
       in crt0 that can handle either form of .upper.data layout.  IE crt0
-      is linker script agnostic.  */
+      is linker script agnostic.
+
+      Note - if the .upper.data section is not going to be defined at all
+      then please add this line back into the .data section above:
+
+        *(.either.data.* .either.data)
+    */
 
   . = ALIGN(2);
   .upper.data :
@@ -220,6 +253,10 @@ SECTIONS
     *(.dynbss)
     *(.sbss .sbss.*)
     *(.bss .bss.* .gnu.linkonce.b.*)
+    /* See note in .rodata section about why we do not have this line here:
+
+      *(.either.bss.* .either.bss)
+    */
     . = ALIGN(2);
     *(COMMON)
     . = ALIGN(2);
@@ -240,6 +277,11 @@ SECTIONS
 
   .upper.bss :
   {
+    /* Note - if this section is not going to be defined then please
+       add this line back into the definition of the .bss section above:
+       
+      *(.either.bss.* .either.bss)
+    */
     . = ALIGN(2);
     __high_bssstart = .;
     *(.upper.bss.* .upper.bss)
@@ -262,7 +304,10 @@ SECTIONS
      chance that it will collide with allocated data in the RAM region.
      In scripts targeted at real MCUs however it may be better to place
      the stack and heap in RAM, as flash does have a limited number of
-     writes before failure.  */
+     writes before failure.
+
+     Note - if the location of .stack is changed, then be sure to change
+     the definition of .heap_start above as well.  */
   .stack (ORIGIN (HIFRAM) + LENGTH (HIFRAM)) :
   {
     PROVIDE (__stack = .);
@@ -284,6 +329,11 @@ SECTIONS
     . = ALIGN(2);
     *(.text .stub .text.* .gnu.linkonce.t.* .text:*)
 
+    /* See note in .rodata section about why we do not have this line here:
+
+      *(.either.text.* .either.text)
+    */
+    
     KEEP (*(.text.*personality*))
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
@@ -299,6 +349,12 @@ SECTIONS
 
   .upper.text :
   {
+    /* Note - if this section is not going to be included in the script
+       then please add this line back into the definition of the .text
+       section above:
+
+       *(.either.text.* .either.text)
+    */
     . = ALIGN(2);
     *(.upper.text.* .upper.text)
   } > HIROM

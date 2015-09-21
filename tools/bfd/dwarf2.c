@@ -1582,6 +1582,16 @@ decode_line_info (struct comp_unit *unit, struct dwarf2_debug *stash)
       line_ptr += 4;
       offset_size = 8;
     }
+  if ((lh.total_length & 0xffffffffUL) == 0xfffffffcUL)
+    {
+      /* Unlinked object with "empty" table might have this.  */
+      lh.total_length = 0;
+    }
+
+  /* Avoid buffer overflow.  */
+  if (lh.total_length + 4 > stash->dwarf_line_size)
+    lh.total_length = stash->dwarf_line_size - 4;
+
   line_end = line_ptr + lh.total_length;
   lh.version = read_2_bytes (abfd, line_ptr);
   if (lh.version < 2 || lh.version > 4)

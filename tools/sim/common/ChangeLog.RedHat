@@ -1,3 +1,8 @@
+2015-04-16  DJ Delorie  <dj@redhat.com>
+
+	* sim-arange.h (sim_addr_range_hit_p): Change inline semantics to
+	match C99.
+
 2012-07-31  Nick Clifton  <nickc@redhat.com>
 
 	* sim-trace.c (trace_generic): Add (suppressed) example of how to

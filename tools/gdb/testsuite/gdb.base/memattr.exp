@@ -222,6 +222,7 @@ set see3 0
 set see4 0
 set see5 0
 
+setup_xfail "*-*-*"
 gdb_test_multiple "info mem" "mem 2-4 were enabled" {
     -re "1   y  \[ \t\]+$hex $hex wo nocache \[^\r\n\]*" {
 	set see1 1

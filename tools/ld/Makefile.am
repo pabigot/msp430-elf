@@ -337,7 +337,7 @@ ALL_EMULATION_SOURCES = \
 	emcorepe.c \
 	emn10200.c \
 	emn10300.c \
-	emsp430.c \
+	emsp430elf.c \
 	emsp430X.c \
 	ends32elf.c \
 	ends32elf16m.c \
@@ -1463,11 +1463,11 @@ emn10300.c: $(srcdir)/emulparams/mn10300.sh \
 	${GENSCRIPTS} mn10300 "$(tdir_mn10300)"
 emsp430.c: $(srcdir)/emulparams/msp430all.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc \
-  ${GEN_DEPENDS} $(srcdir)/emultempl/msp430.em
-	${GENSCRIPTS} msp430 "$(tdir_msp430)" msp430all
+  ${GEN_DEPENDS} $(srcdir)/emultempl/msp430elf.em
+	${GENSCRIPTS} msp430elf "$(tdir_msp430)" msp430all
 emsp430X.c: $(srcdir)/emulparams/msp430all.sh \
   $(ELF_GEN_DEPS) $(srcdir)/scripttempl/elf32msp430.sc \
-  ${GEN_DEPENDS} $(srcdir)/emultempl/msp430.em
+  ${GEN_DEPENDS} $(srcdir)/emultempl/msp430elf.em
 	${GENSCRIPTS} msp430X "$(tdir_msp430X)" msp430all
 ends32elf.c: $(srcdir)/emulparams/nds32elf.sh \
   $(ELF_DEPS) $(srcdir)/emultempl/nds32elf.em \

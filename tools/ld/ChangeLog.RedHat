@@ -1,3 +1,17 @@
+2015-06-25  DJ Delorie  <dj@redhat.com>
+
+	* emulparams/msp430all.sh: Additional tweak needed for previous patch.
+
+2015-04-24  DJ Delorie  <dj@redhat.com>
+
+	* Makefile.am (msp430): Rename primary emulation to msp430elf.
+	(emsp430.c): Rename to emsp430elf.c, update dependencies
+	(emsp430X.c): Update dependencies.
+	* Makefile.in: Likewise.
+	* configure.tgt (msp430-*-*): Rename primary emulation to msp430elf.
+	* emultempl/msp430.em: Rename to msp430elf.em.
+	* emulparams/msp430all.sh: Update.
+
 2014-09-23  Nick Clifton  <nickc@redhat.com>
 
 	* emultempl/msp430.em (place_orphan): Correct computation of

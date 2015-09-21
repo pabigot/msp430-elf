@@ -65,6 +65,7 @@ function will be called to print an error message and terminate execution.
 #endif
 #include "ansidecl.h"
 #include "libiberty.h"
+#include "environ.h"
 
 #include <stdio.h>
 
@@ -117,7 +118,6 @@ void
 xmalloc_failed (size_t size)
 {
 #ifdef HAVE_SBRK
-  extern char **environ;
   size_t allocated;
 
   if (first_break != NULL)

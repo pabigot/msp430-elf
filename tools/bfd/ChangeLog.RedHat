@@ -1,3 +1,19 @@
+2015-07-20  Nick Clifton  <nickc@redhat.com>
+
+	Issue 5930443
+	* elf32-msp430.c (uses_large_model): New function.
+	(msp430_elf_eh_frame_address_size): New function.
+	(elf_backend_eh_frame_address_size): Define.
+
+2015-06-24  DJ Delorie  <dj@redhat.com>
+
+	* elf32-msp430.c (msp430_final_link_relocate): Fix comments.  Fix
+	REL loads to match RELA stores.
+
+2015-02-17  DJ Delorie  <dj@redhat.com>
+
+	* dwarf2.c (decode_line_info): Avoid buffer overruns.
+
 2015-01-14  Nick Clifton  <nickc@redhat.com>
 
 	* elf32-msp430.c (msp430_elf_relax_delete_bytes): Adjust local

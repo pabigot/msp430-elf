@@ -356,7 +356,6 @@
 /macscp4.h/1.1/Mon Nov  4 16:29:59 2002//Tmsp430-14r1-branch
 /maint.exp/1.17/Thu Feb 20 13:38:50 2014//Tmsp430-14r1-branch
 /memattr.c/1.4/Thu Feb 20 13:38:50 2014//Tmsp430-14r1-branch
-/memattr.exp/1.7/Fri May 16 05:39:35 2014//Tmsp430-14r1-branch
 /mips_pro.c/1.2/Fri Aug 31 23:03:01 2012//Tmsp430-14r1-branch
 /mips_pro.exp/1.12/Thu Feb 20 13:38:50 2014//Tmsp430-14r1-branch
 /miscexprs.c/1.3/Fri Aug 31 23:03:01 2012//Tmsp430-14r1-branch
@@ -667,3 +666,4 @@
 /whatis.c/1.11/Thu Feb 20 13:38:50 2014//Tmsp430-14r1-branch
 /whatis.exp/1.13/Thu Feb 20 13:38:50 2014//Tmsp430-14r1-branch
 D/comp-dir////
+/memattr.exp/1.7.2.1/Thu Jul 23 17:31:14 2015//Tmsp430-14r1-branch

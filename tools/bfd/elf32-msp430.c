@@ -812,14 +812,14 @@ msp430_final_link_relocate (reloc_howto_type *     howto,
 	break;
 
       case R_MSP430X_PCR20_EXT_ODST:
-	/* [0,4]+[48,16] = ---F ---- FFFF */
+	/* [0,4]+[48,16] = ---F ---- ---- FFFF */
 	contents += rel->r_offset;
 	srel = (bfd_signed_vma) relocation;
 	if (is_rel_reloc)
 	  {
 	    bfd_vma addend;
 	    addend = (bfd_get_16 (input_bfd, contents) & 0xf) << 16;
-	    addend |= bfd_get_16 (input_bfd, contents+4);
+	    addend |= bfd_get_16 (input_bfd, contents + 6);
 	    srel += addend;
 	    
 	  }
@@ -835,14 +835,14 @@ msp430_final_link_relocate (reloc_howto_type *     howto,
 	break;
 
       case R_MSP430X_ABS20_EXT_SRC:
-	/* [7,4]+[32,16] = -78- FFFF */
+	/* [7,4]+[32,16] = -78- ---- FFFF */
 	contents += rel->r_offset;
 	srel = (bfd_signed_vma) relocation;
 	if (is_rel_reloc)
 	  {
 	    bfd_vma addend;
 	    addend = (bfd_get_16 (input_bfd, contents) & 0x0780) << 9;
-	    addend |= bfd_get_16 (input_bfd, contents+2);
+	    addend |= bfd_get_16 (input_bfd, contents + 4);
 	    srel += addend;
 	  }
 	else
@@ -871,14 +871,14 @@ msp430_final_link_relocate (reloc_howto_type *     howto,
 	break;
 
       case R_MSP430X_PCR20_EXT_DST:
-	/* [0,4]+[32,16] = ---F FFFF */
+	/* [0,4]+[32,16] = ---F ---- FFFF */
 	contents += rel->r_offset;
 	srel = (bfd_signed_vma) relocation;
 	if (is_rel_reloc)
 	  {
 	    bfd_vma addend;
 	    addend = (bfd_get_16 (input_bfd, contents) & 0xf) << 16;
-	    addend |= bfd_get_16 (input_bfd, contents+2);
+	    addend |= bfd_get_16 (input_bfd, contents + 4);
 	    srel += addend;
 	  }
 	else
@@ -894,14 +894,14 @@ msp430_final_link_relocate (reloc_howto_type *     howto,
 	break;
 
       case R_MSP430X_PCR20_EXT_SRC:
-	/* [7,4]+32,16] = -78- FFFF */
+	/* [7,4]+[32,16] = -78- ---- FFFF */
 	contents += rel->r_offset;
 	srel = (bfd_signed_vma) relocation;
 	if (is_rel_reloc)
 	  {
 	    bfd_vma addend;
 	    addend = ((bfd_get_16 (input_bfd, contents) & 0x0780) << 9);
-	    addend |= bfd_get_16 (input_bfd, contents+2);
+	    addend |= bfd_get_16 (input_bfd, contents + 4);
 	    srel += addend;;
 	  }
 	else
@@ -928,10 +928,16 @@ msp430_final_link_relocate (reloc_howto_type *     howto,
 	break;
 
       case R_MSP430X_ABS20_EXT_DST:
+	/* [0,4]+[32,16] = ---F ---- FFFF */
 	contents += rel->r_offset;
 	srel = (bfd_signed_vma) relocation;
 	if (is_rel_reloc)
-	  srel += bfd_get_16 (input_bfd, contents) & 0xf;
+	  {
+	    bfd_vma addend;
+	    addend = (bfd_get_16 (input_bfd, contents) & 0xf) << 16;
+	    addend |= bfd_get_16 (input_bfd, contents + 4);
+	    srel += addend;
+	  }
 	else
 	  srel += rel->r_addend;
 	bfd_put_16 (input_bfd, (srel & 0xffff), contents + 4);
@@ -942,14 +948,14 @@ msp430_final_link_relocate (reloc_howto_type *     howto,
 	break;
 
       case R_MSP430X_ABS20_EXT_ODST:
-	/* [0,4]+[48,16] = ---F ---- FFFF */
+	/* [0,4]+[48,16] = ---F ---- ---- FFFF */
 	contents += rel->r_offset;
 	srel = (bfd_signed_vma) relocation;
 	if (is_rel_reloc)
 	  {
 	    bfd_vma addend;
 	    addend = (bfd_get_16 (input_bfd, contents) & 0xf) << 16;
-	    addend |= bfd_get_16 (input_bfd, contents+4);
+	    addend |= bfd_get_16 (input_bfd, contents + 6);
 	    srel += addend;
 	  }
 	else
@@ -962,7 +968,7 @@ msp430_final_link_relocate (reloc_howto_type *     howto,
 	break;
 
       case R_MSP430X_ABS20_ADR_SRC:
-	/* [8,4]+[32,16] = -F-- FFFF */
+	/* [8,4]+[16,16] = -F-- FFFF */
 	contents += rel->r_offset;
 	srel = (bfd_signed_vma) relocation;
 	if (is_rel_reloc)
@@ -970,7 +976,7 @@ msp430_final_link_relocate (reloc_howto_type *     howto,
 	    bfd_vma addend;
 
 	    addend = ((bfd_get_16 (input_bfd, contents) & 0xf00) << 8);
-	    addend |= bfd_get_16 (input_bfd, contents+2);
+	    addend |= bfd_get_16 (input_bfd, contents + 2);
 	    srel += addend;
 	  }
 	else
@@ -983,14 +989,14 @@ msp430_final_link_relocate (reloc_howto_type *     howto,
 	break;
 
       case R_MSP430X_ABS20_ADR_DST:
-	/* [0,4]+[32,16] = ---F FFFF */
+	/* [0,4]+[16,16] = ---F FFFF */
 	contents += rel->r_offset;
 	srel = (bfd_signed_vma) relocation;
 	if (is_rel_reloc)
 	  {
 	    bfd_vma addend;
 	    addend = ((bfd_get_16 (input_bfd, contents) & 0xf) << 16);
-	    addend |= bfd_get_16 (input_bfd, contents+2);
+	    addend |= bfd_get_16 (input_bfd, contents + 2);
 	    srel += addend;
 	  }
 	else
@@ -1025,14 +1031,14 @@ msp430_final_link_relocate (reloc_howto_type *     howto,
 	break;
       
       case R_MSP430X_PCR20_CALL:
-	/* [0,4]+[32,16] = ---F FFFF*/
+	/* [0,4]+[16,16] = ---F FFFF*/
 	contents += rel->r_offset;
 	srel = (bfd_signed_vma) relocation;
 	if (is_rel_reloc)
 	  {
 	    bfd_vma addend;
 	    addend = (bfd_get_16 (input_bfd, contents) & 0xf) << 16;
-	    addend |= bfd_get_16 (input_bfd, contents+2);
+	    addend |= bfd_get_16 (input_bfd, contents + 2);
 	    srel += addend;
 	  }
 	else
@@ -2492,6 +2498,30 @@ msp430_elf_is_target_special_symbol (bfd *abfd, asymbol *sym)
 {
   return _bfd_elf_is_local_label_name (abfd, sym->name);
 }
+
+static bfd_boolean
+uses_large_model (bfd *abfd)
+{
+  obj_attribute * attr;
+
+  if (abfd->flags & BFD_LINKER_CREATED)
+    return FALSE;
+
+  attr = elf_known_obj_attributes_proc (abfd);
+  if (attr == NULL)
+    return FALSE;
+
+  return attr[OFBA_MSPABI_Tag_Code_Model].i == 2;
+}
+
+static unsigned int
+msp430_elf_eh_frame_address_size (bfd *abfd, asection *sec ATTRIBUTE_UNUSED)
+{
+  return uses_large_model (abfd) ? 4 : 2;
+}
+
+#define elf_backend_eh_frame_address_size msp430_elf_eh_frame_address_size
+
 
 /* This is gross.  The MSP430 EABI says that (sec 11.5):
 

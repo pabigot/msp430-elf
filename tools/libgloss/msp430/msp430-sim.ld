@@ -19,7 +19,7 @@ INCLUDE intr_vectors.ld
 
 MEMORY
 {
-  RAM (w) : ORIGIN = 0x00200, LENGTH = 0x0ee00
+  RAM (w) : ORIGIN = 0x00500, LENGTH = 0x0eb00
 }
 
 SECTIONS
@@ -33,8 +33,13 @@ SECTIONS
   {
     . = ALIGN(2);
     *(.plt)
+    . = ALIGN(2);
     *(.lower.rodata.* .lower.rodata)
+    . = ALIGN(2);
     *(.rodata .rodata.* .gnu.linkonce.r.* .const .const:*)
+    . = ALIGN(2);
+    *(.either.rodata.* .either.rodata)
+    . = ALIGN(2);
     *(.rodata1)
     *(.eh_frame_hdr)
     KEEP (*(.eh_frame))
@@ -80,8 +85,9 @@ SECTIONS
     PROVIDE (_start = .);
     KEEP (*(SORT(.crt_*)))
     *(.lowtext)
-    *(.lower.text.* .lower.text)    
+    *(.lower.text.* .lower.text)
     *(.text .stub .text.* .gnu.linkonce.t.* .text:*)
+    *(.either.text.* .either.text)
     KEEP (*(.text.*personality*))
     /* .gnu.warning sections are handled specially by elf32.em.  */
     *(.gnu.warning)
@@ -106,6 +112,9 @@ SECTIONS
     *(.dynamic)
 
     *(.data .data.* .gnu.linkonce.d.*)
+
+    *(.either.data.* .either.data)
+
     KEEP (*(.gnu.linkonce.d.*personality*))
     SORT(CONSTRUCTORS)
     *(.data1)
@@ -136,6 +145,7 @@ SECTIONS
     *(.dynbss)
     *(.sbss .sbss.*)
     *(.bss .bss.* .gnu.linkonce.b.*)
+    *(.either.bss.* .either.bss)
     PROVIDE (__bssend = .);
   } > RAM
   PROVIDE (__bsssize = SIZEOF(.bss));
@@ -167,7 +177,7 @@ SECTIONS
     *(.upper.data.* .upper.data)
     *(.upper.bss.* .upper.bss)
     *(.upper.text.* .upper.text)  
-    ASSERT (SIZEOF(.upper) == 0, ".upper sections present in a binary linked without -mlarge support");
+    ASSERT (SIZEOF(.upper) == 0, "This MCU does not support high memory");
   }
 
   /* The rest are all not normally part of the runtime image.  */

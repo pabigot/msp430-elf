@@ -23,6 +23,7 @@ Boston, MA 02110-1301, USA.  */
 #include "config.h"
 #include "libiberty.h"
 #include "pex-common.h"
+#include "environ.h"
 
 #include <stdio.h>
 #include <signal.h>
@@ -388,8 +389,6 @@ pex_child_error (struct pex_obj *obj, const char *executable,
 }
 
 /* Execute a child.  */
-
-extern char **environ;
 
 #if defined(HAVE_SPAWNVE) && defined(HAVE_SPAWNVPE)
 /* Implementation of pex->exec_child using the Cygwin spawn operation.  */

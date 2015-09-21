@@ -1,3 +1,12 @@
+2015-07-20  Nick Clifton  <nickc@redhat.com>
+
+	Issue 5934033
+	Import patch for PR 63758.
+	* environ.h: New file.
+	* pex-unix.c: Use it.
+	* setenv.c: Use it.
+	* xmalloc.c: Use it.
+
 2014-03-31  Nick Clifton  <nickc@redhat.com>
 
 	* Import this patch from the mainline:

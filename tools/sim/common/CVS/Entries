@@ -1,5 +1,4 @@
 /ChangeLog/1.21/Thu Feb 20 13:52:35 2014//Tmsp430-14r1-branch
-/ChangeLog.RedHat/1.7/Tue Jul 31 10:39:34 2012//Tmsp430-14r1-branch
 /Make-common.in/1.14/Thu Feb 20 13:52:35 2014//Tmsp430-14r1-branch
 /Makefile.in/1.10/Thu Feb 20 13:52:35 2014//Tmsp430-14r1-branch
 /acinclude.m4/1.4/Thu Feb 20 13:52:35 2014//Tmsp430-14r1-branch
@@ -67,7 +66,6 @@
 /sim-abort.c/1.7/Thu Feb 20 13:52:35 2014//Tmsp430-14r1-branch
 /sim-alu.h/1.8/Thu Feb 20 13:52:35 2014//Tmsp430-14r1-branch
 /sim-arange.c/1.7/Thu Feb 20 13:52:35 2014//Tmsp430-14r1-branch
-/sim-arange.h/1.7/Thu Feb 20 13:52:35 2014//Tmsp430-14r1-branch
 /sim-assert.h/1.6/Thu Feb 20 13:52:35 2014//Tmsp430-14r1-branch
 /sim-base.h/1.11/Thu Feb 20 13:52:35 2014//Tmsp430-14r1-branch
 /sim-basics.h/1.9/Thu Feb 20 13:52:35 2014//Tmsp430-14r1-branch
@@ -128,4 +126,6 @@
 /syscall.c/1.9/Thu Feb 20 13:52:35 2014//Tmsp430-14r1-branch
 /tconfig.in/1.1/Mon Nov  4 20:15:52 2002//Tmsp430-14r1-branch
 /version.h/1.5/Thu Feb 20 13:52:35 2014//Tmsp430-14r1-branch
+/ChangeLog.RedHat/1.7.14.1/Fri Apr 17 14:20:16 2015//Tmsp430-14r1-branch
+/sim-arange.h/1.7.2.1/Fri Apr 17 14:20:16 2015//Tmsp430-14r1-branch
 D

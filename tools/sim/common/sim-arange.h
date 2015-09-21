@@ -62,17 +62,30 @@ extern void sim_addr_range_delete (ADDR_RANGE * /*ar*/,
 
 /* Return non-zero if ADDR is in range AR, traversing the entire tree.
    If no range is specified, that is defined to mean "everything".  */
-extern INLINE int
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) && defined(HAVE_INLINE)
+inline
+#else
+extern INLINE
+#endif
+int
 sim_addr_range_hit_p (ADDR_RANGE * /*ar*/, address_word /*addr*/);
 #define ADDR_RANGE_HIT_P(ar, addr) \
   ((ar)->range_tree == NULL || sim_addr_range_hit_p ((ar), (addr)))
 
 #ifdef HAVE_INLINE
+#if defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L)
+#ifdef SIM_ARANGE_C
+#define SIM_ARANGE_INLINE EXTERN_INLINE
+#else
+#define SIM_ARANGE_INLINE INLINE
+#endif
+#else /* STDC */
 #ifdef SIM_ARANGE_C
 #define SIM_ARANGE_INLINE INLINE
 #else
 #define SIM_ARANGE_INLINE EXTERN_INLINE
 #endif
+#endif /* STDC */
 #include "sim-arange.c"
 #else
 #define SIM_ARANGE_INLINE

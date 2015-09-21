@@ -61,9 +61,6 @@ START_CRT_FUNC 0000 start
 #endif
 	mov_	#__stack, R1
 
-	;; Disable watchdog timer.
-	MOV	#0x5a80, &0x15C
-
 	;; Note - execution now drops through into whichever
 	;; block of code comes next.
 	
